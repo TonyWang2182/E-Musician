@@ -1,10 +1,10 @@
-# 当前正在进行：0.5.1 Keyscape修复候选（2026-10-27下午）
+# 当前状态：0.5.1 MIDI编写、播放及Keyscape使用已获人工确认（2026-10-27）
 
-用户已报告0.5 Keyscape Arm/Monitor崩溃；不能用下面旧交付结论替代本次验收。分支fix/keyscape-output-buffers。已通过WER及本地dbgeng定位ASIO处理线程Keyscape近空地址写入，候选补丁为inactive VST3通道预分配隔离缓冲，Release已构建，相关自动检查通过，用户新增“写音符后播放退出”反馈，版本待确认：16:51所见最新WER仍是16:20的0.5.0，早于16:37新构建；未找到新版转储，不据此否定用户现象。详见[本次记录](verification/2026-10-27-v051/RESULTS.md)。
+用户最新反馈：“没事了，现在是可以的写入midi和播放的，插件也没问题”。当前测试工程的MIDI写入、播放与Keyscape使用已通过用户验收；先前播放退出不再作为已确认的当前版本复现。Arm/Monitor切换和实体键盘实时输入仍待分项反馈，已提供简短复测；不要把一次可用扩大为所有插件/音色或长期稳定性保证。详见[本轮记录](verification/2026-10-27-v051/RESULTS.md)。
 
-最新协作方式：用户亲自操作界面并报告，我负责构建/debug；不使用computer-use，减少重复自动化，仅相关检查。用户确认MIDI片段/钢琴卷帘写音符和普通音频有声，Keyscape播放/自带琴键无声；现已提供0.5.1原路径EXE供用户复测；不再启动自动音频测试占用声卡。代码构建期间冻结，DEVLOG保持追加。原用户工程不改，DMP仅本地忽略目录分析。
+分支fix/keyscape-output-buffers已同步GitHub，候选包含VST3闲置通道隔离缓冲、匹配Release符号及由CMake驱动的应用版本/窗口标题。最新构建身份见[version-identification-build.json](verification/2026-10-27-v051/version-identification-build.json)；首次相关自动回归见[candidate-summary.json](verification/2026-10-27-v051/candidate-summary.json)。旧WER定位到0.5.0 Keyscape音频处理线程的近空地址写入；兼容补丁生效方向与用户结果一致，仍不宣称唯一根因已被证明。
 
-补充：版本辨认单独修正已构建，原生窗口标题和应用自报现均来自CMake版本0.5.1，音频逻辑未改。最新EXE/PDB身份见[version-identification-build.json](verification/2026-10-27-v051/version-identification-build.json)，旧candidate-summary.json保留首次候选证据。用户播放退出反馈的对应版本仍待确认，勿据旧WER继续叠加猜测修复。
+协作方式：用户操作GUI，我负责构建/debug；不使用computer-use，减少重复自动化。本次只更新人工验收档案，不改应用、不构建、不占用声卡。DEVLOG保持追加，用户工程不改，DMP/PDB仅在本地忽略目录。下一个检查为实体键盘及Arm/Monitor，然后再做短MIDI录音、保存重开。
 
 以下为0.5已发布基线，保留供对照：
 # E-musician 当前上下文
