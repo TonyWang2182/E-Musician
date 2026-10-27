@@ -4,7 +4,7 @@
 
 分支fix/keyscape-output-buffers已同步GitHub，候选包含VST3闲置通道隔离缓冲、匹配Release符号及由CMake驱动的应用版本/窗口标题。最新构建身份见[version-identification-build.json](verification/2026-10-27-v051/version-identification-build.json)；首次相关自动回归见[candidate-summary.json](verification/2026-10-27-v051/candidate-summary.json)。旧WER定位到0.5.0 Keyscape音频处理线程的近空地址写入；兼容补丁生效方向与用户结果一致，仍不宣称唯一根因已被证明。
 
-协作方式：用户操作GUI，我负责构建/debug；不使用computer-use，减少重复自动化。本次只更新人工验收档案，不改应用、不构建、不占用声卡。DEVLOG保持追加，用户工程不改，DMP/PDB仅在本地忽略目录。下一项已交用户：约10秒实体MIDI录音、关闭Arm回放、另存新测试工程并重开，检查音符/Keyscape音色/回放保留；等待结果。
+协作方式：用户操作GUI，我负责构建/debug；不使用computer-use，减少重复自动化。本次只更新人工验收档案，不改应用、不构建、不占用声卡。DEVLOG保持追加，用户工程不改，DMP/PDB仅在本地忽略目录。最新：用户确认MIDI录音正常，但保存位置对话框确认后显示Save failed - retry。保存失败尚未定位，重开未验。已请用户保持工程打开，读取保存状态tooltip/底部完整错误；此时不重建、不关闭用户应用，避免丢失未保存录音。先拿具体错误再做针对性修改，不以假设替代根因。
 
 以下为0.5已发布基线，保留供对照：
 # E-musician 当前上下文
