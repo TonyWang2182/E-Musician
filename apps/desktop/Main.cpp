@@ -10,7 +10,7 @@ namespace emusician {
 class Application final : public juce::JUCEApplication {
 public:
     const juce::String getApplicationName() override { return "E-musician"; }
-    const juce::String getApplicationVersion() override { return "0.5.0"; }
+    const juce::String getApplicationVersion() override { return EMUSICIAN_APPLICATION_VERSION; }
     bool moreThanOneInstanceAllowed() override
     {
         // CTest must execute its own process even when the interactive app is open.
@@ -262,7 +262,7 @@ private:
     class Window final : public juce::DocumentWindow {
     public:
         Window(EngineSession& session, bool visible)
-            : DocumentWindow("E-musician - Audio workspace", juce::Colours::white, allButtons)
+            : DocumentWindow("E-musician " EMUSICIAN_APPLICATION_VERSION " - Audio workspace", juce::Colours::white, allButtons)
         {
             setUsingNativeTitleBar(true);
             setContentOwned(new MainComponent(session), true);

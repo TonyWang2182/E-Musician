@@ -2136,3 +2136,22 @@
 - 定向补丁契约重跑20261027T084201.342150Z-3dee0ba2c4通过；与此前4/5中的其余四组共同完成本轮相关检查。生产集成125项通过。应用EXE未因Python白名单修正改变，源码差异和匹配EXE/PDB哈希归档到candidate-summary.json。
 - 用户已确认旧版普通音频有声并关闭程序。现已提供原路径0.5.1，要求分别检查Keyscape琴键发声及MIDI输入/Arm/Monitor切换稳定性，等待人工反馈。没有操作用户桌面，没有继续占用音频设备测试。
 - 更新CONTEXT、开发计划、架构、依赖及README候选状态；不把0.5历史长跑/插件矩阵套用为0.5.1实测，不将候选标成Keyscape已修复。原DMP、PDB和私有调试输出不提交。
+
+## 2026-10-27 16:51 — 新增播放退出反馈，版本待确认
+
+用户反馈写入音符后点击播放会卡顿退出。核对本机WER及CrashDumps，最新仍是16:20:41的0.5.0/Keyscape 1.5.0.0/c0000005/0x782693；0.5.1 Release生成于16:37:58。16:51检查未找到构建之后的E-musician崩溃或挂起事件，不能据此否定用户现象，也不能直接认定为0.5.1复现。已向用户确认是补充旧版现象还是重新打开新版后发生；在确认前不凭旧转储叠加新修复、不重复启动音频测试。Debug目录仍是0.5.0，当前候选路径必须指向Release。此次没有修改应用代码。
+
+### 2026-10-27T16:55:15+08:00 · build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 24.672s.
+- Command: `cmake --build --preset windows-release --parallel 2 --target EMusician`
+- Context: Version identification only: use CMake project version for application and visible title; audio processing unchanged; playback exit report awaiting version confirmation
+- Source SHA-256: `99970e361cc4fcd852cd3a3ad8439b5d3d1d816c62ddff34487b455e9988f70f`; Git HEAD: `3c07cfb43ae9ad64d5c7f97d73d5ebc2499d6572`.
+- [Record](builds/20261027T085515.875313Z-0539ec5c57.json) · [Raw log](../build-logs/20261027T085515.875313Z-0539ec5c57.log)
+- [Exact process output](../build-logs/20261027T085515.875313Z-0539ec5c57.raw.log)
+
+## 2026-10-27 — 修正版本辨认，尚未确认播放反馈对应构建
+
+- 只读检查发现Main.cpp的getApplicationVersion仍硬编码0.5.0，与CMake/PE资源0.5.1不一致。改为由CMake PROJECT_VERSION传入Main.cpp专用编译定义，同时在原生窗口标题显示版本；无音频/MIDI处理修改。
+- Release构建20261027T085515.875313Z-0539ec5c57成功，源码全程冻结；仅编译Main.cpp并链接。没有重新启动应用或运行音频测试。当前EXE/PDB指纹见version-identification-build.json，对应文件另存本地忽略目录.cache/v051/symbols以备后续匹配转储。
+- 普通GUI没有持久化启动/崩溃日志；启动catch只覆盖初始化std::exception，不覆盖之后音频线程AV。未找到新WER不能等同于用户没有遇到退出。仍等待用户确认是否在新版重新打开后发生，不推定Keyscape已修复。

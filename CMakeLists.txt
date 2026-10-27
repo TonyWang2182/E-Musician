@@ -72,6 +72,9 @@ if(EMUSICIAN_BUILD_DESKTOP)
         apps/desktop/MainComponent.cpp apps/desktop/ArrangementView.cpp
         apps/desktop/ProjectStorage.cpp apps/desktop/AudioSource.cpp apps/desktop/PluginHost.cpp
         apps/desktop/PianoRoll.cpp apps/desktop/ControlServer.cpp apps/desktop/SelectedTrackPanel.cpp tests/Vst3InactiveBusSmoke.cpp)
+    # Keep the application-reported version and window title tied to the build version.
+    set_property(SOURCE apps/desktop/Main.cpp APPEND PROPERTY COMPILE_DEFINITIONS
+        "EMUSICIAN_APPLICATION_VERSION=\"${PROJECT_VERSION}\"")
     target_include_directories(EMusician PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/_deps/asio_sdk/common")
     target_compile_definitions(EMusician PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_USE_MP3AUDIOFORMAT=1
         JUCE_PLUGINHOST_VST3=1 JUCE_PLUGINHOST_VST=1 JUCE_ASIO=1
