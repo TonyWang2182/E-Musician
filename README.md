@@ -2,11 +2,11 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。本轮先把音频编辑、MIDI 编曲、插件宿主、工程保存和导出做成可直接操作的基础，并给后续 Agent 提供同一套控制接口。
 
-**0.5.0 基础编曲版本已通过本轮指定回归及30分钟持续播放检查，交付摘要见 [DELIVERY](docs/verification/2026-10-27-v05/DELIVERY.md)。** 下述是当前代码的功能入口，具体设备、插件和性能以实测范围为准；最新上下文见 [CONTEXT](docs/CONTEXT.md)。
+**0.5.2 已通过Release 5/5回归与用户实际MIDI录音、保存、导出和重开验收，见[本轮记录](docs/verification/2026-10-27-v052/RESULTS.md)。** 早期性能和插件矩阵保留各自版本范围，见[0.5交付档案](docs/verification/2026-10-27-v05/DELIVERY.md)；最新上下文见[CONTEXT](docs/CONTEXT.md)。
 
 新工程默认 **120 BPM、4/4**。不提供和弦工具、乐句模板或自带音源；MIDI 通过用户安装的 Windows x64 VST2/VST3 乐器发声。独立运行不需要 Ableton、模型服务或 API 密钥。
 
-当前修复分支为 **0.5.2 录音MIDI保存修复候选**：0.5.1的Keyscape播放、实体键盘与Arm/Monitor已获用户确认；0.5.2修正录音时间边界、短音符导出及录音收尾Undo，验证进度见[本轮记录](docs/verification/2026-10-27-v052/RESULTS.md)。真实新录音、直接保存和重开仍待用户验收。
+本轮修复了Keyscape使用兼容、录音音符时间边界、短音符MIDI导出与录音收尾Undo。用户已确认键盘发声、Arm/Monitor切换、新录音直接保存及重开回放正常，无需手动升降音高修正。
 
 ## 打开与开发
 

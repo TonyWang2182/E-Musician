@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-27",
+  "timezone": "Asia/Shanghai",
+  "version": "0.5.2",
+  "status": "passed",
+  "evidence": "User response to the requested manual recording/save/MIDI export/reopen workflow",
+  "source_commit": "c5b246b",
+  "source_sha256": "4f47112f23e3cda47505af8f92bfa6f2425adf693429ef596717aa7f6b8a78ad",
+  "checks": [
+    "Keyscape playback from recovered project",
+    "New physical MIDI recording saved directly without transpose workaround",
+    "MIDI export",
+    "Close and reopen saved project with notes, patch and playback retained"
+  ],
+  "earlier_user_checks": [
+    "Live keyboard sound",
+    "Arm and Monitor Off/On switching"
+  ],
+  "automated_evidence": "release-summary.json",
+  "limitations": "One user-tested setup; no new all-plugin, all-device or long-duration claim"
+}
