@@ -42,7 +42,7 @@
 
 ## 可追溯与边界
 
-最终源码指纹 `34eb7d59f81aac2e98ca90500e8dcce3bb3ce0c23a5c0f6b6fce59d2188c4676`；Release EXE SHA256 `1a72c25210e296898167db1e33f57f4cbee0b21fa8c358e636917ee8f23024dd`。[完整性摘要](34eb7d59-final-integrity.json)保留报告哈希、内存首尾及33个用户文件共410250775字节未变的结果；精确用户素材清单和音乐不发布。较早6414应用源与最终候选的区别是测试脚本和性能探针，旧证据保留原指纹。
+最终源码指纹 `34eb7d59f81aac2e98ca90500e8dcce3bb3ce0c23a5c0f6b6fce59d2188c4676`；Release EXE SHA256 `1a72c25210e296898167db1e33f57f4cbee0b21fa8c358e636917ee8f23024dd`。源码与档案已发布为[提交1ddef4e](https://github.com/TonyWang2182/E-Musician/commit/1ddef4eedfbe83a1c32b06668a0cef3711c17d2f)，后续为文档收口。[完整性摘要](34eb7d59-final-integrity.json)保留报告哈希、内存首尾及33个用户文件共410250775字节未变的结果；精确用户素材清单和音乐不发布。较早6414应用源与最终候选的区别是测试脚本和性能探针，旧证据保留原指纹。
 
 原生瞬时Ctrl+S自动注入未触发，Space正常；鼠标Save/Save As闭环已验，不能据此宣布物理键盘快捷键已通过或确定存在应用缺陷。原生检查wrapper曾因20分钟无命令主动结束，失败记录保留；不把局部GUI操作包装为完整GUI套件通过。归档校验脚本一次成功状态名称写错也已记录并更正，详见[完整迭代记录](RESULTS.md)与[DEVLOG](../../DEVLOG.md)。
 

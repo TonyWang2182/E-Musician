@@ -1,6 +1,6 @@
 ﻿# E-musician 当前上下文
 
-更新：2026-10-27（Asia/Shanghai）。当前阶段：**0.5.0最终34eb7d59候选的双配置各5/5、原生保存新进程回读、Serum播放中8次保存和完整30分钟16轨ASIO长跑已通过。33个用户文件末次SHA256核对全部不变。正在完成Git发布。**
+更新：2026-10-27（Asia/Shanghai）。当前阶段：**0.5.0基础编曲版本本轮交付完成：双配置各5/5、原生保存回读、Serum播放中8次保存和30分钟16轨ASIO长跑通过；33个用户文件全部未变。代码及档案已推送GitHub main。**
 
 ## 用户要求与授权
 
@@ -33,18 +33,18 @@
 
 ## 归属与纪律
 
-代码已全部冻结。v05_ui_audit已更新QUICKSTART/BUILDING/UI_REFERENCE；v05_save_audit已更新ADR0006并复核公开候选。root执行所有构建、测试、运行及最终文档/Git。应用执行必须走dev.py或Recorder，期间源码冻结；轻量文档工作可继续。失败日志保留，DEVLOG只追加。
+本轮代理工作已结束，无正在执行的构建或测试。后续修改从新的迭代开始，先阅读本上下文及相关模块；应用执行必须走dev.py或Recorder，期间源码冻结。失败日志保留，DEVLOG只追加。v05_ui_audit复核指南和交付计划，v05_save_audit独立复核报告及公开暂存范围，root统一构建/测试和发布。
 
 ## 保护与发布
 
 项目E:/E-musician，不是环境默认MusicAgent&DAW目录。保护基线.cache/v05-inventory/user-files-before.json：33文件/410250775字节，最终逐文件SHA256全部一致，详细结果在.cache/v05-inventory/user-files-after-final.json。用户原CL schema3/revision159仅两audio，build独立副本加Serum，原清单和所有旧素材代次保留。
 
-Git main尚未提交，origin为获授权公开空仓库，原index备份.cache/v05-inventory/original-index。不reset/clean/force push。.gitignore排除test-projects、_deps、build、build-logs、缓存、凭据、8张用户工程波形截图及精确素材保护清单；其余56张图经报告及抽查为合成/空工作区/编辑面板。未发现用户原始音频、插件二进制或凭据进入发布候选。旧暂存区仍是历史M1内容，最终审查时统一暂存当前文件。
+Git main已发布至[授权仓库](https://github.com/TonyWang2182/E-Musician)。首次源码交付提交[1ddef4e](https://github.com/TonyWang2182/E-Musician/commit/1ddef4eedfbe83a1c32b06668a0cef3711c17d2f)已通过远端SHA核对，后续提交只收口发布文档。原index备份.cache/v05-inventory/original-index保留，未reset/clean/force push。.gitignore排除test-projects、_deps、build、build-logs、缓存、凭据、8张用户工程波形及精确素材清单；发布图片为60张已审查验证图和3张用户提供设计参考，音频仅2个生成MP3测试信号。未上传用户音乐、插件或程序二进制。
 
-VS Code已打开E-musician，F5/构建任务走dev.py。产物build/bin/Release/E-musician.exe。完成验证后审查暂存内容、commit/push并核对本地remote SHA。
+VS Code已打开E-musician，main跟踪origin/main，F5/构建任务走dev.py。可直接运行build/bin/Release/E-musician.exe；操作见QUICKSTART。68个源文件的Git blob SHA256与最终测试指纹一致，原始报告和第三方许可证字节由.gitattributes保护，避免换行转换破坏审计哈希。
 
 ## 完成条件与边界
 
-本轮实现、指定验证及用户文件核对已完成，当前只剩文档收口和Git提交同步。后续真实使用反馈与新增功能单独迭代，不能把现有测试范围外能力写成已验收。
+本轮实现、指定验证、文件保护及源码发布已完成。后续优先实体MIDI演奏/听感与可见GUI交互验收，再按实际反馈扩展负载和插件矩阵；Agent业务开发仍留后续。不能把现有测试范围外能力写成已验收。
 
 不含全部插件保证、运行期插件沙箱、32位桥接、侧链/任意插件多输出、comping、TempoMap、warp、Touch/Latch/Write或LLM Agent。长跑测回调均值/最大值、xrun、CPU/内存、消息定时器/控制命令延迟；回调P99.9、物理输入到绘制未采集，通过也不等于B01全部原指标完成。

@@ -2022,3 +2022,9 @@
 - 当前暂存459个文件，11,180,583bytes；68个构建指纹文件的index blob SHA256全部与最终长跑一致，docs/builds及verification原始JSON/执行器档案与本地字节一致。Markdown相对目标均存在；依赖源码与原始build-logs链接为明确的本地记录，不随仓库发布。
 - 独立审查确认不含用户工程/音乐、8张用户CL波形、精确保护清单、插件/EXE/SDK/缓存；仅2个CC0生成MP3测试素材。文本凭据特征扫描无命中。中文文件均是有效UTF-8，先前终端显示问题未导致文件改写；旧ADR只调整Markdown段落空白。
 - .gitattributes保留原始报告及第三方许可证字节，patch的上下文空格按diff语法保留；git add --renormalize刷新旧暂存内容，未改工作区应用源码。git diff --cached --check通过。不reset/clean/force push。
+
+## 2026-10-27 — 0.5 源码发布完成
+
+- 已提交并非强制推送main至 https://github.com/TonyWang2182/E-Musician 。源码交付提交1ddef4eedfbe83a1c32b06668a0cef3711c17d2f，git ls-remote核对远端main相同；main已跟踪origin/main，VS Code沿用此工作区。
+- 459个公开文件包含源码、固定依赖清单/精确补丁、构建失败和成功记录、合成验证图及用户指南；不上传用户音乐/工程、插件/应用二进制、本机SDK及缓存。
+- 本条和CONTEXT/DAW_BASELINE/DEVELOPMENT/DELIVERY的完成状态以独立文档提交跟进，不重新编译，也不把文档改动冒充应用代码变化。68个源文件仍与最终验证指纹一致。
