@@ -4,7 +4,7 @@
 
 ## 0.5.1候选：VST3通道缓冲边界
 
-固定JUCE的宿主mapper在prepare阶段按最大块长为inactive输入/输出通道预分配独立float/double缓冲，process阶段清零复用；active通道仍映射到原宿主音频。bus数量、通道数和激活状态保持不变，闲置输出写入不混入主输出；过长块拒绝处理并清零，避免越界。该兼容补丁不提供插件多输出路由，也不隔离插件运行期崩溃；新增回归覆盖实际mapper，Keyscape结果仍待人工验证。实现与证据见[候选记录](verification/2026-10-27-v051/RESULTS.md)。
+固定JUCE的宿主mapper在prepare阶段按最大块长为inactive输入/输出通道预分配独立float/double缓冲，process阶段清零复用；active通道仍映射到原宿主音频。bus数量、通道数和激活状态保持不变，闲置输出写入不混入主输出；过长块拒绝处理并清零，避免越界。该兼容补丁不提供插件多输出路由，也不隔离插件运行期崩溃；新增回归覆盖实际mapper，用户已确认当前Keyscape工程的MIDI编写/播放、实体键盘及Arm/Monitor正常，短录音和保存重开待验。实现与证据见[候选记录](verification/2026-10-27-v051/RESULTS.md)。
 
 ## 权威状态与产品边界
 

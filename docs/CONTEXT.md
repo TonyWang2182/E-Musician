@@ -1,10 +1,10 @@
-# 当前状态：0.5.1 MIDI编写、播放及Keyscape使用已获人工确认（2026-10-27）
+# 当前状态：0.5.1 Keyscape播放、实体键盘及Arm/Monitor人工复测通过（2026-10-27）
 
-用户最新反馈：“没事了，现在是可以的写入midi和播放的，插件也没问题”。当前测试工程的MIDI写入、播放与Keyscape使用已通过用户验收；先前播放退出不再作为已确认的当前版本复现。Arm/Monitor切换和实体键盘实时输入仍待分项反馈，已提供简短复测；不要把一次可用扩大为所有插件/音色或长期稳定性保证。详见[本轮记录](verification/2026-10-27-v051/RESULTS.md)。
+用户最新反馈：“没事了，现在是可以的写入midi和播放的，插件也没问题”。当前测试工程的MIDI写入、播放与Keyscape使用已通过用户验收；先前播放退出不再作为已确认的当前版本复现。随后针对Arm/Monitor和实体键盘的复测，用户确认“键盘有声音，切换正常”，本次原始故障场景人工验收通过；不要把一次可用扩大为所有插件/音色或长期稳定性保证。详见[本轮记录](verification/2026-10-27-v051/RESULTS.md)。
 
 分支fix/keyscape-output-buffers已同步GitHub，候选包含VST3闲置通道隔离缓冲、匹配Release符号及由CMake驱动的应用版本/窗口标题。最新构建身份见[version-identification-build.json](verification/2026-10-27-v051/version-identification-build.json)；首次相关自动回归见[candidate-summary.json](verification/2026-10-27-v051/candidate-summary.json)。旧WER定位到0.5.0 Keyscape音频处理线程的近空地址写入；兼容补丁生效方向与用户结果一致，仍不宣称唯一根因已被证明。
 
-协作方式：用户操作GUI，我负责构建/debug；不使用computer-use，减少重复自动化。本次只更新人工验收档案，不改应用、不构建、不占用声卡。DEVLOG保持追加，用户工程不改，DMP/PDB仅在本地忽略目录。下一个检查为实体键盘及Arm/Monitor，然后再做短MIDI录音、保存重开。
+协作方式：用户操作GUI，我负责构建/debug；不使用computer-use，减少重复自动化。本次只更新人工验收档案，不改应用、不构建、不占用声卡。DEVLOG保持追加，用户工程不改，DMP/PDB仅在本地忽略目录。下一项已交用户：约10秒实体MIDI录音、关闭Arm回放、另存新测试工程并重开，检查音符/Keyscape音色/回放保留；等待结果。
 
 以下为0.5已发布基线，保留供对照：
 # E-musician 当前上下文

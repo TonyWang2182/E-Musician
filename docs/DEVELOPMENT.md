@@ -6,7 +6,7 @@
 
 ## 当前修复：0.5.1 Keyscape兼容候选
 
-用户反馈0.5.0的Keyscape无声且Arm/Monitor切换退出。已加入VST3闲置通道隔离缓冲和Release调试符号，Release构建及相关回归通过；用户已确认MIDI编写、播放与Keyscape使用正常；Arm/Monitor切换和实体键盘输入仍待分项确认。MIDI片段和钢琴卷帘写音符已由用户确认可用，当前没有单独的画笔按钮。详情及后续分支见[候选记录](verification/2026-10-27-v051/RESULTS.md)。本轮采用用户操作界面、开发者构建/debug的方式，避免重复大范围测试。
+用户反馈0.5.0的Keyscape无声且Arm/Monitor切换退出。已加入VST3闲置通道隔离缓冲和Release调试符号，Release构建及相关回归通过；用户已确认MIDI编写、播放与Keyscape使用正常；实体键盘输入与Arm/Monitor切换也已获用户确认正常；短MIDI录音和保存重开待反馈。MIDI片段和钢琴卷帘写音符已由用户确认可用，当前没有单独的画笔按钮。详情及后续分支见[候选记录](verification/2026-10-27-v051/RESULTS.md)。本轮采用用户操作界面、开发者构建/debug的方式，避免重复大范围测试。
 
 ## 已完成的实施前复盘
 
