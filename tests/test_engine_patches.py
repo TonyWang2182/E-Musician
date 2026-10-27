@@ -192,8 +192,10 @@ class RecordedPatchTests(unittest.TestCase):
         self.assertEqual(manifest["schema"], 2)
         self.assertEqual({entry["path"] for entry in manifest["files"]}, {
             "modules/tracktion_engine/playback/graph/tracktion_WaveNode.cpp",
-            "modules/tracktion_engine/plugins/external/tracktion_ExternalAutomatableParameter.h"})
-        self.assertEqual(len(manifest["files"]), 2)
+            "modules/tracktion_engine/plugins/external/tracktion_ExternalAutomatableParameter.h",
+            "modules/juce/modules/juce_audio_processors/format_types/juce_VST3Common.h",
+            "modules/juce/modules/juce_audio_processors/format_types/juce_VST3PluginFormat.cpp"})
+        self.assertEqual(len(manifest["files"]), 4)
         for entry in manifest["files"]:
             patch = patcher.inside(manifest_file.parent, entry["patch"]).read_bytes()
             self.assertEqual(patcher.digest(patch), entry["patch_sha256_lf"])

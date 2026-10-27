@@ -1,6 +1,7 @@
 // Included after the other EngineSession smoke tests, inside emusician.
 // All captured input is generated here and fed through HostedAudioDeviceInterface.
 // No physical audio or MIDI input is opened by this suite.
+juce::Result runVst3InactiveBusSmoke();
 juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
 {
     requireControlThread(); int checks = 0;
@@ -8,6 +9,7 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
     auto okay = [&](const juce::Result& r, const juce::String& context) { check(r.wasOk(), context + ": " + r.getErrorMessage()); };
     auto command = [&](EngineSession& target, const juce::String& name, juce::var args = object({})) { okay(target.execute(name, args, target.snapshot().revision), name); };
     try {
+        okay(runVst3InactiveBusSmoke(), "VST3 inactive-bus compatibility buffers");
         const auto workspace = directory.getChildFile("production-" + uid()); okay(workspace.createDirectory(), "owned test workspace");
         storage::StoredProject graph; graph.projectId = uid();
         storage::StoredTrack source, busA, busB; source.id = "source"; source.name = "Source";

@@ -17,6 +17,20 @@
       "before_sha256_lf": "4c2cbd1eb527da5ce5870a69e49b27f86ebb14ec35169d135b546ad904465b51",
       "after_sha256_lf": "7636b9652a9e927dce3d5915941968a2c8a4c95bcaef721e357c16722f84d65d",
       "patch_sha256_lf": "fd2f5cd47516d2827b6cb9128255f62cdd494109057fa9e572c4841d0bb6fe0c"
+    },
+    {
+      "path": "modules/juce/modules/juce_audio_processors/format_types/juce_VST3Common.h",
+      "patch": "vst3-inactive-buffer-storage.patch",
+      "before_sha256_lf": "fc84393c1838007ecd9abeaf44f78dc09ffe288dc771f4f67ef568640e88481d",
+      "after_sha256_lf": "59c3a091350250742a50cf520bd6f08dd054fc18cb7354b3dfd4d30732bf3b23",
+      "patch_sha256_lf": "b8a464309ec74ae93e8e91f065147c21a0d54a9a0c65bb927be91e5bd81b8678"
+    },
+    {
+      "path": "modules/juce/modules/juce_audio_processors/format_types/juce_VST3PluginFormat.cpp",
+      "patch": "vst3-inactive-buffer-host.patch",
+      "before_sha256_lf": "d2a30d8ed9fcd14585605856bb18d319a80e1f842a1f246c23c3acfc81d54036",
+      "after_sha256_lf": "1371d21f50d07bfb24198b694b922d4bf115eb6060dcd80955d940460068cad3",
+      "patch_sha256_lf": "5726605bd003fd92ac9a3a3d2c4c7b7c01dd567ecca26a4397069d654ccdcbc9"
     }
   ]
 }

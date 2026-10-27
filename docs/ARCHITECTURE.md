@@ -2,6 +2,10 @@
 
 更新日期：2026-10-27（Asia/Shanghai）。本文描述 0.5 当前实现及边界；保存管线、工作台、录音和生产图已通过最终候选双配置检查，具体原生操作、硬件及性能范围见 [CONTEXT](CONTEXT.md) 和 [本轮实测](verification/2026-10-27-v05/RESULTS.md)。历史 0.3/0.4 证据不替代新版本验收。
 
+## 0.5.1候选：VST3通道缓冲边界
+
+固定JUCE的宿主mapper在prepare阶段按最大块长为inactive输入/输出通道预分配独立float/double缓冲，process阶段清零复用；active通道仍映射到原宿主音频。bus数量、通道数和激活状态保持不变，闲置输出写入不混入主输出；过长块拒绝处理并清零，避免越界。该兼容补丁不提供插件多输出路由，也不隔离插件运行期崩溃；新增回归覆盖实际mapper，Keyscape结果仍待人工验证。实现与证据见[候选记录](verification/2026-10-27-v051/RESULTS.md)。
+
 ## 权威状态与产品边界
 
 应用为 Windows x64 原生 DAW。C++20 承担工程控制，JUCE 承担界面、设备和平台设施，Tracktion Engine 承担 Edit、播放图、轨道、片段与渲染。活动音乐只有一个权威来源：`EngineSession` 拥有的 Tracktion Edit。保存、导入和命令校验使用临时 DTO；GUI、Agent 与后台任务不持有第二份可任意修改的音乐模型。

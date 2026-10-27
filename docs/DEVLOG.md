@@ -2028,3 +2028,111 @@
 - 已提交并非强制推送main至 https://github.com/TonyWang2182/E-Musician 。源码交付提交1ddef4eedfbe83a1c32b06668a0cef3711c17d2f，git ls-remote核对远端main相同；main已跟踪origin/main，VS Code沿用此工作区。
 - 459个公开文件包含源码、固定依赖清单/精确补丁、构建失败和成功记录、合成验证图及用户指南；不上传用户音乐/工程、插件/应用二进制、本机SDK及缓存。
 - 本条和CONTEXT/DAW_BASELINE/DEVELOPMENT/DELIVERY的完成状态以独立文档提交跟进，不重新编译，也不把文档改动冒充应用代码变化。68个源文件仍与最终验证指纹一致。
+
+### 2026-10-27T16:16:29+08:00 · debug-keyscape-existing-dump · succeeded
+
+- Config: Release; exit code: 0; elapsed: 6.636s.
+- Command: `C:\Python314\python.exe E:/E-musician/.cache/v051/read_dump.py C:/Users/28712/AppData/Local/CrashDumps/E-musician.exe.36020.dmp E:/E-musician/.cache/v051/keyscape-dump.txt`
+- Context: Read-only analysis of user-reported Keyscape crash with system dbgeng; no live process or GUI control
+- Source SHA-256: `34eb7d59f81aac2e98ca90500e8dcce3bb3ce0c23a5c0f6b6fce59d2188c4676`; Git HEAD: `b23cb89321705ecdf46c3f312b24966d0f2193a1`.
+- [Record](builds/20261027T081629.162648Z-8e1620d997.json) · [Raw log](../build-logs/20261027T081629.162648Z-8e1620d997.log)
+- [Exact process output](../build-logs/20261027T081629.162648Z-8e1620d997.raw.log)
+
+### 2026-10-27T16:19:51+08:00 · debug-keyscape-process-data · succeeded
+
+- Config: Release; exit code: 0; elapsed: 2.378s.
+- Command: `C:\Python314\python.exe E:/E-musician/.cache/v051/read_dump_detail.py C:/Users/28712/AppData/Local/CrashDumps/E-musician.exe.36020.dmp E:/E-musician/.cache/v051/keyscape-detail.txt`
+- Context: Read existing dump audio-processing arguments and bus pointer evidence
+- Source SHA-256: `34eb7d59f81aac2e98ca90500e8dcce3bb3ce0c23a5c0f6b6fce59d2188c4676`; Git HEAD: `b23cb89321705ecdf46c3f312b24966d0f2193a1`.
+- [Record](builds/20261027T081951.556702Z-a553119d2d.json) · [Raw log](../build-logs/20261027T081951.556702Z-a553119d2d.log)
+- [Exact process output](../build-logs/20261027T081951.556702Z-a553119d2d.raw.log)
+
+### 2026-10-27T16:20:34+08:00 · debug-keyscape-bus-pointers · failed
+
+- Config: Release; exit code: 1; elapsed: 2.027s.
+- Command: `C:\Python314\python.exe E:/E-musician/.cache/v051/read_dump_buses.py C:/Users/28712/AppData/Local/CrashDumps/E-musician.exe.36020.dmp E:/E-musician/.cache/v051/keyscape-buses.txt`
+- Context: Recover ProcessData and output channel pointers from existing crash dump
+- Source SHA-256: `34eb7d59f81aac2e98ca90500e8dcce3bb3ce0c23a5c0f6b6fce59d2188c4676`; Git HEAD: `b23cb89321705ecdf46c3f312b24966d0f2193a1`.
+- [Record](builds/20261027T082034.838241Z-0d1d7e4e93.json) · [Raw log](../build-logs/20261027T082034.838241Z-0d1d7e4e93.log)
+- [Exact process output](../build-logs/20261027T082034.838241Z-0d1d7e4e93.raw.log)
+- Error: Command failed with code 1; see E:\E-musician\build-logs\20261027T082034.838241Z-0d1d7e4e93.log
+
+### 2026-10-27T16:32:18+08:00 · patch-vst3-inactive-buffers · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.998s.
+- Command: `C:\Python314\python.exe E:/E-musician/scripts/apply_engine_patches.py apply`
+- Context: Apply exact JUCE compatibility patches; preserve inactive bus state and preallocate discarded channels
+- Source SHA-256: `5dfdc60864a063bdf06ae829b1dd126eaadfa325fccda1cda8577a4c65710fd0`; Git HEAD: `b23cb89321705ecdf46c3f312b24966d0f2193a1`.
+- [Record](builds/20261027T083218.168571Z-0de675fac5.json) · [Raw log](../build-logs/20261027T083218.168571Z-0de675fac5.log)
+- [Exact process output](../build-logs/20261027T083218.168571Z-0de675fac5.raw.log)
+
+## 2026-10-27 — 0.5.1 Keyscape 人工验收迭代开始
+
+- 用户要求节省额度、由其操作GUI，我负责代码/构建/debug；本轮禁止computer-use。用户反馈0.5实际Keyscape/Arm/Monitor崩溃，上一轮指定测试不覆盖这款插件，不能再将旧通过范围泛化。
+- 已只读分析4次同偏移崩溃及最新minidump：异常在ASIO处理线程的Keyscape内，写地址0x20；恢复ProcessData有9输出。minidump不含完整输出堆内存，因此inactive bus假设待证，不能直接归因插件或宿主。
+- 用户已验证钢琴卷帘/写音符、普通音频播放可用；Keyscape片段及插件屏幕琴键无声。用户已关闭程序，允许替换构建。
+- 新分支fix/keyscape-output-buffers实现0.5.1候选：为inactive VST3总线提供预分配独立丢弃缓冲，保持inactive路由与主声道；新增真实mapper回归和优化Release符号。精确JUCE补丁加入manifest，已应用并核验。尚未构建通过或人工确认修复。
+
+### 2026-10-27T16:34:07+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 25.189s.
+- Command: `cmake --preset windows-msvc`
+- Context: 0.5.1 inactive VST3 buffers and Release symbols; focused mapper coverage, human Keyscape retest pending
+- Source SHA-256: `5dfdc60864a063bdf06ae829b1dd126eaadfa325fccda1cda8577a4c65710fd0`; Git HEAD: `b23cb89321705ecdf46c3f312b24966d0f2193a1`.
+- [Record](builds/20261027T083407.969352Z-0d4158cce8.json) · [Raw log](../build-logs/20261027T083407.969352Z-0d4158cce8.log)
+- [Exact process output](../build-logs/20261027T083407.969352Z-0d4158cce8.raw.log)
+
+### 2026-10-27T16:34:33+08:00 · check · failed
+
+- Config: Release; exit code: 1; elapsed: 114.179s.
+- Command: `cmake --build --preset windows-release --parallel 2`
+- Context: 0.5.1 inactive VST3 buffers and Release symbols; focused mapper coverage, human Keyscape retest pending
+- Source SHA-256: `5dfdc60864a063bdf06ae829b1dd126eaadfa325fccda1cda8577a4c65710fd0`; Git HEAD: `b23cb89321705ecdf46c3f312b24966d0f2193a1`.
+- [Record](builds/20261027T083433.249113Z-f5ef139bb0.json) · [Raw log](../build-logs/20261027T083433.249113Z-f5ef139bb0.log)
+- [Exact process output](../build-logs/20261027T083433.249113Z-f5ef139bb0.raw.log)
+- Error: Command failed with code 1; see E:\E-musician\build-logs\20261027T083433.249113Z-f5ef139bb0.log
+
+## 2026-10-27 — 0.5.1首轮构建修正
+
+- 首轮Release构建083433.249113Z-f5ef139bb0失败：新增独立mapper测试引用JUCE内部VST3Common时缺少juce_FlagCache.h，FlaggedFloatCache类型不可见。仅补测试的内部头文件依赖后重新构建；真实补丁和原失败记录保留。
+- 小范围独立审查确认预分配/路由隔离/变长块检查一致；人工发声和Arm/Monitor仍待新版验证，不能以静态审查替代实测。
+
+### 2026-10-27T16:37:42+08:00 · build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 18.633s.
+- Command: `cmake --build --preset windows-release --parallel 2 --target EMusician`
+- Context: 0.5.1 rebuild after test-only FlagCache include correction; source frozen
+- Source SHA-256: `084b4e91a9806fb4d67fc5d652ed5ebef5f3d901da3e3938e2b044bf8b581cd4`; Git HEAD: `b23cb89321705ecdf46c3f312b24966d0f2193a1`.
+- [Record](builds/20261027T083742.671390Z-8ab8e6f706.json) · [Raw log](../build-logs/20261027T083742.671390Z-8ab8e6f706.log)
+- [Exact process output](../build-logs/20261027T083742.671390Z-8ab8e6f706.raw.log)
+
+### 2026-10-27T16:38:01+08:00 · test · failed
+
+- Config: Release; exit code: 8; elapsed: 174.176s.
+- Command: `ctest --preset windows-release --output-on-failure`
+- Context: 0.5.1 relevant regression including real VST3 mapper isolation; Keyscape GUI retest is manual
+- Source SHA-256: `084b4e91a9806fb4d67fc5d652ed5ebef5f3d901da3e3938e2b044bf8b581cd4`; Git HEAD: `b23cb89321705ecdf46c3f312b24966d0f2193a1`.
+- [Record](builds/20261027T083801.599393Z-21ba7d3201.json) · [Raw log](../build-logs/20261027T083801.599393Z-21ba7d3201.log)
+- [Exact process output](../build-logs/20261027T083801.599393Z-21ba7d3201.raw.log)
+- Error: Command failed with code 8; see E:\E-musician\build-logs\20261027T083801.599393Z-21ba7d3201.log
+
+## 2026-10-27 — 0.5.1构建通过、相关回归完成
+
+- Release构建083742.671390Z-8ab8e6f706通过，产物0.5.1及对应PDB生成；原pwsh.exe后处理环境警告仍存在，但编译/链接退出0。
+- 首轮CTest083801.599393Z-21ba7d3201为4/5：日志、core、引擎/生产/mapper集成、控制输出隔离通过；补丁契约失败是正式清单测试仍写死原2项。同步为精确4条文件白名单及数量4，保留全部哈希和拒绝未知修改规则；只重跑受此Python变更影响的契约检查，不重复已通过的应用集成。
+- 此时只确认候选编译和自动回归，Keyscape发声/Arm/Monitor仍交由用户人工复测，未宣布修复完成。
+
+### 2026-10-27T16:42:01+08:00 · verify-v051-patch-contracts · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.918s.
+- Command: `ctest --test-dir E:/E-musician/build -C Release -R ^engine.patch_contracts$ --output-on-failure`
+- Context: Update exact allowlist from two to four approved patches; rerun only affected Python contract tests; application EXE unchanged
+- Source SHA-256: `a67e1d7f272b95c6a93652ecdd8a08f99f2ae29c8f8502ec8696524482fb0314`; Git HEAD: `b23cb89321705ecdf46c3f312b24966d0f2193a1`.
+- [Record](builds/20261027T084201.342150Z-3dee0ba2c4.json) · [Raw log](../build-logs/20261027T084201.342150Z-3dee0ba2c4.log)
+- [Exact process output](../build-logs/20261027T084201.342150Z-3dee0ba2c4.raw.log)
+
+## 2026-10-27 — 0.5.1候选交人工复测
+
+- 定向补丁契约重跑20261027T084201.342150Z-3dee0ba2c4通过；与此前4/5中的其余四组共同完成本轮相关检查。生产集成125项通过。应用EXE未因Python白名单修正改变，源码差异和匹配EXE/PDB哈希归档到candidate-summary.json。
+- 用户已确认旧版普通音频有声并关闭程序。现已提供原路径0.5.1，要求分别检查Keyscape琴键发声及MIDI输入/Arm/Monitor切换稳定性，等待人工反馈。没有操作用户桌面，没有继续占用音频设备测试。
+- 更新CONTEXT、开发计划、架构、依赖及README候选状态；不把0.5历史长跑/插件矩阵套用为0.5.1实测，不将候选标成Keyscape已修复。原DMP、PDB和私有调试输出不提交。

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(EMusician VERSION 0.5.0 LANGUAGES C CXX)
+project(EMusician VERSION 0.5.1 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -71,13 +71,15 @@ if(EMUSICIAN_BUILD_DESKTOP)
     target_sources(EMusician PRIVATE apps/desktop/Main.cpp apps/desktop/EngineSession.cpp
         apps/desktop/MainComponent.cpp apps/desktop/ArrangementView.cpp
         apps/desktop/ProjectStorage.cpp apps/desktop/AudioSource.cpp apps/desktop/PluginHost.cpp
-        apps/desktop/PianoRoll.cpp apps/desktop/ControlServer.cpp apps/desktop/SelectedTrackPanel.cpp)
+        apps/desktop/PianoRoll.cpp apps/desktop/ControlServer.cpp apps/desktop/SelectedTrackPanel.cpp tests/Vst3InactiveBusSmoke.cpp)
     target_include_directories(EMusician PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/_deps/asio_sdk/common")
     target_compile_definitions(EMusician PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_USE_MP3AUDIOFORMAT=1
         JUCE_PLUGINHOST_VST3=1 JUCE_PLUGINHOST_VST=1 JUCE_ASIO=1
         JUCE_MODAL_LOOPS_PERMITTED=1 TRACKTION_ENABLE_TIMESTRETCH_SOUNDTOUCH=0)
     if(MSVC)
-        target_compile_options(EMusician PRIVATE /utf-8 /bigobj)
+        target_compile_options(EMusician PRIVATE /utf-8 /bigobj $<$<CONFIG:Release>:/Zi>)
+        target_link_options(EMusician PRIVATE $<$<CONFIG:Release>:/DEBUG:FULL>
+            $<$<CONFIG:Release>:/OPT:REF> $<$<CONFIG:Release>:/OPT:ICF>)
     endif()
     target_link_libraries(EMusician PRIVATE tracktion::tracktion_engine tracktion::tracktion_graph
         tracktion::tracktion_core juce::juce_audio_utils juce::juce_cryptography juce::juce_recommended_config_flags)

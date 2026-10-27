@@ -4,6 +4,10 @@
 
 当前目标是0.5：修复用户实际保存/卡顿问题并简化操作，补上录音、ASIO、曲线和可用路由。V501–V508已实现，最终候选的[Release检查](builds/20261027T014338.621504Z-71806cf8f6.json)与[Debug检查](builds/20261027T014517.945704Z-e8baa314a1.json)均5/5通过；三轨原生保存及新进程回读、播放中保存、指定插件/硬件矩阵、10万音符JSONL短测和16轨无插件30分钟长跑通过。V509指定范围已交付并同步GitHub main，B01仍缺回调P99.9与输入到绘制测量。Ctrl+S瞬时原生注入尚未确认，实体键盘和听感未验；最新状态见[CONTEXT](CONTEXT.md)和[本轮验证记录](verification/2026-10-27-v05/RESULTS.md)。
 
+## 当前修复：0.5.1 Keyscape兼容候选
+
+用户反馈0.5.0的Keyscape无声且Arm/Monitor切换退出。已加入VST3闲置通道隔离缓冲和Release调试符号，Release构建及相关回归通过；用户人工复测待反馈，不标记问题已解决。MIDI片段和钢琴卷帘写音符已由用户确认可用，当前没有单独的画笔按钮。详情及后续分支见[候选记录](verification/2026-10-27-v051/RESULTS.md)。本轮采用用户操作界面、开发者构建/debug的方式，避免重复大范围测试。
+
 ## 已完成的实施前复盘
 
 入口：[工程复盘](review/2026-10-27-v05/REVIEW.md)；分项：[保存](review/2026-10-27-v05/SAVE-AUDIT.md)、[界面](review/2026-10-27-v05/UI-AUDIT.md)、[音频架构](review/2026-10-27-v05/AUDIO-ARCHITECTURE.md)。旧计划完整保留在[0.4历史计划](history/DEVELOPMENT-v09.md)，其中旧范围不再限制本轮用户新增需求。

@@ -83,9 +83,9 @@ MP3回归样本来自本项目公式合成，包含CBR双声道和VBR单声道�
 
 ## 本地补充与升级流程
 
-上游基线仍为 `b0c7dd090a56b27fe01bb394617891906eb34daf`。[补丁清单](../cmake/patches/tracktion/manifest.json)采用 schema 2，分别记录下述两个源文件及各自的统一差异、应用前后 SHA-256；哈希按 UTF-8/LF 标准化计算，应用时保留 checkout 原有换行格式。
+上游基线仍为 `b0c7dd090a56b27fe01bb394617891906eb34daf`。[补丁清单](../cmake/patches/tracktion/manifest.json)采用 schema 2，分别记录下述四个源文件及各自的统一差异、应用前后 SHA-256；哈希按 UTF-8/LF 标准化计算，应用时保留 checkout 原有换行格式。
 
-[apply_engine_patches.py](../scripts/apply_engine_patches.py)的`apply`/`verify`核对 HEAD、全部清单项、差异上下文与输出哈希；只逐项原子替换清单列出的两个源文件，不改写其他上游文件。未应用补丁、错误提交、未知修改、哈希不符或路径越界都会拒绝，已经应用的确切结果可重复核验。`scripts/dev.py bootstrap`负责应用，CMake 配置阶段只核验。脚本回归使用独立临时夹具，不依赖真实 checkout 当前是否已打补丁。
+[apply_engine_patches.py](../scripts/apply_engine_patches.py)的`apply`/`verify`核对 HEAD、全部清单项、差异上下文与输出哈希；只逐项原子替换清单列出的四个源文件，不改写其他上游文件。未应用补丁、错误提交、未知修改、哈希不符或路径越界都会拒绝，已经应用的确切结果可重复核验。`scripts/dev.py bootstrap`负责应用，CMake 配置阶段只核验。脚本回归使用独立临时夹具，不依赖真实 checkout 当前是否已打补丁。
 
 ### HQ sinc 源定位补丁
 
@@ -110,6 +110,10 @@ MP3回归样本来自本项目公式合成，包含CBR双声道和VBR单声道�
 | `.patch` 文件 | `fd2f5cd47516d2827b6cb9128255f62cdd494109057fa9e572c4841d0bb6fe0c` |
 
 本机 Serum VST3 1.3.6.8 的[记录 20261026T185830.754109Z-ce021a9d95](builds/20261026T185830.754109Z-ce021a9d95.json)通过 20 项断言：2,397 个参数的两轮相同值通知不增加 revision/dirty，实际参数变化立即可见并标脏，强制自动化回传不覆盖基础值，保存重开保留基础值、自动化 lane 和稳定点 ID。此测试未打开原生编辑器、未开始播放，不能替代真实编辑器交互、播放或其他插件版本的兼容验证。
+
+### 0.5.1 VST3闲置通道缓冲兼容候选
+
+新增两项作用于固定JUCE子模块的juce_VST3Common.h和juce_VST3PluginFormat.cpp，见[存储补丁](../cmake/patches/tracktion/vst3-inactive-buffer-storage.patch)和[宿主补丁](../cmake/patches/tracktion/vst3-inactive-buffer-host.patch)。源/补丁/结果完整哈希均在同一manifest，四文件精确白名单由契约测试核验；CMake继续核验Tracktion与JUCE精确HEAD，不升级依赖。inactive通道预分配隔离缓冲、宿主传入最大块长、拒绝超长块；不改变bus激活和混音路由。VST3允许inactive实际样本地址为null，该变更属于兼容候选，不是宣称旧JUCE违反规格。详情与人工复测状态见[本轮记录](verification/2026-10-27-v051/RESULTS.md)。
 
 ### 项目构建规则与后续升级
 

@@ -1,0 +1,38 @@
+--- a/modules/juce/modules/juce_audio_processors/format_types/juce_VST3PluginFormat.cpp
++++ b/modules/juce/modules/juce_audio_processors/format_types/juce_VST3PluginFormat.cpp
+@@ -2844,8 +2844,8 @@
+ 
+         setLatencySamples (jmax (0, (int) processor->getLatencySamples()));
+ 
+-        inputBusMap .prepare (createChannelMappings (true));
+-        outputBusMap.prepare (createChannelMappings (false));
++        inputBusMap .prepare (createChannelMappings (true), (int) setup.maxSamplesPerBlock);
++        outputBusMap.prepare (createChannelMappings (false), (int) setup.maxSamplesPerBlock);
+ 
+         setStateForAllMidiBuses (true);
+ 
+@@ -2943,6 +2943,13 @@
+     {
+         using namespace Vst;
+         auto numSamples = buffer.getNumSamples();
++        // A block beyond setupProcessing's limit must not overrun compatibility storage.
++        if (! inputBusMap.supportsBufferSize (numSamples) || ! outputBusMap.supportsBufferSize (numSamples))
++        {
++            buffer.clear();
++            midiMessages.clear();
++            return;
++        }
+ 
+         auto numInputAudioBuses  = getBusCount (true);
+         auto numOutputAudioBuses = getBusCount (false);
+@@ -3694,8 +3701,8 @@
+ 
+         warnOnFailure (processor->setupProcessing (setup));
+ 
+-        inputBusMap .prepare (createChannelMappings (true));
+-        outputBusMap.prepare (createChannelMappings (false));
++        inputBusMap .prepare (createChannelMappings (true), (int) setup.maxSamplesPerBlock);
++        outputBusMap.prepare (createChannelMappings (false), (int) setup.maxSamplesPerBlock);
+         setRateAndBufferSizeDetails (setup.sampleRate, (int) setup.maxSamplesPerBlock);
+     }
+ 

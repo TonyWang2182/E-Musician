@@ -1,4 +1,11 @@
-﻿# E-musician 当前上下文
+# 当前正在进行：0.5.1 Keyscape修复候选（2026-10-27下午）
+
+用户已报告0.5 Keyscape Arm/Monitor崩溃；不能用下面旧交付结论替代本次验收。分支fix/keyscape-output-buffers。已通过WER及本地dbgeng定位ASIO处理线程Keyscape近空地址写入，候选补丁为inactive VST3通道预分配隔离缓冲，Release已构建，相关自动检查通过，用户人工复测待反馈。详见[本次记录](verification/2026-10-27-v051/RESULTS.md)。
+
+最新协作方式：用户亲自操作界面并报告，我负责构建/debug；不使用computer-use，减少重复自动化，仅相关检查。用户确认MIDI片段/钢琴卷帘写音符和普通音频有声，Keyscape播放/自带琴键无声；现已提供0.5.1原路径EXE供用户复测；不再启动自动音频测试占用声卡。代码构建期间冻结，DEVLOG保持追加。原用户工程不改，DMP仅本地忽略目录分析。
+
+以下为0.5已发布基线，保留供对照：
+# E-musician 当前上下文
 
 更新：2026-10-27（Asia/Shanghai）。当前阶段：**0.5.0基础编曲版本本轮交付完成：双配置各5/5、原生保存回读、Serum播放中8次保存和30分钟16轨ASIO长跑通过；33个用户文件全部未变。代码及档案已推送GitHub main。**
 

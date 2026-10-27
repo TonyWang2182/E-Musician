@@ -1,0 +1,92 @@
+--- a/modules/juce/modules/juce_audio_processors/format_types/juce_VST3Common.h
++++ b/modules/juce/modules/juce_audio_processors/format_types/juce_VST3Common.h
+@@ -1115,9 +1115,22 @@
+ {
+ public:
+     /*  Builds a cached map of juce <-> vst3 channel mappings. */
+-    void prepare (std::vector<ChannelMapping> arrangements)
++    void prepare (std::vector<ChannelMapping> arrangements, int inactiveBufferSamples = 0)
+     {
+         mappings = std::move (arrangements);
++        scratchSamples = jmax (0, inactiveBufferSamples);
++        inactiveOffsets.clear();
++        int inactiveChannels = 0;
++        for (const auto& mapping : mappings)
++        {
++            inactiveOffsets.push_back (inactiveChannels);
++            if (! mapping.isActive())
++                inactiveChannels += (int) mapping.size();
++        }
++        // Compatibility storage is allocated only while preparing, never in process().
++        // Each inactive channel has separate memory; these outputs are never mixed back.
++        inactiveFloat.setSize (scratchSamples > 0 ? inactiveChannels : 0, scratchSamples);
++        inactiveDouble.setSize (scratchSamples > 0 ? inactiveChannels : 0, scratchSamples);
+ 
+         const auto numBuses = mappings.size();
+         floatBusMap .resize (numBuses);
+@@ -1132,16 +1145,28 @@
+         }
+     }
+ 
++    bool supportsBufferSize (int samples) const noexcept
++    {
++        return samples >= 0 && (scratchSamples == 0 || samples <= scratchSamples);
++    }
++
+     /*  Applies the mapping to an AudioBuffer using JUCE channel layout. */
+     template <typename FloatType>
+     Steinberg::Vst::AudioBusBuffers* getVst3LayoutForJuceBuffer (AudioBuffer<FloatType>& source)
+     {
++        if (! supportsBufferSize (source.getNumSamples()))
++            return nullptr;
++
++        auto& scratch = getInactive (detail::Tag<FloatType>{});
++        if (scratchSamples > 0)
++            scratch.clear (0, source.getNumSamples());
++
+         int channelIndexOffset = 0;
+ 
+         for (size_t i = 0; i < mappings.size(); ++i)
+         {
+             const auto& mapping = mappings[i];
+-            associateBufferTo (busBuffers[i], get (detail::Tag<FloatType>{})[i], source, mapping, channelIndexOffset);
++            associateBufferTo (busBuffers[i], get (detail::Tag<FloatType>{})[i], source, mapping, channelIndexOffset, scratch, inactiveOffsets[i]);
+             channelIndexOffset += mapping.isActive() ? (int) mapping.size() : 0;
+         }
+ 
+@@ -1163,7 +1188,9 @@
+                             Bus<FloatType>& bus,
+                             AudioBuffer<FloatType>& buffer,
+                             const ChannelMapping& busMap,
+-                            int channelStartOffset) const
++                            int channelStartOffset,
++                            AudioBuffer<FloatType>& inactive,
++                            int inactiveChannelOffset) const
+     {
+         // If this is hit, we may be about to allocate memory. Ideally, this should have been
+         // allocated in prepare().
+@@ -1174,7 +1201,8 @@
+         for (size_t i = 0; i < busMap.size(); ++i)
+         {
+             bus.push_back (busMap.isActive() ? buffer.getWritePointer (channelStartOffset + busMap.getJuceChannelForVst3Channel ((int) i))
+-                                             : nullptr);
++                                             : scratchSamples > 0 ? inactive.getWritePointer (inactiveChannelOffset + (int) i)
++                                                                  : nullptr);
+         }
+ 
+         assignRawPointer (vstBuffers, bus.data());
+@@ -1184,6 +1212,14 @@
+ 
+     auto& get (detail::Tag<float>)    { return floatBusMap; }
+     auto& get (detail::Tag<double>)   { return doubleBusMap; }
++
++    auto& getInactive (detail::Tag<float>)  { return inactiveFloat; }
++    auto& getInactive (detail::Tag<double>) { return inactiveDouble; }
++
++    AudioBuffer<float> inactiveFloat;
++    AudioBuffer<double> inactiveDouble;
++    std::vector<int> inactiveOffsets;
++    int scratchSamples = 0;
+ 
+     BusMap<float>  floatBusMap;
+     BusMap<double> doubleBusMap;
