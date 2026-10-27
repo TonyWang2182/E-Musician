@@ -4,7 +4,7 @@
 
 源码提交c5b246b，源码指纹4f47112f，EXE5c88bc65；最终Release5/5、生产146项通过。完整成功/失败证据见[0.5.2记录](verification/2026-10-27-v052/RESULTS.md)，用户反馈见[人工验收](verification/2026-10-27-v052/human-acceptance.json)。原救回工程2文件在自动验证前后哈希未变。修复包含录音短音/尾部处理、严格MIDI导出边界、详细校验错误和收尾空闲期Undo归组；没有把短测扩展为任意插件/音色/设备或长期性能保证。
 
-已验收代码和档案保留在fix/keyscape-output-buffers分支；自动审批拒绝了向默认main合并并推送，要求用户明确授权发布到默认分支。main保持不变，等待该授权；功能验收本身已完成。应用入口仍为E:/E-musician/build/bin/Release/E-musician.exe（0.5.2），本次只更新文档，不重建、不操作或关闭用户应用。后续继续遵守用户操作GUI、开发者构建/debug、节省重复自动化的协作方式；不使用computer-use。DEVLOG只追加，用户工程与DMP/PDB不上传。
+用户已明确授权“允许合并并同步 main”。已将fix/keyscape-output-buffers快进合并到本地main，并推送GitHub；远端已核对包含060f65c人工验收提交及此前全部代码/日志，修复分支保留。当前工作分支main，发布授权不再待确认。应用入口仍为E:/E-musician/build/bin/Release/E-musician.exe（0.5.2），本次只更新文档，不重建、不操作或关闭用户应用。后续继续遵守用户操作GUI、开发者构建/debug、节省重复自动化的协作方式；不使用computer-use。DEVLOG只追加，用户工程与DMP/PDB不上传。
 
 后续可按用户需求开展多轨实际编曲、音频录音及其他插件场景验收；没有为这些范围新增通过结论。不要重新调查已通过的旧版0.5.0崩溃，也不要把历史0.5报告当成0.5.2新的测量。
 
