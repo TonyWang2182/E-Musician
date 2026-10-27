@@ -1,0 +1,73 @@
+{
+  "schema_version": 2,
+  "id": "20261026T064622.712628Z-e2b5cbdb72",
+  "session_id": "0b1f0365271f4d70b0ee95d9beb14958",
+  "kind": "command",
+  "action": "run",
+  "config": "Release",
+  "note": "Launch M1 native workspace for user review; runtime presence verified separately",
+  "command": [
+    "E:\\E-musician\\build\\bin\\Release\\E-musician.exe"
+  ],
+  "command_display": "E:\\E-musician\\build\\bin\\Release\\E-musician.exe",
+  "cwd": "E:\\E-musician",
+  "status": "launched",
+  "started_at": "2026-10-26T06:46:22.713+00:00",
+  "finished_at": "2026-10-26T06:46:23.223+00:00",
+  "elapsed_seconds": 0.510855,
+  "exit_code": null,
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+  "git_head": null,
+  "source_fingerprint": {
+    "algorithm": "sha256",
+    "digest": "fb5fdef98fd3ae6ac0ab7aa92da96da41d39600ab8c3ad8b56d06bd30fafe180",
+    "files": {
+      "CMakeLists.txt": "b72d5504ba1ccdb58111d62b6a9a81406cec15822ef6a06530e2c5539e0ab48a",
+      "CMakePresets.json": "930c5e94486ce61f167f7933d0acbed76a2f45f48ae593a31520e15b5bc92e72",
+      "apps/desktop/EngineSession.cpp": "1d39d492adab4df93d0d668ee6eb9bafc6fc9b8333070368633e85e05c0353e2",
+      "apps/desktop/EngineSession.h": "ea77629e862376ef5e534e85cec859e4fc8d7cbea373e4753f227f2e16a984df",
+      "apps/desktop/Main.cpp": "47f9c0cddbac81e37b33cc0cffcf7853619beac899ce4549de841e4ae49a3c48",
+      "apps/desktop/MainComponent.cpp": "33b9c1e51dc1f6bae5e078bfe4dd5842bd1fd939a571740f2a3def30dff6925d",
+      "apps/desktop/MainComponent.h": "162891454c2fbfde2396178bd481c8c462bf26d7622907154bb89fcbdb2fddf8",
+      "cmake/dependencies.json": "f013aa717aa0fb3ba629ba9f916adc2b3b6339202fd9bb66545b92c41f195763",
+      "core/commands/RevisionGuard.hpp": "a94b254b9d97b921375695416263d96219fc6e656aefb698ee7c227b813fc267",
+      "core/time/Time.hpp": "11e3beabffaafb9d5b581a504a535e7d0cab6a6666bbc99d9d8f87eba9148ce2",
+      "scripts/dev.py": "b42db3f57c8eb9f1b62ca27995680e4a13d312a5fbd42be87adbfc34af39d91e",
+      "tests/CoreTests.cpp": "15ccded9942314c49b78e43fd838a609282171028e7da5ad73ea988971f679ac",
+      "tests/RunEngineSmoke.py": "4341da567a7c1edab8984554cde8153ac71d4fab8bde0adcace9f7ebd5d57033",
+      "tests/test_dev_logger.py": "77efbd88b7507c52c31112951e6c12e32c1fc6bd4241b9bc596d969e2233329f"
+    },
+    "errors": []
+  },
+  "log": "build-logs/20261026T064622.712628Z-e2b5cbdb72.log",
+  "runtime_verified": false,
+  "raw_log": "build-logs/20261026T064622.712628Z-e2b5cbdb72.raw.log",
+  "environment_overrides": {
+    "VSLANG": "1033"
+  },
+  "log_encoding": "UTF-8; process bytes preserved separately",
+  "pid": 50380,
+  "source_fingerprint_end": {
+    "algorithm": "sha256",
+    "digest": "fb5fdef98fd3ae6ac0ab7aa92da96da41d39600ab8c3ad8b56d06bd30fafe180",
+    "files": {
+      "CMakeLists.txt": "b72d5504ba1ccdb58111d62b6a9a81406cec15822ef6a06530e2c5539e0ab48a",
+      "CMakePresets.json": "930c5e94486ce61f167f7933d0acbed76a2f45f48ae593a31520e15b5bc92e72",
+      "apps/desktop/EngineSession.cpp": "1d39d492adab4df93d0d668ee6eb9bafc6fc9b8333070368633e85e05c0353e2",
+      "apps/desktop/EngineSession.h": "ea77629e862376ef5e534e85cec859e4fc8d7cbea373e4753f227f2e16a984df",
+      "apps/desktop/Main.cpp": "47f9c0cddbac81e37b33cc0cffcf7853619beac899ce4549de841e4ae49a3c48",
+      "apps/desktop/MainComponent.cpp": "33b9c1e51dc1f6bae5e078bfe4dd5842bd1fd939a571740f2a3def30dff6925d",
+      "apps/desktop/MainComponent.h": "162891454c2fbfde2396178bd481c8c462bf26d7622907154bb89fcbdb2fddf8",
+      "cmake/dependencies.json": "f013aa717aa0fb3ba629ba9f916adc2b3b6339202fd9bb66545b92c41f195763",
+      "core/commands/RevisionGuard.hpp": "a94b254b9d97b921375695416263d96219fc6e656aefb698ee7c227b813fc267",
+      "core/time/Time.hpp": "11e3beabffaafb9d5b581a504a535e7d0cab6a6666bbc99d9d8f87eba9148ce2",
+      "scripts/dev.py": "b42db3f57c8eb9f1b62ca27995680e4a13d312a5fbd42be87adbfc34af39d91e",
+      "tests/CoreTests.cpp": "15ccded9942314c49b78e43fd838a609282171028e7da5ad73ea988971f679ac",
+      "tests/RunEngineSmoke.py": "4341da567a7c1edab8984554cde8153ac71d4fab8bde0adcace9f7ebd5d57033",
+      "tests/test_dev_logger.py": "77efbd88b7507c52c31112951e6c12e32c1fc6bd4241b9bc596d969e2233329f"
+    },
+    "errors": []
+  },
+  "source_changed_during_command": false
+}

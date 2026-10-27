@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "id": "20261026T061630.730815Z-529c08f40c",
+  "session_id": "9bae6cb78f5b4b2e8442a34b68a5b191",
+  "kind": "command",
+  "action": "check",
+  "config": "Debug",
+  "note": "M1 first native build: WAV transport, shared time/revision core, offline engine smoke",
+  "command": [
+    "cmake",
+    "--build",
+    "--preset",
+    "windows-debug",
+    "--parallel",
+    "2"
+  ],
+  "command_display": "cmake --build --preset windows-debug --parallel 2",
+  "cwd": "E:\\E-musician",
+  "status": "failed",
+  "started_at": "2026-10-26T06:16:30.731+00:00",
+  "finished_at": "2026-10-26T06:17:45.810+00:00",
+  "elapsed_seconds": 75.079396,
+  "exit_code": 1,
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+  "git_head": null,
+  "source_fingerprint": {
+    "algorithm": "sha256",
+    "digest": "bb0b8ee35a880f0db5e65834e094791459d8e1aaf2d399217ad01b77bed7df2a",
+    "files": {
+      "CMakeLists.txt": "9106fdac2d46dbbe8b8e3ebb6ae30baae3e3a55f6146490a382e999033dcc9c9",
+      "CMakePresets.json": "930c5e94486ce61f167f7933d0acbed76a2f45f48ae593a31520e15b5bc92e72",
+      "apps/desktop/EngineSession.cpp": "0a3d59877251661e9a251304f2de087f2a53dcd2b1c3e47e36a141a30a8c0615",
+      "apps/desktop/EngineSession.h": "ea77629e862376ef5e534e85cec859e4fc8d7cbea373e4753f227f2e16a984df",
+      "apps/desktop/Main.cpp": "c568d16eebfa9b2ef8612b4097527deaa074ec2777dd28cd3764eec425af0273",
+      "apps/desktop/MainComponent.cpp": "758769eb0d518e7ef9517cb6031987620478e4ee99c20752f01c513da461c669",
+      "apps/desktop/MainComponent.h": "162891454c2fbfde2396178bd481c8c462bf26d7622907154bb89fcbdb2fddf8",
+      "cmake/dependencies.json": "f013aa717aa0fb3ba629ba9f916adc2b3b6339202fd9bb66545b92c41f195763",
+      "core/commands/RevisionGuard.hpp": "a94b254b9d97b921375695416263d96219fc6e656aefb698ee7c227b813fc267",
+      "core/time/Time.hpp": "11e3beabffaafb9d5b581a504a535e7d0cab6a6666bbc99d9d8f87eba9148ce2",
+      "scripts/dev.py": "bb2bc7630115bca809ba77c24e9b0a059acdf8cdb4e3d114df57fa395108fd65",
+      "tests/CoreTests.cpp": "15ccded9942314c49b78e43fd838a609282171028e7da5ad73ea988971f679ac"
+    },
+    "errors": []
+  },
+  "log": "build-logs/20261026T061630.730815Z-529c08f40c.log",
+  "runtime_verified": false,
+  "pid": 46172,
+  "error": "Command failed with code 1; see E:\\E-musician\\build-logs\\20261026T061630.730815Z-529c08f40c.log"
+}

@@ -1,0 +1,24 @@
+{
+  "status": "invalidated",
+  "reason": "Hidden instance reproduces warmup stop, excluding direct foreground interaction. Investigating asynchronous device/graph initialization before probe playback; not a completed performance measurement.",
+  "last_progress": {
+    "phase": "warmup",
+    "updated_at": "2026-10-27T09:31:50.589+08:00",
+    "elapsed_seconds": 60.422635300002995,
+    "measured_seconds": 0.0,
+    "requested_measure_seconds": 1800,
+    "callback_count": 11925,
+    "callback_mean_ms": 0.16928005870021,
+    "xrun_delta": 0,
+    "edit_count": 0,
+    "last_dispatch_ms": 0.0,
+    "memory": {
+      "elapsed_seconds": 0.0,
+      "private_bytes": 227467264,
+      "working_set_bytes": 178696192
+    },
+    "playing": false,
+    "error": ""
+  },
+  "recorded_at": "2026-10-27T01:32:36.127164+00:00"
+}

@@ -1,0 +1,20 @@
+/_deps/
+/build/
+/build-logs/
+/.cache/
+/local-data/
+/test-projects/
+/.impeccable/review/
+*.user
+*.suo
+*.pdb
+*.obj
+__pycache__/
+.env
+CMakeUserPresets.json
+
+# Local evidence containing the user's project waveforms / exact asset inventory.
+/docs/verification/2026-10-26-clips/ui-cl-*-native.jpg
+/docs/verification/2026-10-26-clips/ui-project-*.png
+/docs/verification/2026-10-26-arrangement/ui-project-*.png
+/docs/verification/**/project-preservation.json

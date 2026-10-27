@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "source": "Deterministic synthesized formula in scripts/generate_audio_fixtures.py",
+  "audio_license": "CC0-1.0",
+  "contains_user_audio": false,
+  "encoder": {
+    "package": "lameenc",
+    "version": "1.8.1",
+    "package_source": "https://pypi.org/project/lameenc/1.8.1/",
+    "source_repository": "https://github.com/chrisstaite/lameenc",
+    "binary_sha256": "ff9f47ecfc0b167e2e3e4edacaeb23aa0b10422ef4cc180d52ae3b86ff7636dc",
+    "python": "3.12.6",
+    "platform": "Windows",
+    "machine": "AMD64",
+    "runtime_dependency": false
+  },
+  "fixtures": [
+    {
+      "file": "stereo-cbr-48000.mp3",
+      "sha256": "8f9ccc3a6ade2b200f9870c5375df8367a0946470547ecdec63d9fe71f800915",
+      "bytes": 32875,
+      "sample_rate": 48000,
+      "channels": 2,
+      "source_duration_seconds": 2.0,
+      "decoded_duration_tolerance_seconds": 0.12,
+      "bitrate_mode": "CBR",
+      "source_pcm_s16le_sha256": "7c1cee79c72e61e313a74cf2c830c8604ace4e12ed567d79d85dde077f77578f",
+      "id3_version": "2.3",
+      "frequencies_hz": [
+        [
+          220
+        ],
+        [
+          330
+        ]
+      ],
+      "mpeg_frame_count": 85,
+      "observed_bitrates_kbps": [
+        128
+      ],
+      "encoded_frame_duration_seconds": 2.04
+    },
+    {
+      "file": "mono-vbr-44100.mp3",
+      "sha256": "c51ac2e8d6289113bfa694ee100e350f9d6353e7131ccbe17962f4257bf9c552",
+      "bytes": 9129,
+      "sample_rate": 44100,
+      "channels": 1,
+      "source_duration_seconds": 2.0,
+      "decoded_duration_tolerance_seconds": 0.12,
+      "bitrate_mode": "VBR",
+      "source_pcm_s16le_sha256": "8fdc21a74595ee563529acfb70f7f840f4f0adbccf2b937356557dc135e587c4",
+      "id3_version": "2.3",
+      "frequencies_hz": [
+        [
+          440,
+          880
+        ]
+      ],
+      "mpeg_frame_count": 78,
+      "observed_bitrates_kbps": [
+        32,
+        48,
+        64,
+        192
+      ],
+      "encoded_frame_duration_seconds": 2.0375510204081633
+    }
+  ]
+}

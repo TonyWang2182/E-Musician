@@ -1,0 +1,488 @@
+{
+  "passed": true,
+  "source": "E:\\E-musician\\build\\native-ui\\d3297339-b6d4-4f98-911a-53383a94b73c\\Native Saved.emproj",
+  "executable_sha256": "1a72c25210e296898167db1e33f57f4cbee0b21fa8c358e636917ee8f23024dd",
+  "open": {
+    "request_id": "f35517f6-84ec-47cc-943c-3bfc8bf62cd0",
+    "status": "accepted",
+    "project_id": "06e261371ed845feaf44efdf8109777a",
+    "revision": 0,
+    "result": {
+      "job_id": "3b8d3c71bc1747d0b27dc5878e434729"
+    },
+    "error": "",
+    "job_completion": {
+      "id": "3b8d3c71bc1747d0b27dc5878e434729",
+      "kind": "open_project",
+      "status": "completed",
+      "progress": 1.0,
+      "error": "",
+      "phase": "completed",
+      "detail": "Project data ready",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    }
+  },
+  "snapshot": {
+    "project_id": "9d747beaa1f0451fbeffa439aac70017",
+    "revision": 16,
+    "name": "Native Saved",
+    "dirty": false,
+    "bpm": 120.0,
+    "numerator": 4,
+    "denominator": 4,
+    "duration_seconds": 394.370612244898,
+    "position_seconds": 0.0,
+    "playing": false,
+    "looping": true,
+    "loop_start_seconds": 0.0,
+    "loop_end_seconds": 8.0,
+    "master_gain_db": -42.0,
+    "selected_track_id": "7b755f3d03df4f2ab826888148ac6f63",
+    "selected_clip_id": "f99012f62e94440f8daee66db005a90e",
+    "can_undo": true,
+    "can_redo": false,
+    "tracks": [
+      {
+        "id": "7b755f3d03df4f2ab826888148ac6f63",
+        "name": "owned-0",
+        "kind": "audio",
+        "gain_db": -18.0,
+        "pan": 0.0,
+        "muted": false,
+        "solo": false,
+        "clips": [
+          {
+            "id": "f99012f62e94440f8daee66db005a90e",
+            "asset_id": "3af1b2522a684d9e9eb86b88b25e8466",
+            "kind": "audio",
+            "start_seconds": 0.0,
+            "source_offset": 0.0,
+            "duration_seconds": 394.370612244898,
+            "start_beats": 0.0,
+            "length_beats": 4.0,
+            "fade_in_seconds": 0.0,
+            "fade_out_seconds": 0.0,
+            "note_count": 0,
+            "controller_count": 0
+          }
+        ],
+        "clip_count": 1,
+        "clips_truncated": false,
+        "plugins": [],
+        "input_device_id": "",
+        "output_target_id": "master",
+        "armed": false,
+        "monitor": "off",
+        "sends": [],
+        "automation": []
+      },
+      {
+        "id": "f4cded344421416681997d71aba81079",
+        "name": "owned-1",
+        "kind": "audio",
+        "gain_db": -18.0,
+        "pan": 0.0,
+        "muted": false,
+        "solo": false,
+        "clips": [
+          {
+            "id": "f81eefc11adf49ed98289109717e2155",
+            "asset_id": "121aef5442b048d2a51acf20118bed92",
+            "kind": "audio",
+            "start_seconds": 0.0,
+            "source_offset": 0.0,
+            "duration_seconds": 394.370612244898,
+            "start_beats": 0.0,
+            "length_beats": 4.0,
+            "fade_in_seconds": 0.0,
+            "fade_out_seconds": 0.0,
+            "note_count": 0,
+            "controller_count": 0
+          }
+        ],
+        "clip_count": 1,
+        "clips_truncated": false,
+        "plugins": [],
+        "input_device_id": "",
+        "output_target_id": "master",
+        "armed": false,
+        "monitor": "off",
+        "sends": [],
+        "automation": []
+      },
+      {
+        "id": "2914c4f929fe4479a9d8693ac3c9fcf9",
+        "name": "Quiet playback-save instrument",
+        "kind": "instrument",
+        "gain_db": -18.0,
+        "pan": 0.189999997615814,
+        "muted": false,
+        "solo": false,
+        "clips": [
+          {
+            "id": "a598b98a5cb144ae9c443c436db0963b",
+            "asset_id": "",
+            "kind": "midi",
+            "start_seconds": 0.0,
+            "source_offset": 0.0,
+            "duration_seconds": 8.0,
+            "start_beats": 0.0,
+            "length_beats": 16.0,
+            "fade_in_seconds": 0.0,
+            "fade_out_seconds": 0.0,
+            "note_count": 16,
+            "controller_count": 0
+          }
+        ],
+        "clip_count": 1,
+        "clips_truncated": false,
+        "plugins": [
+          {
+            "id": "3c28c8b2f9d24d338c3ba033a54b87e1",
+            "name": "Serum",
+            "format": "VST3",
+            "enabled": true,
+            "missing": false,
+            "is_instrument": true
+          }
+        ],
+        "input_device_id": "",
+        "output_target_id": "master",
+        "armed": false,
+        "monitor": "off",
+        "sends": [],
+        "automation": []
+      }
+    ],
+    "jobs": [
+      {
+        "id": "3b8d3c71bc1747d0b27dc5878e434729",
+        "kind": "open_project",
+        "status": "completed",
+        "progress": 1.0,
+        "error": "",
+        "phase": "completed",
+        "detail": "Project data ready",
+        "capture_ms": 0.0,
+        "max_plugin_capture_ms": 0.0,
+        "bytes_written": 0,
+        "bytes_reused": 0,
+        "plugins_captured": 0
+      }
+    ],
+    "plugin_catalog": [
+      {
+        "id": "f7da4b6792f9fbe0c85f738beeb0f87249b2befe43d1ed889b17bed6153de068",
+        "name": "Kontakt 7 Portable",
+        "format": "VST",
+        "manufacturer": "Native Instruments",
+        "is_instrument": true
+      },
+      {
+        "id": "64dbeca6519b3e2af95e048ed2192e24541d8deefa70f1107e7e6aad28f3da8a",
+        "name": "Ample Bass A",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "5a00a9151d1511ac050b755d64711e5c6779c0091aabdded1774a38be5f46b24",
+        "name": "Ample Bass J",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "f6e28cb0ff87c569d4593ca956859f41f958e9cb49c090819965a222f20ee0e3",
+        "name": "Ample Bass JF",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "d27eecc4696382b4bdcd0a736291f920d2ee0824a40d8a9feeff1c9309400439",
+        "name": "Ample Bass U",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "6663365f7f3434efc115aca2d57397b2fe4f2ce0fe660e07f41705530e434c7b",
+        "name": "Ample Bass Y",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "74c0052380eed6f9a1a71285b6e0f1b0bc2787337cae2d38bec1cf2ba3457f60",
+        "name": "Ample Ethno U",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "93becceaa47f188f0f6ebda0daeb0ff32f7a50609909aa722799837d30b5aa79",
+        "name": "Ample Guitar L",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "49cb1d3fec4ff811d4e8cfff0c7a80207c14fb24d6678f81c1ab1df0314979b9",
+        "name": "Ample Guitar LP",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "80f8791123a339a6a4a8bb859df09a3829f042f07a5fa533642af288aceb1598",
+        "name": "Ample Guitar M",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "2900a915931fdd5f4232924d000b43a4c68effb822c8744ce72dc0423b2543c3",
+        "name": "Ample Guitar PF",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "ac1c98862656bfe0811a3217522af0c9af091bc0f4dc8890558b4d15b7a8b4f3",
+        "name": "Ample Guitar SC",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "fc2a7695f1cee10650e4cb85af3dca8755e6a80292580855da429fcb83a5ce4c",
+        "name": "Ample Guitar SH",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "f1cb2b708241e56bca7c3a7fe468625c016825364cb1a0c51e6609e780a60164",
+        "name": "Ample Guitar SJ",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "060aab9574ab42abfeedd46f86065cb6d9028951555617734c6706c36fd28da6",
+        "name": "Ample Guitar T",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "51012d40c64e246f490c15423d6df321150db6c7eb4379fd34324092ee69f6d1",
+        "name": "Ample Guitar TC",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "8b92f2d449273caea54082a2d9f21031a95839918d68a297f01fe938caaa563a",
+        "name": "Ample Guitar Twelve",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "6a81127f6694fd1a4ba0897d602524952777b6bc4a3ec73ce1a248d5d6e0fd34",
+        "name": "Ample Guitar VC",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "3e59c3d36c57648e8291e88d17883c3a0d9ac2e97affeb51d6856a36e03764ba",
+        "name": "Ample Metal Eclipse",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "ee73240c84ccd4d209a11623298171ae4eb018b492e4818e709e1c959fb460f3",
+        "name": "Ample Metal Hellrazer",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "3c6c5345d818d59dddc62bac29d1446fc265cbae443937e891b502bea41244db",
+        "name": "Ample Metal R",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "ab03e2fb0d7601e7caca08829931ab01dceef93087e37ce01bbfdf63e0e39321",
+        "name": "Keyscape",
+        "format": "VST",
+        "manufacturer": "Spectrasonics",
+        "is_instrument": true
+      },
+      {
+        "id": "e39fd0ce38471503576c859e1d6b6738fbf2c7fcc84b994278a82c5b338d0fdb",
+        "name": "MPC Beats64",
+        "format": "VST",
+        "manufacturer": "Akai Professional",
+        "is_instrument": true
+      },
+      {
+        "id": "8ea58a92b14557aac7aa152c3822cb4a080623610e822181c805bda30bda879e",
+        "name": "Omnisphere",
+        "format": "VST",
+        "manufacturer": "Spectrasonics",
+        "is_instrument": true
+      },
+      {
+        "id": "b0ddfcd5911491da1ee68b8d812c48dd8bf17590e8d344ebf67caf0c7911b450",
+        "name": "Auto-Tune Pro",
+        "format": "VST3",
+        "manufacturer": "Antares",
+        "is_instrument": false
+      },
+      {
+        "id": "c63f7b6913df3046aefba6f582ce61f08c7028217648a4d771d93a665ff195c9",
+        "name": "SWAM Cello 3",
+        "format": "VST3",
+        "manufacturer": "Audio Modeling",
+        "is_instrument": true
+      },
+      {
+        "id": "2af2bfd2e981c19ff62c1aaf28c551edf96854e60673bc79924e3b13095aee36",
+        "name": "SWAM Double Bass 3",
+        "format": "VST3",
+        "manufacturer": "Audio Modeling",
+        "is_instrument": true
+      },
+      {
+        "id": "00fb690edcf5361cfcca305d891309f150fd1db7ed6cef466a88209159455a37",
+        "name": "SWAM Viola 3",
+        "format": "VST3",
+        "manufacturer": "Audio Modeling",
+        "is_instrument": true
+      },
+      {
+        "id": "97a1bce796f6896c502f0d8d743b4fb552af1fa408754c6d2ea2aed058710542",
+        "name": "SWAM Violin 3",
+        "format": "VST3",
+        "manufacturer": "Audio Modeling",
+        "is_instrument": true
+      },
+      {
+        "id": "8d922c369a6f430a1b0fdeb1cfce8c36d099a9509db7f54c4ac0219208c96bf0",
+        "name": "Keyscape",
+        "format": "VST3",
+        "manufacturer": "Spectrasonics",
+        "is_instrument": true
+      },
+      {
+        "id": "029638882191eaab4d00dafccece57194cf810e258d11af26f1ddbc2ea617aa8",
+        "name": "Kontakt 7",
+        "format": "VST3",
+        "manufacturer": "Native Instruments",
+        "is_instrument": true
+      },
+      {
+        "id": "a24784dadc10d8cd56a8d156115cc7827d77be95631f66d0bf73626a0754b096",
+        "name": "Omnisphere",
+        "format": "VST3",
+        "manufacturer": "Spectrasonics",
+        "is_instrument": true
+      },
+      {
+        "id": "6a120331b21f700d7a606ea29eb75d18d408f9cd708ab78064e06b283ab6dd77",
+        "name": "HALion Sonic SE",
+        "format": "VST3",
+        "manufacturer": "Steinberg Media Technologies",
+        "is_instrument": true
+      },
+      {
+        "id": "f662205a84ff8beaa192731162604f8062ca333ed13bdedab24e8170c3a4ea8e",
+        "name": "BM-BERSERK",
+        "format": "VST3",
+        "manufacturer": "UJAM",
+        "is_instrument": true
+      },
+      {
+        "id": "b05fe127c183485a5745a6d527e64c849e388e8daa1c5dd1002417b7a6386448",
+        "name": "BM-CIRCUITS",
+        "format": "VST3",
+        "manufacturer": "UJAM",
+        "is_instrument": true
+      },
+      {
+        "id": "267b37eca2cb6b0878f072c66b079bef0c91ea91028699618fd97849fb6c06e5",
+        "name": "BM-COZY",
+        "format": "VST3",
+        "manufacturer": "UJAM",
+        "is_instrument": true
+      },
+      {
+        "id": "56a3b17dc0f5b66ef3e883760687bcdeece7f13c5d37389ba3055e72bbe10e81",
+        "name": "Serum",
+        "format": "VST3",
+        "manufacturer": "Xfer Records",
+        "is_instrument": true
+      },
+      {
+        "id": "32a9128b5f7f36eca1d3247faa40da4a0ac2e0ce17e38632c6b76c8b62d79cdc",
+        "name": "Ample Bass P",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      {
+        "id": "766b5af4b582d85bff9aa0a412d31243f9eff0c44b50029558477c0b71538d29",
+        "name": "Auto-Key 2",
+        "format": "VST3",
+        "manufacturer": "Antares",
+        "is_instrument": false
+      },
+      {
+        "id": "344bb90639ad5a1f5dd7847cd592067a3dba854c9eae5e94be8127b31ae0fe81",
+        "name": "BM-DOPE",
+        "format": "VST3",
+        "manufacturer": "UJAM",
+        "is_instrument": true
+      }
+    ],
+    "plugin_catalog_total": 40,
+    "plugin_catalog_truncated": false,
+    "master_plugins": [],
+    "master_automation": [],
+    "recording": false,
+    "recording_finalizing": false,
+    "recording_error": "",
+    "cpu_usage": 0.001682812219227,
+    "xruns": 0,
+    "sample_rate": 48000.0,
+    "buffer_size": 256,
+    "event_sequence": 3
+  },
+  "restored_native_parameter": {
+    "id": "0",
+    "name": "MasterVol",
+    "value": 0.5815789103508,
+    "text": " 58% (-14.1 dB)",
+    "active": true
+  },
+  "diagnostics": {
+    "current_key": "c2528c243fa04bd298d502700b16da260eaf1e4eb016631bf559cfd3dacb4f7c",
+    "saved_key": "c2528c243fa04bd298d502700b16da260eaf1e4eb016631bf559cfd3dacb4f7c",
+    "fresh_content_key": "c2528c243fa04bd298d502700b16da260eaf1e4eb016631bf559cfd3dacb4f7c",
+    "plugin_dirty": false,
+    "pending_plugin_changes": false,
+    "revision": 16
+  },
+  "manifest_sha256_before_after": "ce16dda8710269aa926b9c582354eb27d206f1e9704ee5e51e390040f00535d1"
+}

@@ -1,0 +1,2 @@
+# Test-asset generation only: CPython 3.12, Windows x64.
+lameenc==1.8.1 --hash=sha256:715e0e72ed5429f00042379e48a7903e54ee5dc01069db34338536f3595059c3

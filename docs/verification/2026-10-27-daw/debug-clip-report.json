@@ -1,0 +1,36 @@
+{
+  "status": "passed",
+  "scope": "real Tracktion renders for WAV and both MP3 fixtures; move, undo/redo, schema 2 round trips, shared assets, schema 1 migration and recovery; no listening or realtime performance claim",
+  "checks_passed": 317,
+  "formats": [
+    {
+      "format": "WAV",
+      "sample_rate": 48000.0,
+      "channels": 2,
+      "moved_start_seconds": 8,
+      "delayed_max_sample_difference": 0.0
+    },
+    {
+      "format": "MP3",
+      "sample_rate": 48000.0,
+      "channels": 2,
+      "moved_start_seconds": 8,
+      "delayed_max_sample_difference": 0.0
+    },
+    {
+      "format": "MP3",
+      "sample_rate": 44100.0,
+      "channels": 1,
+      "moved_start_seconds": 8,
+      "delayed_max_sample_difference": 0.0
+    }
+  ],
+  "delayed_max_sample_difference": 0.0,
+  "fresh_session_max_sample_difference": 0.0,
+  "silence_before_eight_seconds": true,
+  "shared_asset_multiple_clips_and_source_offset": true,
+  "invalid_edits_and_opens_preserve_active": true,
+  "schema1_open_is_read_only": true,
+  "schema1_backup_recovery": true,
+  "original_audio_bytes_unchanged": true
+}

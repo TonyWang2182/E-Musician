@@ -1,0 +1,18 @@
+--- a/modules/tracktion_engine/plugins/external/tracktion_ExternalAutomatableParameter.h
++++ b/modules/tracktion_engine/plugins/external/tracktion_ExternalAutomatableParameter.h
+@@ -328,6 +328,15 @@
+         if (automatableEditElement.edit.isLoading() || hasActiveModifierAssignments())
+             return;
+ 
++        // A host automation write may be echoed through the native parameter
++        // listener. Its value is already current; treating that echo as a new
++        // explicit edit would overwrite the user's manual base value. Keep
++        // valueChangedByPlugin itself unconditional for initialisation/program
++        // refreshes, which intentionally synchronise all explicit values.
++        if (auto p = getParam())
++            if (p->getValue() == getCurrentValue())
++                return;
++
+         valueChangedByPlugin();
+     }
+ 

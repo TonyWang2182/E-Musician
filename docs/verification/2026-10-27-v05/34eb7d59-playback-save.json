@@ -1,0 +1,1362 @@
+{
+  "schema_version": 1,
+  "test_version": 2,
+  "status": "passed",
+  "started_at": "2026-10-27T01:46:50.145484+00:00",
+  "workspace": "E:\\E-musician\\build\\playback-save-smoke\\f33d0e7a-9b48-4145-b107-fe40b2232d9d",
+  "machine": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel"
+  },
+  "checks": [
+    "two owned audio tracks and exact instrument play quietly on the existing output device",
+    "repeated async saves complete with playback continuing and unchanged media reused",
+    "editing after acceptance preserves earlier disk snapshot and later dirty state; next Save includes the edit",
+    "saved native plugin, all MIDI notes, media bytes and mixer/loop state reopen intact"
+  ],
+  "saves": [
+    {
+      "label": "repeat-1",
+      "job_id": "0201a8bc5f534ab193fac9af83377bb5",
+      "ack_ms": 11.817099999461789,
+      "accepted_revision": 11,
+      "phases": [
+        "capturing_plugins",
+        "writing_media",
+        "completed"
+      ],
+      "total_ms": 170.83270000148332,
+      "max_job_poll_ms": 10.843000003660563,
+      "job": {
+        "id": "0201a8bc5f534ab193fac9af83377bb5",
+        "kind": "save_project",
+        "status": "completed",
+        "progress": 1.0,
+        "error": "",
+        "phase": "completed",
+        "detail": "Confirming saved project",
+        "capture_ms": 3.558900006115437,
+        "max_plugin_capture_ms": 3.062800005078316,
+        "bytes_written": 31574273,
+        "bytes_reused": 0,
+        "plugins_captured": 1
+      },
+      "xruns_before": 0,
+      "xruns_after": 0,
+      "save_diagnostics": {
+        "current_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "saved_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "fresh_content_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "plugin_dirty": false,
+        "pending_plugin_changes": false,
+        "revision": 11
+      },
+      "saved_plugin_identity": [
+        {
+          "id": "81eab27aa6c241d78f3744a5b18d6803",
+          "identifier": "C:\\Program Files\\Common Files\\VST3\\Serum.vst3",
+          "format": "VST3",
+          "unique_id": -1426101106,
+          "deprecated_unique_id": 897860924,
+          "version": "1.3.6.8",
+          "role": "instrument"
+        }
+      ]
+    },
+    {
+      "label": "repeat-2",
+      "job_id": "28683bf9522e47c0913bb873d9407a0a",
+      "ack_ms": 10.573300001851749,
+      "accepted_revision": 11,
+      "phases": [
+        "capturing_plugins",
+        "completed"
+      ],
+      "total_ms": 97.73629999835975,
+      "max_job_poll_ms": 10.147099994355813,
+      "job": {
+        "id": "28683bf9522e47c0913bb873d9407a0a",
+        "kind": "save_project",
+        "status": "completed",
+        "progress": 1.0,
+        "error": "",
+        "phase": "completed",
+        "detail": "Confirming saved project",
+        "capture_ms": 2.227399997413158,
+        "max_plugin_capture_ms": 1.999799996614456,
+        "bytes_written": 22647,
+        "bytes_reused": 31551826,
+        "plugins_captured": 1
+      },
+      "xruns_before": 0,
+      "xruns_after": 0,
+      "save_diagnostics": {
+        "current_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "saved_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "fresh_content_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "plugin_dirty": false,
+        "pending_plugin_changes": false,
+        "revision": 11
+      },
+      "saved_plugin_identity": [
+        {
+          "id": "81eab27aa6c241d78f3744a5b18d6803",
+          "identifier": "C:\\Program Files\\Common Files\\VST3\\Serum.vst3",
+          "format": "VST3",
+          "unique_id": -1426101106,
+          "deprecated_unique_id": 897860924,
+          "version": "1.3.6.8",
+          "role": "instrument"
+        }
+      ]
+    },
+    {
+      "label": "repeat-3",
+      "job_id": "2bb31ed4df164f9e9cd0d9b8d88a6e36",
+      "ack_ms": 8.49039999593515,
+      "accepted_revision": 11,
+      "phases": [
+        "capturing_plugins",
+        "committing",
+        "completed"
+      ],
+      "total_ms": 160.7064999989234,
+      "max_job_poll_ms": 10.181100005866028,
+      "job": {
+        "id": "2bb31ed4df164f9e9cd0d9b8d88a6e36",
+        "kind": "save_project",
+        "status": "completed",
+        "progress": 1.0,
+        "error": "",
+        "phase": "completed",
+        "detail": "Confirming saved project",
+        "capture_ms": 2.907899998128414,
+        "max_plugin_capture_ms": 2.637499995529652,
+        "bytes_written": 22648,
+        "bytes_reused": 31551826,
+        "plugins_captured": 1
+      },
+      "xruns_before": 0,
+      "xruns_after": 0,
+      "save_diagnostics": {
+        "current_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "saved_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "fresh_content_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "plugin_dirty": false,
+        "pending_plugin_changes": false,
+        "revision": 11
+      },
+      "saved_plugin_identity": [
+        {
+          "id": "81eab27aa6c241d78f3744a5b18d6803",
+          "identifier": "C:\\Program Files\\Common Files\\VST3\\Serum.vst3",
+          "format": "VST3",
+          "unique_id": -1426101106,
+          "deprecated_unique_id": 897860924,
+          "version": "1.3.6.8",
+          "role": "instrument"
+        }
+      ]
+    },
+    {
+      "label": "repeat-4",
+      "job_id": "2d9e4b97d7ba4c70aa056df326d937dc",
+      "ack_ms": 8.702300001459662,
+      "accepted_revision": 11,
+      "phases": [
+        "capturing_plugins",
+        "completed"
+      ],
+      "total_ms": 94.97179999743821,
+      "max_job_poll_ms": 9.832399999140762,
+      "job": {
+        "id": "2d9e4b97d7ba4c70aa056df326d937dc",
+        "kind": "save_project",
+        "status": "completed",
+        "progress": 1.0,
+        "error": "",
+        "phase": "completed",
+        "detail": "Confirming saved project",
+        "capture_ms": 2.117800004780293,
+        "max_plugin_capture_ms": 1.89580000191927,
+        "bytes_written": 22654,
+        "bytes_reused": 31551826,
+        "plugins_captured": 1
+      },
+      "xruns_before": 0,
+      "xruns_after": 0,
+      "save_diagnostics": {
+        "current_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "saved_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "fresh_content_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "plugin_dirty": false,
+        "pending_plugin_changes": false,
+        "revision": 11
+      },
+      "saved_plugin_identity": [
+        {
+          "id": "81eab27aa6c241d78f3744a5b18d6803",
+          "identifier": "C:\\Program Files\\Common Files\\VST3\\Serum.vst3",
+          "format": "VST3",
+          "unique_id": -1426101106,
+          "deprecated_unique_id": 897860924,
+          "version": "1.3.6.8",
+          "role": "instrument"
+        }
+      ]
+    },
+    {
+      "label": "repeat-5",
+      "job_id": "289fecf666e6426281fd9c7c2621be83",
+      "ack_ms": 9.816199999477249,
+      "accepted_revision": 11,
+      "phases": [
+        "capturing_plugins",
+        "completed"
+      ],
+      "total_ms": 93.35819999978412,
+      "max_job_poll_ms": 9.69700000132434,
+      "job": {
+        "id": "289fecf666e6426281fd9c7c2621be83",
+        "kind": "save_project",
+        "status": "completed",
+        "progress": 1.0,
+        "error": "",
+        "phase": "completed",
+        "detail": "Confirming saved project",
+        "capture_ms": 1.141199998557568,
+        "max_plugin_capture_ms": 0.988899998366833,
+        "bytes_written": 22651,
+        "bytes_reused": 31551826,
+        "plugins_captured": 1
+      },
+      "xruns_before": 0,
+      "xruns_after": 0,
+      "save_diagnostics": {
+        "current_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "saved_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "fresh_content_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "plugin_dirty": false,
+        "pending_plugin_changes": false,
+        "revision": 11
+      },
+      "saved_plugin_identity": [
+        {
+          "id": "81eab27aa6c241d78f3744a5b18d6803",
+          "identifier": "C:\\Program Files\\Common Files\\VST3\\Serum.vst3",
+          "format": "VST3",
+          "unique_id": -1426101106,
+          "deprecated_unique_id": 897860924,
+          "version": "1.3.6.8",
+          "role": "instrument"
+        }
+      ]
+    },
+    {
+      "label": "repeat-6",
+      "job_id": "65b63751b6b3445080de190f6ec470e4",
+      "ack_ms": 10.547799996857066,
+      "accepted_revision": 11,
+      "phases": [
+        "capturing_plugins",
+        "completed"
+      ],
+      "total_ms": 95.30969999468653,
+      "max_job_poll_ms": 9.543200001644436,
+      "job": {
+        "id": "65b63751b6b3445080de190f6ec470e4",
+        "kind": "save_project",
+        "status": "completed",
+        "progress": 1.0,
+        "error": "",
+        "phase": "completed",
+        "detail": "Confirming saved project",
+        "capture_ms": 1.721200004220009,
+        "max_plugin_capture_ms": 1.482600003480911,
+        "bytes_written": 22670,
+        "bytes_reused": 31551826,
+        "plugins_captured": 1
+      },
+      "xruns_before": 0,
+      "xruns_after": 0,
+      "save_diagnostics": {
+        "current_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "saved_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "fresh_content_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "plugin_dirty": false,
+        "pending_plugin_changes": false,
+        "revision": 11
+      },
+      "saved_plugin_identity": [
+        {
+          "id": "81eab27aa6c241d78f3744a5b18d6803",
+          "identifier": "C:\\Program Files\\Common Files\\VST3\\Serum.vst3",
+          "format": "VST3",
+          "unique_id": -1426101106,
+          "deprecated_unique_id": 897860924,
+          "version": "1.3.6.8",
+          "role": "instrument"
+        }
+      ]
+    },
+    {
+      "label": "edit after acceptance",
+      "job_id": "c9ed18d7b0674166a0bcfb59eab4d84b",
+      "ack_ms": 8.433000002696645,
+      "accepted_revision": 11,
+      "phases": [
+        "writing_manifest",
+        "completed"
+      ],
+      "job_before_edit": {
+        "id": "c9ed18d7b0674166a0bcfb59eab4d84b",
+        "kind": "save_project",
+        "status": "running",
+        "progress": 0.0,
+        "error": "",
+        "phase": "capturing_plugins",
+        "detail": "Preparing project snapshot",
+        "capture_ms": 0.279200002551079,
+        "max_plugin_capture_ms": 0.0,
+        "bytes_written": 0,
+        "bytes_reused": 0,
+        "plugins_captured": 0
+      },
+      "total_ms": 129.14090000413125,
+      "max_job_poll_ms": 11.375200003385544,
+      "job": {
+        "id": "c9ed18d7b0674166a0bcfb59eab4d84b",
+        "kind": "save_project",
+        "status": "completed",
+        "progress": 1.0,
+        "error": "",
+        "phase": "completed",
+        "detail": "Confirming saved project",
+        "capture_ms": 1.610200002789497,
+        "max_plugin_capture_ms": 1.331000000238419,
+        "bytes_written": 22447,
+        "bytes_reused": 31551826,
+        "plugins_captured": 1
+      },
+      "xruns_before": 0,
+      "xruns_after": 0,
+      "save_diagnostics": {
+        "current_key": "124868b82e74fa62712e456eb3f90d6eb16d5864f8b15791a6b1ebefa44b06cb",
+        "saved_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+        "fresh_content_key": "124868b82e74fa62712e456eb3f90d6eb16d5864f8b15791a6b1ebefa44b06cb",
+        "plugin_dirty": false,
+        "pending_plugin_changes": false,
+        "revision": 12
+      },
+      "saved_plugin_identity": [
+        {
+          "id": "81eab27aa6c241d78f3744a5b18d6803",
+          "identifier": "C:\\Program Files\\Common Files\\VST3\\Serum.vst3",
+          "format": "VST3",
+          "unique_id": -1426101106,
+          "deprecated_unique_id": 897860924,
+          "version": "1.3.6.8",
+          "role": "instrument"
+        }
+      ]
+    },
+    {
+      "label": "save later edit",
+      "job_id": "bdbae45489b244379f3f2df998fc77d6",
+      "ack_ms": 9.592599999450613,
+      "accepted_revision": 12,
+      "phases": [
+        "capturing_plugins",
+        "completed"
+      ],
+      "total_ms": 95.3016999992542,
+      "max_job_poll_ms": 10.23669999995036,
+      "job": {
+        "id": "bdbae45489b244379f3f2df998fc77d6",
+        "kind": "save_project",
+        "status": "completed",
+        "progress": 1.0,
+        "error": "",
+        "phase": "completed",
+        "detail": "Confirming saved project",
+        "capture_ms": 2.171999998390675,
+        "max_plugin_capture_ms": 2.041999995708466,
+        "bytes_written": 22470,
+        "bytes_reused": 31551826,
+        "plugins_captured": 1
+      },
+      "xruns_before": 0,
+      "xruns_after": 0,
+      "save_diagnostics": {
+        "current_key": "124868b82e74fa62712e456eb3f90d6eb16d5864f8b15791a6b1ebefa44b06cb",
+        "saved_key": "124868b82e74fa62712e456eb3f90d6eb16d5864f8b15791a6b1ebefa44b06cb",
+        "fresh_content_key": "124868b82e74fa62712e456eb3f90d6eb16d5864f8b15791a6b1ebefa44b06cb",
+        "plugin_dirty": false,
+        "pending_plugin_changes": false,
+        "revision": 12
+      },
+      "saved_plugin_identity": [
+        {
+          "id": "81eab27aa6c241d78f3744a5b18d6803",
+          "identifier": "C:\\Program Files\\Common Files\\VST3\\Serum.vst3",
+          "format": "VST3",
+          "unique_id": -1426101106,
+          "deprecated_unique_id": 897860924,
+          "version": "1.3.6.8",
+          "role": "instrument"
+        }
+      ]
+    }
+  ],
+  "playback_samples": [
+    {
+      "label": "play started",
+      "at": 55442.421255,
+      "request_ms": 11.282999999821186,
+      "position_seconds": 0.0,
+      "playing": true,
+      "dirty": true,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.026031773284699,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "before save window",
+      "at": 55443.4264673,
+      "request_ms": 4.991699999663979,
+      "position_seconds": 0.992,
+      "playing": true,
+      "dirty": true,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.067763727403304,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-1 before",
+      "at": 55443.4479875,
+      "request_ms": 12.155099997471552,
+      "position_seconds": 1.013333333333333,
+      "playing": true,
+      "dirty": true,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.060908572617686,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-1 polling",
+      "at": 55443.4816829,
+      "request_ms": 12.42400000046473,
+      "position_seconds": 1.056,
+      "playing": true,
+      "dirty": true,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.059797599347564,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-1 polling",
+      "at": 55443.5543187,
+      "request_ms": 11.3742999965325,
+      "position_seconds": 1.12,
+      "playing": true,
+      "dirty": true,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.033667793867086,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-1 polling",
+      "at": 55443.6187894,
+      "request_ms": 12.067399999068584,
+      "position_seconds": 1.178666666666667,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.049921474571247,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "saved clean",
+      "at": 55443.6403864,
+      "request_ms": 9.61519999691518,
+      "position_seconds": 1.2,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.058395135958794,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "post-save settle",
+      "at": 55443.8001201,
+      "request_ms": 9.331300003395882,
+      "position_seconds": 1.365333333333333,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.045356486991756,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-2 before",
+      "at": 55443.8100736,
+      "request_ms": 9.940700001607183,
+      "position_seconds": 1.386666666666667,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.036865651632255,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-2 polling",
+      "at": 55443.8430227,
+      "request_ms": 12.183400001958944,
+      "position_seconds": 1.408,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.027955570521165,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-2 polling",
+      "at": 55443.9077893,
+      "request_ms": 11.68830000096932,
+      "position_seconds": 1.472,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.024587758800452,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "saved clean",
+      "at": 55443.9289498,
+      "request_ms": 10.723700004746206,
+      "position_seconds": 1.493333333333333,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.02898989594655,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "post-save settle",
+      "at": 55444.089888,
+      "request_ms": 10.039299995696638,
+      "position_seconds": 1.653333333333333,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.042753508383797,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-3 before",
+      "at": 55444.1004841,
+      "request_ms": 10.567799996351823,
+      "position_seconds": 1.68,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.047629495512347,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-3 polling",
+      "at": 55444.1310409,
+      "request_ms": 11.818099999800324,
+      "position_seconds": 1.696,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.04910823969896,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-3 polling",
+      "at": 55444.1947654,
+      "request_ms": 11.893299997609574,
+      "position_seconds": 1.76,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.041999782389879,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-3 polling",
+      "at": 55444.2611594,
+      "request_ms": 12.030999998387415,
+      "position_seconds": 1.824,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.052589121307088,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "saved clean",
+      "at": 55444.2854987,
+      "request_ms": 14.189300003636163,
+      "position_seconds": 1.845333333333333,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.058343569084753,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "post-save settle",
+      "at": 55444.4444034,
+      "request_ms": 8.24550000106683,
+      "position_seconds": 2.016,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.069208429776708,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-4 before",
+      "at": 55444.4553842,
+      "request_ms": 10.957699996652082,
+      "position_seconds": 2.032,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.063860894925665,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-4 polling",
+      "at": 55444.4863014,
+      "request_ms": 12.326100004429463,
+      "position_seconds": 2.053333333333333,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.05976357799195,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-4 polling",
+      "at": 55444.5503251,
+      "request_ms": 12.23549999849638,
+      "position_seconds": 2.117333333333333,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.043878555209141,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "saved clean",
+      "at": 55444.5718137,
+      "request_ms": 11.897399999725167,
+      "position_seconds": 2.138666666666666,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.042080626262151,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "post-save settle",
+      "at": 55444.7280022,
+      "request_ms": 5.803699998068623,
+      "position_seconds": 2.304,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.043352442630762,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-5 before",
+      "at": 55444.7392404,
+      "request_ms": 11.225499998545274,
+      "position_seconds": 2.304,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.037051563121504,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-5 polling",
+      "at": 55444.7697781,
+      "request_ms": 10.889899996982422,
+      "position_seconds": 2.346666666666667,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.030765663048415,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-5 polling",
+      "at": 55444.83258,
+      "request_ms": 11.072300003434066,
+      "position_seconds": 2.410666666666667,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.034369999644714,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "saved clean",
+      "at": 55444.8555268,
+      "request_ms": 11.23399999778485,
+      "position_seconds": 2.432,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.027961081976451,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "post-save settle",
+      "at": 55445.0119668,
+      "request_ms": 5.875700000615325,
+      "position_seconds": 2.581333333333333,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.030252188356327,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-6 before",
+      "at": 55445.0229768,
+      "request_ms": 10.997299999871757,
+      "position_seconds": 2.602666666666666,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.036438120066864,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-6 polling",
+      "at": 55445.0549024,
+      "request_ms": 11.771800003771205,
+      "position_seconds": 2.618666666666666,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.039446187382624,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "repeat-6 polling",
+      "at": 55445.1182487,
+      "request_ms": 11.650000000372529,
+      "position_seconds": 2.688,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.040076069619598,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "saved clean",
+      "at": 55445.1402616,
+      "request_ms": 11.08840000233613,
+      "position_seconds": 2.704,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.044506828242655,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "post-save settle",
+      "at": 55445.2948459,
+      "request_ms": 4.201299998385366,
+      "position_seconds": 2.853333333333333,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.037886592203355,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "edit after acceptance before",
+      "at": 55445.3063609,
+      "request_ms": 11.40049999958137,
+      "position_seconds": 2.88,
+      "playing": true,
+      "dirty": false,
+      "revision": 11,
+      "xruns": 0,
+      "cpu_usage": 0.048851918871745,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "edit after acceptance polling",
+      "at": 55445.3713396,
+      "request_ms": 12.057500003720634,
+      "position_seconds": 2.938666666666667,
+      "playing": true,
+      "dirty": true,
+      "revision": 12,
+      "xruns": 0,
+      "cpu_usage": 0.051869719293805,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "edit after acceptance polling",
+      "at": 55445.4354793,
+      "request_ms": 11.740699999791104,
+      "position_seconds": 3.002666666666667,
+      "playing": true,
+      "dirty": true,
+      "revision": 12,
+      "xruns": 0,
+      "cpu_usage": 0.033716585046245,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "later edit retained",
+      "at": 55445.4568954,
+      "request_ms": 11.597500000789296,
+      "position_seconds": 3.024,
+      "playing": true,
+      "dirty": true,
+      "revision": 12,
+      "xruns": 0,
+      "cpu_usage": 0.042311273235546,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "save later edit before",
+      "at": 55445.4667342,
+      "request_ms": 9.817199999815784,
+      "position_seconds": 3.045333333333333,
+      "playing": true,
+      "dirty": true,
+      "revision": 12,
+      "xruns": 0,
+      "cpu_usage": 0.038332214809774,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "save later edit polling",
+      "at": 55445.4987488,
+      "request_ms": 12.149100002716295,
+      "position_seconds": 3.066666666666667,
+      "playing": true,
+      "dirty": true,
+      "revision": 12,
+      "xruns": 0,
+      "cpu_usage": 0.033073308201195,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "save later edit polling",
+      "at": 55445.5620125,
+      "request_ms": 11.541799998667557,
+      "position_seconds": 3.130666666666666,
+      "playing": true,
+      "dirty": false,
+      "revision": 12,
+      "xruns": 0,
+      "cpu_usage": 0.025725825957649,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    },
+    {
+      "label": "after save window",
+      "at": 55445.5848397,
+      "request_ms": 11.248700000578538,
+      "position_seconds": 3.152,
+      "playing": true,
+      "dirty": false,
+      "revision": 12,
+      "xruns": 0,
+      "cpu_usage": 0.025918837987101,
+      "sample_rate": 48000.0,
+      "buffer_size": 256
+    }
+  ],
+  "save_diagnostics": [
+    {
+      "label": "before play",
+      "current_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "saved_key": "3929da3cef164b34cd2d93c3503e750fb395025909781927453385af629be46a",
+      "fresh_content_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "plugin_dirty": false,
+      "pending_plugin_changes": false,
+      "revision": 11
+    },
+    {
+      "label": "after play",
+      "current_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "saved_key": "3929da3cef164b34cd2d93c3503e750fb395025909781927453385af629be46a",
+      "fresh_content_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "plugin_dirty": false,
+      "pending_plugin_changes": false,
+      "revision": 11
+    },
+    {
+      "label": "repeat-1 completed",
+      "current_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "saved_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "fresh_content_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "plugin_dirty": false,
+      "pending_plugin_changes": false,
+      "revision": 11
+    },
+    {
+      "label": "repeat-2 completed",
+      "current_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "saved_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "fresh_content_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "plugin_dirty": false,
+      "pending_plugin_changes": false,
+      "revision": 11
+    },
+    {
+      "label": "repeat-3 completed",
+      "current_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "saved_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "fresh_content_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "plugin_dirty": false,
+      "pending_plugin_changes": false,
+      "revision": 11
+    },
+    {
+      "label": "repeat-4 completed",
+      "current_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "saved_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "fresh_content_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "plugin_dirty": false,
+      "pending_plugin_changes": false,
+      "revision": 11
+    },
+    {
+      "label": "repeat-5 completed",
+      "current_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "saved_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "fresh_content_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "plugin_dirty": false,
+      "pending_plugin_changes": false,
+      "revision": 11
+    },
+    {
+      "label": "repeat-6 completed",
+      "current_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "saved_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "fresh_content_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "plugin_dirty": false,
+      "pending_plugin_changes": false,
+      "revision": 11
+    },
+    {
+      "label": "edit after acceptance completed",
+      "current_key": "124868b82e74fa62712e456eb3f90d6eb16d5864f8b15791a6b1ebefa44b06cb",
+      "saved_key": "c265e413d2b46308296970a06324e91db9aa5a6c31e5d096e7c87aa0ab933db9",
+      "fresh_content_key": "124868b82e74fa62712e456eb3f90d6eb16d5864f8b15791a6b1ebefa44b06cb",
+      "plugin_dirty": false,
+      "pending_plugin_changes": false,
+      "revision": 12
+    },
+    {
+      "label": "save later edit completed",
+      "current_key": "124868b82e74fa62712e456eb3f90d6eb16d5864f8b15791a6b1ebefa44b06cb",
+      "saved_key": "124868b82e74fa62712e456eb3f90d6eb16d5864f8b15791a6b1ebefa44b06cb",
+      "fresh_content_key": "124868b82e74fa62712e456eb3f90d6eb16d5864f8b15791a6b1ebefa44b06cb",
+      "plugin_dirty": false,
+      "pending_plugin_changes": false,
+      "revision": 12
+    },
+    {
+      "label": "reopened clean",
+      "current_key": "124868b82e74fa62712e456eb3f90d6eb16d5864f8b15791a6b1ebefa44b06cb",
+      "saved_key": "124868b82e74fa62712e456eb3f90d6eb16d5864f8b15791a6b1ebefa44b06cb",
+      "fresh_content_key": "124868b82e74fa62712e456eb3f90d6eb16d5864f8b15791a6b1ebefa44b06cb",
+      "plugin_dirty": false,
+      "pending_plugin_changes": false,
+      "revision": 13
+    }
+  ],
+  "limitations": [
+    "API transport and driver xrun counters do not prove acoustic continuity.",
+    "No GUI Save click, native editor or physical input coverage.",
+    "Default program of one exact scanned instrument descriptor only."
+  ],
+  "executable": {
+    "path": "E:\\E-musician\\build\\bin\\Release\\E-musician.exe",
+    "sha256": "1a72c25210e296898167db1e33f57f4cbee0b21fa8c358e636917ee8f23024dd"
+  },
+  "media": [
+    {
+      "path": "E:\\E-musician\\build\\playback-save-smoke\\f33d0e7a-9b48-4145-b107-fe40b2232d9d\\owned-0.mp3",
+      "bytes": 15775913,
+      "sha256": "b771dc54aea4f37d39ba3da9f5090e1cc671303c899d15958e0798eac12b62b5"
+    },
+    {
+      "path": "E:\\E-musician\\build\\playback-save-smoke\\f33d0e7a-9b48-4145-b107-fe40b2232d9d\\owned-1.mp3",
+      "bytes": 15775913,
+      "sha256": "270f451a8e646feb8cf7f4935f7a7a111ef097788bf33795076edec0b860a90c"
+    }
+  ],
+  "plugin": {
+    "module": "C:\\Program Files\\Common Files\\VST3\\Serum.vst3",
+    "descriptor": {
+      "id": "56a3b17dc0f5b66ef3e883760687bcdeece7f13c5d37389ba3055e72bbe10e81",
+      "name": "Serum",
+      "format": "VST3",
+      "manufacturer": "Xfer Records",
+      "is_instrument": true
+    },
+    "untested": []
+  },
+  "audio_device": {
+    "drivers": [
+      {
+        "driver_type": "Windows Audio",
+        "inputs": [
+          "Line 1/2 (3- M-Audio M-Track Solo and Duo)",
+          "麦克风 (ToDesk Virtual Audio)",
+          "麦克风阵列 (适用于数字麦克风的英特尔® 智音技术)"
+        ],
+        "outputs": [
+          "扬声器 (3- M-Audio M-Track Solo and Duo)",
+          "扬声器 (Realtek(R) Audio)"
+        ],
+        "separate_inputs_and_outputs": true
+      },
+      {
+        "driver_type": "Windows Audio (Exclusive Mode)",
+        "inputs": [
+          "Line 1/2 (3- M-Audio M-Track Solo and Duo)",
+          "麦克风 (ToDesk Virtual Audio)",
+          "麦克风阵列 (适用于数字麦克风的英特尔® 智音技术)"
+        ],
+        "outputs": [
+          "扬声器 (3- M-Audio M-Track Solo and Duo)",
+          "扬声器 (Realtek(R) Audio)"
+        ],
+        "separate_inputs_and_outputs": true
+      },
+      {
+        "driver_type": "Windows Audio (Low Latency Mode)",
+        "inputs": [
+          "Line 1/2 (3- M-Audio M-Track Solo and Duo)",
+          "麦克风 (ToDesk Virtual Audio)",
+          "麦克风阵列 (适用于数字麦克风的英特尔® 智音技术)"
+        ],
+        "outputs": [
+          "扬声器 (3- M-Audio M-Track Solo and Duo)",
+          "扬声器 (Realtek(R) Audio)"
+        ],
+        "separate_inputs_and_outputs": true
+      },
+      {
+        "driver_type": "DirectSound",
+        "inputs": [
+          "主声音捕获驱动程序",
+          "Line 1/2 (3- M-Audio M-Track Solo and Duo)",
+          "麦克风 (ToDesk Virtual Audio)",
+          "麦克风阵列 (适用于数字麦克风的英特尔® 智音技术)"
+        ],
+        "outputs": [
+          "主声音驱动程序",
+          "扬声器 (3- M-Audio M-Track Solo and Duo)",
+          "扬声器 (Realtek(R) Audio)"
+        ],
+        "separate_inputs_and_outputs": true
+      },
+      {
+        "driver_type": "ASIO",
+        "inputs": [
+          "Ableton Move",
+          "Ableton Push",
+          "ASIO4ALL v2",
+          "Focusrite Thunderbolt ASIO",
+          "Focusrite USB ASIO",
+          "Generic Low Latency ASIO Driver",
+          "M-Audio M-Track Solo and Duo ASIO",
+          "NUX Audio",
+          "UMC ASIO Driver",
+          "Yamaha Steinberg USB ASIO"
+        ],
+        "outputs": [
+          "Ableton Move",
+          "Ableton Push",
+          "ASIO4ALL v2",
+          "Focusrite Thunderbolt ASIO",
+          "Focusrite USB ASIO",
+          "Generic Low Latency ASIO Driver",
+          "M-Audio M-Track Solo and Duo ASIO",
+          "NUX Audio",
+          "UMC ASIO Driver",
+          "Yamaha Steinberg USB ASIO"
+        ],
+        "separate_inputs_and_outputs": false
+      }
+    ],
+    "driver_type": "ASIO",
+    "device_name": "M-Audio M-Track Solo and Duo ASIO",
+    "input_device_name": "M-Audio M-Track Solo and Duo ASIO",
+    "output_device_name": "M-Audio M-Track Solo and Duo ASIO",
+    "sample_rate": 48000.0,
+    "buffer_size": 256,
+    "sample_rates": [
+      44100.0,
+      48000.0
+    ],
+    "buffer_sizes": [
+      16,
+      32,
+      48,
+      64,
+      80,
+      96,
+      112,
+      128,
+      144,
+      160,
+      176,
+      192,
+      208,
+      224,
+      240,
+      256,
+      272,
+      288,
+      304,
+      320,
+      336,
+      352,
+      368,
+      384,
+      400,
+      416,
+      432,
+      448,
+      464,
+      480,
+      496,
+      512,
+      528,
+      544,
+      560,
+      576,
+      592,
+      608,
+      624,
+      640,
+      656,
+      672,
+      688,
+      704,
+      720,
+      736,
+      752,
+      768,
+      784,
+      800,
+      816,
+      832,
+      848,
+      864,
+      880,
+      896,
+      912,
+      928,
+      944,
+      960,
+      976,
+      992,
+      1008,
+      1024,
+      1040,
+      1056,
+      1072,
+      1088,
+      1104,
+      1120,
+      1136,
+      1152,
+      1168,
+      1184,
+      1200,
+      1216,
+      1232,
+      1248,
+      1264,
+      1280,
+      1296,
+      1312,
+      1328,
+      1344,
+      1360,
+      1376,
+      1392,
+      1408,
+      1424,
+      1440,
+      1456,
+      1472,
+      1488,
+      1504,
+      1520,
+      1536,
+      1552,
+      1568,
+      1584,
+      1600,
+      1616,
+      1632,
+      1648,
+      1664,
+      1680,
+      1696,
+      1712,
+      1728,
+      1744,
+      1760,
+      1776,
+      1792,
+      1808,
+      1824,
+      1840,
+      1856,
+      1872,
+      1888,
+      1904,
+      1920,
+      1936,
+      1952,
+      1968,
+      1984,
+      2000,
+      2016,
+      2032,
+      2048
+    ],
+    "input_channels": [
+      {
+        "index": 0,
+        "name": "In 1",
+        "active": true
+      },
+      {
+        "index": 1,
+        "name": "In 2",
+        "active": true
+      }
+    ],
+    "output_channels": [
+      {
+        "index": 0,
+        "name": "Out 1",
+        "active": true
+      },
+      {
+        "index": 1,
+        "name": "Out 2",
+        "active": true
+      }
+    ],
+    "input_latency_samples": 420,
+    "output_latency_samples": 369
+  },
+  "xrun_measurement": {
+    "available": true,
+    "before": 0,
+    "after": 0,
+    "delta": 0,
+    "requested_limit": 0
+  },
+  "source_checks": [
+    {
+      "path": "E:\\E-musician\\test-projects\\CL.assets\\08e80dc054ed4e96901c8dc7f1be91ce\\2dc8bfd4f9f640f19148cb660061aba3.mp3",
+      "unchanged": true
+    },
+    {
+      "path": "E:\\E-musician\\test-projects\\CL.assets\\08e80dc054ed4e96901c8dc7f1be91ce\\dc31cfbb4caf49c49a5ca9e0944295b6.mp3",
+      "unchanged": true
+    }
+  ],
+  "finished_at": "2026-10-27T01:47:00.007940+00:00"
+}

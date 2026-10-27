@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "scope": "actual MP3 decode and Tracktion offline renders; multi-track controls, undo/redo and archived project round trips; no listening or performance claim",
+  "checks_passed": 202,
+  "formats": [
+    {
+      "format": "MP3 CBR / ID3v2.3 / Unicode uppercase path",
+      "source_sample_rate": 48000.0,
+      "source_channels": 2,
+      "decoded_duration_seconds": 2.04,
+      "render_rms": 0.067322187125683
+    },
+    {
+      "format": "MP3 VBR / ID3v2.3",
+      "source_sample_rate": 44100.0,
+      "source_channels": 1,
+      "decoded_duration_seconds": 2.037551020408163,
+      "render_rms": 0.050404351204634
+    }
+  ],
+  "mixed_render_rms": 0.144447416067123,
+  "solo_render_rms": 0.050404351204634,
+  "attenuated_track_rms": 0.025262014940381,
+  "fresh_session_max_sample_difference": 0.0,
+  "source_removal_and_relocation": "passed; only test-owned source copies deleted",
+  "failed_import_open_save_preserve_active": true,
+  "undo_redo_saved_dirty_state": "passed, including -23.4 dB and grouped gesture",
+  "review_project": "E:\\E-musician\\build\\smoke\\Release\\93795279e5cc\\relocated-bundle\\Mixed Audio.emproj",
+  "final_tracks": 3,
+  "final_revision": 39
+}

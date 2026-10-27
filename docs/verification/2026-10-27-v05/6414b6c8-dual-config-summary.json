@@ -1,0 +1,650 @@
+{
+  "source_fingerprint": "6414b6c822ea3fddaf205eebba37d050c6ec13a1d299e6ad788325c4f14259f2",
+  "scope": "Frozen-source automated checks and synthetic UI captures; native GUI workflows, external plugin matrix and sustained performance are separate gates.",
+  "configurations": {
+    "Release": {
+      "record_id": "20261026T195504.062081Z-eb7ee0ca8d",
+      "record_file": "../../builds/20261026T195504.062081Z-eb7ee0ca8d.json",
+      "ctest_passed": 5,
+      "ctest_total": 5,
+      "source_changed_during_command": false,
+      "source_summary": "build/smoke/Release/latest.json",
+      "source_artifacts_directory": "E:\\E-musician\\build\\smoke\\Release\\9bb36d92396e",
+      "curated_artifacts": [
+        {
+          "file": "6414b6c8-release-arrangement-report.json",
+          "bytes": 4448,
+          "sha256": "01bd883efbbc73aac71b31923699653c2c6d774c73d632873d4e86facbbe8fdd",
+          "source": "E:\\E-musician\\build\\smoke\\Release\\9bb36d92396e\\arrangement-report.json"
+        },
+        {
+          "file": "6414b6c8-release-production-smoke.json",
+          "bytes": 245,
+          "sha256": "d8cdfdf41b35b2579982d3a92d6026c95cf21bfbe2b36ea47ba356b243916088",
+          "source": "E:\\E-musician\\build\\smoke\\Release\\9bb36d92396e\\production-smoke.json"
+        },
+        {
+          "file": "6414b6c8-release-job-retry-report.json",
+          "bytes": 253,
+          "sha256": "3cdec5ab1d8e5a24c02510a6bffe4ed91bd34e2c71abdf71ca056fa917404218",
+          "source": "E:\\E-musician\\build\\smoke\\Release\\9bb36d92396e\\job-retry-report.json"
+        },
+        {
+          "file": "6414b6c8-release-ui-1000x650.png",
+          "bytes": 46005,
+          "sha256": "cf3e5652aa99d8e277e36a709581c68c642858d6528ff2cb906723485f866303",
+          "source": "E:\\E-musician\\build\\smoke\\Release\\9bb36d92396e\\ui-1000x650.png"
+        },
+        {
+          "file": "6414b6c8-release-ui-1280x800.png",
+          "bytes": 50084,
+          "sha256": "16f346399fa51a59597d8e7713745b8a23024a8bfec9a08cbe2a0f6c22ca7fde",
+          "source": "E:\\E-musician\\build\\smoke\\Release\\9bb36d92396e\\ui-1280x800.png"
+        }
+      ],
+      "reports": {
+        "directory": "E:\\E-musician\\build\\smoke\\Release\\9bb36d92396e",
+        "report": {
+          "status": "passed",
+          "scope": "offline render and control integration; no physical listening or realtime performance claim",
+          "sample_rate": 48000,
+          "samples": 96000,
+          "channels": 2,
+          "rms_minus6": 0.070878580212593,
+          "rms_minus12": 0.035523440688848,
+          "device_available": true,
+          "device_name": "M-Audio M-Track Solo and Duo ASIO",
+          "device_sample_rate": 48000.0,
+          "device_buffer_size": 256
+        },
+        "transport": {
+          "status": "passed",
+          "scope": "short transport-clock check; no loopback, physical listening or performance claim",
+          "reason": "play/pause/resume/end/loop/stop observed",
+          "test_gain_db": -60
+        },
+        "project": {
+          "status": "passed",
+          "scope": "actual MP3 decode and Tracktion offline renders; multi-track controls, undo/redo and archived project round trips; no listening or performance claim",
+          "checks_passed": 202,
+          "formats": [
+            {
+              "format": "MP3 CBR / ID3v2.3 / Unicode uppercase path",
+              "source_sample_rate": 48000.0,
+              "source_channels": 2,
+              "decoded_duration_seconds": 2.04,
+              "render_rms": 0.067322187125683
+            },
+            {
+              "format": "MP3 VBR / ID3v2.3",
+              "source_sample_rate": 44100.0,
+              "source_channels": 1,
+              "decoded_duration_seconds": 2.037551020408163,
+              "render_rms": 0.050404351204634
+            }
+          ],
+          "mixed_render_rms": 0.144447416067123,
+          "solo_render_rms": 0.050404351204634,
+          "attenuated_track_rms": 0.025262014940381,
+          "fresh_session_max_sample_difference": 0.0,
+          "source_removal_and_relocation": "passed; only test-owned source copies deleted",
+          "failed_import_open_save_preserve_active": true,
+          "undo_redo_saved_dirty_state": "passed, including -23.4 dB and grouped gesture",
+          "review_project": "E:\\E-musician\\build\\smoke\\Release\\9bb36d92396e\\relocated-bundle\\Mixed Audio.emproj",
+          "final_tracks": 3,
+          "final_revision": 39
+        },
+        "arrangement": {
+          "schema": 1,
+          "status": "passed",
+          "default_page": "compose",
+          "page_switch": true,
+          "zoom_buttons": true,
+          "track_rows": 3,
+          "waveforms_complete": true,
+          "clip_geometry": [
+            {
+              "track_id": "001f6563254642a7ad389c36cedc4dcb",
+              "clip_id": "dfe350d38b104e1aadff34ec7200fb26",
+              "timeline_start": 0.0,
+              "source_offset": 0.0,
+              "duration": 2.0,
+              "width_px": 779.4117431640625,
+              "waveform_source": "E:\\E-musician\\build\\smoke\\Release\\9bb36d92396e\\relocated-bundle\\Mixed Audio.assets\\fb33662e724548c99a2b5539184831f5\\e3d603d408c44337a07c05180d8fce24.wav"
+            },
+            {
+              "track_id": "e7deb81f0b9140fc8806062fc4f8c030",
+              "clip_id": "e1ca8d5179454448b4a47aff7c17e57e",
+              "timeline_start": 0.0,
+              "source_offset": 0.0,
+              "duration": 2.04,
+              "width_px": 795.0,
+              "waveform_source": "C:\\Users\\28712\\AppData\\Roaming\\E-musician\\cache\\audio-v1\\8f9ccc3a6ade2b200f9870c5375df8367a0946470547ecdec63d9fe71f800915.wav"
+            },
+            {
+              "track_id": "d395429038b441bca20096eb8927fdb9",
+              "clip_id": "08ecee54d72b4443adb9dcbdcf7e1b03",
+              "timeline_start": 0.0,
+              "source_offset": 0.0,
+              "duration": 2.037551020408163,
+              "width_px": 794.0455932617188,
+              "waveform_source": "C:\\Users\\28712\\AppData\\Roaming\\E-musician\\cache\\audio-v1\\c51ac2e8d6289113bfa694ee100e350f9d6353e7131ccbe17962f4257bf9c552.wav"
+            }
+          ],
+          "selection_and_seek_events": true,
+          "high_zoom_tick_labels_distinct": true,
+          "high_zoom_tick_step_seconds": 0.01,
+          "zoom_and_horizontal_bounds": true,
+          "selection_reveals_row": true,
+          "constrained_vertical_viewport_height": 130,
+          "last_row_scroll_y": 182,
+          "vertical_scroll_last_row": true,
+          "navigation_preserves_revision_and_dirty": true,
+          "keyboard_seek": true,
+          "common_time_scale": true,
+          "clip_click_selects_without_seek": true,
+          "clip_drag_commit_evidence": {
+            "command_ok": true,
+            "command_error": "",
+            "revision_before": 54,
+            "revision_after": 55,
+            "start_seconds": "0.50000006448997647",
+            "source_offset_before": "0.00000000000000000",
+            "source_offset_after": "0.00000000000000000",
+            "length_before": "2.00000000000000000",
+            "length_after": "2.00000000000000000",
+            "playing": false
+          },
+          "clip_drag_preview_then_single_commit": true,
+          "clip_drag_single_undo": true,
+          "clip_drag_escape_cancel": true,
+          "clip_drag_stale_revision_rejected": true,
+          "clip_start_draft_refresh_blur_escape": true,
+          "clip_start_exact_eight_seconds": true,
+          "clip_start_single_undo": true,
+          "drag_enter_exit_feedback": true,
+          "clip_tests_restore_content_and_dirty": true,
+          "inspector_matches_selection": true,
+          "midi_unchanged_snapshot_projection_reused": true,
+          "midi_drag_single_commit": true,
+          "midi_escape_preserves_notes": true,
+          "midi_external_revision_cancels_preview": true,
+          "midi_note_resize": true,
+          "midi_duplicate_velocity_delete": true,
+          "midi_drum_steps_share_note_model": true,
+          "midi_editor_revision_contract": true,
+          "midi_first_open_fits_pitch_in_dock": true,
+          "midi_compact_drum_mode_fits_dock": true,
+          "parameter_initial_values_render_visible": true,
+          "audio_settings_draft_apply_actual_readback_and_failure": true,
+          "async_save_continuation_after_commit": true,
+          "fast_failed_clean_saveas_never_continues": true,
+          "ordinary_save_evidence": {
+            "dirty": false,
+            "revision": 2,
+            "jobs_before": 2,
+            "jobs_after": 3,
+            "save_button_enabled": true,
+            "save_status": "Saved",
+            "save_error": "",
+            "footer_status": "save project completed.",
+            "engine_status": "save project completed.",
+            "preparing": false,
+            "pending_job": "",
+            "continuation_pending": false,
+            "has_continuation": false,
+            "save_again": false,
+            "project_file": "E:\\E-musician\\build\\smoke\\Release\\9bb36d92396e\\ui-save-e3f8db11f2fd4372866ea8f97d0afb8a.emproj",
+            "jobs": [
+              {
+                "id": "6bbf5be7a8384ca68c366519f87be5f8",
+                "kind": "save_project",
+                "status": "completed",
+                "phase": "completed",
+                "detail": "Confirming saved project",
+                "error": "",
+                "progress": 1.0
+              },
+              {
+                "id": "d418f76a327e4db5ba152f531fce3553",
+                "kind": "save_project",
+                "status": "failed",
+                "phase": "failed",
+                "detail": "Validating project",
+                "error": "The project folder does not exist: E:\\E-musician\\build\\smoke\\Release\\9bb36d92396e\\ui-save-blocker-fc7b8f9e481249159ea85930ab2149d9",
+                "progress": 0.1
+              },
+              {
+                "id": "c5cbb703df9e4923a66d35c2aab2f666",
+                "kind": "save_project",
+                "status": "completed",
+                "phase": "completed",
+                "detail": "Confirming saved project",
+                "error": "",
+                "progress": 1.0
+              }
+            ]
+          },
+          "ordinary_save_feedback_and_repeated_shortcut_coalescing": true,
+          "save_continuation_rechecks_late_edits": true,
+          "repeated_save_captures_new_edits_once_without_loop": true,
+          "midi_dock_preserves_two_tracks_at_minimum_size": true,
+          "automation_panel_command_and_delete": true
+        },
+        "clips": {
+          "status": "passed",
+          "scope": "real Tracktion renders for WAV and both MP3 fixtures; move, undo/redo, schema 4 round trips, shared assets, schema 1 migration and recovery; no listening or realtime performance claim",
+          "checks_passed": 317,
+          "formats": [
+            {
+              "format": "WAV",
+              "sample_rate": 48000.0,
+              "channels": 2,
+              "moved_start_seconds": 8,
+              "delayed_max_sample_difference": 0.0
+            },
+            {
+              "format": "MP3",
+              "sample_rate": 48000.0,
+              "channels": 2,
+              "moved_start_seconds": 8,
+              "delayed_max_sample_difference": 0.0
+            },
+            {
+              "format": "MP3",
+              "sample_rate": 44100.0,
+              "channels": 1,
+              "moved_start_seconds": 8,
+              "delayed_max_sample_difference": 0.0
+            }
+          ],
+          "delayed_max_sample_difference": 0.0,
+          "fresh_session_max_sample_difference": 0.0,
+          "silence_before_eight_seconds": true,
+          "shared_asset_multiple_clips_and_source_offset": true,
+          "invalid_edits_and_opens_preserve_active": true,
+          "schema1_open_is_read_only": true,
+          "schema1_backup_recovery": true,
+          "original_audio_bytes_unchanged": true
+        },
+        "daw": {
+          "status": "passed",
+          "checks_passed": 799,
+          "formats": [
+            {
+              "format": "WAV",
+              "sample_rate": 48000.0,
+              "channels": 2,
+              "trim_max_sample_difference": 0.0,
+              "block_size_max_sample_difference": 0.0,
+              "source": "source.wav"
+            },
+            {
+              "format": "MP3",
+              "sample_rate": 48000.0,
+              "channels": 2,
+              "trim_max_sample_difference": 0.0,
+              "block_size_max_sample_difference": 0.0,
+              "source": "stereo-cbr-48000.mp3"
+            },
+            {
+              "format": "MP3",
+              "sample_rate": 44100.0,
+              "channels": 1,
+              "trim_max_sample_difference": 0.0,
+              "block_size_max_sample_difference": 0.0,
+              "source": "mono-vbr-44100.mp3"
+            }
+          ],
+          "scope": "Actual Tracktion audio renders, editing/undo, schema 4, MIDI SMF jobs and in-process Agent protocol. No third-party VST binary or listening claim.",
+          "playback_edit_check": "passed",
+          "dense_midi_diagnostics": {
+            "note_count": 10001,
+            "initial_write_ms": 40.201800003647804,
+            "complete_note_edit_ms": 39.58449999988079,
+            "single_pan_command_ms": 0.098200000822544,
+            "scope": "Single control-thread command elapsed time in this smoke fixture; no realtime or sustained-performance claim."
+          },
+          "storage_report": "storage-v3-report.json",
+          "workspace": "E:\\E-musician\\build\\smoke\\Release\\9bb36d92396e\\daw-cases-08edef61da8f4c909c7afb5d6fd88dae"
+        },
+        "storage": {
+          "status": "passed",
+          "checks_passed": 103,
+          "scope": "schema4 DTO/binary persistence, incremental media, conflict/cancellation, routing/automation/controllers and schema2/3 migration; no plugin instantiation or audio decode claim",
+          "workspace": "E:\\E-musician\\build\\smoke\\Release\\9bb36d92396e\\storage-v3-3bb116d61c094b29b393036d060214d0"
+        },
+        "production": {
+          "ok": true,
+          "checks": 124,
+          "input_source": "generated hosted buffers; no physical inputs",
+          "sample_rate": 48000,
+          "block_size": 256,
+          "workspace": "E:\\E-musician\\build\\smoke\\Release\\9bb36d92396e\\production-44931ddfee8c465ea02c2459abbb1ce7"
+        }
+      }
+    },
+    "Debug": {
+      "record_id": "20261026T195640.420355Z-4224db8938",
+      "record_file": "../../builds/20261026T195640.420355Z-4224db8938.json",
+      "ctest_passed": 5,
+      "ctest_total": 5,
+      "source_changed_during_command": false,
+      "source_summary": "build/smoke/Debug/latest.json",
+      "source_artifacts_directory": "E:\\E-musician\\build\\smoke\\Debug\\beea99687a1d",
+      "curated_artifacts": [
+        {
+          "file": "6414b6c8-debug-arrangement-report.json",
+          "bytes": 4442,
+          "sha256": "be7213c9591ccfb9d99c510adea95b5b96b7923a88f2a11dc10d4ecc7bc005d8",
+          "source": "E:\\E-musician\\build\\smoke\\Debug\\beea99687a1d\\arrangement-report.json"
+        },
+        {
+          "file": "6414b6c8-debug-production-smoke.json",
+          "bytes": 243,
+          "sha256": "d937f7fc6d74829f626e3d1afb2d930f336a8fc7240275486d8e8ee542ee80a0",
+          "source": "E:\\E-musician\\build\\smoke\\Debug\\beea99687a1d\\production-smoke.json"
+        },
+        {
+          "file": "6414b6c8-debug-job-retry-report.json",
+          "bytes": 253,
+          "sha256": "3cdec5ab1d8e5a24c02510a6bffe4ed91bd34e2c71abdf71ca056fa917404218",
+          "source": "E:\\E-musician\\build\\smoke\\Debug\\beea99687a1d\\job-retry-report.json"
+        },
+        {
+          "file": "6414b6c8-debug-ui-1000x650.png",
+          "bytes": 46005,
+          "sha256": "cf3e5652aa99d8e277e36a709581c68c642858d6528ff2cb906723485f866303",
+          "source": "E:\\E-musician\\build\\smoke\\Debug\\beea99687a1d\\ui-1000x650.png"
+        },
+        {
+          "file": "6414b6c8-debug-ui-1280x800.png",
+          "bytes": 50084,
+          "sha256": "16f346399fa51a59597d8e7713745b8a23024a8bfec9a08cbe2a0f6c22ca7fde",
+          "source": "E:\\E-musician\\build\\smoke\\Debug\\beea99687a1d\\ui-1280x800.png"
+        }
+      ],
+      "reports": {
+        "directory": "E:\\E-musician\\build\\smoke\\Debug\\beea99687a1d",
+        "report": {
+          "status": "passed",
+          "scope": "offline render and control integration; no physical listening or realtime performance claim",
+          "sample_rate": 48000,
+          "samples": 96000,
+          "channels": 2,
+          "rms_minus6": 0.070878580212593,
+          "rms_minus12": 0.035523440688848,
+          "device_available": true,
+          "device_name": "M-Audio M-Track Solo and Duo ASIO",
+          "device_sample_rate": 48000.0,
+          "device_buffer_size": 256
+        },
+        "transport": {
+          "status": "passed",
+          "scope": "short transport-clock check; no loopback, physical listening or performance claim",
+          "reason": "play/pause/resume/end/loop/stop observed",
+          "test_gain_db": -60
+        },
+        "project": {
+          "status": "passed",
+          "scope": "actual MP3 decode and Tracktion offline renders; multi-track controls, undo/redo and archived project round trips; no listening or performance claim",
+          "checks_passed": 202,
+          "formats": [
+            {
+              "format": "MP3 CBR / ID3v2.3 / Unicode uppercase path",
+              "source_sample_rate": 48000.0,
+              "source_channels": 2,
+              "decoded_duration_seconds": 2.04,
+              "render_rms": 0.067322187125683
+            },
+            {
+              "format": "MP3 VBR / ID3v2.3",
+              "source_sample_rate": 44100.0,
+              "source_channels": 1,
+              "decoded_duration_seconds": 2.037551020408163,
+              "render_rms": 0.050404351204634
+            }
+          ],
+          "mixed_render_rms": 0.144447416067123,
+          "solo_render_rms": 0.050404351204634,
+          "attenuated_track_rms": 0.025262014940381,
+          "fresh_session_max_sample_difference": 0.0,
+          "source_removal_and_relocation": "passed; only test-owned source copies deleted",
+          "failed_import_open_save_preserve_active": true,
+          "undo_redo_saved_dirty_state": "passed, including -23.4 dB and grouped gesture",
+          "review_project": "E:\\E-musician\\build\\smoke\\Debug\\beea99687a1d\\relocated-bundle\\Mixed Audio.emproj",
+          "final_tracks": 3,
+          "final_revision": 39
+        },
+        "arrangement": {
+          "schema": 1,
+          "status": "passed",
+          "default_page": "compose",
+          "page_switch": true,
+          "zoom_buttons": true,
+          "track_rows": 3,
+          "waveforms_complete": true,
+          "clip_geometry": [
+            {
+              "track_id": "21c4b1812ab0403bb6d94297d508c6f6",
+              "clip_id": "d8bab3ed19a44f2dac014a18517665d8",
+              "timeline_start": 0.0,
+              "source_offset": 0.0,
+              "duration": 2.0,
+              "width_px": 779.4117431640625,
+              "waveform_source": "E:\\E-musician\\build\\smoke\\Debug\\beea99687a1d\\relocated-bundle\\Mixed Audio.assets\\2ca6726ea0e5441db64faf8a717cde9e\\dba8f2979be54e17825f4067dea4f18a.wav"
+            },
+            {
+              "track_id": "c8fa298de03a4a98b457d6a81815ec18",
+              "clip_id": "304db179dde74d36b04b8fc90dba2f7d",
+              "timeline_start": 0.0,
+              "source_offset": 0.0,
+              "duration": 2.04,
+              "width_px": 795.0,
+              "waveform_source": "C:\\Users\\28712\\AppData\\Roaming\\E-musician\\cache\\audio-v1\\8f9ccc3a6ade2b200f9870c5375df8367a0946470547ecdec63d9fe71f800915.wav"
+            },
+            {
+              "track_id": "a189c7eb0890401b8512c1e75593c706",
+              "clip_id": "95ee33fcdd664ec3833246b373e5c698",
+              "timeline_start": 0.0,
+              "source_offset": 0.0,
+              "duration": 2.037551020408163,
+              "width_px": 794.0455932617188,
+              "waveform_source": "C:\\Users\\28712\\AppData\\Roaming\\E-musician\\cache\\audio-v1\\c51ac2e8d6289113bfa694ee100e350f9d6353e7131ccbe17962f4257bf9c552.wav"
+            }
+          ],
+          "selection_and_seek_events": true,
+          "high_zoom_tick_labels_distinct": true,
+          "high_zoom_tick_step_seconds": 0.01,
+          "zoom_and_horizontal_bounds": true,
+          "selection_reveals_row": true,
+          "constrained_vertical_viewport_height": 130,
+          "last_row_scroll_y": 182,
+          "vertical_scroll_last_row": true,
+          "navigation_preserves_revision_and_dirty": true,
+          "keyboard_seek": true,
+          "common_time_scale": true,
+          "clip_click_selects_without_seek": true,
+          "clip_drag_commit_evidence": {
+            "command_ok": true,
+            "command_error": "",
+            "revision_before": 54,
+            "revision_after": 55,
+            "start_seconds": "0.50000006448997647",
+            "source_offset_before": "0.00000000000000000",
+            "source_offset_after": "0.00000000000000000",
+            "length_before": "2.00000000000000000",
+            "length_after": "2.00000000000000000",
+            "playing": false
+          },
+          "clip_drag_preview_then_single_commit": true,
+          "clip_drag_single_undo": true,
+          "clip_drag_escape_cancel": true,
+          "clip_drag_stale_revision_rejected": true,
+          "clip_start_draft_refresh_blur_escape": true,
+          "clip_start_exact_eight_seconds": true,
+          "clip_start_single_undo": true,
+          "drag_enter_exit_feedback": true,
+          "clip_tests_restore_content_and_dirty": true,
+          "inspector_matches_selection": true,
+          "midi_unchanged_snapshot_projection_reused": true,
+          "midi_drag_single_commit": true,
+          "midi_escape_preserves_notes": true,
+          "midi_external_revision_cancels_preview": true,
+          "midi_note_resize": true,
+          "midi_duplicate_velocity_delete": true,
+          "midi_drum_steps_share_note_model": true,
+          "midi_editor_revision_contract": true,
+          "midi_first_open_fits_pitch_in_dock": true,
+          "midi_compact_drum_mode_fits_dock": true,
+          "parameter_initial_values_render_visible": true,
+          "audio_settings_draft_apply_actual_readback_and_failure": true,
+          "async_save_continuation_after_commit": true,
+          "fast_failed_clean_saveas_never_continues": true,
+          "ordinary_save_evidence": {
+            "dirty": false,
+            "revision": 2,
+            "jobs_before": 2,
+            "jobs_after": 3,
+            "save_button_enabled": true,
+            "save_status": "Saved",
+            "save_error": "",
+            "footer_status": "save project completed.",
+            "engine_status": "save project completed.",
+            "preparing": false,
+            "pending_job": "",
+            "continuation_pending": false,
+            "has_continuation": false,
+            "save_again": false,
+            "project_file": "E:\\E-musician\\build\\smoke\\Debug\\beea99687a1d\\ui-save-b2a53544263c4a0391f336b4469d1e78.emproj",
+            "jobs": [
+              {
+                "id": "9c38d648c4a8417f9b49e3ef2ee24877",
+                "kind": "save_project",
+                "status": "completed",
+                "phase": "completed",
+                "detail": "Confirming saved project",
+                "error": "",
+                "progress": 1.0
+              },
+              {
+                "id": "1baafad307384abe989aa51aced1702d",
+                "kind": "save_project",
+                "status": "failed",
+                "phase": "failed",
+                "detail": "Validating project",
+                "error": "The project folder does not exist: E:\\E-musician\\build\\smoke\\Debug\\beea99687a1d\\ui-save-blocker-44402c8765c84339a516cdf8bd8abf12",
+                "progress": 0.1
+              },
+              {
+                "id": "4a98c45354b34bafb8ef9f0331f51545",
+                "kind": "save_project",
+                "status": "completed",
+                "phase": "completed",
+                "detail": "Confirming saved project",
+                "error": "",
+                "progress": 1.0
+              }
+            ]
+          },
+          "ordinary_save_feedback_and_repeated_shortcut_coalescing": true,
+          "save_continuation_rechecks_late_edits": true,
+          "repeated_save_captures_new_edits_once_without_loop": true,
+          "midi_dock_preserves_two_tracks_at_minimum_size": true,
+          "automation_panel_command_and_delete": true
+        },
+        "clips": {
+          "status": "passed",
+          "scope": "real Tracktion renders for WAV and both MP3 fixtures; move, undo/redo, schema 4 round trips, shared assets, schema 1 migration and recovery; no listening or realtime performance claim",
+          "checks_passed": 317,
+          "formats": [
+            {
+              "format": "WAV",
+              "sample_rate": 48000.0,
+              "channels": 2,
+              "moved_start_seconds": 8,
+              "delayed_max_sample_difference": 0.0
+            },
+            {
+              "format": "MP3",
+              "sample_rate": 48000.0,
+              "channels": 2,
+              "moved_start_seconds": 8,
+              "delayed_max_sample_difference": 0.0
+            },
+            {
+              "format": "MP3",
+              "sample_rate": 44100.0,
+              "channels": 1,
+              "moved_start_seconds": 8,
+              "delayed_max_sample_difference": 0.0
+            }
+          ],
+          "delayed_max_sample_difference": 0.0,
+          "fresh_session_max_sample_difference": 0.0,
+          "silence_before_eight_seconds": true,
+          "shared_asset_multiple_clips_and_source_offset": true,
+          "invalid_edits_and_opens_preserve_active": true,
+          "schema1_open_is_read_only": true,
+          "schema1_backup_recovery": true,
+          "original_audio_bytes_unchanged": true
+        },
+        "daw": {
+          "status": "passed",
+          "checks_passed": 756,
+          "formats": [
+            {
+              "format": "WAV",
+              "sample_rate": 48000.0,
+              "channels": 2,
+              "trim_max_sample_difference": 0.0,
+              "block_size_max_sample_difference": 0.0,
+              "source": "source.wav"
+            },
+            {
+              "format": "MP3",
+              "sample_rate": 48000.0,
+              "channels": 2,
+              "trim_max_sample_difference": 0.0,
+              "block_size_max_sample_difference": 0.0,
+              "source": "stereo-cbr-48000.mp3"
+            },
+            {
+              "format": "MP3",
+              "sample_rate": 44100.0,
+              "channels": 1,
+              "trim_max_sample_difference": 0.0,
+              "block_size_max_sample_difference": 0.0,
+              "source": "mono-vbr-44100.mp3"
+            }
+          ],
+          "scope": "Actual Tracktion audio renders, editing/undo, schema 4, MIDI SMF jobs and in-process Agent protocol. No third-party VST binary or listening claim.",
+          "playback_edit_check": "passed",
+          "dense_midi_diagnostics": {
+            "note_count": 10001,
+            "initial_write_ms": 473.6979000046849,
+            "complete_note_edit_ms": 424.95629999786615,
+            "single_pan_command_ms": 0.845499999821186,
+            "scope": "Single control-thread command elapsed time in this smoke fixture; no realtime or sustained-performance claim."
+          },
+          "storage_report": "storage-v3-report.json",
+          "workspace": "E:\\E-musician\\build\\smoke\\Debug\\beea99687a1d\\daw-cases-2221ae9db9704610bb0f121115146ae1"
+        },
+        "storage": {
+          "status": "passed",
+          "checks_passed": 103,
+          "scope": "schema4 DTO/binary persistence, incremental media, conflict/cancellation, routing/automation/controllers and schema2/3 migration; no plugin instantiation or audio decode claim",
+          "workspace": "E:\\E-musician\\build\\smoke\\Debug\\beea99687a1d\\storage-v3-d35e7b0a02dc4667a40e9daa906c27e7"
+        },
+        "production": {
+          "ok": true,
+          "checks": 124,
+          "input_source": "generated hosted buffers; no physical inputs",
+          "sample_rate": 48000,
+          "block_size": 256,
+          "workspace": "E:\\E-musician\\build\\smoke\\Debug\\beea99687a1d\\production-c8e8161e41404bf7bc523c7e3e4ca7aa"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "cmake.useCMakePresets": "always",
+  "cmake.configureOnOpen": false,
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "files.exclude": {"**/_deps": true, "**/build": true, "**/build-logs": true},
+  "search.exclude": {"**/_deps": true, "**/build": true, "**/build-logs": true}
+}

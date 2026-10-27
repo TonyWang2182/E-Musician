@@ -1,0 +1,81 @@
+{
+  "schema_version": 2,
+  "id": "20261026T063244.248302Z-0a092cb718",
+  "session_id": "3df21e749fe847e38975a31287886986",
+  "kind": "command",
+  "action": "logger-verification",
+  "config": "Debug",
+  "note": "Verify UTF-8 redirected console output as well as durable failure records, source drift and raw bytes",
+  "command": [
+    "C:\\Python314\\python.exe",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests",
+    "-p",
+    "test_dev_logger.py",
+    "-v"
+  ],
+  "command_display": "C:\\Python314\\python.exe -m unittest discover -s tests -p test_dev_logger.py -v",
+  "cwd": "E:\\E-musician",
+  "status": "succeeded",
+  "started_at": "2026-10-26T06:32:44.249+00:00",
+  "finished_at": "2026-10-26T06:32:47.492+00:00",
+  "elapsed_seconds": 3.244206,
+  "exit_code": 0,
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+  "git_head": null,
+  "source_fingerprint": {
+    "algorithm": "sha256",
+    "digest": "5e796ac46ffed6acc657ab2e5030a0b3209da1187da4e79725f0c50c07387769",
+    "files": {
+      "CMakeLists.txt": "34b8d95bf39f5458ca47816c7b541662d9262640d605170665dc751b41037b4f",
+      "CMakePresets.json": "930c5e94486ce61f167f7933d0acbed76a2f45f48ae593a31520e15b5bc92e72",
+      "apps/desktop/EngineSession.cpp": "9e66d92b72dbe9d3db0a749bc5732d827fd629dff8449bc8f2ac93acd280b14f",
+      "apps/desktop/EngineSession.h": "ea77629e862376ef5e534e85cec859e4fc8d7cbea373e4753f227f2e16a984df",
+      "apps/desktop/Main.cpp": "a3f8b0638fdf7b6301fda6730dfe67fb072fd3faace75b8afb9c328ad2329a9c",
+      "apps/desktop/MainComponent.cpp": "758769eb0d518e7ef9517cb6031987620478e4ee99c20752f01c513da461c669",
+      "apps/desktop/MainComponent.h": "162891454c2fbfde2396178bd481c8c462bf26d7622907154bb89fcbdb2fddf8",
+      "cmake/dependencies.json": "f013aa717aa0fb3ba629ba9f916adc2b3b6339202fd9bb66545b92c41f195763",
+      "core/commands/RevisionGuard.hpp": "a94b254b9d97b921375695416263d96219fc6e656aefb698ee7c227b813fc267",
+      "core/time/Time.hpp": "11e3beabffaafb9d5b581a504a535e7d0cab6a6666bbc99d9d8f87eba9148ce2",
+      "scripts/dev.py": "b42db3f57c8eb9f1b62ca27995680e4a13d312a5fbd42be87adbfc34af39d91e",
+      "tests/CoreTests.cpp": "15ccded9942314c49b78e43fd838a609282171028e7da5ad73ea988971f679ac",
+      "tests/RunEngineSmoke.py": "b66daf899301ede34c958afc865461dc15e2f98153227ef1faa027b201147210",
+      "tests/test_dev_logger.py": "77efbd88b7507c52c31112951e6c12e32c1fc6bd4241b9bc596d969e2233329f"
+    },
+    "errors": []
+  },
+  "log": "build-logs/20261026T063244.248302Z-0a092cb718.log",
+  "runtime_verified": false,
+  "raw_log": "build-logs/20261026T063244.248302Z-0a092cb718.raw.log",
+  "environment_overrides": {
+    "VSLANG": "1033"
+  },
+  "log_encoding": "UTF-8; process bytes preserved separately",
+  "pid": 47816,
+  "source_fingerprint_end": {
+    "algorithm": "sha256",
+    "digest": "5e796ac46ffed6acc657ab2e5030a0b3209da1187da4e79725f0c50c07387769",
+    "files": {
+      "CMakeLists.txt": "34b8d95bf39f5458ca47816c7b541662d9262640d605170665dc751b41037b4f",
+      "CMakePresets.json": "930c5e94486ce61f167f7933d0acbed76a2f45f48ae593a31520e15b5bc92e72",
+      "apps/desktop/EngineSession.cpp": "9e66d92b72dbe9d3db0a749bc5732d827fd629dff8449bc8f2ac93acd280b14f",
+      "apps/desktop/EngineSession.h": "ea77629e862376ef5e534e85cec859e4fc8d7cbea373e4753f227f2e16a984df",
+      "apps/desktop/Main.cpp": "a3f8b0638fdf7b6301fda6730dfe67fb072fd3faace75b8afb9c328ad2329a9c",
+      "apps/desktop/MainComponent.cpp": "758769eb0d518e7ef9517cb6031987620478e4ee99c20752f01c513da461c669",
+      "apps/desktop/MainComponent.h": "162891454c2fbfde2396178bd481c8c462bf26d7622907154bb89fcbdb2fddf8",
+      "cmake/dependencies.json": "f013aa717aa0fb3ba629ba9f916adc2b3b6339202fd9bb66545b92c41f195763",
+      "core/commands/RevisionGuard.hpp": "a94b254b9d97b921375695416263d96219fc6e656aefb698ee7c227b813fc267",
+      "core/time/Time.hpp": "11e3beabffaafb9d5b581a504a535e7d0cab6a6666bbc99d9d8f87eba9148ce2",
+      "scripts/dev.py": "b42db3f57c8eb9f1b62ca27995680e4a13d312a5fbd42be87adbfc34af39d91e",
+      "tests/CoreTests.cpp": "15ccded9942314c49b78e43fd838a609282171028e7da5ad73ea988971f679ac",
+      "tests/RunEngineSmoke.py": "b66daf899301ede34c958afc865461dc15e2f98153227ef1faa027b201147210",
+      "tests/test_dev_logger.py": "77efbd88b7507c52c31112951e6c12e32c1fc6bd4241b9bc596d969e2233329f"
+    },
+    "errors": []
+  },
+  "source_changed_during_command": false
+}

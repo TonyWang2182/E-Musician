@@ -1,0 +1,10 @@
+The synthetic MP3 recordings under audio/ were generated for E-musician from
+mathematical signals in scripts/generate_audio_fixtures.py. They contain no
+third-party musical performance, user recording, or downloaded music.
+
+To the extent copyright applies to these generated recordings, the recordings
+are dedicated to the public domain under CC0 1.0 Universal (CC0-1.0):
+https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+This notice covers the synthetic recordings, not the encoder software or any
+other third-party dependency.

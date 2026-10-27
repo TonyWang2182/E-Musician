@@ -1,0 +1,6 @@
+{
+  "status": "passed",
+  "scope": "short transport-clock check; no loopback, physical listening or performance claim",
+  "reason": "play/pause/resume/end/loop/stop observed",
+  "test_gain_db": -60
+}

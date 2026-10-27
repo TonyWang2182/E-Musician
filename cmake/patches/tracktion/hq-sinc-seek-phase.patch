@@ -1,0 +1,118 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_WaveNode.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_WaveNode.cpp
+@@ -431,14 +431,57 @@
+ 
+     void setPosition (SampleCount t) override
+     {
+-        if (std::abs (t - getReadPosition()) <= 1)
++        if (positionIsValid && std::abs (t - getReadPosition()) <= 1)
+             return;
+ 
+-        readPosition = (double) t;
+-
+-        source->setPosition (TimePosition::fromSamples (t, destSampleRate));
+-
+-        src_reset (src_state);
++        positionIsValid = false;
++        failedToRead = false;
++
++        const auto ratio = sampleRatio * speedRatio;
++        const auto sourcePosition = static_cast<double> (t) * sampleRatio;
++
++        if (! std::isfinite (sourcePosition)
++            || std::abs (sourcePosition) > static_cast<double> (std::numeric_limits<SampleCount>::max() / 4)
++            || ! std::isfinite (ratio) || ratio <= 0.0
++            || ! src::src_is_valid_ratio (1.0 / ratio))
++            return;
++
++        // E-musician patch: a source seek must retain the fractional input
++        // phase. Rounding sourcePosition and then running a continuous SRC
++        // permanently shifts every output sample after that seek.
++        //
++        // Prime from an integer input anchor. The discarded prefix uses a
++        // temporary ratio chosen to end at sourcePosition exactly. Switching
++        // the ratio immediately afterwards preserves SRC's input history and
++        // phase; none of the audible output uses the temporary ratio.
++        //
++        // 256 discarded frames are sufficient for all three pinned sinc
++        // kernels (largest half-filter < 143 input frames, scaled for
++        // downsampling). For extreme upsampling we prime near unity instead
++        // of generating seconds of discarded output at the final ratio.
++        // There is no gcd/alignment-period search and no allocation here.
++        const auto inputSpan = seekWarmupFrames * std::max (1.0, ratio);
++        const auto anchor = static_cast<SampleCount> (std::ceil (sourcePosition - inputSpan));
++        const auto primeRatio = seekWarmupFrames / (sourcePosition - static_cast<double> (anchor));
++
++        if (! src::src_is_valid_ratio (primeRatio))
++            return;
++
++        source->setPosition (anchor);
++        src::src_reset (src_state);
++
++        if (src::src_set_ratio (src_state, primeRatio) != 0)
++            return;
++
++        const auto generated = src::src_callback_read (src_state, primeRatio, seekWarmupFrames,
++                                                       interleavedOutputScratchBuffer.getView().data.data);
++        const auto restored = src::src_set_ratio (src_state, 1.0 / ratio);
++
++        if (failedToRead || generated != seekWarmupFrames || restored != 0)
++            return;
++
++        readPosition = static_cast<double> (t);
++        positionIsValid = true;
+     }
+ 
+     void setPosition (TimePosition t) override
+@@ -471,6 +514,12 @@
+ 
+     bool readSamples (choc::buffer::ChannelArrayView<float>& destBuffer) override
+     {
++        if (! positionIsValid)
++        {
++            destBuffer.clear();
++            return false;
++        }
++
+         const auto numFramesToDo = destBuffer.getNumFrames();
+         choc::buffer::FrameCount startFrame = 0;
+         auto framesRemaining = numFramesToDo;
+@@ -501,6 +550,8 @@
+     }
+ 
+     static constexpr choc::buffer::FrameCount chunkSize = 256;
++    static constexpr long seekWarmupFrames = 256;
++    static_assert (seekWarmupFrames <= chunkSize);
+     const int numChannels;
+     const double destSampleRate;
+     const double sourceSampleRate { source->getSampleRate() };
+@@ -514,7 +565,7 @@
+ 
+     double speedRatio = 1.0, readPosition = 0.0;
+     float gains[2] = { 1.0f, 1.0f };
+-    bool failedToRead = false;
++    bool failedToRead = false, positionIsValid = false;
+ 
+     SampleCount getReadPosition() const
+     {
+@@ -536,8 +587,11 @@
+         // If the reader fails, we can't bail out or SRC will hang so just give it an empty buffer and pass the fail via a flag
+ 
+ 
+-        if (failedToRead = ! source->readSamples (scratchView); failedToRead)
++        if (! source->readSamples (scratchView))
++        {
++            failedToRead = true;
+             scratchView.clear();
++        }
+ 
+         // Interleave
+         choc::buffer::copy (interleavedInputScratchBuffer, scratchBuffer);
+@@ -555,6 +609,7 @@
+         const auto ratio = sampleRatio * speedRatio;
+         assert (ratio > 0.0);
+ 
++        failedToRead = false;
+         const auto numRead = src_callback_read (src_state, 1.0 / ratio,
+                                                 static_cast<long> (numFramesToDo),
+                                                 interleavedOutputScratchBuffer.getView().data.data);

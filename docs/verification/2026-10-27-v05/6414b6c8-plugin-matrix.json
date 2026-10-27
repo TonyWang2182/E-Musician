@@ -1,0 +1,630 @@
+{
+  "passed": true,
+  "requested_modules": 4,
+  "completed_modules": 4,
+  "workspace": "E:\\E-musician\\build\\plugin-host-smoke\\bfca240d-847c-4244-8c39-fa313788906c",
+  "results": [
+    {
+      "module": "C:\\Program Files\\Common Files\\VST3\\Serum.vst3",
+      "passed": true,
+      "checks": [
+        {
+          "name": "isolated single-module scan / exact catalog identity",
+          "passed": true,
+          "detail": {
+            "id": "56a3b17dc0f5b66ef3e883760687bcdeece7f13c5d37389ba3055e72bbe10e81",
+            "name": "Serum",
+            "format": "VST3",
+            "manufacturer": "Xfer Records",
+            "is_instrument": true
+          }
+        },
+        {
+          "name": "load installed plugin on matching track",
+          "passed": true,
+          "detail": {
+            "id": "5d4c4aefda55481cbe09d3abb0339447",
+            "name": "Serum",
+            "format": "VST3",
+            "enabled": true,
+            "missing": false,
+            "is_instrument": true
+          }
+        },
+        {
+          "name": "normalized parameter / Undo / Redo",
+          "passed": true,
+          "detail": {
+            "id": "2",
+            "name": "A Pan",
+            "original": 0.5,
+            "requested": 0.51,
+            "observed_changed": 0.509999990463257
+          }
+        },
+        {
+          "name": "host parameter Undo / Undo Add / wait / Redo Add / parameter Redo",
+          "passed": true,
+          "detail": {
+            "wait_seconds": 2.25,
+            "native_editor_simulated": false
+          }
+        },
+        {
+          "name": "remove / wait beyond cache timer / Undo restores state",
+          "passed": true,
+          "detail": {
+            "wait_seconds": 2.25
+          }
+        },
+        {
+          "name": "save / reopen preserves plugin and parameter",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "isolated render format / frame count / finite samples",
+          "passed": true,
+          "detail": {
+            "channels": 2,
+            "sample_rate": 48000,
+            "bit_depth": 32,
+            "encoding": 3,
+            "frames": 96000,
+            "finite": true,
+            "peak": 0.010759447701275349,
+            "rms": 0.004039571745104923,
+            "nonzero": true
+          }
+        },
+        {
+          "name": "plugin render is nonzero",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "version mismatch remains missing and preserves opaque state",
+          "passed": true,
+          "detail": {
+            "fixture": "test manifest only; installed plugin unchanged",
+            "state_sha256": "6a9f3339f0b59a8d2fceba167b4762e247db4c9b8fe2fe863ce98fe8f76e9774"
+          }
+        },
+        {
+          "name": "saved version-mismatch placeholder reopens without loading the plugin",
+          "passed": true,
+          "detail": null
+        }
+      ],
+      "stage": "open_project",
+      "coverage_limits": [
+        "Native editor changes are not exercised.",
+        "Default program only; no cross-version state migration.",
+        "Nonzero FX output verifies signal flow, not the intended DSP effect."
+      ],
+      "scan": {
+        "job": {
+          "id": "plugin-scan",
+          "kind": "scan_plugins",
+          "status": "completed",
+          "progress": 1.0,
+          "error": "Plugin scan complete: 1 modules, 0 failed.",
+          "phase": "",
+          "detail": "",
+          "capture_ms": 0.0,
+          "max_plugin_capture_ms": 0.0,
+          "bytes_written": 0,
+          "bytes_reused": 0,
+          "plugins_captured": 0
+        },
+        "exact_module_entries": [
+          {
+            "id": "56a3b17dc0f5b66ef3e883760687bcdeece7f13c5d37389ba3055e72bbe10e81",
+            "available": true,
+            "error": "",
+            "name": "Serum",
+            "format": "VST3",
+            "is_instrument": true,
+            "version": "1.3.6.8"
+          }
+        ],
+        "new_catalog_ids": []
+      },
+      "descriptor": {
+        "id": "56a3b17dc0f5b66ef3e883760687bcdeece7f13c5d37389ba3055e72bbe10e81",
+        "name": "Serum",
+        "format": "VST3",
+        "manufacturer": "Xfer Records",
+        "is_instrument": true
+      },
+      "untested_descriptors": [],
+      "parameter_count": 317,
+      "parameter": {
+        "id": "2",
+        "name": "A Pan",
+        "original": 0.5,
+        "requested": 0.51,
+        "observed_changed": 0.509999990463257
+      },
+      "render": {
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 32,
+        "encoding": 3,
+        "frames": 96000,
+        "finite": true,
+        "peak": 0.010759447701275349,
+        "rms": 0.004039571745104923,
+        "nonzero": true
+      },
+      "elapsed_seconds": 16.14435890000459
+    },
+    {
+      "module": "C:\\Program Files\\Steinberg\\VstPlugins\\Ample Bass P.dll",
+      "passed": true,
+      "checks": [
+        {
+          "name": "isolated single-module scan / exact catalog identity",
+          "passed": true,
+          "detail": {
+            "id": "32a9128b5f7f36eca1d3247faa40da4a0ac2e0ce17e38632c6b76c8b62d79cdc",
+            "name": "Ample Bass P",
+            "format": "VST",
+            "manufacturer": "Ample Sound",
+            "is_instrument": true
+          }
+        },
+        {
+          "name": "load installed plugin on matching track",
+          "passed": true,
+          "detail": {
+            "id": "0606bc1199304429a913c93ea89bbc8f",
+            "name": "Ample Bass P",
+            "format": "VST",
+            "enabled": true,
+            "missing": false,
+            "is_instrument": true
+          }
+        },
+        {
+          "name": "normalized parameter / Undo / Redo",
+          "passed": true,
+          "detail": {
+            "id": "3",
+            "name": "M-Pan",
+            "original": 0.5,
+            "requested": 0.51,
+            "observed_changed": 0.509999990463257
+          }
+        },
+        {
+          "name": "host parameter Undo / Undo Add / wait / Redo Add / parameter Redo",
+          "passed": true,
+          "detail": {
+            "wait_seconds": 2.25,
+            "native_editor_simulated": false
+          }
+        },
+        {
+          "name": "remove / wait beyond cache timer / Undo restores state",
+          "passed": true,
+          "detail": {
+            "wait_seconds": 2.25
+          }
+        },
+        {
+          "name": "save / reopen preserves plugin and parameter",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "isolated render format / frame count / finite samples",
+          "passed": true,
+          "detail": {
+            "channels": 2,
+            "sample_rate": 48000,
+            "bit_depth": 32,
+            "encoding": 3,
+            "frames": 96000,
+            "finite": true,
+            "peak": 0.004468487109988928,
+            "rms": 0.001343238959377952,
+            "nonzero": true
+          }
+        },
+        {
+          "name": "plugin render is nonzero",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "version mismatch remains missing and preserves opaque state",
+          "passed": true,
+          "detail": {
+            "fixture": "test manifest only; installed plugin unchanged",
+            "state_sha256": "1e1de1531e61390b1cc20de70dca770a7f167905facf4cd155965faf7f93af3b"
+          }
+        },
+        {
+          "name": "saved version-mismatch placeholder reopens without loading the plugin",
+          "passed": true,
+          "detail": null
+        }
+      ],
+      "stage": "open_project",
+      "coverage_limits": [
+        "Native editor changes are not exercised.",
+        "Default program only; no cross-version state migration.",
+        "Nonzero FX output verifies signal flow, not the intended DSP effect."
+      ],
+      "scan": {
+        "job": {
+          "id": "plugin-scan",
+          "kind": "scan_plugins",
+          "status": "completed",
+          "progress": 1.0,
+          "error": "Plugin scan complete: 1 modules, 0 failed.",
+          "phase": "",
+          "detail": "",
+          "capture_ms": 0.0,
+          "max_plugin_capture_ms": 0.0,
+          "bytes_written": 0,
+          "bytes_reused": 0,
+          "plugins_captured": 0
+        },
+        "exact_module_entries": [
+          {
+            "id": "32a9128b5f7f36eca1d3247faa40da4a0ac2e0ce17e38632c6b76c8b62d79cdc",
+            "available": true,
+            "error": "",
+            "name": "Ample Bass P",
+            "format": "VST",
+            "is_instrument": true,
+            "version": "3.2.0.0"
+          }
+        ],
+        "new_catalog_ids": []
+      },
+      "descriptor": {
+        "id": "32a9128b5f7f36eca1d3247faa40da4a0ac2e0ce17e38632c6b76c8b62d79cdc",
+        "name": "Ample Bass P",
+        "format": "VST",
+        "manufacturer": "Ample Sound",
+        "is_instrument": true
+      },
+      "untested_descriptors": [],
+      "parameter_count": 186,
+      "parameter": {
+        "id": "3",
+        "name": "M-Pan",
+        "original": 0.5,
+        "requested": 0.51,
+        "observed_changed": 0.509999990463257
+      },
+      "render": {
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 32,
+        "encoding": 3,
+        "frames": 96000,
+        "finite": true,
+        "peak": 0.004468487109988928,
+        "rms": 0.001343238959377952,
+        "nonzero": true
+      },
+      "elapsed_seconds": 28.75613870000234
+    },
+    {
+      "module": "C:\\Program Files\\Common Files\\VST3\\Antares\\Auto-Key.vst3",
+      "passed": true,
+      "checks": [
+        {
+          "name": "isolated single-module scan / exact catalog identity",
+          "passed": true,
+          "detail": {
+            "id": "766b5af4b582d85bff9aa0a412d31243f9eff0c44b50029558477c0b71538d29",
+            "name": "Auto-Key 2",
+            "format": "VST3",
+            "manufacturer": "Antares",
+            "is_instrument": false
+          }
+        },
+        {
+          "name": "load installed plugin on matching track",
+          "passed": true,
+          "detail": {
+            "id": "812f5ca8db84472b816fafd88f8baee2",
+            "name": "Auto-Key 2",
+            "format": "VST3",
+            "enabled": true,
+            "missing": false,
+            "is_instrument": false
+          }
+        },
+        {
+          "name": "normalized parameter / Undo / Redo",
+          "passed": true,
+          "detail": {
+            "id": "1",
+            "name": "Send",
+            "original": 0.0,
+            "requested": 0.01,
+            "observed_changed": 0.009999999776483
+          }
+        },
+        {
+          "name": "host parameter Undo / Undo Add / wait / Redo Add / parameter Redo",
+          "passed": true,
+          "detail": {
+            "wait_seconds": 2.25,
+            "native_editor_simulated": false
+          }
+        },
+        {
+          "name": "remove / wait beyond cache timer / Undo restores state",
+          "passed": true,
+          "detail": {
+            "wait_seconds": 2.25
+          }
+        },
+        {
+          "name": "save / reopen preserves plugin and parameter",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "isolated render format / frame count / finite samples",
+          "passed": true,
+          "detail": {
+            "channels": 2,
+            "sample_rate": 48000,
+            "bit_depth": 32,
+            "encoding": 3,
+            "frames": 96000,
+            "finite": true,
+            "peak": 0.0007905506645329297,
+            "rms": 0.0005589986961256539,
+            "nonzero": true
+          }
+        },
+        {
+          "name": "plugin render is nonzero",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "version mismatch remains missing and preserves opaque state",
+          "passed": true,
+          "detail": {
+            "fixture": "test manifest only; installed plugin unchanged",
+            "state_sha256": "9aa9e34ab4895f6201598bebb2ec245652243dfcd4b2e53cd8dbea205900a70c"
+          }
+        },
+        {
+          "name": "saved version-mismatch placeholder reopens without loading the plugin",
+          "passed": true,
+          "detail": null
+        }
+      ],
+      "stage": "open_project",
+      "coverage_limits": [
+        "Native editor changes are not exercised.",
+        "Default program only; no cross-version state migration.",
+        "Nonzero FX output verifies signal flow, not the intended DSP effect."
+      ],
+      "scan": {
+        "job": {
+          "id": "plugin-scan",
+          "kind": "scan_plugins",
+          "status": "completed",
+          "progress": 1.0,
+          "error": "Plugin scan complete: 1 modules, 0 failed.",
+          "phase": "",
+          "detail": "",
+          "capture_ms": 0.0,
+          "max_plugin_capture_ms": 0.0,
+          "bytes_written": 0,
+          "bytes_reused": 0,
+          "plugins_captured": 0
+        },
+        "exact_module_entries": [
+          {
+            "id": "766b5af4b582d85bff9aa0a412d31243f9eff0c44b50029558477c0b71538d29",
+            "available": true,
+            "error": "",
+            "name": "Auto-Key 2",
+            "format": "VST3",
+            "is_instrument": false,
+            "version": "2.0.0"
+          }
+        ],
+        "new_catalog_ids": []
+      },
+      "descriptor": {
+        "id": "766b5af4b582d85bff9aa0a412d31243f9eff0c44b50029558477c0b71538d29",
+        "name": "Auto-Key 2",
+        "format": "VST3",
+        "manufacturer": "Antares",
+        "is_instrument": false
+      },
+      "untested_descriptors": [],
+      "parameter_count": 3,
+      "parameter": {
+        "id": "1",
+        "name": "Send",
+        "original": 0.0,
+        "requested": 0.01,
+        "observed_changed": 0.009999999776483
+      },
+      "render": {
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 32,
+        "encoding": 3,
+        "frames": 96000,
+        "finite": true,
+        "peak": 0.0007905506645329297,
+        "rms": 0.0005589986961256539,
+        "nonzero": true
+      },
+      "elapsed_seconds": 16.18366149999929
+    },
+    {
+      "module": "C:\\Program Files\\Common Files\\VST3\\uJAM\\BM-DOPE.vst3",
+      "passed": true,
+      "checks": [
+        {
+          "name": "isolated single-module scan / exact catalog identity",
+          "passed": true,
+          "detail": {
+            "id": "344bb90639ad5a1f5dd7847cd592067a3dba854c9eae5e94be8127b31ae0fe81",
+            "name": "BM-DOPE",
+            "format": "VST3",
+            "manufacturer": "UJAM",
+            "is_instrument": true
+          }
+        },
+        {
+          "name": "load installed plugin on matching track",
+          "passed": true,
+          "detail": {
+            "id": "fbf80af81a734b93aba9e677a68eca80",
+            "name": "BM-DOPE",
+            "format": "VST3",
+            "enabled": true,
+            "missing": false,
+            "is_instrument": true
+          }
+        },
+        {
+          "name": "normalized parameter / Undo / Redo",
+          "passed": true,
+          "detail": {
+            "id": "1",
+            "name": "Mix",
+            "original": 0.545454561710358,
+            "requested": 0.555454561710358,
+            "observed_changed": 0.555454552173615
+          }
+        },
+        {
+          "name": "host parameter Undo / Undo Add / wait / Redo Add / parameter Redo",
+          "passed": true,
+          "detail": {
+            "wait_seconds": 2.25,
+            "native_editor_simulated": false
+          }
+        },
+        {
+          "name": "remove / wait beyond cache timer / Undo restores state",
+          "passed": true,
+          "detail": {
+            "wait_seconds": 2.25
+          }
+        },
+        {
+          "name": "save / reopen preserves plugin and parameter",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "isolated render format / frame count / finite samples",
+          "passed": true,
+          "detail": {
+            "channels": 2,
+            "sample_rate": 48000,
+            "bit_depth": 32,
+            "encoding": 3,
+            "frames": 96000,
+            "finite": true,
+            "peak": 0.016238167881965637,
+            "rms": 0.00269787535431515,
+            "nonzero": true
+          }
+        },
+        {
+          "name": "plugin render is nonzero",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "version mismatch remains missing and preserves opaque state",
+          "passed": true,
+          "detail": {
+            "fixture": "test manifest only; installed plugin unchanged",
+            "state_sha256": "87dd24fc1d7caa5a95ec38cf80231b804fb8a08a7723ef31c447ed94964b30ed"
+          }
+        },
+        {
+          "name": "saved version-mismatch placeholder reopens without loading the plugin",
+          "passed": true,
+          "detail": null
+        }
+      ],
+      "stage": "open_project",
+      "coverage_limits": [
+        "Native editor changes are not exercised.",
+        "Default program only; no cross-version state migration.",
+        "Nonzero FX output verifies signal flow, not the intended DSP effect."
+      ],
+      "scan": {
+        "job": {
+          "id": "plugin-scan",
+          "kind": "scan_plugins",
+          "status": "completed",
+          "progress": 1.0,
+          "error": "Plugin scan complete: 1 modules, 0 failed.",
+          "phase": "",
+          "detail": "",
+          "capture_ms": 0.0,
+          "max_plugin_capture_ms": 0.0,
+          "bytes_written": 0,
+          "bytes_reused": 0,
+          "plugins_captured": 0
+        },
+        "exact_module_entries": [
+          {
+            "id": "344bb90639ad5a1f5dd7847cd592067a3dba854c9eae5e94be8127b31ae0fe81",
+            "available": true,
+            "error": "",
+            "name": "BM-DOPE",
+            "format": "VST3",
+            "is_instrument": true,
+            "version": "2.2.1"
+          }
+        ],
+        "new_catalog_ids": []
+      },
+      "descriptor": {
+        "id": "344bb90639ad5a1f5dd7847cd592067a3dba854c9eae5e94be8127b31ae0fe81",
+        "name": "BM-DOPE",
+        "format": "VST3",
+        "manufacturer": "UJAM",
+        "is_instrument": true
+      },
+      "untested_descriptors": [],
+      "parameter_count": 129,
+      "parameter": {
+        "id": "1",
+        "name": "Mix",
+        "original": 0.545454561710358,
+        "requested": 0.555454561710358,
+        "observed_changed": 0.555454552173615
+      },
+      "render": {
+        "channels": 2,
+        "sample_rate": 48000,
+        "bit_depth": 32,
+        "encoding": 3,
+        "frames": 96000,
+        "finite": true,
+        "peak": 0.016238167881965637,
+        "rms": 0.00269787535431515,
+        "nonzero": true
+      },
+      "elapsed_seconds": 19.491050999997242
+    }
+  ],
+  "executable_sha256": "a9e47c8fddd9e2ef315ee5da3ae69ceb3a9a08f9d7dd1573d02071d0963c093c",
+  "script_sha256": "3be0f85bafbc844014f3e59e418539d8ca5167df9ed14145667d3e18f6be0775"
+}

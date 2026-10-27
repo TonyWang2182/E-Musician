@@ -1,0 +1,535 @@
+{
+  "passed": true,
+  "workspace": "E:\\E-musician\\build\\agent-jobs-smoke\\071a5a82-97a8-432e-8fa2-e7e5cc2f1158",
+  "checks": [
+    {
+      "name": "background WAV import / one revision",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "background MP3 import",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "isolated WAV partial range / fixed tail / master gain",
+      "passed": true,
+      "details": {
+        "frames": 60000,
+        "rms": 0.08859554630135326
+      }
+    },
+    {
+      "name": "cancel render / preserve target / no late write",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "export fingerprint rejects changed destination",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "import revision conflict preserves concurrent edit",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "cancel MIDI preparation leaves project unchanged",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "save fixed snapshot / preserve later dirty edit",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "open revision conflict preserves active project",
+      "passed": true,
+      "details": {
+        "order": "edit_before_open_commit"
+      }
+    },
+    {
+      "name": "background open restores captured project cleanly",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "SMF type0 / channel split / 960 PPQN roundtrip",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "SMF type1 / channel split / 960 PPQN roundtrip",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "MIDI rejects controllers without partial edits",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "MIDI rejects tempo-map without partial edits",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "MIDI rejects truncated without partial edits",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "MIDI rejects smpte without partial edits",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "MIDI rejects type2 without partial edits",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "explicit notes_only imports notes from controller SMF",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "fixed SMF tempo adoption / explicit existing-tempo policy",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "all source files remain byte-identical",
+      "passed": true,
+      "details": null
+    }
+  ],
+  "jobs": [
+    {
+      "id": "364b554312934a2c801bf1073ebd30dc",
+      "kind": "import_audio",
+      "status": "completed",
+      "progress": 1.0,
+      "error": "",
+      "phase": "completed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "b41b4623663f46fb8a9c35d65c5d8cb8",
+      "kind": "import_audio",
+      "status": "completed",
+      "progress": 1.0,
+      "error": "",
+      "phase": "completed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "d557714748cf4b4586336ee908eafd98",
+      "kind": "export_wav",
+      "status": "completed",
+      "progress": 1.0,
+      "error": "",
+      "phase": "completed",
+      "detail": "Project saved",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 384915,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "b87c7f8e16b644789b0922cab44eac7e",
+      "kind": "export_wav",
+      "status": "cancelled",
+      "progress": 0.210954666696489,
+      "error": "Cancelled.",
+      "phase": "cancelled",
+      "detail": "Project saved",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 384914,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "0e74abcf3aab40e6ae10b0aed6bf20e1",
+      "kind": "export_wav",
+      "status": "failed",
+      "progress": 0.99,
+      "error": "The destination changed during export. It was not overwritten.",
+      "phase": "failed",
+      "detail": "Project saved",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 384914,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "7f2da05e5e9f4ea79c3a9518950f3a42",
+      "kind": "import_midi",
+      "status": "conflict",
+      "progress": 1.0,
+      "error": "The project changed while this task was running. Its result was not applied.",
+      "phase": "conflict",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "a4c3fa8dbbcc405b9b6a411795483757",
+      "kind": "import_midi",
+      "status": "cancelled",
+      "progress": 0.0,
+      "error": "Cancelled.",
+      "phase": "cancelled",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "ecdc5f18027c4c1a8ea803371d8953ea",
+      "kind": "import_audio",
+      "status": "completed",
+      "progress": 1.0,
+      "error": "",
+      "phase": "completed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "35c6bce09e554e1288ac867466e6e770",
+      "kind": "save_project",
+      "status": "completed",
+      "progress": 1.0,
+      "error": "",
+      "phase": "completed",
+      "detail": "Confirming saved project",
+      "capture_ms": 0.138000003993511,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 98304928,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "0292d19199f44543a320fb598e2bb772",
+      "kind": "open_project",
+      "status": "conflict",
+      "progress": 1.0,
+      "error": "The project changed while this task was running. Its result was not applied.",
+      "phase": "conflict",
+      "detail": "Project data ready",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "2f8ceb61f9434b5d9eab02675f7a7b6b",
+      "kind": "open_project",
+      "status": "completed",
+      "progress": 1.0,
+      "error": "",
+      "phase": "completed",
+      "detail": "Project data ready",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "73bf4d6ee5d7471286c2d1a3cea7d325",
+      "kind": "import_midi",
+      "status": "completed",
+      "progress": 1.0,
+      "error": "",
+      "phase": "completed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "57056cb42e7c4485a6a5c36a615b5987",
+      "kind": "export_midi",
+      "status": "completed",
+      "progress": 1.0,
+      "error": "",
+      "phase": "completed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "0d5f1612664f4d9c992cfedf450dcb19",
+      "kind": "import_midi",
+      "status": "completed",
+      "progress": 1.0,
+      "error": "",
+      "phase": "completed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "ceb9de37eec746dcb25693d8a9dda61f",
+      "kind": "export_midi",
+      "status": "completed",
+      "progress": 1.0,
+      "error": "",
+      "phase": "completed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "a46a9c8262624335923a2cf526128e12",
+      "kind": "import_midi",
+      "status": "failed",
+      "progress": 0.0,
+      "error": "MIDI contains controllers, program changes, expression or unsupported metadata. Use notes_only explicitly to import only notes.",
+      "phase": "failed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "9ed67fca4d3e47d58cf236ef5fbc881e",
+      "kind": "import_midi",
+      "status": "failed",
+      "progress": 0.0,
+      "error": "Tempo maps are not supported. Use notes_only to import beat positions at the project tempo.",
+      "phase": "failed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "3da800f70544450f825cc85b1cf850e8",
+      "kind": "import_midi",
+      "status": "failed",
+      "progress": 0.0,
+      "error": "Malformed or truncated MIDI event stream.",
+      "phase": "failed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "bf0e5634bfbf48e6ab7bc385d35f0f1a",
+      "kind": "import_midi",
+      "status": "failed",
+      "progress": 0.0,
+      "error": "Only complete SMF 0/1 files with PPQN timing and at most 256 source tracks are supported.",
+      "phase": "failed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "529de5a0a07c46b5b33b55b3ac03edc0",
+      "kind": "import_midi",
+      "status": "failed",
+      "progress": 0.0,
+      "error": "Only complete SMF 0/1 files with PPQN timing and at most 256 source tracks are supported.",
+      "phase": "failed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "0b2fc8f51c2240a5b81f4a44a371606a",
+      "kind": "import_midi",
+      "status": "completed",
+      "progress": 1.0,
+      "error": "",
+      "phase": "completed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "2d6e752755c24d6792b2a7519091cc1b",
+      "kind": "import_midi",
+      "status": "completed",
+      "progress": 1.0,
+      "error": "",
+      "phase": "completed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "829413bb690e44219b8003e5ec6a8c45",
+      "kind": "import_midi",
+      "status": "failed",
+      "progress": 1.0,
+      "error": "MIDI tempo differs from this project. Use notes_only to import at the current project tempo.",
+      "phase": "failed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    },
+    {
+      "id": "02f410b2178e4890be5e5db5caea96e5",
+      "kind": "import_midi",
+      "status": "completed",
+      "progress": 1.0,
+      "error": "",
+      "phase": "completed",
+      "detail": "",
+      "capture_ms": 0.0,
+      "max_plugin_capture_ms": 0.0,
+      "bytes_written": 0,
+      "bytes_reused": 0,
+      "plugins_captured": 0
+    }
+  ],
+  "observations": [
+    {
+      "case": "open versus rename",
+      "job_id": "0292d19199f44543a320fb598e2bb772",
+      "before_project_id": "e0c2fe64b4d745adac97cf7685c4814d",
+      "before_revision": 9,
+      "saved_revision": 8,
+      "edit_response": {
+        "request_id": "840ce444-6231-4662-85f5-26030503b910",
+        "status": "completed",
+        "project_id": "e0c2fe64b4d745adac97cf7685c4814d",
+        "revision": 10,
+        "result": null,
+        "error": ""
+      },
+      "job_after_edit": {
+        "id": "0292d19199f44543a320fb598e2bb772",
+        "kind": "open_project",
+        "status": "conflict",
+        "progress": 1.0,
+        "error": "The project changed while this task was running. Its result was not applied.",
+        "phase": "conflict",
+        "detail": "Project data ready",
+        "capture_ms": 0.0,
+        "max_plugin_capture_ms": 0.0,
+        "bytes_written": 0,
+        "bytes_reused": 0,
+        "plugins_captured": 0
+      },
+      "order": "edit_before_open_commit",
+      "after": {
+        "revision": 10,
+        "dirty": true,
+        "music": {
+          "project_id": "e0c2fe64b4d745adac97cf7685c4814d",
+          "bpm": 120.0,
+          "numerator": 4,
+          "denominator": 4,
+          "duration_seconds": 512.0,
+          "looping": false,
+          "loop_start_seconds": 0.0,
+          "loop_end_seconds": 0.0,
+          "master_gain_db": -6.0,
+          "tracks": [
+            {
+              "id": "e5453986ff8940bdb2d2030acffe068f",
+              "name": "Keep this edit",
+              "kind": "audio",
+              "gain_db": -9.0,
+              "pan": 0.0,
+              "muted": false,
+              "solo": false,
+              "clips": [
+                {
+                  "id": "055ae2899b90403ea22be180ba0389c5",
+                  "asset_id": "00475314e8d142b69f76aa3373612c8e",
+                  "kind": "audio",
+                  "start_seconds": 0.0,
+                  "source_offset": 0.0,
+                  "duration_seconds": 512.0,
+                  "start_beats": 0.0,
+                  "length_beats": 4.0,
+                  "fade_in_seconds": 0.0,
+                  "fade_out_seconds": 0.0,
+                  "note_count": 0,
+                  "controller_count": 0
+                }
+              ],
+              "clip_count": 1,
+              "clips_truncated": false,
+              "plugins": [],
+              "input_device_id": "",
+              "output_target_id": "master",
+              "armed": false,
+              "monitor": "off",
+              "sends": [],
+              "automation": []
+            }
+          ],
+          "master_plugins": [],
+          "master_automation": []
+        }
+      }
+    }
+  ],
+  "elapsed_seconds": 10.931019399999059
+}

@@ -1,0 +1,23 @@
+{
+  "status": "passed_with_limits",
+  "source_fingerprint": "8337032508478607fe47f05ebe8c10154210227cf2f16501c1ca2475901553e7",
+  "launch_record": "20261026T132042.202787Z-ee95a4cd81",
+  "project_copy": "E:\\E-musician\\build\\user-review\\clips-318586745ea8",
+  "observed": [
+    "schema1 CL copy loaded with both real waveforms",
+    "native digit key and Enter moved Drum to 8 seconds",
+    "Undo button once returned to 0 and clean state",
+    "Redo button once returned to 8",
+    "Save wrote schema2 and exact-byte legacy backup",
+    "Open dialog reloaded saved copy with Drum at 8 seconds",
+    "OS mouse drag moved Drum to 43.990216 seconds",
+    "one Undo button restored 8 seconds and saved state"
+  ],
+  "audio_playback_started": false,
+  "keyboard_chords": "not verified: injected Ctrl+A, paste and Ctrl+Z did not reliably trigger; direct digit/Enter and pointer buttons worked; physical keyboard confirmation remains",
+  "limits": [
+    "not physical listening",
+    "not performance or DPI matrix",
+    "no assertion that synthetic chord failure proves an application shortcut defect"
+  ]
+}

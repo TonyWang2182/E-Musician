@@ -1,0 +1,37 @@
+[
+  {
+    "action": "verify-hardware",
+    "status": "passed",
+    "record": "E:\\E-musician\\docs\\builds\\20261026T194106.756363Z-d70e9abda5.json"
+  },
+  {
+    "action": "verify-plugin-notification",
+    "status": "passed",
+    "record": "E:\\E-musician\\docs\\builds\\20261026T194114.338310Z-57144eaf5e.json"
+  },
+  {
+    "action": "verify-save-pipeline",
+    "status": "passed",
+    "record": "E:\\E-musician\\docs\\builds\\20261026T194122.469882Z-0d28c8936e.json"
+  },
+  {
+    "action": "verify-playback-save",
+    "status": "failed",
+    "error": "Command failed with code 1; see E:\\E-musician\\build-logs\\20261026T194130.535270Z-b022c0890a.log"
+  },
+  {
+    "action": "verify-plugin-matrix",
+    "status": "passed",
+    "record": "E:\\E-musician\\docs\\builds\\20261026T194136.857763Z-ddd05c02f8.json"
+  },
+  {
+    "action": "verify-agent-jobs",
+    "status": "passed",
+    "record": "E:\\E-musician\\docs\\builds\\20261026T194302.385626Z-411b22b108.json"
+  },
+  {
+    "action": "verify-midi-performance",
+    "status": "failed",
+    "error": "Command failed with code 1; see E:\\E-musician\\build-logs\\20261026T194314.316584Z-58235959b3.log"
+  }
+]

@@ -1,0 +1,29 @@
+import json,sys,uuid
+from pathlib import Path
+root=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(root/'scripts'))
+from dev import Recorder, CommandFailure
+exe=str(root/'build/bin/Release/E-musician.exe')
+audio=root/'test-projects/CL.assets/08e80dc054ed4e96901c8dc7f1be91ce'
+soak=root/'build/performance'/uuid.uuid4().hex
+plans=[
+ ('verify-final-release','Release',['ctest','--preset','windows-release','--output-on-failure']),
+ ('build-final-debug','Debug',['cmake','--build','--preset','windows-debug','--parallel','2']),
+ ('verify-final-debug','Debug',['ctest','--preset','windows-debug','--output-on-failure']),
+ ('verify-native-save-reopen','Release',[sys.executable,str(root/'.cache/native_reopen_verify.py'),'--run']),
+ ('verify-final-playback-save','Release',[sys.executable,'tests/PlaybackSaveSmoke.py','--exe',exe,'--module','C:/Program Files/Common Files/VST3/Serum.vst3','--audio',str(audio/'2dc8bfd4f9f640f19148cb660061aba3.mp3'),'--audio',str(audio/'dc31cfbb4caf49c49a5ca9e0944295b6.mp3'),'--max-xrun-delta','0']),
+ ('performance-final','Release',[exe,'--performance-test',str(soak),'1800']),
+]
+results=[]
+for action,config,command in plans:
+ if len(sys.argv)>1 and action not in sys.argv[1:]:continue
+ if action=='performance-final':(root/'.cache/final-soak.json').write_text(json.dumps({'directory':str(soak)}),encoding='utf-8')
+ try:
+  result=Recorder(action,config,'Frozen final candidate; production unchanged, probe initialization/first-stop diagnostics only; full 120s warmup and 1800s soak last').execute(command)
+  results.append({'action':action,'status':'passed','record':str(result.record)})
+ except CommandFailure as error:
+  results.append({'action':action,'status':'failed','error':str(error)})
+  (root/'.cache/final-delivery-result.json').write_text(json.dumps(results,indent=2),encoding='utf-8')
+  raise
+ (root/'.cache/final-delivery-result.json').write_text(json.dumps(results,indent=2),encoding='utf-8')
+print(json.dumps(results,indent=2),flush=True)

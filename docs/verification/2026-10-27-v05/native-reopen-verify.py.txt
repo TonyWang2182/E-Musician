@@ -1,0 +1,41 @@
+import hashlib, json, sys, uuid
+from pathlib import Path
+root=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(root/'scripts'))
+from dev import Recorder
+from agent_client import Client
+
+if len(sys.argv)==1:
+    Recorder('verify-native-save-reopen','Release','New process restores the archive saved by actual native buttons and Serum editor').execute([sys.executable,str(Path(__file__).resolve()),'--run'])
+    raise SystemExit(0)
+
+source=root/'build/native-ui/d3297339-b6d4-4f98-911a-53383a94b73c/Native Saved.emproj'
+directory=root/'build/native-reopen'/str(uuid.uuid4());directory.mkdir(parents=True,exist_ok=False)
+exe=root/'build/bin/Release/E-musician.exe'
+report={'passed':False,'source':str(source),'executable_sha256':hashlib.sha256(exe.read_bytes()).hexdigest()}
+before=hashlib.sha256(source.read_bytes()).hexdigest()
+try:
+    with Client(exe,90) as client:
+        report['open']=client.request({'command':'open_project','args':{'path':str(source)}})
+        s=client.state();report['snapshot']=s
+        assert len(s['tracks'])==3 and not s['dirty'] and not s['playing']
+        assert [t['kind'] for t in s['tracks']]==['audio','audio','instrument']
+        assert all(abs(t['clips'][0]['duration_seconds']-394.370612244898)<1e-8 for t in s['tracks'][:2])
+        instrument=s['tracks'][2];assert abs(instrument['pan']-.19)<1e-6
+        assert len(instrument['plugins'])==1 and not instrument['plugins'][0]['missing']
+        notes=client.completed(client.request({'command':'get_clip_notes','args':{'clip_id':instrument['clips'][0]['id']}}))
+        assert notes['total']==16
+        p=client.completed(client.request({'command':'get_plugin_parameters','args':{'plugin_id':instrument['plugins'][0]['id'],'offset':0,'limit':1}}))
+        assert p['parameters'][0]['name']=='MasterVol'
+        assert abs(p['parameters'][0]['value']-.5815789103508)<1e-7
+        report['restored_native_parameter']=p['parameters'][0]
+        report['diagnostics']=client.completed(client.request({'command':'get_save_diagnostics'}))
+        keys=report['diagnostics'];assert keys['current_key']==keys['saved_key']==keys['fresh_content_key']
+        assert not keys['plugin_dirty'] and not keys['pending_plugin_changes']
+    assert before==hashlib.sha256(source.read_bytes()).hexdigest()
+    report['manifest_sha256_before_after']=before
+    report['passed']=True
+    print('PASS native Save As / Serum knob / native Save archive restores in a new process',flush=True)
+finally:
+    (directory/'report.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+    print('Report:',directory/'report.json',flush=True)

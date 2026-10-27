@@ -1,0 +1,6 @@
+{
+  "status": "passed",
+  "checks_passed": 59,
+  "scope": "schema3 DTO/binary persistence, cancellation and schema2 migration; no plugin instantiation or audio decode claim",
+  "workspace": "E:\\E-musician\\build\\smoke\\Debug\\32b2592b47bf\\storage-v3-4b36e16121c24fc4bcfbba38738e477a"
+}

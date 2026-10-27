@@ -1,0 +1,22 @@
+{
+  "schema": 2,
+  "upstream_repository": "https://github.com/Tracktion/tracktion_engine.git",
+  "upstream_commit": "b0c7dd090a56b27fe01bb394617891906eb34daf",
+  "hash_normalization": "utf8-lf",
+  "files": [
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_WaveNode.cpp",
+      "patch": "hq-sinc-seek-phase.patch",
+      "before_sha256_lf": "93a8eb18a677992e36cdc9912e98a0b93ab9e33de38c067e161a17df62b08700",
+      "after_sha256_lf": "f812ffbe31dcdde2eeae1973b0192495bfc9b666cee349394a8230bf1a65f9d3",
+      "patch_sha256_lf": "93244d7afb47b90fddf4c48ffc13f7ba3df3a99aafd574390a1e9808eb368156"
+    },
+    {
+      "path": "modules/tracktion_engine/plugins/external/tracktion_ExternalAutomatableParameter.h",
+      "patch": "external-parameter-automation-echo.patch",
+      "before_sha256_lf": "4c2cbd1eb527da5ce5870a69e49b27f86ebb14ec35169d135b546ad904465b51",
+      "after_sha256_lf": "7636b9652a9e927dce3d5915941968a2c8a4c95bcaef721e357c16722f84d65d",
+      "patch_sha256_lf": "fd2f5cd47516d2827b6cb9128255f62cdd494109057fa9e572c4841d0bb6fe0c"
+    }
+  ]
+}

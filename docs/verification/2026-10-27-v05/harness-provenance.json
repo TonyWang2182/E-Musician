@@ -1,0 +1,22 @@
+{
+  "native-ui-probe.py.txt": {
+    "original_local_path": ".cache/gui_agent_probe.py",
+    "sha256": "6a2e01f0e8ecffdc361b2e9acacaed2981b559c80ca3dccde5864a0c0b1a395e",
+    "purpose": "Exact review copy of the local execution harness, not a repository test entry point"
+  },
+  "native-reopen-verify.py.txt": {
+    "original_local_path": ".cache/native_reopen_verify.py",
+    "sha256": "9982cc5b95c9f98203fba3d8b24b6e2deea5fbb0bdefbed6e6ae64d00ae14d2d",
+    "purpose": "Exact review copy of the local execution harness, not a repository test entry point"
+  },
+  "final-delivery-validation.py.txt": {
+    "original_local_path": ".cache/final-delivery-validation.py",
+    "sha256": "12fd54133481a9ae240f2a24eebf004ed38a02704a24bce00833ac69b74a80fe",
+    "purpose": "Exact review copy of the local execution harness, not a repository test entry point"
+  },
+  "final-integrity.py.txt": {
+    "original_local_path": ".cache/final-integrity.py",
+    "sha256": "780f3e1f2a5c15adcbd857a140507fd379eef53b6403f860d4473847ccb4cb3a",
+    "purpose": "Exact final archival and protection audit harness; not a repository test entry point"
+  }
+}
