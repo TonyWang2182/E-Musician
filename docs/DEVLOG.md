@@ -2173,3 +2173,105 @@ Arm/Monitor切换与实体键盘实时输入尚未得到分项确认，已给出
 用户确认“录音正常，但保存或重开有问题”；随后明确保存位置对话框可以打开，确认路径后显示“Save failed - retry”。因此录音已获人工通过，保存尚未通过，重开未进入验收；不是已经证实的按钮未触发或界面冻结。
 
 已要求保持未保存工程打开、不要覆盖原测试文件，并读取Save failed标签悬浮提示/底部完整错误。源码确认该标签对应保存任务失败或受理失败，完整saveError已放在tooltip和底部。只读审查列出插件无效参数、捕获期间状态代次冲突、录音数据校验等候选，尚无实际错误文本，不把这些候选写成根因，也不跳过参数或强制清dirty。本轮未改代码、未构建、未启动测试或操作GUI。
+
+### 2026-10-27T18:03:56+08:00 · build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 43.024s.
+- Command: `cmake --build --preset windows-release --parallel 2 --target EMusician`
+- Context: Test-only reproduction: same-sample note on/off and held note through actual hosted MIDI recording; new headless production test avoids physical devices
+- Source SHA-256: `e48a9de34ea7c9d2ce9e217e8097e2f8eea35c5cbd61ac23230b3158e8c7cad4`; Git HEAD: `8a436551f77bba2979982c222a74bb59ec144153`.
+- [Record](builds/20261027T100356.650637Z-88b09f8b58.json) · [Raw log](../build-logs/20261027T100356.650637Z-88b09f8b58.log)
+- [Exact process output](../build-logs/20261027T100356.650637Z-88b09f8b58.raw.log)
+
+### 2026-10-27T18:05:34+08:00 · reproduce-recorded-zero-note · failed
+
+- Config: Release; exit code: 1; elapsed: 7.998s.
+- Command: `E:\E-musician\build\bin\Release\E-musician.exe --production-test E:\E-musician\build\recording-boundary\v052-before`
+- Context: Synthetic hosted MIDI same-sample note edges; expected pre-fix failure; no physical inputs or GUI
+- Source SHA-256: `e48a9de34ea7c9d2ce9e217e8097e2f8eea35c5cbd61ac23230b3158e8c7cad4`; Git HEAD: `8a436551f77bba2979982c222a74bb59ec144153`.
+- [Record](builds/20261027T100534.579713Z-f75dc24dae.json) · [Raw log](../build-logs/20261027T100534.579713Z-f75dc24dae.log)
+- [Exact process output](../build-logs/20261027T100534.579713Z-f75dc24dae.raw.log)
+- Error: Command failed with code 1; see E:\E-musician\build-logs\20261027T100534.579713Z-f75dc24dae.log
+
+### 2026-10-27T18:08:57+08:00 · build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 46.235s.
+- Command: `cmake --build --preset windows-release --parallel 2 --target EMusician`
+- Context: 0.5.2: normalize new MIDI take timing in the existing Undo transaction, preserve late events, export positive sub-tick notes, and report exact invalid note values
+- Source SHA-256: `b33d4357dc86b513f803cfb0ab30af35d32aeea8d184712c332d40842343fda6`; Git HEAD: `8a436551f77bba2979982c222a74bb59ec144153`.
+- [Record](builds/20261027T100857.520845Z-83dd06a1fb.json) · [Raw log](../build-logs/20261027T100857.520845Z-83dd06a1fb.log)
+- [Exact process output](../build-logs/20261027T100857.520845Z-83dd06a1fb.raw.log)
+
+### 2026-10-27T18:10:00+08:00 · verify-recorded-note-boundaries · failed
+
+- Config: Release; exit code: 1; elapsed: 8.269s.
+- Command: `E:\E-musician\build\bin\Release\E-musician.exe --production-test E:\E-musician\build\recording-boundary\v052-after`
+- Context: Fixed hosted zero-duration and held notes, late event boundaries, Undo/Redo, save/reopen and positive sub-tick SMF; no physical inputs or GUI
+- Source SHA-256: `b33d4357dc86b513f803cfb0ab30af35d32aeea8d184712c332d40842343fda6`; Git HEAD: `8a436551f77bba2979982c222a74bb59ec144153`.
+- [Record](builds/20261027T101000.828618Z-025b3503f2.json) · [Raw log](../build-logs/20261027T101000.828618Z-025b3503f2.log)
+- [Exact process output](../build-logs/20261027T101000.828618Z-025b3503f2.raw.log)
+- Error: Command failed with code 1; see E:\E-musician\build-logs\20261027T101000.828618Z-025b3503f2.log
+
+### 2026-10-27T18:12:15+08:00 · build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 31.163s.
+- Command: `cmake --build --preset windows-release --parallel 2 --target EMusician`
+- Context: 0.5.2 regression caught controller endpoint floating-point cancellation; retain strict bounds with bounded upward adjustment, and reject unrepresentable export ticks before integer conversion
+- Source SHA-256: `7c17c049c6cc29255eab798e02635eae740414b0003c3fb3e3df9d10c91a91ec`; Git HEAD: `8a436551f77bba2979982c222a74bb59ec144153`.
+- [Record](builds/20261027T101215.033413Z-d61706853c.json) · [Raw log](../build-logs/20261027T101215.033413Z-d61706853c.log)
+- [Exact process output](../build-logs/20261027T101215.033413Z-d61706853c.raw.log)
+
+### 2026-10-27T18:13:16+08:00 · verify-recorded-note-boundaries · succeeded
+
+- Config: Release; exit code: 0; elapsed: 18.962s.
+- Command: `E:\E-musician\build\bin\Release\E-musician.exe --production-test E:\E-musician\build\recording-boundary\v052-final`
+- Context: Corrected floating endpoint; hosted recording, Undo/Redo, save/reopen, late controllers, one-tick export and overflow rejection
+- Source SHA-256: `7c17c049c6cc29255eab798e02635eae740414b0003c3fb3e3df9d10c91a91ec`; Git HEAD: `8a436551f77bba2979982c222a74bb59ec144153`.
+- [Record](builds/20261027T101316.664999Z-f12a1392da.json) · [Raw log](../build-logs/20261027T101316.664999Z-f12a1392da.log)
+- [Exact process output](../build-logs/20261027T101316.664999Z-f12a1392da.raw.log)
+
+## 2026-10-27 — 0.5.2录音时间边界修复
+
+- 用户截图给出MIDI音符数据校验错误，MIDI导出也失败；全选升/降半音触发现有编辑器边界修正后另存成功。只读检查50音符中23个为0.001拍，原始未保存快照不可恢复，不把修改后数据当原始证据。用户已保存并关闭，原工程只读保留。
+- 真实合成Hosted录音确定复现零长度note与同一保存错误；基线失败f75dc24dae保留。录音收尾在原Undo事务内补最短有效时长并保留尾部事件，导出允许正长度音符量化到一刻度，存储错误补具体数值。
+- 首修专项025b3503f2抓到控制器尾端浮点回算，修正后专项f12a1392da通过145项，新增溢出/非法值拒绝。完整Release回归1609c807e7进行中；构建期间源码冻结。详见verification/2026-10-27-v052/RESULTS.md。
+
+### 2026-10-27T18:13:45+08:00 · test · failed
+
+- Config: Release; exit code: 8; elapsed: 166.892s.
+- Command: `ctest --preset windows-release --output-on-failure`
+- Context: 0.5.2 full relevant Release regression after hosted zero/short/late-note fixes; user GUI remains closed, no new plugin matrix or long performance run
+- Source SHA-256: `7c17c049c6cc29255eab798e02635eae740414b0003c3fb3e3df9d10c91a91ec`; Git HEAD: `8a436551f77bba2979982c222a74bb59ec144153`.
+- [Record](builds/20261027T101345.836004Z-1609c807e7.json) · [Raw log](../build-logs/20261027T101345.836004Z-1609c807e7.log)
+- [Exact process output](../build-logs/20261027T101345.836004Z-1609c807e7.raw.log)
+- Error: Command failed with code 8; see E:\E-musician\build-logs\20261027T101345.836004Z-1609c807e7.log
+
+### 2026-10-27T18:20:27+08:00 · build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 30.653s.
+- Command: `cmake --build --preset windows-release --parallel 2 --target EMusician`
+- Context: Keep deferred native take updates inside Record take until the next explicit command closes it; preserve delayed single-Undo assertion and add Undo history evidence
+- Source SHA-256: `4f47112f23e3cda47505af8f92bfa6f2425adf693429ef596717aa7f6b8a78ad`; Git HEAD: `8a436551f77bba2979982c222a74bb59ec144153`.
+- [Record](builds/20261027T102027.131228Z-31c021b764.json) · [Raw log](../build-logs/20261027T102027.131228Z-31c021b764.log)
+- [Exact process output](../build-logs/20261027T102027.131228Z-31c021b764.raw.log)
+
+### 2026-10-27T18:21:22+08:00 · test · succeeded
+
+- Config: Release; exit code: 0; elapsed: 71.359s.
+- Command: `ctest --preset windows-release --output-on-failure`
+- Context: 0.5.2 final regression with delayed-recording Undo transaction boundary fix; original one-Undo and save/reopen assertions unchanged, histories archived
+- Source SHA-256: `4f47112f23e3cda47505af8f92bfa6f2425adf693429ef596717aa7f6b8a78ad`; Git HEAD: `8a436551f77bba2979982c222a74bb59ec144153`.
+- [Record](builds/20261027T102122.338120Z-85e9527585.json) · [Raw log](../build-logs/20261027T102122.338120Z-85e9527585.log)
+- [Exact process output](../build-logs/20261027T102122.338120Z-85e9527585.raw.log)
+
+## 2026-10-27 — 完整回归发现并修正录音Undo事务边界
+
+- 首次完整Release回归1609c807e7为4/5，生产部分在全局消息泵之后的“单次Undo移除整段录音”失败；先前单独生产专项通过不替代此完整环境失败。
+- finishRecording原调用recordEdit会立即切到新事务，收尾后延迟native写入可能进入空的新事务。只对该路径改为recordEdit(false)，保留Record take直到下一次明确编辑/手势/保存等正常入口建立边界；其他调用默认行为不变。新增泵前后Undo历史及片段数量报告，未移动消息泵、未移除单次Undo断言。
+- 构建31c021b764成功，完整Release回归85e9527585进行中。只读复核确认后续正常编辑有事务边界；此改动不宣称所有晚到保存/下一编辑之后的native写入问题已解决。
+
+## 2026-10-27 — 0.5.2自动回归完成并交人工复测
+
+- 最终构建31c021b764通过；完整Release检查85e9527585为5/5（70.97秒），生产146项。录音Undo历史泵前/后均为Record take，单次Undo后音频和MIDI片段均为0，Redo/保存重开断言保留并通过。首次4/5与中间失败不删改。
+- 源码4f47112f23e3cda47505af8f92bfa6f2425adf693429ef596717aa7f6b8a78ad，EXE5c88bc658429ba9f07b84f99a0545168e4e57b9d52d7b9f422ffd038b665f899；原救回工程2文件SHA-256不变。对应PDB/EXE归档本地忽略目录，合成证据及摘要见verification/2026-10-27-v052。
+- 已通知用户打开0.5.2，在救回工程回放后新录、直接另存、导出MIDI并重开。人工结果待反馈；不宣称新版本实际键盘/Keyscape保存重开已经验证。本轮不再运行测试占用设备。

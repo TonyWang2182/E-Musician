@@ -6,7 +6,7 @@ Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。本轮先把音�
 
 新工程默认 **120 BPM、4/4**。不提供和弦工具、乐句模板或自带音源；MIDI 通过用户安装的 Windows x64 VST2/VST3 乐器发声。独立运行不需要 Ableton、模型服务或 API 密钥。
 
-当前修复分支为 **0.5.1 Keyscape兼容候选**：Release构建及相关自动检查通过，用户已确认MIDI编写、播放与Keyscape使用正常；实体键盘输入与Arm/Monitor切换也已获用户确认正常；短MIDI录音已获用户确认，但保存报错，具体错误待定位，重开未验，见[候选记录](docs/verification/2026-10-27-v051/RESULTS.md)。下方0.5证据保留原版本范围，不等同于候选已验收。
+当前修复分支为 **0.5.2 录音MIDI保存修复候选**：0.5.1的Keyscape播放、实体键盘与Arm/Monitor已获用户确认；0.5.2修正录音时间边界、短音符导出及录音收尾Undo，验证进度见[本轮记录](docs/verification/2026-10-27-v052/RESULTS.md)。真实新录音、直接保存和重开仍待用户验收。
 
 ## 打开与开发
 

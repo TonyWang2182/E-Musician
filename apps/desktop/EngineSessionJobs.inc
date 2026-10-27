@@ -172,8 +172,17 @@ template<class J> juce::Result writeJobMidi(const J& j,const juce::File& file,co
         for(const auto& c:track.clips)if(c.kind=="midi"&&(ids.empty()||ids.contains(c.id))){
           for(const auto& n:c.notes){
             if(j->cancel.load())return juce::Result::fail("Cancelled.");
-            auto begin=std::llround((c.startBeats+n.startBeats-origin)*ppqn);auto end=std::llround((c.startBeats+n.startBeats+n.lengthBeats-origin)*ppqn);
-            if(begin<0||end<=begin||end>std::numeric_limits<int>::max())return juce::Result::fail("A note cannot be represented safely at 960 PPQN.");
+            if(!std::isfinite(n.startBeats)||!std::isfinite(n.lengthBeats)||n.startBeats<0||n.lengthBeats<=0)
+                return juce::Result::fail("A note cannot be represented safely at 960 PPQN.");
+            const auto beginTicks=(c.startBeats+n.startBeats-origin)*ppqn, endTicks=(c.startBeats+n.startBeats+n.lengthBeats-origin)*ppqn;
+            if(!std::isfinite(beginTicks)||!std::isfinite(endTicks)||beginTicks<0||endTicks<beginTicks
+                ||beginTicks>=std::numeric_limits<int>::max()||endTicks>std::numeric_limits<int>::max())
+                return juce::Result::fail("A note cannot be represented safely at 960 PPQN.");
+            auto begin=std::llround(beginTicks), end=std::llround(endTicks);
+            if(end<begin||begin>=std::numeric_limits<int>::max())return juce::Result::fail("A note cannot be represented safely at 960 PPQN.");
+            // A valid positive duration can quantise to the same tick at both edges.
+            // Preserve the event with a one-tick note-off instead of rejecting export.
+            end=std::max(end,begin+1);
             auto on=juce::MidiMessage::noteOn(n.channel,n.pitch,juce::uint8(n.velocity));on.setTimeStamp(double(begin));events.push_back(on);
             auto off=juce::MidiMessage::noteOff(n.channel,n.pitch);off.setTimeStamp(double(end));events.push_back(off);hasNotes=true;
           }

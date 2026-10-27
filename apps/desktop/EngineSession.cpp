@@ -210,7 +210,10 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
             const auto source=wave->state[emSource].toString();if(source.isEmpty()||prepared.contains(source))continue;
             AudioInfo info;if(auto r=inspectAudio(juce::File(source),info);r.wasOk())prepared[source]=info;else preparationError=r.getErrorMessage();
         }
-        rebuild(*edit,bindings);refreshRange();choose(selected);recordEdit();status=preparationError.isEmpty()?"Recording added. Undo removes the complete take.":"Recorded file needs attention: "+preparationError;
+        // Keep delayed native take updates in the same Undo transaction until
+        // the next explicit edit/gesture/save closes it. A fresh empty transaction
+        // here would let asynchronous clip updates hide the complete take Undo.
+        rebuild(*edit,bindings);refreshRange();choose(selected);recordEdit(false);status=preparationError.isEmpty()?"Recording added. Undo removes the complete take.":"Recorded file needs attention: "+preparationError;
         publish("recording_completed",recording.state());
     }
     juce::ValueTree metadata(te::Edit& t)const{return t.state.getOrCreateChildWithName("EM_PROJECT",nullptr);}
@@ -294,7 +297,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     juce::Result preflight(std::uint64_t expected){if(expected!=guard.revision())return fail("The project changed. Refresh and try again.");if(guard.revision()>=std::uint64_t(std::numeric_limits<juce::int64>::max())-1)return fail("Project revision limit reached.");return juce::Result::ok();}
     void publish(const juce::String& type,juce::var data={}){events.add(object({{"sequence",juce::int64(++eventSequence)},{"type",type},{"project_id",juce::String(guard.projectId())},{"revision",juce::int64(guard.revision())},{"data",data}}));if(events.size()>1024)events.removeRange(0,events.size()-1024);}
     void advanceRevision(){guard=commands::RevisionGuard(guard.projectId(),guard.revision()+1);}
-    void recordEdit(){advanceRevision();currentKey=calculateCurrentKey();cachedRevision=std::numeric_limits<std::uint64_t>::max();publish("project_changed");if(!gesture)edit->getUndoManager().beginNewTransaction();}
+    void recordEdit(bool closeTransaction=true){advanceRevision();currentKey=calculateCurrentKey();cachedRevision=std::numeric_limits<std::uint64_t>::max();publish("project_changed");if(closeTransaction&&!gesture)edit->getUndoManager().beginNewTransaction();}
     Binding* find(const juce::String& id){auto i=std::find_if(bindings.begin(),bindings.end(),[&](const auto& t){return t.id==id;});return i==bindings.end()?nullptr:&*i;}
     ClipBinding* findClip(const juce::String& id,Binding** parent=nullptr){for(auto& t:bindings)for(auto& c:t.clips)if(c.id==id){if(parent)*parent=&t;return &c;}return nullptr;}
     void choose(const juce::String& tid,const juce::String& cid={}){auto* t=find(tid);if(!t&&!bindings.empty())t=&bindings.front();selected=t?t->id:juce::String();selectedClip={};if(t&&!t->clips.empty()){auto i=std::find_if(t->clips.begin(),t->clips.end(),[&](const auto& c){return c.id==cid;});selectedClip=i==t->clips.end()?t->clips.front().id:i->id;}}

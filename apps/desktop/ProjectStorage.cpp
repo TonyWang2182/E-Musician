@@ -288,7 +288,11 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
                         || !std::isfinite(note.lengthBeats) || note.startBeats < 0.0 || note.lengthBeats <= 0.0
                         || !(note.startBeats + note.lengthBeats > note.startBeats)
                         || note.startBeats + note.lengthBeats > clip.lengthBeats + 1.0e-9)
-                        return Result::fail("A MIDI note has an invalid pitch, velocity, channel, or clip-relative beat range.");
+                        return Result::fail("A MIDI note has an invalid pitch, velocity, channel, or clip-relative beat range. Track: "
+                            + track.name + ", clip: " + clip.id + ", note: " + note.id
+                            + "; pitch=" + String(note.pitch) + ", velocity=" + String(note.velocity) + ", channel=" + String(note.channel)
+                            + ", start=" + String(note.startBeats, 12) + ", length=" + String(note.lengthBeats, 12)
+                            + ", clip length=" + String(clip.lengthBeats, 12));
                 }
             } else return Result::fail("Unsupported clip kind.");
         }

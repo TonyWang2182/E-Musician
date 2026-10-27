@@ -17,7 +17,7 @@ public:
         const auto args = juce::StringArray::fromTokens(getCommandLineParameters(), true);
         return args.contains("--smoke-test") || args.contains("--review-project") || args.contains("--control-stdio")
             || args.contains("--plugin-scan-worker") || args.contains("--render-worker") || args.contains("--performance-test")
-            || args.contains("--control-output-probe-child") || args.contains("--plugin-notification-test");
+            || args.contains("--control-output-probe-child") || args.contains("--plugin-notification-test") || args.contains("--production-test");
     }
     void initialise(const juce::String& commandLine) override
     {
@@ -41,6 +41,15 @@ public:
                 }
             }else if(args.contains("--control-output-probe")||args.contains("--control-output-probe-child")){
                 setApplicationReturnValue(2);quit();return;
+            }
+            if (args.contains("--production-test")) {
+                if (args.size() != 2 || args[0] != "--production-test" || !juce::File::isAbsolutePath(args[1])) {
+                    setApplicationReturnValue(2); quit(); return;
+                }
+                session = std::make_unique<EngineSession>(false);
+                const auto result = session->runProductionSmokeTest(juce::File(args[1]));
+                if (result.failed()) std::cerr << result.getErrorMessage() << std::endl;
+                setApplicationReturnValue(result.wasOk() ? 0 : 1); quit(); return;
             }
             session = std::make_unique<EngineSession>();
             const int notificationTest=args.indexOf("--plugin-notification-test");
@@ -99,7 +108,7 @@ public:
             }
         } catch (const std::exception& e) {
             std::cerr << e.what() << std::endl;
-            if (!smoke && !review && !args.contains("--control-stdio"))
+            if (!smoke && !review && !args.contains("--control-stdio") && !args.contains("--production-test"))
                 juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Unable to start", e.what());
             setApplicationReturnValue(1);
             quit();

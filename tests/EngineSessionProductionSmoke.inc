@@ -140,6 +140,10 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
             juce::AudioBuffer<float> input(2, 256); for (int ch = 0; ch < 2; ++ch) for (int i = 0; i < 256; ++i) input.setSample(ch, i, 0.2f * float(std::sin((block * 256 + i) * 0.035)));
             juce::MidiBuffer midi; if (block == 4) midi.addEvent(juce::MidiMessage::noteOn(1, 60, juce::uint8(100)), 0);
             if (block == 12) midi.addEvent(juce::MidiMessage::controllerEvent(1, 64, 127), 0);
+            // Real keyboards can deliver matching note edges with the same timestamp.
+            if (block == 20) { midi.addEvent(juce::MidiMessage::noteOn(1, 62, juce::uint8(75)), 10); midi.addEvent(juce::MidiMessage::noteOff(1, 62), 10); }
+            if (block == 240) midi.addEvent(juce::MidiMessage::noteOn(1, 64, juce::uint8(85)), 1); // Held across Stop.
+
             if (block == 90) { midi.addEvent(juce::MidiMessage::noteOff(1, 60), 0); midi.addEvent(juce::MidiMessage::controllerEvent(1, 64, 0), 1); }
             hosted.processBlock(input, midi);
             if (block == 64) { isolated.impl->timerCallback(); check(isolated.snapshot().recording, "empty arrangement timer does not stop recording at duration zero"); }
@@ -165,8 +169,73 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
         }
         check(recordedMidi && recordedMidi->getSequence().getNumNotes() >= 1 && recordedMidi->getSequence().getNumControllerEvents() >= 2, "MIDI recording preserves notes and sustain controller");
         check(recordedMidi->getSequence().getNotes()[0]->state["emId"].toString().isNotEmpty(), "recorded MIDI note has stable ID");
+        const auto capturedTake = isolated.impl->capture();
+        juce::Array<juce::var> noteEdges;
+        for (const auto& t : capturedTake.tracks) for (const auto& c : t.clips) for (const auto& n : c.notes)
+            noteEdges.add(object({ {"pitch", n.pitch}, {"start", n.startBeats}, {"length", n.lengthBeats}, {"clip_length", c.lengthBeats} }));
+        check(directory.getChildFile("recording-note-boundaries.json").replaceWithText(juce::JSON::toString(object({ {"notes", noteEdges}, {"validation", storage::validate(capturedTake).getErrorMessage()} }), true)), "write synthetic recording boundary evidence");
+        bool instant = false, held = false;
+        for (auto* n : recordedMidi->getSequence().getNotes()) {
+            if (n->getNoteNumber() == 62) { instant = true; check(n->getLengthBeats().inBeats() >= 1.0 / 960.0 - 1.0e-12, "same-sample note edges retain an exportable positive duration"); }
+            if (n->getNoteNumber() == 64) { held = true; check(n->getLengthBeats().inBeats() > 0, "held note ends safely when recording stops"); }
+        }
+        check(instant && held, "short and held recording notes are preserved");
+        okay(storage::validate(capturedTake), "recorded notes satisfy persistence boundaries");
+        const auto takeUndoBeforePump = recordingEdit->getUndoManager().getUndoDescriptions().joinIntoString(" | ");
+        {
+            // A late native event must not be lost when the engine resets take
+            // length to the Stop boundary. Use a nonzero timeline origin too.
+            EngineSession boundary(false);
+            command(boundary, "create_track", object({ {"kind", "instrument"} }));
+            command(boundary, "create_midi_clip", object({ {"track_id", boundary.snapshot().tracks[0].id}, {"start_beats", 4.0}, {"length_beats", 1.0} }));
+            auto* native = dynamic_cast<te::MidiClip*>(te::getAudioTracks(*boundary.impl->edit)[0]->getClips()[0]);
+            auto& sequence = native->getSequence(); auto* um = &boundary.impl->edit->getUndoManager();
+            auto* late = sequence.addNote(67, te::BeatPosition::fromBeats(1.2), te::BeatDuration::fromBeats(0.3), 90, 0, um);
+            late->state.setProperty("emId", "late-native-note", um);
+            auto* tiny = sequence.addNote(69, te::BeatPosition::fromBeats(0.2506), te::BeatDuration::fromBeats(0), 80, 0, um);
+            tiny->state.setProperty("emId", "short-native-note", um);
+            auto* pedal = sequence.addControllerEvent(te::BeatPosition::fromBeats(1.6), 64, 0, um);
+            pedal->state.setProperty("emId", "late-pedal", um);
+            check(storage::validate(boundary.impl->capture()).failed(), "native late/zero fixture reproduces strict persistence rejection");
+            production::normaliseRecordedMidiTiming(*native);
+            boundary.impl->recordEdit();
+            const auto repaired = boundary.impl->capture(); const auto& fixed = repaired.tracks[0].clips[0];
+            okay(storage::validate(repaired), "normalised native take satisfies strict persistence");
+            check(fixed.startBeats == 4 && std::abs(fixed.lengthBeats - 1.6) < 1.0e-9 && fixed.sourceOffset == 0, "late event extends only the end at a nonzero timeline origin");
+            check(fixed.notes.size() == 2 && fixed.controllers.size() == 1 && late->getStartBeat().inBeats() == 1.2 && late->getVelocity() == 90, "normalisation retains every note/controller, onset and velocity");
+            const auto eventKey = contentKey(repaired); production::normaliseRecordedMidiTiming(*native);
+            check(contentKey(boundary.impl->capture()) == eventKey, "recording normalisation is idempotent");
+            // The user's recovered take contains positive 0.001-beat notes.
+            // Those remain valid in projects even if both SMF edges round alike.
+            tiny->setStartAndLength(te::BeatPosition::fromBeats(0.2506), te::BeatDuration::fromBeats(0.0001), um);
+            boundary.impl->recordEdit();
+            const auto midiFile = workspace.getChildFile("short-positive.mid");
+            command(boundary, "export_midi", object({ {"path", midiFile.getFullPathName()} }));
+            const auto deadline = juce::Time::getMillisecondCounterHiRes() + 5000;
+            while (boundary.hasActiveJobs() && juce::Time::getMillisecondCounterHiRes() < deadline) { juce::MessageManager::getInstance()->runDispatchLoopUntil(5); boundary.impl->timerCallback(); }
+            auto exported = boundary.snapshot(); check(!exported.jobs.empty() && exported.jobs.back().status == "completed" && midiFile.existsAsFile(), "positive sub-tick MIDI note exports successfully");
+            juce::FileInputStream input(midiFile); juce::MidiFile file; check(file.readFrom(input), "read generated short-note MIDI");
+            bool shortRoundTrip = false;
+            for (int track = 0; track < file.getNumTracks(); ++track) { auto seq = *file.getTrack(track); seq.updateMatchedPairs(); for (int index = 0; index < seq.getNumEvents(); ++index) { auto* event = seq.getEventPointer(index); if (event->message.isNoteOn() && event->message.getNoteNumber() == 69) { check(event->noteOffObject != nullptr && event->noteOffObject->message.getTimeStamp() - event->message.getTimeStamp() == 1, "sub-tick note survives as exactly one MIDI tick"); shortRoundTrip = true; } } }
+            check(shortRoundTrip, "short exported note was not dropped");
+            auto invalidExport = boundary.impl->capture(); invalidExport.tracks[0].clips[0].notes[0].lengthBeats = std::numeric_limits<double>::max();
+            auto exportProbe = std::make_shared<Impl::Job>();
+            check(writeJobMidi(exportProbe, workspace.getChildFile("overflow.mid"), invalidExport, {}).failed(), "unrepresentable MIDI duration is rejected before integer conversion");
+            invalidExport.tracks[0].clips[0].notes[0].lengthBeats = 0;
+            check(writeJobMidi(exportProbe, workspace.getChildFile("zero.mid"), invalidExport, {}).failed(), "zero-length stored data is not silently accepted by MIDI export");
+
+            tiny->state.setProperty(te::IDs::l, -1.0, um); production::normaliseRecordedMidiTiming(*native);
+            check(double(tiny->state[te::IDs::l]) == -1.0 && storage::validate(boundary.impl->capture()).failed(), "negative native duration is not repaired into a valid note");
+        }
         const auto recordedFile = recordedAudio->getOriginalFile();
-        command(isolated, "undo"); check(recordingTracks[0]->getClips().isEmpty() && recordingTracks[1]->getClips().isEmpty(), "one public Undo removes the whole simultaneous take");
+        const auto takeUndoAfterPump = recordingEdit->getUndoManager().getUndoDescriptions().joinIntoString(" | ");
+        command(isolated, "undo");
+        check(directory.getChildFile("recording-undo-after-dispatch.json").replaceWithText(juce::JSON::toString(object({
+            {"before_dispatch", takeUndoBeforePump}, {"after_dispatch", takeUndoAfterPump},
+            {"after_undo", recordingEdit->getUndoManager().getUndoDescriptions().joinIntoString(" | ")},
+            {"audio_clips_after_undo", recordingTracks[0]->getClips().size()}, {"midi_clips_after_undo", recordingTracks[1]->getClips().size()}
+        }), true)), "write delayed recording Undo evidence");
+        check(recordingTracks[0]->getClips().isEmpty() && recordingTracks[1]->getClips().isEmpty(), "one public Undo after asynchronous dispatch removes the whole simultaneous take");
         check(recordedFile.existsAsFile(), "Undo retains the recorded source for Redo"); command(isolated, "redo");
         check(recordingTracks[0]->getClips().size() == 1 && recordingTracks[1]->getClips().size() == 1, "one Redo restores both take clips");
         check(isolated.snapshot().tracks[0].clips.size() == 1 && isolated.snapshot().tracks[1].clips.size() == 1, "recorded clips reach public snapshots");

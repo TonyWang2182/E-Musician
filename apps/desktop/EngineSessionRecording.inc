@@ -1,6 +1,47 @@
 // Control-thread recording lifecycle. The pinned engine owns device callbacks,
 // MIDI capture and its audio writer thread; recorded files outlive Undo entries.
 namespace production {
+// Recorded event timestamps may coincide even though both MIDI edges are valid.
+// Normalise the authoritative take before snapshots/Undo/persistence see it.
+// Keep every onset and event; extend the clip rather than discard a late tail.
+static void normaliseRecordedMidiTiming(te::MidiClip& clip)
+{
+    constexpr double minimumNoteBeats = 1.0 / 960.0; // SMF export resolution.
+    auto* undo = &clip.edit.getUndoManager();
+    double lastEventBeat = 0;
+    for (auto* note : clip.getSequence().getNotes()) {
+        const double start = double(note->state[te::IDs::b]), length = double(note->state[te::IDs::l]);
+        const int pitch = int(note->state[te::IDs::p]), velocity = int(note->state[te::IDs::v]);
+        // Do not disguise corrupted state as a legitimate short captured note.
+        if (!std::isfinite(start) || !std::isfinite(length) || start < 0 || length < 0
+            || pitch < 0 || pitch > 127 || velocity < 1 || velocity > 127) continue;
+        const auto duration = std::max(length, minimumNoteBeats);
+        const auto end = start + duration;
+        if (!std::isfinite(end)) continue;
+        if (duration != length) note->setStartAndLength(te::BeatPosition::fromBeats(start), te::BeatDuration::fromBeats(duration), undo);
+        lastEventBeat = std::max(lastEventBeat, end);
+    }
+    for (auto* event : clip.getSequence().getControllerEvents()) {
+        const auto beat = event->getBeatPosition().inBeats();
+        if (std::isfinite(beat) && beat >= 0) lastEventBeat = std::max(lastEventBeat, beat);
+    }
+    // Content beats are source-relative: this handles a nonzero timeline start
+    // without adding that start twice, and does not alter the source offset.
+    const auto end = clip.getTimeOfContentBeat(te::BeatPosition::fromBeats(lastEventBeat));
+    const auto position = clip.getPosition();
+    if (!std::isfinite(end.inSeconds()) || end.inSeconds() > storage::maximumTimelineSeconds) return;
+    double endSeconds = std::max(end.inSeconds(), position.time.getEnd().inSeconds());
+    if (position.offset.inSeconds() == 0) {
+        // Persistence derives clip beats from its duration in seconds. At a
+        // nonzero origin, subtraction can round below a controller's exact end.
+        const auto bpm = clip.edit.tempoSequence.getTempo(0)->getBpm();
+        for (int i = 0; i < 8 && time::secondsToBeats(endSeconds - position.time.getStart().inSeconds(), bpm) < lastEventBeat; ++i)
+            endSeconds = std::nextafter(endSeconds, std::numeric_limits<double>::infinity());
+    }
+    if (endSeconds <= storage::maximumTimelineSeconds && endSeconds > position.time.getEnd().inSeconds())
+        clip.setEnd(te::TimePosition::fromSeconds(endSeconds), true);
+}
+
 struct RecordingController::State final : te::TransportControl::Listener {
     te::Engine& engine;
     te::Edit* edit = nullptr;
@@ -89,6 +130,7 @@ struct RecordingController::State final : te::TransportControl::Listener {
                 adopted = true;
             } else if (auto* midi = dynamic_cast<te::MidiClip*>(clip)) {
                 clip->state.setProperty("emKind", "midi", um); midi->setUsesProxy(false); midi->setSyncType(te::Clip::syncBarsBeats);
+                normaliseRecordedMidiTiming(*midi);
                 for (auto* note : midi->getSequence().getNotes()) if (note->state["emId"].toString().isEmpty()) note->state.setProperty("emId", freshId(), um);
                 for (auto* controller : midi->getSequence().getControllerEvents()) if (controller->state["emId"].toString().isEmpty()) controller->state.setProperty("emId", freshId(), um);
                 adopted = true;
