@@ -1,6 +1,6 @@
 # 依赖版本与来源记录
 
-更新日期：2026-10-27。机器可读基线为 [cmake/dependencies.json](../cmake/dependencies.json)。Tracktion/JUCE按完整提交固定；VST2接口按固定提交中的三个blob固定；ASIO按官方SDK包及逐文件SHA-256固定。依赖工作区位于被忽略的`_deps/`，不进入本项目版本管理。实现与本轮验证进度分别见 [ARCHITECTURE](ARCHITECTURE.md) 与 [CONTEXT](CONTEXT.md)。
+更新日期：2026-10-29。机器可读基线为 [cmake/dependencies.json](../cmake/dependencies.json)。Tracktion/JUCE按完整提交固定；VST2接口按固定提交中的三个blob固定；ASIO按官方SDK包及逐文件SHA-256固定。依赖工作区位于被忽略的`_deps/`，不进入本项目版本管理。实现与本轮验证进度分别见 [ARCHITECTURE](ARCHITECTURE.md) 与 [CONTEXT](CONTEXT.md)。
 
 ## 固定组合
 
@@ -85,7 +85,7 @@ MP3回归样本来自本项目公式合成，包含CBR双声道和VBR单声道�
 
 上游基线仍为 `b0c7dd090a56b27fe01bb394617891906eb34daf`。[补丁清单](../cmake/patches/tracktion/manifest.json)采用 schema 2，分别记录下述四个源文件及各自的统一差异、应用前后 SHA-256；哈希按 UTF-8/LF 标准化计算，应用时保留 checkout 原有换行格式。
 
-[apply_engine_patches.py](../scripts/apply_engine_patches.py)的`apply`/`verify`核对 HEAD、全部清单项、差异上下文与输出哈希；只逐项原子替换清单列出的四个源文件，不改写其他上游文件。未应用补丁、错误提交、未知修改、哈希不符或路径越界都会拒绝，已经应用的确切结果可重复核验。`scripts/dev.py bootstrap`负责应用，CMake 配置阶段只核验。脚本回归使用独立临时夹具，不依赖真实 checkout 当前是否已打补丁。
+[apply_engine_patches.py](../scripts/apply_engine_patches.py)的`apply`/`verify`核对 HEAD、全部清单项、差异上下文与输出哈希；0.6.0逐项原子替换清单列出的九个源文件，不改写其他上游文件。未应用补丁、错误提交、未知修改、哈希不符或路径越界都会拒绝，已经应用的确切结果可重复核验。`scripts/dev.py bootstrap`负责应用，CMake 配置阶段只核验。脚本回归使用独立临时夹具，不依赖真实 checkout 当前是否已打补丁。
 
 ### HQ sinc 源定位补丁
 
@@ -116,6 +116,8 @@ MP3回归样本来自本项目公式合成，包含CBR双声道和VBR单声道�
 新增两项作用于固定JUCE子模块的juce_VST3Common.h和juce_VST3PluginFormat.cpp，见[存储补丁](../cmake/patches/tracktion/vst3-inactive-buffer-storage.patch)和[宿主补丁](../cmake/patches/tracktion/vst3-inactive-buffer-host.patch)。源/补丁/结果完整哈希均在同一manifest，四文件精确白名单由契约测试核验；CMake继续核验Tracktion与JUCE精确HEAD，不升级依赖。inactive通道预分配隔离缓冲、宿主传入最大块长、拒绝超长块；不改变bus激活和混音路由。VST3允许inactive实际样本地址为null，该变更属于兼容候选，不是宣称旧JUCE违反规格。详情与人工复测状态见[本轮记录](verification/2026-10-27-v051/RESULTS.md)。
 
 ### 项目构建规则与后续升级
+
+2026-10-29，0.6.0新增五个录音/节拍器补丁：Edit.h增加四小节预备枚举并保留旧数值；Edit.cpp统一分母拍与四分音符坐标换算并支持低click音量；ClickNode按拍号分母调度点击和小节重音；TransportControl统一预备范围单位；MidiInputDevice处理录音边界持续音符和独立controller状态。源文件、补丁和结果哈希以[manifest](../cmake/patches/tracktion/manifest.json)为准。Bank、Program、RPN/NRPN及Data Entry等有顺序语义的操作不合成追赶；边界内的真实事件保留。具体契约见[ADR 0007](decisions/0007-daily-workflow-and-recording-clock.md)，结果见最新CONTEXT；没有升级Tracktion/JUCE版本。
 
 0.3.0在项目`CMakeLists.txt`为Windows生成的`EMusician_resources.rc`补上`Info.txt`依赖。固定JUCE 8.0.6的生成规则遗漏该依赖，曾导致增量构建后程序内为0.3.0而Explorer属性仍为0.1.0。修正在本项目，不修改上游依赖；升级JUCE时检查是否仍需补充。
 

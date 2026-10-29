@@ -20,6 +20,14 @@ public:
     bool cancelClipDrag();
     juce::StringArray selectedClipIds() const;
     void setGrid(double beats, bool bars);
+    void setRulerMode(int mode); // 0: bars/beats, 1: minutes/seconds, 2: both
+    void setGridBeats(double beats);
+    void setSnapEnabled(bool enabled);
+    void setAdaptiveGrid(bool enabled);
+    void setFollowPlayhead(bool enabled);
+    juce::Range<double> selectedTimeRange() const;
+    void selectClipIds(const juce::StringArray&);
+    juce::Result loopSelection();
     void setCompactRows(bool);
     bool waveformsReady() const;
     bool trackWaveformReady(const juce::String&) const;
@@ -31,6 +39,7 @@ public:
     void resized() override;
     void mouseDown(const juce::MouseEvent&) override;
     void mouseDrag(const juce::MouseEvent&) override;
+    void mouseUp(const juce::MouseEvent&) override;
     void mouseWheelMove(const juce::MouseEvent&, const juce::MouseWheelDetails&) override;
     bool keyPressed(const juce::KeyPress&) override;
     void focusGained(FocusChangeType) override;

@@ -49,7 +49,58 @@ struct RecordingController::State final : te::TransportControl::Listener {
     juce::String error;
     bool activeTake = false, transactionStarted = false, adopted = false;
     int finishingInputs = 0;
-    explicit State(te::Engine& e) : engine(e) {}
+    bool metronomeEnabled=false, recordOnly=false, countEnabled=false, cancelled=false;
+    int countBars=1;
+    float gainDb=-12;
+    double punchTime=0;
+    explicit State(te::Engine& e) : engine(e) {
+        auto& p=engine.getPropertyStorage().getPropertiesFile();
+        metronomeEnabled=p.getBoolValue("emMetronomeEnabled",false);
+        recordOnly=p.getBoolValue("emMetronomeRecordOnly",false);
+        countEnabled=p.getBoolValue("emCountInEnabled",false);
+        countBars=p.getIntValue("emCountInBars",1);if(countBars!=1&&countBars!=2&&countBars!=4)countBars=1;
+        gainDb=float(p.getDoubleValue("emMetronomeGainDb",-12));if(!std::isfinite(gainDb))gainDb=-12;gainDb=juce::jlimit(-36.0f,0.0f,gainDb);
+    }
+    void applyPreferences() {
+        if(!edit)return;
+        edit->clickTrackEnabled=metronomeEnabled;edit->clickTrackRecordingOnly=recordOnly;
+        edit->clickTrackEmphasiseBars=true;edit->setClickTrackVolume(juce::Decibels::decibelsToGain(gainDb));
+        edit->setCountInMode(!countEnabled?te::Edit::CountIn::none:countBars==1?te::Edit::CountIn::oneBar:countBars==2?te::Edit::CountIn::twoBar:te::Edit::CountIn::fourBar);
+    }
+    double position() const {
+        if(!edit)return 0;
+        auto& transport=edit->getTransport();
+        if(auto* context=transport.getCurrentPlaybackContext()){
+            // postPlay/postPosition take effect at the next audio block. Before
+            // that block, the old playhead may already equal the punch-in point.
+            // Use the native queued transport position only while play is pending;
+            // after dispatch, count-down is exclusively the audio-clock position.
+            if(context->isPlayPending())return transport.getPosition().inSeconds();
+            return context->getPosition().inSeconds();
+        }
+        return transport.getPosition().inSeconds();
+    }
+    bool countingIn() const {return edit&&edit->getTransport().isRecording()&&position()<punchTime-1.0e-8;}
+    juce::Result setPreferences(const juce::var& args) {
+        for(const auto& field:args.getDynamicObject()->getProperties()){
+            const auto name=field.name.toString();
+            if(name!="metronome_enabled"&&name!="metronome_gain_db"&&name!="metronome_record_only"&&name!="count_in_enabled"&&name!="count_in_bars")return graphError("Unknown recording preference: "+name);
+        }
+        for(const auto* field:{"metronome_enabled","metronome_record_only","count_in_enabled"})if(args.hasProperty(field)&&!args[field].isBool())return graphError(juce::String(field)+" must be boolean.");
+        if(args.hasProperty("metronome_gain_db")){
+            auto v=args["metronome_gain_db"];double gain=double(v);
+            if((!v.isInt()&&!v.isInt64()&&!v.isDouble())||!std::isfinite(gain)||gain < -36||gain>0)return graphError("Metronome gain must be -36 to 0 dB.");
+        }
+        if(args.hasProperty("count_in_bars")){
+            auto v=args["count_in_bars"];double bars=double(v);
+            if((!v.isInt()&&!v.isInt64()&&!v.isDouble())||(bars!=1&&bars!=2&&bars!=4))return graphError("Count-in must be 1, 2, or 4 bars; use count_in_enabled to disable it.");
+        }
+        metronomeEnabled=bool(args.getProperty("metronome_enabled",metronomeEnabled));recordOnly=bool(args.getProperty("metronome_record_only",recordOnly));
+        countEnabled=bool(args.getProperty("count_in_enabled",countEnabled));countBars=int(args.getProperty("count_in_bars",countBars));gainDb=float(args.getProperty("metronome_gain_db",gainDb));
+        auto& p=engine.getPropertyStorage().getPropertiesFile();
+        p.setValue("emMetronomeEnabled",metronomeEnabled);p.setValue("emMetronomeRecordOnly",recordOnly);p.setValue("emMetronomeGainDb",gainDb);p.setValue("emCountInEnabled",countEnabled);p.setValue("emCountInBars",countBars);
+        applyPreferences();return juce::Result::ok();
+    }
 
     te::InputDevice* device(const juce::String& id) const {
         for (auto* d : engine.getDeviceManager().getWaveInputDevices()) if (d->getDeviceID() == id) return d;
@@ -110,15 +161,16 @@ struct RecordingController::State final : te::TransportControl::Listener {
             }
         }
     }
-    void recordingStarted(te::SyncPoint, std::optional<te::TimeRange>) override {
+    void recordingStarted(te::SyncPoint start, std::optional<te::TimeRange>) override {
+        punchTime=start.time.inSeconds();cancelled=false;
         activeTake = true; adopted = false; transactionStarted = false; finishingInputs = 0; error.clear();
     }
     void recordingAboutToStop(te::InputDeviceInstance&, te::EditItemID) override {
-        if (edit && !transactionStarted) { edit->getUndoManager().beginNewTransaction("Record take"); transactionStarted = true; }
+        if (edit && !cancelled && !transactionStarted) { edit->getUndoManager().beginNewTransaction("Record take"); transactionStarted = true; }
         ++finishingInputs;
     }
     void recordingFinished(te::InputDeviceInstance&, te::EditItemID, const juce::ReferenceCountedArray<te::Clip>& clips) override {
-        if (!edit) return; auto* um = &edit->getUndoManager();
+        if (!edit || cancelled) { finishingInputs=std::max(0,finishingInputs-1);return; } auto* um = &edit->getUndoManager();
         for (auto* clip : clips) {
             if (clip->state["emId"].toString().isEmpty()) clip->state.setProperty("emId", freshId(), um);
             if (auto* audio = dynamic_cast<te::WaveAudioClip*>(clip)) {
@@ -191,6 +243,7 @@ void RecordingController::attach(te::Edit& edit, const juce::File& directory) {
     // A project never starts recording/monitoring simply because it was opened.
     for (auto* i : edit.getAllInputDevices()) for (auto t : i->getTargets()) i->setRecordingEnabled(t, false);
     data->restoreMonitorsOrDefaultOff({});
+    data->applyPreferences();
 }
 juce::Result RecordingController::execute(const juce::String& command, const juce::var& args) {
     auto& s = *data; if (!s.edit) return graphError("No project is attached to the recorder.");
@@ -201,8 +254,14 @@ juce::Result RecordingController::execute(const juce::String& command, const juc
     for (const auto* key : { "sample_rate", "buffer_size" }) if (args.hasProperty(key) && (!args[key].isInt() && !args[key].isInt64() && !args[key].isDouble())) return graphError(juce::String(key) + " must be numeric.");
     if (args.hasProperty("buffer_size") && (!std::isfinite(double(args["buffer_size"])) || double(args["buffer_size"]) != std::floor(double(args["buffer_size"])))) return graphError("buffer_size must be an integer.");
     auto& transport = s.edit->getTransport();
-    if (command == "stop_recording") { transport.stop(false, false); return juce::Result::ok(); }
+    if (command == "stop_recording") {
+        s.cancelled=s.countingIn();transport.stop(s.cancelled, false);
+        s.edit->setClickTrackRange({});
+        if(s.cancelled){s.activeTake=false;s.adopted=false;s.finishingInputs=0;s.error.clear();transport.setPosition(te::TimePosition::fromSeconds(s.punchTime));}
+        return juce::Result::ok();
+    }
     if (transport.isRecording() || transport.isRecordingStopping() || s.finishingInputs > 0 || s.activeTake) return graphError("Finish the current recording before changing inputs or the device.");
+    if(command=="set_recording_preferences")return s.setPreferences(args);
     s.reconcile();
     if (command == "configure_audio_device") return s.configureDevice(args);
     if (command == "set_track_armed") {
@@ -235,7 +294,7 @@ juce::Result RecordingController::execute(const juce::String& command, const juc
             bool used = false; if (auto* i = s.instance(input->getDeviceID())) for (auto id : i->getTargets()) used |= i->isRecordingEnabled(id);
             if (used) { input->mergeRecordings = false; input->replaceExistingClips = false; input->recordingEnabled = true; input->recordToNoteAutomation = false; }
         }
-        s.error.clear(); transport.record(false, false);
+        s.error.clear();s.cancelled=false;s.punchTime=transport.getPosition().inSeconds();transport.record(false, false);
         if (!transport.isRecording()) return graphError("Recording could not start. Check the selected input and driver.");
         return juce::Result::ok();
     }
@@ -247,7 +306,12 @@ juce::var RecordingController::state() const {
         const auto inputId = s.selectedInput(*track); auto* input = s.instance(inputId); auto* device = s.device(inputId);
         tracks.add(graphObject({ {"track_id", track->state["emId"].toString()}, {"input_device_id", inputId}, {"armed", input && input->isRecordingEnabled(track->itemID)}, {"monitor", device ? State::monitor(*device) : "off"}, {"input_available", device != nullptr} }));
     }
-    return graphObject({ {"recording", s.edit && s.edit->getTransport().isRecording()}, {"finalizing", s.edit && (s.edit->getTransport().isRecordingStopping() || s.finishingInputs > 0 || (s.activeTake && !s.edit->getTransport().isRecording()))}, {"error", s.error}, {"tracks", tracks}, {"recording_directory", s.directory.getFullPathName()}, {"monitor_scope", "input_device"} });
+    const auto remaining=s.countingIn()?juce::jlimit(0.0,double(s.countBars*s.edit->tempoSequence.getTimeSig(0)->numerator),(s.punchTime-s.position())*s.edit->tempoSequence.getTempo(0)->getBpm()/60.0*s.edit->tempoSequence.getTimeSig(0)->denominator/4.0):0.0;
+    return graphObject({ {"counting_in",s.countingIn()},{"count_in_beats_remaining",remaining},{"recording_start_seconds",s.punchTime}, {"recording", s.edit && s.edit->getTransport().isRecording()}, {"finalizing", s.edit && (s.edit->getTransport().isRecordingStopping() || s.finishingInputs > 0 || (s.activeTake && !s.edit->getTransport().isRecording()))}, {"error", s.error}, {"tracks", tracks}, {"recording_directory", s.directory.getFullPathName()}, {"monitor_scope", "input_device"} });
+}
+juce::var RecordingController::preferences() const {
+    const auto& s=*data;
+    return graphObject({{"metronome_enabled",s.metronomeEnabled},{"metronome_gain_db",s.gainDb},{"metronome_record_only",s.recordOnly},{"count_in_enabled",s.countEnabled},{"count_in_bars",s.countBars},{"scope","application"}});
 }
 juce::var RecordingController::inputs() const {
     juce::Array<juce::var> inputs;

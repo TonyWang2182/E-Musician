@@ -1,6 +1,20 @@
 # E-musician 技术架构
 
-更新日期：2026-10-27（Asia/Shanghai）。本文描述 0.5 当前实现及边界；保存管线、工作台、录音和生产图已通过最终候选双配置检查，具体原生操作、硬件及性能范围见 [CONTEXT](CONTEXT.md) 和 [本轮实测](verification/2026-10-27-v05/RESULTS.md)。历史 0.3/0.4 证据不替代新版本验收。
+更新日期：2026-10-29（Asia/Shanghai）。0.6.0增加下述编辑/录音准备模块，验证状态见[CONTEXT](CONTEXT.md)。历史版本的硬件、插件及性能结果保持各自适用范围，不替代新版验收。
+
+## 0.6.0：日常编辑与录音准备
+
+标尺单位、Snap开关、网格精度和跟随属于界面状态，互相独立；`core/time/EditGrid.hpp`供编曲与钢琴卷帘共用，`MusicalPosition.hpp`定义音乐位置。引擎及SMF使用四分音符拍，显示和节拍器按拍号分母计拍；固定引擎的`lengthOfOneBeatDependsOnTimeSignature()`明确返回false，避免6/8等拍号下出现两套坐标。音乐位置每个显示拍960刻度，属性未修改时保留底层完整精度。
+
+Arrangement提供框选、时间选区、批量跨兼容轨移动、循环拖柄/选区循环、播放跟随及音频淡化拖柄。手动滚动/编辑暂停自动跟随，重启播放后恢复。时间选区当前选中相交的完整片段。PianoRoll的画笔、独立Snap、音符剪贴板通过既有write_notes命令提交，不保存第二份可写序列。
+
+片段剪贴板由EngineSession保留当前工程的不可变DTO与素材引用；cut验证成功才更新剪贴板，paste在候选中验证整组轨道兼容性和边界，分配新的片段/音符/controller ID，再按一次Undo应用。音频素材复用，Save As后按asset ID解析新的归档路径。纯MIDI组保留音乐间距，混合组保留绝对秒间距。新建/打开工程清空剪贴板。JSONL要求clipboard_id，复制重试遵守原有幂等响应，过时内容身份被拒绝。
+
+RecordingController管理应用级click和count-in偏好；通过统一命令更改，不修改工程revision或dirty。从停止状态起录才执行预备拍，播放中Record仍是即时起录。倒数和录音边界由Tracktion原生时钟控制，UI只显示状态；停止预备拍直接取消。持续到首拍的音符及允许的独立控制器状态在原生录音边界收拢；原生依赖补丁由manifest哈希校验。细节与取舍见[ADR 0007](decisions/0007-daily-workflow-and-recording-clock.md)。
+
+`EngineSessionTelemetry.inc`在控制线程读取原生LevelMeasurer：电平最高20Hz、RAM每秒一次，编辑内容快照仍沿既有缓存。监听绑定使用弱引用，Edit替换、轨道/输入消失及时清理。工作集含同进程插件，私有提交量另列；DSP百分比和xrun来自实际设备管理器，不冒充整机CPU或已听见的爆音。节拍器走设备cue，Master表包含cue，不写入内部输入录音和离线渲染。
+
+自动smoke显式`--offline`，进程内所有嵌套引擎使用内存设备设置，避免测试访问真实声卡。保留物理播放检查的skipped状态，不能把合成时钟/渲染通过写成人工听感通过。
 
 ## 0.5.1候选：VST3通道缓冲边界
 
@@ -36,11 +50,13 @@
 | `EngineSessionProduction.h` | 生产图与录音控制器的消息线程契约，不是第二个Edit |
 | `EngineSessionAutomationRouting.inc` | Bus/输出/发送的DAG校验及应用、自动化参数绑定/曲线、MIDI controller捕获/恢复与Undo |
 | `EngineSessionRecording.inc` | 实际设备枚举/配置、输入绑定与设备级监听、Arm、线性take生命周期及录音结果接纳 |
+| `EngineSessionTelemetry.inc` | 控制线程低频RAM/电平采集、监听生命周期、峰值重置；不修改音乐状态 |
 | `AudioSource.*` | WAV检查，MP3完整帧扫描、顺序解码、内容寻址PCM缓存、取消与进度 |
 | `ProjectStorage.*` | schema4校验、旧版迁移备份、未变媒体复用、新媒体归档、插件状态二进制、清单替换；不修改活动Edit |
 | `PluginHost.*` | 插件目录、隔离扫描、实例化、原生窗口、状态保存/恢复、参数变化监听 |
 | `ControlServer.*` | 有界JSONL读取/响应线程、消息线程分发、EOF/慢读/异常关闭 |
 | `core/time/Time.hpp` | 固定速度的拍/秒/采样转换和边界检查 |
+| `core/time/EditGrid.hpp`、`MusicalPosition.hpp` | 共享固定/自适应吸附、拍号显示坐标和严格音乐位置输入 |
 | `core/commands/RevisionGuard.hpp` | 工程身份和版本契约；应用级幂等响应账本在EngineSession |
 | `scripts/agent_client.py` | 专用控制进程的Python客户端与实际命令演示，无模型依赖 |
 | `tests/`、`scripts/dev.py` | 引擎/存储/UI/后台任务回归；构建、运行、原始日志与源码指纹 |

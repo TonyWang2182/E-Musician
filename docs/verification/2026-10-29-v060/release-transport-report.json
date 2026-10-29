@@ -1,0 +1,6 @@
+{
+  "status": "skipped",
+  "scope": "short transport-clock check; no loopback, physical listening or performance claim",
+  "reason": "No output device available",
+  "test_gain_db": -60
+}

@@ -58,6 +58,8 @@ public:
         int controllerCount = 0;
     };
     struct TrackSnapshot {
+        float peakLeftDb = -100.0f, peakRightDb = -100.0f, inputPeakDb = -100.0f;
+        bool overloaded = false;
         juce::String id, name, format;
         juce::File source;
         // Read-only prepared playback source; MP3 points at the validated PCM cache.
@@ -77,6 +79,13 @@ public:
         std::vector<AutomationLaneSnapshot> automation;
     };
     struct Snapshot {
+        bool metronomeEnabled = false, metronomeRecordOnly = false, countInEnabled = false, countingIn = false;
+        int countInBars = 1;
+        float metronomeGainDb = -12.0f;
+        double countInBeatsRemaining = 0;
+        juce::int64 memoryWorkingSetBytes = 0, memoryPrivateBytes = 0;
+        float masterPeakLeftDb = -100.0f, masterPeakRightDb = -100.0f;
+        bool masterOverloaded = false;
         juce::File source;
         double duration = 0.0, position = 0.0, sampleRate = 0.0;
         juce::File waveformSource;
@@ -102,6 +111,8 @@ public:
         juce::String recordingError;
         juce::var recordingState;
     };
+    // Process-local test isolation, set before constructing any test sessions.
+    static void setOfflineTestMode(bool);
     explicit EngineSession(bool initialiseAudioDevice = true);
     ~EngineSession();
     Snapshot snapshot() const;

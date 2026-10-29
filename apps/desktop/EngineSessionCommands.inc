@@ -19,9 +19,10 @@ std::vector<storage::StoredControllerEvent> sliceControllers(const std::vector<s
 {
     using Event=storage::StoredControllerEvent;using Key=std::pair<int,int>;
     std::vector<Event> result;std::map<Key,Event> preceding;std::set<Key> atBoundary;
-    const auto key=[](const Event& e){return Key{e.type,e.type==0x1004?e.metadata:0};};
-    const auto stateful=[](const Event& e){return (e.type>=0&&e.type<120)||e.type==0x1001
-        ||e.type==0x1004||e.type==0x1005||e.type==0x1007;};
+    const auto key=[](const Event& e){return Key{e.type,e.type==te::MidiControllerEvent::aftertouchType?e.metadata:0};};
+    const auto stateful=[](const Event& e){return e.type==1||e.type==2||e.type==4||e.type==7||e.type==8||e.type==10||e.type==11
+        ||(e.type>=64&&e.type<=79)||(e.type>=91&&e.type<=95)||e.type==te::MidiControllerEvent::pitchWheelType
+        ||e.type==te::MidiControllerEvent::aftertouchType||e.type==te::MidiControllerEvent::channelPressureType;};
     for(auto event:source){
         if(event.beats<start){
             if(stateful(event)){auto found=preceding.find(key(event));
@@ -31,8 +32,9 @@ std::vector<storage::StoredControllerEvent> sliceControllers(const std::vector<s
             if(newIds)event.id=uid();result.push_back(std::move(event));
         }
     }
-    // Chase persistent controller state at the new edge. Channel-mode actions
-    // (all-sound/all-notes-off etc., CC >= 120) must never be replayed here.
+    // Chase only independent retained state at the edge. Bank/program changes,
+    // RPN/NRPN/data-entry sequences and increment/channel-mode actions cannot
+    // safely be reconstructed by key sorting, so are not synthesized.
     std::vector<Event> chased;
     for(auto& [type,event]:preceding)if(!atBoundary.contains(type)){event.id=uid();event.beats=0;chased.push_back(std::move(event));}
     // Prior state precedes real boundary events (for example bank-select before
@@ -112,6 +114,36 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
         for(const auto& id:ids){storage::StoredTrack* parent=nullptr;auto* clip=storedClip(s,id,&parent);if(!clip||!unique.insert(id).second)return bad("A clip is missing or repeated.");if(target&&target->kind!=parent->kind)return bad("Audio and MIDI clips need matching track types.");auto next=*clip;next.timelineStart+=delta;if(next.timelineStart<0)return bad("Clips cannot start before zero.");if(next.kind=="midi")next.startBeats=time::secondsToBeats(next.timelineStart,s.bpm);moving.push_back({target?target->id:parent->id,std::move(next)});}
         for(auto& track:s.tracks)std::erase_if(track.clips,[&](const auto& clip){return unique.contains(clip.id);});
         for(auto& [tid,clip]:moving)storedTrack(s,tid)->clips.push_back(std::move(clip));
+    }else if(cmd=="paste_clips"){
+        if(clipClipboard.clips.empty()||clipClipboard.projectId!=juce::String(guard.projectId()))return bad("Copy clips from this project before pasting.");
+        if(a.hasProperty("clipboard_id")&&(!a["clipboard_id"].isString()||a["clipboard_id"].toString()!=clipClipboard.id))return bad("Clipboard changed. Copy again or read its current identity before pasting.");
+        if(a.hasProperty("target_track_id")&&!a["target_track_id"].isString())return bad("target_track_id must be a string.");
+        const auto at=number(a,"start_seconds");const auto targetId=textArg(a,"target_track_id");
+        if(!std::isfinite(at)||at<0||at>storage::maximumTimelineSeconds)return bad("Paste position is outside the project timeline.");
+        int targetRow=-1;for(size_t i=0;i<s.tracks.size();++i)if(s.tracks[i].id==targetId)targetRow=int(i);
+        if(targetId.isNotEmpty()&&targetRow<0)return bad("The paste target track no longer exists.");
+        // Clipboard holds content, so deleting/changing its source clips does not
+        // change a later paste. Never create plugin instances or duplicate media.
+        for(const auto& asset:clipClipboard.assets){
+            const auto found=std::find_if(s.assets.begin(),s.assets.end(),[&](const auto& x){return x.id==asset.id;});
+            if(found==s.assets.end())s.assets.push_back(asset);
+            // Save As may relocate a stable asset into its new .assets folder.
+            // The current project owns its canonical path; do not restore the old path.
+        }
+        const bool musicalOnly=std::all_of(clipClipboard.clips.begin(),clipClipboard.clips.end(),[](const auto& entry){return entry.clip.kind=="midi";});
+        for(const auto& entry:clipClipboard.clips){
+            storage::StoredTrack* destination=nullptr;
+            if(targetRow<0)destination=storedTrack(s,entry.trackId);
+            else {const int row=targetRow+entry.row-clipClipboard.firstRow;if(row>=0&&row<int(s.tracks.size()))destination=&s.tracks[size_t(row)];}
+            if(!destination||destination->kind!=entry.trackKind)return bad("Paste needs matching audio/MIDI tracks in the same relative row positions.");
+            auto copy=entry.clip;copy.id=uid();copy.timelineStart=at+(copy.timelineStart-clipClipboard.originSeconds);
+            if(copy.kind=="midi"){
+                copy.startBeats=musicalOnly?time::secondsToBeats(at,s.bpm)+entry.clip.startBeats-time::secondsToBeats(clipClipboard.originSeconds,clipClipboard.originBpm)
+                    :time::secondsToBeats(copy.timelineStart,s.bpm);
+                for(auto& n:copy.notes)n.id=uid();for(auto& e:copy.controllers)e.id=uid();
+            }
+            chooseAfter=copy.id;destination->clips.push_back(std::move(copy));
+        }
     }else if(cmd=="trim_clip"){
         if(!c)return bad("Clip no longer exists.");auto start=number(a,"start_seconds"),end=number(a,"end_seconds");
         if(!std::isfinite(start)||!std::isfinite(end)||start<0||end<=start)return bad("Clip trim needs a positive range.");
@@ -170,6 +202,26 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
 juce::Result EngineSession::Impl::perform(const juce::String& command,const juce::var& args)
 {
     if(!args.isObject())return fail("Command arguments must be an object.");
+    if(command=="copy_clips"||command=="cut_clips"){
+        ClipClipboard next;next.projectId=juce::String(guard.projectId());next.id=uid();next.originSeconds=storage::maximumTimelineSeconds;next.firstRow=int(storage::maximumTracks);
+        try{
+            const auto ids=idsArg(args,"clip_ids");std::set<juce::String> chosen(ids.begin(),ids.end());
+            if(ids.empty()||chosen.size()!=ids.size())return fail("Select clips to copy; repeated IDs are not allowed.");
+            auto source=capture();next.originBpm=source.bpm;
+            std::set<juce::String> assets;
+            for(size_t row=0;row<source.tracks.size();++row)for(const auto& clip:source.tracks[row].clips)if(chosen.erase(clip.id)){
+                next.clips.push_back({source.tracks[row].id,source.tracks[row].kind,int(row),clip});
+                next.firstRow=std::min(next.firstRow,int(row));next.originSeconds=std::min(next.originSeconds,clip.timelineStart);
+                if(clip.assetId.isNotEmpty())assets.insert(clip.assetId);
+            }
+            if(!chosen.empty())return fail("A selected clip no longer exists. Select it again.");
+            for(const auto& asset:source.assets)if(assets.contains(asset.id))next.assets.push_back(asset);
+        }catch(const std::exception& error){return fail(error.what());}
+        if(command=="cut_clips")if(auto result=perform("delete_clips",args);result.failed())return result;
+        clipClipboard=std::move(next);publish("clipboard_changed",object({{"clip_count",int(clipClipboard.clips.size())}}));
+        status=command=="cut_clips"?"Clips cut. Paste at the playhead; Undo restores the cut.":"Clips copied. Select a destination track and paste at the playhead.";
+        return juce::Result::ok();
+    }
     if(gesture&&command!="set_track_gain"&&command!="set_master_gain"&&command!="set_track_pan")finishGesture();
     if(command=="set_plugin_parameter")return setPluginParameter(args);
     if(command=="scan_plugins"||command=="cancel_job"||command=="import_audio"||command=="import_midi"||command=="save_project"||command=="open_project"||command=="export_wav"||command=="export_midi")return performJob(command,args);

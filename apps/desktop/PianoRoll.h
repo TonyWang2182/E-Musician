@@ -33,6 +33,8 @@ public:
     bool keyPressed(const juce::KeyPress&) override;
     juce::Result runInteractionSmokeTest(juce::DynamicObject& report);
     std::function<void(const juce::String&, const std::vector<Note>&, std::uint64_t)> onWriteNotes;
+    // Rejected local clipboard operations leave the authoritative notes untouched.
+    std::function<void(const juce::String&)> onEditError;
     std::function<void(double)> onSeek;
     std::function<void()> onTogglePlay;
     std::function<bool(const juce::KeyPress&)> onProjectKey;

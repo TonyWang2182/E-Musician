@@ -21,6 +21,7 @@ public:
     void detach();
     juce::Result execute(const juce::String&, const juce::var&);
     juce::var state() const;
+    juce::var preferences() const;
     // Device lists are refreshed only on explicit requests, never by the UI timer.
     juce::var inputs() const;
     juce::var audioDevices(bool scan = false) const;

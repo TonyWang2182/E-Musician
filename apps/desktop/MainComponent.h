@@ -45,6 +45,8 @@ private:
     void showPlugins(const juce::String& trackId = {});
     void showPianoRoll();
     void showProjectTiming();
+    void showMetronomeOptions();
+    void clipClipboardAction(const juce::String&);
     void showClipProperties();
     void chooseMidi();
     void chooseExport(bool midi, bool selectedOnly, bool realtime);

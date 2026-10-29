@@ -2299,3 +2299,203 @@ Arm/Monitor切换与实体键盘实时输入尚未得到分项确认，已给出
 - main/d4ed6c8只读源码审查发现：已有1/4–1/32吸附和Alt绕过，但绘线最细为四分音符，且seconds/free切换会关吸附。节拍器和预备拍无应用级入口，音频负载/xrun已有快照，内存仅测试探针采集；建议先统一时间/网格再补录音准备和观察反馈。
 - 查阅Ableton Live 12官方Arrangement View、Recording New Clips及Computer Audio Resources章节，写入review/2026-10-29-daily-workflow/PLAN.md；额外建议框选/剪贴板、循环拖柄/播放跟随、电平表，明确P0需求与P1建议。impeccable仅用于交互规划，继承现有视觉和用户自行GUI测试约定。
 - 同步CONTEXT、DEVELOPMENT，新增能力全部标待实现。本次未修改应用源码、未构建、未执行程序、未操作桌面，运行版本仍0.5.2；不生成虚构构建或验收记录。
+
+## 2026-10-29 — 0.6.0日常编曲功能开始实施
+
+用户授权开始上述功能并要求保留计划和核查档案。已建立feature/daily-workflow-v060分支，先提交此前只读审查文档；工作拆为编曲/网格、原生节拍器与预备拍/遥测、MIDI编辑、主窗口与剪贴板四块。归属及状态见review/2026-10-29-daily-workflow/IMPLEMENTATION.md。检测到用户仍在运行0.5.2，候选将使用独立输出路径，不关闭或控制用户程序。代理不单独构建；root统一冻结、记录和验证，人工界面与听感仍由用户负责。
+
+用户随后确认已关闭已有程序。改用原Release入口构建，取消候选输出目录的临时改动；不需要关闭或控制用户进程。已将完整smoke的嵌套引擎切到明确offline测试模式，真实设备播放仍另列人工验收。剪贴板复核发现保存路径重定位、变速后的MIDI组间距和Agent重试身份问题，均加入对应修正和回归；下一步冻结源码构建，当前不声明测试通过。
+
+首轮Release构建3004181548失败：新增剪贴板测试的嵌套初始化列表少一个括号，修正为命名的音符数组。独立审查同时指出录音“小节中间”夹具实际在小节线、预备期控制器重建不应回放增减/RPN等序列动作，以及设备消失后的输入电平应清空；分别修正并补相应检查。输出隔离探针也启用offline模式，避免无关声卡访问。失败构建及原始输出保留；源码变更后重新冻结构建。
+
+### 2026-10-29T14:23:29+08:00 · configure · succeeded
+
+- Config: Release; exit code: 0; elapsed: 2.248s.
+- Command: `python scripts/apply_engine_patches.py apply`
+- Context: 0.6.0 daily workflow: apply pinned audio-clock patches and configure after source freeze; user confirmed app closed; automated runtime tests will use offline device isolation
+- Source SHA-256: `7f9a3c146552d5d7b229bc2b102434249bf24de709b9de93cdadcfe5441a31d4`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T062329.407687Z-c07b4b391b.json) · [Raw log](../build-logs/20261029T062329.407687Z-c07b4b391b.log)
+- [Exact process output](../build-logs/20261029T062329.407687Z-c07b4b391b.raw.log)
+
+### 2026-10-29T14:23:31+08:00 · configure · succeeded
+
+- Config: Release; exit code: 0; elapsed: 23.897s.
+- Command: `cmake --preset windows-msvc`
+- Context: 0.6.0 daily workflow: apply pinned audio-clock patches and configure after source freeze; user confirmed app closed; automated runtime tests will use offline device isolation
+- Source SHA-256: `7f9a3c146552d5d7b229bc2b102434249bf24de709b9de93cdadcfe5441a31d4`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T062331.818886Z-c75673ae72.json) · [Raw log](../build-logs/20261029T062331.818886Z-c75673ae72.log)
+- [Exact process output](../build-logs/20261029T062331.818886Z-c75673ae72.raw.log)
+
+### 2026-10-29T14:24:03+08:00 · build · failed
+
+- Config: Release; exit code: 1; elapsed: 141.190s.
+- Command: `cmake --build --preset windows-release --parallel 2`
+- Context: 0.6.0 first integrated candidate: independent grid/ruler, clipboard, native metronome/count-in, telemetry and offline regression isolation; source frozen
+- Source SHA-256: `7f9a3c146552d5d7b229bc2b102434249bf24de709b9de93cdadcfe5441a31d4`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T062403.161979Z-3004181548.json) · [Raw log](../build-logs/20261029T062403.161979Z-3004181548.log)
+- [Exact process output](../build-logs/20261029T062403.161979Z-3004181548.raw.log)
+- Error: Command failed with code 1; see E:\E-musician\build-logs\20261029T062403.161979Z-3004181548.log
+
+### 2026-10-29T14:30:34+08:00 · build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.846s.
+- Command: `python scripts/apply_engine_patches.py apply`
+- Context: 0.6.0 second candidate: repair clipboard fixture syntax; actual mid-bar count-in, conservative controller-state chase, removed-device meters and offline output probe; frozen source
+- Source SHA-256: `f92b8fbbccc482e08561aa583438cd177a4bcde6a15b9a78f7e21383df1e8bbd`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T063034.294840Z-83455c6651.json) · [Raw log](../build-logs/20261029T063034.294840Z-83455c6651.log)
+- [Exact process output](../build-logs/20261029T063034.294840Z-83455c6651.raw.log)
+
+### 2026-10-29T14:30:35+08:00 · build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 103.110s.
+- Command: `cmake --build --preset windows-release --parallel 2`
+- Context: 0.6.0 second candidate: repair clipboard fixture syntax; actual mid-bar count-in, conservative controller-state chase, removed-device meters and offline output probe; frozen source
+- Source SHA-256: `f92b8fbbccc482e08561aa583438cd177a4bcde6a15b9a78f7e21383df1e8bbd`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T063035.245079Z-1636c815fd.json) · [Raw log](../build-logs/20261029T063035.245079Z-1636c815fd.log)
+- [Exact process output](../build-logs/20261029T063035.245079Z-1636c815fd.raw.log)
+
+### 2026-10-29T14:35:55+08:00 · test · failed
+
+- Config: Release; exit code: 8; elapsed: 20.125s.
+- Command: `ctest --preset windows-release --output-on-failure`
+- Context: 0.6.0 daily workflow full Release regression; source frozen; offline synthetic audio and GUI component tests only
+- Source SHA-256: `f92b8fbbccc482e08561aa583438cd177a4bcde6a15b9a78f7e21383df1e8bbd`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T063555.614793Z-77df8e6474.json) · [Raw log](../build-logs/20261029T063555.614793Z-77df8e6474.log)
+- [Exact process output](../build-logs/20261029T063555.614793Z-77df8e6474.raw.log)
+- Error: Command failed with code 8; see E:\E-musician\build-logs\20261029T063555.614793Z-77df8e6474.log
+
+
+## 2026-10-29 v0.6.0 regression correction
+
+Second Release build succeeded. First full CTest: 4/5; integration stopped at the legacy content-end seek assertion. New blank-arrangement recording needs future seek; retain explicit negative and 48-hour bounds instead of removing bounds coverage. Read-only review also found denominator-beat tick labels and unchanged seconds-form rounding inconsistent; corrected shared position formatting and exact-value preservation. Failed record 20261029T063555.614793Z-77df8e6474 remains. No physical device or user project operated.
+
+### 2026-10-29T14:39:50+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 66.364s.
+- Command: `cmake --build --preset windows-release --parallel 2`
+- Context: 0.6.0 regression candidate: future seek bounds and consistent meter ticks/exact unchanged positions; source frozen
+- Source SHA-256: `92a0077b0d592d569fd394c972ff8a1bc4bc10cde3ee426dadb7be8f005c63e9`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T063950.182526Z-cde6dbc6f0.json) · [Raw log](../build-logs/20261029T063950.182526Z-cde6dbc6f0.log)
+- [Exact process output](../build-logs/20261029T063950.182526Z-cde6dbc6f0.raw.log)
+
+### 2026-10-29T14:40:56+08:00 · check · failed
+
+- Config: Release; exit code: 8; elapsed: 101.019s.
+- Command: `ctest --preset windows-release --output-on-failure`
+- Context: 0.6.0 regression candidate: future seek bounds and consistent meter ticks/exact unchanged positions; source frozen
+- Source SHA-256: `92a0077b0d592d569fd394c972ff8a1bc4bc10cde3ee426dadb7be8f005c63e9`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T064056.710497Z-c73da3d8e7.json) · [Raw log](../build-logs/20261029T064056.710497Z-c73da3d8e7.log)
+- [Exact process output](../build-logs/20261029T064056.710497Z-c73da3d8e7.raw.log)
+- Error: Command failed with code 8; see E:\E-musician\build-logs\20261029T064056.710497Z-c73da3d8e7.log
+
+
+## 2026-10-29 v0.6.0 count-in and Agent boundary correction
+
+Release CTest 20261029T064056.710497Z-c73da3d8e7 stopped at the new four-bar count-in state check, after project/clip/DAW reports passed. Native queued playhead was still at the old punch position before the first audio block; use native queued transport position while play is pending, then use audio-clock position. Keep actual-count/cancel assertions and add diagnostics. Review also closed the JSONL batch paste token bypass, and replaced MIDI controller magic values with actual upstream enum constants (program=0x1001, pitch wheel=0x1005). Preserve old pitch/pedal assertions and extend excluded program/RPN coverage. No hardware test; targeted production regression next.
+
+### 2026-10-29T14:48:40+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 65.954s.
+- Command: `cmake --build --preset windows-release --parallel 2`
+- Context: 0.6.0 native count-in queued first-block fix; batch clipboard identity guard and controller enum review; source frozen
+- Source SHA-256: `89219e433c0d2c3c0eb1cae43eb4e5847c65e724b60d40096900df645ebd3203`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T064840.065150Z-90212e226e.json) · [Raw log](../build-logs/20261029T064840.065150Z-90212e226e.log)
+- [Exact process output](../build-logs/20261029T064840.065150Z-90212e226e.raw.log)
+
+### 2026-10-29T14:49:46+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 16.385s.
+- Command: `E:\E-musician\build\bin\Release\E-musician.exe --production-test E:\E-musician\build\production-v060\17d3ffda9316`
+- Context: 0.6.0 native count-in queued first-block fix; batch clipboard identity guard and controller enum review; source frozen
+- Source SHA-256: `89219e433c0d2c3c0eb1cae43eb4e5847c65e724b60d40096900df645ebd3203`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T064946.173022Z-b655867202.json) · [Raw log](../build-logs/20261029T064946.173022Z-b655867202.log)
+- [Exact process output](../build-logs/20261029T064946.173022Z-b655867202.raw.log)
+
+### 2026-10-29T14:50:17+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.925s.
+- Command: `python scripts/apply_engine_patches.py verify`
+- Context: 0.6.0 final Release candidate; native targeted production passed; LF source bytes match Git; source frozen
+- Source SHA-256: `ffc09b4ea594b5410eaf5984ab20e48c26bff3b5e0c63ba53582dbfa69a1d7f5`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T065017.810357Z-baad38188f.json) · [Raw log](../build-logs/20261029T065017.810357Z-baad38188f.log)
+- [Exact process output](../build-logs/20261029T065017.810357Z-baad38188f.raw.log)
+
+### 2026-10-29T14:50:18+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 88.497s.
+- Command: `cmake --build --preset windows-release --parallel 2`
+- Context: 0.6.0 final Release candidate; native targeted production passed; LF source bytes match Git; source frozen
+- Source SHA-256: `ffc09b4ea594b5410eaf5984ab20e48c26bff3b5e0c63ba53582dbfa69a1d7f5`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T065018.825580Z-0cea0757ac.json) · [Raw log](../build-logs/20261029T065018.825580Z-0cea0757ac.log)
+- [Exact process output](../build-logs/20261029T065018.825580Z-0cea0757ac.raw.log)
+
+### 2026-10-29T14:51:47+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 105.039s.
+- Command: `ctest --preset windows-release --output-on-failure`
+- Context: 0.6.0 final Release candidate; native targeted production passed; LF source bytes match Git; source frozen
+- Source SHA-256: `ffc09b4ea594b5410eaf5984ab20e48c26bff3b5e0c63ba53582dbfa69a1d7f5`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T065147.494048Z-acba21716f.json) · [Raw log](../build-logs/20261029T065147.494048Z-acba21716f.log)
+- [Exact process output](../build-logs/20261029T065147.494048Z-acba21716f.raw.log)
+
+
+## 2026-10-29 v0.6.0 visual review
+
+Release full regression 20261029T065147.494048Z-acba21716f passed5/5, including229production and359clip checks. Synthetic1000x650/1280x800 captures reviewed without desktop access. Overview grid was visually dense, so cull subdivisions below8px without changing fixed edit snap. The smoke fixture had left its direct view Snap override out of sync with the real toolbar; restore toolbar callbacks after that test and bars before final captures, and add the already-tested minimum MIDI dock capture. These final small changes require a fresh Release check.
+
+### 2026-10-29T14:55:13+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 29.315s.
+- Command: `cmake --build --preset windows-release --parallel 2`
+- Context: 0.6.0 visual review follow-up: readable overview grid, restore fixture toolbar state and capture minimum MIDI dock; source frozen
+- Source SHA-256: `c09544b7c31109c33c83e8ae1a06279e60615f6ecbde34de043277fe2cbf6db3`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T065513.700199Z-e6fa0f3ef0.json) · [Raw log](../build-logs/20261029T065513.700199Z-e6fa0f3ef0.log)
+- [Exact process output](../build-logs/20261029T065513.700199Z-e6fa0f3ef0.raw.log)
+
+### 2026-10-29T14:55:43+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 103.393s.
+- Command: `ctest --preset windows-release --output-on-failure`
+- Context: 0.6.0 visual review follow-up: readable overview grid, restore fixture toolbar state and capture minimum MIDI dock; source frozen
+- Source SHA-256: `c09544b7c31109c33c83e8ae1a06279e60615f6ecbde34de043277fe2cbf6db3`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T065543.193153Z-2ba5dc2103.json) · [Raw log](../build-logs/20261029T065543.193153Z-2ba5dc2103.log)
+- [Exact process output](../build-logs/20261029T065543.193153Z-2ba5dc2103.raw.log)
+
+
+## 2026-10-29 v0.6.0 minimum-dock visual findings
+
+Follow-up Release 20261029T065543.193153Z-2ba5dc2103 passed5/5. Reviewed the added minimum MIDI dock capture: first-row labels ellipsized; also a fresh MainComponent showed bars in its combo but seconds in the view because dontSendNotification defaults were never applied. Initialize view preferences after Impl construction, and adjust PianoRoll toolbar labels/layout with complete tooltips. These are actual synthetic visual findings, not passed native user interaction. Rebuild/recheck after source freeze.
+
+### 2026-10-29T15:02:00+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 19.854s.
+- Command: `cmake --build --preset windows-release --parallel 2`
+- Context: 0.6.0 final minimum-dock labels and fresh-window ruler initialization; source frozen; offline regression
+- Source SHA-256: `606cd667564e1a468d74f1d3ddea8f510714b08d98f6a7dd5f75f66f3c78d1b9`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T070200.459525Z-f18a3c9cf4.json) · [Raw log](../build-logs/20261029T070200.459525Z-f18a3c9cf4.log)
+- [Exact process output](../build-logs/20261029T070200.459525Z-f18a3c9cf4.raw.log)
+
+### 2026-10-29T15:02:20+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 86.074s.
+- Command: `ctest --preset windows-release --output-on-failure`
+- Context: 0.6.0 final minimum-dock labels and fresh-window ruler initialization; source frozen; offline regression
+- Source SHA-256: `606cd667564e1a468d74f1d3ddea8f510714b08d98f6a7dd5f75f66f3c78d1b9`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T070220.387857Z-16536d0236.json) · [Raw log](../build-logs/20261029T070220.387857Z-16536d0236.log)
+- [Exact process output](../build-logs/20261029T070220.387857Z-16536d0236.raw.log)
+
+### 2026-10-29T15:04:04+08:00 · verify · succeeded
+
+- Config: Release; exit code: 0; elapsed: 2.192s.
+- Command: `python .cache/v060/archive.py`
+- Context: 0.6.0 final evidence archive and protected user file hashes; no application launch
+- Source SHA-256: `606cd667564e1a468d74f1d3ddea8f510714b08d98f6a7dd5f75f66f3c78d1b9`; Git HEAD: `5d116d221089e37daaf464ebf78041946de3b36e`.
+- [Record](builds/20261029T070404.979170Z-2ef9f7aafe.json) · [Raw log](../build-logs/20261029T070404.979170Z-2ef9f7aafe.log)
+- [Exact process output](../build-logs/20261029T070404.979170Z-2ef9f7aafe.raw.log)
+
+
+## 2026-10-29 v0.6.0 implementation and offline acceptance complete
+
+Final source606cd667564e1a468d74f1d3ddea8f510714b08d98f6a7dd5f75f66f3c78d1b9; Release EXE be41f94fe8e3e365694360f08079fe0c1ce427c95f036e61e1940e55a3451119, file/product version0.6.0. Build070200.459525Z-f18a3c9cf4 and CTest070220.387857Z-16536d0236 succeeded with source unchanged. CTest5/5: core101, clip359, production229 plus remaining integration reports. Final synthetic minimum dock/empty-window captures reviewed: complete button labels and matching musical ruler. Archive070404.979170Z-2ef9f7aafe verifies69 protected files/514019450 bytes unchanged. Release only; physical transport explicitly skipped, no desktop or audio hardware operation, no new long-run performance claim.
+
+Plans, architecture ADR0007, API, quickstart, implementation ownership, manual checklist and raw-byte evidence summary are updated. Model Agent not implemented; existing command/revision/Undo path extended. Autosave/recovery and deferred expansions remain out of scope. Ready to commit and synchronize feature/daily-workflow-v060; main remains accepted0.5.2 baseline pending new-feature human review.

@@ -293,7 +293,7 @@ void EngineSession::Impl::timerCallback()
         pluginDirty=true;advanceRevision();cachedRevision=std::numeric_limits<std::uint64_t>::max();
         publish("plugin_changed",object({{"plugin_ids",ids}}));
     }
-    auto& transport=edit->getTransport();if(transport.isPlaying()&&!transport.isRecording()&&!transport.isRecordingStopping()&&!transport.looping.get()&&transport.getPosition().inSeconds()>=duration){transport.stop(false,false);transport.setPosition(te::TimePosition::fromSeconds(duration));}
+    auto& transport=edit->getTransport();if(transport.isPlaying()&&!transport.isRecording()&&!transport.isRecordingStopping()&&!transport.looping.get()&&!(edit->clickTrackEnabled.get()&&!edit->clickTrackRecordingOnly.get())&&transport.getPosition().inSeconds()>=duration){transport.stop(false,false);transport.setPosition(te::TimePosition::fromSeconds(duration));}
     for(auto& job:jobs)if(job->preparation&&!job->done.load(std::memory_order_acquire)){
         auto step=job->preparation;step(); // Keep the callable alive if it clears itself.
     }

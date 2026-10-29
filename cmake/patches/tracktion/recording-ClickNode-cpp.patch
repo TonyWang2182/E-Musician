@@ -1,0 +1,52 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_ClickNode.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_ClickNode.cpp
+@@ -113,12 +113,13 @@
+         bool isFirstBeatOfBar = false;
+     };
+ 
+-    inline BeatInfo getBeatInfo (const tempo::Sequence& sequence, tempo::Sequence::Position& tempoPosition)
++    inline BeatInfo getBeatInfo (const tempo::Sequence& sequence, tempo::Sequence::Position& tempoPosition, double unit)
+     {
+         const auto beats = tempoPosition.getBeats().inBeats();
+-        int beat = static_cast<int> (std::floor (beats));
++        const double beat = std::floor (beats / unit + 1.0e-9) * unit;
+         const auto beatTime = sequence.toTime (BeatPosition::fromBeats (beat));
+-        const bool isFirstBeatOfBar = tempoPosition.getBarsBeats().getWholeBeats() == 0;
++        const double bar = tempoPosition.getTimeSignature().numerator * unit;
++        const bool isFirstBeatOfBar = std::abs (beat / bar - std::round (beat / bar)) < 1.0e-8;
+ 
+         return { beatTime, isFirstBeatOfBar };
+     }
+@@ -134,7 +135,9 @@
+     const bool emphasis = edit.clickTrackEmphasiseBars;
+ 
+     tempoPosition.set (editTime.getStart());
+-    auto beatInfo = getBeatInfo (sequence, tempoPosition);
++    const double unit = edit.engine.getEngineBehaviour().lengthOfOneBeatDependsOnTimeSignature()
++        ? 1.0 : 4.0 / tempoPosition.getTimeSignature().denominator;
++    auto beatInfo = getBeatInfo (sequence, tempoPosition, unit);
+ 
+     if (midi)
+     {
+@@ -154,8 +157,8 @@
+                                                        (t - editTime.getStart()).inSeconds(),
+                                                        {});
+ 
+-            tempoPosition.add (1_bd);
+-            beatInfo = getBeatInfo (sequence, tempoPosition);
++            tempoPosition.add (BeatDuration::fromBeats (unit));
++            beatInfo = getBeatInfo (sequence, tempoPosition, unit);
+             t = beatInfo.time;
+         }
+     }
+@@ -192,8 +195,8 @@
+                 render (dstView);
+             }
+ 
+-            tempoPosition.add (1_bd);
+-            beatInfo = getBeatInfo (sequence, tempoPosition);
++            tempoPosition.add (BeatDuration::fromBeats (unit));
++            beatInfo = getBeatInfo (sequence, tempoPosition, unit);
+             t = beatInfo.time;
+         }
+     }

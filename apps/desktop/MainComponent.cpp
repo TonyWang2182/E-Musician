@@ -2,6 +2,7 @@
 #include "ArrangementView.h"
 #include "PianoRoll.h"
 #include "SelectedTrackPanel.h"
+#include "core/time/MusicalPosition.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -28,6 +29,17 @@ juce::String clockText(double seconds)
 juce::String rateText(double rate)
 {
     return rate > 0.0 ? juce::String(rate / 1000.0, std::fmod(rate, 1000.0) == 0.0 ? 0 : 1) + " kHz" : "--";
+}
+juce::String positionText(double seconds, const EngineSession::Snapshot& s, bool musical)
+{
+    return musical ? juce::String(time::musicalPosition(seconds,s.bpm,s.numerator,s.denominator)) : juce::String(seconds,6);
+}
+std::optional<double> positionValue(const juce::String& text,const EngineSession::Snapshot& s,bool musical)
+{
+    if(musical)return time::parseMusicalPosition(text.trim().toStdString(),s.bpm,s.numerator,s.denominator);
+    const auto value=text.trim();const auto* begin=value.toRawUTF8();char* end=nullptr;const auto seconds=std::strtod(begin,&end);
+    if(value.isEmpty()||end==begin||*end!='\0'||!std::isfinite(seconds)||seconds<0)return {};
+    return seconds;
 }
 void openCorners(juce::Graphics& g, juce::Rectangle<float> bounds, juce::Colour colour)
 {
@@ -660,7 +672,8 @@ struct MainComponent::Impl : private juce::ListBoxModel {
             &saveButton, &saveAsButton, &undoButton, &redoButton, &trackGain, &mute, &solo, &remove,
             &arrangement, &zoomOut, &zoomIn, &fit, &clipStart, &setClipStart,
             &editMenu, &exportMenu, &plugins, &tempo, &gridMode, &clipProperties, &trackPan, &cancelJob,
-            &closeEditor, &details, &saveStatus, &trackPanel, &record };
+            &closeEditor, &details, &saveStatus, &trackPanel, &record, &rulerMode, &snap, &follow,
+            &metronome, &metronomeOptions, &countIn, &countInBars, &resources, &meterReset };
         for (auto* child : children) {
             owner.addAndMakeVisible(child);
             child->addKeyListener(&owner);
@@ -695,12 +708,34 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         plugins.onClick = [this] { dock = dock == Dock::track ? Dock::closed : Dock::track; owner.resized(); owner.refreshSnapshot(); owner.repaint(); };
         tempo.onClick = [&component] { component.showProjectTiming(); };
         clipProperties.onClick = [&component] { component.showClipProperties(); };
-        gridMode.addItem("seconds / free", 1); gridMode.addItem("bars / free", 2);
-        gridMode.addItem("grid 1/4", 3); gridMode.addItem("grid 1/8", 4); gridMode.addItem("grid 1/16", 5); gridMode.addItem("grid 1/32", 6);
+        rulerMode.addItem("bars",1);rulerMode.addItem("seconds",2);rulerMode.addItem("both",3);
+        rulerMode.setSelectedId(1,juce::dontSendNotification);
+        rulerMode.onChange=[this]{arrangement.setRulerMode(rulerMode.getSelectedId()-1);owner.resetClipStartInput();owner.repaint();};
+        rulerMode.setTooltip("Ruler units only. Musical position uses bar:beat:tick (960 ticks per meter beat). Snap is independent.");
+        gridMode.addItem("adaptive",1);gridMode.addItem("1 bar",2);
+        gridMode.addItem("1/4", 3); gridMode.addItem("1/8", 4); gridMode.addItem("1/16", 5); gridMode.addItem("1/32", 6);
+        gridMode.addItem("1/8 triplet",7);gridMode.addItem("1/16 triplet",8);
         gridMode.setSelectedId(5, juce::dontSendNotification);
-        gridMode.onChange = [this] { const int n = gridMode.getSelectedId(); arrangement.setGrid(n < 3 ? 0.0 : std::pow(0.5, n - 3), n != 1); };
+        gridMode.onChange = [this] { const int n=gridMode.getSelectedId();arrangement.setAdaptiveGrid(n==1);
+            arrangement.setGridBeats(n==2?state.numerator*4.0/state.denominator:n==7?1.0/3:n==8?1.0/6:n==1?0.25:std::pow(0.5,n-3)); };
         gridMode.onChange();
-        gridMode.setTooltip("Grid controls snapping and the arrangement ruler. Alt temporarily bypasses snapping.");
+        gridMode.setTooltip("Edit grid. Fixed spacing survives zoom; adaptive follows zoom. Alt temporarily bypasses snapping.");
+        snap.setClickingTogglesState(true);snap.setToggleState(true,juce::dontSendNotification);
+        snap.onClick=[this]{arrangement.setSnapEnabled(snap.getToggleState());};
+        snap.setTooltip("Snap edits to grid and nearby clip edges. Ctrl+4 toggles; Alt temporarily bypasses.");
+        follow.setClickingTogglesState(true);follow.onClick=[this]{arrangement.setFollowPlayhead(follow.getToggleState());};
+        follow.setTooltip("Follow playback. Manual scrolling or editing pauses following until playback restarts.");
+        metronome.onClick=[this]{owner.execute("set_recording_preferences",arguments({{"metronome_enabled",!state.metronomeEnabled}}));};
+        metronome.setTooltip("Metronome on/off. Its sound is for monitoring and is excluded from export.");
+        metronomeOptions.onClick=[this]{owner.showMetronomeOptions();};
+        metronomeOptions.setTooltip("Metronome volume and recording-only mode.");
+        countIn.onClick=[this]{owner.execute("set_recording_preferences",arguments({{"count_in_enabled",!state.countInEnabled}}));};
+        countIn.setTooltip("Enable recording count-in. Stop cancels the count-in; normal playback has no count-in.");
+        countInBars.addItem("1 bar",1);countInBars.addItem("2 bars",2);countInBars.addItem("4 bars",4);
+        countInBars.onChange=[this]{owner.execute("set_recording_preferences",arguments({{"count_in_bars",countInBars.getSelectedId()}}));};
+        resources.setFont(mono(11));resources.setJustificationType(juce::Justification::centredRight);
+        meterReset.setTooltip("Master output peak meters. Click to reset overload indicators.");
+        meterReset.onClick=[this]{owner.execute("reset_meters",arguments({}));};
         cancelJob.onClick = [this] {
             for (auto it = state.jobs.rbegin(); it != state.jobs.rend(); ++it) if (it->status == "queued" || it->status == "running") {
                 owner.execute("cancel_job", arguments({ { "job_id", it->id } })); return;
@@ -709,9 +744,9 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         clipStart.setName("Selected clip start in seconds");
         clipStart.setFont(mono(13.0f));
         clipStart.setJustification(juce::Justification::centredRight);
-        clipStart.setInputRestrictions(18, "0123456789.-");
+        clipStart.setInputRestrictions(24, "0123456789.:-");
         clipStart.setSelectAllWhenFocused(true);
-        clipStart.setTooltip("Timeline start in seconds. Enter or set applies; Escape restores. Leaving the field does not apply.");
+        clipStart.setTooltip("Start in ruler units: bar:beat:tick or seconds. Enter/set applies; Escape restores. 960 ticks per meter beat.");
         clipStart.onEditBegin = [this] {
             if (!startInputDirty) { startEditId = state.selectedClipId; startEditRevision = state.revision; }
         };
@@ -775,7 +810,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         };
         play.setTooltip("Play or pause the project mix. Shortcut: Space.");
         stop.setTooltip("Stop playback and return to the start.");
-        loop.setTooltip("Loop the entire project.");
+        loop.setTooltip("Loop the chosen range. Shift-drag the ruler selects time; Ctrl+L loops the selection. Drag the loop brace to adjust.");
         for (auto* slider : { &gain, &trackGain }) {
             slider->setSliderStyle(juce::Slider::LinearHorizontal);
             slider->setTextBoxStyle(juce::Slider::TextBoxRight, false, 76, 30);
@@ -882,7 +917,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     }
     void layoutDeviceButtons()
     {
-        int y = 432;
+        int y = 470;
         for (auto& button : deviceButtons) {
             button->setBounds(inspector.getX(), y, inspector.getWidth(), 28);
             button->setVisible(inspectorVisible && y + 28 <= footerY - 12);
@@ -933,7 +968,9 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     juce::TextButton separate { "separate" }, zoomOut { "-" }, zoomIn { "+" }, fit { "fit" };
     juce::TextButton editMenu { "edit" }, exportMenu { "export" }, plugins { "devices" }, tempo { "120 BPM" };
     juce::TextButton clipProperties { "clip properties..." }, cancelJob { "cancel task" };
-    juce::ComboBox gridMode;
+    juce::ComboBox gridMode, rulerMode, countInBars;
+    juce::TextButton snap { "snap" }, follow { "follow" }, metronome { "click" }, metronomeOptions { "..." }, countIn { "count-in" }, meterReset { "OUT" };
+    juce::Label resources;
     juce::Label filename, status, saveStatus;
     juce::TextButton closeEditor { "close editor" }, details { "details" };
     ClipStartEditor clipStart;
@@ -972,6 +1009,9 @@ MainComponent::MainComponent(EngineSession& engine) : session(engine), impl(std:
     setWantsKeyboardFocus(true);
     setSize(1280, 800);
     refreshSnapshot();
+    // Combo defaults use dontSendNotification while Impl is constructed.
+    // Apply them only after impl exists, so a fresh view matches its toolbar.
+    impl->rulerMode.onChange();impl->gridMode.onChange();impl->snap.onClick();impl->follow.onClick();
     startTimerHz(30);
 }
 MainComponent::~MainComponent() { stopTimer(); }
@@ -980,10 +1020,10 @@ void MainComponent::resized()
 {
     auto& p = *impl;
     constexpr int margin = 16;
-    p.footerY = getHeight() - 82;
+    p.footerY = getHeight() - 110;
     const int inspectorWidth = p.inspectorVisible ? 226 : 0;
-    p.inspector = { getWidth() - margin - inspectorWidth, 114, inspectorWidth, p.footerY - 126 };
-    p.workspace = { margin, 114, getWidth() - margin * 2 - (p.inspectorVisible ? inspectorWidth + 16 : 0), p.footerY - 126 };
+    p.inspector = { getWidth() - margin - inspectorWidth, 144, inspectorWidth, p.footerY - 156 };
+    p.workspace = { margin, 144, getWidth() - margin * 2 - (p.inspectorVisible ? inspectorWidth + 16 : 0), p.footerY - 156 };
     p.library = {};
     p.trackList.setVisible(false); p.compose.setVisible(false); p.transcribe.setVisible(false); p.filename.setVisible(false);
     auto header = juce::Rectangle<int>(getWidth() - 590, 14, 574, 32);
@@ -997,11 +1037,12 @@ void MainComponent::resized()
         b->setBounds(x, 75, b == &p.importButton ? 80 : 76, 30); x = b->getRight() + 4;
     }
     p.undoButton.setBounds(x + 8, 75, 60, 30); p.redoButton.setBounds(x + 72, 75, 60, 30);
-    p.gridMode.setBounds(getWidth() - margin - 246, 75, 118, 30);
+    p.rulerMode.setBounds(margin,113,102,28);p.snap.setBounds(126,113,66,28);
+    p.gridMode.setBounds(200,113,128,28);p.follow.setBounds(336,113,76,28);
     p.zoomOut.setBounds(getWidth() - margin - 120, 75, 32, 30);
     p.zoomIn.setBounds(getWidth() - margin - 84, 75, 32, 30);
     p.fit.setBounds(getWidth() - margin - 48, 75, 48, 30);
-    const int dockHeight = p.dock == Impl::Dock::closed ? 0 : juce::jlimit(180, 340, p.workspace.getHeight() - 190);
+    const int dockHeight = p.dock == Impl::Dock::closed ? 0 : juce::jlimit(180, 340, p.workspace.getHeight() - 204);
     p.dockBounds = p.workspace.withTrimmedTop(p.workspace.getHeight() - dockHeight);
     p.arrangement.setBounds(p.workspace.withTrimmedBottom(dockHeight > 0 ? dockHeight + 6 : 0));
     p.arrangement.setCompactRows(dockHeight > 0 && p.arrangement.getHeight() < 258);
@@ -1010,23 +1051,27 @@ void MainComponent::resized()
     p.closeEditor.setBounds(p.dockBounds.getRight() - 112, p.dockBounds.getY(), 112, 26);
     p.waveform.setVisible(p.dock == Impl::Dock::source);
     p.waveform.setBounds(p.dockBounds.reduced(0, 30));
-    if (p.pianoRoll) { p.pianoRoll->setVisible(p.dock == Impl::Dock::midi); p.pianoRoll->setBounds(p.dockBounds.withTrimmedTop(28)); }
+    if (p.pianoRoll) { p.pianoRoll->setVisible(p.dock == Impl::Dock::midi); p.pianoRoll->setBounds(p.dockBounds.withTrimmedTop(24)); }
     p.trackPanel.setVisible(p.dock == Impl::Dock::track); p.trackPanel.setBounds(p.dockBounds.withTrimmedTop(28));
     p.separate.setToggleState(p.dock == Impl::Dock::source, juce::dontSendNotification);
     p.details.setToggleState(p.inspectorVisible, juce::dontSendNotification);
     const int ix = p.inspector.getX(), iw = p.inspector.getWidth();
-    p.clipStart.setBounds(ix + 68, 168, iw - 118, 28); p.setClipStart.setBounds(ix + iw - 46, 168, 46, 28);
-    p.clipProperties.setBounds(ix, 204, iw, 28);
-    p.trackGain.setBounds(ix, 260, iw, 30); p.trackPan.setBounds(ix, 318, iw, 30);
-    p.mute.setBounds(ix, 356, (iw - 6) / 2, 28); p.solo.setBounds(p.mute.getRight() + 6, 356, (iw - 6) / 2, 28);
+    p.clipStart.setBounds(ix + 54, 206, iw - 104, 28); p.setClipStart.setBounds(ix + iw - 46, 206, 46, 28);
+    p.clipProperties.setBounds(ix, 242, iw, 28);
+    p.trackGain.setBounds(ix, 298, iw, 30); p.trackPan.setBounds(ix, 356, iw, 30);
+    p.mute.setBounds(ix, 394, (iw - 6) / 2, 28); p.solo.setBounds(p.mute.getRight() + 6, 394, (iw - 6) / 2, 28);
     p.remove.setVisible(false);
     for (juce::Component* c : std::initializer_list<juce::Component*>{ &p.clipStart, &p.setClipStart, &p.clipProperties, &p.trackGain, &p.trackPan, &p.mute, &p.solo }) c->setVisible(p.inspectorVisible);
     p.layoutDeviceButtons();
     p.play.setBounds(margin, p.footerY + 8, 88, 38); p.stop.setBounds(108, p.footerY + 8, 88, 38); p.record.setBounds(200, p.footerY + 8, 80, 38); p.loop.setBounds(284, p.footerY + 8, 88, 38);
     p.tempo.setBounds(498, p.footerY + 8, 102, 34);
     p.gain.setBounds(getWidth() - margin - 260, p.footerY + 8, 260, 36);
-    p.cancelJob.setBounds(getWidth() - margin - 116, p.footerY + 49, 116, 26);
-    p.status.setBounds(margin, p.footerY + 50, getWidth() - margin * 2 - 125, 23);
+    p.meterReset.setBounds(p.gain.getX()-50,p.footerY+10,46,30);
+    p.metronome.setBounds(margin,p.footerY+50,80,30);p.metronomeOptions.setBounds(100,p.footerY+50,38,30);
+    p.countIn.setBounds(152,p.footerY+50,104,30);p.countInBars.setBounds(264,p.footerY+50,100,30);
+    p.resources.setBounds(380,p.footerY+50,getWidth()-396,30);
+    p.cancelJob.setBounds(getWidth() - margin - 116, p.footerY + 85, 116, 22);
+    p.status.setBounds(margin, p.footerY + 86, getWidth() - margin * 2 - 125, 20);
 }
 
 void MainComponent::paint(juce::Graphics& g)
@@ -1039,18 +1084,21 @@ void MainComponent::paint(juce::Graphics& g)
         juce::jmax(120, p.newButton.getX() - 80), 29, juce::Justification::centredLeft, 1);
     g.setColour(rule); g.drawHorizontalLine(68, 16.0f, float(getWidth() - 16));
     g.drawHorizontalLine(109, 16.0f, float(getWidth() - 16));
+    g.drawHorizontalLine(142,16.0f,float(getWidth()-16));
+    g.setColour(secondary);g.setFont(mono(11));
+    g.drawFittedText("drag empty: select clips   Shift-drag ruler: time   Ctrl+L: loop",426,115,getWidth()-442,24,juce::Justification::centredLeft,1);
     if (p.inspectorVisible) {
         const int ix = p.inspector.getX(), iw = p.inspector.getWidth();
-        g.drawVerticalLine(ix - 8, 114.0f, float(p.footerY - 12));
+        g.drawVerticalLine(ix - 8, 144.0f, float(p.footerY - 12));
         g.setColour(ink); g.setFont(mono(14.0f, juce::Font::bold));
-        g.drawFittedText(p.selectedTrack() ? p.selectedTrack()->name : "Select a track", ix, 120, iw, 30, juce::Justification::centredLeft, 1);
+        g.drawFittedText(p.selectedTrack() ? p.selectedTrack()->name : "Select a track", ix, 158, iw, 30, juce::Justification::centredLeft, 1);
         g.setColour(secondary); g.setFont(mono(12.0f));
-        g.drawText("start / s", ix, 168, 68, 28, juce::Justification::centredLeft);
-        g.drawText("track volume", ix, 238, iw, 22, juce::Justification::centredLeft);
-        g.drawText("pan / L - R", ix, 296, iw, 22, juce::Justification::centredLeft);
-        g.drawText("devices", ix, 401, iw, 24, juce::Justification::centredLeft);
+        g.drawText(p.rulerMode.getSelectedId()==2?"start/s":"start", ix, 206, 54, 28, juce::Justification::centredLeft);
+        g.drawText("track volume", ix, 276, iw, 22, juce::Justification::centredLeft);
+        g.drawText("pan / L - R", ix, 334, iw, 22, juce::Justification::centredLeft);
+        g.drawText("devices", ix, 439, iw, 24, juce::Justification::centredLeft);
         if (const auto* track = p.selectedTrack()) {
-            if (track->plugins.empty()) g.drawFittedText(track->kind == "instrument" ? "Add an instrument in Devices." : "No effects. Add in Devices.", ix, 432, iw, 44, juce::Justification::topLeft, 2);
+            if (track->plugins.empty()) g.drawFittedText(track->kind == "instrument" ? "Add an instrument in Devices." : "No effects. Add in Devices.", ix, 470, iw, 44, juce::Justification::topLeft, 2);
         }
     }
     if (p.dock != Impl::Dock::closed) {
@@ -1060,10 +1108,14 @@ void MainComponent::paint(juce::Graphics& g)
             p.dockBounds.getWidth() - 130, 24, juce::Justification::centredLeft, 1);
     }
     g.setColour(ink); g.drawHorizontalLine(p.footerY, 16.0f, float(getWidth() - 16));
-    g.setFont(mono(14)); g.drawText(clockText(s.position), 382, p.footerY + 8, 110, 23, juce::Justification::centredLeft);
+    g.setFont(mono(14)); g.drawText(p.rulerMode.getSelectedId()==2?clockText(s.position):positionText(s.position,s,true), 382, p.footerY + 8, 110, 23, juce::Justification::centredLeft);
     g.setColour(secondary); g.setFont(mono(11)); g.drawText("/ " + clockText(s.duration), 382, p.footerY + 30, 110, 17, juce::Justification::centredLeft);
     g.drawText(juce::String(s.numerator) + "/" + juce::String(s.denominator), 602, p.footerY + 13, 40, 24, juce::Justification::centred);
-    if (getWidth() >= 1150) g.drawFittedText(s.deviceAvailable ? s.deviceName : "No audio device", 652, p.footerY + 13, getWidth() - 958, 24, juce::Justification::centredLeft, 1);
+    if (getWidth() >= 1200) g.drawFittedText(s.deviceAvailable ? s.deviceName : "No audio device", 652, p.footerY + 13, getWidth() - 1030, 24, juce::Justification::centredLeft, 1);
+    for(int channel=0;channel<2;++channel){const auto db=channel?s.masterPeakRightDb:s.masterPeakLeftDb;
+        const float height=juce::jlimit(0.0f,1.0f,(db+60.0f)/60.0f)*28.0f;
+        const float x=float(p.gain.getX()-74+channel*10);g.setColour(rule);g.fillRect(x,float(p.footerY+12),6.0f,28.0f);
+        g.setColour(ink);g.fillRect(x,float(p.footerY+40)-height,6.0f,height);}
 }
 
 void MainComponent::refreshSnapshot()
@@ -1088,13 +1140,26 @@ void MainComponent::refreshSnapshot()
     p.waveform.update(p.state);
     p.filename.setText(p.composeActive ? "arrangement~" : p.selectedClipName(), juce::dontSendNotification);
     p.filename.setTooltip(p.composeActive ? "Audio and MIDI clips on the project timeline." : p.state.source.getFullPathName());
-    const bool playable = p.state.duration > 0.0;
+    const bool playable = p.state.duration > 0.0 || p.state.metronomeEnabled;
     const bool recordingBusy = p.state.recording || p.state.recordingFinalizing;
     const bool busy = p.chooser != nullptr || p.confirming || bool(p.pendingAfterSave) || p.saveContinuationPending || recordingBusy;
     p.play.setEnabled(playable && p.state.deviceAvailable && !recordingBusy);
     p.stop.setEnabled(playable || recordingBusy);
     p.record.setEnabled(p.state.deviceAvailable && !p.state.recordingFinalizing && p.audioDialog == nullptr && p.chooser == nullptr && !p.confirming && p.pendingSaveJob.isEmpty() && !p.savePreparing && !p.saveContinuationPending);
     p.record.setToggleState(p.state.recording, juce::dontSendNotification);
+    p.metronome.setToggleState(p.state.metronomeEnabled,juce::dontSendNotification);
+    p.countIn.setToggleState(p.state.countInEnabled,juce::dontSendNotification);
+    p.countInBars.setSelectedId(p.state.countInBars,juce::dontSendNotification);
+    p.metronome.setEnabled(!recordingBusy);p.metronomeOptions.setEnabled(!recordingBusy);p.countIn.setEnabled(!recordingBusy);p.countInBars.setEnabled(!recordingBusy);
+    const auto ram=p.state.memoryWorkingSetBytes>0?juce::String(double(p.state.memoryWorkingSetBytes)/(1024*1024),0)+" MiB":"--";
+    p.resources.setText("RAM "+ram+"   DSP "+juce::String(p.state.cpuUsage*100,1)+"%   xruns "+juce::String(p.state.xruns)
+        +"   "+rateText(p.state.sampleRate)+" / "+juce::String(p.state.bufferSize),juce::dontSendNotification);
+    p.resources.setTooltip("RAM: process working set including in-process plugins; private commit: "+juce::String(double(p.state.memoryPrivateBytes)/(1024*1024),1)
+        +" MiB. DSP: audio callback load, not system CPU. Xruns: device/host underrun count. RAM sampled once per second.");
+    p.meterReset.setToggleState(p.state.masterOverloaded,juce::dontSendNotification);
+    p.meterReset.setButtonText(p.state.masterOverloaded?"CLIP":"OUT");
+    p.meterReset.setTooltip("Master L "+juce::String(p.state.masterPeakLeftDb,1)+" dB / R "+juce::String(p.state.masterPeakRightDb,1)+" dB. Click to reset peak overload indicators.");
+    if(p.gridMode.getSelectedId()==2)p.arrangement.setGridBeats(p.state.numerator*4.0/p.state.denominator);
     p.settings.setEnabled(!recordingBusy);
     if (p.pianoRoll) p.pianoRoll->setEnabled(!busy);
     p.loop.setEnabled(playable && !busy);
@@ -1133,7 +1198,7 @@ void MainComponent::refreshSnapshot()
     p.setClipStart.setEnabled(clip != nullptr && !busy && p.startInputDirty);
     if (!p.startInputDirty && (!p.clipStart.hasKeyboardFocus(true) || clipChanged)) {
         p.updatingStartInput = true;
-        p.clipStart.setText(clip != nullptr ? juce::String(clip->timelineStart, 6) : "", false);
+        p.clipStart.setText(clip != nullptr ? positionText(clip->timelineStart,p.state,p.rulerMode.getSelectedId()!=2) : "", false);
         p.updatingStartInput = false;
         p.startEditId = p.state.selectedClipId;
         p.startEditRevision = p.state.revision;
@@ -1165,13 +1230,15 @@ void MainComponent::refreshSnapshot()
         break;
     }
     p.cancelJob.setVisible(taskText.isNotEmpty());
-    const auto statusText = p.state.recordingFinalizing ? juce::String("Finishing recording...") : p.state.recording ? juce::String("Recording - Stop finishes the take")
+    const auto statusText = p.state.countingIn ? "Count-in: "+juce::String(int(std::ceil(p.state.countInBeatsRemaining)))+" beats remaining - Stop cancels"
+        : p.state.recordingFinalizing ? juce::String("Finishing recording...") : p.state.recording ? juce::String("Recording - Stop finishes the take")
         : taskText.isNotEmpty() ? taskText : p.saveError.isNotEmpty() ? p.saveError : p.error.isNotEmpty() ? p.error
         : p.state.recordingError.isNotEmpty() ? p.state.recordingError : p.state.status;
     p.status.setText(statusText, juce::dontSendNotification);
     p.status.setTooltip(statusText);
     p.status.setColour(juce::Label::textColourId, p.error.isEmpty() ? secondary : ink);
-    repaint(400, p.footerY + 10, 150, 57);
+    repaint(380, p.footerY + 8, 114, 40);
+    repaint(p.gain.getX()-78,p.footerY+8,25,36);
     if (repaintChrome) repaint();
     if (p.pendingSaveJob.isNotEmpty()) {
         for (const auto& job : p.state.jobs) if (job.id == p.pendingSaveJob && job.status != "queued" && job.status != "running") {
@@ -1210,7 +1277,7 @@ void MainComponent::resetClipStartInput()
     p.startEditRevision = p.state.revision;
     p.updatingStartInput = true;
     const auto* clip = p.selectedClip();
-    p.clipStart.setText(clip != nullptr ? juce::String(clip->timelineStart, 6) : "", false);
+    p.clipStart.setText(clip != nullptr ? positionText(clip->timelineStart,p.state,p.rulerMode.getSelectedId()!=2) : "", false);
     p.updatingStartInput = false;
     p.setClipStart.setEnabled(false);
 }
@@ -1219,11 +1286,9 @@ bool MainComponent::commitClipStart()
     auto& p = *impl;
     if (!p.startInputDirty || p.chooser != nullptr || p.confirming) return false;
     const auto text = p.clipStart.getText().trim();
-    const auto utf8 = text.toRawUTF8();
-    char* end = nullptr;
-    const auto value = std::strtod(utf8, &end);
-    if (text.isEmpty() || end == utf8 || *end != '\0' || !std::isfinite(value) || value < 0.0) {
-        showResult(juce::Result::fail("Enter a non-negative start time in seconds, then press Enter or set."));
+    const auto value = positionValue(text,p.state,p.rulerMode.getSelectedId()!=2);
+    if (!value || *value>172800.0) {
+        showResult(juce::Result::fail(p.rulerMode.getSelectedId()==2?"Enter seconds from 0 to 172800.":"Enter bar:beat:tick, e.g. 2:1:000. Ticks range 000-959; position must be within 48 hours."));
         return false;
     }
     if (p.startEditId != p.state.selectedClipId || p.startEditId.isEmpty()) {
@@ -1231,8 +1296,15 @@ bool MainComponent::commitClipStart()
         showResult(juce::Result::fail("The selected clip changed. Enter its start time again."));
         return false;
     }
+    if(const auto* clip=p.selectedClip();clip&&session.snapshot().revision==p.startEditRevision){
+        const bool musical=p.rulerMode.getSelectedId()!=2;
+        if(musical?text==positionText(clip->timelineStart,p.state,true)
+            :*value==juce::String(clip->timelineStart,6).getDoubleValue()){
+            resetClipStartInput();return true;
+        }
+    }
     session.endEditGesture();
-    const auto result = session.moveClip(p.startEditId, value, p.startEditRevision);
+    const auto result = session.moveClip(p.startEditId, *value, p.startEditRevision);
     if (result.wasOk() || session.snapshot().revision != p.startEditRevision) {
         p.startInputDirty = false;
         refreshSnapshot();
@@ -1292,10 +1364,12 @@ juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDire
         p.arrangement.setGrid(0.0, false);
         result = p.arrangement.runSmokeTest(*report);
         p.gridMode.onChange();
+        p.snap.onClick();p.rulerMode.onChange();
     }
     if (result.wasOk()) {
         // Exercise the same editor/button callbacks used by keyboard and pointer
         // input. The hidden smoke window never pretends to have OS focus.
+        p.rulerMode.setSelectedId(2,juce::dontSendNotification);p.rulerMode.onChange();
         refreshSnapshot();
         const auto selected = p.selectedClip() != nullptr ? *p.selectedClip() : EngineSession::ClipSnapshot {};
         const auto editBefore = session.snapshot();
@@ -1546,9 +1620,15 @@ juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDire
             if (result.wasOk()) result = saveSession.execute("create_midi_clip", arguments({ { "track_id", midiTrack }, { "start_beats", 0.0 }, { "length_beats", 8.0 } }), saveSession.snapshot().revision);
             saveView.refreshSnapshot(); saveView.setSize(1000, 650); saveView.showPianoRoll();
             if (result.wasOk() && (!saveView.impl->arrangement.isVisible() || !saveView.impl->pianoRoll || !saveView.impl->pianoRoll->isVisible()
-                || saveView.impl->arrangement.getHeight() < 178 || saveView.impl->pianoRoll->getBottom() > saveView.impl->footerY - 12))
+                || saveView.impl->arrangement.getHeight() < 198 || saveView.impl->pianoRoll->getBottom() > saveView.impl->footerY - 12))
                 result = juce::Result::fail("The MIDI dock must fit below at least two compact track rows at the minimum window size.");
             report->setProperty("midi_dock_preserves_two_tracks_at_minimum_size", result.wasOk());
+            if(result.wasOk()){
+                juce::MemoryOutputStream png;
+                if(!juce::PNGImageFormat().writeImageToStream(saveView.createComponentSnapshot(saveView.getLocalBounds(),true),png)
+                    ||!outputDirectory.getChildFile("ui-midi-dock-1000x650.png").replaceWithData(png.getData(),png.getDataSize()))
+                    result=juce::Result::fail("Could not capture minimum MIDI dock.");
+            }
             saveView.impl->closeEditor.onClick();
             if (result.wasOk() && (saveView.impl->pianoRoll->isVisible() || !saveView.impl->arrangement.isVisible())) result = juce::Result::fail("Closing the dock hid the arrangement or left the editor visible.");
             saveView.impl->dock = Impl::Dock::track; saveView.resized();
@@ -1556,6 +1636,7 @@ juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDire
         }
         saveView.impl->pendingAfterSave = {};
     }
+    p.rulerMode.setSelectedId(1,juce::dontSendNotification);p.rulerMode.onChange();p.snap.onClick();
     report->setProperty("status", result.wasOk() ? "passed" : "failed");
     if (result.failed()) report->setProperty("error", result.getErrorMessage());
     setSize(originalSize.x, originalSize.y);
@@ -1603,12 +1684,17 @@ void MainComponent::showEditMenu()
     menu.addItem(3, "Delete selected clips (Delete)", clip != nullptr);
     menu.addItem(4, "Clip properties...", clip != nullptr);
     menu.addItem(5, "Edit MIDI notes...", clip && clip->kind == "midi");
+    menu.addSeparator();menu.addItem(11,"Copy selected clips (Ctrl+C)",clip!=nullptr);
+    menu.addItem(12,"Cut selected clips (Ctrl+X)",clip!=nullptr);menu.addItem(13,"Paste clips at playhead (Ctrl+V)",track!=nullptr);
+    menu.addItem(14,"Loop selection (Ctrl+L)",clip!=nullptr||!impl->arrangement.selectedTimeRange().isEmpty());
     menu.addSeparator(); menu.addItem(6, "Rename selected track...", track != nullptr);
     menu.addItem(7, "Move track up", track != nullptr); menu.addItem(8, "Move track down", track != nullptr);
     menu.addSeparator(); menu.addItem(9, "Tempo, meter and loop range...");
     menu.addSeparator(); menu.addItem(10, "Remove selected track", track != nullptr);
     menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&impl->editMenu), [safe = juce::Component::SafePointer<MainComponent>(this)](int id) {
         if (!safe) return; auto& p = *safe->impl;
+        if(id>=11&&id<=13){safe->clipClipboardAction(id==11?"copy_clips":id==12?"cut_clips":"paste_clips");return;}
+        if(id==14){safe->showResult(p.arrangement.loopSelection());return;}
         if (id == 1) safe->execute("split_clip", arguments({ { "clip_id", p.state.selectedClipId }, { "at_seconds", p.state.position } }));
         if (id == 2 || id == 3) safe->execute(id == 2 ? "duplicate_clips" : "delete_clips", arguments({ { "clip_ids", idsValue(p.arrangement.selectedClipIds()) } }));
         if (id == 4) safe->showClipProperties(); if (id == 5) safe->showPianoRoll();
@@ -1663,6 +1749,7 @@ void MainComponent::showPianoRoll()
     if (!impl->dockPiano) {
         auto piano = std::make_unique<PianoRoll>(); impl->pianoRoll = piano.get(); piano->setLookAndFeel(&impl->look);
         piano->onProjectKey = [safe = juce::Component::SafePointer<MainComponent>(this)](const juce::KeyPress& key) { return safe && safe->keyPressed(key); };
+        piano->onEditError = [safe = juce::Component::SafePointer<MainComponent>(this)](const juce::String& error) {if(safe)safe->showResult(juce::Result::fail(error));};
         piano->onWriteNotes = [safe = juce::Component::SafePointer<MainComponent>(this)](const juce::String& id, const std::vector<PianoRoll::Note>& notes, std::uint64_t expected) {
             if (!safe) return;
             const auto serialise = [](const auto& n) { return arguments({ { "id", n.id }, { "pitch", n.pitch }, { "start_beats", n.startBeats }, { "length_beats", n.lengthBeats }, { "velocity", n.velocity }, { "channel", n.channel } }); };
@@ -1708,19 +1795,57 @@ void MainComponent::showPianoRoll()
     impl->pianoRoll->setClip(impl->state.projectId, clip->id, impl->selectedClipName(), impl->state.revision, clip->startBeats, clip->lengthBeats, impl->state.bpm, notes);
     impl->pianoRoll->setTimeSignature(impl->state.numerator, impl->state.denominator);
 }
+void MainComponent::clipClipboardAction(const juce::String& command)
+{
+    auto& p=*impl;juce::StringArray before;
+    for(const auto& track:p.state.tracks)for(const auto& clip:track.clips)before.add(clip.id);
+    const auto args=command=="paste_clips"?arguments({{"start_seconds",p.state.position},{"target_track_id",p.state.selectedTrackId}})
+        :arguments({{"clip_ids",idsValue(p.arrangement.selectedClipIds())}});
+    const auto result=session.execute(command,args,p.state.revision);showResult(result);
+    if(result.wasOk()&&command=="paste_clips"){
+        juce::StringArray added;for(const auto& track:p.state.tracks)for(const auto& clip:track.clips)if(!before.contains(clip.id))added.add(clip.id);
+        p.arrangement.selectClipIds(added);
+    }
+}
+void MainComponent::showMetronomeOptions()
+{
+    juce::PopupMenu menu;
+    menu.addItem(1,"Only sound while recording",true,impl->state.metronomeRecordOnly);
+    menu.addSeparator();const int volumes[]{-36,-30,-24,-18,-12,-6,0};
+    for(int i=0;i<7;++i)menu.addItem(10+i,"Click volume "+juce::String(volumes[i])+" dB",true,std::abs(impl->state.metronomeGainDb-volumes[i])<0.01f);
+    menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&impl->metronomeOptions),[safe=juce::Component::SafePointer<MainComponent>(this)](int id){
+        if(!safe)return;
+        if(id==1)safe->execute("set_recording_preferences",arguments({{"metronome_record_only",!safe->impl->state.metronomeRecordOnly}}));
+        if(id>=10&&id<17)safe->execute("set_recording_preferences",arguments({{"metronome_gain_db",-36+(id-10)*6}}));
+    });
+}
 void MainComponent::showProjectTiming()
 {
     const auto s = impl->state; const auto expected = s.revision;
+    const bool musical=impl->rulerMode.getSelectedId()!=2;
     auto content = std::make_unique<ValueForm>(std::vector<ValueForm::Field>{
         { "bpm", "tempo / BPM (20-300)", juce::String(s.bpm) },
         { "numerator", "meter numerator", juce::String(s.numerator) }, { "denominator", "meter denominator", juce::String(s.denominator) },
-        { "start_seconds", "loop start / seconds", juce::String(s.loopStart, 6) }, { "end_seconds", "loop end / seconds", juce::String(s.loopEnd > s.loopStart ? s.loopEnd : juce::jmax(s.duration, 8.0), 6) } },
-        [safe = juce::Component::SafePointer<MainComponent>(this), expected](const juce::var& values) {
+        { "start_seconds", musical?"loop start / bar:beat:tick":"loop start / seconds", positionText(s.loopStart,s,musical),!musical },
+        { "end_seconds", musical?"loop end / bar:beat:tick":"loop end / seconds", positionText(s.loopEnd > s.loopStart ? s.loopEnd : juce::jmax(s.duration, 8.0),s,musical),!musical } },
+        [safe = juce::Component::SafePointer<MainComponent>(this), expected, musical, s](const juce::var& values) {
             if (!safe) return juce::Result::fail("The project window is closed.");
+            auto timing=s;timing.bpm=double(values["bpm"]);const auto n=double(values["numerator"]),d=double(values["denominator"]);
+            if(!std::isfinite(n)||!std::isfinite(d)||n<1||n>32||d<1||d>32||n!=std::floor(n)||d!=std::floor(d)||timing.bpm<20||timing.bpm>300)
+                return juce::Result::fail("Enter a valid tempo and integer meter before applying the loop.");
+            timing.numerator=int(n);timing.denominator=int(d);
+            auto start=positionValue(values["start_seconds"].toString(),timing,musical),end=positionValue(values["end_seconds"].toString(),timing,musical);
+            if(!start||!end)return juce::Result::fail("Enter loop positions in the displayed units; bar:beat:tick uses ticks 000-959.");
+            if(timing.bpm==s.bpm&&timing.numerator==s.numerator&&timing.denominator==s.denominator){
+                const auto unchanged=[&](const juce::var& value,double old){return musical
+                    ?value.toString()==positionText(old,s,true):double(value)==juce::String(old,6).getDoubleValue();};
+                if(unchanged(values["start_seconds"],s.loopStart))start=s.loopStart;
+                if(s.loopEnd>s.loopStart&&unchanged(values["end_seconds"],s.loopEnd))end=s.loopEnd;
+            }
             juce::Array<juce::var> commands;
             commands.add(arguments({ { "command", "set_tempo" }, { "args", arguments({ { "bpm", values["bpm"] } }) } }));
             commands.add(arguments({ { "command", "set_time_signature" }, { "args", arguments({ { "numerator", values["numerator"] }, { "denominator", values["denominator"] } }) } }));
-            commands.add(arguments({ { "command", "set_loop_range" }, { "args", arguments({ { "start_seconds", values["start_seconds"] }, { "end_seconds", values["end_seconds"] } }) } }));
+            commands.add(arguments({ { "command", "set_loop_range" }, { "args", arguments({ { "start_seconds", *start }, { "end_seconds", *end } }) } }));
             const auto result = safe->session.execute("batch", arguments({ { "commands", commands } }), expected);
             safe->showResult(result); return result;
         });
@@ -1732,23 +1857,39 @@ void MainComponent::showProjectTiming()
 void MainComponent::showClipProperties()
 {
     const auto* clip = impl->selectedClip(); if (!clip) return;
-    if (clip->kind == "midi") { showPianoRoll(); return; }
-    const auto id = clip->id; const auto expected = impl->state.revision;
-    auto content = std::make_unique<ValueForm>(std::vector<ValueForm::Field>{
-        { "start_seconds", "timeline start / seconds", juce::String(clip->timelineStart, 6) },
-        { "source_offset", "source offset / seconds", juce::String(clip->sourceOffset, 6) },
-        { "length", "length / seconds", juce::String(clip->duration, 6) },
-        { "fade_in_seconds", "fade in / seconds", juce::String(clip->fadeIn, 6) },
-        { "fade_out_seconds", "fade out / seconds", juce::String(clip->fadeOut, 6) } },
-        [safe = juce::Component::SafePointer<MainComponent>(this), id, expected](const juce::var& values) {
+    const auto id = clip->id; const auto expected = impl->state.revision;const auto original=*clip;
+    const auto timing=impl->state;const bool musical=impl->rulerMode.getSelectedId()!=2,midi=clip->kind=="midi";
+    const auto secondsPerBar=60.0/timing.bpm*timing.numerator*4.0/timing.denominator;
+    std::vector<ValueForm::Field> fields{{"start_seconds",musical?"start / bar:beat:tick":"start / seconds",positionText(clip->timelineStart,timing,musical),!musical},
+        {"length",musical?"length / bars (fraction allowed)":"length / seconds",juce::String(clip->duration/(musical?secondsPerBar:1.0),9)}};
+    if(!midi){fields.push_back({"source_offset","source offset / seconds",juce::String(clip->sourceOffset,6)});
+        fields.push_back({"fade_in_seconds","fade in / seconds",juce::String(clip->fadeIn,6)});fields.push_back({"fade_out_seconds","fade out / seconds",juce::String(clip->fadeOut,6)});}
+    auto content = std::make_unique<ValueForm>(fields,
+        [safe = juce::Component::SafePointer<MainComponent>(this), id, expected, timing, musical, midi, secondsPerBar, original](const juce::var& values) {
             if (!safe) return juce::Result::fail("The project window is closed."); juce::Array<juce::var> commands;
-            commands.add(arguments({ { "command", "trim_clip" }, { "args", arguments({ { "clip_id", id }, { "start_seconds", values["start_seconds"] }, { "end_seconds", double(values["start_seconds"]) + double(values["length"]) }, { "source_offset", values["source_offset"] } }) } }));
-            commands.add(arguments({ { "command", "set_clip_fades" }, { "args", arguments({ { "clip_id", id }, { "fade_in_seconds", values["fade_in_seconds"] }, { "fade_out_seconds", values["fade_out_seconds"] } }) } }));
+            auto start=positionValue(values["start_seconds"].toString(),timing,musical);
+            if(!start)return juce::Result::fail("Enter a valid start in the displayed ruler units.");
+            if(musical?values["start_seconds"].toString()==positionText(original.timelineStart,timing,true)
+                :double(values["start_seconds"])==juce::String(original.timelineStart,6).getDoubleValue())start=original.timelineStart;
+            auto duration=double(values["length"])*(musical?secondsPerBar:1.0);
+            if(double(values["length"])==juce::String(original.duration/(musical?secondsPerBar:1.0),9).getDoubleValue())duration=original.duration;
+            if(!std::isfinite(duration)||duration<=0)return juce::Result::fail("Clip length must be positive.");
+            const auto preserve=[](double value,double old){return value==juce::String(old,6).getDoubleValue()?old:value;};
+            const auto offset=midi?0.0:preserve(double(values["source_offset"]),original.sourceOffset);
+            const auto fadeIn=midi?0.0:preserve(double(values["fade_in_seconds"]),original.fadeIn),fadeOut=midi?0.0:preserve(double(values["fade_out_seconds"]),original.fadeOut);
+            // Relocate first, then trim at the new start: moving MIDI via its
+            // properties must not shift or discard its clip-relative notes.
+            if(*start!=original.timelineStart)commands.add(arguments({{"command","move_clip"},{"args",arguments({{"clip_id",id},{"start_seconds",*start}})}}));
+            auto trim=arguments({{"clip_id",id},{"start_seconds",*start},{"end_seconds",*start+duration}});
+            if(!midi)trim.getDynamicObject()->setProperty("source_offset",offset);
+            if(duration!=original.duration||offset!=original.sourceOffset)commands.add(arguments({{"command","trim_clip"},{"args",trim}}));
+            if(!midi&&(fadeIn!=original.fadeIn||fadeOut!=original.fadeOut))commands.add(arguments({ { "command", "set_clip_fades" }, { "args", arguments({ { "clip_id", id }, { "fade_in_seconds", fadeIn }, { "fade_out_seconds", fadeOut } }) } }));
+            if(commands.isEmpty())return juce::Result::ok();
             const auto result = safe->session.execute("batch", arguments({ { "commands", commands } }), expected);
             safe->showResult(result); return result;
         });
     content->setLookAndFeel(&impl->look);
-    juce::DialogWindow::LaunchOptions options; options.dialogTitle = "Audio clip / non-destructive edit"; options.dialogBackgroundColour = paper;
+    juce::DialogWindow::LaunchOptions options; options.dialogTitle = midi?"MIDI clip properties":"Audio clip / non-destructive edit"; options.dialogBackgroundColour = paper;
     options.content.setOwned(content.release()); options.componentToCentreAround = this; options.useNativeTitleBar = true;
     options.escapeKeyTriggersCloseButton = true; options.resizable = false; impl->forms.emplace_back(options.launchAsync());
 }
@@ -2048,6 +2189,15 @@ bool MainComponent::keyPressed(const juce::KeyPress& key)
     if (modifiers.isCommandDown() || modifiers.isCtrlDown()) {
         if (impl->chooser != nullptr || impl->confirming || impl->pendingAfterSave) return false;
         const int code = key.getKeyCode();
+        if(code=='C'||code=='c'||code=='X'||code=='x'||code=='V'||code=='v'){
+            if(impl->pianoRoll&&impl->pianoRoll->hasKeyboardFocus(true))return false;
+            clipClipboardAction(code=='C'||code=='c'?"copy_clips":code=='X'||code=='x'?"cut_clips":"paste_clips");return true;
+        }
+        if(code=='L'||code=='l'){showResult(impl->arrangement.loopSelection());return true;}
+        if(code=='4'){
+            if(impl->pianoRoll&&impl->pianoRoll->hasKeyboardFocus(true))return false;
+            impl->snap.setToggleState(!impl->snap.getToggleState(),juce::dontSendNotification);impl->snap.onClick();return true;
+        }
         if (code == 's' || code == 'S') { saveProject(modifiers.isShiftDown()); return true; }
         if (code == 'o' || code == 'O') { openProject(); return true; }
         if (code == 'n' || code == 'N') { newProject(); return true; }
@@ -2067,7 +2217,7 @@ bool MainComponent::keyPressed(const juce::KeyPress& key)
         execute("split_clip", arguments({ { "clip_id", impl->state.selectedClipId }, { "at_seconds", impl->state.position } })); return true;
     }
     if (key.getKeyCode() != juce::KeyPress::spaceKey || modifiers.isAnyModifierKeyDown()) return false;
-    if (impl->state.duration <= 0.0 || !impl->state.deviceAvailable) return false;
+    if ((impl->state.duration <= 0.0 && !impl->state.metronomeEnabled) || !impl->state.deviceAvailable) return false;
     impl->error.clear();
     session.togglePlay();
     refreshSnapshot();

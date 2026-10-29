@@ -31,6 +31,32 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
         juce::MemoryBlock preferencesBefore;
         check(!preferencesExisted || preferencesFile.loadFileAsData(preferencesBefore), "read user settings without modifying them");
         {
+            EngineSession preferences(false);const auto initial=preferences.snapshot();
+            command(preferences,"set_recording_preferences",object({{"metronome_enabled",true},{"metronome_gain_db",-30.0},{"metronome_record_only",true},{"count_in_enabled",true},{"count_in_bars",4}}));
+            auto changed=preferences.snapshot();
+            check(changed.revision==initial.revision&&changed.dirty==initial.dirty&&!changed.canUndo,"recording preferences do not mutate project revision/dirty/Undo");
+            check(changed.metronomeEnabled&&changed.metronomeRecordOnly&&changed.countInEnabled&&changed.countInBars==4&&std::abs(changed.metronomeGainDb+30)<1.0e-6,"all recording preferences round trip");
+            check(std::abs(preferences.impl->edit->getClickTrackVolume()-juce::Decibels::decibelsToGain(-30.0f))<1.0e-6,"quiet metronome gain is not clamped to native 0.2 floor");
+            check(preferences.execute("set_recording_preferences",object({{"metronome_enabled",false},{"count_in_bars",3}}),changed.revision).failed()&&preferences.snapshot().metronomeEnabled,"invalid preference patch is atomic");
+            check(preferences.execute("set_recording_preferences",object({{"metronome_gain_db",std::numeric_limits<double>::quiet_NaN()}}),changed.revision).failed(),"nonfinite metronome gain rejected");
+            check(changed.memoryWorkingSetBytes>0&&changed.memoryPrivateBytes>0,"Windows RAM observations are real positive byte counts");
+            const auto readAt=preferences.impl->memoryReadAt;preferences.snapshot();check(preferences.impl->memoryReadAt==readAt,"repeated snapshots reuse RAM sample");
+            {
+                te::LevelMeasurer disconnected;auto probe=preferences.snapshot();TrackSnapshot track;track.inputDeviceId="disconnected-device";probe.tracks.push_back(track);
+                auto tap=std::make_unique<Impl::MeterTap>();tap->bind(&disconnected);tap->left=tap->right=-3.0f;
+                preferences.impl->inputMeters.emplace(track.inputDeviceId,std::move(tap));preferences.impl->metersReadAt=-1000000;
+                preferences.impl->updateTelemetry(probe);
+                check(!preferences.impl->inputMeters.contains(track.inputDeviceId)&&probe.tracks.back().inputPeakDb==-100.0f,"missing enumerated input is detached and stale peak disappears even while track binding remains");
+            }
+            command(preferences,"reset_meters");check(!preferences.snapshot().masterOverloaded,"meter reset available without project mutation");
+            for(const auto signature:std::array<std::pair<int,int>,4>{{{4,4},{3,4},{6,8},{3,8}}}){
+                command(preferences,"set_time_signature",object({{"numerator",signature.first},{"denominator",signature.second}}));
+                preferences.impl->edit->tempoSequence.updateTempoData();
+                check(std::abs(preferences.impl->edit->getNumCountInBeats()-signature.first*4.0/signature.second*4)<1.0e-8,"four-bar preroll matches meter denominator");
+                check(std::abs(preferences.impl->edit->tempoSequence.toTime(te::BeatPosition::fromBeats(4)).inSeconds()-2.0)<1.0e-8,"native MIDI quarter-beat clock remains consistent across signatures");
+            }
+        }
+        {
             EngineSession first(false); auto& firstProperties = first.impl->engine.getPropertyStorage();
             check(firstProperties.getPropertiesFile().getFile() == juce::File(), "offline settings have no disk backing file");
             juce::XmlElement setup("DEVICESETUP"); setup.setAttribute("deviceType", "Offline isolation sentinel");
@@ -97,7 +123,12 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
             return samples;
         };
         okay(production::applyGraph(*edit, graph, true), "direct output graph");
-        auto direct = render("direct"); const auto directRms = direct.getRMSLevel(0, 12000, 48000); check(directRms > 0.01f, "direct graph renders non-silent audio");
+        auto direct = render("direct");
+        edit->clickTrackEnabled=true;edit->clickTrackEmphasiseBars=true;
+        auto withClick = render("click-excluded");double clickDifference=0;
+        for(int ch=0;ch<direct.getNumChannels();++ch)for(int i=0;i<direct.getNumSamples();++i)clickDifference=std::max(clickDifference,double(std::abs(direct.getSample(ch,i)-withClick.getSample(ch,i))));
+        check(clickDifference<1.0e-7,"enabled metronome never enters offline render");edit->clickTrackEnabled=false;
+        const auto directRms = direct.getRMSLevel(0, 12000, 48000); check(directRms > 0.01f, "direct graph renders non-silent audio");
         graph.tracks[0].sends = { { "send-a", "bus-a", 0.0f, false, true } }; okay(production::applyGraph(*edit, graph, false), "add post-fader send");
         auto sent = render("send"); const auto ratio = sent.getRMSLevel(0, 12000, 48000) / directRms;
         check(ratio > 1.8f && ratio < 2.2f, "send and bus return add audible parallel audio");
@@ -133,6 +164,32 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
         command(isolated, "set_track_armed", object({ {"track_id", audioTrackId}, {"armed", true} }));
         command(isolated, "set_track_armed", object({ {"track_id", midiTrackId}, {"armed", true} }));
         recordingEdit->dispatchPendingUpdatesSynchronously(); recordingEdit->getUndoManager().clearUndoHistory();
+        juce::Array<juce::var> countInReports;
+        const auto reportCountIn=[&](const juce::String& phase){
+            auto& native=isolated.impl->edit->getTransport();auto* context=native.getCurrentPlaybackContext();
+            countInReports.add(object({{"phase",phase},{"state",isolated.impl->recording.state()},
+                {"transport_position",native.getPosition().inSeconds()},
+                {"audio_position",context?context->getPosition().inSeconds():0.0},
+                {"play_pending",context&&context->isPlayPending()},
+                {"native_count_beats",isolated.impl->edit->getNumCountInBeats()}}));
+            check(directory.getChildFile("recording-countin-diagnostics.json").replaceWithText(juce::JSON::toString(object({{"stages",countInReports}}),true)),"write count-in clock diagnostics");
+        };
+        // Cancellation during native preroll must never create a partial take.
+        command(isolated,"set_recording_preferences",object({{"count_in_enabled",true},{"count_in_bars",4},{"metronome_enabled",false}}));
+        const auto beforeCancel=isolated.snapshot();
+        command(isolated,"start_recording");
+        reportCountIn("four-bars-before-first-audio-block");
+        check(isolated.snapshot().countingIn&&isolated.snapshot().countInBeatsRemaining>15,"native four-bar prerecord state is visible while click switch is off");
+        double countClickPeak=0;
+        for(int b=0;b<100;++b){juce::AudioBuffer<float> input(2,256);input.clear();juce::MidiBuffer midi;hosted.processBlock(input,midi);countClickPeak=std::max(countClickPeak,double(input.getMagnitude(0,input.getNumSamples())));}
+        reportCountIn("four-bars-after-100-blocks");
+        check(countClickPeak>0.001,"count-in produces click independently of metronome play switch");
+        command(isolated,"stop_recording");isolated.impl->finishRecording();
+        reportCountIn("four-bars-cancelled");
+        check(!isolated.snapshot().recording&&!isolated.snapshot().recordingFinalizing&&isolated.snapshot().recordingError.isEmpty(),"cancelled count-in returns cleanly to idle");
+        check(isolated.snapshot().revision==beforeCancel.revision&&recordingTracks[0]->getClips().isEmpty()&&recordingTracks[1]->getClips().isEmpty(),"cancelled count-in creates no clips or revision");
+        command(isolated,"set_recording_preferences",object({{"count_in_enabled",false}}));
+        recordingEdit->getUndoManager().clearUndoHistory();
         const auto beforeTakeRevision = isolated.snapshot().revision;
         command(isolated, "start_recording");
         check(isolated.snapshot().recording && isolated.snapshot().duration == 0, "public record starts in an empty arrangement");
@@ -256,22 +313,79 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
             check(list != nullptr, "reopened engine input list is available");
             for (const auto& input : *list) check(input["monitor"].toString() == "off", "reopening resets all input owners, not just current Edit destinations");
         }
+        // A completed count-in at a nonzero mid-bar position captures only the
+        // punch-in region, retaining a held note and pre-roll sustain state.
+        command(isolated,"set_time_signature",object({{"numerator",3},{"denominator",8}}));
+        command(isolated,"set_recording_preferences",object({{"count_in_enabled",true},{"count_in_bars",1},{"metronome_enabled",false}}));
+        command(isolated,"set_track_armed",object({{"track_id",audioTrackId},{"armed",true}}));
+        command(isolated,"set_track_armed",object({{"track_id",midiTrackId},{"armed",true}}));
+        auto* takeEdit=isolated.impl->edit.get();takeEdit->dispatchPendingUpdatesSynchronously();
+        isolated.seek(5.375);const auto beforeCountTake=isolated.snapshot().revision;
+        command(isolated,"start_recording");
+        reportCountIn("mid-bar-before-first-audio-block");
+        check(isolated.snapshot().countingIn,"mid-bar count-in is active");
+        bool sentHeld=false,sentRelease=false;double audibleCountPeak=0;
+        for(int block=0;block<300;++block){
+            auto* playback=takeEdit->getTransport().getCurrentPlaybackContext();const auto position=playback->getPosition().inSeconds();
+            juce::AudioBuffer<float> input(2,256);input.clear();juce::MidiBuffer midi;
+            if(!sentHeld&&position<5.375){midi.addEvent(juce::MidiMessage::noteOn(1,72,juce::uint8(90)),0);midi.addEvent(juce::MidiMessage::controllerEvent(1,64,127),0);
+                for(int cc:{0,6,32,38,84,88,96,97,98,99,100,101,123})midi.addEvent(juce::MidiMessage::controllerEvent(1,cc,1),1);
+                sentHeld=true;}
+            if(!sentRelease&&position>5.625){midi.addEvent(juce::MidiMessage::noteOff(1,72),0);midi.addEvent(juce::MidiMessage::controllerEvent(1,64,0),1);sentRelease=true;}
+            hosted.processBlock(input,midi);if(position<5.375)audibleCountPeak=std::max(audibleCountPeak,double(input.getMagnitude(0,input.getNumSamples())));
+        }
+        reportCountIn("mid-bar-after-300-blocks");
+        check(sentHeld&&sentRelease&&!isolated.snapshot().countingIn&&audibleCountPeak>0.001,"native sample clock finishes 3/8 count-in and keeps click audible");
+        command(isolated,"stop_recording");isolated.impl->finishRecording();
+        check(isolated.snapshot().revision==beforeCountTake+1,"completed count-in take commits one revision");
+        const auto countTake=isolated.impl->capture();bool foundHeld=false,foundPedal=false,foundAudio=false;
+        for(const auto& t:countTake.tracks)for(const auto& c:t.clips)if(std::abs(c.timelineStart-5.375)<0.011){
+            if(c.kind=="audio"){
+                foundAudio=true;juce::WavAudioFormat format;auto* native=isolated.impl->findClip(c.id);std::unique_ptr<juce::AudioFormatReader> r(format.createReaderFor(native->source.createInputStream().release(),true));
+                check(r!=nullptr,"read count-in silent input take");juce::AudioBuffer<float> data(1,int(r->lengthInSamples));r->read(&data,0,data.getNumSamples(),0,true,false);
+                check(data.getMagnitude(0,data.getNumSamples())<1.0e-6,"metronome does not leak into input recording");
+            }
+            for(const auto& n:c.notes)if(n.pitch==72){foundHeld=true;check(std::abs(n.startBeats)<0.025&&n.lengthBeats>0,"held note enters at recording boundary without negative offset");}
+            for(const auto& event:c.controllers){
+                if(event.type==64&&event.value==(127<<7)&&std::abs(event.beats)<1.0e-8)foundPedal=true;
+                check(event.type!=0&&event.type!=6&&event.type!=32&&event.type!=38&&event.type!=84&&event.type!=88
+                    &&(event.type<96||event.type>101)&&event.type!=123,"pre-count bank/RPN/increment/channel-mode events are not synthesized at recording start");
+            }
+        }
+        check(foundHeld&&foundPedal&&foundAudio,"count-in retains held note, sustain-at-start and audio take");
+        okay(storage::validate(countTake),"count-in take is saveable");
+        command(isolated,"undo");command(isolated,"set_recording_preferences",object({{"count_in_enabled",false}}));
+        command(isolated,"set_time_signature",object({{"numerator",4},{"denominator",4}}));
         {
             EngineSession chase(false); command(chase, "create_track", object({ {"kind", "instrument"}, {"name", "Controller boundary test"} }));
             const auto tid = chase.snapshot().tracks.front().id;
             command(chase, "create_midi_clip", object({ {"track_id", tid}, {"start_beats", 0.0}, {"length_beats", 8.0} }));
             auto fixture = chase.impl->capture(); const auto cid = fixture.tracks[0].clips[0].id;
-            fixture.tracks[0].clips[0].controllers = { { "pedal-on", 1, 64, 127 << 7, 0 }, { "bend", 2, 0x1005, 10000, 0 }, { "all-notes-off", 2, 123, 0, 0 }, { "pedal-off", 6, 64, 0, 0 } };
+            fixture.tracks[0].clips[0].controllers = {
+                { "pedal-on", 1, 64, 127 << 7, 0 },
+                { "bend", 2, te::MidiControllerEvent::pitchWheelType, 10000, 0 },
+                { "all-notes-off", 2, 123, 0, 0 }, { "pedal-off", 6, 64, 0, 0 },
+                { "program", 2, te::MidiControllerEvent::programChangeType, 7 << 7, 0 }
+            };
+            for(int cc:{0,6,32,38,96,97,98,99,100,101})
+                fixture.tracks[0].clips[0].controllers.push_back({"unsupported-"+juce::String(cc),2,cc,1<<7,0});
             okay(chase.impl->applyTo(*chase.impl->edit, fixture, chase.impl->bindings, false), "prepare native controller fixture"); chase.impl->recordEdit(); chase.impl->edit->getUndoManager().clearUndoHistory();
             auto boundary = [&](const storage::StoredClip& clip) {
                 bool pedal = false, bend = false, off = false, replayedAction = false;
-                for (const auto& event : clip.controllers) { pedal |= event.type == 64 && event.value == (127 << 7) && event.beats == 0; bend |= event.type == 0x1005 && event.value == 10000 && event.beats == 0; off |= event.type == 64 && event.value == 0 && event.beats == 2; replayedAction |= event.type == 123; }
-                check(pedal && bend && off && !replayedAction, "boundary chases pedal/bend, preserves later off and does not replay channel-mode actions");
+                for (const auto& event : clip.controllers) {
+                    pedal |= event.type == 64 && event.value == (127 << 7) && event.beats == 0;
+                    bend |= event.type == te::MidiControllerEvent::pitchWheelType && event.value == 10000 && event.beats == 0;
+                    off |= event.type == 64 && event.value == 0 && event.beats == 2;
+                    replayedAction |= event.type == te::MidiControllerEvent::programChangeType || event.type == 123
+                        || event.type == 0 || event.type == 6 || event.type == 32 || event.type == 38
+                        || (event.type >= 96 && event.type <= 101);
+                }
+                check(pedal && bend && off && !replayedAction, "boundary chases pedal/bend, preserves later off and does not replay program/bank/RPN/increment/channel-mode actions");
             };
             command(chase, "split_clip", object({ {"clip_id", cid}, {"at_seconds", 2.0} })); auto split = chase.impl->capture();
             check(split.tracks[0].clips.size() == 2, "public MIDI split creates two clips");
             for (const auto& piece : split.tracks[0].clips) if (piece.id != cid) boundary(piece);
-            command(chase, "undo"); check(chase.impl->capture().tracks[0].clips[0].controllers.size() == 4, "split Undo preserves original controller events"); command(chase, "redo");
+            command(chase, "undo"); check(chase.impl->capture().tracks[0].clips[0].controllers.size() == 15, "split Undo preserves original controller events"); command(chase, "redo");
             for (const auto& piece : chase.impl->capture().tracks[0].clips) if (piece.id != cid) boundary(piece);
             command(chase, "undo"); command(chase, "trim_clip", object({ {"clip_id", cid}, {"start_seconds", 2.0}, {"end_seconds", 4.0} })); boundary(chase.impl->capture().tracks[0].clips[0]);
             command(chase, "undo"); command(chase, "duplicate_clips", object({ {"clip_ids", juce::var(juce::Array<juce::var>{ cid })} }));

@@ -1,0 +1,30 @@
+--- a/modules/tracktion_engine/model/edit/tracktion_Edit.h
++++ b/modules/tracktion_engine/model/edit/tracktion_Edit.h
+@@ -683,7 +683,7 @@
+     TimeRange getClickTrackRange() const noexcept;
+ 
+     /** Returns the click track volume. */
+-    float getClickTrackVolume() const noexcept              { return juce::jlimit (0.2f, 1.0f, clickTrackGain.get()); }
++    float getClickTrackVolume() const noexcept              { return juce::jlimit (0.0f, 1.0f, clickTrackGain.get()); }
+ 
+     /** Returns the name of the device being used as the click track output. */
+     juce::String getClickTrackDevice() const;
+@@ -705,7 +705,8 @@
+         oneBar    = 1,  /**< One bar count in. */
+         twoBar    = 2,  /**< Two bars count in. */
+         twoBeat   = 3,  /**< Two beats count in. */
+-        oneBeat   = 4   /**< One beat count in. */
++        oneBeat   = 4,  /**< One beat count in. */
++        fourBar   = 5   /**< Four bars count in. */
+     };
+ 
+     /** Sets the duration of the count in. */
+@@ -715,7 +716,7 @@
+     CountIn getCountInMode() const;
+ 
+     /** Returns the number of beats of the count in. */
+-    int getNumCountInBeats() const;
++    double getNumCountInBeats() const;
+ 
+     //==============================================================================
+     /** Sends a 'sourceMediaChanged' call to all the clips. */

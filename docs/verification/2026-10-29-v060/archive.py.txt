@@ -1,0 +1,41 @@
+from pathlib import Path
+import hashlib,json,shutil,sys
+sys.path.insert(0,str(Path.cwd()))
+from scripts.dev import source_fingerprint
+root=Path.cwd()
+out=root/'docs/verification/2026-10-29-v060'
+out.mkdir(parents=True,exist_ok=True)
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+fp=source_fingerprint()
+assert not fp['errors'],fp['errors']
+records=[json.loads(p.read_text(encoding='utf-8-sig')) for p in (root/'docs/builds').glob('20261029*.json')]
+configs=sys.argv[1:] or ['Release']
+evidence=[]
+for cfg in configs:
+ tests=[r for r in records if r.get('config')==cfg and r.get('command',[None])[0]=='ctest' and r.get('status')=='succeeded' and r.get('source_fingerprint',{}).get('digest')==fp['digest'] and not r.get('source_changed_during_command',True)]
+ assert tests,(cfg,'no passed CTest for final source')
+ record=max(tests,key=lambda r:r['started_at'])
+ latest=json.loads((root/'build/smoke'/cfg/'latest.json').read_text(encoding='utf-8-sig'))
+ directory=Path(latest['directory'])
+ assert (directory/'production-smoke.json').exists()
+ reports={}
+ for name in ['engine-report.json','project-report.json','clip-report.json','daw-report.json','storage-v3-report.json','production-smoke.json','arrangement-report.json','transport-report.json','recording-note-boundaries.json','recording-countin-diagnostics.json','job-retry-report.json']:
+  src=directory/name
+  if src.exists():
+   dst=out/(cfg.lower()+'-'+name);shutil.copyfile(src,dst)
+   reports[dst.name]=sha(dst)
+ for name in ['ui-1280x800.png','ui-1000x650.png','ui-empty-1280x800.png','ui-midi-dock-1280x800.png','ui-midi-dock-1000x650.png']:
+  src=directory/name
+  if src.exists():shutil.copyfile(src,out/(cfg.lower()+'-'+name))
+ exe=root/'build/bin'/cfg/'E-musician.exe'
+ evidence.append({'config':cfg,'ctest_record':record['id'],'ctest_status':record['status'],'source_fingerprint':fp['digest'],'exe_sha256':sha(exe),'report_sha256':reports,'artifact_directory':str(directory)})
+before=json.loads((root/'.cache/v060/user-files-before.json').read_text(encoding='utf-8-sig'))
+changed=[]
+for item in before:
+ p=Path(item['path'])
+ if not p.exists() or p.stat().st_size!=item['bytes'] or sha(p)!=item['sha256']:changed.append(item['path'])
+(root/'.cache/v060/user-files-after.json').write_text(json.dumps({'changed':changed,'checked':len(before)},indent=2),encoding='utf-8')
+assert not changed,'Protected user files changed; inspect local report'
+summary={'version':'0.6.0','source_fingerprint':fp,'configs':evidence,'user_files':{'checked':len(before),'bytes':sum(i['bytes'] for i in before),'unchanged':True},'scope':'Offline automated tests and synthetic component captures; no physical device or human listening test in this iteration','attempt_records':[{'id':r['id'],'status':r['status'],'config':r.get('config'),'command':r.get('command'),'source_changed':r.get('source_changed_during_command')} for r in sorted(records,key=lambda r:r['started_at']) if r.get('status')!='running']}
+(out/'verification-summary.json').write_text(json.dumps(summary,indent=2)+'\n',encoding='utf-8')
+print(json.dumps({'source':fp['digest'],'configs':[{k:v for k,v in e.items() if k!='report_sha256'} for e in evidence],'protected_files':len(before),'protected_bytes':sum(i['bytes'] for i in before),'unchanged':True}))

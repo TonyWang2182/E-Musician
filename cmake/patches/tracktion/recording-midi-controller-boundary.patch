@@ -1,0 +1,43 @@
+--- a/modules/tracktion_engine/playback/devices/tracktion_MidiInputDevice.cpp
++++ b/modules/tracktion_engine/playback/devices/tracktion_MidiInputDevice.cpp
+@@ -1316,6 +1316,40 @@
+             }
+             else
+             {
++                // Restore persistent controller state at the punch-in boundary.
++                // Channel-mode actions (all-notes-off etc.) must never be replayed.
++                std::map<std::pair<int, int>, juce::MidiMessage> initialControllers;
++                const auto controllerKey = [] (const juce::MidiMessage& message) -> int
++                {
++                    if (message.isController())
++                    {
++                        const auto cc = message.getControllerNumber();
++                        // Independent persistent controls only. Do not synthesize bank,
++                        // RPN/NRPN/data-entry sequences, increments or note actions.
++                        if (cc == 1 || cc == 2 || cc == 4 || cc == 7 || cc == 8 || cc == 10 || cc == 11
++                            || (cc >= 64 && cc <= 79) || (cc >= 91 && cc <= 95))
++                            return cc;
++                    }
++                    if (message.isPitchWheel()) return 120;
++                    if (message.isChannelPressure()) return 121;
++                    return -1;
++                };
++                for (int i = 0; i < recorded.getNumEvents(); ++i)
++                {
++                    const auto& message = recorded.getEventPointer(i)->message;
++                    const auto at = message.getTimeStamp();
++                    if (at > startPos.inSeconds()) break;
++                    const auto controller = controllerKey (message);
++                    if (controller < 0) continue;
++                    const auto key = std::make_pair (message.getChannel(), controller);
++                    if (at < startPos.inSeconds()) initialControllers.insert_or_assign (key, message);
++                    else initialControllers.erase (key); // Keep an explicit boundary event authoritative.
++                }
++                for (auto& [key, message] : initialControllers)
++                {
++                    message.setTimeStamp (0.0);
++                    mpeMessagesToAddAtStartPos.add (message);
++                }
+                 for (int i = recorded.getNumEvents(); --i >= 0;)
+                 {
+                     auto& m = *recorded.getEventPointer (i);

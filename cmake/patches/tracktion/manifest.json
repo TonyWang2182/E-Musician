@@ -31,6 +31,41 @@
       "before_sha256_lf": "d2a30d8ed9fcd14585605856bb18d319a80e1f842a1f246c23c3acfc81d54036",
       "after_sha256_lf": "1371d21f50d07bfb24198b694b922d4bf115eb6060dcd80955d940460068cad3",
       "patch_sha256_lf": "5726605bd003fd92ac9a3a3d2c4c7b7c01dd567ecca26a4397069d654ccdcbc9"
+    },
+    {
+      "path": "modules/tracktion_engine/model/edit/tracktion_Edit.h",
+      "patch": "recording-Edit-h.patch",
+      "before_sha256_lf": "279159b9a57aa1251e62c704f172b0f45e1f99845c5a7136d4481fd943034e73",
+      "after_sha256_lf": "636236695e6493b722124396f35a83b5f06662c06cd2cee11525a2ad1e9c704a",
+      "patch_sha256_lf": "00c522571bb92702ae47b3603128f15b54165aa3a3cce6ee8c7d451c348702b5"
+    },
+    {
+      "path": "modules/tracktion_engine/model/edit/tracktion_Edit.cpp",
+      "patch": "recording-Edit-cpp.patch",
+      "before_sha256_lf": "4329875765f86f2b4000ed0019ab393d915f69c8672e68614698fdd3b033718a",
+      "after_sha256_lf": "8e9b038a12e79e069f7d9edacf9ad9e8ccc6661ca0a07d74a220ebbc2188099a",
+      "patch_sha256_lf": "505cf9a23c772784d2a860397ef966a388d4959d724be1133a9b123e3e7f9e59"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_ClickNode.cpp",
+      "patch": "recording-ClickNode-cpp.patch",
+      "before_sha256_lf": "290f36125fc4b94b8a07c207d8f1e354a5ef5f197e784bdefc46d0ba639a2731",
+      "after_sha256_lf": "9e5451d13a6e189b906156349bde1754e76790f30978d346fa46bd581d4ed630",
+      "patch_sha256_lf": "707dd3aa4f9fe2c5538444f1d886d31d3d2e657bf294153f702cb116d8d8834f"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/tracktion_TransportControl.cpp",
+      "patch": "recording-TransportControl-cpp.patch",
+      "before_sha256_lf": "2ca55395cc3905b37abdaefb28b52c3a92084cc6d446d185ace307fec15b90d6",
+      "after_sha256_lf": "311010048630f17ca504f705d7924caf33f98a3a0db727525c30e2e1a4300f46",
+      "patch_sha256_lf": "aac015d3f654ca5d457fda59a4464c13a60132fca9c7bd3c898c6d4da2662958"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/devices/tracktion_MidiInputDevice.cpp",
+      "patch": "recording-midi-controller-boundary.patch",
+      "before_sha256_lf": "90b39337fadc3b942d90f632a64b1aa4806635e86daf945daf88df432d652b3c",
+      "after_sha256_lf": "7b0550c31c9c00753ba600121423567d44d3e37c3ca299c21665584cb2e34b4d",
+      "patch_sha256_lf": "73a5511f4326fb86d21f1a8e227f294c8eff9f177cd0ce91d4b2996949aff078"
     }
   ]
 }

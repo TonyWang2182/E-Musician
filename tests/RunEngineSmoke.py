@@ -12,7 +12,7 @@ def main() -> int:
     directory = root / uuid.uuid4().hex[:12]
     directory.mkdir(parents=True, exist_ok=False)
     fixtures = Path(__file__).resolve().parent / "fixtures" / "audio"
-    result = subprocess.run([str(executable), "--smoke-test", str(directory), str(fixtures)], timeout=240)
+    result = subprocess.run([str(executable), "--smoke-test", str(directory), str(fixtures), "--offline"], timeout=240)
     if result.returncode:
         failure = directory / "failure.txt"
         if failure.exists():

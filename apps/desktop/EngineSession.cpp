@@ -37,6 +37,7 @@
 namespace emusician {
 namespace te = tracktion;
 namespace {
+bool offlineTestMode = false;
 // Offline renders and hosted-input tests must never replace the user's device
 // configuration when their Engine flushes settings during destruction.
 struct TransientPropertyStorage final : te::PropertyStorage {
@@ -64,6 +65,7 @@ std::unique_ptr<te::PropertyStorage> sessionProperties(bool interactive) {
 struct OutputOnlyBehaviour : te::EngineBehaviour {
     explicit OutputOnlyBehaviour(bool enable=true):enabled(enable){}
     bool enabled;
+    bool lengthOfOneBeatDependsOnTimeSignature() override { return false; }
     bool shouldOpenAudioInputByDefault() override { return false; }
     bool autoInitialiseDeviceManager() override { return enabled; }
     te::EditLimits getEditLimits() override {
@@ -162,6 +164,38 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     te::Engine engine;
     plugins::PluginHost pluginHost{engine};commands::RevisionGuard guard{uid().toStdString()};
     production::RecordingController recording{engine};
+    struct MeterTap {
+        juce::WeakReference<te::LevelMeasurer> source;
+        te::LevelMeasurer::Client client;
+        float left = -100, right = -100;
+        bool overloaded = false;
+        ~MeterTap() { bind(nullptr); }
+        void bind(te::LevelMeasurer* next) {
+            if(source.get()==next)return;
+            if(auto* old=source.get())old->removeClient(client);
+            source=next;client.reset();left=right=-100;overloaded=false;
+            if(next)next->addClient(client);
+        }
+        void sample() {
+            if(!source){left=right=-100;return;}
+            const auto n=client.getNumChannelsUsed();
+            const auto l=n>0?client.getAndClearAudioLevel(0).dB:-100.0f;
+            const auto r=n>1?client.getAndClearAudioLevel(1).dB:l;
+            left=std::max(l,left-1.5f);right=std::max(r,right-1.5f);
+            overloaded|=l>=-0.01f||r>=-0.01f;
+        }
+        void reset() { client.reset();left=right=-100;overloaded=false; }
+    };
+    std::map<juce::String,std::unique_ptr<MeterTap>> trackMeters,inputMeters;
+    MeterTap masterMeter;
+    double metersReadAt=-1000,memoryReadAt=-1000;
+    juce::int64 workingSetBytes=0,privateBytes=0;
+    void updateTelemetry(Snapshot&);
+    void resetMeters();
+    struct ClipboardEntry {juce::String trackId,trackKind;int row=0;storage::StoredClip clip;};
+    struct ClipClipboard {juce::String projectId,id;double originSeconds=0,originBpm=120;int firstRow=0;std::vector<ClipboardEntry> clips;std::vector<storage::StoredAsset> assets;};
+    ClipClipboard clipClipboard;
+    juce::StringArray lastPastedClipIds;
     std::unique_ptr<te::Edit> edit=te::createEmptyEdit(engine,{});
     std::unique_ptr<te::Edit::UndoTransactionInhibitor> transactionControl;
     std::vector<Binding> bindings;std::map<juce::String,AudioInfo> prepared;
@@ -199,7 +233,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         *alive=false;shuttingDown=true;stopTimer();for(auto& j:jobs)j->cancel=true;
         for(auto& j:jobs)if(j->worker.joinable())j->worker.join();
         for(auto& j:jobs)j->commit={};jobs.clear();pluginHost.cancelScan();plugins::PluginHost::closeAllEditors(*edit);
-        edit->getTransport().stop(false,false);recording.detach();pluginHost.detachEdit(*edit);edit->state.removeListener(this);noteViews.clear();transactionControl.reset();bindings.clear();edit.reset();
+        edit->getTransport().stop(false,false);trackMeters.clear();inputMeters.clear();masterMeter.bind(nullptr);recording.detach();pluginHost.detachEdit(*edit);edit->state.removeListener(this);noteViews.clear();transactionControl.reset();bindings.clear();edit.reset();
     }
     juce::File recordingDirectory()const{return juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("E-musician/recordings").getChildFile(guard.projectId());}
     bool recordingBusy()const{return edit->getTransport().isRecording()||edit->getTransport().isRecordingStopping()||bool(recording.state()["finalizing"]);}
@@ -309,7 +343,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     void refreshRange(){
         duration=0;for(const auto& t:bindings)for(const auto& c:t.clips)duration=juce::jmax(duration,c.clip->getPosition().time.getEnd().inSeconds());
         auto m=metadata(*edit);double a=double(m.getProperty("loopStart",0.0)),b=double(m.getProperty("loopEnd",0.0));if(b<=a){a=0;b=duration;}
-        auto& tr=edit->getTransport();tr.setLoopRange({te::TimePosition::fromSeconds(a),te::TimePosition::fromSeconds(b)});if(b-a<0.010)tr.looping=false;if(tr.getPosition().inSeconds()>juce::jmax(duration,b))tr.setPosition(te::TimePosition::fromSeconds(duration));
+        auto& tr=edit->getTransport();tr.setLoopRange({te::TimePosition::fromSeconds(a),te::TimePosition::fromSeconds(b)});if(b-a<0.010)tr.looping=false;
     }
     void remember(const juce::String& name){if(!gesture)edit->getUndoManager().beginNewTransaction(name);}
     void finishGesture(){gesture=false;edit->getUndoManager().beginNewTransaction();}
@@ -326,7 +360,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         if(auto r=prepare(s);r.failed())return r;candidate=te::createEmptyEdit(engine,{});if(!candidate)return fail("Could not create project.");auto r=applyTo(*candidate,s,next,true);if(r.wasOk())candidate->getUndoManager().clearUndoHistory();return r;
     }
     void adopt(std::unique_ptr<te::Edit> next,std::vector<Binding> bs,const juce::String& tid,const juce::String& cid={}){
-        plugins::PluginHost::closeAllEditors(*edit);edit->getTransport().stop(false,false);recording.detach();pluginHost.detachEdit(*edit);edit->state.removeListener(this);noteViews.clear();transactionControl.reset();bindings.clear();edit=std::move(next);bindings=std::move(bs);transactionControl=std::make_unique<te::Edit::UndoTransactionInhibitor>(*edit);edit->state.addListener(this);recording.attach(*edit,recordingDirectory());
+        plugins::PluginHost::closeAllEditors(*edit);edit->getTransport().stop(false,false);trackMeters.clear();inputMeters.clear();masterMeter.bind(nullptr);recording.detach();pluginHost.detachEdit(*edit);edit->state.removeListener(this);noteViews.clear();transactionControl.reset();bindings.clear();edit=std::move(next);clipClipboard={};lastPastedClipIds.clear();bindings=std::move(bs);transactionControl=std::make_unique<te::Edit::UndoTransactionInhibitor>(*edit);edit->state.addListener(this);recording.attach(*edit,recordingDirectory());
         edit->getUndoManager().setMaxNumberOfStoredUnits(1000000,64);refreshRange();choose(tid,cid);gesture=false;watchedPlugins.clear();refreshPluginWatches();currentKey=calculateCurrentKey();cachedRevision=std::numeric_limits<std::uint64_t>::max();
     }
     void timerCallback() override;
@@ -346,6 +380,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
 #include "EngineSessionModel.inc"
 #include "EngineSessionCommands.inc"
 #include "EngineSessionJobs.inc"
+#include "EngineSessionTelemetry.inc"
 #include "EngineSessionPublic.inc"
 #include "../../tests/EngineSessionSmoke.inc"
 #include "../../tests/EngineSessionProjectSmoke.inc"

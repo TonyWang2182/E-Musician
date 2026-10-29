@@ -1,5 +1,6 @@
 #include "core/commands/RevisionGuard.hpp"
 #include "core/time/Time.hpp"
+#include "core/time/MusicalPosition.hpp"
 
 #include <algorithm>
 #include <array>
@@ -207,6 +208,18 @@ int main()
 {
     Checks checks;
     testTime(checks);
+    using namespace emusician::time;
+    checks.expect(musicalPosition(0,120,4,4)=="1:1:000","musical display starts at bar1");
+    checks.expect(musicalPosition(1.5,120,6,8)=="2:1:000","6/8 denominator beat display");
+    checks.expect(musicalPosition(0.75,120,3,8)=="2:1:000","3/8 bar uses three eighths");
+    checks.expect(musicalPosition(1.99999999,120,4,4)=="2:1:000","tick carry reaches next bar");
+    for(const auto meter:{std::pair{4,4},std::pair{3,4},std::pair{6,8},std::pair{3,8}}){
+        const auto label=musicalPosition(17.25,123.5,meter.first,meter.second);
+        const auto decoded=parseMusicalPosition(label,123.5,meter.first,meter.second);
+        checks.expect(decoded&&std::abs(*decoded-17.25)<=60.0/123.5*4/meter.second/1920.0+1e-10,"musical roundtrip within half display tick");
+    }
+    for(const auto* invalid:{"0:1:000","2:0:000","1:5:000","1:1:960","1:1:000junk","nan","1:1","1:1:0:0","99999999999999999999:1:0"})
+        checks.expect(!parseMusicalPosition(invalid,120,4,4),"reject malformed/out-of-range musical input");
     testRevisionGuard(checks);
     return checks.finish();
 }

@@ -32,6 +32,8 @@ public:
         const int reviewIndex = args.indexOf("--review-project");
         const bool smoke = smokeIndex >= 0;
         const bool review = reviewIndex >= 0;
+        if ((smoke && args.contains("--offline")) || args.contains("--production-test") || args.contains("--control-output-probe"))
+            EngineSession::setOfflineTestMode(true);
         reviewMode = review;
         try {
             if(args.contains("--control-stdio")){
