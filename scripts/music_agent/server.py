@@ -130,8 +130,8 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError("请求必须为对象。")
             runtime = self.server.runtime
             path = urlsplit(self.path).path
-            if path == "/api/plan" and set(value) == {"prompt"}:
-                result = runtime.plan_request(value["prompt"])
+            if path == "/api/plan" and set(value) in ({"prompt"}, {"prompt","scope"}):
+                result = runtime.plan_request(value["prompt"], value.get("scope","selection"))
             elif path == "/api/apply" and set(value) == {"plan_id"}:
                 result = runtime.apply(value["plan_id"])
             elif path == "/api/cancel" and not value:
@@ -141,6 +141,8 @@ class Handler(BaseHTTPRequestHandler):
             elif path == "/api/settings":
                 result = runtime.settings(value)
             elif path == "/api/shutdown" and set(value) == {"confirm"} and value["confirm"] is True:
+                if getattr(runtime.bridge, "embedded", False):
+                    raise ValueError("请用侧栏关闭按钮收起助手；DAW 由原生窗口管理。")
                 runtime.close()
                 self._send(200, {"closed":True})
                 threading.Thread(target=self.server.shutdown,daemon=True).start()

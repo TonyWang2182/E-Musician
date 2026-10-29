@@ -128,3 +128,10 @@ MP3回归样本来自本项目公式合成，包含CBR双声道和VBR单声道�
 产品使用Python标准库，验证解释器Python3.14.0（建议3.10+），无OpenAI/Moonshot SDK运行依赖。Kimi模型为官方接口实际返回的kimi-k2.6；网络模型不在本地锁定权重，官方参数依据见ADR0009。凭证使用Windows DPAPI系统API。
 
 合成UI测试使用Codex bundled runtime 26.1020.11618中的Playwright1.62.1和本机headless Microsoft Edge156.0.4314.50；这些仅为测试工具，不是产品运行依赖。源码测试脚本通过PLAYWRIGHT_MODULE定位已有包，未自动下载依赖。真实DAW复用0.6.1已记录哈希的原生EXE。
+
+
+## 0.7.0 WebView2
+
+内嵌助手使用Microsoft.Web.WebView2 SDK 1.0.2903.40；[固定清单](../cmake/webview2.json)记录官方NuGet来源、归档SHA-256和实际header/x64静态加载库的SHA-256。scripts/bootstrap_webview2.py校验后解包至忽略目录.cache/webview2，不执行归档脚本、不安装系统运行时。CMake使用该SDK的WebView2LoaderStatic.lib与本机已有WebView2 Runtime；缺少运行时与缺少SDK分别报告。
+
+SDK包的原LICENSE.txt、NOTICE.txt及nuspec留在本地解包目录；不将SDK二进制纳入Git。包内nuspec声明license为该原文件。Python模型适配使用标准库，无额外运行时包；Kimi/OpenAI均为外部可选服务，DAW的独立音频运行不依赖它们。

@@ -1,0 +1,35 @@
+{
+  "mode": "live-kimi",
+  "requested_provider": "kimi",
+  "requested_model": "kimi-k2.6",
+  "exe_sha256": "ea4295383382bec0833a21e2207238e2bbb7d8bb061fa86e8d3766a0da9ac48e",
+  "physical_audio": false,
+  "checks": [
+    "tempo + new track plan/atomic apply/native readback",
+    "read tool -> note transpose + track gain -> native verification",
+    "single undo restores both notes and mix",
+    "concurrent manual edit rejects stale plan without mutation",
+    "native selection revision guard rejects without mutation"
+  ],
+  "passed": true,
+  "configured_model": "kimi-k2.6",
+  "real_provider_phase_complete": true,
+  "real_model_usage": {
+    "attempts": 3,
+    "completed_responses": 3,
+    "prompt_tokens": 6577,
+    "completion_tokens": 283,
+    "returned_models": [
+      "kimi-k2.6"
+    ]
+  },
+  "synthetic_provider_usage": {
+    "attempts": 1,
+    "completed_responses": 1,
+    "prompt_tokens": 0,
+    "completion_tokens": 0
+  },
+  "usage_note": "Real provider attempts/token totals exclude synthetic conflict tests. A failed attempt may be billed without returned usage.",
+  "protected_file_count": 59,
+  "protected_files_unchanged": true
+}

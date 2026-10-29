@@ -28,6 +28,12 @@ public:
                              double startBeats, double lengthBeats, double bpm);
     void setPlayhead(double projectSeconds, bool playing);
     void setTimeSignature(int numerator, int denominator);
+    juce::String clipId() const;
+    juce::StringArray selectedNoteIds(int maximum = 2000) const;
+    int selectedNoteCount() const;
+    std::uint64_t selectionRevision() const;
+    void focusGained(FocusChangeType) override;
+    void focusOfChildComponentChanged(FocusChangeType) override;
     void paint(juce::Graphics&) override;
     void resized() override;
     bool keyPressed(const juce::KeyPress&) override;
@@ -38,6 +44,8 @@ public:
     std::function<void(double)> onSeek;
     std::function<void()> onTogglePlay;
     std::function<bool(const juce::KeyPress&)> onProjectKey;
+    std::function<void()> onSelectionChange;
+    std::function<void()> onFocus;
 private:
     struct Impl;
     std::unique_ptr<Impl> impl;

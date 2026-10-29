@@ -23,6 +23,7 @@
 #include <set>
 #include <stdexcept>
 #include <thread>
+#include <unordered_set>
 #if JUCE_WINDOWS
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -39,6 +40,12 @@ namespace emusician {
 namespace te = tracktion;
 namespace {
 bool offlineTestMode = false;
+struct SelectionNoteIdHash {
+    size_t operator()(const juce::String& id) const noexcept {
+        return static_cast<size_t>(id.hashCode64());
+    }
+};
+using SelectionNoteIdSet=std::unordered_set<juce::String,SelectionNoteIdHash>;
 // Offline renders and hosted-input tests must never replace the user's device
 // configuration when their Engine flushes settings during destruction.
 struct TransientPropertyStorage final : te::PropertyStorage {
@@ -212,6 +219,12 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     };
     mutable std::map<juce::String,NoteView> noteViews;
     juce::String selected,selectedClip,status="Import audio or create a MIDI track.",savedKey,currentKey;juce::File projectFile;
+    juce::var selectionState;
+    juce::String selectionSignature;
+    std::uint64_t selectionRevision=0,selectionMusicRevision=std::numeric_limits<std::uint64_t>::max();
+    std::shared_ptr<const std::vector<NoteSnapshot>> selectionNoteSource;
+    SelectionNoteIdSet selectionNoteIndex;
+    void refreshSelectionContext(const juce::var* proposed=nullptr);
     double duration=0;bool gesture=false,shuttingDown=false,pluginDirty=false;
     std::uint64_t cachedRevision=std::numeric_limits<std::uint64_t>::max(),eventSequence=0;Snapshot cached;
     std::vector<std::shared_ptr<Job>> jobs;juce::Array<juce::var> events;
@@ -382,6 +395,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
 #include "EngineSessionCommands.inc"
 #include "EngineSessionJobs.inc"
 #include "EngineSessionTelemetry.inc"
+#include "EngineSessionSelection.inc"
 #include "EngineSessionPublic.inc"
 #include "../../tests/EngineSessionSmoke.inc"
 #include "../../tests/EngineSessionProjectSmoke.inc"

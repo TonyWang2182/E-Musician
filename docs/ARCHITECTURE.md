@@ -1,8 +1,36 @@
 # E-musician 技术架构
 
-更新日期：2026-10-29（Asia/Shanghai）。0.6.0增加下述编辑/录音准备模块，验证状态见[CONTEXT](CONTEXT.md)。历史版本的硬件、插件及性能结果保持各自适用范围，不替代新版验收。
+更新日期：2026-10-29（Asia/Shanghai）。当前实现为 DAW 0.7.0 / Agent 0.2 第一批；最终验证状态见[CONTEXT](CONTEXT.md)。历史硬件、插件及性能结果保持各自适用范围，不替代新版验收。
 
-## Agent 0.1：非实时伴随进程
+## Agent 0.2：DAW 内嵌界面与独立 worker
+
+`MainComponent` 显示可开关的 `AgentSidebar`，侧栏 WebView2 只载入本次会话受控的 loopback 页面。DAW 按需启动并拥有 Python 助手；隐藏侧栏保留草稿和正在执行的任务，暂停可见状态轮询。关闭/重启助手只清理所属 worker，不执行 DAW 的工程关闭逻辑。旧 stdio 伴随模式保留兼容，嵌入连接不沿用 EOF 导致 DAW 退出的所有权语义。新入口与旧入口不能混淆。
+
+```mermaid
+flowchart LR
+  Native["DAW 主窗口 / Agent 侧栏"] --> Web["WebView2 本机页面"]
+  Web --> HTTP["Python 本机 HTTP / 会话认证"]
+  HTTP --> Runtime["任务循环 / 范围校验 / 动作编译"]
+  Runtime <--> Provider["Kimi / OpenAI 适配器"]
+  Runtime --> Bridge["认证 loopback JSONL 桥"]
+  Bridge --> Session["主消息线程 EngineSession"]
+  Session --> Edit["唯一 Edit / 一次 batch / Undo"]
+  Edit --> Audio["原有实时播放图"]
+```
+
+模型网络、JSON 解析及凭证存储留在 Python 非实时进程；原生桥通过有界请求队列进入主消息线程。网页不直接写 Edit；模型也不能调用任意 shell、文件、插件或设备接口。发布方案和应用前分别校验权威快照，应用仍是一次原子 batch，回读仅证明音乐状态符合预期，不证明听感或创作质量。
+
+`EngineSessionSelection.inc` 持有可丢弃的只读选择投影：project_id/project_revision、selection_revision、活动轨/片段、track_ids/clip_ids、note_clip_id/note_ids、时间范围和最后音乐焦点。`MainComponent` 在控制请求执行前同步真实 UI 选择；`PianoRoll` 只导出稳定 ID，侧栏获得焦点不抹去音乐焦点。选择不修改音乐 revision、dirty 或 Undo。按音乐版本和音符快照身份失效的成员索引，避免每次轮询遍历大音符集合；使用预留容量的哈希集合查找音符ID，片段索引用位置而不跨快照保存原始指针。无音符选择不建立全音符索引，Agent从未打开时不做UI选择同步；超限选择明确标记 unavailable/truncated。
+
+`selection.py` 冻结并检查操作范围：默认 selection，只对发送时选中的对象生效；project 必须由用户明确选择。底层另有 clip 范围接口，当前产品下拉框不展示。选中音符只授权这些 ID；时间范围以绝对秒的起音 `[start,end)` 过滤，量化也不能把起音移出范围。轨级操作、全局速度和新建对象有各自范围权限，不能靠模型提示词自行扩大。写命令带 expected_selection_revision，最终原生执行前再次拒绝过时选择。
+
+`DawBridge.resolve_selection/resolve_clips` 对快照之外的明确目标分页读取并验证同一音乐版本；只补指定对象，不把摘要中的 64/256 片段上限当完整工程。待编辑 MIDI 片段必须完整读取且不超过 2000 音符，编译器另限制单方案 2000 次音符处理。不存在、过大或过期目标不进行部分修改。
+
+`providers.py` 统一能力、配置和工厂；Kimi 使用聊天工具协议，OpenAI 使用 Responses，并仅在当前模型循环内部保留必要私有推理状态。schema2 偏好按 provider 存储 model/base_url，Windows DPAPI 凭证按 provider 隔离。Anthropic、Gemini、本地兼容服务明确 adapter_pending，不能调用。OpenAI 只接受受控官方端点；可沿用机器已有的 loopback 代理，代理不替换服务端点或 TLS 校验。无静默跨厂商回退、自动充值或无限付费重试。
+
+开发与产品入口为 `scripts/dev_agent.py build/test/run`、`scripts/Start-Agent.ps1`；独立构建输出 build/sidebar。原生组件截图不含子 HWND 的真实网页像素，载入状态、合成网页视觉、实体 WebView 输入/听感分别验收。具体决策见[ADR0010](decisions/0010-embedded-agent-and-selection.md)。本节描述已实现边界，最终通过项以本批验证记录为准。
+
+## 历史：Agent 0.1 非实时伴随进程
 
 `scripts/music_agent`包含Provider/DPAPI、动作编译器、DawBridge、任务循环、HTTP及vanilla网页；Python标准库无运行时包依赖。网页只发送自然语言、plan ID和显式按钮操作。模型读取有界工程上下文/音符统计，提出结构化动作，本地校验器生成命令及可核查的前后预览。人工确认后一次batch进入原EngineSession，以原project_id/revision校验；回读验证与最近批次Undo同样受版本保护。
 
@@ -56,6 +84,7 @@ RecordingController管理应用级click和count-in偏好；通过统一命令更
 |---|---|
 | `apps/desktop/Main.cpp` | 应用、窗口生命周期；普通启动、stdio控制、扫描worker、渲染worker、smoke与性能探针入口 |
 | `MainComponent.*` | 原生菜单、独立保存状态/请求合并、轨道混音/Inspector、单主编曲、下方Dock、全局录音控制和插件浏览器 |
+| `AgentSidebar.*` | 可开关 WebView2 侧栏、本机会话/认证桥与所属 Python worker 生命周期；不拥有音乐工程 |
 | `ArrangementView.*` | 唯一轨头与M/S/R/Devices、共轴音频/MIDI片段、选择/移动/裁剪手势、缩放滚动、后台波形峰值和MIDI概览 |
 | `PianoRoll.*` | 音符绘制、移动、长度、力度、多选、量化、转调、复制/删除及16步鼓点；通过回调提交命令 |
 | `SelectedTrackPanel.*` | 选轨/Master设备链、实际录音输入与设备级Monitor、Bus输出/发送、参数枚举和自动化曲线手势；只读快照与临时预览 |
@@ -65,6 +94,7 @@ RecordingController管理应用级click和count-in偏好；通过统一命令更
 | `EngineSessionParameters.inc` | 插件参数分页读取及标量参数写入/Undo |
 | `EngineSessionJobs.inc` | 后台导入/打开、分阶段插件状态采集与保存提交、SMF读写、WAV渲染子进程 |
 | `EngineSessionPublic.inc` | UI兼容门面、快照、capabilities、JSONL请求和幂等响应 |
+| `EngineSessionSelection.inc` | 可失效的 UI 选择投影、独立选择版本、稳定 ID 检查；不写音乐状态 |
 | `EngineSessionProduction.h` | 生产图与录音控制器的消息线程契约，不是第二个Edit |
 | `EngineSessionAutomationRouting.inc` | Bus/输出/发送的DAG校验及应用、自动化参数绑定/曲线、MIDI controller捕获/恢复与Undo |
 | `EngineSessionRecording.inc` | 实际设备枚举/配置、输入绑定与设备级监听、Arm、线性take生命周期及录音结果接纳 |
@@ -77,6 +107,8 @@ RecordingController管理应用级click和count-in偏好；通过统一命令更
 | `core/time/EditGrid.hpp`、`MusicalPosition.hpp` | 共享固定/自适应吸附、拍号显示坐标和严格音乐位置输入 |
 | `core/commands/RevisionGuard.hpp` | 工程身份和版本契约；应用级幂等响应账本在EngineSession |
 | `scripts/agent_client.py` | 专用控制进程的Python客户端与实际命令演示，无模型依赖 |
+| `scripts/music_agent/` | 非实时任务循环、范围/动作校验、多供应商适配、DPAPI、嵌入/兼容桥、HTTP及网页；权威音乐仍在 Edit |
+| `scripts/dev_agent.py` | 独立 build/sidebar 的构建、测试和原生 --agent 启动，复用 Recorder |
 | `tests/`、`scripts/dev.py` | 引擎/存储/UI/后台任务回归；构建、运行、原始日志与源码指纹 |
 
 `.inc` 是同一翻译单元的实现分片，不是独立可写工程层。源码、测试与精确依赖由版本管理维护；`_deps/`、`build/`、`build-logs/`、缓存和用户工程不作为源码提交。

@@ -52,10 +52,23 @@ def _duplicates(pairs: list[tuple[str, object]]) -> dict:
 
 
 class KimiProvider:
+    provider_id = "kimi"
+    label = "Kimi"
+    allowed_base_urls = ALLOWED_BASE_URLS
+
+    @property
+    def capabilities(self):
+        return {"text": True, "tools": self.supports_tools(self.model), "streaming": False,
+                "image_input": False, "audio_input": False, "audio_output": False}
+
+    @staticmethod
+    def supports_tools(model):
+        return isinstance(model, str) and model.startswith(("kimi-", "moonshot-v1-"))
+
     def __init__(self, model: str = "kimi-k2.6", base_url: str = "https://api.moonshot.cn/v1",
                  timeout: float = 45, *, api_key: str | None = None, opener=None):
-        if not isinstance(base_url, str) or base_url.rstrip("/") not in ALLOWED_BASE_URLS:
-            raise ProviderError("configuration", "只允许连接 Moonshot 官方 HTTPS API 地址。")
+        if not isinstance(base_url, str) or base_url.rstrip("/") not in self.allowed_base_urls:
+            raise ProviderError("configuration", "只允许连接所选服务的官方 HTTPS API 地址。")
         if not isinstance(model, str) or not re.fullmatch(r"[A-Za-z0-9_.:-]{1,128}", model):
             raise ProviderError("configuration", "模型名称无效。")
         if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or not 1 <= timeout <= 120:
@@ -64,17 +77,21 @@ class KimiProvider:
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self._api_key = api_key
-        # Ignore environment proxies, so a credential cannot accidentally be sent
-        # through a user-configured cleartext proxy. TLS still uses OS/Python trust.
-        self._opener = opener if opener is not None else build_opener(ProxyHandler({}), _NoRedirect())
+        self.network_mode = "injected" if opener is not None else "direct"
+        self._opener = opener if opener is not None else self._default_opener()
+
+    def _default_opener(self):
+        # Kimi stays direct. Adapters may explicitly permit a bounded local proxy;
+        # no arbitrary environment proxy is inherited here.
+        return build_opener(ProxyHandler({}), _NoRedirect())
 
     def _request(self, path: str, payload: dict | None = None) -> dict:
         try:
-            key = self._api_key if self._api_key is not None else load_key()
+            key = self._api_key if self._api_key is not None else load_key(provider=self.provider_id)
         except SecretError:
-            raise ProviderError("missing_key", "Kimi 密钥尚未配置或无法解密，请重新配置。") from None
-        if not isinstance(key, str) or not re.fullmatch(r"[A-Za-z0-9_.-]{12,512}", key):
-            raise ProviderError("missing_key", "Kimi API 密钥格式无效，请重新配置。")
+            raise ProviderError("missing_key", "模型服务 密钥尚未配置或无法解密，请重新配置。") from None
+        if not isinstance(key, str) or not re.fullmatch(r"[A-Za-z0-9_.-]{12,4096}", key):
+            raise ProviderError("missing_key", "模型服务 API 密钥格式无效，请重新配置。")
         try:
             body = None if payload is None else json.dumps(payload, ensure_ascii=False,
                         allow_nan=False, separators=(",", ":")).encode("utf-8")
@@ -105,11 +122,17 @@ class KimiProvider:
             raise
         except HTTPError as error:
             # Never include response body/reason/headers: providers can echo input.
+            # Close without reading: deferred urllib cleanup can otherwise emit
+            # a ResourceWarning containing the raw HTTPError repr.
+            try:
+                error.close()
+            except OSError:
+                pass
             raise self._http_error(error.code) from None
         except (TimeoutError, socket.timeout):
-            raise ProviderError("timeout", "Kimi 请求超时。可稍后重试；不会自动重复收费请求。") from None
+            raise ProviderError("timeout", "模型服务 请求超时。可稍后重试；不会自动重复收费请求。") from None
         except (URLError, OSError):
-            raise ProviderError("network", "无法连接 Kimi，请检查网络后重试。") from None
+            raise ProviderError("network", f"无法连接 {self.label}，请检查网络后重试。") from None
         except (UnicodeError, ValueError, TypeError, RecursionError):
             raise _invalid() from None
 
@@ -118,14 +141,14 @@ class KimiProvider:
         if status in (301, 302, 303, 307, 308):
             return ProviderError("redirect", "模型服务返回了重定向，连接已停止。", status)
         if status in (401, 403):
-            return ProviderError("authentication", "Kimi 拒绝了当前密钥或访问权限，请检查本机配置。", status)
+            return ProviderError("authentication", "模型服务 拒绝了当前密钥或访问权限，请检查本机配置。", status)
         if status == 429:
-            return ProviderError("rate_limit", "Kimi 额度不足或请求过于频繁，请检查平台用量后重试。", status)
+            return ProviderError("rate_limit", "模型服务 额度不足或请求过于频繁，请检查平台用量后重试。", status)
         if status == 400:
-            return ProviderError("bad_request", "Kimi 拒绝了请求，请检查模型名称与参数支持情况。", status)
+            return ProviderError("bad_request", "模型服务 拒绝了请求，请检查模型名称与参数支持情况。", status)
         if status == 404:
-            return ProviderError("model_not_found", "Kimi 模型或接口不可用，请检查模型名称。", status)
-        return ProviderError("http_error", "Kimi 服务暂时不可用，请稍后重试。", status)
+            return ProviderError("model_not_found", "模型服务 模型或接口不可用，请检查模型名称。", status)
+        return ProviderError("http_error", "模型服务 服务暂时不可用，请稍后重试。", status)
 
     def list_models(self) -> list[str]:
         data = self._request("/models").get("data")
@@ -140,10 +163,14 @@ class KimiProvider:
         return models
 
     def complete(self, messages: list[dict], tools: list[dict] | None = None) -> dict:
+        if tools and not self.capabilities["tools"]:
+            raise ProviderError("unsupported_capability", "当前模型不在已支持的工具调用模型系列中。")
         if not isinstance(messages, list) or not 1 <= len(messages) <= 64:
             raise ProviderError("invalid_request", "对话条数超出范围。")
         if any(not isinstance(message, dict) or message.get("role") not in {"system", "user", "assistant", "tool"} for message in messages):
             raise ProviderError("invalid_request", "对话格式无效。")
+        if any("_provider_state" in message for message in messages):
+            raise ProviderError("provider_mismatch", "工具上下文属于其他模型服务，请重新开始任务。")
         payload = {"model": self.model, "messages": messages,
                    "max_tokens": MAX_COMPLETION_TOKENS, "stream": False}
         if self.model in {"kimi-k2.5", "kimi-k2.6"}:

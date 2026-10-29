@@ -163,7 +163,9 @@ void EngineSession::cancelAllJobs(){for(auto& j:impl->jobs)j->cancel=true;impl->
 
 juce::var EngineSession::capabilities()const
 {
+    // Selection revision is independent from musical project revision.
     juce::Array<juce::var> commands;
+    commands.add("get_selection_context");
     for(const auto* name:{"get_capabilities","get_snapshot","get_project_state","get_jobs","get_job","get_events","get_clip_notes","create_track","rename_track","reorder_track","remove_track","set_track_gain","set_track_pan","set_track_muted","set_track_solo","set_master_gain","set_loop","set_loop_range","set_tempo","set_time_signature","move_clip","move_clips","trim_clip","split_clip","duplicate_clips","delete_clips","set_clip_fades","create_midi_clip","write_notes","batch","undo","redo","import_audio","import_midi","save_project","open_project","export_wav","export_midi","scan_plugins","cancel_job","add_plugin","remove_plugin","move_plugin","set_plugin_enabled","open_plugin","new_project","play","pause","stop","seek"})commands.add(name);
     for(const auto* command:{"get_recording_preferences","set_recording_preferences","reset_meters","get_clipboard_state","copy_clips","cut_clips","paste_clips"})commands.add(command);
     commands.add("get_track_clips");commands.add("get_plugin_catalog");commands.add("get_plugin_parameters");commands.add("set_plugin_parameter");commands.add("edit_notes");commands.add("get_save_diagnostics");
@@ -188,7 +190,7 @@ juce::var EngineSession::snapshotJson()const
         tracks.add(object({{"id",t.id},{"name",t.name},{"kind",t.kind},{"gain_db",t.gainDb},{"pan",t.pan},{"muted",t.muted},{"solo",t.solo},{"clips",clips},{"clip_count",int(t.clips.size())},{"clips_truncated",clips.size()<int(t.clips.size())},{"plugins",plugins(t.plugins)},{"input_device_id",t.inputDeviceId},{"output_target_id",t.outputTargetId},{"armed",t.armed},{"monitor",t.monitorMode},{"peak_left_db",t.peakLeftDb},{"peak_right_db",t.peakRightDb},{"input_peak_db",t.inputPeakDb},{"overloaded",t.overloaded},{"sends",sends},{"automation",controlLanesJson(t.automation)}}));}
     for(const auto& j:s.jobs)jobs.add(jobSnapshotJson(j));
     for(const auto& c:s.pluginCatalog){if(catalog.size()>=256)break;catalog.add(controlCatalogJson(c));}
-    return object({{"project_id",s.projectId},{"revision",juce::int64(s.revision)},{"name",s.projectName},{"dirty",s.dirty},{"bpm",s.bpm},{"numerator",s.numerator},{"denominator",s.denominator},{"duration_seconds",s.duration},{"position_seconds",s.position},{"playing",s.playing},{"looping",s.looping},{"loop_start_seconds",s.loopStart},{"loop_end_seconds",s.loopEnd},{"master_gain_db",s.gainDb},{"selected_track_id",s.selectedTrackId},{"selected_clip_id",s.selectedClipId},{"can_undo",s.canUndo},{"can_redo",s.canRedo},{"tracks",tracks},{"jobs",jobs},{"plugin_catalog",catalog},{"plugin_catalog_total",int(s.pluginCatalog.size())},{"plugin_catalog_truncated",catalog.size()<int(s.pluginCatalog.size())},{"master_plugins",plugins(s.masterPlugins)},{"master_automation",controlLanesJson(s.masterAutomation)},{"recording",s.recording},{"recording_finalizing",s.recordingFinalizing},{"recording_error",s.recordingError},{"recording_preferences",impl->recording.preferences()},{"counting_in",s.countingIn},{"count_in_beats_remaining",s.countInBeatsRemaining},{"memory_working_set_bytes",s.memoryWorkingSetBytes},{"memory_private_bytes",s.memoryPrivateBytes},{"master_peak_left_db",s.masterPeakLeftDb},{"master_peak_right_db",s.masterPeakRightDb},{"master_overloaded",s.masterOverloaded},{"cpu_usage",s.cpuUsage},{"xruns",s.xruns},{"sample_rate",s.sampleRate},{"buffer_size",s.bufferSize},{"event_sequence",juce::int64(impl->eventSequence)}});
+    return object({{"project_id",s.projectId},{"revision",juce::int64(s.revision)},{"name",s.projectName},{"dirty",s.dirty},{"bpm",s.bpm},{"numerator",s.numerator},{"denominator",s.denominator},{"duration_seconds",s.duration},{"position_seconds",s.position},{"playing",s.playing},{"looping",s.looping},{"loop_start_seconds",s.loopStart},{"loop_end_seconds",s.loopEnd},{"master_gain_db",s.gainDb},{"selection_context",selectionContext()},{"selected_track_id",s.selectedTrackId},{"selected_clip_id",s.selectedClipId},{"can_undo",s.canUndo},{"can_redo",s.canRedo},{"tracks",tracks},{"jobs",jobs},{"plugin_catalog",catalog},{"plugin_catalog_total",int(s.pluginCatalog.size())},{"plugin_catalog_truncated",catalog.size()<int(s.pluginCatalog.size())},{"master_plugins",plugins(s.masterPlugins)},{"master_automation",controlLanesJson(s.masterAutomation)},{"recording",s.recording},{"recording_finalizing",s.recordingFinalizing},{"recording_error",s.recordingError},{"recording_preferences",impl->recording.preferences()},{"counting_in",s.countingIn},{"count_in_beats_remaining",s.countInBeatsRemaining},{"memory_working_set_bytes",s.memoryWorkingSetBytes},{"memory_private_bytes",s.memoryPrivateBytes},{"master_peak_left_db",s.masterPeakLeftDb},{"master_peak_right_db",s.masterPeakRightDb},{"master_overloaded",s.masterOverloaded},{"cpu_usage",s.cpuUsage},{"xruns",s.xruns},{"sample_rate",s.sampleRate},{"buffer_size",s.bufferSize},{"event_sequence",juce::int64(impl->eventSequence)}});
 }
 juce::var EngineSession::eventsSince(std::uint64_t seq)const
 {juce::Array<juce::var> out;for(const auto& e:impl->events)if(std::uint64_t(juce::int64(e.getProperty("sequence",0)))>seq)out.add(e);bool lost=!impl->events.isEmpty()&&seq+1<std::uint64_t(juce::int64(impl->events[0].getProperty("sequence",0)));return object({{"events",out},{"resync_required",lost},{"sequence",juce::int64(impl->eventSequence)}});}
@@ -201,6 +203,7 @@ juce::var EngineSession::executeRequest(const juce::var& envelope)
     auto args=envelope.getProperty("args",object({}));
     if(!args.isObject())return reply("invalid",{},"Request args must be an object.");
     if(command=="get_capabilities")return reply("completed",capabilities());
+    if(command=="get_selection_context")return reply("completed",selectionContext());
     if(command=="get_project_state"||command=="get_snapshot")return reply("completed",snapshotJson());
     if(command=="get_save_diagnostics"){
         // Explicit troubleshooting only: never hash full musical content in
@@ -277,6 +280,11 @@ juce::var EngineSession::executeRequest(const juce::var& envelope)
     auto expected=envelope.getProperty("expected_revision",{});if((!expected.isInt()&&!expected.isInt64())||juce::int64(expected)<0)return reply("invalid",{},"expected_revision must be a non-negative integer.");
     if(textArg(envelope,"project_id")!=juce::String(impl->guard.projectId()))return reply("wrong_project",{},"Project identity changed.");
     auto revision=std::uint64_t(juce::int64(expected));if(revision!=impl->guard.revision())return reply("conflict",{},"Project revision changed.");
+    if(envelope.hasProperty("expected_selection_revision")){
+        auto expectedSelection=envelope["expected_selection_revision"];
+        if((!expectedSelection.isInt()&&!expectedSelection.isInt64())||juce::int64(expectedSelection)<0)return reply("invalid",{},"expected_selection_revision must be a non-negative integer.");
+        if(juce::int64(selectionContext()["selection_revision"])!=juce::int64(expectedSelection))return reply("selection_conflict",{},"Music selection changed; review a new plan.");
+    }
     if(impl->replies.size()>=10000)return reply("busy",{},"Request history is full; restart the control session.");
     const auto missingClipboardToken=[](const juce::String& name,const juce::var& parameters){return name=="paste_clips"&&!parameters["clipboard_id"].isString();};
     bool missingToken=missingClipboardToken(command,args);

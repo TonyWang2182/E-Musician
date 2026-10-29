@@ -8,6 +8,7 @@ import sys
 import threading
 import time
 import unittest
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from agent_client import ControlError
@@ -22,15 +23,18 @@ class FakeRuntime:
         self.fail_state = False
         self.fail_plan = False
         self.closed = False
+        self.bridge = SimpleNamespace(embedded=False)
     def state(self):
         self.calls.append("state")
         if self.fail_state:
             raise Exception("private internal traceback and file path")
         return {"phase": "idle", "snapshot": {"name": "Synthetic"}}
-    def plan_request(self, prompt):
+    def plan_request(self, prompt, scope="selection"):
         if self.fail_plan:
             raise Exception("private internal traceback and file path")
-        self.calls.append(("plan", prompt))
+        if scope not in ("selection", "project"):
+            raise ValueError("Invalid scope")
+        self.calls.append(("plan", prompt, scope))
         return {"phase": "planning"}
     def apply(self, plan_id):
         self.calls.append(("apply", plan_id))
@@ -147,7 +151,16 @@ class ServerTests(unittest.TestCase):
         status, _, body = self.request("POST", "/api/plan", {"prompt": "把当前片段升高两半音"})
         self.assertEqual(status, 200)
         self.assertEqual(json.loads(body)["phase"], "planning")
-        self.assertEqual(self.runtime.calls, [("plan", "把当前片段升高两半音")])
+        self.assertEqual(self.runtime.calls, [("plan", "把当前片段升高两半音", "selection")])
+    def test_explicit_project_scope_is_forwarded(self):
+        status, _, _ = self.request("POST", "/api/plan", {"prompt": "把工程速度改为100", "scope": "project"})
+        self.assertEqual(status, 200)
+        self.assertEqual(self.runtime.calls, [("plan", "把工程速度改为100", "project")])
+    def test_invalid_scope_is_rejected(self):
+        for scope in (None, True, [], "all"):
+            with self.subTest(scope=scope):
+                self.assertEqual(self.request("POST", "/api/plan", {"prompt": "x", "scope": scope})[0], 400)
+        self.assertEqual(self.runtime.calls, [])
     def test_unexpected_post_exception_is_generic(self):
         self.runtime.fail_plan = True
         status, _, body = self.request("POST", "/api/plan", {"prompt": "x"})
@@ -171,6 +184,14 @@ class ServerTests(unittest.TestCase):
         status, _, _ = self.request("POST", "/api/shutdown", {})
         self.assertEqual(status, 400)
         self.assertFalse(self.runtime.closed)
+    def test_embedded_shutdown_never_closes_daw(self):
+        self.runtime.bridge.embedded = True
+        status, _, body = self.request("POST", "/api/shutdown", {"confirm": True})
+        self.assertEqual(status, 400)
+        self.assertIn("侧栏", json.loads(body)["error"])
+        self.assertFalse(self.runtime.closed)
+        self.assertNotIn("close", self.runtime.calls)
+        self.assertEqual(self.request()[0], 200)
 
 
 STATE = {"project_id": "p", "revision": 10, "dirty": False, "bpm": 120,

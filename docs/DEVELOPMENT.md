@@ -1,8 +1,25 @@
 # E-musician 开发计划
 
-版本：1.8。日期：2026-10-29（Asia/Shanghai）。项目：E:/E-musician。
+版本：1.9。日期：2026-10-29（Asia/Shanghai）。原项目：E:/E-musician；当前 Agent 工作树：music-agent-kimi。
 
-## Agent 0.1：Kimi控制闭环
+## DAW 0.7.0 / Agent 0.2：内嵌助手第一批
+
+当前状态为**实现及自动验证完成，人工桌面/声音短测待执行**。统一证据见[RESULTS](verification/2026-10-29-agent-sidebar/RESULTS.md)。阶段范围见[实施计划](review/2026-10-29-agent-sidebar/PLAN.md)，决策见[ADR0010](decisions/0010-embedded-agent-and-selection.md)。旧版硬件、性能、Kimi 调用报告保留原适用范围，不直接升级为本批验收。
+
+| 工作 | 已落地内容 | 本批验收状态 |
+|---|---|---|
+| 原生侧栏与所有权 | Agent 按钮/Ctrl+Shift+A；WebView2；DAW 拥有 Python worker；隐藏保留任务和草稿 | 原生23项通过；用户GUI短测待执行 |
+| 完整选择上下文 | 轨、片段、音符、时间范围、音乐焦点和独立 selection_revision；不改变 dirty/Undo | Python选择回归、原生作用域/版本/修剪及轨头恢复检查通过 |
+| 确定性范围约束 | 默认当前选择；明确整个工程；生成及应用前拒绝过时范围；目标分页补齐 | 178项Python、原有5项CTest及最终模拟闭环通过 |
+| 多模型接口 | Kimi/OpenAI；能力声明；分供应商 DPAPI/偏好；无静默厂商回退 | 模拟协议与本批GPT-5-mini/Kimi真实小样本通过，指纹/用量独立归档 |
+| UI 与输入 | 同一侧栏查看范围/模型/方案、明确应用/撤销；窄窗与焦点处理 | 合成窄侧栏/实际网页载入/合成focus桥通过；物理键盘、IME与实际外观待用户 |
+| 可追溯交付 | 独立 build/sidebar、Recorder、协议/架构/上手更新及人工短测 | 构建/失败/性能/实模报告已归档；源码、日志与文档随功能分支管理 |
+
+开发顺序为 `python scripts/dev_agent.py build`、`test`、`run`；默认 Release，保留原 build/bin 产物。命令内部统一经过 Recorder，原始日志留 build-logs，摘要留 docs/builds，DEVLOG 只追加。真实模型测试明确选择 provider/model，并分别统计真实调用和模拟冲突阶段；失败请求可能收费但无法取得 token，用量不得虚构。
+
+每个待编辑 MIDI 片段必须取得完整且不超过 2000 个的音符集合，单方案最多 16 项动作、2000 次音符处理。选区超限、目标不存在、选择或工程变化时停止旧方案，不能自动扩大到全工程。Anthropic、Gemini、本地兼容适配、连续多阶段新 ID 编排、音频理解/生成与任意插件控制留待后续。用户按[人工检查](review/2026-10-29-agent-sidebar/MANUAL-CHECK.md)验收本批新增行为，不重做旧录音全套测试。
+
+## 历史：Agent 0.1 Kimi控制闭环
 
 2026-10-29用户提供Kimi凭证并授权实施，取代历史“Agent后置”的安排。独立分支，不干扰原DAW开发。
 

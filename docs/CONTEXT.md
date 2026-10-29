@@ -1,4 +1,20 @@
-# 当前迭代：Kimi Agent 0.1（2026-10-29）
+# 当前迭代：DAW 0.7.0 / Agent 0.2 第一批（2026-10-29）
+
+工作树仍为 `music-agent-kimi`、分支 `feature/kimi-music-agent`。本批已落地原生可开关 Agent 侧栏、完整选择上下文与范围校验，以及 Kimi/OpenAI 两种模型适配。**状态：实现与本批自动验证完成，真实桌面/听感待人工短测**。最终Release构建、原有CTest 5/5、Python 178项、原生侧栏23项及最终二进制模拟编辑闭环通过；GPT-5-mini与Kimi-k2.6在本批中间构建的真实小样本也通过，精确指纹与费用计数分别保留。详见[交付证据](verification/2026-10-29-agent-sidebar/RESULTS.md)。实际 GUI、中文输入法、播放听感由用户操作，不使用 computer-use。
+
+入口改为 DAW 自己管理助手：工具栏 `Agent` 或 `Ctrl+Shift+A` 开关侧栏；首次打开启动独立 Python worker，网络和模型逻辑仍不进入音频回调。侧栏隐藏保留输入与任务，助手关闭/断开不能关闭 DAW。原 `run_agent.py --exe ...` 伴随窗口保留兼容；它不再是本批默认入口。
+
+本机 `E:\MusicAgent&DAW\Start E-musician Agent.cmd` 经 `Start-Agent.cmd` / `scripts/Start-Agent.ps1` 启动新原生版本。开发入口为 `python scripts/dev_agent.py build|test|run`，默认 Release，独立产物 `build/sidebar/bin/Release/E-musician.exe`；不覆盖原 `build/bin/Release` 的 0.6.1。源码仍使用同一个权威 Edit、命令及 Undo。
+
+范围默认“当前选择”，捕获活动轨/片段、实际片段/音符 IDs、时间区间及最后音乐焦点；切入聊天不清掉选区。选区有独立 `selection_revision`，不把选择变化写成工程编辑；方案发布和应用都检查工程及选择是否过期。若要改全局速度或新建轨，用户明确选择“整个工程”。大快照分页补齐明确目标，每个待编辑 MIDI 片段完整读取上限 2000 音符；大选择和超限片段明确拒绝，不用被截断子集冒充完整数据。
+
+Kimi 与 OpenAI 适配器和按厂商隔离的 DPAPI 凭证/设置已实现；Anthropic、Gemini、本地兼容服务仅预留，不可调用。OpenAI 可使用机器已有的 loopback 代理，不安装代理、不改系统网络；模型支持、账户配置与真实请求成功分别记录。API 密钥、完整对话与模型私有推理不进入 Git 或审计日志。
+
+最终原始源码指纹a10df962、EXE 92a39c89，117个输入文件在最终构建/测试期间保持冻结。最终模拟集成检查60个受保护工程/设置文件未变；没有新增物理ASIO或长期性能验收。当前功能分支交付，不自动合并main。
+
+下一步：用户按[七项人工检查](review/2026-10-29-agent-sidebar/MANUAL-CHECK.md)确认实际操作。本批不扩展音频理解/生成、任意插件自动化、长期自主任务或自动保存。实现范围见[计划](review/2026-10-29-agent-sidebar/PLAN.md)、[ADR0010](decisions/0010-embedded-agent-and-selection.md)，入口和限制见[Agent 快速上手](AGENT_QUICKSTART.md)。下方保留各阶段原始证据，不能把旧版通过项当作 0.7.0 新验证。
+
+# 历史迭代：Kimi Agent 0.1（2026-10-29）
 
 本聊天在独立工作树 `music-agent-kimi` / 分支 `feature/kimi-music-agent` 从 `7f7eb65` 开始。实现可选Python本机助手和网页，通过JSONL连接自己启动的可见DAW；实时引擎仍为原0.6.1。本轮不替换原DAW目录、不自动合并main。
 

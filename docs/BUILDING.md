@@ -1,6 +1,15 @@
 # 本地构建、使用与 VS Code 调试
 
-更新日期：2026-10-27。项目目录：`E:\E-musician`。本文说明当前0.5迭代源码对应的操作入口和可重复执行的方法。日常操作先读 [快速上手](QUICKSTART.md)；实际构建、设备、音频、界面及性能验证状态以 [CONTEXT](CONTEXT.md) 和 [本轮验证记录](verification/2026-10-27-v05/RESULTS.md) 为准。历史0.4通过记录不代表新增录音、ASIO、路由和自动化已经通过。
+更新日期：2026-10-29。本页保留通用构建流程与历史0.5入口；当前0.7.0 Agent功能工作树使用下面的独立入口。日常助手操作见[快速上手](AGENT_QUICKSTART.md)，实际验证边界见[CONTEXT](CONTEXT.md)。
+
+## 0.7.0 Agent工作树入口（2026-10-29）
+
+本批在 music-agent-kimi 功能工作树开发，用VS Code打开该工作树。日常运行读[Agent快速上手](AGENT_QUICKSTART.md)，本批构建/模型/性能证据读[RESULTS](verification/2026-10-29-agent-sidebar/RESULTS.md)。下方旧版E盘入口与验证日期保留为历史说明。
+
+执行 python scripts/dev_agent.py build、test、run，默认Release；也可用VS Code中Agent sidebar对应任务。构建使用VS18 2026和独立build/sidebar，固定WebView2 SDK经官方NuGet下载与哈希检查；编译并发限制2。本批不覆盖build/bin旧EXE，不改全局依赖或系统网络。源码改动后先关闭自己运行的新版再构建；冻结源码直到Recorder结束。WebView2 Runtime是运行时条件，与SDK不同，缺失时侧栏给出错误，不把失败写成就绪。
+
+测试入口包含原有CTest、Python聚合及原生离线侧栏测试；真实模型测试是另外显式授权和计费的检查，不在常规build/test中自动调用。助手只依赖Python标准库；网页开发测试所用headless浏览器工具不属于运行时需求。最终本版仅Release通过，Debug未重建。
+
 
 ## 开发环境
 

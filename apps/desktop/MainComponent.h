@@ -19,12 +19,16 @@ public:
     void requestClose(std::function<void()> onReady);
     juce::Result runArrangementSmokeTest(const juce::File& outputDirectory);
     bool arrangementWaveformsReady() const;
+    void showAgent();
+    juce::Result runAgentSidebarSmokeTest(const juce::File&);
 private:
     struct Impl;
     EngineSession& session;
     std::unique_ptr<Impl> impl;
     void timerCallback() override;
     void refreshSnapshot();
+    void synchronizeAgentSelection();
+    void toggleAgent();
     bool commitClipStart();
     void resetClipStartInput();
     void chooseSource();

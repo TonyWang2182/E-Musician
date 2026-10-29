@@ -122,6 +122,10 @@ public:
     juce::var executeRequest(const juce::var& envelope);
     juce::var capabilities() const;
     juce::var snapshotJson() const;
+    // Message-thread UI projection only; never changes music revision/dirty/Undo.
+    void setSelectionContext(const juce::var& context);
+    juce::var selectionContext() const;
+    juce::Result runSelectionContextSmokeTest(juce::DynamicObject& report);
     juce::var eventsSince(std::uint64_t sequence) const;
     bool hasActiveJobs() const;
     void cancelAllJobs();

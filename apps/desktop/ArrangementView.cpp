@@ -209,6 +209,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
             p.cancelDrag();
             p.followSuspended = true;
             p.rangeSelection = {};
+            if (e.position.x >= p.labelWidth()) p.explicitTrackSelection.clear();
             p.marquee = false;
             p.marqueeOrigin = e.position;
             p.marqueeBase = (e.mods.isCtrlDown() || e.mods.isCommandDown()) ? p.selection : juce::StringArray{};
@@ -270,7 +271,14 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                 p.drag.secondsPerPixel = p.visibleDuration() / p.plotWidth();
                 return;
             }
-            if (e.position.x < p.labelWidth()) p.engine.selectTrack(p.state.tracks[static_cast<std::size_t>(index)].id);
+            if (e.position.x < p.labelWidth()) {
+                p.explicitTrackSelection = p.state.tracks[static_cast<std::size_t>(index)].id;
+                p.selection.clear();
+                p.engine.selectTrack(p.explicitTrackSelection);
+                if (p.owner.onTrackFocus) p.owner.onTrackFocus(p.explicitTrackSelection);
+                p.notifyState();
+                return;
+            }
             else if (!e.mods.isCtrlDown() && !e.mods.isCommandDown()) p.selection.clear();
             seeking = e.position.x >= p.labelWidth();
             if (seeking) p.seekAt(e.position.x); else p.notifyState();
@@ -913,6 +921,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
     double rulerDownTime = 0, loopBeforeStart = 0, loopBeforeEnd = 0, loopPreviewStart = 0, loopPreviewEnd = 0;
     std::uint64_t rulerRevision = 0;
     juce::StringArray selection;
+    juce::String explicitTrackSelection;
     juce::uint32 lastSourceCheck = 0;
     bool forceSourceCheck = true, dropActive = false, selecting = false;
 };
@@ -965,12 +974,13 @@ void ArrangementView::update(const EngineSession::Snapshot& next)
     }
     if (contentChanged) p.updateMidiOverviews();
     if (projectChanged) { p.selection.clear(); p.rangeSelection = {}; p.rulerDrag = 0; p.followSuspended = false; }
+    if (projectChanged || next.selectedTrackId != p.explicitTrackSelection) p.explicitTrackSelection.clear();
     for (int i = p.selection.size(); --i >= 0;) {
         bool exists = false;
         for (const auto& track : next.tracks) for (const auto& clip : track.clips) if (clip.id == p.selection[i]) exists = true;
         if (!exists) p.selection.remove(i);
     }
-    if (!p.selecting && (primaryClipChanged || projectChanged) && next.selectedClipId.isNotEmpty()) p.selection = { next.selectedClipId };
+    if (!p.selecting && p.explicitTrackSelection.isEmpty() && (primaryClipChanged || projectChanged) && next.selectedClipId.isNotEmpty()) p.selection = { next.selectedClipId };
     p.updatePeaks(sourcesChanged || p.forceSourceCheck);
     p.forceSourceCheck = false;
     if (projectChanged) { p.zoom = 1.0; p.viewStart = 0.0; p.viewport.setViewPosition(0, 0); }
@@ -1006,6 +1016,7 @@ void ArrangementView::setDropActive(bool active)
 bool ArrangementView::isDropActive() const { return impl->dropActive; }
 bool ArrangementView::cancelClipDrag() { return impl->cancelDrag(); }
 juce::StringArray ArrangementView::selectedClipIds() const { return impl->selection; }
+juce::String ArrangementView::explicitSelectedTrackId() const { return impl->explicitTrackSelection; }
 void ArrangementView::setGrid(double beats, bool bars) { setGridBeats(beats > 0 ? beats : impl->gridBeats); setSnapEnabled(beats > 0); setRulerMode(bars ? 0 : 1); }
 void ArrangementView::setRulerMode(int mode) { impl->rulerMode = juce::jlimit(0, 2, mode); impl->bars = impl->rulerMode != 1; repaint(); }
 void ArrangementView::setGridBeats(double beats) { if (std::isfinite(beats) && beats > 0) impl->gridBeats = beats; impl->canvas.repaint(); repaint(); }
@@ -1014,7 +1025,7 @@ void ArrangementView::setAdaptiveGrid(bool enabled) { impl->adaptiveGrid = enabl
 void ArrangementView::setFollowPlayhead(bool enabled) { impl->follow = enabled; impl->followSuspended = false; }
 void ArrangementView::selectClipIds(const juce::StringArray& ids)
 {
-    auto& p = *impl; p.selection = ids; p.rangeSelection = {}; p.selecting = true;
+    auto& p = *impl; p.explicitTrackSelection.clear(); p.selection = ids; p.rangeSelection = {}; p.selecting = true;
     if (!ids.isEmpty()) p.engine.selectClip(ids[0]); p.notifyState(); p.selecting = false; p.canvas.repaint();
 }
 juce::Range<double> ArrangementView::selectedTimeRange() const
@@ -1027,6 +1038,7 @@ juce::Range<double> ArrangementView::selectedTimeRange() const
     }
     return end > start ? juce::Range<double>(start, end) : juce::Range<double>();
 }
+juce::Range<double> ArrangementView::explicitSelectedTimeRange() const { return impl->rangeSelection; }
 juce::Result ArrangementView::loopSelection()
 {
     const auto range = selectedTimeRange();
@@ -1115,7 +1127,7 @@ void ArrangementView::mouseDown(const juce::MouseEvent& e)
 {
     if (!isEnabled() || e.position.x < impl->labelWidth()) return;
     if (isShowing()) grabKeyboardFocus();
-    auto& p = *impl; p.cancelDrag(); p.followSuspended = true;
+    auto& p = *impl; p.cancelDrag(); p.followSuspended = true; p.explicitTrackSelection.clear();
     p.rulerRevision = p.state.revision; p.rulerDownTime = p.snapTime(p.timeAt(e.position.x), e.mods.isAltDown());
     p.loopBeforeStart = p.loopPreviewStart = p.state.loopStart; p.loopBeforeEnd = p.loopPreviewEnd = p.state.loopEnd;
     p.rulerDrag = 1;
@@ -1173,9 +1185,9 @@ bool ArrangementView::keyPressed(const juce::KeyPress& key)
     impl->notifyState();
     return true;
 }
-void ArrangementView::focusGained(FocusChangeType) { impl->canvas.repaint(); repaint(); }
+void ArrangementView::focusGained(FocusChangeType) { impl->canvas.repaint(); repaint(); if (onFocus) onFocus(); }
 void ArrangementView::focusLost(FocusChangeType) { impl->canvas.repaint(); repaint(); }
-void ArrangementView::focusOfChildComponentChanged(FocusChangeType) { impl->canvas.repaint(); repaint(); }
+void ArrangementView::focusOfChildComponentChanged(FocusChangeType) { impl->canvas.repaint(); repaint(); if (hasKeyboardFocus(true) && onFocus) onFocus(); }
 
 juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const juce::File& outputDirectory)
 {
@@ -1216,10 +1228,26 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
             &p.canvas, &p.canvas, now, { x, y }, now, 1, dragging);
     };
     const auto lastRow = static_cast<int>(initial.tracks.size()) - 1;
+    const auto headerRevision = p.engine.snapshot().revision;
     p.canvas.mouseDown(event(20.0f, static_cast<float>(lastRow * rowHeight + 30)));
     if (p.engine.snapshot().selectedTrackId != initial.tracks.back().id) return juce::Result::fail("Clicking an arrangement row did not select its real track.");
+    update(p.engine.snapshot()); // A periodic refresh must not restore the first clip selection.
+    if (explicitSelectedTrackId() != initial.tracks.back().id || !selectedClipIds().isEmpty()
+        || !explicitSelectedTimeRange().isEmpty() || p.engine.snapshot().revision != headerRevision)
+        return juce::Result::fail("Track header selection did not remain track-only across refresh.");
+    if (!initial.tracks.back().clips.empty()) {
+        const auto clipId = initial.tracks.back().clips.front().id;
+        if (p.engine.snapshot().selectedClipId != clipId)
+            return juce::Result::fail("Track header selection changed the engine active-clip semantics.");
+        selectClipIds(juce::StringArray{clipId});
+        if (explicitSelectedTrackId().isNotEmpty() || !selectedClipIds().contains(clipId))
+            return juce::Result::fail("Explicit clip selection did not leave track-only mode.");
+        p.canvas.mouseDown(event(20.0f, static_cast<float>(lastRow * rowHeight + 30)));
+    }
+    report.setProperty("track_header_scope_and_clip_restore", true);
     const auto halfX = static_cast<float>(p.labelWidth() + p.plotWidth() * 0.5);
     p.canvas.mouseDown(event(halfX, static_cast<float>(lastRow * rowHeight + 5)));
+    if (explicitSelectedTrackId().isNotEmpty()) return juce::Result::fail("Timeline selection did not leave track-only mode.");
     if (std::abs(p.engine.snapshot().position - initialHorizon * 0.5) > 0.002) return juce::Result::fail("Timeline click did not seek to the shared time coordinate including trailing space.");
     // Empty-space dragging now selects clips; transport scrubbing stays in the ruler.
     p.canvas.mouseUp(event(halfX, static_cast<float>(lastRow * rowHeight + 5)));

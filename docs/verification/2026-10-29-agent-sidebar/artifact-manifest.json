@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "physical_audio": false,
+  "source": "Synthetic fixtures only. Native images exclude WebView HWND; web images are headless UI fixtures. Reports preserve original bytes.",
+  "artifacts": {
+    "native-sidebar-report.json": "1c83ce0e19efed60211bea950fec63e8d34dc28c21efc0c7136319be6cf64a11",
+    "native-layout-1280.png": "3182e9600b53ad0f0ef738e7602f6f853cacb512674497ec78365f094b6a0475",
+    "native-layout-1000.png": "3e5f8f6fe92c855ec7d0acb13bf3dfc863102cc2ff2547e442df0f4b86125237",
+    "synthetic-agent-report.json": "5b4dac0395f1d3edcc4fa28637edefe0ac8151f5180050ec81225fc859745ee9",
+    "live-openai-report.json": "2a3021424d49444a782661475f7dcd953c2b98392b09ba09d406e189c2fec20b",
+    "live-kimi-report.json": "3d5edeb7b8c4d6999567e49b3c5c4ef5211d71b3532d116f5a04d9a7b0f79a6a",
+    "first-openai-incomplete-report.json": "a18754b28e1d5c844a8c5a9bd53af9a5d87544bffb2d39aee5e24b6fc7c6bb12",
+    "web-ready-340.png": "fe7dd8bc7dc66abf77d20d21de206db538e046648fb8482292cb1b937b751127",
+    "web-settings-340.png": "1e4e04a1b1209b99dd81153529b6e6813acf174e76cd8d2be1c271774cbb05f1",
+    "arrangement-report.json": "dbd10fa60461f478ce0cfd9f204690acc5e49c0ea1fc882c94b6b5f5291bb969",
+    "clip-report.json": "a5cc2c5e48e527438dfafc38f3c8a33a2db8ff2bcdf4c07f89181cda4325b0b9",
+    "daw-report.json": "e8911b794696c02114c35f9cb817047bdf75b7a28fce40a8f1acf1cd16dafe65",
+    "engine-report.json": "5855033e2af0d5d48380fa8ba8ef635e67be2815092e0eb5fa2105cfc557baec",
+    "project-report.json": "0005386b678419342fbce3482c0da5e0f3a8643f973ebbbf031b6f510da41549",
+    "storage-v3-report.json": "aaf3c5db31b4093c8449a2d32d1babcb9373b5127922b73b37c40e82146aee98",
+    "transport-report.json": "4ad59f36e3f3d8a93fe42f9a923b8c1325b14b7c92bb89e1703716642aa36b4e",
+    "job-retry-report.json": "3cdec5ab1d8e5a24c02510a6bffe4ed91bd34e2c71abdf71ca056fa917404218",
+    "production-smoke.json": "4bc57dcaa1a793643ee255de7a294dba5ec38ccd8524593211e465eb52c25dd1"
+  }
+}

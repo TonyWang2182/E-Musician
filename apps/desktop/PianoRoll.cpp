@@ -238,6 +238,10 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     }
     void refreshButtons()
     {
+        if (selected != reportedSelection || clipId != reportedClip) {
+            reportedSelection = selected; reportedClip = clipId; ++selectionGeneration;
+            if (owner.onSelectionChange) owner.onSelectionChange();
+        }
         const bool usable = clipId.isNotEmpty(); const bool chosen = usable && !selected.empty();
         for (auto* b : { &copy, &cut, &erase, &duplicate, &quantize, &down, &up }) b->setEnabled(chosen);
         paste.setEnabled(usable && clipboardProject == projectId && !clipboard.empty()); draw.setEnabled(usable);
@@ -524,6 +528,9 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     std::vector<std::pair<float, float>> lastPaintedLabels;
     bool densePreview = false;
     std::set<juce::String> selected;
+    std::set<juce::String> reportedSelection;
+    juce::String reportedClip;
+    std::uint64_t selectionGeneration = 0;
     juce::String projectId, clipId, name, clipboardProject, editError;
     std::uint64_t revision = 0, gestureRevision = 0;
     double clipStart = 0, length = 4, bpm = 120, firstBeat = 0, pixelsPerBeat = 80, gridBeats = 0.25, playheadBeat = 0, barBeats = 4, beatUnit = 1, insertionBeat = 0;
@@ -535,6 +542,13 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
 
 PianoRoll::PianoRoll() : impl(std::make_unique<Impl>(*this)) { setSize(1000, 580); }
 PianoRoll::~PianoRoll() = default;
+juce::String PianoRoll::clipId() const { return impl->clipId; }
+juce::StringArray PianoRoll::selectedNoteIds(int maximum) const
+{ juce::StringArray ids; for (const auto& id : impl->selected) { if (ids.size() >= juce::jlimit(0, 2000, maximum)) break; ids.add(id); } return ids; }
+int PianoRoll::selectedNoteCount() const { return int(impl->selected.size()); }
+std::uint64_t PianoRoll::selectionRevision() const { return impl->selectionGeneration; }
+void PianoRoll::focusGained(FocusChangeType) { if (onFocus) onFocus(); }
+void PianoRoll::focusOfChildComponentChanged(FocusChangeType) { if (hasKeyboardFocus(true) && onFocus) onFocus(); }
 void PianoRoll::setTimeSignature(int numerator, int denominator)
 {
     const double next = time::beatsPerBar(numerator, denominator), unit = 4.0 / juce::jmax(1, denominator);

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(EMusician VERSION 0.6.1 LANGUAGES C CXX)
+project(EMusician VERSION 0.7.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -46,6 +46,27 @@ if(EMUSICIAN_BUILD_DESKTOP)
     if(NOT ENGINE_PATCH_RESULT EQUAL 0)
         message(FATAL_ERROR "Tracktion source patch is missing or changed. Run python scripts/dev.py bootstrap. ${ENGINE_PATCH_ERROR}")
     endif()
+    if(WIN32)
+        file(READ "${CMAKE_CURRENT_SOURCE_DIR}/cmake/webview2.json" WEBVIEW_MANIFEST)
+        string(JSON WEBVIEW_VERSION GET "${WEBVIEW_MANIFEST}" version)
+        set(JUCE_WEBVIEW2_PACKAGE_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/.cache/webview2" CACHE PATH "Pinned WebView2 SDK root")
+        set(WEBVIEW_SDK "${JUCE_WEBVIEW2_PACKAGE_LOCATION}/Microsoft.Web.WebView2.${WEBVIEW_VERSION}")
+        foreach(WEBVIEW_ITEM IN ITEMS header x64_library)
+            if(WEBVIEW_ITEM STREQUAL "header")
+                set(WEBVIEW_FILE "${WEBVIEW_SDK}/build/native/include/WebView2.h")
+            else()
+                set(WEBVIEW_FILE "${WEBVIEW_SDK}/build/native/x64/WebView2LoaderStatic.lib")
+            endif()
+            if(NOT EXISTS "${WEBVIEW_FILE}")
+                message(FATAL_ERROR "Pinned WebView2 SDK missing. Run python scripts/bootstrap_webview2.py")
+            endif()
+            file(SHA256 "${WEBVIEW_FILE}" WEBVIEW_HASH)
+            string(JSON WEBVIEW_EXPECTED GET "${WEBVIEW_MANIFEST}" "${WEBVIEW_ITEM}_sha256")
+            if(NOT WEBVIEW_HASH STREQUAL WEBVIEW_EXPECTED)
+                message(FATAL_ERROR "Pinned WebView2 SDK hash mismatch")
+            endif()
+        endforeach()
+    endif()
     add_subdirectory("${ENGINE_ROOT}/modules/juce" "dependencies/juce")
     set(EMUSICIAN_VST2_SDK "${CMAKE_CURRENT_SOURCE_DIR}/_deps/vst2_sdk" CACHE PATH "Local VST2 interface headers")
     if(NOT EXISTS "${EMUSICIAN_VST2_SDK}/pluginterfaces/vst2.x/aeffect.h")
@@ -59,7 +80,7 @@ if(EMUSICIAN_BUILD_DESKTOP)
     endif()
     add_subdirectory("${ENGINE_ROOT}/modules" "dependencies/tracktion")
     juce_add_gui_app(EMusician PRODUCT_NAME "E-musician" COMPANY_NAME "E-musician"
-        BUNDLE_ID "local.emusician.desktop")
+        BUNDLE_ID "local.emusician.desktop" NEEDS_WEBVIEW2 TRUE)
     if(WIN32)
         # JUCE 8.0.6 omits its Info.txt dependency for generated Windows resources.
         # Keep Explorer's file/product version current on incremental builds.
@@ -69,14 +90,17 @@ if(EMUSICIAN_BUILD_DESKTOP)
             APPEND DEPENDS "${EMUSICIAN_INFO_FILE}")
     endif()
     target_sources(EMusician PRIVATE apps/desktop/Main.cpp apps/desktop/EngineSession.cpp
-        apps/desktop/MainComponent.cpp apps/desktop/ArrangementView.cpp
+        apps/desktop/MainComponent.cpp apps/desktop/AgentSidebar.cpp apps/desktop/ArrangementView.cpp
         apps/desktop/ProjectStorage.cpp apps/desktop/AudioSource.cpp apps/desktop/PluginHost.cpp
         apps/desktop/PianoRoll.cpp apps/desktop/ControlServer.cpp apps/desktop/SelectedTrackPanel.cpp tests/Vst3InactiveBusSmoke.cpp)
     # Keep the application-reported version and window title tied to the build version.
     set_property(SOURCE apps/desktop/Main.cpp APPEND PROPERTY COMPILE_DEFINITIONS
         "EMUSICIAN_APPLICATION_VERSION=\"${PROJECT_VERSION}\"")
     target_include_directories(EMusician PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/_deps/asio_sdk/common")
-    target_compile_definitions(EMusician PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_USE_MP3AUDIOFORMAT=1
+    target_compile_definitions(EMusician PRIVATE
+        EMUSICIAN_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+        EMUSICIAN_AGENT_PYTHON="${Python3_EXECUTABLE}"
+        JUCE_USE_WIN_WEBVIEW2=1 JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING=1 JUCE_WEB_BROWSER=1 JUCE_USE_CURL=0 JUCE_USE_MP3AUDIOFORMAT=1
         JUCE_PLUGINHOST_VST3=1 JUCE_PLUGINHOST_VST=1 JUCE_ASIO=1
         JUCE_MODAL_LOOPS_PERMITTED=1 TRACKTION_ENABLE_TIMESTRETCH_SOUNDTOUCH=0)
     if(MSVC)

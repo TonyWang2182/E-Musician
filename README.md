@@ -1,16 +1,26 @@
 # E-musician
 
-Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。本轮先把音频编辑、MIDI 编曲、插件宿主、工程保存和导出做成可直接操作的基础，并给后续 Agent 提供同一套控制接口。
+Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
-**0.6.1：最细1/16384网格、Ctrl+4吸附虚实线、三级小节标尺与深度缩放。** 保留0.6.0剪贴板、循环跟随、节拍器、录音预备拍和资源/电平显示。 当前验证状态和后续人工检查见[CONTEXT](docs/CONTEXT.md)。0.5.2基础录音保存及用户混合工程验收保留原范围，早期性能和插件矩阵见[0.5交付档案](docs/verification/2026-10-27-v05/DELIVERY.md)。
+**本分支：DAW 0.7.0 / Agent 0.2 第一批，构建及自动验证完成。** 新增原生可开关侧栏、实际选择上下文与 Kimi/OpenAI 适配。CTest 5/5、Python 178 项、原生侧栏 23 项检查通过；GPT-5-mini 和 Kimi-k2.6 均完成真实联网的合成工程编辑及撤销验证。实际界面操作、中文输入法和 ASIO 播放仍待人工确认，离屏焦点测试只验证合成事件到原生快捷键保护的连接。完整证据见[本批验证结果](docs/verification/2026-10-29-agent-sidebar/RESULTS.md)及[人工短测](docs/review/2026-10-29-agent-sidebar/MANUAL-CHECK.md)。
+
+保留0.6.1的1/16384网格、Ctrl+4吸附虚实线、三级小节标尺与深缩放，以及0.6.0剪贴板、循环跟随、节拍器、预备拍和资源/电平显示。旧录音、混合工程、性能与插件证据保持原版本范围，见[0.5交付档案](docs/verification/2026-10-27-v05/DELIVERY.md)。
 
 新工程默认 **120 BPM、4/4**。不提供和弦工具、乐句模板或自带音源；MIDI 通过用户安装的 Windows x64 VST2/VST3 乐器发声。独立运行不需要 Ableton、模型服务或 API 密钥。
 
-既有Keyscape兼容、录音音符时间边界和保存修复继续保留。新功能沿用同一个工程、命令接口及Undo；实际模型Agent尚未接入，不提供自动保存和恢复。
+既有Keyscape兼容、录音音符时间边界和保存修复继续保留。新功能沿用同一个工程、命令接口及Undo；模型请求在独立非实时进程中执行。不提供自动保存和恢复。
 
 ## 打开与开发
 
-在 VS Code 中打开 `E:\E-musician`。首次准备依赖后，按 **F5** 构建并调试；**Ctrl+Shift+B** 只构建。
+在 VS Code 中打开当前功能分支工作树。原 `E:\E-musician` 和 `build/bin` 保留既有 DAW 入口；本批 Agent 原生侧栏使用独立 `build/sidebar`：
+
+```powershell
+python scripts/dev_agent.py build
+python scripts/dev_agent.py test
+python scripts/dev_agent.py run
+```
+
+默认 Release，产物为 `build/sidebar/bin/Release/E-musician.exe`。本机也可双击 `E:\MusicAgent&DAW\Start E-musician Agent.cmd`，工作树内为 `Start-Agent.cmd`。**先保存并关闭已有的0.6.1或其他旧版窗口，再启动；标题栏应显示0.7.0。** 否则单实例机制可能把启动请求交给仍运行的旧版。普通旧构建、F5 调试及固定依赖入口继续保留：
 
 ```powershell
 python scripts/dev.py bootstrap --note "准备固定依赖"
@@ -34,9 +44,13 @@ python scripts/dev.py run --config Debug --note "启动编辑器"
 
 Source 在底部查看选中音频源。真实分轨/转录、32 位插件桥接、侧链、插件任意多输出、comping、自动化 Touch/Latch/Write、TempoMap 和时间拉伸尚未实现。MP3 支持导入和播放，不支持导出。
 
-## Kimi 编曲助手 0.1
+## 原生编曲助手 0.2
 
-本分支新增可选的本机助手：读取工程 → 提出方案 → 明确应用 → 回读检查，支持基本轨道/片段和 MIDI 编辑。双击 `Start-Agent.cmd`，或运行 `python scripts/run_agent.py --exe PATH`。它连接自己启动的 DAW 窗口；密钥通过 Windows DPAPI 保存在本机，代码与 Git 不包含凭证。首次人工步骤、支持范围与费用边界见 [Agent 快速上手](docs/AGENT_QUICKSTART.md)，自动和真实模型证据见 [验证记录](docs/verification/2026-10-29-kimi-agent/RESULTS.md)。
+点击工具栏 **Agent** 或 **Ctrl+Shift+A** 开关侧栏：读取当前工程/选择 → 提出具体方案 → 明确应用 → 回读检查。收起保留输入和任务；DAW 拥有独立模型 worker，助手断开不能关闭工程。默认“当前选择”，全局速度/新建轨等操作需明确切为“整个工程”；选区或工程变化会拒绝旧方案。
+
+Kimi 与 OpenAI 适配器已实现，凭证按服务通过 Windows DPAPI 本机加密保存；Anthropic、Gemini、本地兼容服务仍预留。本次交付机器的两套凭证已配置，无需重复提供。OpenAI 可沿用已有 loopback 代理，不改系统网络。界面的“已配置”只说明本地凭证存在；本批 GPT-5-mini / Kimi-k2.6 的实际调用结果另外记录在[验证结果](docs/verification/2026-10-29-agent-sidebar/RESULTS.md)。启动、支持范围、数据和费用边界见[Agent 快速上手](docs/AGENT_QUICKSTART.md)；[0.1历史证据](docs/verification/2026-10-29-kimi-agent/RESULTS.md)仅覆盖旧伴随模式。
+
+默认摘要之外的明确片段目标通过分页补齐；每个待编辑片段完整音符读取最多2000个，超限拒绝。当前是受范围约束的基本编辑助手，尚无音频理解/生成、任意插件自动控制或长期自主任务。旧 `run_agent.py --exe PATH` 仍供独立浏览器伴随模式兼容使用。
 
 ## 工程与 Agent
 

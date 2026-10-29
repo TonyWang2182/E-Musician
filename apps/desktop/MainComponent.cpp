@@ -1,12 +1,15 @@
 #include "MainComponent.h"
 #include "ArrangementView.h"
 #include "PianoRoll.h"
+#include "AgentSidebar.h"
 #include "SelectedTrackPanel.h"
 #include "core/time/MusicalPosition.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <stdexcept>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 namespace emusician {
@@ -673,7 +676,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
             &arrangement, &zoomOut, &zoomIn, &fit, &clipStart, &setClipStart,
             &editMenu, &exportMenu, &plugins, &tempo, &gridMode, &clipProperties, &trackPan, &cancelJob,
             &closeEditor, &details, &saveStatus, &trackPanel, &record, &rulerMode, &snap, &follow,
-            &metronome, &metronomeOptions, &countIn, &countInBars, &resources, &meterReset };
+            &metronome, &metronomeOptions, &countIn, &countInBars, &resources, &meterReset, &agentButton };
         for (auto* child : children) {
             owner.addAndMakeVisible(child);
             child->addKeyListener(&owner);
@@ -697,7 +700,11 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         closeEditor.setTooltip("Close the lower editor. Double-click a MIDI clip to reopen it.");
         details.onClick = [this] { inspectorVisible = !inspectorVisible; owner.resized(); owner.repaint(); };
         details.setTooltip("Show or hide selected track and clip controls.");
-        arrangement.onUserStateChange = [&component] { component.refreshSnapshot(); };
+        arrangement.onUserStateChange = [&component] { component.refreshSnapshot(); component.synchronizeAgentSelection(); };
+        arrangement.onFocus = [&component] { if(component.impl){component.impl->musicFocus="arrangement";if(component.impl->agentSidebar)component.impl->agentSidebar->clearKeyboardFocusHint();component.synchronizeAgentSelection();} };
+        arrangement.onTrackFocus = [&component](const juce::String&) { if(component.impl){component.impl->musicFocus="track";component.synchronizeAgentSelection();} };
+        agentButton.setTooltip("Show or hide the music assistant (Ctrl+Shift+A). Closing the panel preserves its task.");
+        agentButton.onClick = [&component] { component.toggleAgent(); };
         arrangement.onEditResult = [&component](const juce::Result& result) { component.showResult(result); };
         arrangement.onOpenMidiClip = [&component](const juce::String&) { component.showPianoRoll(); };
         arrangement.onOpenTrackDevices = [this](const juce::String&) { dock = Dock::track; trackPanel.showDevices(); owner.resized(); owner.repaint(); };
@@ -872,6 +879,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     }
     ~Impl()
     {
+        agentSidebar.reset();
         chooser.reset();
         trackList.setModel(nullptr);
         if (audioDialog != nullptr) delete audioDialog.getComponent();
@@ -921,7 +929,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         int y = 470;
         for (auto& button : deviceButtons) {
             button->setBounds(inspector.getX(), y, inspector.getWidth(), 28);
-            button->setVisible(inspectorVisible && y + 28 <= footerY - 12);
+            button->setVisible(inspectorDisplayed && y + 28 <= footerY - 12);
             y += 34;
         }
     }
@@ -973,7 +981,10 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     juce::TextButton snap { "snap" }, follow { "follow" }, metronome { "click" }, metronomeOptions { "..." }, countIn { "count-in" }, meterReset { "OUT" };
     juce::Label resources;
     juce::Label filename, status, saveStatus;
-    juce::TextButton closeEditor { "close editor" }, details { "details" };
+    juce::TextButton closeEditor { "close editor" }, details { "details" }, agentButton { "Agent" };
+    std::unique_ptr<AgentSidebar> agentSidebar;
+    juce::String musicFocus="arrangement";
+    bool agentVisible=false, inspectorDisplayed=true, syncingSelection=false;
     ClipStartEditor clipStart;
     juce::TextButton setClipStart { "set" };
     juce::Slider gain, trackGain, trackPan;
@@ -1017,14 +1028,188 @@ MainComponent::MainComponent(EngineSession& engine) : session(engine), impl(std:
 }
 MainComponent::~MainComponent() { stopTimer(); }
 
+
+void MainComponent::synchronizeAgentSelection()
+{
+    if(!impl||!impl->agentSidebar||impl->syncingSelection)return;
+    auto& p=*impl;juce::ScopedValueSetter<bool> guard(p.syncingSelection,true);
+    const auto state=session.snapshot();
+    auto clips=p.arrangement.selectedClipIds();
+    const auto explicitTrack=p.arrangement.explicitSelectedTrackId();
+    juce::StringArray tracks;
+    std::unordered_set<std::string> selectedIds;selectedIds.reserve(size_t(clips.size()));
+    for(const auto& id:clips)selectedIds.insert(id.toStdString());
+    if(!selectedIds.empty())for(const auto& track:state.tracks)
+        for(const auto& clip:track.clips)if(selectedIds.contains(clip.id.toStdString())){tracks.addIfNotAlreadyThere(track.id);break;}
+    if(tracks.isEmpty()&&state.selectedTrackId.isNotEmpty())tracks.add(state.selectedTrackId);
+    const auto range=p.arrangement.explicitSelectedTimeRange();
+    auto focus=p.musicFocus;
+    if(focus!="piano_roll"&&explicitTrack.isNotEmpty())focus="track";
+    if(focus=="track"&&explicitTrack.isEmpty())focus="arrangement";
+    const bool piano=focus=="piano_roll"&&p.pianoRoll&&p.dock==Impl::Dock::midi
+        &&p.pianoRoll->clipId()==state.selectedClipId;
+    if(focus=="piano_roll"&&!piano)focus="arrangement";
+    if(piano&&clips.isEmpty()&&state.selectedClipId.isNotEmpty())clips.add(state.selectedClipId);
+    session.setSelectionContext(arguments({
+        {"project_id",state.projectId},{"active_track_id",state.selectedTrackId},{"active_clip_id",state.selectedClipId},
+        {"track_ids",idsValue(tracks)},{"clip_ids",idsValue(clips)},{"focus",focus},
+        {"note_clip_id",piano?p.pianoRoll->clipId():juce::String()},
+        {"note_ids",piano?idsValue(p.pianoRoll->selectedNoteIds()):juce::var(juce::Array<juce::var>())},
+        {"note_count",piano?p.pianoRoll->selectedNoteCount():0},
+        {"notes_truncated",piano&&p.pianoRoll->selectedNoteCount()>2000},
+        {"time_range",arguments({{"active",!range.isEmpty()},{"start_seconds",range.getStart()},{"end_seconds",range.getEnd()}})}
+    }));
+}
+void MainComponent::showAgent(){if(!impl->agentVisible)toggleAgent();}
+void MainComponent::toggleAgent()
+{
+    auto& p=*impl;p.agentVisible=!p.agentVisible;
+    if(p.agentVisible&&!p.agentSidebar){
+        p.agentSidebar=std::make_unique<AgentSidebar>([safe=juce::Component::SafePointer<MainComponent>(this)](const juce::var& request)->juce::var{
+            if(!safe)return arguments({{"request_id",request["request_id"]},{"status","failed"},{"error","Project window is closed."}});
+            safe->refreshSnapshot();safe->synchronizeAgentSelection();
+            return safe->session.executeRequest(request);
+        });
+        p.agentSidebar->onClose=[safe=juce::Component::SafePointer<MainComponent>(this)]{if(safe&&safe->impl->agentVisible)safe->toggleAgent();};
+        addChildComponent(*p.agentSidebar);
+    }
+    synchronizeAgentSelection();resized();repaint();
+    if(!p.agentVisible){
+        if(p.musicFocus=="piano_roll"&&p.pianoRoll&&p.dock==Impl::Dock::midi)p.pianoRoll->grabKeyboardFocus();
+        else p.arrangement.grabKeyboardFocus();
+    }
+}
+
+
+juce::Result MainComponent::runAgentSidebarSmokeTest(const juce::File& directory)
+{
+    auto report=std::make_unique<juce::DynamicObject>();
+    report->setProperty("schema_version",1);report->setProperty("status","failed");
+    report->setProperty("physical_audio",false);report->setProperty("provider_mode","synthetic");
+    report->setProperty("scope","Offline synthetic native window/WebView2 lifecycle. No model request; parent-layout captures exclude browser HWND pixels.");
+    juce::Array<juce::var> checks;auto timings=std::make_unique<juce::DynamicObject>();
+    juce::String failure;
+    auto require=[&](bool condition,const juce::String& name){
+        directory.getChildFile("last-check.txt").replaceWithText(name+(condition?" passed":" failed"));
+        checks.add(arguments({{"name",name},{"passed",condition}}));
+        if(!condition)throw std::runtime_error(name.toStdString());
+    };
+    auto pump=[](int ms){juce::MessageManager::getInstance()->runDispatchLoopUntil(ms);};
+    auto wait=[&](auto condition,int ms){
+        const auto end=juce::Time::getMillisecondCounterHiRes()+ms;
+        while(!condition()&&juce::Time::getMillisecondCounterHiRes()<end)pump(10);
+        return condition();
+    };
+    auto js=[&](const juce::String& expression)->juce::var{
+        struct Evaluation{bool done=false;juce::var value;};
+        auto result=std::make_shared<Evaluation>();
+        impl->agentSidebar->evaluateForTest(expression,[result](juce::WebBrowserComponent::EvaluationResult value){
+            if(const auto* output=value.getResult())result->value=*output;result->done=true;
+        });
+        if(!wait([&]{return result->done;},3000))return {};
+        return result->value;
+    };
+    auto state=[&]()->juce::var{
+        impl->agentSidebar->probeStateForTest(nullptr);
+        juce::var value;
+        const bool ok=wait([&]{value=js("window.__nativeSmokeState || null");return value.isObject();},6000);
+        return ok?value:juce::var();
+    };
+    try {
+        directory.getChildFile("last-check.txt").replaceWithText("starting selection checks");
+        juce::DynamicObject selectionReport;
+        require(session.runSelectionContextSmokeTest(selectionReport).wasOk(),"selection_context");
+        report->setProperty("selection_checks",juce::var(selectionReport.clone().release()));
+        require(session.execute("create_track",arguments({{"kind","instrument"},{"name","Sidebar synthetic fixture"}}),session.snapshot().revision).wasOk(),"fixture_track");
+        const auto tid=session.snapshot().tracks.front().id;
+        require(session.execute("create_midi_clip",arguments({{"track_id",tid},{"start_beats",0.0},{"length_beats",16.0}}),session.snapshot().revision).wasOk(),"fixture_clip");
+        const auto cid=session.snapshot().tracks.front().clips.front().id;
+        juce::Array<juce::var> notes;
+        for(int i=0;i<6;++i)notes.add(arguments({{"id","sidebar-note-"+juce::String(i)},{"pitch",60+i},{"start_beats",double(i)},{"length_beats",0.5},{"velocity",80},{"channel",1}}));
+        require(session.execute("write_notes",arguments({{"clip_id",cid},{"notes",notes}}),session.snapshot().revision).wasOk(),"fixture_notes");
+        session.selectClip(cid);refreshSnapshot();impl->arrangement.selectClipIds({cid});showPianoRoll();
+        impl->musicFocus="piano_roll";
+        impl->pianoRoll->keyPressed(juce::KeyPress('A',juce::ModifierKeys::ctrlModifier,0));synchronizeAgentSelection();
+        const auto before=session.snapshot();const auto start=juce::Time::getMillisecondCounterHiRes();
+        toggleAgent();
+        require(wait([&]{return impl->agentSidebar->isReady();},50000),"native_page_loaded");
+        timings->setProperty("first_open_ms",juce::Time::getMillisecondCounterHiRes()-start);
+        auto first=state();
+        require(first.isObject()&&bool(first["control"]["embedded"]),"embedded_connection");
+        require(first["snapshot"]["project_id"].toString()==before.projectId,"same_project");
+        require(int(first["snapshot"]["selection_context"]["note_count"])==6
+            &&first["snapshot"]["selection_context"]["focus"].toString()=="piano_roll","full_native_note_selection");
+        require(int(first["usage"]["calls"])==0,"no_paid_provider");
+        require(bool(js("typeof window.__JUCE__?.backend?.emitEvent === 'function'")),"native_event_bridge");
+        js("document.getElementById('prompt').value='retained synthetic draft'; document.getElementById('prompt').focus(); true");
+        pump(100);
+        report->setProperty("focus_before_synthetic_event",arguments({
+            {"sidebar_showing",impl->agentSidebar->isShowing()},
+            {"captures_keyboard",impl->agentSidebar->capturesKeyboard()},
+            {"web",js("({active:document.activeElement?.id,documentFocused:document.hasFocus(),hidden:document.hidden})")}
+        }));
+        // Offscreen WebView has no physical desktop focus. Deliver the same DOM
+        // focus event as a user click, then verify the real JS->native guard.
+        js("document.getElementById('prompt').dispatchEvent(new FocusEvent('focusin',{bubbles:true})); true");
+        pump(100);
+        report->setProperty("focus_probe_scope","Synthetic DOM focus event through actual WebView2; physical keyboard/IME acceptance remains manual");
+        report->setProperty("focus_after_synthetic_event",impl->agentSidebar->capturesKeyboard());
+        const auto snapState=impl->snap.getToggleState();const auto playing=before.playing;
+        require(!keyPressed(juce::KeyPress('4',juce::ModifierKeys::ctrlModifier,0))
+            &&impl->snap.getToggleState()==snapState
+            &&!keyPressed(juce::KeyPress(juce::KeyPress::spaceKey))
+            &&session.snapshot().playing==playing,"key_focus");
+        double toggleMax=0;
+        for(int i=0;i<12;++i){
+            const auto a=juce::Time::getMillisecondCounterHiRes();toggleAgent();toggleAgent();
+            toggleMax=juce::jmax(toggleMax,juce::Time::getMillisecondCounterHiRes()-a);pump(20);
+        }
+        timings->setProperty("hide_show_pair_max_ms_12",toggleMax);
+        require(impl->agentVisible&&impl->agentSidebar->isReady(),"hide_show");
+        require(js("document.getElementById('prompt').value").toString()=="retained synthetic draft","state_preserved");
+        const auto selected=state()["snapshot"]["selection_context"];
+        require(int(selected["note_count"])==6&&selected["focus"].toString()=="piano_roll","focus_preserved_after_sidebar");
+        for(const auto size:{juce::Point<int>{1280,800},juce::Point<int>{1000,650}}){
+            setSize(size.x,size.y);pump(100);
+            const auto bounds=impl->agentSidebar->getBounds();
+            require(bounds.getWidth()>=320&&impl->workspace.getWidth()>=540,"minimum_layout_"+juce::String(size.x));
+            auto output=directory.getChildFile("ui-agent-"+juce::String(size.x)+"x"+juce::String(size.y)+".png").createOutputStream();
+            require(output!=nullptr&&juce::PNGImageFormat().writeImageToStream(createComponentSnapshot(getLocalBounds()),*output),"native_parent_capture_"+juce::String(size.x));
+        }
+        impl->agentSidebar->stopWorkerForTest();
+        require(wait([&]{return !impl->agentSidebar->isWorkerRunning();},4000),"helper_stopped");
+        require(session.snapshot().projectId==before.projectId&&session.snapshot().revision==before.revision,"project_survived_helper_stop");
+        impl->agentSidebar->restartWorker();
+        require(wait([&]{return impl->agentSidebar->isReady();},50000),"helper_restart");
+        auto restarted=state();
+        require(restarted["snapshot"]["project_id"].toString()==before.projectId&&int(restarted["usage"]["calls"])==0,"single_engine");
+        require(session.snapshot().revision==before.revision,"no_music_mutation");
+        report->setProperty("parent_private_bytes",juce::int64(session.snapshot().memoryPrivateBytes));
+        report->setProperty("sample_rate",session.snapshot().sampleRate);
+        report->setProperty("buffer_size",session.snapshot().bufferSize);
+        report->setProperty("audio_mode","offline memory device; no physical playback");
+        report->setProperty("status","passed");
+    }catch(const std::exception& error){failure=error.what();report->setProperty("error",failure);}
+    report->setProperty("checks",checks);report->setProperty("timings_ms",juce::var(timings.release()));
+    report->setProperty("artifacts",juce::var(juce::StringArray{"ui-agent-1280x800.png","ui-agent-1000x650.png"}));
+    directory.getChildFile("agent-sidebar-report.json").replaceWithText(juce::JSON::toString(juce::var(report.release())));
+    return failure.isEmpty()?juce::Result::ok():juce::Result::fail(failure);
+}
+
 void MainComponent::resized()
 {
     auto& p = *impl;
     constexpr int margin = 16;
     p.footerY = getHeight() - 110;
-    const int inspectorWidth = p.inspectorVisible ? 226 : 0;
-    p.inspector = { getWidth() - margin - inspectorWidth, 144, inspectorWidth, p.footerY - 156 };
-    p.workspace = { margin, 144, getWidth() - margin * 2 - (p.inspectorVisible ? inspectorWidth + 16 : 0), p.footerY - 156 };
+    const int sidebarWidth=p.agentVisible?juce::jlimit(340,520,getWidth()/3):0;
+    const int workspaceRight=getWidth()-margin-(p.agentVisible?sidebarWidth+8:0);
+    p.inspectorDisplayed=p.inspectorVisible&&!p.agentVisible;
+    const int inspectorWidth = p.inspectorDisplayed ? 226 : 0;
+    if(p.agentSidebar){p.agentSidebar->setBounds(workspaceRight+8,110,sidebarWidth,p.footerY-122);p.agentSidebar->setPanelVisible(p.agentVisible);}
+    p.agentButton.setBounds(getWidth()-margin-208,75,80,30);
+    p.agentButton.setToggleState(p.agentVisible,juce::dontSendNotification);
+    p.inspector = { workspaceRight - inspectorWidth, 144, inspectorWidth, p.footerY - 156 };
+    p.workspace = { margin, 144, workspaceRight-margin - (p.inspectorDisplayed ? inspectorWidth + 16 : 0), p.footerY - 156 };
     p.library = {};
     p.trackList.setVisible(false); p.compose.setVisible(false); p.transcribe.setVisible(false); p.filename.setVisible(false);
     auto header = juce::Rectangle<int>(getWidth() - 590, 14, 574, 32);
@@ -1055,14 +1240,15 @@ void MainComponent::resized()
     if (p.pianoRoll) { p.pianoRoll->setVisible(p.dock == Impl::Dock::midi); p.pianoRoll->setBounds(p.dockBounds.withTrimmedTop(24)); }
     p.trackPanel.setVisible(p.dock == Impl::Dock::track); p.trackPanel.setBounds(p.dockBounds.withTrimmedTop(28));
     p.separate.setToggleState(p.dock == Impl::Dock::source, juce::dontSendNotification);
-    p.details.setToggleState(p.inspectorVisible, juce::dontSendNotification);
+    p.details.setToggleState(p.inspectorDisplayed, juce::dontSendNotification);
+    p.details.setEnabled(!p.agentVisible);
     const int ix = p.inspector.getX(), iw = p.inspector.getWidth();
     p.clipStart.setBounds(ix + 54, 206, iw - 104, 28); p.setClipStart.setBounds(ix + iw - 46, 206, 46, 28);
     p.clipProperties.setBounds(ix, 242, iw, 28);
     p.trackGain.setBounds(ix, 298, iw, 30); p.trackPan.setBounds(ix, 356, iw, 30);
     p.mute.setBounds(ix, 394, (iw - 6) / 2, 28); p.solo.setBounds(p.mute.getRight() + 6, 394, (iw - 6) / 2, 28);
     p.remove.setVisible(false);
-    for (juce::Component* c : std::initializer_list<juce::Component*>{ &p.clipStart, &p.setClipStart, &p.clipProperties, &p.trackGain, &p.trackPan, &p.mute, &p.solo }) c->setVisible(p.inspectorVisible);
+    for (juce::Component* c : std::initializer_list<juce::Component*>{ &p.clipStart, &p.setClipStart, &p.clipProperties, &p.trackGain, &p.trackPan, &p.mute, &p.solo }) c->setVisible(p.inspectorDisplayed);
     p.layoutDeviceButtons();
     p.play.setBounds(margin, p.footerY + 8, 88, 38); p.stop.setBounds(108, p.footerY + 8, 88, 38); p.record.setBounds(200, p.footerY + 8, 80, 38); p.loop.setBounds(284, p.footerY + 8, 88, 38);
     p.tempo.setBounds(498, p.footerY + 8, 102, 34);
@@ -1088,7 +1274,7 @@ void MainComponent::paint(juce::Graphics& g)
     g.drawHorizontalLine(142,16.0f,float(getWidth()-16));
     g.setColour(secondary);g.setFont(mono(11));
     g.drawFittedText("drag empty: select clips   Shift-drag ruler: time   Ctrl+L: loop",426,115,getWidth()-442,24,juce::Justification::centredLeft,1);
-    if (p.inspectorVisible) {
+    if (p.inspectorDisplayed) {
         const int ix = p.inspector.getX(), iw = p.inspector.getWidth();
         g.drawVerticalLine(ix - 8, 144.0f, float(p.footerY - 12));
         g.setColour(ink); g.setFont(mono(14.0f, juce::Font::bold));
@@ -1749,6 +1935,8 @@ void MainComponent::showPianoRoll()
     if (!clip || clip->kind != "midi") { showResult(juce::Result::fail("Select a MIDI clip, or add one on an instrument track first.")); return; }
     if (!impl->dockPiano) {
         auto piano = std::make_unique<PianoRoll>(); impl->pianoRoll = piano.get(); piano->setLookAndFeel(&impl->look);
+        piano->onFocus = [safe=juce::Component::SafePointer<MainComponent>(this)]{if(safe){safe->impl->musicFocus="piano_roll";if(safe->impl->agentSidebar)safe->impl->agentSidebar->clearKeyboardFocusHint();safe->synchronizeAgentSelection();}};
+        piano->onSelectionChange = [safe=juce::Component::SafePointer<MainComponent>(this)]{if(safe)safe->synchronizeAgentSelection();};
         piano->onProjectKey = [safe = juce::Component::SafePointer<MainComponent>(this)](const juce::KeyPress& key) { return safe && safe->keyPressed(key); };
         piano->onEditError = [safe = juce::Component::SafePointer<MainComponent>(this)](const juce::String& error) {if(safe)safe->showResult(juce::Result::fail(error));};
         piano->onWriteNotes = [safe = juce::Component::SafePointer<MainComponent>(this)](const juce::String& id, const std::vector<PianoRoll::Note>& notes, std::uint64_t expected) {
@@ -2175,6 +2363,8 @@ void MainComponent::showAudioSettings()
 }
 bool MainComponent::keyPressed(const juce::KeyPress& key)
 {
+    if(key.getModifiers().isCtrlDown()&&key.getModifiers().isShiftDown()&&(key.getKeyCode()=='A'||key.getKeyCode()=='a')){toggleAgent();return true;}
+    if(impl->agentVisible&&impl->agentSidebar&&impl->agentSidebar->capturesKeyboard())return false;
     if ((key.getModifiers().isCommandDown() || key.getModifiers().isCtrlDown())
         && (key.getKeyCode() == 's' || key.getKeyCode() == 'S')) {
         saveProject(key.getModifiers().isShiftDown()); return true;

@@ -1,82 +1,124 @@
-"""Launch the optional Kimi companion; all launches/checks use development Recorder."""
+"""Start the optional Agent, or serve the embedded DAW-owned sidebar."""
 from __future__ import annotations
 import argparse
 import getpass
 import json
 from pathlib import Path
 import sys
+import time
+import threading
 import webbrowser
 from dev import Recorder, CommandFailure
 from music_agent.audit import data_directory
-from music_agent.config import load_config
+from music_agent.config import load_config, active_config
+from music_agent.providers import create_provider
 from music_agent.bridge import DawBridge
-from music_agent.provider import KimiProvider, ProviderError
+from music_agent.provider import ProviderError
 from music_agent.runtime import AgentRuntime
 from music_agent.secrets import save_key, SecretError
 from music_agent.server import AgentServer
 
 ROOT = Path(__file__).resolve().parent.parent
 
+def embedded_session(path, provider):
+    from music_agent.embedded import load_session, SocketClient
+    recorder=Recorder("agent-embedded-launch","Python + native DAW","DAW-owned helper only; launch is not GUI/audio acceptance")
+    started=time.perf_counter()
+    record, record_path, log_path=recorder.new_record([sys.executable,__file__,"--serve","--embedded-session","<local session capability file>"],"launch")
+    try:
+        config=load_session(path)
+        bridge=DawBridge(client=SocketClient(config),embedded=True)
+        runtime=AgentRuntime(bridge,provider)
+        server=AgentServer(runtime)
+        ready=Path(config["ready_path"])
+        temporary=ready.with_suffix(".tmp")
+        temporary.write_text(json.dumps({"url":server.origin+"/?embedded=1#token="+server.token}),encoding="utf-8")
+        temporary.replace(ready)
+        record.update(status="launched",exit_code=0)
+        log_path.write_text("Authenticated loopback helper ready; no model request sent.\n",encoding="utf-8")
+    except Exception:
+        record.update(status="failed",exit_code=2,error="Embedded helper startup failed; capability and credentials omitted.")
+        log_path.write_text("Embedded helper startup failed.\n",encoding="utf-8")
+        recorder.finish(record,record_path,log_path,started)
+        raise
+    recorder.finish(record,record_path,log_path,started)
+    stopping=threading.Event()
+    def watch_native():
+        while not stopping.wait(1.0):
+            if not bridge.client.is_alive():
+                bridge.connected=False
+                runtime.cancel_event.set()
+                server.shutdown()
+                return
+    watcher=threading.Thread(target=watch_native,daemon=True,name="Native DAW lifetime")
+    watcher.start()
+    try:
+        server.serve_forever(poll_interval=0.25)
+    finally:
+        stopping.set()
+        server.server_close()
+        bridge.close()
+    return 0
+
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--exe", type=Path)
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--exe",type=Path)
+    parser.add_argument("--provider",choices=["kimi","openai"])
     parser.add_argument("--model")
     parser.add_argument("--base-url")
-    parser.add_argument("--no-browser", action="store_true")
-    parser.add_argument("--configure-key", action="store_true", help="Hidden console entry; encrypt with current-user DPAPI.")
-    parser.add_argument("--serve", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--check-provider", action="store_true", help="List model availability; no chat request.")
-    args = parser.parse_args()
-    config = load_config()
-    args.model = args.model or config["model"]
-    args.base_url = args.base_url or config["base_url"]
+    parser.add_argument("--no-browser",action="store_true")
+    parser.add_argument("--configure-key",action="store_true")
+    parser.add_argument("--serve",action="store_true",help=argparse.SUPPRESS)
+    parser.add_argument("--embedded-session",type=Path,help=argparse.SUPPRESS)
+    parser.add_argument("--check-provider",action="store_true")
+    args=parser.parse_args()
+    config=load_config()
+    selected=args.provider or config["active_provider"]
+    preference=config["providers"][selected]
+    model=args.model or preference["model"]
+    base=args.base_url or preference["base_url"]
     if args.configure_key:
-        # Never pass a key on argv or print it. No traceback includes the value.
         try:
-            value = getpass.getpass("Kimi API key (hidden): ")
-            save_key(value)
+            value=getpass.getpass(selected+" API key (hidden): ")
+            save_key(value,provider=selected)
             print("Credential encrypted for the current Windows user.")
             return 0
-        except (SecretError, KeyboardInterrupt, EOFError) as exc:
+        except (SecretError,KeyboardInterrupt,EOFError):
             print("Credential setup was not completed.")
             return 2
+    provider=create_provider(selected,model,base)
     if args.check_provider:
         if not args.serve:
-            return Recorder("agent-provider-check","Python","Official /models availability; no chat inference").execute(
-                [sys.executable,__file__,"--check-provider","--serve","--model",args.model,"--base-url",args.base_url]).returncode
+            return Recorder("agent-provider-check","Python","Official /models availability only; no inference").execute(
+                [sys.executable,__file__,"--check-provider","--serve","--provider",selected,"--model",model,"--base-url",base]).returncode
         try:
-            models = KimiProvider(model=args.model,base_url=args.base_url).list_models()
-            print(json.dumps({"status":"connected","models":models},ensure_ascii=False))
+            print(json.dumps({"status":"connected","provider":selected,"models":provider.list_models()},ensure_ascii=False))
             return 0
         except ProviderError as exc:
             print(json.dumps({"status":"failed","code":exc.code,"http_status":exc.status,"message":str(exc)},ensure_ascii=False))
             return 2
-    exe = args.exe or ROOT/"build/bin/Release/E-musician.exe"
+    if args.embedded_session:
+        return embedded_session(args.embedded_session,provider)
+    exe=args.exe or ROOT/"build/sidebar/bin/Release/E-musician.exe"
     if not exe.is_file():
         Recorder("agent-launch","Python","Missing DAW executable").preflight_failure("DAW executable not found.")
-        parser.error("DAW executable missing. Pass --exe with the built E-musician.exe path.")
+        parser.error("DAW executable missing. Pass --exe with the built path.")
     if not args.serve:
-        command = [sys.executable,__file__,"--serve","--exe",str(exe.resolve()),
-                   "--model",args.model,"--base-url",args.base_url]
-        if args.no_browser:
-            command.append("--no-browser")
-        Recorder("agent-launch","Python + Release DAW","Launch only; GUI/hearing acceptance remains manual").execute(command,launch_only=True)
+        command=[sys.executable,__file__,"--serve","--exe",str(exe.resolve()),"--provider",selected,"--model",model,"--base-url",base]
+        if args.no_browser:command.append("--no-browser")
+        Recorder("agent-launch","Python + Release DAW","Legacy external companion launch; use native Agent button for embedding").execute(command,launch_only=True)
         return 0
-    bridge = DawBridge(exe)
-    runtime = AgentRuntime(bridge,KimiProvider(model=args.model,base_url=args.base_url))
-    server = AgentServer(runtime)
-    # Capability URL stays out of logs; no user key is sent to a browser.
+    bridge=DawBridge(exe)
+    runtime=AgentRuntime(bridge,provider)
+    server=AgentServer(runtime)
     print("Agent ready on localhost port",server.server_port,flush=True)
-    print("Save the project in the controlled DAW before closing the assistant.",flush=True)
+    print("Save the project in the controlled DAW before closing the external assistant.",flush=True)
     if not args.no_browser:
         webbrowser.open(server.launch_url)
     else:
-        # Explicit debug mode: a protected launcher file gives the user a clickable
-        # entry without exposing capabilities in process argv or development logs.
-        link = data_directory()/"current-session.url"
+        link=data_directory()/"current-session.url"
         link.parent.mkdir(parents=True,exist_ok=True)
         link.write_text("[InternetShortcut]\nURL="+server.launch_url+"\n",encoding="utf-8")
-        print("Open the local current-session.url under the Agent data directory.",flush=True)
     try:
         while True:
             try:
@@ -92,9 +134,9 @@ def main():
         server.server_close()
     return 0
 
-if __name__ == "__main__":
+if __name__=="__main__":
     try:
         raise SystemExit(main())
-    except (CommandFailure, ProviderError, SecretError) as exc:
+    except (CommandFailure,ProviderError,SecretError) as exc:
         print(str(exc),file=sys.stderr)
         raise SystemExit(2)

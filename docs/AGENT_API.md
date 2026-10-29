@@ -1,6 +1,18 @@
 # 本地 Agent 控制接口 v1
 
-实现入口：`EngineSession::executeRequest`、`ControlServer`。本文已对照0.6.0源码更新（2026-10-29），协议版本仍为v1。新增接口随最终Release5/5通过；人工操作与听感待验收，完整范围见[0.6.0记录](verification/2026-10-29-v060/RESULTS.md)。协议本身不包含模型、聊天界面或网络服务。可选的 Kimi 伴随层现已在独立分支实现，入口与边界见[Agent快速上手](AGENT_QUICKSTART.md)。
+实现入口为 EngineSession::executeRequest；协议仍为v1。0.7.0增加原生选择上下文和可选选择版本保护；原命令语义继续使用唯一Edit/Undo。最终Release检查范围见[本批记录](verification/2026-10-29-agent-sidebar/RESULTS.md)，助手产品入口见[快速上手](AGENT_QUICKSTART.md)。
+
+## 0.7.0内嵌传输与选择契约
+
+常规DAW由工具栏Agent或Ctrl+Shift+A打开侧栏；DAW创建本机会话并拥有Python worker。AgentSidebar中的loopback JSONL桥先验证每会话能力令牌，再将EngineSession命令发到主消息线程；断开只结束助手连接，不能退出DAW。1MiB消息上限、有限等待及失联拒绝均属于传输约束；不是公开网络服务或模型API。原ControlServer的stdio模式保留下面的独立进程语义。
+
+get_selection_context返回选择对象；get_snapshot的selection_context包含同一投影：
+project_id、project_revision、selection_revision、active_track_id、active_clip_id、track_ids、clip_ids、note_clip_id、note_ids、note_count、notes_truncated、time_range（active/start_seconds/end_seconds）、focus与available。focus为arrangement/piano_roll/track/none；对象ID稳定，选择变化不增加音乐revision、不改变dirty或Undo。GUI保留最后音乐焦点，纯轨头选择不能冒充首个片段选择。控制stdio模式没有真实GUI选择时不能假造用户选区。
+
+写请求可在顶层携带非负整数expected_selection_revision；不匹配返回selection_conflict，且不执行写入。它补充project_id/expected_revision，不替代工程版本校验。选择有界，available=false或truncated时Agent必须停止当前选择操作，不能自动扩大范围。模型产品的单方案16动作、每片段完整音符读取最多2000等更窄限制见快速上手。
+
+页面/api/plan接受prompt与scope（selection默认、project显式）；/api/settings选择provider/model/base_url及可选api_key。嵌入页面不能通过/api/shutdown关闭DAW。Provider可以继续扩展，但只有Kimi/OpenAI实现了实际协议；API凭证和模型私有轮次状态不出现在页面状态。
+
 
 ## 启动和最小示例
 
@@ -40,6 +52,7 @@ Python中可用`Client(executable, show=True)`同时显示受控工程，Agent�
 
 | command | args | result |
 |---|---|---|
+| get_selection_context | 无 | 当前只读选择对象及独立selection_revision |
 | get_capabilities | 无 | 命令列表、格式、范围和分页上限 |
 | get_snapshot / get_project_state | 无 | 工程身份、版本、速度、播放位置、轨道、片段预览、插件槽及任务 |
 | get_save_diagnostics | 无 | current_key/saved_key/fresh_content_key、plugin_dirty、pending_plugin_changes和revision；仅排错时显式调用，重新计算内容摘要，不用于播放头高频轮询 |

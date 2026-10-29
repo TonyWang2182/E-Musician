@@ -15,7 +15,7 @@ public:
     {
         // CTest must execute its own process even when the interactive app is open.
         const auto args = juce::StringArray::fromTokens(getCommandLineParameters(), true);
-        return args.contains("--smoke-test") || args.contains("--review-project") || args.contains("--control-stdio")
+        return args.contains("--agent-sidebar-smoke") || args.contains("--smoke-test") || args.contains("--review-project") || args.contains("--control-stdio")
             || args.contains("--plugin-scan-worker") || args.contains("--render-worker") || args.contains("--performance-test")
             || args.contains("--control-output-probe-child") || args.contains("--plugin-notification-test") || args.contains("--production-test");
     }
@@ -32,7 +32,7 @@ public:
         const int reviewIndex = args.indexOf("--review-project");
         const bool smoke = smokeIndex >= 0;
         const bool review = reviewIndex >= 0;
-        if ((smoke && args.contains("--offline")) || args.contains("--production-test") || args.contains("--control-output-probe"))
+        if (args.contains("--agent-sidebar-smoke") || (smoke && args.contains("--offline")) || args.contains("--production-test") || args.contains("--control-output-probe"))
             EngineSession::setOfflineTestMode(true);
         reviewMode = review;
         try {
@@ -54,6 +54,21 @@ public:
                 setApplicationReturnValue(result.wasOk() ? 0 : 1); quit(); return;
             }
             session = std::make_unique<EngineSession>();
+            const int agentSmoke=args.indexOf("--agent-sidebar-smoke");
+            if(agentSmoke>=0){
+                if(args.size()!=3||agentSmoke!=0||!juce::File::isAbsolutePath(args[1])||args[2]!="--offline"){setApplicationReturnValue(2);quit();return;}
+                const juce::File directory(args[1]);
+                require(!directory.exists(),"Agent smoke directory must be fresh");
+                require(directory.createDirectory().wasOk(),"Could not create Agent smoke directory");
+                window=std::make_unique<Window>(*session,false);
+                window->setTopLeftPosition(-3000,-3000);window->setVisible(true);
+                after(100,directory,[this,directory]{
+                    const auto result=static_cast<MainComponent*>(window->getContentComponent())->runAgentSidebarSmokeTest(directory);
+                    if(result.failed())std::cerr<<result.getErrorMessage()<<std::endl;
+                    setApplicationReturnValue(result.wasOk()?0:1);quit();
+                });
+                return;
+            }
             const int notificationTest=args.indexOf("--plugin-notification-test");
             if(notificationTest>=0){
                 if(notificationTest+2>=args.size()){setApplicationReturnValue(2);quit();return;}
@@ -74,6 +89,7 @@ public:
                 waitForPerformance(directory,seconds+180);return;
             }
             window = std::make_unique<Window>(*session, !smoke && !review);
+            if(args.contains("--agent"))static_cast<MainComponent*>(window->getContentComponent())->showAgent();
             if (smoke) {
                 if (smokeIndex + 1 >= args.size()) { setApplicationReturnValue(2); quit(); return; }
                 if (smokeIndex + 2 >= args.size()) { setApplicationReturnValue(2); quit(); return; }
@@ -110,7 +126,7 @@ public:
             }
         } catch (const std::exception& e) {
             std::cerr << e.what() << std::endl;
-            if (!smoke && !review && !args.contains("--control-stdio") && !args.contains("--production-test"))
+            if (!smoke && !review && !args.contains("--agent-sidebar-smoke") && !args.contains("--control-stdio") && !args.contains("--production-test"))
                 juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Unable to start", e.what());
             setApplicationReturnValue(1);
             quit();

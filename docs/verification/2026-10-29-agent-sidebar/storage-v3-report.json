@@ -1,0 +1,6 @@
+{
+  "status": "passed",
+  "checks_passed": 103,
+  "scope": "schema4 DTO/binary persistence, incremental media, conflict/cancellation, routing/automation/controllers and schema2/3 migration; no plugin instantiation or audio decode claim",
+  "workspace": "C:\\Users\\28712\\.codex\\worktrees\\music-agent-kimi\\E-musician\\build\\sidebar\\smoke\\Release\\73d8bc1a51d1\\storage-v3-e7b9e3da2bf24cbaa6749a952f57239c"
+}

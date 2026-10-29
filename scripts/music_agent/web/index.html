@@ -1,27 +1,84 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>E-musician · 编曲助手</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>E-musician · 编曲助手</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
 <body>
-<a class="skip-link" href="#prompt">跳到输入框</a>
-<div class="app-shell">
-<header class="topbar"><div class="brand" aria-label="E-musician">e~</div><div class="title-block"><h1>编曲助手</h1><p id="project-title">正在连接工程…</p></div><div class="header-actions"><span id="connection" class="connection">连接中</span><button id="settings-toggle" type="button" aria-controls="settings" aria-expanded="false">模型设置</button></div></header>
-<section id="settings" class="settings" aria-label="模型设置" hidden><form id="settings-form"><div class="settings-grid">
-<label>模型<input id="model" name="model" type="text" value="kimi-k2.6" maxlength="100" spellcheck="false" autocomplete="off"></label>
-<label>服务地址<select id="base-url" name="base_url"><option value="https://api.moonshot.cn/v1">Moonshot 中国站</option><option value="https://api.moonshot.ai/v1">Moonshot 国际站</option></select></label>
-<label>API 密钥<span id="key-state" class="field-hint">检查中</span><input id="api-key" name="api_key" type="password" placeholder="留空则保留现有密钥" autocomplete="new-password" maxlength="256" spellcheck="false"></label></div>
-<div class="settings-footer"><p>密钥交给本机服务保管，不保存在浏览器中。</p><button id="settings-save" type="submit">保存设置</button></div><p id="settings-feedback" class="feedback" role="status"></p></form></section>
-<div id="notice" class="notice" role="alert" hidden></div>
-<div class="workspace">
-<aside class="project-panel" aria-labelledby="project-heading"><div class="section-heading"><h2 id="project-heading">当前工程</h2><button id="refresh" class="quiet" type="button" aria-label="刷新工程状态">刷新</button></div>
-<dl class="project-facts"><div><dt>速度</dt><dd id="tempo">—</dd></div><div><dt>拍号</dt><dd id="meter">—</dd></div><div><dt>修订</dt><dd id="revision">—</dd></div></dl>
-<div class="selection"><h3>DAW 中的选择</h3><p id="selection-text">尚未读取</p></div><div class="section-heading track-heading"><h3>轨道</h3><span id="track-count" class="muted">0</span></div><ul id="tracks" class="tracks"><li class="empty">连接后显示轨道。</li></ul><p class="scope-note">只连接本助手启动的 DAW。请在那个窗口打开工程、选择片段；其他已打开的窗口不会连接。</p></aside>
-<main class="conversation-panel"><div class="conversation-heading"><h2>今天想怎样调整？</h2><span id="phase" role="status" aria-live="polite">连接中</span></div><p class="intro">描述你的想法，先看修改方案，再决定是否应用。</p>
-<form id="prompt-form" class="composer"><label class="sr-only" for="prompt">告诉助手你想做的修改</label><textarea id="prompt" name="prompt" rows="3" maxlength="4000" placeholder="例如：把工程速度改为 100 BPM" required></textarea><div class="composer-footer"><span>Ctrl + Enter 发送</span><button id="submit" class="primary" type="submit" disabled>生成方案</button></div></form>
-<div id="examples" class="examples" aria-label="尝试这些请求"><span>可以试试</span><button type="button" data-prompt="概括一下当前工程。">了解工程</button><button type="button" data-prompt="把工程速度改为 100 BPM。">调整速度</button><button type="button" data-prompt="把当前选中 MIDI 片段的全部音符升高一个八度。">片段升八度</button></div>
-<div class="task-controls"><p id="busy-detail" class="muted"></p><button id="cancel-work" type="button" hidden>停止生成</button></div>
-<section id="plan" class="plan" aria-labelledby="plan-heading" hidden><div class="section-heading"><h2 id="plan-heading">待应用的修改</h2><span id="plan-revision" class="muted"></span></div><p id="plan-summary"></p><ol id="changes"></ol><p class="plan-hint">请核对目标与数值。工程有新修改时，旧方案会被拒绝，需要重新生成。</p><div class="plan-actions"><button id="apply" class="primary" type="button">应用到工程</button><button id="discard" type="button">放弃方案</button></div></section>
-<section id="result" class="result" aria-label="执行结果" hidden><div><h2>执行结果</h2><p id="result-text"></p></div><button id="undo" type="button" disabled>撤销这次修改</button></section>
-<section id="conversation" class="conversation" aria-label="对话记录"><p id="conversation-empty" class="empty">助手会读取工程结构；音频文件不会随请求上传。</p><div id="messages"></div></section></main>
-</div><footer class="footer"><p id="usage">本次会话 · 0 次模型请求</p><div><span>关闭助手前，请在 DAW 保存工程</span><button id="shutdown" class="quiet" type="button">关闭助手</button></div></footer>
-</div>
-<dialog id="shutdown-dialog" aria-labelledby="shutdown-title"><h2 id="shutdown-title">已在 DAW 保存工程？</h2><p>关闭助手会结束它连接的 DAW 进程。请先切回 DAW 保存工程；仅关闭这个网页不会结束服务。</p><p id="shutdown-feedback" role="alert"></p><div class="dialog-actions"><button id="shutdown-cancel" type="button" autofocus>返回保存</button><button id="shutdown-confirm" class="primary" type="button">已保存，关闭助手</button></div></dialog>
-</body></html>
+  <a class="skip-link" href="#prompt">跳到输入框</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="title-block"><span class="brand" aria-hidden="true">e~</span><h1>编曲助手</h1></div>
+      <div class="header-actions">
+        <span id="connection" class="connection">连接中</span>
+        <button id="collapse" class="icon-button" type="button" aria-label="收起助手" title="收起助手 · Esc" hidden><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M6 4l6 6-6 6M15 4v12"/></svg></button>
+      </div>
+    </header>
+    <div class="model-bar">
+      <button id="settings-toggle" class="model-toggle" type="button" aria-controls="settings" aria-expanded="false"><span id="current-model">模型设置</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></button>
+      <button id="refresh" class="quiet" type="button" aria-label="刷新工程状态">刷新</button>
+    </div>
+    <section id="settings" class="settings" aria-label="模型设置" hidden>
+      <form id="settings-form">
+        <div class="settings-grid">
+          <label>模型服务<select id="provider" name="provider"><option value="kimi">Kimi</option></select></label>
+          <label>模型<input id="model" name="model" type="text" list="model-options" maxlength="100" spellcheck="false" autocomplete="off"><datalist id="model-options"></datalist></label>
+        </div>
+        <p id="provider-status" class="field-hint"></p>
+        <details id="connection-settings"><summary>连接与密钥</summary>
+          <label>服务地址<input id="base-url" name="base_url" type="url" maxlength="200" spellcheck="false" autocomplete="off"></label>
+          <label>API 密钥<span id="key-state" class="field-hint">检查中</span><input id="api-key" name="api_key" type="password" placeholder="留空则保留此服务的密钥" autocomplete="new-password" maxlength="4096" spellcheck="false"></label>
+          <p class="privacy-note">密钥由本机保管，不保存在浏览器中。</p>
+        </details>
+        <div class="settings-footer"><p id="settings-feedback" class="feedback" role="status"></p><button id="settings-save" type="submit">保存设置</button></div>
+      </form>
+    </section>
+    <div class="work-area">
+      <aside class="project-panel">
+        <details id="project-details">
+          <summary><span id="project-title">正在连接工程…</span><span class="project-meta"><span id="tempo">—</span> · <span id="meter">—</span></span></summary>
+          <div class="project-content">
+            <p class="revision-line">修订 <span id="revision">—</span></p>
+            <p id="selection-text">尚未读取选择</p>
+            <div class="section-heading"><h2>轨道</h2><span id="track-count" class="muted">0</span></div>
+            <ul id="tracks" class="tracks"><li class="empty">连接后显示轨道。</li></ul>
+            <p id="scope-note" class="scope-note">只连接本助手启动的 DAW。请在那个窗口打开工程、选择片段。</p>
+          </div>
+        </details>
+      </aside>
+      <main class="conversation-panel">
+        <div id="transcript" class="conversation-scroll" tabindex="0" aria-label="对话与修改方案">
+          <div id="notice" class="notice" role="alert" hidden></div>
+          <section id="conversation" class="conversation" aria-label="对话记录">
+            <div id="conversation-empty" class="welcome"><h2>从一个小调整开始</h2><p>选好轨道、片段或音符，告诉我你想怎样调整。修改会先列成方案，等你确认。</p><div class="examples"><button type="button" data-prompt="概括一下当前选择的内容。">查看当前选择</button><button type="button" data-prompt="把选中的 MIDI 音符升高一个八度。">音符升八度</button></div><p class="privacy-note">发送工程结构与必要的音符数据，不上传音频文件。</p></div>
+            <div id="messages"></div>
+          </section>
+          <section id="task-progress" class="task-progress" aria-label="任务进度" hidden><div class="task-heading"><span class="activity-dot" aria-hidden="true"></span><span id="phase" role="status" aria-live="polite">准备就绪</span><button id="cancel-work" class="quiet" type="button" hidden>停止</button></div><p id="busy-detail" class="muted"></p></section>
+          <section id="plan" class="plan" aria-labelledby="plan-heading" hidden>
+            <div class="section-heading"><h2 id="plan-heading">待应用的修改</h2><span id="plan-revision" class="muted"></span></div>
+            <p id="plan-summary"></p><ol id="changes"></ol>
+            <p id="plan-scope" class="plan-hint"></p>
+            <p class="plan-hint">工程或选区改变后，请重新生成方案。</p>
+            <div class="plan-actions"><button id="apply" class="primary" type="button">应用修改</button><button id="discard" type="button">放弃</button></div>
+          </section>
+          <section id="result" class="result" aria-label="执行结果" hidden><h2>执行结果</h2><p id="result-text"></p><button id="undo" type="button" disabled>撤销这次修改</button></section>
+        </div>
+        <div class="composer-dock">
+          <div class="scope-row"><label for="scope">操作范围</label><select id="scope"><option value="selection" selected>当前选择</option><option value="project">整个工程</option></select></div>
+          <div id="context-pills" class="context-pills" aria-label="当前选择上下文"></div>
+          <p id="scope-hint" class="scope-hint">正在读取选择…</p>
+          <form id="prompt-form" class="composer"><label class="sr-only" for="prompt">告诉助手你想做的调整</label><textarea id="prompt" name="prompt" rows="2" maxlength="4000" placeholder="描述想做的调整…" required></textarea><div class="composer-footer"><span id="composer-hint">Ctrl + Enter 发送</span><button id="submit" class="primary" type="submit" disabled>发送</button></div></form>
+          <p id="usage" class="usage">本次会话 · 0 次请求</p>
+        </div>
+      </main>
+    </div>
+    <footer id="standalone-footer" class="footer"><span>关闭助手前，请在 DAW 保存工程</span><button id="shutdown" class="quiet" type="button">关闭助手</button></footer>
+  </div>
+  <dialog id="shutdown-dialog" aria-labelledby="shutdown-title"><h2 id="shutdown-title">已在 DAW 保存工程？</h2><p>关闭助手会结束它连接的 DAW 进程。请先回到 DAW 保存；仅关闭网页不会结束服务。</p><p id="shutdown-feedback" role="alert"></p><div class="dialog-actions"><button id="shutdown-cancel" type="button" autofocus>返回保存</button><button id="shutdown-confirm" class="primary" type="button">已保存，关闭助手</button></div></dialog>
+</body>
+</html>

@@ -248,7 +248,7 @@ class SecretTests(unittest.TestCase):
     def test_invalid_key_never_written(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "test.key"
-            for key in ["short", "bad\nheader: injected", "a" * 513]:
+            for key in ["short", "bad\nheader: injected", "a" * 4097]:
                 with self.subTest(key=key[:8]), self.assertRaises(SecretError):
                     save_key(key, path=path)
             self.assertFalse(path.exists())

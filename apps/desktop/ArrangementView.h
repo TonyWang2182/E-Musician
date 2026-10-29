@@ -19,6 +19,7 @@ public:
     bool isDropActive() const;
     bool cancelClipDrag();
     juce::StringArray selectedClipIds() const;
+    juce::String explicitSelectedTrackId() const;
     void setGrid(double beats, bool bars);
     void setRulerMode(int mode); // 0: bars/beats, 1: minutes/seconds, 2: both
     void setGridBeats(double beats);
@@ -26,6 +27,7 @@ public:
     void setAdaptiveGrid(bool enabled);
     void setFollowPlayhead(bool enabled);
     juce::Range<double> selectedTimeRange() const;
+    juce::Range<double> explicitSelectedTimeRange() const;
     void selectClipIds(const juce::StringArray&);
     juce::Result loopSelection();
     void setCompactRows(bool);
@@ -46,6 +48,8 @@ public:
     void focusLost(FocusChangeType) override;
     void focusOfChildComponentChanged(FocusChangeType) override;
     std::function<void()> onUserStateChange;
+    std::function<void()> onFocus;
+    std::function<void(const juce::String&)> onTrackFocus;
     std::function<void(const juce::Result&)> onEditResult;
     std::function<void(const juce::String&)> onOpenMidiClip;
     std::function<void(const juce::String&)> onOpenTrackDevices;

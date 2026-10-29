@@ -2765,3 +2765,569 @@ print('PASS credential absent from',count,'source/evidence/log files; no credent
 - 凭证只用隐藏输入配置DPAPI，652文件扫描未发现明文；开发文件/日志不记录实际凭据。模型设置另存非密钥配置，不增加工程自动保存/恢复。
 - 文档：AGENT_QUICKSTART、ADR0009、CONTEXT/DEVELOPMENT/ARCHITECTURE/UI_REFERENCE/AGENT_API及本轮RESULTS全部更新。
 - 独立运行文件为SHA256核对后的原0.6.1副本；当前入口E:/MusicAgent&DAW/Start E-musician Agent.cmd。未通过电脑控制进行用户桌面操作。
+
+### 2026-10-29T17:58:19+08:00 · agent-launch · launched
+
+- Config: Python + Release DAW; exit code: None; elapsed: 0.148s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build\bin\Release\E-musician.exe --model kimi-k2.6 --base-url https://api.moonshot.cn/v1`
+- Context: Launch only; GUI/hearing acceptance remains manual
+- Source SHA-256: `a65a39df2dc6b4464fcd2282541ef9ad620852cbd0e19062e5b5532cc6f7db8f`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T095819.901098Z-1e370b1cba.json) · [Raw log](../build-logs/20261029T095819.901098Z-1e370b1cba.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261029T095819.901098Z-1e370b1cba.raw.log)
+
+### 2026-10-29T18:42:12+08:00 · agent-webview2-sdk · succeeded
+
+- Config: Release; exit code: 0; elapsed: 6.150s.
+- Command: `C:\Python314\python.exe -c "from pathlib import Path
+import urllib.request,hashlib,zipfile,json
+version='1.0.2903.40'
+url=f'https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/{version}/microsoft.web.webview2.{version}.nupkg'
+root=Path('.cache/webview2')
+root.mkdir(parents=True,exist_ok=True)
+archive=root/f'webview2-{version}.nupkg'
+with urllib.request.urlopen(url,timeout=45) as response:
+ data=response.read(32*1024*1024)
+assert len(data)<32*1024*1024
+archive.write_bytes(data)
+out=root/f'Microsoft.Web.WebView2.{version}'
+out.mkdir(exist_ok=True)
+with zipfile.ZipFile(archive) as z:
+ for item in z.infolist():
+  target=(out/item.filename).resolve()
+  assert target.is_relative_to(out.resolve()), 'Unsafe SDK archive path'
+ z.extractall(out)
+manifest={'version':version,'url':url,'sha256':hashlib.sha256(data).hexdigest(),'header_sha256':hashlib.sha256((out/'build/native/include/WebView2.h').read_bytes()).hexdigest(),'x64_library_sha256':hashlib.sha256((out/'build/native/x64/WebView2LoaderStatic.lib').read_bytes()).hexdigest()}
+Path('cmake/webview2.json').write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf-8')
+print(json.dumps(manifest))
+"`
+- Context: Download official Microsoft NuGet SDK only; pin source/archive/header/library hashes
+- Source SHA-256: `8427ffe089bd768ef1c811bf781b5ad8b88539b70e883669ac6e692ce57f4c34`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T104212.484122Z-ba4589fb9b.json) · [Raw log](../build-logs/20261029T104212.484122Z-ba4589fb9b.log)
+- [Exact process output](../build-logs/20261029T104212.484122Z-ba4589fb9b.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-10-29T18:45:07+08:00 · agent-multi-provider-check · succeeded
+
+- Config: Python; exit code: 0; elapsed: 2.745s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_provider*.py -v`
+- Context: Mocked Responses protocol, provider capability and credential isolation; no live API requests
+- Source SHA-256: `4b825d9290730e2e4d7292a1593279137554d5d13f068927d0d0bcf4edeeb6bf`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T104507.514415Z-703831acf5.json) · [Raw log](../build-logs/20261029T104507.514415Z-703831acf5.log)
+- [Exact process output](../build-logs/20261029T104507.514415Z-703831acf5.raw.log)
+
+### 2026-10-29T18:45:10+08:00 · agent-multi-provider-check · succeeded
+
+- Config: Python; exit code: 0; elapsed: 5.506s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_config.py -v`
+- Context: Mocked Responses protocol, provider capability and credential isolation; no live API requests
+- Source SHA-256: `4b825d9290730e2e4d7292a1593279137554d5d13f068927d0d0bcf4edeeb6bf`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T104510.376798Z-2cea2fa999.json) · [Raw log](../build-logs/20261029T104510.376798Z-2cea2fa999.log)
+- [Exact process output](../build-logs/20261029T104510.376798Z-2cea2fa999.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-10-29T18:45:27+08:00 · agent-selection-tests · succeeded
+
+- Config: Python; exit code: 0; elapsed: 0.693s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_selection.py -v`
+- Context: Frozen note/clip/track/time selection boundaries; synthetic snapshots only
+- Source SHA-256: `19e21314837b564cf50354daa38185e5a4120238f1237e560d8fa1d5932e4523`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T104527.009047Z-907ed40235.json) · [Raw log](../build-logs/20261029T104527.009047Z-907ed40235.log)
+- [Exact process output](../build-logs/20261029T104527.009047Z-907ed40235.raw.log)
+
+### 2026-10-29T18:49:19+08:00 · agent-sidebar-ui · failed
+
+- Config: Synthetic; exit code: 1; elapsed: 6.718s.
+- Command: `node tests/MusicAgentUI.cjs`
+- Context: Embedded sidebar mock HTTP and native event fixture; no live model or DAW
+- Source SHA-256: `8ff2a92d51849bf9f846098597eaef29126d9b494a4b91c2ccc82256854ef4cf`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T104919.793885Z-6b6026c91c.json) · [Raw log](../build-logs/20261029T104919.793885Z-6b6026c91c.log)
+- [Exact process output](../build-logs/20261029T104919.793885Z-6b6026c91c.raw.log)
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261029T104919.793885Z-6b6026c91c.log
+
+### 2026-10-29T18:50:04+08:00 · agent-sidebar-ui · succeeded
+
+- Config: Synthetic; exit code: 0; elapsed: 11.068s.
+- Command: `node tests/MusicAgentUI.cjs`
+- Context: Check native disabled option property; continuing sidebar fixture regression
+- Source SHA-256: `642835654a24cdc0b7623ffe63f216f9afbb1b835540a9a34b9fc8a4b652b428`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T105004.797987Z-e66451b7f8.json) · [Raw log](../build-logs/20261029T105004.797987Z-e66451b7f8.log)
+- [Exact process output](../build-logs/20261029T105004.797987Z-e66451b7f8.raw.log)
+
+### 2026-10-29T18:50:50+08:00 · agent-sidebar-configure · failed
+
+- Config: Release; exit code: 1; elapsed: 1.027s.
+- Command: `cmake -S . -B build/sidebar -G "Visual Studio 17 2022" -A x64`
+- Context: Independent native 0.7.0 build; pinned WebView2/JUCE/Tracktion, no devices opened
+- Source SHA-256: `610654eda4545dd3e867ab8fee54807e79cd5ebd99a7416b5c12044775bce862`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T105050.000461Z-4e47fc1ccb.json) · [Raw log](../build-logs/20261029T105050.000461Z-4e47fc1ccb.log)
+- [Exact process output](../build-logs/20261029T105050.000461Z-4e47fc1ccb.raw.log)
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261029T105050.000461Z-4e47fc1ccb.log
+
+### 2026-10-29T18:52:21+08:00 · agent-sidebar-ui · succeeded
+
+- Config: Synthetic; exit code: 0; elapsed: 8.119s.
+- Command: `node tests/MusicAgentUI.cjs`
+- Context: Final sidebar UI fixture after readable meta text and sticky error/save feedback
+- Source SHA-256: `cc400faa510adc4e41855639618ad6fc66f04686cf60e2ef06c081bd413d92db`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T105221.349289Z-5b22069259.json) · [Raw log](../build-logs/20261029T105221.349289Z-5b22069259.log)
+- [Exact process output](../build-logs/20261029T105221.349289Z-5b22069259.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-10-29T18:51:13+08:00 · agent-sidebar-configure · succeeded
+
+- Config: Release; exit code: 0; elapsed: 82.765s.
+- Command: `cmake --preset windows-msvc -B build/sidebar --fresh`
+- Context: Use repository Visual Studio 2026 preset; previous VS2022 unavailable attempt retained
+- Source SHA-256: `f3fe3a836c400cfb5417c5d2a6aa3a9e1d4d356062b4feaad2695e9bc4b16d1e`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T105113.936785Z-6c354b4d96.json) · [Raw log](../build-logs/20261029T105113.936785Z-6c354b4d96.log)
+- [Exact process output](../build-logs/20261029T105113.936785Z-6c354b4d96.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-10-29T18:53:30+08:00 · agent-selection-runtime-tests · succeeded
+
+- Config: Python; exit code: 0; elapsed: 17.912s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_runtime.py -v`
+- Context: Scope freeze integration, provider switching, embedded lifetime and selected-clip paging; no network or physical DAW
+- Source SHA-256: `0cc37cf000ca671e5fadfd0e74170ae6bc291fb14db3a3e7f4bdfbd9f9789974`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T105330.543813Z-c2d2d1fe2c.json) · [Raw log](../build-logs/20261029T105330.543813Z-c2d2d1fe2c.log)
+- [Exact process output](../build-logs/20261029T105330.543813Z-c2d2d1fe2c.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-10-29T18:54:43+08:00 · agent-sidebar-ui · succeeded
+
+- Config: Synthetic; exit code: 0; elapsed: 7.812s.
+- Command: `node tests/MusicAgentUI.cjs`
+- Context: Settings drawer usability and native visibility fixture validation
+- Source SHA-256: `ef42e395c9b59ab2f4f65c06e90af4c5eeff48fd37cadab4505d4538a705e903`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T105443.873023Z-6749eb9670.json) · [Raw log](../build-logs/20261029T105443.873023Z-6749eb9670.log)
+- [Exact process output](../build-logs/20261029T105443.873023Z-6749eb9670.raw.log)
+
+### 2026-10-29T18:56:22+08:00 · agent-sidebar-build · failed
+
+- Config: Release; exit code: 1; elapsed: 64.931s.
+- Command: `cmake --build build/sidebar --config Release --parallel 2`
+- Context: First native 0.7.0 compile; sidebar and selection integration, tests still evolving
+- Source SHA-256: `1c391e0ac83ba8a0716dd9c5aff01caec20bfe4ae130fa462ef15c32a171738c`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T105622.874019Z-e5b9be9f37.json) · [Raw log](../build-logs/20261029T105622.874019Z-e5b9be9f37.log)
+- [Exact process output](../build-logs/20261029T105622.874019Z-e5b9be9f37.raw.log)
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261029T105622.874019Z-e5b9be9f37.log
+
+### 2026-10-29T18:59:22+08:00 · agent-embedded-transport · succeeded
+
+- Config: Python; exit code: 0; elapsed: 2.200s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_embedded.py -v`
+- Context: Synthetic loopback session/auth/poison/ownership and scoped HTTP contract
+- Source SHA-256: `da2b1db9ed69d95cb27def42e81cade401d0f30e00d0100cacf4a0e80830c8f0`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T105922.151214Z-bd9986f9d9.json) · [Raw log](../build-logs/20261029T105922.151214Z-bd9986f9d9.log)
+- [Exact process output](../build-logs/20261029T105922.151214Z-bd9986f9d9.raw.log)
+
+### 2026-10-29T18:59:24+08:00 · agent-http-contract · succeeded
+
+- Config: Python; exit code: 0; elapsed: 1.308s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_server.py -v`
+- Context: HTTP scope and embedded lifecycle with fake runtime
+- Source SHA-256: `da2b1db9ed69d95cb27def42e81cade401d0f30e00d0100cacf4a0e80830c8f0`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T105924.506419Z-d867db1c47.json) · [Raw log](../build-logs/20261029T105924.506419Z-d867db1c47.log)
+- [Exact process output](../build-logs/20261029T105924.506419Z-d867db1c47.raw.log)
+
+### 2026-10-29T18:59:43+08:00 · agent-integration-metrics-tests · succeeded
+
+- Config: Python; exit code: 0; elapsed: 0.890s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_integration_metrics.py -v`
+- Context: Separate actual-provider and synthetic-fixture accounting; no model, key, or DAW calls
+- Source SHA-256: `c32a418ba52554a09967d16de7613466d33eaa53f8a9b9bf628f30b80b13d6c2`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T105943.342743Z-caa1b9324a.json) · [Raw log](../build-logs/20261029T105943.342743Z-caa1b9324a.log)
+- [Exact process output](../build-logs/20261029T105943.342743Z-caa1b9324a.raw.log)
+
+### 2026-10-29T19:01:33+08:00 · agent-embedded-transport · failed
+
+- Config: Python; exit code: 1; elapsed: 1.570s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_embedded.py -v`
+- Context: Idle native EOF watchdog and active reply isolation, plus bounded protocol regression
+- Source SHA-256: `0a128f59d12e26c353c51cc6d655685baa3710d297aba1be1cb3e04afe4d1f8a`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T110133.933761Z-2a8472d91d.json) · [Raw log](../build-logs/20261029T110133.933761Z-2a8472d91d.log)
+- [Exact process output](../build-logs/20261029T110133.933761Z-2a8472d91d.raw.log)
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261029T110133.933761Z-2a8472d91d.log
+
+### 2026-10-29T19:01:01+08:00 · agent-sidebar-build · failed
+
+- Config: Release; exit code: 1; elapsed: 37.174s.
+- Command: `cmake --build build/sidebar --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Retry with MSBuild multi-tool concurrency limited to two; previous worker termination preserved, cause not confirmed
+- Source SHA-256: `2c46cfa81b9df710bfbe64aa678a2a6c56baf690ec01c8bc18f3b866a0689326`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T110101.150279Z-f05d2c4e33.json) · [Raw log](../build-logs/20261029T110101.150279Z-f05d2c4e33.log)
+- [Exact process output](../build-logs/20261029T110101.150279Z-f05d2c4e33.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261029T110101.150279Z-f05d2c4e33.log
+
+### 2026-10-29T19:02:05+08:00 · agent-openai-model-check · failed
+
+- Config: Python; exit code: 2; elapsed: 21.937s.
+- Command: `C:\Python314\python.exe -c "import sys,json
+sys.path.insert(0,'scripts')
+from music_agent.providers import create_provider
+from music_agent.provider import ProviderError
+try:
+ ids=create_provider('openai').list_models()
+ relevant=[m for m in ids if m in ('gpt-5-mini','gpt-6.1-sol','gpt-6-astra','gpt-4.1-mini')]
+ print(json.dumps({'provider':'openai','connected':True,'model_count':len(ids),'relevant_models':relevant}))
+except ProviderError as e:
+ print(json.dumps({'provider':'openai','connected':False,'code':e.code,'status':e.status,'message':str(e)}))
+ raise SystemExit(2)
+"`
+- Context: User-authorized official OpenAI /models check; no inference
+- Source SHA-256: `0a128f59d12e26c353c51cc6d655685baa3710d297aba1be1cb3e04afe4d1f8a`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T110205.976424Z-3688aed0d2.json) · [Raw log](../build-logs/20261029T110205.976424Z-3688aed0d2.log)
+- [Exact process output](../build-logs/20261029T110205.976424Z-3688aed0d2.raw.log)
+- Error: Command failed with code 2; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261029T110205.976424Z-3688aed0d2.log
+
+### 2026-10-29T19:02:33+08:00 · agent-embedded-transport · succeeded
+
+- Config: Python; exit code: 0; elapsed: 1.766s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_embedded.py -v`
+- Context: Explicit JSON depth bound across Python parser versions; idle EOF and active RPC isolation
+- Source SHA-256: `a1944fd2a8e27446a38b30a2a5fe9a45c8647a4e326eb74f591783db96eb2123`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T110233.634458Z-8d449bd182.json) · [Raw log](../build-logs/20261029T110233.634458Z-8d449bd182.log)
+- [Exact process output](../build-logs/20261029T110233.634458Z-8d449bd182.raw.log)
+
+### 2026-10-29T19:03:47+08:00 · agent-sidebar-ui · succeeded
+
+- Config: Synthetic; exit code: 0; elapsed: 7.724s.
+- Command: `node tests/MusicAgentUI.cjs`
+- Context: Final long synthetic key and settings drawer inert boundary; unchanged host-free browser fixture
+- Source SHA-256: `3401e5f70ef0c3b2628babfd3fb080c883006abbb760eed4200de3433412087a`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T110347.155361Z-5c28fad262.json) · [Raw log](../build-logs/20261029T110347.155361Z-5c28fad262.log)
+- [Exact process output](../build-logs/20261029T110347.155361Z-5c28fad262.raw.log)
+
+### 2026-10-29T19:04:24+08:00 · agent-network-diagnostic · succeeded
+
+- Config: Python; exit code: 0; elapsed: 10.370s.
+- Command: `C:\Python314\python.exe -c "import json,urllib.request,urllib.parse
+proxies=urllib.request.getproxies()
+safe={}
+for scheme,url in proxies.items():
+ if scheme=='no':continue
+ p=urllib.parse.urlsplit(url if '://' in url else 'http://'+url)
+ safe[scheme]={'scheme':p.scheme,'host':p.hostname,'port':p.port,'has_auth':bool(p.username or p.password)}
+print(json.dumps({'system_proxies':safe}))
+for label,handler in [('direct',urllib.request.ProxyHandler({})),('system',urllib.request.ProxyHandler())]:
+ try:
+  with urllib.request.build_opener(handler).open('https://api.openai.com/v1/models',timeout=8) as r:
+   print(json.dumps({'transport':label,'http_status':r.status}))
+ except Exception as e:
+  print(json.dumps({'transport':label,'type':type(e).__name__,'http_status':getattr(e,'code',None),'reason_type':type(getattr(e,'reason',None)).__name__}))
+"`
+- Context: No credential sent; official endpoint direct/system proxy reachability
+- Source SHA-256: `3401e5f70ef0c3b2628babfd3fb080c883006abbb760eed4200de3433412087a`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T110424.411361Z-a8672ef289.json) · [Raw log](../build-logs/20261029T110424.411361Z-a8672ef289.log)
+- [Exact process output](../build-logs/20261029T110424.411361Z-a8672ef289.raw.log)
+
+### 2026-10-29T19:03:32+08:00 · agent-sidebar-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 208.129s.
+- Command: `cmake --build build/sidebar --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Fix native smoke DynamicObject ownership conversion; bounded MSBuild concurrency
+- Source SHA-256: `b8b02b3bcbcf4f8f16dcd1f48a9f8df3fc0eabc973dbb90e051ca4e785851cac`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T110332.366007Z-215e394822.json) · [Raw log](../build-logs/20261029T110332.366007Z-215e394822.log)
+- [Exact process output](../build-logs/20261029T110332.366007Z-215e394822.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-10-29T19:07:47+08:00 · agent-sidebar-ui · succeeded
+
+- Config: Synthetic; exit code: 0; elapsed: 7.848s.
+- Command: `node tests/MusicAgentUI.cjs`
+- Context: Align frozen plan scope/revision with runtime; explicit oversized note selection and active track context
+- Source SHA-256: `ed06c9be06b05c99f37780bbc274da540d3ad7fb45710a7774d8ff4c76ae3980`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T110747.894134Z-17f0efd865.json) · [Raw log](../build-logs/20261029T110747.894134Z-17f0efd865.log)
+- [Exact process output](../build-logs/20261029T110747.894134Z-17f0efd865.raw.log)
+
+### 2026-10-29T19:08:54+08:00 · agent-sidebar-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 22.304s.
+- Command: `cmake --build build/sidebar --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Native smoke and direct embedded launcher complete; incremental compile
+- Source SHA-256: `4a1a66e0d25389d4c318cfbe84d5bc470e1ac13914c702bd387a0a032490d4b7`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T110854.739839Z-6dc41dc79a.json) · [Raw log](../build-logs/20261029T110854.739839Z-6dc41dc79a.log)
+- [Exact process output](../build-logs/20261029T110854.739839Z-6dc41dc79a.raw.log)
+
+### 2026-10-29T19:10:01+08:00 · agent-provider-loopback-proxy · succeeded
+
+- Config: Python; exit code: 0; elapsed: 2.583s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_provider*.py -v`
+- Context: Synthetic provider tests: loopback-only existing proxy, error label, credentials isolation; no API calls
+- Source SHA-256: `56f1ec4870bed104f358395887cc410d9b4e58dad9bdfeb5036b90e72743c74f`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T111001.824824Z-cc2320eec3.json) · [Raw log](../build-logs/20261029T111001.824824Z-cc2320eec3.log)
+- [Exact process output](../build-logs/20261029T111001.824824Z-cc2320eec3.raw.log)
+
+### 2026-10-29T19:10:41+08:00 · agent-provider-loopback-proxy · succeeded
+
+- Config: Python; exit code: 0; elapsed: 2.070s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_provider*.py -q`
+- Context: Synthetic provider regression including bounded local proxy and closed sanitized HTTP errors; no API calls
+- Source SHA-256: `53ae04c86c772ae2b3b766ed872516107d6fe26ab1bdadca1e4fd963f7c2d78c`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T111041.123340Z-3bd38a7ccf.json) · [Raw log](../build-logs/20261029T111041.123340Z-3bd38a7ccf.log)
+- [Exact process output](../build-logs/20261029T111041.123340Z-3bd38a7ccf.raw.log)
+
+### 2026-10-29T19:12:12+08:00 · agent-openai-model-check · succeeded
+
+- Config: Python; exit code: 0; elapsed: 3.443s.
+- Command: `C:\Python314\python.exe -c "import sys,json
+sys.path.insert(0,'scripts')
+from music_agent.providers import create_provider
+from music_agent.provider import ProviderError
+p=create_provider('openai')
+try:
+ ids=p.list_models()
+ print(json.dumps({'provider':'openai','connected':True,'network_mode':p.network_mode,'model_count':len(ids),'gpt_5_mini_available':'gpt-5-mini' in ids}))
+except ProviderError as e:
+ print(json.dumps({'provider':'openai','connected':False,'code':e.code,'status':e.status,'message':str(e)}))
+ raise SystemExit(2)
+"`
+- Context: Official /models check through existing local system proxy; no inference
+- Source SHA-256: `53ae04c86c772ae2b3b766ed872516107d6fe26ab1bdadca1e4fd963f7c2d78c`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T111212.089599Z-1c2c445802.json) · [Raw log](../build-logs/20261029T111212.089599Z-1c2c445802.log)
+- [Exact process output](../build-logs/20261029T111212.089599Z-1c2c445802.raw.log)
+
+### 2026-10-29T19:13:46+08:00 · agent-check · succeeded
+
+- Config: Python; exit code: 0; elapsed: 37.392s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: Kimi companion deterministic tests; no live model calls or physical audio
+- Source SHA-256: `53ae04c86c772ae2b3b766ed872516107d6fe26ab1bdadca1e4fd963f7c2d78c`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T111346.810356Z-8ce2c58254.json) · [Raw log](../build-logs/20261029T111346.810356Z-8ce2c58254.log)
+- [Exact process output](../build-logs/20261029T111346.810356Z-8ce2c58254.raw.log)
+
+### 2026-10-29T19:14:18+08:00 · agent-openai-live-integration · failed
+
+- Config: Release + Python; exit code: 1; elapsed: 21.030s.
+- Command: `C:\Python314\python.exe tests/MusicAgentIntegration.py --exe build/sidebar/bin/Release/E-musician.exe --live --provider openai --model gpt-5-mini`
+- Context: User-authorized GPT-5-mini synthetic music fixture; real Responses/tool roundtrip, no user audio/physical device
+- Source SHA-256: `53ae04c86c772ae2b3b766ed872516107d6fe26ab1bdadca1e4fd963f7c2d78c`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T111418.838754Z-9baa84e769.json) · [Raw log](../build-logs/20261029T111418.838754Z-9baa84e769.log)
+- [Exact process output](../build-logs/20261029T111418.838754Z-9baa84e769.raw.log)
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261029T111418.838754Z-9baa84e769.log
+
+### 2026-10-29T19:13:46+08:00 · embedded-agent-integration · failed
+
+- Config: Release + Python; exit code: 1; elapsed: 184.250s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\tests\EmbeddedAgentIntegration.py --recorded --exe build\sidebar\bin\Release\E-musician.exe --output-root C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build\embedded-agent-integration --timeout 180`
+- Context: Native WebView2/Agent lifecycle smoke; offline audio, no provider calls
+- Source SHA-256: `53ae04c86c772ae2b3b766ed872516107d6fe26ab1bdadca1e4fd963f7c2d78c`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T111346.505256Z-9a6dac4996.json) · [Raw log](../build-logs/20261029T111346.505256Z-9a6dac4996.log)
+- [Exact process output](../build-logs/20261029T111346.505256Z-9a6dac4996.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261029T111346.505256Z-9a6dac4996.log
+
+### 2026-10-29T19:18:56+08:00 · agent-sidebar-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 31.838s.
+- Command: `cmake --build build/sidebar --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Track-header scope + smoke fresh-output contract + headless error handling; GPT music unit prompt clarified
+- Source SHA-256: `24ea6b4b6c92890a4dcc459cf2ec36b846786ef038ce6ab70f2d3a54225f56a8`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T111856.790492Z-d6a92e4c2a.json) · [Raw log](../build-logs/20261029T111856.790492Z-d6a92e4c2a.log)
+- [Exact process output](../build-logs/20261029T111856.790492Z-d6a92e4c2a.raw.log)
+
+### 2026-10-29T19:21:23+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.129s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `24ea6b4b6c92890a4dcc459cf2ec36b846786ef038ce6ab70f2d3a54225f56a8`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T112123.122313Z-b1f24db6cb.json) · [Raw log](../build-logs/20261029T112123.122313Z-b1f24db6cb.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-10-29T19:21:11+08:00 · embedded-agent-integration · failed
+
+- Config: Release + Python; exit code: 1; elapsed: 14.581s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\tests\EmbeddedAgentIntegration.py --recorded --exe build\sidebar\bin\Release\E-musician.exe --output-root C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build\embedded-agent-integration --timeout 180`
+- Context: Native WebView2/Agent lifecycle smoke; offline audio, no provider calls
+- Source SHA-256: `24ea6b4b6c92890a4dcc459cf2ec36b846786ef038ce6ab70f2d3a54225f56a8`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T112111.977565Z-07ae54a826.json) · [Raw log](../build-logs/20261029T112111.977565Z-07ae54a826.log)
+- [Exact process output](../build-logs/20261029T112111.977565Z-07ae54a826.raw.log)
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261029T112111.977565Z-07ae54a826.log
+
+### 2026-10-29T19:22:09+08:00 · agent-openai-live-integration · succeeded
+
+- Config: Release + Python; exit code: 0; elapsed: 18.551s.
+- Command: `C:\Python314\python.exe tests/MusicAgentIntegration.py --exe build/sidebar/bin/Release/E-musician.exe --live --provider openai --model gpt-5-mini`
+- Context: Repeat after explicit semitone terminology fix; user-authorized synthetic fixture only, no automatic transport retry
+- Source SHA-256: `24ea6b4b6c92890a4dcc459cf2ec36b846786ef038ce6ab70f2d3a54225f56a8`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T112209.942844Z-dcbd1534f5.json) · [Raw log](../build-logs/20261029T112209.942844Z-dcbd1534f5.log)
+- [Exact process output](../build-logs/20261029T112209.942844Z-dcbd1534f5.raw.log)
+
+### 2026-10-29T19:26:51+08:00 · agent-sidebar-ui · succeeded
+
+- Config: Synthetic; exit code: 0; elapsed: 8.037s.
+- Command: `node tests/MusicAgentUI.cjs`
+- Context: Native boolean-only focus hint, DOM/window blur, hidden-state clearing and keyboard boundary
+- Source SHA-256: `56edc8b664c6526567c8eaa0fef93c0344979692b0ad2d0f05cb073856ceddf3`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T112651.676911Z-a27046e45a.json) · [Raw log](../build-logs/20261029T112651.676911Z-a27046e45a.log)
+- [Exact process output](../build-logs/20261029T112651.676911Z-a27046e45a.raw.log)
+
+### 2026-10-29T19:29:10+08:00 · agent-sidebar-build · failed
+
+- Config: Release; exit code: 1; elapsed: 17.454s.
+- Command: `cmake --build build/sidebar --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Final native focus bridge, bounded selection index, inactive-helper fast path and teardown ordering
+- Source SHA-256: `54be25da7136eeec0f3d324003626e6399e9b02c76654ea0bdbee489e0b2aaab`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T112910.153035Z-e4b28f23bf.json) · [Raw log](../build-logs/20261029T112910.153035Z-e4b28f23bf.log)
+- [Exact process output](../build-logs/20261029T112910.153035Z-e4b28f23bf.raw.log)
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261029T112910.153035Z-e4b28f23bf.log
+
+### 2026-10-29T19:31:13+08:00 · agent-sidebar-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 46.030s.
+- Command: `cmake --build build/sidebar --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Fix Release-only benchmark build-label macro; complete final native source compilation
+- Source SHA-256: `891e521ac43cef1983a342dbe2a86ee70722350abbd9fe0b3e970df16ff5e76c`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T113113.023819Z-33cb74baf3.json) · [Raw log](../build-logs/20261029T113113.023819Z-33cb74baf3.log)
+- [Exact process output](../build-logs/20261029T113113.023819Z-33cb74baf3.raw.log)
+
+### 2026-10-29T19:32:47+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 0.889s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `891e521ac43cef1983a342dbe2a86ee70722350abbd9fe0b3e970df16ff5e76c`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T113247.739544Z-78a2636db1.json) · [Raw log](../build-logs/20261029T113247.739544Z-78a2636db1.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-10-29T19:32:37+08:00 · embedded-agent-integration · failed
+
+- Config: Release + Python; exit code: 1; elapsed: 13.496s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\tests\EmbeddedAgentIntegration.py --recorded --exe build\sidebar\bin\Release\E-musician.exe --output-root C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build\embedded-agent-integration --timeout 180`
+- Context: Native WebView2/Agent lifecycle smoke; offline audio, no provider calls
+- Source SHA-256: `891e521ac43cef1983a342dbe2a86ee70722350abbd9fe0b3e970df16ff5e76c`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T113237.257197Z-290302475b.json) · [Raw log](../build-logs/20261029T113237.257197Z-290302475b.log)
+- [Exact process output](../build-logs/20261029T113237.257197Z-290302475b.raw.log)
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261029T113237.257197Z-290302475b.log
+
+### 2026-10-29T19:33:33+08:00 · agent-kimi-live-integration · succeeded
+
+- Config: Release + Python; exit code: 0; elapsed: 12.559s.
+- Command: `C:\Python314\python.exe tests/MusicAgentIntegration.py --exe build/sidebar/bin/Release/E-musician.exe --live --provider kimi --model kimi-k2.6`
+- Context: Existing authorized Kimi credential; small synthetic fixture validates current multi-provider build, no physical audio
+- Source SHA-256: `891e521ac43cef1983a342dbe2a86ee70722350abbd9fe0b3e970df16ff5e76c`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T113333.089129Z-63d5925ba1.json) · [Raw log](../build-logs/20261029T113333.089129Z-63d5925ba1.log)
+- [Exact process output](../build-logs/20261029T113333.089129Z-63d5925ba1.raw.log)
+
+### 2026-10-29T19:37:36+08:00 · agent-sidebar-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 24.927s.
+- Command: `cmake --build build/sidebar --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Distinguish inactive offscreen DOM focus from native guard; exercise actual JS focus bridge explicitly
+- Source SHA-256: `653f92a3d7c1ed9dad374d157f2eb9baac1b0624420440e3b7c4bb89ebb921c5`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T113736.058197Z-905eb84e8e.json) · [Raw log](../build-logs/20261029T113736.058197Z-905eb84e8e.log)
+- [Exact process output](../build-logs/20261029T113736.058197Z-905eb84e8e.raw.log)
+
+### 2026-10-29T19:38:10+08:00 · agent-sidebar-ui · succeeded
+
+- Config: Synthetic; exit code: 0; elapsed: 8.318s.
+- Command: `node tests/MusicAgentUI.cjs`
+- Context: Dedicated Ctrl+Shift+A collapses embedded sidebar while preserving draft and remaining shutdown-free
+- Source SHA-256: `551fc338c08d8e721f4ebf041393eb6fb8a1ebc5fc3340c6e2ebd7ce8cb05c0c`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T113810.876878Z-03628b470d.json) · [Raw log](../build-logs/20261029T113810.876878Z-03628b470d.log)
+- [Exact process output](../build-logs/20261029T113810.876878Z-03628b470d.raw.log)
+
+### 2026-10-29T19:40:05+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 0.865s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `551fc338c08d8e721f4ebf041393eb6fb8a1ebc5fc3340c6e2ebd7ce8cb05c0c`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T114005.292468Z-fb10a27330.json) · [Raw log](../build-logs/20261029T114005.292468Z-fb10a27330.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-10-29T19:40:08+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 0.543s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `551fc338c08d8e721f4ebf041393eb6fb8a1ebc5fc3340c6e2ebd7ce8cb05c0c`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T114008.621633Z-453cd80d29.json) · [Raw log](../build-logs/20261029T114008.621633Z-453cd80d29.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-10-29T19:39:53+08:00 · embedded-agent-integration · succeeded
+
+- Config: Release + Python; exit code: 0; elapsed: 17.599s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\tests\EmbeddedAgentIntegration.py --recorded --exe build\sidebar\bin\Release\E-musician.exe --output-root C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build\embedded-agent-integration --timeout 180`
+- Context: Native WebView2/Agent lifecycle smoke; offline audio, no provider calls
+- Source SHA-256: `551fc338c08d8e721f4ebf041393eb6fb8a1ebc5fc3340c6e2ebd7ce8cb05c0c`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T113953.488479Z-f455331e05.json) · [Raw log](../build-logs/20261029T113953.488479Z-f455331e05.log)
+- [Exact process output](../build-logs/20261029T113953.488479Z-f455331e05.raw.log)
+
+### 2026-10-29T19:41:35+08:00 · agent-check · succeeded
+
+- Config: Python; exit code: 0; elapsed: 31.348s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: Kimi companion deterministic tests; no live model calls or physical audio
+- Source SHA-256: `a10df962203e2e9fa58f8ac073b6e53fdfae2f4493febb462f63105e329eba5d`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T114135.497679Z-7ae5033af7.json) · [Raw log](../build-logs/20261029T114135.497679Z-7ae5033af7.log)
+- [Exact process output](../build-logs/20261029T114135.497679Z-7ae5033af7.raw.log)
+
+### 2026-10-29T19:41:30+08:00 · agent-sidebar-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 45.469s.
+- Command: `cmake --build build/sidebar --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Frozen final source; reserved note-ID hash cache reduces repeated dense-note tree cost
+- Source SHA-256: `a10df962203e2e9fa58f8ac073b6e53fdfae2f4493febb462f63105e329eba5d`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T114130.084290Z-426ba6ce86.json) · [Raw log](../build-logs/20261029T114130.084290Z-426ba6ce86.log)
+- [Exact process output](../build-logs/20261029T114130.084290Z-426ba6ce86.raw.log)
+
+### 2026-10-29T19:43:06+08:00 · agent-final-native-check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 94.334s.
+- Command: `ctest --test-dir build/sidebar -C Release --output-on-failure`
+- Context: Frozen final source; original DAW CTest suite then isolated sidebar lifecycle/performance and synthetic-provider integration
+- Source SHA-256: `a10df962203e2e9fa58f8ac073b6e53fdfae2f4493febb462f63105e329eba5d`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T114306.607037Z-8b65c5bbfe.json) · [Raw log](../build-logs/20261029T114306.607037Z-8b65c5bbfe.log)
+- [Exact process output](../build-logs/20261029T114306.607037Z-8b65c5bbfe.raw.log)
+
+### 2026-10-29T19:44:48+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 0.904s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `a10df962203e2e9fa58f8ac073b6e53fdfae2f4493febb462f63105e329eba5d`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T114448.115281Z-7354a87b70.json) · [Raw log](../build-logs/20261029T114448.115281Z-7354a87b70.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-10-29T19:44:51+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 0.530s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `a10df962203e2e9fa58f8ac073b6e53fdfae2f4493febb462f63105e329eba5d`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T114451.186993Z-24f35f4065.json) · [Raw log](../build-logs/20261029T114451.186993Z-24f35f4065.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-10-29T19:44:41+08:00 · agent-final-native-check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 12.225s.
+- Command: `C:\Python314\python.exe tests/EmbeddedAgentIntegration.py --recorded --exe build/sidebar/bin/Release/E-musician.exe`
+- Context: Frozen final source; original DAW CTest suite then isolated sidebar lifecycle/performance and synthetic-provider integration
+- Source SHA-256: `a10df962203e2e9fa58f8ac073b6e53fdfae2f4493febb462f63105e329eba5d`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T114441.131746Z-8c0e241c98.json) · [Raw log](../build-logs/20261029T114441.131746Z-8c0e241c98.log)
+- [Exact process output](../build-logs/20261029T114441.131746Z-8c0e241c98.raw.log)
+
+### 2026-10-29T19:44:53+08:00 · agent-final-native-check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 3.537s.
+- Command: `C:\Python314\python.exe tests/MusicAgentIntegration.py --exe build/sidebar/bin/Release/E-musician.exe`
+- Context: Frozen final source; original DAW CTest suite then isolated sidebar lifecycle/performance and synthetic-provider integration
+- Source SHA-256: `a10df962203e2e9fa58f8ac073b6e53fdfae2f4493febb462f63105e329eba5d`; Git HEAD: `1d664d1c013500814f6f1017b53e8149c1f53d82`.
+- [Record](builds/20261029T114453.459912Z-798c59b52a.json) · [Raw log](../build-logs/20261029T114453.459912Z-798c59b52a.log)
+- [Exact process output](../build-logs/20261029T114453.459912Z-798c59b52a.raw.log)
+
+
+## 2026-10-29 — Agent 0.2第一批最终收尾
+
+DAW0.7.0：内嵌WebView2侧栏、按需Python助手与同一Edit生命周期；实际选择及独立版本、范围约束；Kimi/OpenAI Responses与供应商隔离DPAPI。GUI/模型逻辑不进入音频回调，未增加自动保存、音频生成或任意插件控制。
+
+最终源码a10df962（117输入）、EXE92a39c89。构建426ba6ce86、Python178项7ae5033af7、原CTest5/5 8b65c5bbfe、原生23项8c0e241c98、最终模拟闭环798c59b52a均成功且源码冻结。真实OpenAI/Kimi小样本在各自中间构建完成，未以最终EXE重复付费；计数、原始指纹、失败与修复、性能边界见docs/verification/2026-10-29-agent-sidebar/RESULTS.md。最终模拟测试60个受保护工程/设置文件未变。
+
+离屏原生测试没有Windows焦点；合成DOM focusin仅验证WebView→native快捷键保护。实际中文输入/Space/Ctrl+4和ASIO播放下查询待用户短测，不把旧设备验收或局部索引计时当成本版全面性能保证。README、上下文、计划、架构、接口、依赖、构建入口及人工清单同步更新；代码与归档随feature/kimi-music-agent管理，不自动合并main。
+
+
+提交前核查：707个Git候选文件未发现两把实际API密钥或长密钥字面量；117个最终构建输入与暂存内容逐一对应，其中85个原字节一致、32个仅CRLF→LF规范化，无语义内容差异，见staged-source-manifest.json。git diff --cached --check通过；未暂存构建产物、SDK、凭证、用户工程/音频/MIDI或插件二进制。历史DEVLOG前缀保留，本次测试未留下E-musician进程。
