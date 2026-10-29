@@ -6,7 +6,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from music_agent.plans import PLAN_TOOL, PlanError, compile_plan, verify_plan
+from music_agent.plans import PLAN_TOOL, PlanError, compile_plan, verify_plan, resolve_plan_refs
 
 
 def fixture():
@@ -222,10 +222,12 @@ class PlanCompilerTests(unittest.TestCase):
                                    {"type": "create_midi_clip", "track_id": "midi-1", "start_beats": 6, "length_beats": 6}), context)
         after = deepcopy(context)
         after["revision"] += 1
-        after["tracks"].append({"id": "assigned-by-engine", "name": "Another", "kind": "instrument", "clips": []})
+        after["tracks"].append({"id": "assigned-by-engine", "name": "Another", "kind": "instrument", "gain_db": 0.0, "pan": 0.0, "muted": False, "solo": False, "clips": []})
         after["tracks"][0]["clip_count"] = 2
         after["tracks"][0]["clips"].append({"id": "new-clip-id", "kind": "midi", "start_seconds": 3.0,
             "duration_seconds": 3.0, "start_beats": 6, "length_beats": 6, "note_count": 0})
+        plan = resolve_plan_refs(plan, {"agent1": "assigned-by-engine", "agent2": "new-clip-id"})
+        after["clip_notes"]["new-clip-id"] = []
         self.assertEqual(verify_plan(plan, context, after), [])
         after["tracks"][0]["clips"][-1]["note_count"] = 5
         self.assertTrue(verify_plan(plan, context, after))

@@ -57,7 +57,12 @@ def _object(payload):
 
 
 def load_session(path):
-    path = Path(path).resolve()
+    # Compare logical siblings. Windows packaged-app file virtualization can
+    # resolve an existing input into LocalCache while the not-yet-created ready
+    # file still resolves to the logical AppData path.
+    path = Path(path).absolute()
+    if path.is_symlink():
+        raise ValueError("Embedded session must be a regular local file.")
     with path.open("rb") as source:
         payload = source.read(4097)
     if not payload or len(payload) > 4096:
@@ -71,8 +76,9 @@ def load_session(path):
         raise ValueError("Invalid embedded capability.")
     if not isinstance(value["ready_path"], str) or not value["ready_path"]:
         raise ValueError("Invalid embedded readiness path.")
-    ready = Path(value["ready_path"]).resolve()
-    if ready.parent != path.parent or ready.name != path.stem + ".ready.json":
+    ready = Path(value["ready_path"])
+    expected = path.with_name(path.stem + ".ready.json")
+    if not ready.is_absolute() or ready != expected or ready.is_symlink() or ready.with_suffix(".tmp").is_symlink():
         raise ValueError("Invalid embedded readiness path.")
     return value
 

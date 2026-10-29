@@ -1,6 +1,20 @@
 # E-musician 开发计划
 
-版本：1.9。日期：2026-10-29（Asia/Shanghai）。原项目：E:/E-musician；当前 Agent 工作树：music-agent-kimi。
+版本：2.0。日期：2026-10-29（Asia/Shanghai）。原项目：E:/E-musician；当前 Agent 工作树：music-agent-kimi。
+
+## DAW 0.8.0 / Agent 0.3：第二批自动验收完成
+
+| 工作 | 状态与依据 |
+| --- | --- |
+| 依赖创建、常用片段与MIDI编辑 | 已实现19种动作；真实离线DAW13项、GPT/Kimi各一次真实创建链通过 |
+| 一次预览/确认/原子提交/Undo/Redo | 已验证；补齐异步根排序导致的历史污染，原生126条 |
+| 选区、版本、错误/暂停边界 | Python219通过；失败不留下部分修改，已提交回读错误不重复执行 |
+| 折叠音符明细、进度和规划暂停 | 合成UI尺寸/2000分页/轮询保持通过；真实鼠标与IME待人工 |
+| 原生侧栏及助手启动 | 原生24条与真实helper启动退出通过，修复Windows包路径误判 |
+| DAW基础回归 | 最终Release CTest5/5；不提升为新硬件或长期性能验收 |
+| 计划/日志/审查/精确源码与产物 | [PLAN](review/2026-10-29-agent-batch2/PLAN.md)、[REVIEW](review/2026-10-29-agent-batch2/REVIEW.md)、[RESULTS](verification/2026-10-29-agent-batch2/RESULTS.md) |
+
+独立build/agent-batch2保留旧0.7；功能分支交付，不自动合并main。下一步为[人工短测](review/2026-10-29-agent-batch2/MANUAL-CHECK.md)，Warp/侧链等底座长期范围和Agent第三批仍未实施。
 
 ## DAW 0.7.0 / Agent 0.2：内嵌助手第一批
 

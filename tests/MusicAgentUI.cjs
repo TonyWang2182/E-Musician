@@ -22,7 +22,7 @@ const initial = {
   usage:{calls:0,prompt_tokens:0,completion_tokens:0},can_undo:false,last_result:'',error:null,control:{connected:true}
 };
 let state = structuredClone(initial), rejectShutdown = false, lastPlan = null, lastSettings = null;
-const count = {get:0,plan:0,apply:0,undo:0,shutdown:0,settings:0,cancel:0};
+const count = {get:0,plan:0,apply:0,undo:0,shutdown:0,settings:0,cancel:0,pause:0,resume:0};
 const server = http.createServer(async (req,res) => {
   const pathname = new URL(req.url,'http://127.0.0.1').pathname;
   if (pathname.startsWith('/api/')) {
@@ -32,18 +32,21 @@ const server = http.createServer(async (req,res) => {
     if (pathname === '/api/state') count.get++;
     if (pathname === '/api/plan') {
       count.plan++;lastPlan=body;assert.deepEqual(Object.keys(body).sort(),['prompt','scope']);assert.ok(['selection','project'].includes(body.scope));
-      state.phase='ready';state.error=null;state.last_result='';
+      state.phase='ready';state.error=null;state.last_result='';state.progress={stage:'ready',label:'请核对完整方案后应用。',completed:0,total:0};
       state.plan={id:'p'+count.plan,scope:{mode:body.scope,project_revision:state.snapshot.revision,selection_revision:3},revision:state.snapshot.revision,summary:body.scope==='project'?'调整工程固定速度':'移调当前选中的两个音符',changes:body.scope==='project'?['工程速度：120 → 100 BPM','MIDI 保持拍位；音频保持原速。']:['钢琴 / 主旋律：仅修改所选 2 个音符。','音高 +12 半音，起点、长度和力度保持不变。']};
+      state.plan.steps=[{index:1,label:body.scope==='project'?'调整工程速度':'移调选中的两个音符'}];
       state.messages.push({role:'user',content:body.prompt},{role:'assistant',content:'已准备修改方案，请核对后应用。'});
       state.usage={calls:count.plan,prompt_tokens:913*count.plan,completion_tokens:85*count.plan};
     }
-    if (pathname === '/api/apply') {count.apply++;assert.equal(body.plan_id,state.plan.id);state.phase='done';state.snapshot.bpm=100;state.snapshot.revision++;state.last_result='已应用 1 项修改，并回读确认工程速度为 100 BPM。';state.can_undo=true;}
+    if (pathname === '/api/apply') {count.apply++;assert.equal(body.plan_id,state.plan.id);state.phase='done';state.snapshot.bpm=100;state.snapshot.revision++;state.last_result='已应用 1 项修改，并回读确认工程速度为 100 BPM。';state.can_undo=true;state.progress={stage:'done',label:'已核对全部修改。',completed:1,total:1};}
     if (pathname === '/api/undo') {count.undo++;state.snapshot.bpm=120;state.can_undo=false;state.last_result='本次修改已撤销。';}
     if (pathname === '/api/settings') {
       count.settings++;lastSettings=body;const entry=state.providers.find(p=>p.id===body.provider);assert.ok(entry.adapter_ready);
       entry.model=body.model;entry.base_url=body.base_url||entry.base_url;entry.configured=entry.configured||!!body.api_key;state.provider=structuredClone(entry);
     }
-    if (pathname === '/api/cancel') {count.cancel++;state.phase='cancelled';state.plan=null;}
+    if (pathname === '/api/cancel') {count.cancel++;state.phase='cancelled';state.busy=false;state.plan=null;if('pause_requested' in state)state.pause_requested=false;state.progress={stage:'cancelled',label:'已停止，未提交后续修改。',completed:0,total:0};}
+    if (pathname === '/api/pause') {count.pause++;assert.deepEqual(body,{});assert.equal(state.phase,'planning');state.pause_requested=true;state.progress={stage:'planning',label:'当前步骤结束后暂停。',completed:0,total:0};}
+    if (pathname === '/api/resume') {count.resume++;assert.deepEqual(body,{});assert.equal(state.phase,'paused');state.phase='planning';state.pause_requested=false;state.progress={stage:'planning',label:'继续准备方案。',completed:0,total:0};}
     if (pathname === '/api/shutdown') {
       if (rejectShutdown) {res.writeHead(400,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'工程未保存，请返回 DAW 保存。'}));return;}
       count.shutdown++;assert.equal(body.confirm,true);
@@ -96,6 +99,7 @@ async function capture(page,name,width,height) {
     await page.reload();await waitReady(page);assert.equal(new URL(page.url()).search,'?embedded=1');
     await page.locator('#prompt').fill('把所选两个音符升高一个八度');await page.locator('#submit').click();await page.locator('#apply').waitFor({state:'visible'});
     assert.equal(lastPlan.scope,'selection');assert.equal(count.apply,0);
+    assert.equal(await page.locator('#plan-sequence').isVisible(),true);assert.deepEqual(await page.locator('#plan-steps li').allTextContents(),['移调选中的两个音符']);
     for (const [name,width,height] of [['sidebar-ready-340',340,740],['sidebar-ready-560',560,820],['sidebar-edge-260',260,540]]) await capture(page,name,width,height);
     await page.locator('#scope').selectOption('project');assert.match(await page.locator('#plan-scope').innerText(),/发送时的选择/);
     await page.locator('#discard').click();await page.waitForFunction(()=>document.getElementById('phase').textContent==='已停止');
@@ -104,6 +108,41 @@ async function capture(page,name,width,height) {
     assert.match(await page.locator('#plan-scope').innerText(),/整个工程/);state.snapshot.revision=2;await refresh(page);assert.match(await page.locator('#plan-revision').innerText(),/基于修订 1/);state.snapshot.revision=1;
     await page.locator('#apply').click();await page.waitForFunction(()=>document.getElementById('tempo').textContent==='100 BPM');assert.equal(count.apply,1);
     await page.locator('#undo').click();await page.waitForFunction(()=>document.getElementById('tempo').textContent==='120 BPM');assert.equal(count.undo,1);
+    const afterEdit=structuredClone(state), writesBefore=count.apply, cancelsBefore=count.cancel;
+    state.phase='ready';state.plan={id:'notes-synthetic',scope:{mode:'project'},revision:state.snapshot.revision,summary:'在两个片段中新增明确音符。',changes:['测试钢琴 / 新片段：新增 2 个音符。','旋律轨 / 第二片段：新增 1 个音符。'],note_previews:[{label:'测试钢琴 / 新片段',notes:[{pitch:60,start_beats:0,length_beats:1,velocity:80,channel:1},{pitch:64,start_beats:1.125,length_beats:0.25,velocity:90,channel:2}]},{label:'<img src=x onerror=alert(1)>',notes:[{pitch:67,start_beats:2,length_beats:0.5,velocity:70,channel:16}]}]};state.last_result='';state.progress=null;
+    await refresh(page);assert.equal(await page.locator('#note-preview-summary').innerText(),'新增音符明细（3）');assert.equal(await page.locator('#note-previews').evaluate(e=>e.open),false);assert.equal(await page.locator('.note-preview-row').count(),0);
+    await page.locator('#note-preview-summary').click();await page.waitForFunction(()=>document.querySelectorAll('.note-preview-row').length===3);
+    assert.match(await page.locator('.note-preview-help').innerText(),/新增时的音符.*后续变化见方案步骤/);assert.match(await page.locator('.note-preview-help').innerText(),/片段内 0.*四分音符拍/);
+    assert.match(await page.locator('.note-preview-row').nth(0).innerText(),/MIDI 音高 60/);assert.deepEqual(await page.locator('.note-preview-row').nth(0).locator('dd').allTextContents(),['0 拍','1 拍','80','1']);assert.deepEqual(await page.locator('.note-preview-row').nth(1).locator('dd').allTextContents(),['1.125 拍','0.25 拍','90','2']);assert.deepEqual(await page.locator('.note-preview-row').nth(2).locator('dd').allTextContents(),['2 拍','0.5 拍','70','16']);assert.equal(await page.locator('#note-preview-rows img').count(),0);assert.equal(await page.locator('.note-preview-group h4').nth(1).textContent(),'<img src=x onerror=alert(1)>');assert.equal(await page.locator('#note-preview-pager').isVisible(),false);
+    await page.evaluate(()=>{window.savedPreviewRow=document.querySelector('.note-preview-row');});await refresh(page);assert.equal(await page.locator('#note-previews').evaluate(e=>e.open),true);assert.equal(await page.evaluate(()=>window.savedPreviewRow===document.querySelector('.note-preview-row')),true);
+    await capture(page,'sidebar-note-preview-340',340,740);await capture(page,'sidebar-note-preview-260',260,540);await page.setViewportSize({width:340,height:740});
+    await page.locator('#note-preview-summary').click();await page.locator('#note-preview-summary').click();assert.equal(await page.evaluate(()=>window.savedPreviewRow===document.querySelector('.note-preview-row')),true);
+    state.plan={...state.plan,id:'notes-2000-synthetic',changes:['测试钢琴 / 长片段：新增 2000 个音符。'],note_previews:[{label:'测试钢琴 / 长片段',notes:Array.from({length:2000},(_,i)=>({pitch:60+i%12,start_beats:i/8,length_beats:0.125,velocity:80,channel:1}))}]};await refresh(page);assert.equal(await page.locator('#note-previews').evaluate(e=>e.open),false);assert.equal(await page.locator('.note-preview-row').count(),0);assert.equal(await page.locator('#note-preview-summary').innerText(),'新增音符明细（2000）');
+    await page.locator('#note-preview-summary').click();await page.waitForFunction(()=>document.querySelectorAll('.note-preview-row').length===50);assert.equal(await page.locator('#note-preview-page').innerText(),'第 1–50 个，共 2000 个');assert.equal(await page.locator('#note-preview-prev').isDisabled(),true);
+    await page.locator('#note-preview-next').click();assert.equal(await page.locator('#note-preview-page').innerText(),'第 51–100 个，共 2000 个');await page.evaluate(()=>{window.savedPreviewRow=document.querySelector('.note-preview-row');});await refresh(page);assert.equal(await page.locator('#note-preview-page').innerText(),'第 51–100 个，共 2000 个');assert.equal(await page.evaluate(()=>window.savedPreviewRow===document.querySelector('.note-preview-row')),true);
+    await page.evaluate(()=>{for(let i=0;i<38;i++)document.getElementById('note-preview-next').click();});assert.equal(await page.locator('#note-preview-page').innerText(),'第 1951–2000 个，共 2000 个');assert.equal(await page.locator('#note-preview-next').isDisabled(),true);assert.equal(await page.locator('.note-preview-row').count(),50);assert.deepEqual(await page.locator('.note-preview-row').last().locator('dd').allTextContents(),['249.875 拍','0.125 拍','80','1']);assert.match(await page.locator('.note-preview-row').last().innerText(),/音符 2000/);
+    await page.locator('#note-preview-prev').click();assert.equal(await page.locator('#note-preview-page').innerText(),'第 1901–1950 个，共 2000 个');assert.equal(count.apply,writesBefore);
+    state.phase='ready';state.plan={id:'destructive-synthetic',scope:{mode:'selection'},revision:state.snapshot.revision,summary:'整理当前选择中的音符与片段。',steps:[{index:1,label:'删除主旋律中选中的音符'},{index:2,label:'删除过渡片段'}],changes:['钢琴 / 主旋律：删除选中的 2 个音符，其余音符保持不变。','鼓组 / 过渡：删除 1 个片段，磁盘素材不变。']};state.last_result='';state.progress=null;
+    await refresh(page);assert.equal(await page.locator('#note-previews').isVisible(),false);assert.equal(await page.locator('.note-preview-row').count(),0);assert.deepEqual(await page.locator('#plan-steps li').allTextContents(),['删除主旋律中选中的音符','删除过渡片段']);assert.equal(await page.locator('#changes .change-action').count(),2);assert.match(await page.locator('#changes').innerText(),/删除选中的 2 个音符/);assert.match(await page.locator('#changes').innerText(),/删除 1 个片段/);assert.equal(count.apply,writesBefore);
+    await capture(page,'sidebar-sequence-340',340,740);await capture(page,'sidebar-sequence-260',260,540);await page.setViewportSize({width:340,height:740});
+    const readableChanges=structuredClone(state.plan.changes);state.plan.changes=[{internal_id:'never-show-code'}];await refresh(page);assert.equal(await page.locator('#apply').isDisabled(),true);assert.match(await page.locator('#notice').innerText(),/方案说明不完整/);assert.doesNotMatch(await page.locator('#changes').innerText(),/internal_id|never-show-code/);state.plan.changes=readableChanges;
+    delete state.plan.steps;await refresh(page);assert.equal(await page.locator('#plan-sequence').isVisible(),false);assert.equal(await page.locator('#apply').isDisabled(),false);
+    state.phase='applying';state.busy=true;state.plan=null;state.can_undo=false;
+    for(const [stage,label] of [['preflight','正在核对工程和选择。'],['submitting','整批修改已提交，等待结果。'],['verifying','正在核对修改结果。']]){
+      state.progress={stage,label,completed:stage==='verifying'?1:0,total:2};await refresh(page);
+      assert.equal(await page.locator('#execution-stages [aria-current="step"]').getAttribute('data-stage'),stage);assert.equal(await page.locator('#busy-detail').innerText(),label);assert.equal(await page.locator('#cancel-work').isVisible(),false);assert.equal(await page.locator('#pause-work').isVisible(),false);assert.equal(await page.locator('#commit-hint').isVisible(),true);assert.doesNotMatch(await page.locator('#execution-stages').innerText(),/50%|1\s*\/\s*2/);
+      await page.locator('#cancel-work').evaluate(e=>e.dispatchEvent(new MouseEvent('click')));await page.locator('#pause-work').evaluate(e=>e.dispatchEvent(new MouseEvent('click')));assert.equal(count.cancel,cancelsBefore);assert.equal(count.pause,0);
+      if(stage==='submitting')await capture(page,'sidebar-submitting-340',340,740);
+    }
+    state.phase='done';state.busy=false;state.progress={stage:'done',label:'已核对整批修改。',completed:2,total:2};state.last_result='整批修改已完成，可以一次撤销。';state.can_undo=true;await refresh(page);assert.equal(await page.locator('#execution-stages li[data-status="complete"]').count(),4);assert.equal(await page.locator('#undo').isDisabled(),false);
+    state.progress={stage:'done',label:'已回答工程问题。',completed:0,total:0};await refresh(page);assert.equal(await page.locator('#execution-stages').isVisible(),false);
+    state.phase='planning';state.busy=true;state.plan=null;state.last_result='';state.pause_requested=false;state.progress={stage:'planning',label:'正在准备修改方案。',completed:0,total:0};await refresh(page);assert.equal(await page.locator('#pause-work').innerText(),'暂停');assert.equal(await page.locator('#pause-work').isDisabled(),false);
+    await page.locator('#pause-work').click();await page.waitForFunction(()=>document.getElementById('pause-work').textContent==='等待暂停');assert.equal(count.pause,1);assert.equal(await page.locator('#pause-work').isDisabled(),true);
+    state.phase='paused';state.progress={stage:'paused',label:'已暂停，继续后进行下一步。',completed:0,total:0};await refresh(page);assert.equal(await page.locator('#phase').innerText(),'已暂停');assert.equal(await page.locator('#pause-work').innerText(),'继续');assert.equal(await page.locator('#cancel-work').isDisabled(),false);await capture(page,'sidebar-paused-340',340,740);await capture(page,'sidebar-paused-260',260,540);await page.setViewportSize({width:340,height:740});
+    await page.locator('#pause-work').click();await page.waitForFunction(()=>document.getElementById('pause-work').textContent==='暂停');assert.equal(count.resume,1);
+    state.phase='paused';await refresh(page);await page.locator('#cancel-work').click();await page.waitForFunction(()=>document.getElementById('phase').textContent==='已停止');assert.equal(count.cancel,cancelsBefore+1);assert.equal(count.apply,writesBefore);
+    state.phase='planning';state.busy=true;delete state.pause_requested;state.progress=null;await refresh(page);assert.equal(await page.locator('#pause-work').isVisible(),false);
+    state=afterEdit;await refresh(page);
     await page.locator('#settings-toggle').click();
     assert.equal(await page.locator('.work-area').evaluate(e=>e.inert),true);
     assert.equal(await page.locator('#provider option[value="anthropic"]').evaluate(option=>option.disabled),true);
@@ -150,6 +189,6 @@ async function capture(page,name,width,height) {
     rejectShutdown=false;await standalone.locator('#shutdown-confirm').click();await standalone.waitForFunction(()=>document.getElementById('connection').textContent==='助手已关闭');assert.equal(count.shutdown,1);assert.equal(await standalone.evaluate(()=>sessionStorage.length),0);
     assert.equal(await standalone.evaluate(()=>window.nativeEvents.length),0);
     assert.deepEqual(errors,[]);
-    console.log('PASS: synthetic sidebar at 260/340/560 and standalone1280; scoped plan/apply/Undo, provider registry and per-provider key handling, unavailable selection, cancellation cleanup, native collapse/IME/keyboard/draft preservation, boolean-only focus hints and blur/hide clearing, hidden polling pause/resume, exact shutdown boundary, escaped data, no overflow. No real model, WebView2 host or DAW was tested.');
+    console.log('PASS: synthetic sidebar at 260/340/560 and standalone1280; scoped plan/apply/Undo, exact added-note fields with lazy50 paging through2000 and refresh preservation, provider registry and per-provider key handling, unavailable selection, cancellation cleanup, native collapse/IME/keyboard/draft preservation, boolean-only focus hints and blur/hide clearing, hidden polling pause/resume, exact shutdown boundary, escaped data, no overflow. No real model, WebView2 host or DAW was tested.');
   } finally {await browser.close();server.close();}
 })().catch(error=>{console.error(error);server.close();process.exitCode=1;});

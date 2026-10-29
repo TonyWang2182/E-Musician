@@ -12,7 +12,7 @@ class ScopeError(ValueError):
     pass
 
 
-NOTE_ACTIONS = {"transpose_notes", "quantize_notes", "set_note_velocity"}
+NOTE_ACTIONS = {"transpose_notes", "quantize_notes", "set_note_velocity", "set_note_length", "move_notes", "delete_notes", "add_notes"}
 TRACK_ACTIONS = {"rename_track", "set_track_gain", "set_track_pan", "set_track_muted", "set_track_solo"}
 MODES = {"selection", "clip", "project"}
 
@@ -79,20 +79,18 @@ def assert_scope_unchanged(frozen: dict, context: dict) -> None:
 
 
 def constrain_proposal(payload: dict, context: dict, frozen: dict) -> dict:
-    """Return a copy with explicit allowed note_ids; reject all scope widening.
+    """Scope each action against the same sequential candidate as compilation.
 
-    Call after model read tools loaded complete clip_notes and before compile_plan.
-    Preserve frozen selection_revision in the final native mutation envelope.
+    Earlier authorized creations/clones may be referenced; they never authorize
+    unrelated original objects. No DAW state or caller payload is changed.
     """
+    from .plans import PlanError, _compile_plan
     assert_scope_unchanged(frozen, context)
     if not isinstance(payload, dict) or not isinstance(payload.get("actions"), list):
         raise ScopeError("修改方案缺少操作列表。")
-    result = deepcopy(payload)
     if frozen["mode"] == "project":
-        return result
+        return deepcopy(payload)
     selection = frozen["selection"]
-    tracks = {t["id"]: t for t in context.get("tracks", [])}
-    clips = {c["id"]: (t, c) for t in tracks.values() for c in t.get("clips", [])}
     note_focus = frozen["mode"] == "selection" and selection["focus"] == "piano_roll" and bool(selection["note_ids"])
     selected_clips = ({selection["active_clip_id"]} if frozen["mode"] == "clip" else
                       {selection["note_clip_id"]} if note_focus else set(selection["clip_ids"]))
@@ -102,63 +100,118 @@ def constrain_proposal(payload: dict, context: dict, frozen: dict) -> dict:
     time_range = selection["time_range"]
     timed = frozen["mode"] == "selection" and not note_focus and time_range["active"]
     track_only = frozen["mode"] == "selection" and not note_focus and not selected_clips and not timed
+    derived_clips = set()
 
     def contained(start, end):
         return not timed or (time_range["start_seconds"] <= start and end <= time_range["end_seconds"])
 
-    def clip_allowed(cid):
-        if cid not in clips:
-            raise ScopeError("目标片段未读取或已删除，不能猜测范围。")
-        owner, clip = clips[cid]
-        if cid not in selected_clips and not (timed and not selected_clips and owner["id"] in selected_tracks):
-            raise ScopeError("方案目标不在已确认的片段选择内。")
-        if timed and not (clip["start_seconds"] < time_range["end_seconds"] and clip["start_seconds"] + clip["duration_seconds"] > time_range["start_seconds"]):
-            raise ScopeError("片段与时间选区不相交。")
-        return owner, clip
+    def authorize(action, state):
+        tracks = {t["id"]: t for t in state.get("tracks", [])}
+        clips = {c["id"]: (t, c) for t in tracks.values() for c in t.get("clips", [])}
+        kind = action["type"]
+        bpm = state.get("bpm")
+        if not _finite(bpm) or not 20 <= bpm <= 300:
+            raise ScopeError("当前速度无效，无法计算选择范围。")
 
-    for action in result["actions"]:
-        if not isinstance(action, dict):
-            raise ScopeError("修改操作无效。")
-        kind = action.get("type")
+        def clip_allowed(cid):
+            if cid not in clips:
+                raise ScopeError("目标片段未读取、已删除或别名尚未声明，不能猜测范围。")
+            owner, clip = clips[cid]
+            if cid not in selected_clips | derived_clips and not (timed and not selected_clips and owner["id"] in selected_tracks):
+                raise ScopeError("方案目标不在已确认的片段选择内。")
+            if timed and not (clip["start_seconds"] < time_range["end_seconds"] and clip["start_seconds"] + clip["duration_seconds"] > time_range["start_seconds"]):
+                raise ScopeError("片段与时间选区不相交。")
+            return owner, clip
+
         if kind in {"set_tempo", "create_track"}:
             raise ScopeError("此操作会影响整个工程；请明确切换到工程范围后再生成方案。")
-        if kind in TRACK_ACTIONS or kind == "create_midi_clip":
+        if kind in TRACK_ACTIONS:
             tid = action.get("track_id")
             if not track_only or tid not in selected_tracks or tid not in tracks:
                 raise ScopeError("整轨操作需要明确选择轨道；音符、片段或时间选区不能授权整轨修改。")
+        elif kind == "create_midi_clip":
+            tid = action.get("track_id")
+            start, length = action.get("start_beats"), action.get("length_beats")
+            if note_focus or tid not in selected_tracks or tid not in tracks or not (track_only or timed):
+                raise ScopeError("新建片段需要已选轨道或该轨道上的时间范围。")
+            if not _finite(start) or not _finite(length) or length <= 0 or not contained(start*60/bpm, (start+length)*60/bpm):
+                raise ScopeError("新片段超出已确认的时间选区。")
+            derived_clips.add("@"+action["as"])
         elif kind in NOTE_ACTIONS:
             cid = action.get("clip_id")
             _, clip = clip_allowed(cid)
-            notes = context.get("clip_notes", {}).get(cid)
-            if clip.get("kind") != "midi" or not isinstance(notes, list) or len(notes) != clip.get("note_count") or len(notes) > 2000:
+            notes = state.get("clip_notes", {}).get(cid)
+            if clip.get("kind") != "midi" or not isinstance(notes, list) or len(notes) != clip.get("note_count") or len(notes)>2000:
                 raise ScopeError("需要先完整读取目标 MIDI 片段，最多 2000 个音符。")
+            if kind == "add_notes":
+                if note_focus:
+                    raise ScopeError("已选音符不能授权新增无关音符；请明确使用整段或时间范围。")
+                new_notes = action.get("notes")
+                if not isinstance(new_notes, list):
+                    raise ScopeError("新增音符列表无效。")
+                for note in new_notes:
+                    if not isinstance(note, dict) or not _finite(note.get("start_beats")) or not _finite(note.get("length_beats")):
+                        raise ScopeError("新增音符时间无效。")
+                    at = clip["start_seconds"] + note["start_beats"]*60/bpm
+                    end = at + note["length_beats"]*60/bpm
+                    if not contained(at, end) or (timed and at >= time_range["end_seconds"]):
+                        raise ScopeError("新增音符超出已确认的时间区间。")
+                return
             allowed = set(selection["note_ids"]) if note_focus else {n["id"] for n in notes}
             if timed:
-                bpm = context.get("bpm")
-                if not _finite(bpm) or not 20 <= bpm <= 300:
-                    raise ScopeError("当前速度无效，无法计算时间选区。")
-                allowed &= {n["id"] for n in notes if time_range["start_seconds"] <= clip["start_seconds"] + n["start_beats"] * 60 / bpm < time_range["end_seconds"]}
+                allowed &= {n["id"] for n in notes if time_range["start_seconds"] <= clip["start_seconds"]+n["start_beats"]*60/bpm < time_range["end_seconds"]}
             requested = _ids(action["note_ids"], 2000) if "note_ids" in action else sorted(allowed)
             if not requested or not set(requested) <= allowed:
                 raise ScopeError("音符操作超出冻结选择，或选区内没有音符起点。")
             action["note_ids"] = requested
-            if timed and kind == "quantize_notes":
-                denominator = action.get("grid_denominator")
-                if type(denominator) is not int or not 1 <= denominator <= 16384 or denominator & (denominator - 1):
-                    raise ScopeError("量化网格无效。")
-                step = 4 / denominator
+            if timed and kind in {"quantize_notes", "move_notes", "set_note_length"}:
                 for note in notes:
-                    if note["id"] in requested:
-                        at = clip["start_seconds"] + math.floor(note["start_beats"] / step + 0.5) * step * 60 / context["bpm"]
-                        if not time_range["start_seconds"] <= at < time_range["end_seconds"]:
-                            raise ScopeError("量化会将音符起点移出已确认的时间选区。")
-        elif kind == "move_clip":
+                    if note["id"] not in requested:
+                        continue
+                    start, length = note["start_beats"], note["length_beats"]
+                    if kind == "quantize_notes":
+                        denominator = action.get("grid_denominator")
+                        if type(denominator) is not int or not 1<=denominator<=16384 or denominator & (denominator-1):
+                            raise ScopeError("量化网格无效。")
+                        step = 4/denominator
+                        start = math.floor(start/step+0.5)*step
+                    elif kind == "move_notes":
+                        if not _finite(action.get("delta_beats")):
+                            raise ScopeError("音符移动量无效。")
+                        start += action["delta_beats"]
+                    else:
+                        if not _finite(action.get("length_beats")):
+                            raise ScopeError("音符长度无效。")
+                        length = action["length_beats"]
+                    at = clip["start_seconds"]+start*60/bpm
+                    if not time_range["start_seconds"] <= at < time_range["end_seconds"] or (kind=="set_note_length" and not contained(at, at+length*60/bpm)):
+                        raise ScopeError("音符修改会超出已确认的时间选区。")
+        elif kind in {"move_clip", "trim_clip", "delete_clip", "duplicate_clip"}:
             if note_focus:
-                raise ScopeError("音符选择不能授权移动整个片段。")
-            _, clip = clip_allowed(action.get("clip_id"))
-            at = action.get("start_seconds")
-            if not _finite(at) or not contained(clip["start_seconds"], clip["start_seconds"] + clip["duration_seconds"]) or not contained(at, at + clip["duration_seconds"]):
-                raise ScopeError("移动整个片段会超出已确认的时间选区。")
+                raise ScopeError("音符选择不能授权修改整个片段。")
+            owner, clip = clip_allowed(action.get("clip_id"))
+            start, end = clip["start_seconds"], clip["start_seconds"]+clip["duration_seconds"]
+            if not contained(start, end):
+                raise ScopeError("修改完整片段会影响已确认时间区间之外的内容。")
+            if kind == "move_clip":
+                at = action.get("start_seconds")
+                target = action.get("target_track_id", owner["id"])
+                if target != owner["id"] and (target not in selected_tracks or target not in tracks):
+                    raise ScopeError("跨轨移动需要明确选择目标轨道，或切换到整个工程范围。")
+                if not _finite(at) or not contained(at, at+clip["duration_seconds"]):
+                    raise ScopeError("移动整个片段会超出已确认的时间选区。")
+            elif kind == "duplicate_clip":
+                if not contained(end, end+clip["duration_seconds"]):
+                    raise ScopeError("复制片段会超出已确认的时间选区。")
+                derived_clips.add("@"+action["as"])
+            elif kind == "trim_clip":
+                a,b=action.get("start_seconds"),action.get("end_seconds")
+                if not _finite(a) or not _finite(b) or not contained(a,b):
+                    raise ScopeError("裁剪区间超出已确认的时间选区。")
         else:
             raise ScopeError("当前范围不允许此操作。")
-    return result
+    try:
+        plan = _compile_plan(payload, context, authorizer=authorize, allow_noop=True)
+    except PlanError as exc:
+        raise ScopeError(str(exc)) from exc
+    return {"summary": plan["summary"], "actions": plan["actions"]}

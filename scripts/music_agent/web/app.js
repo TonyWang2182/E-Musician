@@ -19,9 +19,13 @@
   let messageSignature = "", trackSignature = "", localNotice = "";
   let providerSignature = "", providers = [], settingsDirty = false, formProviderId = null;
   let shownPlanId = null, followResponse = false, submittedScope = null;
+  let notePreviewSignature = "", notePreviewPlanId = null, notePreviewNotes = [], notePreviewPage = 0;
+  const notePreviewPageSize = 50;
   let nativeVisible = true;
-  const busyPhases = new Set(["planning", "applying"]);
-  const phaseText = {idle: "准备就绪", planning: "正在生成方案", ready: "等待你确认", applying: "正在应用并检查", done: "已完成", error: "需要处理", cancelled: "已停止"};
+  const busyPhases = new Set(["planning", "paused", "applying"]);
+  const phaseText = {idle: "准备就绪", planning: "正在生成方案", paused: "已暂停", ready: "等待你确认", applying: "正在应用并检查", done: "已完成", error: "需要处理", cancelled: "已停止"};
+  const executionStages = ["preflight", "submitting", "verifying", "done"];
+  const stageText = {preflight: "正在检查方案", submitting: "正在提交修改", verifying: "正在核对结果", done: "已完成核对"};
   function text(id, value) { $(id).textContent = value == null ? "" : String(value); }
   function element(tag, value, className) {
     const node = document.createElement(tag);
@@ -30,6 +34,82 @@
     return node;
   }
   function notice(value) { text("notice", value || ""); $("notice").hidden = !value; }
+  function readablePlan(plan) {
+    return Array.isArray(plan?.changes) && plan.changes.length > 0
+      && plan.changes.every((change) => typeof change === "string" && change.trim());
+  }
+  function changeItem(change) {
+    const row = element("li");
+    if (typeof change !== "string") { row.textContent = "此项缺少可读说明，请放弃并重新生成方案。"; return row; }
+    // Highlight the action word without inferring which objects will be deleted.
+    const pattern = /删除|移除|\b(?:delete|remove)\b/gi;
+    let offset = 0;
+    for (const match of change.matchAll(pattern)) {
+      row.append(document.createTextNode(change.slice(offset, match.index)), element("strong", match[0], "change-action"));
+      offset = match.index + match[0].length;
+    }
+    row.append(document.createTextNode(change.slice(offset)));
+    return row;
+  }
+  function renderNotePreviewPage() {
+    if (!$("note-previews").open || !notePreviewNotes.length) return;
+    const start = notePreviewPage * notePreviewPageSize;
+    const end = Math.min(start + notePreviewPageSize, notePreviewNotes.length);
+    const content = document.createDocumentFragment();
+    let group = null, list = null;
+    const number = (value) => typeof value === "number" && Number.isFinite(value) ? String(value) : "—";
+    for (const item of notePreviewNotes.slice(start, end)) {
+      if (group !== item.group) {
+        group = item.group;
+        const section = element("section", null, "note-preview-group");
+        section.append(element("h4", item.label));
+        list = element("ol", null, "note-preview-list");
+        list.start = item.index + 1; section.append(list); content.append(section);
+      }
+      const row = element("li", null, "note-preview-row"), heading = element("div", null, "note-preview-heading");
+      heading.append(element("span", `音符 ${item.index + 1}`), element("strong", `MIDI 音高 ${number(item.note.pitch)}`));
+      const values = element("dl");
+      for (const [key, label, unit] of [["start_beats", "起点", " 拍"], ["length_beats", "长度", " 拍"], ["velocity", "力度", ""], ["channel", "通道", ""]]) {
+        const field = element("div");
+        field.append(element("dt", label), element("dd", number(item.note[key]) + unit)); values.append(field);
+      }
+      row.append(heading, values); list.append(row);
+    }
+    $("note-preview-rows").replaceChildren(content);
+    $("note-preview-pager").hidden = notePreviewNotes.length <= notePreviewPageSize;
+    text("note-preview-page", `第 ${start + 1}–${end} 个，共 ${notePreviewNotes.length} 个`);
+    $("note-preview-prev").disabled = notePreviewPage === 0;
+    $("note-preview-next").disabled = end === notePreviewNotes.length;
+  }
+  function renderNotePreviews(plan) {
+    const signature = JSON.stringify([plan?.id, plan?.note_previews]);
+    if (signature === notePreviewSignature) return;
+    notePreviewSignature = signature;
+    const details = $("note-previews"), retainOpen = details.open && notePreviewPlanId === plan?.id;
+    notePreviewPlanId = plan?.id ?? null;
+    notePreviewNotes = [];
+    for (const [group, preview] of (Array.isArray(plan?.note_previews) ? plan.note_previews : []).entries()) {
+      if (!Array.isArray(preview?.notes)) continue;
+      const label = typeof preview.label === "string" && preview.label.trim() ? preview.label : "新增音符的片段";
+      preview.notes.forEach((note, index) => notePreviewNotes.push({group, label, index, note: note || {}}));
+    }
+    notePreviewPage = 0;
+    details.hidden = !notePreviewNotes.length;
+    details.open = retainOpen && notePreviewNotes.length > 0;
+    $("note-preview-rows").replaceChildren();
+    $("note-preview-pager").hidden = true;
+    text("note-preview-summary", `新增音符明细（${notePreviewNotes.length}）`);
+    if (details.open) renderNotePreviewPage();
+  }
+  $("note-previews").addEventListener("toggle", () => {
+    if ($("note-previews").open && !$("note-preview-rows").childElementCount) renderNotePreviewPage();
+  });
+  for (const [id, offset] of [["note-preview-prev", -1], ["note-preview-next", 1]]) $(id).addEventListener("click", () => {
+    if ($(id).disabled || !$("note-previews").open) return;
+    notePreviewPage = Math.max(0, Math.min(Math.ceil(notePreviewNotes.length / notePreviewPageSize) - 1, notePreviewPage + offset));
+    renderNotePreviewPage();
+    $("note-preview-rows").scrollIntoView({block: "start"});
+  });
   function currentProviderEntry() { return providers.find((entry) => entry.id === $("provider").value); }
   function providerReady(entry) { return entry && (entry.adapter_ready ?? entry.implemented) !== false; }
   function populateProviderFields(entry) {
@@ -117,25 +197,52 @@
     } finally { clearTimeout(timeout); }
   }
   function busy() { return mutating || state?.busy === true || busyPhases.has(state?.phase); }
+  function renderProgress(working) {
+    const phase = state?.phase, progress = state?.progress || {}, stage = progress.stage;
+    const activeIndex = executionStages.indexOf(stage);
+    const showStages = (phase === "applying" && activeIndex >= 0)
+      || (phase === "done" && stage === "done" && Number.isInteger(progress.total) && progress.total > 0);
+    $("execution-stages").hidden = !showStages;
+    for (const item of $("execution-stages").children) {
+      const index = executionStages.indexOf(item.dataset.stage);
+      const current = showStages && index === activeIndex;
+      item.dataset.status = showStages && (stage === "done" || index < activeIndex) ? "complete" : "pending";
+      if (current) item.setAttribute("aria-current", "step"); else item.removeAttribute("aria-current");
+    }
+    if (state) text("phase", phase === "applying" && stageText[stage] ? stageText[stage] : phaseText[phase] || "处理中");
+    const fallback = phase === "paused" ? "已在步骤之间暂停。继续后再进行下一步。"
+      : state?.pause_requested ? "当前步骤结束后暂停，不会继续下一步。"
+      : working ? phase === "applying" ? "正在应用整份方案并核对结果。"
+      : phase === "cancelled" ? "正在结束当前请求，完成后可以继续。" : "正在读取工程并生成方案，尚未修改工程。" : "";
+    text("busy-detail", typeof progress.label === "string" && progress.label.trim() ? progress.label
+      : typeof state?.detail === "string" && state.detail ? state.detail : fallback);
+    $("commit-hint").hidden = phase !== "applying";
+    $("task-progress").hidden = !working && !["ready", "error", "cancelled", "done", "paused"].includes(phase);
+    $("task-progress").dataset.busy = String(working);
+    $("task-progress").dataset.paused = String(phase === "paused");
+  }
   function updateControls() {
     const working = busy(), connected = !!state?.control?.connected && online;
     $("submit").disabled = working || inFlight || !connected || !state?.provider?.configured || !$("prompt").value.trim();
     $("prompt").disabled = working;
-    $("apply").disabled = working || inFlight || !connected || state?.phase !== "ready" || !state?.plan?.id;
+    $("apply").disabled = working || inFlight || !connected || state?.phase !== "ready" || !state?.plan?.id || !readablePlan(state.plan);
     $("discard").disabled = working || inFlight || !online;
     $("undo").disabled = working || inFlight || !connected || !state?.can_undo;
     $("refresh").disabled = inFlight;
     $("settings-save").disabled = working || inFlight || !online || !providerReady(currentProviderEntry());
     $("scope").disabled = working;
-    $("cancel-work").hidden = !busyPhases.has(state?.phase);
+    $("cancel-work").hidden = !["planning", "paused"].includes(state?.phase);
     $("cancel-work").disabled = inFlight || state?.phase === "applying" || !online;
-    text("cancel-work", state?.phase === "applying" ? "正在提交修改" : "停止生成");
+    text("cancel-work", "停止");
+    const canPause = state?.phase === "paused" || Object.prototype.hasOwnProperty.call(state || {}, "pause_requested");
+    $("pause-work").hidden = !canPause || !["planning", "paused"].includes(state?.phase);
+    $("pause-work").disabled = !canPause || inFlight || !online || !["planning", "paused"].includes(state?.phase)
+      || (state?.phase === "planning" && state?.pause_requested === true);
+    text("pause-work", state?.phase === "paused" ? "继续" : state?.pause_requested ? "等待暂停" : "暂停");
     $("shutdown").disabled = working || inFlight || !online;
     text("submit", state?.phase === "planning" ? "生成中…" : "发送");
     document.querySelectorAll("[data-prompt]").forEach((button) => { button.disabled = working; });
-    $("task-progress").hidden = !working && !["ready", "error", "cancelled"].includes(state?.phase);
-    $("task-progress").dataset.busy = String(working);
-    text("busy-detail", typeof state?.detail === "string" && state.detail ? state.detail : working ? state?.phase === "applying" ? "正在回读 DAW，检查修改结果。" : state?.phase === "cancelled" ? "正在结束当前请求，完成后可以继续。" : "正在读取工程并生成方案，尚未修改工程。" : "");
+    renderProgress(working);
   }
   function renderSnapshot(snapshot) {
     text("project-title", `${snapshot.name || "未命名工程"}${snapshot.dirty ? " · 未保存" : ""}`);
@@ -181,7 +288,6 @@
     const connected = !!state.control?.connected;
     text("connection", online ? connected ? "DAW 已连接" : "DAW 未连接" : "连接中断");
     $("connection").classList.toggle("connected", online && connected);
-    text("phase", phaseText[state.phase] || state.phase || "准备就绪");
     renderSnapshot(state.snapshot || {}); renderMessages(state.messages);
     const plan = state.plan, visible = !!plan && ["ready", "applying"].includes(state.phase);
     $("plan").hidden = !visible;
@@ -192,13 +298,19 @@
       text("plan-revision", revision == null ? "" : `基于修订 ${revision}`);
       const scope = (frozenScope && typeof frozenScope === "object" ? frozenScope.mode : frozenScope) || submittedScope;
       text("plan-scope", scope === "project" ? "本次范围：整个工程" : scope === "selection" ? "本次范围：发送时的选择" : scope === "clip" ? "本次范围：整个片段" : "范围以提交时的选择为准");
-      $("changes").replaceChildren(...(Array.isArray(plan.changes) ? plan.changes : []).map((change) => element("li", typeof change === "string" ? change : JSON.stringify(change))));
+      const steps = Array.isArray(plan.steps) ? plan.steps : [];
+      const hasSteps = steps.length > 0 && steps.every((step) => typeof step?.label === "string" && step.label.trim());
+      $("plan-sequence").hidden = !hasSteps;
+      $("plan-steps").replaceChildren(...(hasSteps ? steps.map((step) => element("li", step.label)) : []));
+      $("changes").replaceChildren(...(Array.isArray(plan.changes) ? plan.changes : []).map(changeItem));
     }
+    renderNotePreviews(visible ? plan : null);
     $("result").hidden = !state.last_result; text("result-text", state.last_result || "");
     const usage = state.usage || {}, format = (value) => Number(value || 0).toLocaleString("zh-CN");
     text("usage", `${format(usage.calls)} 次请求 · 输入 ${format(usage.prompt_tokens)} / 输出 ${format(usage.completion_tokens)} tokens`);
     renderProviders();
-    notice(localNotice || state.error || (!state.provider?.configured ? "先展开顶部模型设置，配置所选服务的密钥。" : "")); updateControls();
+    notice(localNotice || state.error || (visible && !readablePlan(plan) ? "方案说明不完整，请放弃并重新生成。" : "")
+      || (!state.provider?.configured ? "先展开顶部模型设置，配置所选服务的密钥。" : "")); updateControls();
     if (visible && plan.id !== shownPlanId) {
       shownPlanId = plan.id;
       requestAnimationFrame(() => $("plan").scrollIntoView({block: "start"}));
@@ -237,6 +349,7 @@
   $("apply").addEventListener("click", () => { if (!$("apply").disabled) mutate("/api/apply", {plan_id: state.plan.id}); });
   $("discard").addEventListener("click", () => mutate("/api/cancel", {}));
   $("cancel-work").addEventListener("click", () => { if (!$("cancel-work").disabled) mutate("/api/cancel", {}); });
+  $("pause-work").addEventListener("click", () => { if (!$("pause-work").disabled) mutate(state?.phase === "paused" ? "/api/resume" : "/api/pause", {}); });
   $("undo").addEventListener("click", () => { if (!$("undo").disabled) mutate("/api/undo", {}); });
   $("refresh").addEventListener("click", () => { clearTimeout(timer); refresh(); });
   function toggleSettings(open) {

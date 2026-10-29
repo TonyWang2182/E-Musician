@@ -71,9 +71,10 @@ EngineSession::Snapshot EngineSession::snapshot()const
     return s;
 }
 
-juce::Result EngineSession::execute(const juce::String& command,const juce::var& args,std::uint64_t expected)
+juce::Result EngineSession::execute(const juce::String& command,const juce::var& args,std::uint64_t expected,juce::var* commandResult)
 {
     requireControlThread();
+    if(commandResult)*commandResult=juce::var();
     if(command=="stop_recording")return impl->recording.execute(command,args);
     if(command=="reset_meters"){impl->resetMeters();return juce::Result::ok();}
     if(impl->recordingBusy()&&command!="cancel_job")return impl->fail("Stop recording and wait for the take to finish before editing.");
@@ -90,7 +91,7 @@ juce::Result EngineSession::execute(const juce::String& command,const juce::var&
         impl->status=command=="set_recording_preferences"?"Recording preferences updated.":command=="start_recording"?"Recording...":command=="configure_audio_device"?"Audio device ready.":"Recording input updated.";
         impl->publish("recording_state_changed",impl->recording.state());return result;
     }
-    try{return impl->perform(command,args);}catch(const std::exception& e){return impl->fail(e.what());}
+    try{return impl->perform(command,args,commandResult);}catch(const std::exception& e){return impl->fail(e.what());}
 }
 juce::Result EngineSession::importFile(const juce::File& f,std::uint64_t r){return importFiles({f},r);}
 juce::Result EngineSession::importFiles(const juce::Array<juce::File>& files,std::uint64_t revision)
@@ -170,7 +171,7 @@ juce::var EngineSession::capabilities()const
     for(const auto* command:{"get_recording_preferences","set_recording_preferences","reset_meters","get_clipboard_state","copy_clips","cut_clips","paste_clips"})commands.add(command);
     commands.add("get_track_clips");commands.add("get_plugin_catalog");commands.add("get_plugin_parameters");commands.add("set_plugin_parameter");commands.add("edit_notes");commands.add("get_save_diagnostics");
     for(const auto* command:{"get_recording_state","get_recording_inputs","get_audio_devices","configure_audio_device","set_track_input","set_track_armed","set_input_monitor","start_recording","stop_recording","set_track_output","add_send","update_send","remove_send","get_automation_targets","get_automation_points","set_automation_lane","remove_automation_lane","get_clip_controllers"})commands.add(command);
-    return object({{"protocol_version",1},{"project_schema_version",4},{"max_controller_events",100000},{"max_automation_points",100000},{"max_automation_page",1000},{"max_sends_per_track",32},{"max_sends",512},{"recording_mode","linear_take"},{"monitor_scope","input_device"},{"commands",commands},{"default_bpm",120},{"tempo_min",20},{"tempo_max",300},{"max_tracks",64},{"max_clips",4096},{"max_notes",100000},{"max_note_page",1000},{"max_clip_page",256},{"max_catalog_page",256},{"snapshot_clips_per_track",64},{"snapshot_clips_total",256},{"snapshot_includes_note_content",false},{"plugin_formats",juce::var(juce::Array<juce::var>{"VST","VST3"})},{"network_control",false},{"event_sequence",juce::int64(impl->eventSequence)}});
+    return object({{"protocol_version",1},{"batch_result_refs",true},{"batch_result_refs_version",1},{"project_schema_version",4},{"max_controller_events",100000},{"max_automation_points",100000},{"max_automation_page",1000},{"max_sends_per_track",32},{"max_sends",512},{"recording_mode","linear_take"},{"monitor_scope","input_device"},{"commands",commands},{"default_bpm",120},{"tempo_min",20},{"tempo_max",300},{"max_tracks",64},{"max_clips",4096},{"max_notes",100000},{"max_note_page",1000},{"max_clip_page",256},{"max_catalog_page",256},{"snapshot_clips_per_track",64},{"snapshot_clips_total",256},{"snapshot_includes_note_content",false},{"plugin_formats",juce::var(juce::Array<juce::var>{"VST","VST3"})},{"network_control",false},{"event_sequence",juce::int64(impl->eventSequence)}});
 }
 namespace {
 juce::var controlClipJson(const EngineSession::ClipSnapshot& c)
@@ -290,7 +291,7 @@ juce::var EngineSession::executeRequest(const juce::var& envelope)
     bool missingToken=missingClipboardToken(command,args);
     if(command=="batch")if(auto* children=args["commands"].getArray())
         for(const auto& child:*children)missingToken=missingToken||missingClipboardToken(textArg(child,"command"),child["args"]);
-    const auto priorJob=impl->jobs.empty()?juce::String():impl->jobs.back()->id;juce::Result result=juce::Result::ok();
+    const auto priorJob=impl->jobs.empty()?juce::String():impl->jobs.back()->id;juce::Result result=juce::Result::ok();juce::var data;
     if(impl->recordingBusy()&&(command=="play"||command=="pause"||command=="seek"))result=juce::Result::fail("Stop recording and finish the take before changing transport position or playback.");
     else if(command=="new_project")result=newProject(revision);
     else if(command=="play"){if(!snapshot().playing)togglePlay();if(!snapshot().playing)result=juce::Result::fail("Playback could not start.");}
@@ -298,8 +299,8 @@ juce::var EngineSession::executeRequest(const juce::var& envelope)
     else if(command=="stop")stop();
     else if(command=="seek"){auto at=number(args,"seconds");if(!std::isfinite(at)||at<0)result=juce::Result::fail("Invalid seek position.");else seek(at);}
     else if(missingToken)result=juce::Result::fail("Agent paste_clips, including batch children, requires clipboard_id returned by copy_clips/cut_clips.");
-    else result=execute(command,args,revision);
-    juce::var data;bool accepted=false;
+    else result=execute(command,args,revision,&data);
+    bool accepted=false;
     if(result.wasOk()&&!impl->jobs.empty()&&impl->jobs.back()->id!=priorJob){data=object({{"job_id",impl->jobs.back()->id}});accepted=true;}
     if(result.wasOk()&&command=="scan_plugins"){data=object({{"job_id","plugin-scan"}});accepted=true;}
     if(result.wasOk()&&(command=="copy_clips"||command=="cut_clips"))data=object({{"clipboard_id",impl->clipClipboard.id},{"clip_count",int(impl->clipClipboard.clips.size())}});

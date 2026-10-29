@@ -58,13 +58,26 @@
             <div id="conversation-empty" class="welcome"><h2>从一个小调整开始</h2><p>选好轨道、片段或音符，告诉我你想怎样调整。修改会先列成方案，等你确认。</p><div class="examples"><button type="button" data-prompt="概括一下当前选择的内容。">查看当前选择</button><button type="button" data-prompt="把选中的 MIDI 音符升高一个八度。">音符升八度</button></div><p class="privacy-note">发送工程结构与必要的音符数据，不上传音频文件。</p></div>
             <div id="messages"></div>
           </section>
-          <section id="task-progress" class="task-progress" aria-label="任务进度" hidden><div class="task-heading"><span class="activity-dot" aria-hidden="true"></span><span id="phase" role="status" aria-live="polite">准备就绪</span><button id="cancel-work" class="quiet" type="button" hidden>停止</button></div><p id="busy-detail" class="muted"></p></section>
+          <section id="task-progress" class="task-progress" aria-label="任务进度" hidden>
+            <div class="task-heading"><span class="activity-dot" aria-hidden="true"></span><span id="phase" role="status" aria-live="polite">准备就绪</span><div class="task-actions"><button id="pause-work" class="quiet" type="button" hidden>暂停</button><button id="cancel-work" class="quiet" type="button" hidden>停止</button></div></div>
+            <ol id="execution-stages" class="execution-stages" aria-label="应用阶段" hidden><li data-stage="preflight">检查</li><li data-stage="submitting">提交</li><li data-stage="verifying">核对</li><li data-stage="done">完成</li></ol>
+            <p id="busy-detail" class="muted"></p><p id="commit-hint" class="muted" hidden>应用期间不能暂停或取消；成功后可整体撤销。</p>
+          </section>
           <section id="plan" class="plan" aria-labelledby="plan-heading" hidden>
             <div class="section-heading"><h2 id="plan-heading">待应用的修改</h2><span id="plan-revision" class="muted"></span></div>
-            <p id="plan-summary"></p><ol id="changes"></ol>
+            <p id="plan-summary"></p>
+            <div id="plan-sequence" class="plan-sequence" hidden><h3>执行顺序</h3><ol id="plan-steps"></ol></div>
+            <h3 class="changes-heading">具体修改</h3><ol id="changes"></ol>
+            <details id="note-previews" class="note-previews" hidden>
+              <summary id="note-preview-summary">新增音符明细</summary>
+              <p class="note-preview-help">这是新增时的音符；后续变化见方案步骤。起点从片段内 0 开始，起点和长度以四分音符拍计。音高使用 MIDI 编号。</p>
+              <div id="note-preview-rows"></div>
+              <div id="note-preview-pager" class="note-preview-pager" hidden><p id="note-preview-page" role="status"></p><div><button id="note-preview-prev" type="button">上一页</button><button id="note-preview-next" type="button">下一页</button></div></div>
+            </details>
             <p id="plan-scope" class="plan-hint"></p>
             <p class="plan-hint">工程或选区改变后，请重新生成方案。</p>
-            <div class="plan-actions"><button id="apply" class="primary" type="button">应用修改</button><button id="discard" type="button">放弃</button></div>
+            <p class="plan-hint">按以上顺序整批应用；成功后可一次撤销。</p>
+            <div class="plan-actions"><button id="apply" class="primary" type="button">应用全部修改</button><button id="discard" type="button">放弃</button></div>
           </section>
           <section id="result" class="result" aria-label="执行结果" hidden><h2>执行结果</h2><p id="result-text"></p><button id="undo" type="button" disabled>撤销这次修改</button></section>
         </div>

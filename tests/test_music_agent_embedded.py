@@ -9,6 +9,7 @@ import tempfile
 import threading
 import time
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from agent_client import ControlError
@@ -113,6 +114,43 @@ class SessionTests(unittest.TestCase):
     def test_valid_bom_session(self):
         self.write(self.valid)
         self.assertEqual(load_session(self.path), self.valid)
+
+    def test_virtualized_existing_file_keeps_logical_ready_sibling(self):
+        self.write(self.valid)
+        physical = self.path.parent / "package-cache" / self.path.name
+        physical.parent.mkdir()
+        physical.write_bytes(self.path.read_bytes())
+        original = Path.resolve
+        def resolve(value, *args, **kwargs):
+            return physical if value == self.path else original(value, *args, **kwargs)
+        with patch.object(Path, "resolve", resolve):
+            self.assertEqual(load_session(self.path), self.valid)
+
+    def test_ready_and_temporary_link_targets_are_rejected(self):
+        self.write(self.valid)
+        ready = Path(self.valid["ready_path"])
+        for link in (ready, ready.with_suffix(".tmp"), self.path):
+            with self.subTest(link=link.name), patch.object(Path, "is_symlink", lambda p: p == link):
+                with self.assertRaises(ValueError):
+                    load_session(self.path)
+
+    def test_helper_startup_diagnostic_omits_exception_content(self):
+        from run_agent import embedded_session
+        self.write(self.valid)
+        log = self.path.parent / "diagnostic.log"
+        record = {}
+        secret_text = "sensitive-session-" + "q" * 64
+        with patch("run_agent.Recorder") as recorder, patch(
+                "music_agent.embedded.load_session", side_effect=ValueError(secret_text)):
+            recorder.return_value.new_record.return_value = (record, self.path.parent / "record.json", log)
+            with self.assertRaises(ValueError):
+                embedded_session(self.path, None)
+        text = log.read_text(encoding="utf-8")
+        self.assertNotIn(secret_text, text)
+        self.assertNotIn(TOKEN, text)
+        self.assertNotIn(str(self.path), text)
+        self.assertEqual(record["startup_diagnostic"]["stage"], "load_session")
+        self.assertEqual(record["startup_diagnostic"]["exception_type"], "ValueError")
 
     def test_protocol_port_and_capability_types_strict(self):
         cases = [("protocol", True), ("protocol", 1.0), ("protocol", 2),

@@ -2,7 +2,9 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
-**本分支：DAW 0.7.0 / Agent 0.2 第一批，构建及自动验证完成。** 新增原生可开关侧栏、实际选择上下文与 Kimi/OpenAI 适配。CTest 5/5、Python 178 项、原生侧栏 23 项检查通过；GPT-5-mini 和 Kimi-k2.6 均完成真实联网的合成工程编辑及撤销验证。实际界面操作、中文输入法和 ASIO 播放仍待人工确认，离屏焦点测试只验证合成事件到原生快捷键保护的连接。完整证据见[本批验证结果](docs/verification/2026-10-29-agent-sidebar/RESULTS.md)及[人工短测](docs/review/2026-10-29-agent-sidebar/MANUAL-CHECK.md)。
+**本分支：DAW 0.8.0 / Agent 0.3 第二批，实现和本批自动验收完成，待人工桌面短测。** 本批加入一份方案内的新轨→新片段→明确音符、片段复制/跨轨移动/裁剪/删除、音符增删和时长调整，以及规划暂停、顺序方案和执行阶段显示。本批结果以[验证记录](docs/verification/2026-10-29-agent-batch2/RESULTS.md)为准，真实界面、中文输入法和 ASIO 听感由用户按[人工检查](docs/review/2026-10-29-agent-batch2/MANUAL-CHECK.md)确认。
+
+0.7.0 / Agent 0.2 的原生侧栏、选择上下文和双模型验证保留在[第一批历史证据](docs/verification/2026-10-29-agent-sidebar/RESULTS.md)，不作为0.8.0新增能力的通过证明。
 
 保留0.6.1的1/16384网格、Ctrl+4吸附虚实线、三级小节标尺与深缩放，以及0.6.0剪贴板、循环跟随、节拍器、预备拍和资源/电平显示。旧录音、混合工程、性能与插件证据保持原版本范围，见[0.5交付档案](docs/verification/2026-10-27-v05/DELIVERY.md)。
 
@@ -12,7 +14,7 @@ Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、M
 
 ## 打开与开发
 
-在 VS Code 中打开当前功能分支工作树。原 `E:\E-musician` 和 `build/bin` 保留既有 DAW 入口；本批 Agent 原生侧栏使用独立 `build/sidebar`：
+在 VS Code 中打开当前功能分支工作树。原 `E:\E-musician` 和 `build/bin` 保留既有 DAW 入口；本批使用独立 `build/agent-batch2`：
 
 ```powershell
 python scripts/dev_agent.py build
@@ -20,7 +22,7 @@ python scripts/dev_agent.py test
 python scripts/dev_agent.py run
 ```
 
-默认 Release，产物为 `build/sidebar/bin/Release/E-musician.exe`。本机也可双击 `E:\MusicAgent&DAW\Start E-musician Agent.cmd`，工作树内为 `Start-Agent.cmd`。**先保存并关闭已有的0.6.1或其他旧版窗口，再启动；标题栏应显示0.7.0。** 否则单实例机制可能把启动请求交给仍运行的旧版。普通旧构建、F5 调试及固定依赖入口继续保留：
+默认 Release，产物为 `build/agent-batch2/bin/Release/E-musician.exe`。本机入口为 `E:\MusicAgent&DAW\Start E-musician Agent.cmd`，工作树内为 `Start-Agent.cmd`。**等本批构建完成、准备人工验证时，由用户保存并关闭仍运行的0.7.0或其他旧版，再启动并确认标题栏为0.8.0。** 开发与离线测试不自动关闭旧窗口；旧窗口未关时，单实例机制可能把启动请求交给旧版。0.7.0的历史产物仍位于 `build/sidebar`。普通构建、F5 调试及固定依赖入口继续保留：
 
 ```powershell
 python scripts/dev.py bootstrap --note "准备固定依赖"
@@ -44,13 +46,15 @@ python scripts/dev.py run --config Debug --note "启动编辑器"
 
 Source 在底部查看选中音频源。真实分轨/转录、32 位插件桥接、侧链、插件任意多输出、comping、自动化 Touch/Latch/Write、TempoMap 和时间拉伸尚未实现。MP3 支持导入和播放，不支持导出。
 
-## 原生编曲助手 0.2
+## 原生编曲助手 0.3
 
 点击工具栏 **Agent** 或 **Ctrl+Shift+A** 开关侧栏：读取当前工程/选择 → 提出具体方案 → 明确应用 → 回读检查。收起保留输入和任务；DAW 拥有独立模型 worker，助手断开不能关闭工程。默认“当前选择”，全局速度/新建轨等操作需明确切为“整个工程”；选区或工程变化会拒绝旧方案。
 
-Kimi 与 OpenAI 适配器已实现，凭证按服务通过 Windows DPAPI 本机加密保存；Anthropic、Gemini、本地兼容服务仍预留。本次交付机器的两套凭证已配置，无需重复提供。OpenAI 可沿用已有 loopback 代理，不改系统网络。界面的“已配置”只说明本地凭证存在；本批 GPT-5-mini / Kimi-k2.6 的实际调用结果另外记录在[验证结果](docs/verification/2026-10-29-agent-sidebar/RESULTS.md)。启动、支持范围、数据和费用边界见[Agent 快速上手](docs/AGENT_QUICKSTART.md)；[0.1历史证据](docs/verification/2026-10-29-kimi-agent/RESULTS.md)仅覆盖旧伴随模式。
+规划器当前有19种编辑动作，支持在一次确认中连续建轨、建片段并写入明确音符，也可复制/移动/裁剪/删除片段、添加/删除/移动音符、调整时长/音高/力度及量化。方案显示执行顺序和具体修改，作为一份原子批次提交，成功后可一步撤销。规划中可请求暂停，须等待在途模型请求返回；待确认方案可放弃，应用期间不能暂停或取消。“检查→提交→核对→完成”表示后端阶段，不表示逐条修改已经分别提交。
 
-默认摘要之外的明确片段目标通过分页补齐；每个待编辑片段完整音符读取最多2000个，超限拒绝。当前是受范围约束的基本编辑助手，尚无音频理解/生成、任意插件自动控制或长期自主任务。旧 `run_agent.py --exe PATH` 仍供独立浏览器伴随模式兼容使用。
+Kimi 与 OpenAI 适配器已实现，凭证按服务通过 Windows DPAPI 本机加密保存；Anthropic、Gemini、本地兼容服务仍预留。本机两套凭证已配置，无需重复提供。OpenAI 可沿用已有 loopback 代理，不改系统网络。界面的“已配置”只说明本地凭证存在；0.8.0的实际调用状态另见[本批验证记录](docs/verification/2026-10-29-agent-batch2/RESULTS.md)。启动、支持范围、数据和费用边界见[Agent 快速上手](docs/AGENT_QUICKSTART.md)；[0.1历史证据](docs/verification/2026-10-29-kimi-agent/RESULTS.md)仅覆盖旧伴随模式。
+
+单方案最多16项动作、2000次音符处理，每个待编辑片段的完整读取上限为2000音符；同一音符被多次处理会累计计入。摘要之外的明确片段目标通过分页补齐，超限拒绝。裁剪只保留原片段内部区间；含CC等控制器事件的MIDI片段暂不允许由Agent裁剪。当前没有音频理解/生成、任意插件自动控制或长期自主任务，Agent也不能代替用户保存工程或删除磁盘文件。旧 `run_agent.py --exe PATH` 仍供独立浏览器伴随模式兼容使用。
 
 ## 工程与 Agent
 
@@ -59,7 +63,7 @@ schema 4 工程由 `.emproj` 和同名 `.assets` 目录组成，保存音频归�
 Agent 使用显式开启的本地 JSONL 通道，包含版本冲突保护、幂等请求、任务状态和分页读取：
 
 ```powershell
-python scripts/agent_client.py --exe build/bin/Release/E-musician.exe --demo build/agent-demo
+python scripts/agent_client.py --exe build/agent-batch2/bin/Release/E-musician.exe --demo build/agent-demo
 ```
 
 此示例创建测试 MIDI、导出并验证撤销，不播放声音，也不属于产品乐句模板。协议和命令参数见 [AGENT_API](docs/AGENT_API.md)。

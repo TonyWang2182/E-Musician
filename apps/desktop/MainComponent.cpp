@@ -1120,6 +1120,10 @@ juce::Result MainComponent::runAgentSidebarSmokeTest(const juce::File& directory
         juce::DynamicObject selectionReport;
         require(session.runSelectionContextSmokeTest(selectionReport).wasOk(),"selection_context");
         report->setProperty("selection_checks",juce::var(selectionReport.clone().release()));
+        juce::DynamicObject batchRefsReport;
+        const auto batchRefsResult=session.runBatchRefsSmokeTest(batchRefsReport);
+        report->setProperty("batch_refs_checks",juce::var(batchRefsReport.clone().release()));
+        require(batchRefsResult.wasOk(),"batch_result_refs");
         require(session.execute("create_track",arguments({{"kind","instrument"},{"name","Sidebar synthetic fixture"}}),session.snapshot().revision).wasOk(),"fixture_track");
         const auto tid=session.snapshot().tracks.front().id;
         require(session.execute("create_midi_clip",arguments({{"track_id",tid},{"start_beats",0.0},{"length_beats",16.0}}),session.snapshot().revision).wasOk(),"fixture_clip");
@@ -1132,7 +1136,9 @@ juce::Result MainComponent::runAgentSidebarSmokeTest(const juce::File& directory
         impl->pianoRoll->keyPressed(juce::KeyPress('A',juce::ModifierKeys::ctrlModifier,0));synchronizeAgentSelection();
         const auto before=session.snapshot();const auto start=juce::Time::getMillisecondCounterHiRes();
         toggleAgent();
-        require(wait([&]{return impl->agentSidebar->isReady();},50000),"native_page_loaded");
+        const auto pageReady=wait([&]{return impl->agentSidebar->isReady();},50000);
+        report->setProperty("sidebar_startup_status",impl->agentSidebar->diagnostic());
+        require(pageReady,"native_page_loaded");
         timings->setProperty("first_open_ms",juce::Time::getMillisecondCounterHiRes()-start);
         auto first=state();
         require(first.isObject()&&bool(first["control"]["embedded"]),"embedded_connection");

@@ -13,9 +13,9 @@ def context():
              {"id": "n2", "pitch": 62, "start_beats": 2, "length_beats": 0.5, "velocity": 80, "channel": 1},
              {"id": "n3", "pitch": 64, "start_beats": 4, "length_beats": 0.5, "velocity": 80, "channel": 1}]
     return {"project_id": "p", "revision": 4, "bpm": 120, "numerator": 6, "denominator": 8,
-            "tracks": [{"id": "t", "kind": "instrument", "clips": [
-                {"id": "c", "kind": "midi", "start_seconds": 3, "duration_seconds": 3, "note_count": 3},
-                {"id": "outside", "kind": "midi", "start_seconds": 8, "duration_seconds": 1, "note_count": 0}]}],
+            "tracks": [{"id": "t", "name": "Keys", "kind": "instrument", "gain_db": 0.0, "pan": 0.0, "muted": False, "solo": False, "clips": [
+                {"id": "c", "kind": "midi", "start_seconds": 3, "duration_seconds": 3, "start_beats": 6, "length_beats": 6, "note_count": 3},
+                {"id": "outside", "kind": "midi", "start_seconds": 8, "duration_seconds": 1, "start_beats": 16, "length_beats": 2, "note_count": 0}]}],
             "clip_notes": {"c": notes}, "selection_context": {
                 "project_id": "p", "project_revision": 4, "selection_revision": 8,
                 "active_track_id": "t", "active_clip_id": "c", "track_ids": ["t"], "clip_ids": ["c"],

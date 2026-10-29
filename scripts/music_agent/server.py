@@ -134,6 +134,10 @@ class Handler(BaseHTTPRequestHandler):
                 result = runtime.plan_request(value["prompt"], value.get("scope","selection"))
             elif path == "/api/apply" and set(value) == {"plan_id"}:
                 result = runtime.apply(value["plan_id"])
+            elif path == "/api/pause" and not value:
+                result = runtime.pause()
+            elif path == "/api/resume" and not value:
+                result = runtime.resume()
             elif path == "/api/cancel" and not value:
                 result = runtime.cancel()
             elif path == "/api/undo" and not value:

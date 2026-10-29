@@ -118,7 +118,8 @@ public:
     Snapshot snapshot() const;
     // GUI and local Agent requests share this dispatcher; all editing is serialized
     // on the message thread. Transport reads never change the project revision.
-    juce::Result execute(const juce::String& command, const juce::var& args, std::uint64_t expectedRevision);
+    juce::Result execute(const juce::String& command, const juce::var& args, std::uint64_t expectedRevision,
+                         juce::var* commandResult = nullptr);
     juce::var executeRequest(const juce::var& envelope);
     juce::var capabilities() const;
     juce::var snapshotJson() const;
@@ -126,6 +127,7 @@ public:
     void setSelectionContext(const juce::var& context);
     juce::var selectionContext() const;
     juce::Result runSelectionContextSmokeTest(juce::DynamicObject& report);
+    juce::Result runBatchRefsSmokeTest(juce::DynamicObject& report);
     juce::var eventsSince(std::uint64_t sequence) const;
     bool hasActiveJobs() const;
     void cancelAllJobs();

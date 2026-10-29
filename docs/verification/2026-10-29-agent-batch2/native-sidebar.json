@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "physical_audio": false,
+  "provider_mode": "synthetic",
+  "scope": "Offline synthetic native window/WebView2 lifecycle. No model request; parent-layout captures exclude browser HWND pixels.",
+  "selection_checks": {
+    "selection_scope_revision_and_pruning": true,
+    "selection_empty_notes_skips_full_index": true,
+    "selection_index_measurement": {
+      "scope": "Synthetic ID-index CPU time only; excludes real Edit, snapshot/JSON, GUI, plugins and audio",
+      "operating_system": "Windows 11",
+      "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700H",
+      "build_config": "Release",
+      "offline": true,
+      "physical_audio_device": false,
+      "sample_rate_hz": null,
+      "buffer_size_samples": null,
+      "tracks": 64,
+      "clips": 4096,
+      "clip_index_rebuild_and_lookup": {
+        "iterations": 64,
+        "p50_ms": 6.953899994492531,
+        "p95_ms": 7.381999999284744,
+        "max_ms": 8.236699998378754
+      },
+      "notes": 100000,
+      "note_index": "reserved unordered_set / JUCE hashCode64 / max_load_factor 0.7",
+      "note_index_cold_build_ms": 9.385899990797043,
+      "selected_notes": 2000,
+      "cached_note_membership_lookup": {
+        "iterations": 64,
+        "p50_ms": 0.101999998092651,
+        "p95_ms": 0.10869999229908,
+        "max_ms": 0.184600010514259
+      },
+      "timing_budget_asserted": false
+    }
+  },
+  "batch_refs_checks": {
+    "deferred_native_properties": "MIDICLIP.mute, TRACK order 2 -> 1 (CLIPSLOTS), TRACK order 5 -> 2 (EM_PLUGINS), TRACK order 7 -> 3 (EM_PRODUCTION), TRACK order 7 -> 4 (MIDICLIP), TRACK order 6 -> 5 (PLUGIN), TRACK order 7 -> 6 (PLUGIN), EDIT.lastSignificantChange",
+    "redo_available_immediately_after_undo": true,
+    "deferred_after_undo_properties": "EDIT.lastSignificantChange",
+    "redo_available_after_dispatch": true,
+    "deferred_after_undo_action_count": 0,
+    "deferred_after_undo_action_types": "",
+    "status": "passed",
+    "checks": 126,
+    "offline": true,
+    "physical_devices": false
+  },
+  "sidebar_startup_status": "Ready",
+  "focus_before_synthetic_event": {
+    "sidebar_showing": true,
+    "captures_keyboard": false,
+    "web": {
+      "active": "prompt",
+      "documentFocused": false,
+      "hidden": false
+    }
+  },
+  "focus_probe_scope": "Synthetic DOM focus event through actual WebView2; physical keyboard/IME acceptance remains manual",
+  "focus_after_synthetic_event": true,
+  "parent_private_bytes": 206716928,
+  "sample_rate": 0.0,
+  "buffer_size": 0,
+  "audio_mode": "offline memory device; no physical playback",
+  "checks": [
+    {
+      "name": "selection_context",
+      "passed": true
+    },
+    {
+      "name": "batch_result_refs",
+      "passed": true
+    },
+    {
+      "name": "fixture_track",
+      "passed": true
+    },
+    {
+      "name": "fixture_clip",
+      "passed": true
+    },
+    {
+      "name": "fixture_notes",
+      "passed": true
+    },
+    {
+      "name": "native_page_loaded",
+      "passed": true
+    },
+    {
+      "name": "embedded_connection",
+      "passed": true
+    },
+    {
+      "name": "same_project",
+      "passed": true
+    },
+    {
+      "name": "full_native_note_selection",
+      "passed": true
+    },
+    {
+      "name": "no_paid_provider",
+      "passed": true
+    },
+    {
+      "name": "native_event_bridge",
+      "passed": true
+    },
+    {
+      "name": "key_focus",
+      "passed": true
+    },
+    {
+      "name": "hide_show",
+      "passed": true
+    },
+    {
+      "name": "state_preserved",
+      "passed": true
+    },
+    {
+      "name": "focus_preserved_after_sidebar",
+      "passed": true
+    },
+    {
+      "name": "minimum_layout_1280",
+      "passed": true
+    },
+    {
+      "name": "native_parent_capture_1280",
+      "passed": true
+    },
+    {
+      "name": "minimum_layout_1000",
+      "passed": true
+    },
+    {
+      "name": "native_parent_capture_1000",
+      "passed": true
+    },
+    {
+      "name": "helper_stopped",
+      "passed": true
+    },
+    {
+      "name": "project_survived_helper_stop",
+      "passed": true
+    },
+    {
+      "name": "helper_restart",
+      "passed": true
+    },
+    {
+      "name": "single_engine",
+      "passed": true
+    },
+    {
+      "name": "no_music_mutation",
+      "passed": true
+    }
+  ],
+  "timings_ms": {
+    "first_open_ms": 2349.449599996209145,
+    "hide_show_pair_max_ms_12": 18.871500000357628
+  },
+  "artifacts": [
+    "ui-agent-1280x800.png",
+    "ui-agent-1000x650.png"
+  ]
+}

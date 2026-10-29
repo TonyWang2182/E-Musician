@@ -1,0 +1,743 @@
+{
+  "source_sha256": "347a75c089fe0cd9b17f2e32866ed977004b8aa4b35e5d86a2603cf765cfa64a",
+  "comparison_counts": {
+    "exact": 97,
+    "line_endings_only": 25
+  },
+  "note": "Raw tested files are compared with staged Git bytes. Only configured text line-ending normalization is accepted. No source semantics were changed after final validation.",
+  "files": [
+    {
+      "path": "CMakeLists.txt",
+      "tested_sha256": "ef9c0be691253819240af601b0aa4a509b9682e5cf4c82446eb23a9b1163c3ea",
+      "index_sha256": "ef9c0be691253819240af601b0aa4a509b9682e5cf4c82446eb23a9b1163c3ea",
+      "comparison": "exact"
+    },
+    {
+      "path": "CMakePresets.json",
+      "tested_sha256": "930c5e94486ce61f167f7933d0acbed76a2f45f48ae593a31520e15b5bc92e72",
+      "index_sha256": "930c5e94486ce61f167f7933d0acbed76a2f45f48ae593a31520e15b5bc92e72",
+      "comparison": "exact"
+    },
+    {
+      "path": "Start-Agent.cmd",
+      "tested_sha256": "dee4b7937c47af468f9589ff6e23b3ebefabff6c36b0b12620025e603323684d",
+      "index_sha256": "cf54a52fc6ae8850306404693483a7b9ee2318f520dae9f3bd1e7b00561eb160",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "apps/desktop/AgentSidebar.cpp",
+      "tested_sha256": "641ec8f887e8ecb7a6da87c28bb5e872bc5332c7e07148c98dc7f5fd1684d62a",
+      "index_sha256": "376287a7d08f5096055cd0ff559d5442b728cb77e8549ceb170ef84ae85f5f0b",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "apps/desktop/AgentSidebar.h",
+      "tested_sha256": "520d663daf9fe2ff181bc47e63260b4678587c2ddf258dec3a82aa4802f3efb4",
+      "index_sha256": "3902890d8b0b7c76fab5b3695032e2b616e407242c484ac46fb0bdff3e8b660d",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "apps/desktop/ArrangementView.cpp",
+      "tested_sha256": "29fdf0a6ad01e13d0c5a1a82921d8cf73249351eed3f45ffcfe0d6950abedf79",
+      "index_sha256": "29fdf0a6ad01e13d0c5a1a82921d8cf73249351eed3f45ffcfe0d6950abedf79",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/ArrangementView.h",
+      "tested_sha256": "38b8cbf3091fff40c294bfadd129764ca0bb4e3f3d7e15fab906407642a7f2fb",
+      "index_sha256": "38b8cbf3091fff40c294bfadd129764ca0bb4e3f3d7e15fab906407642a7f2fb",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/AudioSource.cpp",
+      "tested_sha256": "c6b02a545fb9215b576c9d21ca6923082262ed19e01f56ea67cd708ec5f432e3",
+      "index_sha256": "c6b02a545fb9215b576c9d21ca6923082262ed19e01f56ea67cd708ec5f432e3",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/AudioSource.h",
+      "tested_sha256": "cf0b43f49cbacad64ed334c37b72350c39837ec160643afbf2906c0d4c5ed239",
+      "index_sha256": "cf0b43f49cbacad64ed334c37b72350c39837ec160643afbf2906c0d4c5ed239",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/ControlServer.cpp",
+      "tested_sha256": "7b82d097f0e5256914ebaeacf7aba8fe2038ab9f431bb5f9381073b1216143ea",
+      "index_sha256": "7b82d097f0e5256914ebaeacf7aba8fe2038ab9f431bb5f9381073b1216143ea",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/ControlServer.h",
+      "tested_sha256": "03ed32a0faf67c4b6a806df9e1374f3fc14cc7eb9409652ca159c8c7d547440f",
+      "index_sha256": "03ed32a0faf67c4b6a806df9e1374f3fc14cc7eb9409652ca159c8c7d547440f",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/EngineSession.cpp",
+      "tested_sha256": "826f27e905f06576f9fec45323c6cde0d871771d31b4a63430419660efc0a1c4",
+      "index_sha256": "826f27e905f06576f9fec45323c6cde0d871771d31b4a63430419660efc0a1c4",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/EngineSession.h",
+      "tested_sha256": "498873a9eeb96ebe3804138438a36687a15a8dad9aad1f8dee2d4d1556f874fa",
+      "index_sha256": "498873a9eeb96ebe3804138438a36687a15a8dad9aad1f8dee2d4d1556f874fa",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/EngineSessionAutomationRouting.inc",
+      "tested_sha256": "7774304ba43a55d42f098b4ffe9fc7469eeb6a41e274e11e85850c42f01ee524",
+      "index_sha256": "7774304ba43a55d42f098b4ffe9fc7469eeb6a41e274e11e85850c42f01ee524",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/EngineSessionCommands.inc",
+      "tested_sha256": "9bd2b6786bf3a2c160292ac78eb0dd5e5f562cb555793a553e29adb0f8c4b1cd",
+      "index_sha256": "9bd2b6786bf3a2c160292ac78eb0dd5e5f562cb555793a553e29adb0f8c4b1cd",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/EngineSessionJobs.inc",
+      "tested_sha256": "18a838369d7eeb4195ab07f8f6745d9b46fa54f79da6c3f207f345c3cb5731a2",
+      "index_sha256": "18a838369d7eeb4195ab07f8f6745d9b46fa54f79da6c3f207f345c3cb5731a2",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/EngineSessionModel.inc",
+      "tested_sha256": "d3875937bd8f397f04a4672cb0932604b38225494e0d94c1e8c2da2064212ab1",
+      "index_sha256": "d3875937bd8f397f04a4672cb0932604b38225494e0d94c1e8c2da2064212ab1",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/EngineSessionParameters.inc",
+      "tested_sha256": "17ac2e593d7fb31a8f62bffa4c4cff92db2d2c56fe36fec3a568e5b26684ce0c",
+      "index_sha256": "17ac2e593d7fb31a8f62bffa4c4cff92db2d2c56fe36fec3a568e5b26684ce0c",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/EngineSessionProduction.h",
+      "tested_sha256": "f85517b4bd367d0f0c22c7e79ed15c51bf0c31ee53eddefa96de39918af06861",
+      "index_sha256": "f85517b4bd367d0f0c22c7e79ed15c51bf0c31ee53eddefa96de39918af06861",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/EngineSessionPublic.inc",
+      "tested_sha256": "6bd2b1a5b6158ff6c64853f58f76e763359b0267d354a498d99467fcb21748ba",
+      "index_sha256": "c4157c36527d9fced4fe418fa153689d0ce05b79be0ed7517b429aa38d1ffc16",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "apps/desktop/EngineSessionRecording.inc",
+      "tested_sha256": "da7a4744fede727f2c952d863a8d145645c3711aba7b0b1b1be0e5c26291c9e1",
+      "index_sha256": "da7a4744fede727f2c952d863a8d145645c3711aba7b0b1b1be0e5c26291c9e1",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/EngineSessionSelection.inc",
+      "tested_sha256": "a7c99512b39d0791e838a5c3646193c1c6b99ced98fa3cd30b69ec2baabe17d5",
+      "index_sha256": "cae4edbdd20f0d8046c2cbfcc92387153eabee2a1c71390881181281ca87c8a5",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "apps/desktop/EngineSessionTelemetry.inc",
+      "tested_sha256": "4a8bd40621f633bdcbaa048077743acbaeaef2ea9a3799726ac613375c4e8f44",
+      "index_sha256": "4a8bd40621f633bdcbaa048077743acbaeaef2ea9a3799726ac613375c4e8f44",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/Main.cpp",
+      "tested_sha256": "6366465145b9170d290706eb93c5f49a42b8a8cbf2904136811ef456fd53f410",
+      "index_sha256": "3337dd80d6db87c5b85d89f1a043d8c46b17239ec39c224115f531977b2259c6",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "apps/desktop/MainComponent.cpp",
+      "tested_sha256": "b31d9ae634eda171afbd2440235908787d951df7608d9c344ff553d3fd4cfe93",
+      "index_sha256": "b31d9ae634eda171afbd2440235908787d951df7608d9c344ff553d3fd4cfe93",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/MainComponent.h",
+      "tested_sha256": "b7b327be1c35452cecb11347db04486e4a7719806e67813044cb24b1d8e45f6e",
+      "index_sha256": "371fee86d247efd5df1c9290bd1c41cf9faa22a2e9b9dd99ada6ee7fdc5e59ff",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "apps/desktop/PianoRoll.cpp",
+      "tested_sha256": "96ff1d3432dcc1310f04158a43c30a9e4840cb783bdbba366c89acba9e05c45d",
+      "index_sha256": "96ff1d3432dcc1310f04158a43c30a9e4840cb783bdbba366c89acba9e05c45d",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/PianoRoll.h",
+      "tested_sha256": "f0b1e25132c2475a8bccd8adddec2140916d6d7084ee99d5a0e703d373611655",
+      "index_sha256": "f0b1e25132c2475a8bccd8adddec2140916d6d7084ee99d5a0e703d373611655",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/PluginHost.cpp",
+      "tested_sha256": "70559f7b35c570a103b959b92fe355e6a68e71a0a1244ecbabf43c653d7783c1",
+      "index_sha256": "70559f7b35c570a103b959b92fe355e6a68e71a0a1244ecbabf43c653d7783c1",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/PluginHost.h",
+      "tested_sha256": "ac98bf6ffcde1d787a2c82aea493d7245a3a22abc13494a1db1175b61e707898",
+      "index_sha256": "ac98bf6ffcde1d787a2c82aea493d7245a3a22abc13494a1db1175b61e707898",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/ProjectStorage.cpp",
+      "tested_sha256": "544043c9b91521710c1aa0279583247550b976025ea9ab745e4bc63ef732c788",
+      "index_sha256": "544043c9b91521710c1aa0279583247550b976025ea9ab745e4bc63ef732c788",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/ProjectStorage.h",
+      "tested_sha256": "26508e71af5d5f97d936e5456392a6b559053fc5c4eb8b3fc38cc743b29b74f0",
+      "index_sha256": "26508e71af5d5f97d936e5456392a6b559053fc5c4eb8b3fc38cc743b29b74f0",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/SelectedTrackPanel.cpp",
+      "tested_sha256": "e3c69cde0a1eb94212e320f5a55ca7cf2008e1f952b2f64912daaa39d5f67abc",
+      "index_sha256": "e3c69cde0a1eb94212e320f5a55ca7cf2008e1f952b2f64912daaa39d5f67abc",
+      "comparison": "exact"
+    },
+    {
+      "path": "apps/desktop/SelectedTrackPanel.h",
+      "tested_sha256": "18a19cd40fb81ad7aa713eea83f6294805f84b6a5bf0ec2bea75a798592ef81d",
+      "index_sha256": "18a19cd40fb81ad7aa713eea83f6294805f84b6a5bf0ec2bea75a798592ef81d",
+      "comparison": "exact"
+    },
+    {
+      "path": "cmake/dependencies.json",
+      "tested_sha256": "b036160b3f2060b797b36e8ee2d2e4c07520cc34ea7cce85079c9d66049da3f1",
+      "index_sha256": "b036160b3f2060b797b36e8ee2d2e4c07520cc34ea7cce85079c9d66049da3f1",
+      "comparison": "exact"
+    },
+    {
+      "path": "cmake/patches/tracktion/external-parameter-automation-echo.patch",
+      "tested_sha256": "fd2f5cd47516d2827b6cb9128255f62cdd494109057fa9e572c4841d0bb6fe0c",
+      "index_sha256": "fd2f5cd47516d2827b6cb9128255f62cdd494109057fa9e572c4841d0bb6fe0c",
+      "comparison": "exact"
+    },
+    {
+      "path": "cmake/patches/tracktion/hq-sinc-seek-phase.patch",
+      "tested_sha256": "93244d7afb47b90fddf4c48ffc13f7ba3df3a99aafd574390a1e9808eb368156",
+      "index_sha256": "93244d7afb47b90fddf4c48ffc13f7ba3df3a99aafd574390a1e9808eb368156",
+      "comparison": "exact"
+    },
+    {
+      "path": "cmake/patches/tracktion/manifest.json",
+      "tested_sha256": "77d063a4aaae3d86fdc40dcf9b0641b984849484d17082c4b5382d3485c07ee5",
+      "index_sha256": "77d063a4aaae3d86fdc40dcf9b0641b984849484d17082c4b5382d3485c07ee5",
+      "comparison": "exact"
+    },
+    {
+      "path": "cmake/patches/tracktion/recording-ClickNode-cpp.patch",
+      "tested_sha256": "707dd3aa4f9fe2c5538444f1d886d31d3d2e657bf294153f702cb116d8d8834f",
+      "index_sha256": "707dd3aa4f9fe2c5538444f1d886d31d3d2e657bf294153f702cb116d8d8834f",
+      "comparison": "exact"
+    },
+    {
+      "path": "cmake/patches/tracktion/recording-Edit-cpp.patch",
+      "tested_sha256": "505cf9a23c772784d2a860397ef966a388d4959d724be1133a9b123e3e7f9e59",
+      "index_sha256": "505cf9a23c772784d2a860397ef966a388d4959d724be1133a9b123e3e7f9e59",
+      "comparison": "exact"
+    },
+    {
+      "path": "cmake/patches/tracktion/recording-Edit-h.patch",
+      "tested_sha256": "00c522571bb92702ae47b3603128f15b54165aa3a3cce6ee8c7d451c348702b5",
+      "index_sha256": "00c522571bb92702ae47b3603128f15b54165aa3a3cce6ee8c7d451c348702b5",
+      "comparison": "exact"
+    },
+    {
+      "path": "cmake/patches/tracktion/recording-TransportControl-cpp.patch",
+      "tested_sha256": "aac015d3f654ca5d457fda59a4464c13a60132fca9c7bd3c898c6d4da2662958",
+      "index_sha256": "aac015d3f654ca5d457fda59a4464c13a60132fca9c7bd3c898c6d4da2662958",
+      "comparison": "exact"
+    },
+    {
+      "path": "cmake/patches/tracktion/recording-midi-controller-boundary.patch",
+      "tested_sha256": "73a5511f4326fb86d21f1a8e227f294c8eff9f177cd0ce91d4b2996949aff078",
+      "index_sha256": "73a5511f4326fb86d21f1a8e227f294c8eff9f177cd0ce91d4b2996949aff078",
+      "comparison": "exact"
+    },
+    {
+      "path": "cmake/patches/tracktion/vst3-inactive-buffer-host.patch",
+      "tested_sha256": "5726605bd003fd92ac9a3a3d2c4c7b7c01dd567ecca26a4397069d654ccdcbc9",
+      "index_sha256": "5726605bd003fd92ac9a3a3d2c4c7b7c01dd567ecca26a4397069d654ccdcbc9",
+      "comparison": "exact"
+    },
+    {
+      "path": "cmake/patches/tracktion/vst3-inactive-buffer-storage.patch",
+      "tested_sha256": "b8a464309ec74ae93e8e91f065147c21a0d54a9a0c65bb927be91e5bd81b8678",
+      "index_sha256": "b8a464309ec74ae93e8e91f065147c21a0d54a9a0c65bb927be91e5bd81b8678",
+      "comparison": "exact"
+    },
+    {
+      "path": "cmake/webview2.json",
+      "tested_sha256": "97ebe5046d2e9d148abb0c95ffdbd5964510b5ebd01d9ba8bcdff93f1b7198d8",
+      "index_sha256": "f0a79de23e4b7ef976bb9689e25811ab8d9c0397fc049fb5b4d3be960109898d",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "core/commands/RevisionGuard.hpp",
+      "tested_sha256": "a94b254b9d97b921375695416263d96219fc6e656aefb698ee7c227b813fc267",
+      "index_sha256": "a94b254b9d97b921375695416263d96219fc6e656aefb698ee7c227b813fc267",
+      "comparison": "exact"
+    },
+    {
+      "path": "core/time/EditGrid.hpp",
+      "tested_sha256": "d93db02cb18ffff7c04b3217a530ac8c789f221083ddbb97e5f6364fc56c4928",
+      "index_sha256": "d93db02cb18ffff7c04b3217a530ac8c789f221083ddbb97e5f6364fc56c4928",
+      "comparison": "exact"
+    },
+    {
+      "path": "core/time/MusicalPosition.hpp",
+      "tested_sha256": "2475dd54dfee9972c48a07c2996a3325504233ae0bd64d8f58d89ffd8b76a4b1",
+      "index_sha256": "2475dd54dfee9972c48a07c2996a3325504233ae0bd64d8f58d89ffd8b76a4b1",
+      "comparison": "exact"
+    },
+    {
+      "path": "core/time/Time.hpp",
+      "tested_sha256": "11e3beabffaafb9d5b581a504a535e7d0cab6a6666bbc99d9d8f87eba9148ce2",
+      "index_sha256": "11e3beabffaafb9d5b581a504a535e7d0cab6a6666bbc99d9d8f87eba9148ce2",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/Start-Agent.ps1",
+      "tested_sha256": "4d51e0b421b59548a03f4ead2eccf0026672e1670dd765f055961677cb69b276",
+      "index_sha256": "4d51e0b421b59548a03f4ead2eccf0026672e1670dd765f055961677cb69b276",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/agent_client.py",
+      "tested_sha256": "e6e7b11da1bb9279e185714b32d632c897d29330db5c50b4a88fb24fad7c41d5",
+      "index_sha256": "e6e7b11da1bb9279e185714b32d632c897d29330db5c50b4a88fb24fad7c41d5",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/apply_engine_patches.py",
+      "tested_sha256": "d0a7c056ab7dc4d17df2741263075270904dd0c0fe00cb26727ad9762855b4d8",
+      "index_sha256": "d0a7c056ab7dc4d17df2741263075270904dd0c0fe00cb26727ad9762855b4d8",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/bootstrap_asio.py",
+      "tested_sha256": "c1547c1b8a6a415470a7b49c3b5d670c19afc9da6411d14057aac563dacf7a55",
+      "index_sha256": "c1547c1b8a6a415470a7b49c3b5d670c19afc9da6411d14057aac563dacf7a55",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/bootstrap_vst2.py",
+      "tested_sha256": "21e3004e4ef13a9fb5f78096212b1f8da0e795f9d503613a98f8ec165dd3914d",
+      "index_sha256": "21e3004e4ef13a9fb5f78096212b1f8da0e795f9d503613a98f8ec165dd3914d",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/bootstrap_webview2.py",
+      "tested_sha256": "b00872aa4bd9068cdb0ef6d3803bb3230b2ad1d1694a55449af3af79de6f3262",
+      "index_sha256": "b00872aa4bd9068cdb0ef6d3803bb3230b2ad1d1694a55449af3af79de6f3262",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/check_agent.py",
+      "tested_sha256": "909c8ef35d71365571007d0d99d66811179466330f8650e7e51a0d85d6c0f636",
+      "index_sha256": "909c8ef35d71365571007d0d99d66811179466330f8650e7e51a0d85d6c0f636",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/dev.py",
+      "tested_sha256": "ed51ea7f6336db385b2058063e7ad27db7a012d15d752b1bc2f84f72616bb6fb",
+      "index_sha256": "0cb49491040923c76e5bcf318aad740880acfe178ae66bf7ed10db31c96a0299",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "scripts/dev_agent.py",
+      "tested_sha256": "1dccaa11409ffba3e493b7f8ec5068a0f6abf841985a137b9f434e79039eaddd",
+      "index_sha256": "1dccaa11409ffba3e493b7f8ec5068a0f6abf841985a137b9f434e79039eaddd",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/generate_audio_fixtures.py",
+      "tested_sha256": "c68e2f2208caf1789bc45d9b17ab25fc70359ba59c9172dcb3e89e63fbe96c20",
+      "index_sha256": "c68e2f2208caf1789bc45d9b17ab25fc70359ba59c9172dcb3e89e63fbe96c20",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/music_agent/__init__.py",
+      "tested_sha256": "4d15186e15d2c295a9087f9e4ae0f43bd654c6459379f7d6c9d2a7500502e69e",
+      "index_sha256": "4d15186e15d2c295a9087f9e4ae0f43bd654c6459379f7d6c9d2a7500502e69e",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/music_agent/audit.py",
+      "tested_sha256": "41dce1007b6dfaac2eee6babf90d4f3fb49689ad9ee649a29244a79666af9dfa",
+      "index_sha256": "aad8c545c7fd5b3d9a66560c9c538aaa930ab42eed8f2ed34b978cd4e841f0d0",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "scripts/music_agent/bridge.py",
+      "tested_sha256": "33e6e445df5335a037e03f46a78404bcd09acf3a4634606cd36f842f7f581b16",
+      "index_sha256": "33e6e445df5335a037e03f46a78404bcd09acf3a4634606cd36f842f7f581b16",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/music_agent/config.py",
+      "tested_sha256": "1c12e97677103668b5b3191f95cc58eaacb6c772efb7a9fc28be1c42e6ef7faa",
+      "index_sha256": "51ef244383ba46a25b6103e87c0a8866df030b808a7da1f169b8572b3e1b40d1",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "scripts/music_agent/embedded.py",
+      "tested_sha256": "2edf2db4daba9d97e3612e2414caa82b06c46d0a94487cc8d2bfd2c167399ff4",
+      "index_sha256": "2edf2db4daba9d97e3612e2414caa82b06c46d0a94487cc8d2bfd2c167399ff4",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/music_agent/openai_provider.py",
+      "tested_sha256": "2d6e229955b81dd525f033fa8815187854bb96add67c8eb11d6947a795a94389",
+      "index_sha256": "00389c16cc49df13ee0d1bfcc36aaa0eaaffce5ab814cd98e9f54596a421f1e4",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "scripts/music_agent/plans.py",
+      "tested_sha256": "02e7be149ec3461ac750515070598a92fe62124649a44c15aa61d2e9ee902920",
+      "index_sha256": "02e7be149ec3461ac750515070598a92fe62124649a44c15aa61d2e9ee902920",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/music_agent/provider.py",
+      "tested_sha256": "959cf7905cdeb91af524d1b654e9362eba00bbbf9b45a4abcf9e8d68230cfb7f",
+      "index_sha256": "6b985768f95d378e96f84ba3c195bd215731bc9b8e38624bc856ac719b4a1524",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "scripts/music_agent/providers.py",
+      "tested_sha256": "b7ff1e514620a904b33a1c972f348958eeff6ae2db581ce415a6ff53e15dce0a",
+      "index_sha256": "dfbbf69ac2eddbaccfd79b6f56112cc0d58986aaa27268e7b0c747602efc1152",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "scripts/music_agent/runtime.py",
+      "tested_sha256": "4db515a00db26b1983ced066284672bab6b3555735c84850c6793e1ea0e19e41",
+      "index_sha256": "4db515a00db26b1983ced066284672bab6b3555735c84850c6793e1ea0e19e41",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/music_agent/secrets.py",
+      "tested_sha256": "6b5fffd56ebaecfe5c88f3ff52ed7be56f61582e1ce78164df890f947161e318",
+      "index_sha256": "cd6f6d8003b82840ef56fcb6f75025df08f23d3f2b6545c01e951193ea73a831",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "scripts/music_agent/selection.py",
+      "tested_sha256": "4bb482c1a5c3a9d0a468cf753e7df7b6eef7efdc3ab2133cbe45e496c6fdb728",
+      "index_sha256": "4bb482c1a5c3a9d0a468cf753e7df7b6eef7efdc3ab2133cbe45e496c6fdb728",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/music_agent/server.py",
+      "tested_sha256": "7e9a268003d651650032f75e2bd61fce0a459865615b6c3a53a066ffa24fe9b7",
+      "index_sha256": "7e9a268003d651650032f75e2bd61fce0a459865615b6c3a53a066ffa24fe9b7",
+      "comparison": "exact"
+    },
+    {
+      "path": "scripts/music_agent/web/app.js",
+      "tested_sha256": "2e0328ed3a36046ec73a5fb800bf173f306dbed3d9bb7996f31fcbb454a0bc25",
+      "index_sha256": "b86072ba200120cca722ccddcca4003b4f26d36995ed85721db40a8a5a49efe3",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "scripts/music_agent/web/index.html",
+      "tested_sha256": "7e059ad808f462aed6615757c23022b50617ac01150fe5ccad9c2f5746f02a66",
+      "index_sha256": "8b89884b99df30fd4f715e903f518f201dbe8763795f200241ae050345c0ea51",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "scripts/music_agent/web/style.css",
+      "tested_sha256": "109714e4dcdca4d7ace67f408000fc66a3659b8be230aae70384e2c059a51c12",
+      "index_sha256": "689653fe1cc1dd8f84d09586e763382aefc5c85a5321e172ba4a5bac7e6914f3",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "scripts/run_agent.py",
+      "tested_sha256": "af5bcf1081e499bf3382f4af2f0a53daafa9a2734c495e410ed8f7895e600fa7",
+      "index_sha256": "af5bcf1081e499bf3382f4af2f0a53daafa9a2734c495e410ed8f7895e600fa7",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/AgentJobsSmoke.py",
+      "tested_sha256": "4c73ef7c527ab9faf6f445ab9921afff2ffb219620cd0caa7c694bc53f4db8a6",
+      "index_sha256": "4c73ef7c527ab9faf6f445ab9921afff2ffb219620cd0caa7c694bc53f4db8a6",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/ControlOutputSmoke.py",
+      "tested_sha256": "8bb033d5662bda88a500ce4a5bbe05ce88a1532617642aaa2888774788e9182e",
+      "index_sha256": "8bb033d5662bda88a500ce4a5bbe05ce88a1532617642aaa2888774788e9182e",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/CoreTests.cpp",
+      "tested_sha256": "71d90232ead8bdacf4e8c6e7ff7d576773fa32b55436191de330e021a9fb7e5f",
+      "index_sha256": "71d90232ead8bdacf4e8c6e7ff7d576773fa32b55436191de330e021a9fb7e5f",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/EmbeddedAgentIntegration.py",
+      "tested_sha256": "0c13ebcc8320b1bf72009af5616934e3ee9d2c0834c0b2c5a32c339836fdcd50",
+      "index_sha256": "e4ecd016f9d9b110cc71da118d4dece94b5a4ce14d9fe8e8e4321fdd038c84f7",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "tests/EmbeddedHelperStartup.py",
+      "tested_sha256": "f426cb29e4ef1cc421298a3073d409d8920641b599daa93b0465be221b78ae00",
+      "index_sha256": "f426cb29e4ef1cc421298a3073d409d8920641b599daa93b0465be221b78ae00",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/EngineSessionBatchRefsSmoke.inc",
+      "tested_sha256": "009ba56a5666a7c6f0f3a7183d5e987a010a25356351646e97d88e575e4c0b22",
+      "index_sha256": "009ba56a5666a7c6f0f3a7183d5e987a010a25356351646e97d88e575e4c0b22",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/EngineSessionClipSmoke.inc",
+      "tested_sha256": "c5685ec185303eb0a6334ae6f7e266a4b01095c368ff12c05b5994987299df0e",
+      "index_sha256": "c5685ec185303eb0a6334ae6f7e266a4b01095c368ff12c05b5994987299df0e",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/EngineSessionDawSmoke.inc",
+      "tested_sha256": "1c706258a28cbded73af574978804db020e9b8f1036841f622d214e811402be9",
+      "index_sha256": "1c706258a28cbded73af574978804db020e9b8f1036841f622d214e811402be9",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/EngineSessionJobRetryCases.inc",
+      "tested_sha256": "067e125784ba821a10171f007914fb65a1f62bfc3bd4b6265f83f75275e63975",
+      "index_sha256": "067e125784ba821a10171f007914fb65a1f62bfc3bd4b6265f83f75275e63975",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/EngineSessionPluginNotificationSmoke.inc",
+      "tested_sha256": "9b3479a78598ddecb914dafc4e6cd8699a8e5908c1db69f1075e4a1c30ad3d5f",
+      "index_sha256": "9b3479a78598ddecb914dafc4e6cd8699a8e5908c1db69f1075e4a1c30ad3d5f",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/EngineSessionProductionSmoke.inc",
+      "tested_sha256": "ef92383ed4719acba092c098d7280ba2df73b7fe7f7bf9c132c94af64d961bc3",
+      "index_sha256": "ef92383ed4719acba092c098d7280ba2df73b7fe7f7bf9c132c94af64d961bc3",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/EngineSessionProjectSmoke.inc",
+      "tested_sha256": "c4e53f2f30a91a37fd3129ff1deade1e14c0868ae663f49ee801d14bdefcb2a7",
+      "index_sha256": "c4e53f2f30a91a37fd3129ff1deade1e14c0868ae663f49ee801d14bdefcb2a7",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/EngineSessionSmoke.inc",
+      "tested_sha256": "96b98055bd4493911f06dc4feb10b88c34848f2300ff9781b692ab82ee458f10",
+      "index_sha256": "96b98055bd4493911f06dc4feb10b88c34848f2300ff9781b692ab82ee458f10",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/HardwareRecordingSmoke.py",
+      "tested_sha256": "e0d218a6aef734c3185ffc71e0f7bca2416618628d25f0434e0b3804e6972a4a",
+      "index_sha256": "e0d218a6aef734c3185ffc71e0f7bca2416618628d25f0434e0b3804e6972a4a",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/MidiControlPerformance.py",
+      "tested_sha256": "0285c4c89b3d0f8e12bd4d31e3337e6c88adb90794a0b857aa10d8eb0bd128c6",
+      "index_sha256": "0285c4c89b3d0f8e12bd4d31e3337e6c88adb90794a0b857aa10d8eb0bd128c6",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/MusicAgentBatch2Integration.py",
+      "tested_sha256": "3d5e4b82b455c278e7952892446a6117dff070f68904dfddf663ff5cee709acc",
+      "index_sha256": "3d5e4b82b455c278e7952892446a6117dff070f68904dfddf663ff5cee709acc",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/MusicAgentIntegration.py",
+      "tested_sha256": "01b8f715dae8a7dd295345e95db795336af09f81c74a01373907f331a0e5a5b2",
+      "index_sha256": "5a1432b626e962ae721507b55f9316839867c69ab67b18ded83c1b9f3bf451c3",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "tests/MusicAgentUI.cjs",
+      "tested_sha256": "e57e19a366163ee78b506954a145bf344a090a443514fbecbba007e8c9547fb7",
+      "index_sha256": "ddab6e294e4e825a27d6003bc843d768f8c6d2279ed86f2ef693b004b150eab2",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "tests/PlaybackSaveSmoke.py",
+      "tested_sha256": "a92faf3ff07e1c6d0b06ec026345d6cd79937755fb1f2b86cae1f90e6eecb1dd",
+      "index_sha256": "a92faf3ff07e1c6d0b06ec026345d6cd79937755fb1f2b86cae1f90e6eecb1dd",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/PluginHostSmoke.py",
+      "tested_sha256": "3be0f85bafbc844014f3e59e418539d8ca5167df9ed14145667d3e18f6be0775",
+      "index_sha256": "3be0f85bafbc844014f3e59e418539d8ca5167df9ed14145667d3e18f6be0775",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/PluginNotificationSmoke.py",
+      "tested_sha256": "3106d99bc43eb68d019958c2ccf6723a8abe577d9f9e889f110233f2ac5f6d1f",
+      "index_sha256": "3106d99bc43eb68d019958c2ccf6723a8abe577d9f9e889f110233f2ac5f6d1f",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/RunEngineSmoke.py",
+      "tested_sha256": "8b0f54a75f48c4fdbdaae066df40871e1ab0c9b4c956df41fd12f73848cbbbe8",
+      "index_sha256": "8b0f54a75f48c4fdbdaae066df40871e1ab0c9b4c956df41fd12f73848cbbbe8",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/SavePipelineSmoke.py",
+      "tested_sha256": "7c33e120fc1a9ed687d887d0d7475d2d2d74c7b7f7e7d76ba953bdeaf8695164",
+      "index_sha256": "7c33e120fc1a9ed687d887d0d7475d2d2d74c7b7f7e7d76ba953bdeaf8695164",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/StorageV3Tests.inc",
+      "tested_sha256": "7b62c870d6e9f386f8546a7c02c450c7c0b31766e47d2906894f03aeb4357852",
+      "index_sha256": "7b62c870d6e9f386f8546a7c02c450c7c0b31766e47d2906894f03aeb4357852",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/Vst3InactiveBusSmoke.cpp",
+      "tested_sha256": "8911795ea09c2e091d079951c8371aa1252bee655427d1b8c5e9900aace93bbf",
+      "index_sha256": "8911795ea09c2e091d079951c8371aa1252bee655427d1b8c5e9900aace93bbf",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/fixtures/AUDIO-LICENSE.txt",
+      "tested_sha256": "54d002421c34360a85289a47d6ac1cc82244d5084b334a8702216df9ac818a56",
+      "index_sha256": "54d002421c34360a85289a47d6ac1cc82244d5084b334a8702216df9ac818a56",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/fixtures/README.md",
+      "tested_sha256": "7d4c22072f779711a6984e5c74161c47b11801397f8ba809ff23227a33d89945",
+      "index_sha256": "7d4c22072f779711a6984e5c74161c47b11801397f8ba809ff23227a33d89945",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/fixtures/audio/manifest.json",
+      "tested_sha256": "2be3ac4445722c484530c43b5c4b4a61a3b77e0d95fc26bf3836332ed55b9468",
+      "index_sha256": "2be3ac4445722c484530c43b5c4b4a61a3b77e0d95fc26bf3836332ed55b9468",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/fixtures/audio/mono-vbr-44100.mp3",
+      "tested_sha256": "c51ac2e8d6289113bfa694ee100e350f9d6353e7131ccbe17962f4257bf9c552",
+      "index_sha256": "c51ac2e8d6289113bfa694ee100e350f9d6353e7131ccbe17962f4257bf9c552",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/fixtures/audio/stereo-cbr-48000.mp3",
+      "tested_sha256": "8f9ccc3a6ade2b200f9870c5375df8367a0946470547ecdec63d9fe71f800915",
+      "index_sha256": "8f9ccc3a6ade2b200f9870c5375df8367a0946470547ecdec63d9fe71f800915",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/fixtures/encoder-requirements.txt",
+      "tested_sha256": "4752520b89ee505825df7a9ae5cc45c335f40429aedc52583a23b8d93a37d955",
+      "index_sha256": "4752520b89ee505825df7a9ae5cc45c335f40429aedc52583a23b8d93a37d955",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/fixtures/tool-licenses/lameenc-LICENSE.txt",
+      "tested_sha256": "7888ca2665d0612018f0c66191020636433e3fc28d34234d06ce79c9c212be7d",
+      "index_sha256": "7888ca2665d0612018f0c66191020636433e3fc28d34234d06ce79c9c212be7d",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/test_dev_logger.py",
+      "tested_sha256": "77efbd88b7507c52c31112951e6c12e32c1fc6bd4241b9bc596d969e2233329f",
+      "index_sha256": "77efbd88b7507c52c31112951e6c12e32c1fc6bd4241b9bc596d969e2233329f",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/test_engine_patches.py",
+      "tested_sha256": "aeed8c2161b21fd2d492d4a167d7e827a48f20910f5261167703e716ec40a5c1",
+      "index_sha256": "aeed8c2161b21fd2d492d4a167d7e827a48f20910f5261167703e716ec40a5c1",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/test_music_agent_batch2.py",
+      "tested_sha256": "4fbdf5099548c42b33701baab17cdfa68ccdc39947e1adac529b7b65ae67b673",
+      "index_sha256": "4fbdf5099548c42b33701baab17cdfa68ccdc39947e1adac529b7b65ae67b673",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/test_music_agent_config.py",
+      "tested_sha256": "73ef2379d7f6d7960c8ac929b02bad108a02cbf487fa22eee210b19ccab036af",
+      "index_sha256": "d075929f8aa55613cf0d7fc941c561ee2afddbd3637dfcc83fe5fc802e1f6ba6",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "tests/test_music_agent_embedded.py",
+      "tested_sha256": "eeaee0ce3eb333c2ac06a1b2afa7d98c8483f1a8c2ce9b3a42359efdd923ce08",
+      "index_sha256": "eeaee0ce3eb333c2ac06a1b2afa7d98c8483f1a8c2ce9b3a42359efdd923ce08",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/test_music_agent_integration_metrics.py",
+      "tested_sha256": "f6d808c230f8ba9fc4e04b71042a292a66932fd493c4fcf49d02882a61425fa2",
+      "index_sha256": "f6d808c230f8ba9fc4e04b71042a292a66932fd493c4fcf49d02882a61425fa2",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/test_music_agent_plans.py",
+      "tested_sha256": "d98bc6341e8d67dacfe48b546b36f0a574b5f7b89c2a69ea206f86236275d2cd",
+      "index_sha256": "d98bc6341e8d67dacfe48b546b36f0a574b5f7b89c2a69ea206f86236275d2cd",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/test_music_agent_provider.py",
+      "tested_sha256": "e7b079c00a1363cced35e75ef0987fd68c76d54dc69c8188247cc29b7457444d",
+      "index_sha256": "8f680334e881485c3c6fb25f95c34c08eb7c0c2d42ed11123cdb41bd151ade23",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "tests/test_music_agent_providers.py",
+      "tested_sha256": "4c07fb56bb36a70805f6f0985cd5b57d5be490cf50da2c24542360fd5f1b238c",
+      "index_sha256": "49386ee409a21a520092505dff3b5e70e80f63b9edce38e9e0088ed520d157a3",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "tests/test_music_agent_runtime.py",
+      "tested_sha256": "572675c0b3ea805dc2ae0e692a5659632123df765b3dcaa40d804cd52900a4d8",
+      "index_sha256": "17c761fdbfcbe578684061ce9139ca4cd976d8d3b5bbcf3fabd7dd6cf101bc0f",
+      "comparison": "line_endings_only"
+    },
+    {
+      "path": "tests/test_music_agent_selection.py",
+      "tested_sha256": "bff6649d25282d7306016ce921b3805199da5e9dc95ebfea4b24e84a2e4b0603",
+      "index_sha256": "bff6649d25282d7306016ce921b3805199da5e9dc95ebfea4b24e84a2e4b0603",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/test_music_agent_server.py",
+      "tested_sha256": "99172463f9bb10dc061dbc005b2aea4fce2f40ed94ddb9a3c25c74437690b5d2",
+      "index_sha256": "99172463f9bb10dc061dbc005b2aea4fce2f40ed94ddb9a3c25c74437690b5d2",
+      "comparison": "exact"
+    },
+    {
+      "path": "tests/test_music_agent_task_control.py",
+      "tested_sha256": "2aa95ebdcfa75a6e788e7543f5b4e93d6e4d10d6061466283038dc84d309ee82",
+      "index_sha256": "2aa95ebdcfa75a6e788e7543f5b4e93d6e4d10d6061466283038dc84d309ee82",
+      "comparison": "exact"
+    }
+  ],
+  "index_source_sha256": "364bdd28f476eb13aad76702f53c1b897b60e289f0dd0e5cb81e6b1b69016278"
+}

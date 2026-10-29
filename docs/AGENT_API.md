@@ -1,6 +1,6 @@
 # 本地 Agent 控制接口 v1
 
-实现入口为 EngineSession::executeRequest；协议仍为v1。0.7.0增加原生选择上下文和可选选择版本保护；原命令语义继续使用唯一Edit/Undo。最终Release检查范围见[本批记录](verification/2026-10-29-agent-sidebar/RESULTS.md)，助手产品入口见[快速上手](AGENT_QUICKSTART.md)。
+实现入口为 EngineSession::executeRequest，本文主要描述原生 JSONL 协议，协议仍为v1。0.8.0第二批新增类型化批次结果引用，已通过本批原生与模型闭环验证；0.7.0的选择上下文和选择版本保护继续有效。唯一Edit/Undo边界不变。当前证据见[第二批记录](verification/2026-10-29-agent-batch2/RESULTS.md)。此前Release检查见[第一批记录](verification/2026-10-29-agent-sidebar/RESULTS.md)，不能当作本批验收；助手产品入口见[快速上手](AGENT_QUICKSTART.md)。
 
 ## 0.7.0内嵌传输与选择契约
 
@@ -53,7 +53,7 @@ Python中可用`Client(executable, show=True)`同时显示受控工程，Agent�
 | command | args | result |
 |---|---|---|
 | get_selection_context | 无 | 当前只读选择对象及独立selection_revision |
-| get_capabilities | 无 | 命令列表、格式、范围和分页上限 |
+| get_capabilities | 无 | 命令列表、格式、范围和分页上限；支持本批依赖引用时含batch_result_refs=true、batch_result_refs_version=1 |
 | get_snapshot / get_project_state | 无 | 工程身份、版本、速度、播放位置、轨道、片段预览、插件槽及任务 |
 | get_save_diagnostics | 无 | current_key/saved_key/fresh_content_key、plugin_dirty、pending_plugin_changes和revision；仅排错时显式调用，重新计算内容摘要，不用于播放头高频轮询 |
 | get_track_clips | track_id, offset=0, limit=64（最大256） | total, offset, clips |
@@ -91,7 +91,7 @@ Python中可用`Client(executable, show=True)`同时显示受控工程，Agent�
 | command | args |
 |---|---|
 | new_project | 无；120 BPM，4/4 |
-| create_track | kind: audio、instrument 或 bus，name；MIDI轨的持久类型仍是instrument |
+| create_track | kind: audio、instrument 或 bus，name；MIDI轨的持久类型仍是instrument；新ID由引擎生成，不接受id/track_id覆盖 |
 | rename_track / reorder_track / remove_track | track_id；分别追加 name / index（0起）/ 无 |
 | set_track_gain / set_track_pan | track_id，gain_db（-60到6）/ pan（-1到1） |
 | set_track_muted / set_track_solo | track_id，muted / solo（布尔） |
@@ -106,10 +106,10 @@ Python中可用`Client(executable, show=True)`同时显示受控工程，Agent�
 | copy_clips / cut_clips | clip_ids；非空、不重复且全部存在的完整片段ID数组；成功result含clipboard_id、clip_count |
 | paste_clips | start_seconds（0–172800）、clipboard_id（JSONL必填）；target_track_id可选字符串；详见剪贴板规则 |
 | set_clip_fades | clip_id, fade_in_seconds, fade_out_seconds；两者之和不超过片段长度 |
-| create_midi_clip | track_id, start_beats, length_beats |
+| create_midi_clip | track_id, start_beats, length_beats；新ID由引擎生成，不接受id/clip_id覆盖 |
 | write_notes | clip_id, notes（替换整个片段音符；最多100,000个，但stdio仍受1MiB帧上限） |
 | edit_notes | clip_id, upsert, delete_ids（各最多10,000个）；通过稳定ID局部编辑大MIDI片段 |
-| batch | commands: [{command,args},…]；1–100项纯编辑，不嵌套、不包含文件任务或插件参数写入 |
+| batch | commands: [{command,args,as?},…]；1–100项纯编辑，不嵌套、不包含文件任务或插件参数写入；as仅供下述受支持创建结果使用 |
 | undo / redo | 无 |
 
 音符字段为 `id/pitch/start_beats/length_beats/velocity/channel`。新音符可省略 id；既有音符必须保留 id。音高0–127，力度1–127，通道1–16；同一 MIDI 片段的音符使用相同通道；鼓编辑在空片段默认使用10，已有音符时保留原通道。拍位置相对片段；片段起点是工程绝对拍。音频秒区间保持原速，不实现拉伸；MIDI跟随工程固定 BPM。
@@ -117,6 +117,53 @@ Python中可用`Client(executable, show=True)`同时显示受控工程，Agent�
 这里的beats统一为四分音符拍；不能与界面的`bar:beat:tick`直接互换。界面拍数按拍号分母计，1小节对应`numerator * 4 / denominator`个API拍，界面每个拍号单位拍有960 tick。bars/seconds/both、网格、snap、follow和画笔属于编辑器状态，没有改变API单位或自动量化Agent提交数据。需要对齐的调用者应根据快照中的BPM/拍号明确计算合法时间。
 
 batch 先验证全部候选状态，再一次提交、一次撤销。普通音频/MIDI编辑及对应撤销保留活动 Edit 和无关插件实例；新增/删除/重排插件、工程切换可以明确停止播放。
+
+## 原生 batch 结果引用（0.8.0，已自动验证）
+
+发送带依赖的批次前，先检查 `get_capabilities` 的 `batch_result_refs=true` 和 `batch_result_refs_version=1`。缺少能力时停止该方案，不通过自行指定新轨/片段ID兼容旧程序。
+
+每个子项只能包含 `command`、`args` 和可选的 `as`。`as` 必须匹配 `[A-Za-z][A-Za-z0-9_-]{0,39}`，同批唯一。只有 `create_track`、`create_midi_clip`、恰好复制一个源片段的 `duplicate_clips` 可声明别名。轨道/片段 UUID 由原生候选创建；调用者提供的别名不是持久ID。
+
+| 引用位置 | 允许的结果类型 |
+|---|---|
+| args.track_id、args.target_track_id | 此前create_track产生的轨引用 |
+| args.clip_id、args.clip_ids中的每一项 | 此前create_midi_clip或单源duplicate_clips产生的片段引用 |
+
+只把上述位置中整个字符串为 `@alias` 的值当作引用；名称、音符ID、插件ID及任意嵌套字符串不递归替换，例如轨名 `@literal-name` 仍是文字。未知/前向/跨批次引用、类型不匹配、非字符串ID、重复或非法别名均拒绝。声明结果的对象若在本批结束前被删除，也拒绝整批，避免成功回执携带失效对象。
+
+以下为原生请求示例，身份和版本须替换成最新快照值：
+
+```json
+{
+  "request_id": "create-phrase-example-1",
+  "project_id": "CURRENT_PROJECT_ID",
+  "expected_revision": 12,
+  "command": "batch",
+  "args": {
+    "commands": [
+      {"command":"create_track","args":{"kind":"instrument","name":"Phrase"},"as":"piano"},
+      {"command":"create_midi_clip","args":{"track_id":"@piano","start_beats":0,"length_beats":4},"as":"phrase"},
+      {"command":"write_notes","args":{"clip_id":"@phrase","notes":[{"pitch":60,"start_beats":0,"length_beats":1,"velocity":80,"channel":1}]}}
+    ]
+  }
+}
+```
+
+成功响应的 `result` 为 `{"refs":{"piano":"引擎生成的轨ID","phrase":"引擎生成的片段ID"},"executed_commands":3}`，外层仍含 status/project_id/revision。无别名的成功 batch 返回空 `refs` 和执行命令数。相同request_id/内容的重试返回原回执，不再次分配对象；该回执不保证对象在后来的Undo或其他编辑后仍存在，应以当前快照为准。
+
+原生沿用一个私有候选，逐命令维持原有校验，整批最终验证后才一次应用到 Edit。后续子项失败不会留下前面子项的轨、片段或音符，不增加音乐revision、dirty或Undo，不返回任何临时 refs。有效提交才结束此前GUI手势，整批成为独立一次Undo；失败批次不拆分正在进行的手势。实际无内容变化的批次沿用原无操作语义，不强制增加revision。
+
+`duplicate_clips` 继续给复制出的音符和控制器分配新ID；返回值只映射轨/片段别名，不提供音符映射。`write_notes` 和 `edit_notes` 修改音符时保留片段控制器。控制器原生trim/split规则仍见下文，不因模型助手暂缓带控制器的MIDI裁剪而收窄原生命令。
+
+## Python 助手层的范围与任务控制
+
+本节不是新增原生命令。模型只获得 `read_clip_notes` 与 `propose_plan`；Python动作经候选模拟、选择约束及编译后才变成上表中的原生 batch。例如模型 `duplicate_clip/delete_clip` 对应原生 `duplicate_clips/delete_clips`；`add_notes/delete_notes/move_notes/set_note_length` 等通过 `write_notes/edit_notes` 表达。不能把模型动作名直接发作原生 command。
+
+单方案最多16项动作、2000次音符处理，每个待编辑MIDI片段完整读取最多2000音符。依赖链也受同一累计预算，不能靠多个子项绕过。选择范围及版本在生成和应用前校验：当前音符选择不授权整个片段或无关新增音符，跨轨目标需在授权范围内，派生对象的后续操作仍继承范围限制。含控制器的MIDI trim在此Python层明确拒绝；复制保留控制器，必要的音符UUID重写仍处于同一个原生batch。
+
+本机HTTP的 `/api/pause`、`/api/resume`、`/api/cancel` 接受空对象。暂停只接受规划中任务；在途模型调用等待返回后才到达暂停边界，仍可能计费。恢复重新核对工程/选区；取消阻止后续派发和方案发布。提交/撤销阶段不能暂停或中途取消；原子批次完成后用受版本保护的Undo还原。`/api/state` 提供任务阶段/进度；旧GET结果受generation保护，不能覆盖新任务、取消或模型切换后的状态。
+
+若原生提交未收到明确回执，结果未知，桥停止后续写入且不自动重试。若已收到completed但回读/核对失败，界面明确标记“已提交”，保留已确认版本供安全撤销，不声称未执行；Undo确认提交后立即消费原撤销资格，回读失败也不再次Undo。Kimi/OpenAI适配仍沿用第一批，本批没有新增模型厂商。架构及取舍见[ADR0011](decisions/0011-agent-atomic-dependent-plans.md)。
 
 ## 完整片段剪贴板（0.6.0）
 

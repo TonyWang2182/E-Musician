@@ -45,18 +45,80 @@ std::vector<storage::StoredControllerEvent> sliceControllers(const std::vector<s
 }
 }
 
-juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::String& cmd,const juce::var& a,juce::String& chooseAfter)
+juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::String& cmd,const juce::var& a,juce::String& chooseAfter,juce::var* batchResult)
 {
     if(!a.isObject())return juce::Result::fail("Command arguments must be an object.");
     auto bad=[](const juce::String& x){return juce::Result::fail(x);};
     auto* t=storedTrack(s,textArg(a,"track_id"));
     auto* c=storedClip(s,textArg(a,"clip_id"));
+    juce::var completedBatch;
     if(cmd=="batch"){
         auto v=a.getProperty("commands",{});auto* list=v.getArray();
         if(!list||list->isEmpty()||list->size()>100)return bad("Batch needs 1 to 100 editing commands.");
-        for(const auto& child:*list){auto name=textArg(child,"command");if(name=="batch")return bad("Nested batches are not supported.");
-            if(auto r=mutate(s,name,child.getProperty("args",object({})),chooseAfter);r.failed())return r;}
+        struct Reference {juce::String id;bool track;};
+        std::map<juce::String,Reference> references;
+        const auto validAlias=[](const juce::String& value){
+            if(value.isEmpty()||value.length()>40)return false;
+            const auto letter=[](juce::juce_wchar ch){return (ch>='A'&&ch<='Z')||(ch>='a'&&ch<='z');};
+            if(!letter(value[0]))return false;
+            for(int i=1;i<value.length();++i){const auto ch=value[i];if(!letter(ch)&&!(ch>='0'&&ch<='9')&&ch!='_'&&ch!='-')return false;}
+            return true;
+        };
+        const auto resolveId=[&](const juce::var& value,bool track,juce::String& resolved){
+            if(!value.isString())return bad("Batch object references must be strings.");
+            resolved=value.toString();if(!resolved.startsWithChar('@'))return juce::Result::ok();
+            const auto alias=resolved.substring(1);const auto found=references.find(alias);
+            if(!validAlias(alias)||found==references.end())return bad("Unknown or forward batch reference: "+resolved);
+            if(found->second.track!=track)return bad("Batch reference has the wrong object type: "+resolved);
+            resolved=found->second.id;return juce::Result::ok();
+        };
+        for(const auto& child:*list){
+            if(!child.isObject())return bad("Each batch child must be an object.");
+            for(const auto& field:child.getDynamicObject()->getProperties())
+                if(field.name.toString()!="command"&&field.name.toString()!="args"&&field.name.toString()!="as")return bad("Unknown batch child field: "+field.name.toString());
+            const auto name=textArg(child,"command");
+            if(name.isEmpty()||name=="batch")return bad("A batch child requires a non-nested editing command.");
+            auto parameters=child.getProperty("args",object({})).clone();
+            if(!parameters.isObject())return bad("Batch child args must be an object.");
+            juce::String alias;
+            if(child.hasProperty("as")){
+                if(!child["as"].isString()||!validAlias(alias=child["as"].toString()))return bad("Batch alias must match [A-Za-z][A-Za-z0-9_-]{0,39}.");
+                if(references.contains(alias))return bad("Batch aliases must be unique.");
+                if(name!="create_track"&&name!="create_midi_clip"&&name!="duplicate_clips")return bad("This command cannot produce a batch reference.");
+            }
+            // Only these typed object-ID positions are references. Names, note
+            // payloads, plugin IDs and arbitrary nested strings stay literal.
+            for(const auto* key:{"track_id","target_track_id","clip_id"})if(parameters.hasProperty(key)){
+                juce::String resolved;if(auto r=resolveId(parameters[key],juce::String(key)!="clip_id",resolved);r.failed())return r;
+                parameters.getDynamicObject()->setProperty(key,resolved);
+            }
+            if(parameters.hasProperty("clip_ids")){
+                auto* values=parameters["clip_ids"].getArray();if(!values)return bad("clip_ids must be an array.");
+                juce::Array<juce::var> resolvedIds;
+                for(const auto& value:*values){juce::String resolved;if(auto r=resolveId(value,false,resolved);r.failed())return r;resolvedIds.add(resolved);}
+                parameters.getDynamicObject()->setProperty("clip_ids",resolvedIds);
+            }
+            if(alias.isNotEmpty()&&name=="duplicate_clips"&&idsArg(parameters,"clip_ids").size()!=1)
+                return bad("A duplicate_clips alias requires exactly one source clip.");
+            // All children still validate the same private candidate. Retain the
+            // existing intermediate invariants; nothing reaches the live Edit.
+            if(auto r=mutate(s,name,parameters,chooseAfter);r.failed())return r;
+            if(alias.isNotEmpty()){
+                const bool track=name=="create_track";
+                const auto id=track?s.tracks.back().id:chooseAfter;
+                if(id.isEmpty()||(track?storedTrack(s,id)==nullptr:storedClip(s,id)==nullptr))return bad("Batch command produced no reference target.");
+                references.emplace(alias,Reference{id,track});
+            }
+        }
+        auto refs=object({});
+        for(const auto& [alias,reference]:references){
+            if(reference.track?storedTrack(s,reference.id)==nullptr:storedClip(s,reference.id)==nullptr)
+                return bad("A batch reference target was removed before commit.");
+            refs.getDynamicObject()->setProperty(alias,reference.id);
+        }
+        completedBatch=object({{"refs",refs},{"executed_commands",list->size()}});
     }else if(cmd=="create_track"){
+        if(a.hasProperty("id")||a.hasProperty("track_id"))return bad("New track IDs are assigned by the engine.");
         storage::StoredTrack added;added.id=uid();added.kind=textArg(a,"kind");added.name=textArg(a,"name").trim();
         if(added.kind!="audio"&&added.kind!="instrument"&&added.kind!="bus")return bad("Track kind must be audio, instrument or bus.");
         if(added.name.isEmpty())added.name=added.kind=="audio"?"Audio":added.kind=="bus"?"Bus":"MIDI";s.tracks.push_back(std::move(added));
@@ -82,6 +144,7 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
         auto n=number(a,"numerator"),d=number(a,"denominator");if(!std::isfinite(n)||!std::isfinite(d)||n!=std::floor(n)||d!=std::floor(d)||n<1||n>32||d<1||d>32)return bad("Time signature must use supported integer values.");s.numerator=int(n);s.denominator=int(d);
     }else if(cmd=="set_loop_range"){s.loopStart=number(a,"start_seconds");s.loopEnd=number(a,"end_seconds");}
     else if(cmd=="create_midi_clip"){
+        if(a.hasProperty("id")||a.hasProperty("clip_id"))return bad("New clip IDs are assigned by the engine.");
         if(!t||t->kind!="instrument")return bad("Choose a MIDI instrument track.");storage::StoredClip added;added.id=uid();added.kind="midi";added.startBeats=number(a,"start_beats");added.lengthBeats=number(a,"length_beats");chooseAfter=added.id;t->clips.push_back(std::move(added));syncMidiSeconds(s);
     }else if(cmd=="write_notes"||cmd=="edit_notes"){
         if(!c||c->kind!="midi")return bad("Choose a MIDI clip.");auto value=a.getProperty(cmd=="write_notes"?"notes":"upsert",juce::var(juce::Array<juce::var>{}));auto* notes=value.getArray();
@@ -196,10 +259,13 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
              ||cmd=="set_automation_lane"||cmd=="remove_automation_lane"){
         if(auto r=production::mutateGraph(s,cmd,a);r.failed())return r;
     }else return bad("Unsupported editing command: "+cmd);
-    syncMidiSeconds(s);if(auto r=storage::validate(s);r.failed())return r;return production::validateGraph(s);
+    syncMidiSeconds(s);if(auto r=storage::validate(s);r.failed())return r;
+    if(auto r=production::validateGraph(s);r.failed())return r;
+    if(batchResult&&cmd=="batch")*batchResult=std::move(completedBatch);
+    return juce::Result::ok();
 }
 
-juce::Result EngineSession::Impl::perform(const juce::String& command,const juce::var& args)
+juce::Result EngineSession::Impl::perform(const juce::String& command,const juce::var& args,juce::var* commandResult)
 {
     if(!args.isObject())return fail("Command arguments must be an object.");
     if(command=="copy_clips"||command=="cut_clips"){
@@ -222,7 +288,7 @@ juce::Result EngineSession::Impl::perform(const juce::String& command,const juce
         status=command=="cut_clips"?"Clips cut. Paste at the playhead; Undo restores the cut.":"Clips copied. Select a destination track and paste at the playhead.";
         return juce::Result::ok();
     }
-    if(gesture&&command!="set_track_gain"&&command!="set_master_gain"&&command!="set_track_pan")finishGesture();
+    if(gesture&&command!="batch"&&command!="set_track_gain"&&command!="set_master_gain"&&command!="set_track_pan")finishGesture();
     if(command=="set_plugin_parameter")return setPluginParameter(args);
     if(command=="scan_plugins"||command=="cancel_job"||command=="import_audio"||command=="import_midi"||command=="save_project"||command=="open_project"||command=="export_wav"||command=="export_midi")return performJob(command,args);
     if(command=="open_plugin"){
@@ -370,11 +436,15 @@ juce::Result EngineSession::Impl::perform(const juce::String& command,const juce
     auto s=capture();auto selectedAfter=selectedClip;auto before=contentKey(s);
     const auto pluginTopology=[](const auto& project){juce::StringArray ids;for(const auto& p:project.masterPlugins)ids.add("master:"+p.id);for(const auto& t:project.tracks)for(const auto& p:t.plugins)ids.add(t.id+":"+p.id);return ids;};
     const auto previousTopology=pluginTopology(s);
-    try{if(auto r=mutate(s,command,args,selectedAfter);r.failed())return fail(r.getErrorMessage());}
+    juce::var candidateResult;
+    try{if(auto r=mutate(s,command,args,selectedAfter,&candidateResult);r.failed())return fail(r.getErrorMessage());}
     catch(const std::exception& e){return fail(e.what());}
-    if(contentKey(s)==before)return juce::Result::ok();
+    if(contentKey(s)==before){if(commandResult)*commandResult=std::move(candidateResult);return juce::Result::ok();}
     // Large third-party instance changes are explicit structural operations.
     if(pluginTopology(s)!=previousTopology)edit->getTransport().stop(false,false);
+    // A confirmed batch must not merge into an in-progress GUI gesture. Do this
+    // only after candidate validation, so a rejected batch leaves Undo untouched.
+    if(command=="batch")finishGesture();
     remember(command.replaceCharacter('_',' '));
     auto applied=juce::Result::ok();
     try{applied=applyTo(*edit,s,bindings,false);}
@@ -386,5 +456,11 @@ juce::Result EngineSession::Impl::perform(const juce::String& command,const juce
     }
     refreshRange();refreshPluginWatches();if(auto* c=findClip(selectedAfter)){Binding* parent=nullptr;findClip(c->id,&parent);choose(parent->id,c->id);}else choose(selected);
     if(command=="create_track"&&!bindings.empty())choose(bindings.back().id);
-    recordEdit();status=command.replaceCharacter('_',' ')+" completed.";return juce::Result::ok();
+    // Tracktion can finish new clip/track properties on a later message turn.
+    // Keep those derived writes inside this atomic batch, as recording does;
+    // opening an empty transaction here makes one Undo consume only that tail.
+    // The next explicit edit, gesture, save or Undo still closes this boundary.
+    recordEdit(command!="batch");status=command.replaceCharacter('_',' ')+" completed.";
+    if(commandResult)*commandResult=std::move(candidateResult);
+    return juce::Result::ok();
 }

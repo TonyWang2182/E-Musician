@@ -23,6 +23,7 @@
 #include <set>
 #include <stdexcept>
 #include <thread>
+#include <typeinfo>
 #include <unordered_set>
 #if JUCE_WINDOWS
 #ifndef NOMINMAX
@@ -241,7 +242,18 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         transactionControl=std::make_unique<te::Edit::UndoTransactionInhibitor>(*edit);
         edit->state.addListener(this);
         recording.attach(*edit,recordingDirectory());
-        edit->getUndoManager().setMaxNumberOfStoredUnits(1000000,64);edit->getUndoManager().clearUndoHistory();savedKey=currentKey=calculateCurrentKey();startTimerHz(30);
+        // AudioTrack::initialise lazily asks for SCENES. Create this native
+        // session container before user history begins; its later root sort
+        // must not become part of the first user-created track transaction.
+        edit->getSceneList();
+        savedKey=currentKey=calculateCurrentKey();
+        // Host metadata is not a track and belongs before Tracktion's special
+        // tracks. Establish that canonical initial order outside user history:
+        // otherwise the next asynchronous TrackList sort gets recorded in the
+        // first edit, and Undo restores an unsorted root that clears Redo when
+        // TrackList sorts it again on the next message turn.
+        te::TrackList::sortTracksByType(edit->state,nullptr);
+        edit->getUndoManager().setMaxNumberOfStoredUnits(1000000,64);edit->getUndoManager().clearUndoHistory();startTimerHz(30);
     }
     ~Impl() override{
         *alive=false;shuttingDown=true;stopTimer();for(auto& j:jobs)j->cancel=true;
@@ -371,17 +383,17 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     juce::Result applyTo(te::Edit&,storage::StoredProject,std::vector<Binding>&,bool loading);
     juce::Result build(const storage::StoredProject& s,std::unique_ptr<te::Edit>& candidate,std::vector<Binding>& next){
         if(s.tracks.size()>storage::maximumTracks||s.assets.size()>storage::maximumAssets)return fail("Project object limit exceeded.");size_t n=0;for(const auto& t:s.tracks)n+=t.clips.size();if(n>storage::maximumClips)return fail("Clip limit exceeded.");
-        if(auto r=prepare(s);r.failed())return r;candidate=te::createEmptyEdit(engine,{});if(!candidate)return fail("Could not create project.");auto r=applyTo(*candidate,s,next,true);if(r.wasOk())candidate->getUndoManager().clearUndoHistory();return r;
+        if(auto r=prepare(s);r.failed())return r;candidate=te::createEmptyEdit(engine,{});if(!candidate)return fail("Could not create project.");candidate->getSceneList();auto r=applyTo(*candidate,s,next,true);if(r.wasOk()){te::TrackList::sortTracksByType(candidate->state,nullptr);candidate->getUndoManager().clearUndoHistory();}return r;
     }
     void adopt(std::unique_ptr<te::Edit> next,std::vector<Binding> bs,const juce::String& tid,const juce::String& cid={}){
         plugins::PluginHost::closeAllEditors(*edit);edit->getTransport().stop(false,false);trackMeters.clear();inputMeters.clear();masterMeter.bind(nullptr);recording.detach();pluginHost.detachEdit(*edit);edit->state.removeListener(this);noteViews.clear();transactionControl.reset();bindings.clear();edit=std::move(next);clipClipboard={};lastPastedClipIds.clear();bindings=std::move(bs);transactionControl=std::make_unique<te::Edit::UndoTransactionInhibitor>(*edit);edit->state.addListener(this);recording.attach(*edit,recordingDirectory());
-        edit->getUndoManager().setMaxNumberOfStoredUnits(1000000,64);refreshRange();choose(tid,cid);gesture=false;watchedPlugins.clear();refreshPluginWatches();currentKey=calculateCurrentKey();cachedRevision=std::numeric_limits<std::uint64_t>::max();
+        edit->getUndoManager().setMaxNumberOfStoredUnits(1000000,64);refreshRange();choose(tid,cid);gesture=false;watchedPlugins.clear();refreshPluginWatches();currentKey=calculateCurrentKey();te::TrackList::sortTracksByType(edit->state,nullptr);cachedRevision=std::numeric_limits<std::uint64_t>::max();
     }
     void timerCallback() override;
     void reapFinishedJobs(bool applyCommits);
     std::shared_ptr<Job> startJob(const juce::String&,std::function<void(const std::shared_ptr<Job>&)>);
-    juce::Result mutate(storage::StoredProject&,const juce::String&,const juce::var&,juce::String& selectedAfter);
-    juce::Result perform(const juce::String&,const juce::var&);
+    juce::Result mutate(storage::StoredProject&,const juce::String&,const juce::var&,juce::String& selectedAfter,juce::var* batchResult=nullptr);
+    juce::Result perform(const juce::String&,const juce::var&,juce::var* commandResult=nullptr);
     juce::Result performJob(const juce::String&,const juce::var&);
     juce::Result beginSave(const juce::File&);
     juce::Result setPluginParameter(const juce::var&);
@@ -397,6 +409,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
 #include "EngineSessionTelemetry.inc"
 #include "EngineSessionSelection.inc"
 #include "EngineSessionPublic.inc"
+#include "../../tests/EngineSessionBatchRefsSmoke.inc"
 #include "../../tests/EngineSessionSmoke.inc"
 #include "../../tests/EngineSessionProjectSmoke.inc"
 #include "../../tests/EngineSessionClipSmoke.inc"

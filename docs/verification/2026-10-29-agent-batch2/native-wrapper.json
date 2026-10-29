@@ -1,0 +1,114 @@
+{
+  "mode": "native-sidebar-offline",
+  "status": "passed",
+  "physical_audio": false,
+  "exe_sha256": "4fdb7ad2b6d6c6f7ee196e4d8519d452894e22439dcacbd411dee60467b2d190",
+  "protected_file_count": 6,
+  "webview_visual_acceptance": "not asserted by JUCE component snapshots",
+  "exit_code": 0,
+  "checks": [
+    {
+      "name": "selection_context",
+      "passed": true
+    },
+    {
+      "name": "batch_result_refs",
+      "passed": true
+    },
+    {
+      "name": "fixture_track",
+      "passed": true
+    },
+    {
+      "name": "fixture_clip",
+      "passed": true
+    },
+    {
+      "name": "fixture_notes",
+      "passed": true
+    },
+    {
+      "name": "native_page_loaded",
+      "passed": true
+    },
+    {
+      "name": "embedded_connection",
+      "passed": true
+    },
+    {
+      "name": "same_project",
+      "passed": true
+    },
+    {
+      "name": "full_native_note_selection",
+      "passed": true
+    },
+    {
+      "name": "no_paid_provider",
+      "passed": true
+    },
+    {
+      "name": "native_event_bridge",
+      "passed": true
+    },
+    {
+      "name": "key_focus",
+      "passed": true
+    },
+    {
+      "name": "hide_show",
+      "passed": true
+    },
+    {
+      "name": "state_preserved",
+      "passed": true
+    },
+    {
+      "name": "focus_preserved_after_sidebar",
+      "passed": true
+    },
+    {
+      "name": "minimum_layout_1280",
+      "passed": true
+    },
+    {
+      "name": "native_parent_capture_1280",
+      "passed": true
+    },
+    {
+      "name": "minimum_layout_1000",
+      "passed": true
+    },
+    {
+      "name": "native_parent_capture_1000",
+      "passed": true
+    },
+    {
+      "name": "helper_stopped",
+      "passed": true
+    },
+    {
+      "name": "project_survived_helper_stop",
+      "passed": true
+    },
+    {
+      "name": "helper_restart",
+      "passed": true
+    },
+    {
+      "name": "single_engine",
+      "passed": true
+    },
+    {
+      "name": "no_music_mutation",
+      "passed": true
+    }
+  ],
+  "native_report_sha256": "e634af0f2bf1a4069fe33fb8bac02c3a719e6a9bcc85257eebcbfeb1c9c208f7",
+  "timings_ms": {
+    "first_open_ms": 2349.449599996209,
+    "hide_show_pair_max_ms_12": 18.871500000357628
+  },
+  "elapsed_seconds": 13.59,
+  "protected_files_unchanged": true
+}

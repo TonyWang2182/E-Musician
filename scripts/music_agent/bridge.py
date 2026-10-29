@@ -32,6 +32,7 @@ class DawBridge:
     def __init__(self, executable: Path | None = None, *, offline=False, client=None, embedded=False):
         self.lock = threading.RLock()
         self.connected = True
+        self._capabilities = None
         self.embedded = bool(embedded or getattr(client, "embedded", False))
         if self.embedded and client is None:
             raise ValueError("Embedded mode requires a host-owned transport.")
@@ -61,6 +62,15 @@ class DawBridge:
                     raise BridgeError("音乐选择已变化，旧方案未应用。请重新生成方案。")
                 raise BridgeError("DAW 拒绝操作：" + str(result.get("error") or status)[:500])
             return result
+
+    def capabilities(self):
+        with self.lock:
+            if self._capabilities is None:
+                value = self._request({"command":"get_capabilities"})["result"]
+                if not isinstance(value,dict):
+                    raise BridgeError("DAW 能力响应无效。")
+                self._capabilities = copy.deepcopy(value)
+            return copy.deepcopy(self._capabilities)
 
     def snapshot(self):
         return public_snapshot(self._request({"command": "get_snapshot"})["result"])
@@ -147,6 +157,10 @@ class DawBridge:
             return notes
 
     def apply(self, plan):
+        if any("as" in c for c in plan["commands"]):
+            version = self.capabilities().get("batch_result_refs_version")
+            if type(version) is not int or version != 1:
+                raise BridgeError("DAW 未声明支持连续依赖方案，没有发送修改。")
         envelope = {"request_id": plan["id"], "project_id": plan["project_id"],
             "expected_revision": plan["revision"], "command": "batch",
             "args": {"commands": plan["commands"]}}

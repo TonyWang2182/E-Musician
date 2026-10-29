@@ -1,4 +1,16 @@
-# 当前迭代：DAW 0.7.0 / Agent 0.2 第一批（2026-10-29）
+# 当前交付：DAW 0.8.0 / Agent 0.3 第二批（2026-10-29）
+
+工作树music-agent-kimi，分支feature/kimi-music-agent，基线55f06b7。本批实现和自动验收完成，真实桌面/中文IME/设备听感待人工短测；未自动合并main。入口 E:\\MusicAgent&DAW\\Start E-musician Agent.cmd，原生产物 build/agent-batch2/bin/Release/E-musician.exe；旧0.7的build/sidebar保留。本轮未关闭用户程序或操作其桌面。
+
+**已交付**：19种编辑动作；新轨→新片段→明确音符的一份依赖方案；复制/跨轨移动/裁剪/删除片段及音符增删、时长、位移；按选择/时间范围约束、确认前完整顺序预览与折叠音符明细；规划暂停/继续/取消；原生原子提交、最终回读、一次Undo和正常Redo。新增音符每页50显示，沿用最多16动作/2000音符操作预算和单片段完整读取2000上限。带CC的MIDI裁剪暂拒；没有新增音频理解/生成、模型插件加载、保存/录音或长期自主任务。
+
+**冻结证据**：122个源码输入，SHA256 347a75c089fe0cd9b17f2e32866ed977004b8aa4b35e5d86a2603cf765cfa64a；Release EXE 4fdb7ad2b6d6c6f7ee196e4d8519d452894e22439dcacbd411dee60467b2d190。最终CTest5/5、Python219、侧栏24、原生批次126、第二批真实离线DAW合成闭环13项，以及headless UI和真实helper启动/退出通过。GPT-5-mini与Kimi各1次真实请求完成首个明确创建链，后续编辑仍是合成Provider检查；总5993输入/616输出token。最终检查均关联同一冻结源码和二进制。见[RESULTS](verification/2026-10-29-agent-batch2/RESULTS.md)。
+
+真实闭环修复了两处底座问题：EM_PROJECT/首次懒建SCENES造成异步根排序污染Undo/Redo，现先规范新建/装载基线并保留批次事务到下一显式边界；Windows包虚拟化造成input/ready路径误拒，现严格校验逻辑同名siblings并拒绝链接。没有修改共享依赖、生产消息泵或计时禁Undo。失败、中间版本及修复记录全部保留，见[REVIEW](review/2026-10-29-agent-batch2/REVIEW.md)、append-only DEVLOG及docs/builds；原始日志在build-logs。用户原有6条启动记录和DEVLOG内容已保留。
+
+下一步：按[人工短测](review/2026-10-29-agent-batch2/MANUAL-CHECK.md)检查实际UI/中文输入、一次确认与Undo/Redo、混合工程播放听感。原生离屏和合成焦点不是人工键盘验证，没有新增实时性能或ASIO长期负载结论。Agent第三批及DAW长期能力另行计划，本轮不提前声称完成。
+
+# 历史交付：DAW 0.7.0 / Agent 0.2 第一批（2026-10-29）
 
 工作树仍为 `music-agent-kimi`、分支 `feature/kimi-music-agent`。本批已落地原生可开关 Agent 侧栏、完整选择上下文与范围校验，以及 Kimi/OpenAI 两种模型适配。**状态：实现与本批自动验证完成，真实桌面/听感待人工短测**。最终Release构建、原有CTest 5/5、Python 178项、原生侧栏23项及最终二进制模拟编辑闭环通过；GPT-5-mini与Kimi-k2.6在本批中间构建的真实小样本也通过，精确指纹与费用计数分别保留。详见[交付证据](verification/2026-10-29-agent-sidebar/RESULTS.md)。实际 GUI、中文输入法、播放听感由用户操作，不使用 computer-use。
 

@@ -39,6 +39,12 @@ class FakeRuntime:
     def apply(self, plan_id):
         self.calls.append(("apply", plan_id))
         return {"phase": "applying"}
+    def pause(self):
+        self.calls.append("pause")
+        return {"phase":"paused"}
+    def resume(self):
+        self.calls.append("resume")
+        return {"phase":"planning"}
     def cancel(self):
         self.calls.append("cancel")
         return {"phase": "cancelled"}
@@ -81,6 +87,18 @@ class ServerTests(unittest.TestCase):
             return response.status, dict(response.getheaders()), response.read()
         finally:
             connection.close()
+    def test_pause_resume_require_auth_and_empty_body(self):
+        for action,phase in (("pause","paused"),("resume","planning")):
+            with self.subTest(action=action):
+                self.runtime.calls.clear()
+                self.assertEqual(self.request("POST","/api/"+action,{},authenticated=False)[0],403)
+                self.assertEqual(self.runtime.calls,[])
+                self.assertEqual(self.request("POST","/api/"+action,{"unexpected":True})[0],400)
+                self.assertEqual(self.runtime.calls,[])
+                status,_,body=self.request("POST","/api/"+action,{})
+                self.assertEqual(status,200)
+                self.assertEqual(json.loads(body)["phase"],phase)
+                self.assertEqual(self.runtime.calls,[action])
     def test_bound_only_to_loopback(self):
         self.assertEqual(self.server.server_address[0], "127.0.0.1")
         self.assertTrue(self.server.launch_url.startswith(self.server.origin + "/#token="))
@@ -128,7 +146,10 @@ class ServerTests(unittest.TestCase):
     def test_size_limit(self):
         for content_length in ("0", "-1", "32769"):
             with self.subTest(length=content_length):
-                status, _, _ = self.request("POST", "/api/cancel", b"{}", {"Content-Length": content_length})
+                # No payload is needed to test an invalid declared length. Sending
+                # unread bytes while the server closes can cause a Win32 TCP reset
+                # before the 413 reaches http.client.
+                status, _, _ = self.request("POST", "/api/cancel", b"", {"Content-Length": content_length})
                 self.assertEqual(status, 413)
         self.assertEqual(self.runtime.calls, [])
     def test_invalid_json_duplicate_keys_and_numbers(self):

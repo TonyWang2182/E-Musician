@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(EMusician VERSION 0.7.0 LANGUAGES C CXX)
+project(EMusician VERSION 0.8.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -115,9 +115,11 @@ if(EMUSICIAN_BUILD_DESKTOP)
     endif()
     set_target_properties(EMusician PROPERTIES OUTPUT_NAME "E-musician"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>")
+    # Keep legacy recovery fixture paths below Win32 copy limits, independent
+    # of nested build names. RunEngineSmoke still creates a fresh UUID each run.
     add_test(NAME engine.integration_smoke COMMAND "${Python3_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/RunEngineSmoke.py"
-        "$<TARGET_FILE:EMusician>" "${CMAKE_BINARY_DIR}/smoke/$<CONFIG>")
+        "$<TARGET_FILE:EMusician>" "${CMAKE_CURRENT_SOURCE_DIR}/build/smoke/$<CONFIG>")
     set_tests_properties(engine.integration_smoke PROPERTIES TIMEOUT 260 RUN_SERIAL TRUE)
     if(WIN32)
         add_test(NAME control.output_isolation COMMAND "${Python3_EXECUTABLE}"

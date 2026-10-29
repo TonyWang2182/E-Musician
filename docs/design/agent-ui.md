@@ -67,6 +67,26 @@ DOM focus-in, pointer-down and window focus establish the hint. Blur, focus-out 
 
 An offscreen native smoke must distinguish an active DOM element from OS keyboard focus. The [HTML focus model](https://html.spec.whatwg.org/multipage/interaction.html#focus) distinguishes these states, and [WebView2 MoveFocus](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2controller?view=webview2-1.0.2849.39#movefocus) governs native focus entry separately. A synthetic DOM focus event in the real WebView can test the app listener, native bridge and shortcut guard without bringing a user window forward; that result must be described as integration-contract coverage. Actual click, typing, IME and native focus return remain manual acceptance.
 
+## Batch 2: ordered plan and runtime progress
+
+Implementation status: UI and synthetic fixtures updated; not yet run or visually accepted for this batch. Parent requested a source freeze before any test/build or headless capture. No live DAW window or user desktop has been inspected or operated.
+
+The 340–560px sidebar keeps its existing typography, monochrome palette, independently scrolling history and fixed composer. A proposed plan may add `steps: [{index, label}]`, in the backend's confirmed order. The UI displays that order under “执行顺序”; the full `changes` list stays expanded under “具体修改”. Delete/remove action words are emphasized in place without inferring additional affected objects. One “应用全部修改” submits the full batch; the result retains one undo action. No individual step gets a completed check mark.
+
+Runtime `progress: {stage, label, completed, total}` drives a compact four-stage line: 检查 → 提交 → 核对 → 完成. It shows only known applying stages (`preflight`, `submitting`, `verifying`) or `done` with nonzero verified postconditions. A read-only answer with zero checks does not imply an editing pipeline. Labels come from runtime; the UI does not generate percentages, per-command counters or apparent partial commits from `completed/total`. The full batch cannot be paused or cancelled during application, and this boundary is stated next to the stage line.
+
+Planning pause is available when the backend exports `pause_requested`. While planning, the control reads “暂停”; after a request it becomes disabled “等待暂停”. Runtime phase `paused` exposes “继续” plus “停止”. The backend owns the pause boundary after the current model response / before the next call or publishing a plan. The UI does not claim an in-flight model request was interrupted. Old state without the field continues to work without a pause affordance. Existing hidden-page polling, native focus events, IME handling, explicit scope and draft retention are unchanged.
+
+The synthetic fixture now covers ordered steps, deletion details, optional legacy steps, unreadable change rejection without exposing raw objects, actual runtime stages, no cancellation/pause during applying, pause request/wait/resume/stop, old-backend compatibility and 260px/340px captures. Execution and independent finish review are deferred until the parent authorizes the frozen-source test pass. Earlier pass records in this document apply only to their recorded prior source state.
+
+### Added-note review detail
+
+Optional `plan.note_previews: [{label, notes: [{pitch, start_beats, length_beats, velocity, channel}]}]` is displayed under a default-collapsed “新增音符明细（N）” disclosure. Each clip has the backend's human-readable label; every added note shows its MIDI pitch number, clip-relative zero-based start in quarter-note beats, length in the same unit, velocity and channel. The explanation explicitly identifies these as the inputs at the add-notes step; later transpose, velocity or other changes are described by the plan steps. The disclosure is not presented as the final transformed note state. No JSON or internal identifiers are exposed.
+
+Rows are built only when the disclosure first opens, with 50 notes per page and previous/next navigation through all supplied notes (up to the planner's 2000-operation bound). A plan/content signature prevents polling from replacing the note DOM, its open state or the current page. Closing and reopening the same disclosure reuses its rows; a different plan starts collapsed. Plans without the optional field keep the previous layout. A 2-column definition list fits the narrow sidebar without squeezing six table columns together.
+
+Synthetic assertions and 260px/340px capture cases have been added for the five exact numeric fields, quarter-beat and zero-origin wording, add-step versus final-result wording, text-only clip labels, lazy construction, unchanged DOM/open/page on refresh, all 2000 notes reachable with only 50 rows mounted, and absent-field compatibility. These changes have not been executed or visually accepted yet; the parent requested a fresh freeze before unified verification.
+
 ## Independent finish review
 
 The following review covers the earlier companion layout, not the new embedded sidebar. Batch 1 sidebar evidence and independent review are recorded separately after implementation.

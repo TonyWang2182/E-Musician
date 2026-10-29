@@ -25,20 +25,47 @@ def embedded_session(path, provider):
     recorder=Recorder("agent-embedded-launch","Python + native DAW","DAW-owned helper only; launch is not GUI/audio acceptance")
     started=time.perf_counter()
     record, record_path, log_path=recorder.new_record([sys.executable,__file__,"--serve","--embedded-session","<local session capability file>"],"launch")
+    stage="load_session"
     try:
         config=load_session(path)
+        stage="connect_native"
         bridge=DawBridge(client=SocketClient(config),embedded=True)
+        stage="create_runtime"
         runtime=AgentRuntime(bridge,provider)
+        stage="bind_http"
         server=AgentServer(runtime)
+        stage="publish_ready"
         ready=Path(config["ready_path"])
         temporary=ready.with_suffix(".tmp")
         temporary.write_text(json.dumps({"url":server.origin+"/?embedded=1#token="+server.token}),encoding="utf-8")
         temporary.replace(ready)
         record.update(status="launched",exit_code=0)
         log_path.write_text("Authenticated loopback helper ready; no model request sent.\n",encoding="utf-8")
-    except Exception:
-        record.update(status="failed",exit_code=2,error="Embedded helper startup failed; capability and credentials omitted.")
-        log_path.write_text("Embedded helper startup failed.\n",encoding="utf-8")
+    except Exception as exc:
+        import traceback
+        # Never log exception messages, source lines or locals: they may contain
+        # session capabilities or credentials. Stage/type/locations are sufficient.
+        diagnostic={"stage":stage,"exception_type":type(exc).__name__,
+                    "frames":[{"file":Path(frame.filename).name,"function":frame.name,"line":frame.lineno}
+                              for frame in traceback.extract_tb(exc.__traceback__)]}
+        if stage=="load_session":
+            try:
+                source=Path(path).resolve()
+                with source.open("rb") as sample:
+                    payload=sample.read(4097)
+                if len(payload)<=4096:
+                    value=json.loads(payload.decode("utf-8-sig"))
+                    ready=Path(value["ready_path"]).resolve()
+                    expected=source.stem+".ready.json"
+                    diagnostic["path_shape"]={"parent_equal":ready.parent==source.parent,
+                        "name_equal":ready.name==expected,
+                        "name_casefold_equal":ready.name.casefold()==expected.casefold(),
+                        "input_name_length":len(source.name),"ready_name_length":len(ready.name)}
+            except Exception:
+                pass
+        record.update(status="failed",exit_code=2,error="Embedded helper startup failed; capability and credentials omitted.",
+                      startup_diagnostic=diagnostic)
+        log_path.write_text(json.dumps(diagnostic,ensure_ascii=False)+"\n",encoding="utf-8")
         recorder.finish(record,record_path,log_path,started)
         raise
     recorder.finish(record,record_path,log_path,started)
@@ -99,7 +126,7 @@ def main():
             return 2
     if args.embedded_session:
         return embedded_session(args.embedded_session,provider)
-    exe=args.exe or ROOT/"build/sidebar/bin/Release/E-musician.exe"
+    exe=args.exe or ROOT/"build/agent-batch2/bin/Release/E-musician.exe"
     if not exe.is_file():
         Recorder("agent-launch","Python","Missing DAW executable").preflight_failure("DAW executable not found.")
         parser.error("DAW executable missing. Pass --exe with the built path.")

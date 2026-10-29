@@ -1,0 +1,50 @@
+{
+  "mode": "live-first-plan-kimi",
+  "requested_provider": "kimi",
+  "requested_model": "kimi-k2.6",
+  "exe_sha256": "4fdb7ad2b6d6c6f7ee196e4d8519d452894e22439dcacbd411dee60467b2d190",
+  "physical_audio": false,
+  "plugins_loaded": false,
+  "existing_windows_touched": false,
+  "live_scope": "first three-action create-track/create-clip/add-notes plan only",
+  "live_attempt_limit": 4,
+  "checks": [
+    "three-action symbolic creation applies once and native readback matches all four explicit notes",
+    "one Undo removes the entire first creation chain",
+    "fixture-driver Redo restores the first chain including native IDs",
+    "duplicate uses fresh note IDs; velocity and destination apply to copy while source remains unchanged",
+    "invalid later model action rejects the entire proposal before native mutation",
+    "native missing later reference leaves no orphan track or undo entry",
+    "native reference type mismatch leaves no orphan clip",
+    "native forward reference rolls back earlier candidate rename",
+    "native invalid later note leaves prior gain and history unchanged",
+    "one Undo after all rejected candidates still restores the pre-duplicate project",
+    "trim boundaries, note deletion/length/move/add and clip deletion match one sequential native result",
+    "one Undo restores both deleted clip and all pre-trim note data",
+    "fixture-driver save/open restores persisted chain after an unsaved control edit"
+  ],
+  "passed": true,
+  "configured_model": "kimi-k2.6",
+  "real_provider_phase_complete": true,
+  "saved_project": "build\\music-agent-batch2-integration\\18a9d140-88f0-47d0-923b-ffa341623c36\\batch2-roundtrip.emproj",
+  "final_content_sha256": "89f18c38a37cb38979f194634775a9a6fd4bcba2b21b940745c4ae885a1b7673",
+  "real_model_usage": {
+    "attempts": 1,
+    "completed_responses": 1,
+    "prompt_tokens": 3090,
+    "completion_tokens": 234,
+    "returned_models": [
+      "kimi-k2.6"
+    ]
+  },
+  "synthetic_provider_usage": {
+    "attempts": 3,
+    "completed_responses": 3,
+    "prompt_tokens": 0,
+    "completion_tokens": 0
+  },
+  "usage_note": "Only the initial creation chain may call a real provider. Later calls are fixtures. Failed attempts may be billed without usage.",
+  "protected_file_count": 77,
+  "protected_files_unchanged": true,
+  "elapsed_seconds": 10.686
+}
