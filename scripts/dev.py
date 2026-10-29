@@ -59,7 +59,7 @@ def source_fingerprint() -> dict:
                 if path.is_file() and "__pycache__" not in path.parts
                 and path.suffix.lower() not in (".pyc", ".pyo")
             )
-    for name in ("CMakeLists.txt", "CMakePresets.json"):
+    for name in ("CMakeLists.txt", "CMakePresets.json", "Start-Agent.cmd"):
         path = ROOT / name
         if path.is_file():
             candidates.add(path)

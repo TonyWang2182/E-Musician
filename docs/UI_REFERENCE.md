@@ -23,7 +23,7 @@
 
 切换 Dock、选轨和定位不复制工程，不产生新的音乐状态。选轨不自动独奏；Mute/Solo 独立。文本编辑中不触发 Space 播放；Ctrl+S 绑定工程级保存，其OS输入验证边界见第8节。未保存工程的 New/Open/Close 使用 Save/Discard/Cancel；保存取消或失败不得继续关闭。普通 Save 也独立追踪 job，立即显示`Saving...`；重复 Ctrl+S 在命令入口合并，有新编辑时至多排一次后续保存。失败显示`Save failed - retry`；只有文件与主线程元数据提交完成且没有后续修改才显示`Saved`，后续修改显示`Unsaved changes`。Save As 在选择路径后检查 projectId，以确认时的最新 revision 受理。
 
-Agent 的当前入口是本地 JSONL stdio API，协议见 [AGENT_API](AGENT_API.md)。当前没有聊天栏。后续侧栏应引用同一 project ID、对象 ID、revision 和明确范围；先展示可审阅计划，再通过公共命令提交。它不能直接写 Edit，也不能依据易变的行号猜测目标。
+Agent 的当前入口是本地 JSONL stdio API，协议见 [AGENT_API](AGENT_API.md)。原生JUCE窗口当前没有聊天栏；独立分支已增加可选的Kimi本机伴随窗口，详见[Agent快速上手](AGENT_QUICKSTART.md)与[界面契约](design/agent-ui.md)。后续原生侧栏应引用同一 project ID、对象 ID、revision 和明确范围；先展示可审阅计划，再通过公共命令提交。它不能直接写 Edit，也不能依据易变的行号猜测目标。
 
 ## 3 当前主编曲与音频编辑
 

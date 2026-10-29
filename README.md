@@ -34,6 +34,10 @@ python scripts/dev.py run --config Debug --note "启动编辑器"
 
 Source 在底部查看选中音频源。真实分轨/转录、32 位插件桥接、侧链、插件任意多输出、comping、自动化 Touch/Latch/Write、TempoMap 和时间拉伸尚未实现。MP3 支持导入和播放，不支持导出。
 
+## Kimi 编曲助手 0.1
+
+本分支新增可选的本机助手：读取工程 → 提出方案 → 明确应用 → 回读检查，支持基本轨道/片段和 MIDI 编辑。双击 `Start-Agent.cmd`，或运行 `python scripts/run_agent.py --exe PATH`。它连接自己启动的 DAW 窗口；密钥通过 Windows DPAPI 保存在本机，代码与 Git 不包含凭证。首次人工步骤、支持范围与费用边界见 [Agent 快速上手](docs/AGENT_QUICKSTART.md)，自动和真实模型证据见 [验证记录](docs/verification/2026-10-29-kimi-agent/RESULTS.md)。
+
 ## 工程与 Agent
 
 schema 4 工程由 `.emproj` 和同名 `.assets` 目录组成，保存音频归档、MIDI 音符及控制器、片段、混音、插件状态、路由和曲线。移动工程时两者一起移动并保留名称关系。schema 1/2/3 可只读迁移，首次覆盖前保留旧清单备份。普通保存复用未变素材，后台完成文件事务；界面显示状态和结果，保存期间的新编辑仍保持未保存。保存后重开工程才切到归档素材绑定，删除原素材前先重开；旧素材代次与 MP3 PCM 缓存目前不自动清理。Undo 是进程内历史，不随工程重开恢复。

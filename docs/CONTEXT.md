@@ -1,3 +1,13 @@
+# 当前迭代：Kimi Agent 0.1（2026-10-29）
+
+本聊天在独立工作树 `music-agent-kimi` / 分支 `feature/kimi-music-agent` 从 `7f7eb65` 开始。实现可选Python本机助手和网页，通过JSONL连接自己启动的可见DAW；实时引擎仍为原0.6.1。本轮不替换原DAW目录、不自动合并main。
+
+已通过本地状态机/工具编译/凭证/HTTP回归，以及真实Kimi K2.6 + 真实DAW离线进程的小闭环（3次真实聊天请求、5868输入/298输出token；有一次额外模拟冲突检查）。独立UI合成审查通过，物理设备/实际工程人工操作待用户。完整证据及失败修复见[验证记录](verification/2026-10-29-kimi-agent/RESULTS.md)。
+
+入口与人工步骤：[Agent快速上手](AGENT_QUICKSTART.md)。核心文件 `scripts/music_agent/`，启动 `scripts/run_agent.py`，测试 `scripts/check_agent.py`。凭证只在本机DPAPI；模型偏好与约5MiB元数据审计在LOCALAPPDATA，不在Git。暂无音频生成/理解、任意插件控制、长期任务或内嵌原生聊天栏。
+
+下一步先由用户验证一次已有工程的“提议—应用—回读—撤销”；再根据实际创作任务扩展工具，不把当前受限编辑层当完整自主创作系统。此前DAW阶段的原始状态保留如下，历史“Agent后置”已被本轮明确授权更新。
+
 # 当前状态：0.6.1细网格与缩放（2026-10-29）
 
 已实现并通过Release自动验证：1/16384固定/自适应下界、Ctrl+4当前编辑区吸附、关虚线/开实线、三级小节标尺、指针锚定深缩放及可视范围绘制。入口build/bin/Release/E-musician.exe（0.6.1），旧0.6.0备份.cache/v061。分支feature/fine-grid-v061，从237c1d6继续；main不自动合并。GUI、设备和听感仍由用户操作，不使用computer-use。

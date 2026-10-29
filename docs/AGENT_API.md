@@ -1,6 +1,6 @@
 # 本地 Agent 控制接口 v1
 
-实现入口：`EngineSession::executeRequest`、`ControlServer`。本文已对照0.6.0源码更新（2026-10-29），协议版本仍为v1。新增接口随最终Release5/5通过；人工操作与听感待验收，完整范围见[0.6.0记录](verification/2026-10-29-v060/RESULTS.md)。协议不包含模型、聊天界面或网络服务。
+实现入口：`EngineSession::executeRequest`、`ControlServer`。本文已对照0.6.0源码更新（2026-10-29），协议版本仍为v1。新增接口随最终Release5/5通过；人工操作与听感待验收，完整范围见[0.6.0记录](verification/2026-10-29-v060/RESULTS.md)。协议本身不包含模型、聊天界面或网络服务。可选的 Kimi 伴随层现已在独立分支实现，入口与边界见[Agent快速上手](AGENT_QUICKSTART.md)。
 
 ## 启动和最小示例
 
@@ -9,6 +9,8 @@ python scripts/agent_client.py --exe build/bin/Release/E-musician.exe --demo bui
 ```
 
 该演示只在专用进程创建 8 小节测试音符、导出 MIDI、验证一步撤销，不播放声音，也不是产品乐句模板。应用直接入口为 `E-musician.exe --control-stdio`；加 `--show` 可同时显示该进程的界面。通过 stdin/stdout 发送 UTF-8 JSONL，stderr 留给诊断。关闭 stdin 后排空已接收请求再退出；此进程有自己的工程，不控制另一已打开的 DAW 窗口。
+
+自动测试可使用Python客户端的 `offline_test=True`，映射到0.6.1既有 `--control-output-probe` 离线内存设备模式；普通 `--offline` 单独搭配control-stdio在该二进制中不生效。此诊断模式会向stderr写入探针标记，JSONL仍保持独立。
 
 Python中可用`Client(executable, show=True)`同时显示受控工程，Agent和用户编辑同一活动Edit。调用者需保持Client/进程存活；关闭Client也会结束该控制实例。
 

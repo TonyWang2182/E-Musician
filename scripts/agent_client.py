@@ -39,13 +39,13 @@ class ControlError(RuntimeError):
 
 
 class Client:
-    def __init__(self, executable: Path, timeout: float = 120.0, show: bool = False):
+    def __init__(self, executable: Path, timeout: float = 120.0, show: bool = False, offline_test: bool = False):
         self.timeout = timeout
         self.responses: queue.Queue[object] = queue.Queue(maxsize=32)
         self.closed = threading.Event()
         flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
         self.process = subprocess.Popen(
-            [str(executable.resolve()), "--control-stdio", *(["--show"] if show else [])],
+            [str(executable.resolve()), "--control-stdio", *(["--show"] if show else []), *(["--control-output-probe"] if offline_test else [])],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             creationflags=flags,
         )

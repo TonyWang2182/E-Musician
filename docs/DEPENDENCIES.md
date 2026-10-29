@@ -122,3 +122,9 @@ MP3回归样本来自本项目公式合成，包含CBR双声道和VBR单声道�
 0.3.0在项目`CMakeLists.txt`为Windows生成的`EMusician_resources.rc`补上`Info.txt`依赖。固定JUCE 8.0.6的生成规则遗漏该依赖，曾导致增量构建后程序内为0.3.0而Explorer属性仍为0.1.0。修正在本项目，不修改上游依赖；升级JUCE时检查是否仍需补充。
 
 升级时先明确新的Tracktion/JUCE组合与VST2接口来源，在`dependencies.json`及对应bootstrap中更新精确提交/哈希并记录原因。重新下载核对后，通过日志入口完成Debug/Release和受影响的音频、设备、插件验证，再更新本文件和开发日志中的版本、许可文本差异及兼容结果。上游DemoRunner是可选构建目标，默认应用构建不会替项目执行全部上游示例或测试。
+
+## 可选Kimi助手（2026-10-29）
+
+产品使用Python标准库，验证解释器Python3.14.0（建议3.10+），无OpenAI/Moonshot SDK运行依赖。Kimi模型为官方接口实际返回的kimi-k2.6；网络模型不在本地锁定权重，官方参数依据见ADR0009。凭证使用Windows DPAPI系统API。
+
+合成UI测试使用Codex bundled runtime 26.1020.11618中的Playwright1.62.1和本机headless Microsoft Edge156.0.4314.50；这些仅为测试工具，不是产品运行依赖。源码测试脚本通过PLAYWRIGHT_MODULE定位已有包，未自动下载依赖。真实DAW复用0.6.1已记录哈希的原生EXE。
