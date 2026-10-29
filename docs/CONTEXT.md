@@ -8,6 +8,8 @@
 
 本轮构建/测试期间源码均冻结，最终构建、测试和归档指纹一致。69个用户工程/设置文件、514019450字节逐文件SHA-256未变，精确清单仅保留本地.cache/v060。用户负责GUI和听感，开发者编码/debug；未使用computer-use或物理设备测试。自动smoke明确offline、嵌套引擎用内存配置，物理时钟检查记skipped。下一步按[新增功能短测](review/2026-10-29-daily-workflow/MANUAL-CHECK.md)检查新增手势、click/count-in；不重复全部旧验收。DEVLOG追加，任务/架构/API已更新。
 
+实现提交[9f491e7](https://github.com/TonyWang2182/E-Musician/commit/9f491e71532a448cb80b46dd750e7c79166db7e0)已推送并核对远端feature/daily-workflow-v060；79个源码输入逐文件SHA-256与暂存Git字节相同，未上传用户音乐、工程、插件或二进制。main仍为d4ed6c8，不把待新增人工短测的版本自动合并为默认分支。VS Code继续使用本仓库和既有dev.py任务。
+
 Agent下一阶段可建立在现有JSONL能力、身份/版本校验、批次/Undo、任务及事件上；这轮补齐剪贴板身份和录音准备命令，没有接入模型服务。自动保存/恢复和已暂缓扩展不开发。下方0.5.x章节均为历史基线，不代表当前分支或新版验证。
 
 ## 0.5.2修复与发布基线（2026-10-27）

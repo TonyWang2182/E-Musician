@@ -2,6 +2,8 @@
 
 日期：2026-10-29（Asia/Shanghai）。实现与本轮离线自动验证完成，新增操作和听感待用户短测。分支`feature/daily-workflow-v060`；没有将旧版的硬件测试或长跑当成本版性能证据。
 
+源码及证据提交[9f491e7](https://github.com/TonyWang2182/E-Musician/commit/9f491e71532a448cb80b46dd750e7c79166db7e0)已推送并核对远端开发分支。79个源码输入与提交暂存字节SHA-256一致；main保留d4ed6c8。仅同步源码、文档和合成验证材料。
+
 ## 产物与复现
 
 - 程序：`E:/E-musician/build/bin/Release/E-musician.exe`，0.6.0。旧0.5.2 EXE/PDB保留在忽略目录`.cache/v060`。
