@@ -1,6 +1,12 @@
 # E-musician 开发计划
 
-版本：1.7。日期：2026-10-29（Asia/Shanghai）。项目：E:/E-musician。
+版本：1.8。日期：2026-10-29（Asia/Shanghai）。项目：E:/E-musician。
+
+## 0.6.1：细网格与深度缩放
+
+已实现且Release5/5通过：共享1/16384下界与三级标尺；编曲视口坐标和有界精细波形worker；钢琴卷帘可视索引、吸附虚实线及极细编辑；原生微小片段保存/Undo与4096PPQN标准MIDI往返。首轮统一检查通过，源代码冻结，证据见[0.6.1记录](verification/2026-10-29-v061/RESULTS.md)。
+
+开发计划/文件分工见[计划](review/2026-10-29-fine-grid/PLAN.md)，取舍见ADR0008。用户已关闭旧版，0.6.0备份后使用原build增量构建；Release入口不变。真实GUI/播放短测待用户，Debug未重验。main不自动合并，Agent扩展保持后置。
 
 ## 0.6.0：日常编曲体验
 

@@ -31,7 +31,7 @@ public:
     void paint(juce::Graphics&) override;
     void resized() override;
     bool keyPressed(const juce::KeyPress&) override;
-    juce::Result runInteractionSmokeTest(juce::DynamicObject& report);
+    juce::Result runInteractionSmokeTest(juce::DynamicObject& report, const juce::File& artifactDirectory = {});
     std::function<void(const juce::String&, const std::vector<Note>&, std::uint64_t)> onWriteNotes;
     // Rejected local clipboard operations leave the authoritative notes untouched.
     std::function<void(const juce::String&)> onEditError;

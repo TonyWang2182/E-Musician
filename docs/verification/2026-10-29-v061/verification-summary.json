@@ -1,0 +1,59 @@
+{
+  "version": "0.6.1",
+  "branch": "feature/fine-grid-v061",
+  "git_base": "237c1d6452a35624e77c13f361ebddd489c4ea82",
+  "source_sha256": "f4f5392e7f1c11f811a0e8e4a4a5d3403e9001f11feb8dcb46e7bcfb8c4670b1",
+  "source_input_count": 79,
+  "exe_sha256": "491ba101bfe1eefb48a82bacba2226c722c7e97bc87e4743ff5e45cd4e6a4cfe",
+  "config": "Release",
+  "test_record": "20261029T081851.245584Z-09fd8d780f",
+  "ctest": "5/5 passed",
+  "source_frozen_across_configure_build_test": true,
+  "hardware": {
+    "cpu": "Intel Core i7-13700H",
+    "cores": 14,
+    "logical_processors": 20,
+    "physical_memory_bytes": 31923757056,
+    "os": "Windows11 10.0.26200"
+  },
+  "measurement": {
+    "gui": "synthetic software component renders, no OS input latency or display presentation measurement",
+    "audio": "offline; generated production buffers48000Hz/256; physical device tests skipped",
+    "piano_frames_each": 60,
+    "grid_iterations": 120,
+    "detail_frames": 60
+  },
+  "protected_files": {
+    "count": 73,
+    "bytes": 514827523,
+    "all_unchanged": true,
+    "exact_inventory": "local-only .cache/v061/user-files-before.json"
+  },
+  "manual_status": "pending user checks",
+  "debug_rebuilt": false,
+  "evidence": {
+    "arrangement-report.json": "32f63150565b882f710d987ecd184d94461f6b0b32784e6625940b1beed69c0d",
+    "clip-report.json": "a5cc2c5e48e527438dfafc38f3c8a33a2db8ff2bcdf4c07f89181cda4325b0b9",
+    "production-smoke.json": "73c976e20e44f75d7450ccf031245a6b7c2e43fa42af7775387c284a5c4a5961",
+    "project-report.json": "d294ca93820ad8a15249f2259b2dc2dddec15a174683eee97f9f16570bdc20bb",
+    "daw-report.json": "7ec76e98845bdd570a2ed72548cc40019898cbe7482687b4a3b25aad66acd48d",
+    "storage-v3-report.json": "e530b9ce1cde04516109ec35e0a19d0a5d04bc33e85f003b59ee46395f5c74a4",
+    "engine-report.json": "5855033e2af0d5d48380fa8ba8ef635e67be2815092e0eb5fa2105cfc557baec",
+    "transport-report.json": "4ad59f36e3f3d8a93fe42f9a923b8c1325b14b7c92bb89e1703716642aa36b4e",
+    "arrangement-grid-solid.png": "53a909bf047c20515475b8d2ce06d943bddb1c9442fd24b1cda78002816e0a5c",
+    "arrangement-grid-dashed.png": "8635f9cd05cfeb678ff547c87d5faabe15985d9b15fbb2eea10c54d7545e4516",
+    "arrangement-deepzoom.png": "ef3fbfad6fcda2dcc7afffb95b52cd602ec394017c5af36dd1bc5d20a0d523ef",
+    "arrangement-waveform-detail.png": "07e900a71e3215e51e3e0f422382b4559dd0c266aecd74f60ad540c6945b9995",
+    "piano-fine-grid-solid.png": "2f46ad809a123ac1048632ecf3d012705804b3bb28246aa2a422cfae58ee352b",
+    "piano-fine-grid-dashed.png": "0898ae5b59632a26c7bb7262c68b85c125df2caa6fbed2dd100704cc0f71edfb",
+    "piano-far-ruler.png": "fd2119a80fecbab6611a4628bcb962dbe59e0f84d092df7b945ceb46a3100327",
+    "piano-100k-deep-zoom.png": "bdcb001982b8d2b26f82f73574a26698a56e2406726b86954417d304dba4d29d",
+    "ui-1280x800.png": "463091b87f3a374392609e79f5b99666e0af240a24333a8b42c103df01316374",
+    "ui-1000x650.png": "c56f4fd3e098483e76ddaf845c2ceab62c08edc959315f4370a3abcdd84a8c8f",
+    "ui-midi-dock-1000x650.png": "5fbe5051835714cf1d3ac77abf23467115700cdb37af8a0338205798a35f7230",
+    "ui-empty-1280x800.png": "cf79a46adb30a774cd0eb2c7c190e7a3c974a4b46cf8ff97974f34ccd2f0f6c8",
+    "ctest-output.txt": "8ed31b3fa2269549adfa9dd2a673056244ee0390b4910704c6d244becd90a5c4"
+  },
+  "ctest_text_encoding": "Converted Windows ANSI LastTest.log to UTF-8/LF; original retained under build/Testing/Temporary and command raw logs.",
+  "staged_source_bytes_match_verified_build": true
+}

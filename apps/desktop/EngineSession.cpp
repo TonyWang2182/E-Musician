@@ -5,6 +5,7 @@
 #include "EngineSessionProduction.h"
 #include "core/commands/RevisionGuard.hpp"
 #include "core/time/Time.hpp"
+#include "core/time/EditGrid.hpp"
 #include <tracktion_engine/tracktion_engine.h>
 #include <juce_cryptography/juce_cryptography.h>
 #include <algorithm>

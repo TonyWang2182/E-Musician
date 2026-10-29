@@ -3,12 +3,18 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 #include <set>
 
 namespace emusician {
 namespace {
 const juce::Colour ink { 0xff171817 }, rule { 0xffc6c9c3 }, paper { 0xfffefefd }, quiet { 0xff626560 };
 juce::Font mono(float size) { return juce::Font(juce::FontOptions(juce::Font::getDefaultMonospacedFontName(), size, juce::Font::plain)); }
+bool isTextInput(const juce::Component* focus)
+{
+    for (; focus != nullptr; focus = focus->getParentComponent()) if (dynamic_cast<const juce::TextEditor*>(focus) != nullptr) return true;
+    return false;
+}
 bool isBlack(int pitch) { const int n = pitch % 12; return n == 1 || n == 3 || n == 6 || n == 8 || n == 10; }
 juce::String pitchName(int pitch)
 {
@@ -27,7 +33,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
         void mouseDoubleClick(const juce::MouseEvent& e) override { if (!p.draw.getToggleState()) p.insert(e.position, e.mods.isAltDown()); }
         void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override
         {
-            if (e.mods.isCtrlDown()) p.setZoom(p.pixelsPerBeat * (wheel.deltaY > 0 ? 1.25 : 0.8));
+            if (e.mods.isCtrlDown() && wheel.deltaY != 0) p.setZoom(p.pixelsPerBeat * (wheel.deltaY > 0 ? 1.25 : 0.8), e.position.x);
             else if (e.mods.isShiftDown()) { p.firstBeat = juce::jmax(0.0, p.firstBeat - wheel.deltaY * p.visibleBeats()); p.layout(); }
             else { p.topPitch = juce::jlimit(12, 127, p.topPitch + juce::roundToInt(wheel.deltaY * 24.0f)); p.layout(); }
         }
@@ -41,10 +47,12 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
                 &down, &up, &velocity, &zoomOut, &zoomIn, &fit, &drums, &drumPitch, &drumBar }) owner.addAndMakeVisible(item);
         for (auto* button : { &draw, &snapEnabled, &copy, &cut, &paste, &erase, &duplicate, &quantize, &down, &up, &zoomOut, &zoomIn, &fit, &drums }) button->getProperties().set("flat", true);
         snap.addItem("1/4", 2); snap.addItem("1/8", 3); snap.addItem("1/16", 4); snap.addItem("1/32", 5);
-        snap.addItem("1/64", 6); snap.addItem("1/8 T", 7); snap.addItem("1/16 T", 8);
+        snap.addItem("1/64", 6);
+        for (int power = 7; power <= 14; ++power) snap.addItem("1/" + juce::String(1 << power), power + 2);
+        snap.addItem("1/8 T", 7); snap.addItem("1/16 T", 8);
         snap.setSelectedId(4, juce::dontSendNotification);
-        snap.onChange = [this] { const auto id = snap.getSelectedId(); gridBeats = id == 7 ? 1.0 / 3.0 : id == 8 ? 1.0 / 6.0 : std::pow(0.5, id - 2); layout(); };
-        snap.setTooltip("Note grid precision. T means triplets. Turning Snap off keeps this grid visible.");
+        snap.onChange = [this] { const auto id = snap.getSelectedId(); gridBeats = id == 7 ? 1.0 / 3.0 : id == 8 ? 1.0 / 6.0 : std::ldexp(1.0, id >= 9 ? 4 - id : 2 - id); layout(); };
+        snap.setTooltip("Note grid: 1/4 through 1/16384 of a whole note. T means triplets. Snap off shows dashed time lines.");
         snapEnabled.setClickingTogglesState(true); snapEnabled.setToggleState(true, juce::dontSendNotification);
         snapEnabled.setTooltip("Snap note starts and ends to the grid. Alt bypasses snap temporarily; Ctrl+4 toggles it.");
         snapEnabled.onClick = [this] { grid.repaint(); owner.repaint(); };
@@ -55,7 +63,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
         paste.setTooltip("Paste at the insertion marker (Ctrl+V). Click the ruler or an empty cell to place it; otherwise use the playhead.");
         erase.onClick = [this] { deleteSelected(); };
         duplicate.onClick = [this] { duplicateSelected(); };
-        quantize.onClick = [this] { modify([](Note& n, Impl& p) { n.startBeats = time::snapEditBeat(n.startBeats, p.gridBeats); n.lengthBeats = juce::jmax(0.03125, time::snapEditBeat(n.lengthBeats, p.gridBeats)); }); };
+        quantize.onClick = [this] { modify([](Note& n, Impl& p) { n.startBeats = time::snapEditBeat(n.startBeats, p.gridBeats); n.lengthBeats = juce::jmax(time::minimumEditGridBeats, time::snapEditBeat(n.lengthBeats, p.gridBeats)); }); };
         down.onClick = [this] { transpose(-1); }; up.onClick = [this] { transpose(1); };
         down.setTooltip("Transpose selected notes down one semitone (Down arrow; Shift+Down for one octave).");
         up.setTooltip("Transpose selected notes up one semitone (Up arrow; Shift+Up for one octave).");
@@ -100,14 +108,107 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
         const int rows = juce::jmax(1, int(plot().getHeight() / rowHeight));
         topPitch = juce::jmin(127, high + juce::jlimit(0, 2, (rows - (high - low + 1)) / 2));
     }
-    double visibleBeats() const { return juce::jmax(0.01, plot().getWidth() / pixelsPerBeat); }
+    double visibleBeats() const { return juce::jmax(time::minimumEditGridBeats, plot().getWidth() / pixelsPerBeat); }
     double snapped(double value) const { return snapEnabled.getToggleState() ? time::snapEditBeat(value, gridBeats) : value; }
     double insertionPoint() const { return juce::jlimit(0.0, length, insertionExplicit ? insertionBeat : playheadBeat - clipStart); }
     void markInsertion(double beat) { insertionBeat = juce::jlimit(0.0, length, beat); insertionExplicit = true; editError.clear(); grid.repaint(); owner.repaint(); }
-    float x(double beat) const { return plot().getX() + float((beat - firstBeat) * pixelsPerBeat); }
+    float x(double beat) const
+    {
+        // Convert only viewport-relative coordinates to float. A many-hour clip
+        // at deep zoom must never create giant canvas geometry or int overflow.
+        const double guard = juce::jmax(1, grid.getWidth()) * 4.0;
+        return plot().getX() + float(juce::jlimit(-guard, guard, (beat - firstBeat) * pixelsPerBeat));
+    }
     float y(int pitch) const { return plot().getY() + float(topPitch - pitch) * rowHeight; }
     double atBeat(float px, bool bypass = false) const { const double b = firstBeat + (px - plot().getX()) / pixelsPerBeat; return juce::jmax(0.0, bypass ? b : snapped(b)); }
     int atPitch(float py) const { return juce::jlimit(0, 127, topPitch - int(std::floor((py - plot().getY()) / rowHeight))); }
+    static constexpr std::size_t maximumVisibleNotes = 8192;
+    static constexpr double maximumPixelsPerBeat = 65536.0;
+    struct IndexedNote { std::size_t note; int left = -1, right = -1; double start = 0, end = 0, maxEnd = 0; };
+    int buildIndex(const std::vector<std::size_t>& entries, std::size_t begin, std::size_t end)
+    {
+        if (begin == end) return -1;
+        const auto middle = begin + (end - begin) / 2;
+        const auto noteIndex = entries[middle]; const auto& note = notes[noteIndex];
+        const int index = int(noteIndexNodes.size());
+        noteIndexNodes.push_back({ noteIndex, -1, -1, note.startBeats, note.startBeats + note.lengthBeats, note.startBeats + note.lengthBeats });
+        const int left = buildIndex(entries, begin, middle), right = buildIndex(entries, middle + 1, end);
+        auto& node = noteIndexNodes[std::size_t(index)]; node.left = left; node.right = right;
+        if (left >= 0) node.maxEnd = juce::jmax(node.maxEnd, noteIndexNodes[std::size_t(left)].maxEnd);
+        if (right >= 0) node.maxEnd = juce::jmax(node.maxEnd, noteIndexNodes[std::size_t(right)].maxEnd);
+        return index;
+    }
+    void rebuildNoteIndex()
+    {
+        ++indexBuilds;
+        noteIndexNodes.clear(); noteIndexNodes.reserve(notes.size()); noteIndexRoots.fill(-1);
+        std::array<std::vector<std::size_t>, 128> pitches;
+        for (std::size_t i = 0; i < notes.size(); ++i) if (notes[i].pitch >= 0 && notes[i].pitch <= 127) pitches[std::size_t(notes[i].pitch)].push_back(i);
+        for (std::size_t pitch = 0; pitch < pitches.size(); ++pitch) {
+            auto& entries = pitches[pitch];
+            std::sort(entries.begin(), entries.end(), [&](auto a, auto b) { return notes[a].startBeats == notes[b].startBeats ? a < b : notes[a].startBeats < notes[b].startBeats; });
+            noteIndexRoots[pitch] = buildIndex(entries, 0, entries.size());
+        }
+    }
+    juce::Rectangle<float> noteRectangle(std::size_t index) const
+    {
+        const auto& note = notes[index]; const auto area = plot();
+        const double end = note.startBeats + note.lengthBeats;
+        if (end <= firstBeat || note.startBeats >= firstBeat + visibleBeats()) return {};
+        const double left = juce::jmax(double(area.getX()) - 2.0, double(area.getX()) + (note.startBeats - firstBeat) * pixelsPerBeat);
+        const double right = juce::jmin(double(area.getRight()) + 2.0, double(area.getX()) + (end - firstBeat) * pixelsPerBeat);
+        return { float(left), y(note.pitch) + 1, float(juce::jmax(2.0, right - left)), rowHeight - 2 };
+    }
+    void appendVisible(std::size_t index)
+    {
+        const auto rectangle = noteRectangle(index);
+        if (rectangle.intersects(plot())) visible.push_back({ index, rectangle });
+    }
+    template<typename F> void visitNotes(int index, double begin, double end, F&& visit) const
+    {
+        if (index < 0) return;
+        const auto& node = noteIndexNodes[std::size_t(index)];
+        if (node.maxEnd <= begin) return;
+        visitNotes(node.left, begin, end, visit);
+        if (node.start > end) return;
+        if (node.end > begin) visit(node.note);
+        visitNotes(node.right, begin, end, visit);
+    }
+    std::size_t hitNote(juce::Point<float> point) const
+    {
+        // Hit-testing is independent of the preview drawing budget. Choosing the
+        // highest source index matches the stable paint order even in dense views.
+        std::size_t hit = notes.size();
+        if (!plot().contains(point)) return hit;
+        const double beat = firstBeat + (point.x - plot().getX()) / pixelsPerBeat;
+        visitNotes(noteIndexRoots[std::size_t(atPitch(point.y))], beat - 2.0 / pixelsPerBeat, beat,
+            [&](std::size_t index) { if (noteRectangle(index).contains(point) && (hit == notes.size() || index > hit)) hit = index; });
+        return hit;
+    }
+    void completeBoxSelection()
+    {
+        selected = drag.selectionBefore;
+        const auto box = drag.selectionBox.getIntersection(plot());
+        if (box.isEmpty()) return;
+        const double begin = firstBeat + (box.getX() - plot().getX() - 2.0) / pixelsPerBeat;
+        const double end = firstBeat + (box.getRight() - plot().getX()) / pixelsPerBeat;
+        const int low = atPitch(box.getBottom()), high = atPitch(box.getY());
+        for (int pitch = low; pitch <= high; ++pitch)
+            visitNotes(noteIndexRoots[std::size_t(pitch)], begin, end, [&](std::size_t index) {
+                if (noteRectangle(index).intersects(box)) selected.insert(notes[index].id);
+            });
+    }
+    void queryVisible(int index, double end)
+    {
+        if (index < 0 || visible.size() >= maximumVisibleNotes) { if (index >= 0) densePreview = true; return; }
+        ++queriedIndexNodes;
+        const auto& node = noteIndexNodes[std::size_t(index)];
+        if (node.maxEnd <= firstBeat) return;
+        queryVisible(node.left, end);
+        if (node.start >= end || visible.size() >= maximumVisibleNotes) { if (visible.size() >= maximumVisibleNotes) densePreview = true; return; }
+        if (node.end > firstBeat && !std::binary_search(drag.indices.begin(), drag.indices.end(), node.note)) appendVisible(node.note);
+        queryVisible(node.right, end);
+    }
     void layout()
     {
         firstBeat = juce::jlimit(0.0, juce::jmax(0.0, length - visibleBeats()), firstBeat);
@@ -115,16 +216,26 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
         horizontal.setCurrentRange(firstBeat, visibleBeats(), juce::dontSendNotification);
         vertical.setRangeLimits(0, 128, juce::dontSendNotification);
         vertical.setCurrentRange(127 - topPitch, juce::jmin(128.0, double(plot().getHeight() / rowHeight)), juce::dontSendNotification);
-        visible.clear();
-        for (std::size_t i = 0; i < notes.size(); ++i) {
-            const auto& n = notes[i];
-            juce::Rectangle<float> r { x(n.startBeats), y(n.pitch) + 1, float(n.lengthBeats * pixelsPerBeat), rowHeight - 2 };
-            if (r.intersects(plot())) visible.push_back({ i, r });
-        }
+        visible.clear(); queriedIndexNodes = 0; densePreview = false;
+        // The immutable index represents the committed snapshot. Preview only the
+        // selected notes separately, including those dragged into a new row/range.
+        for (auto index : drag.indices) { if (visible.size() >= maximumVisibleNotes) { densePreview = true; break; } appendVisible(index); }
+        const int lowest = juce::jmax(0, topPitch - int(std::ceil(plot().getHeight() / rowHeight)));
+        for (int pitch = juce::jmin(127, topPitch); pitch >= lowest; --pitch) queryVisible(noteIndexRoots[std::size_t(pitch)], firstBeat + visibleBeats());
+        std::sort(visible.begin(), visible.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
         grid.repaint(); owner.repaint();
     }
     void scrollBarMoved(juce::ScrollBar* bar, double value) override { if (bar == &horizontal) firstBeat = value; else topPitch = 127 - int(value); layout(); }
-    void setZoom(double value) { pixelsPerBeat = juce::jlimit(12.0, 400.0, value); layout(); }
+    void setZoom(double value, float anchorX = -1)
+    {
+        const auto area = plot();
+        if (anchorX < 0) anchorX = area.getCentreX();
+        anchorX = juce::jlimit(area.getX(), area.getRight(), anchorX);
+        const double anchor = firstBeat + (anchorX - area.getX()) / pixelsPerBeat;
+        pixelsPerBeat = juce::jlimit(12.0, maximumPixelsPerBeat, value);
+        firstBeat = anchor - (anchorX - area.getX()) / pixelsPerBeat;
+        layout();
+    }
     void refreshButtons()
     {
         const bool usable = clipId.isNotEmpty(); const bool chosen = usable && !selected.empty();
@@ -138,7 +249,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     }
     void refreshSteps()
     {
-        if (steps.size() != 16) return;
+        if (steps.size() != 16 || !drums.getToggleState()) return;
         const auto block = juce::jmax(0, drumBar.getText().getIntValue() - 1) * 4.0;
         std::array<bool, 16> active {};
         for (const auto& note : notes) if (note.pitch == drumPitch.getSelectedId()) {
@@ -154,13 +265,13 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     void submit(std::uint64_t expected)
     {
         editError.clear();
-        refreshButtons(); layout();
+        rebuildNoteIndex(); refreshButtons(); layout();
         if (owner.onWriteNotes && clipId.isNotEmpty()) owner.onWriteNotes(clipId, notes, expected);
     }
     template<typename F> void modify(F fn)
     {
         if (selected.empty() || clipId.isEmpty()) return;
-        for (auto& n : notes) if (selected.count(n.id)) { fn(n, *this); n.lengthBeats = juce::jlimit(0.001, length, n.lengthBeats); n.startBeats = juce::jlimit(0.0, length - n.lengthBeats, n.startBeats); }
+        for (auto& n : notes) if (selected.count(n.id)) { fn(n, *this); n.lengthBeats = juce::jlimit(juce::jmin(time::minimumEditGridBeats, n.lengthBeats), length, n.lengthBeats); n.startBeats = juce::jlimit(0.0, length - n.lengthBeats, n.startBeats); }
         submit(revision);
     }
     void transpose(int delta) { modify([delta](Note& n, Impl&) { n.pitch = juce::jlimit(0, 127, n.pitch + delta); }); }
@@ -231,9 +342,9 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     void insert(juce::Point<float> point, bool bypass = false)
     {
         if (clipId.isEmpty() || !plot().contains(point)) return;
-        for (const auto& item : visible) if (item.second.contains(point)) return;
+        if (hitNote(point) != notes.size()) return;
         const auto start = atBeat(point.x, bypass); const auto len = juce::jmin(gridBeats, length - start);
-        if (len <= 0.001) return;
+        if (!std::isfinite(len) || len <= 0 || start + len <= start) return;
         if (notes.size() >= 100000) { reject("This clip already contains 100,000 notes."); return; }
         Note n { juce::Uuid().toString(), atPitch(point.y), start, len, int(velocity.getValue()), notes.empty() ? 1 : notes.front().channel };
         markInsertion(start);
@@ -255,23 +366,38 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
         if (grid.isShowing()) grid.grabKeyboardFocus();
         drag = {}; if (clipId.isEmpty()) return;
         if (e.position.y < plot().getY() && e.position.x >= plot().getX()) { markInsertion(atBeat(e.position.x, e.mods.isAltDown())); if (owner.onSeek) owner.onSeek((clipStart + insertionPoint()) * 60.0 / bpm); return; }
-        for (auto it = visible.rbegin(); it != visible.rend(); ++it) if (it->second.contains(e.position)) {
-            const auto& n = notes[it->first];
+        const auto hit = hitNote(e.position);
+        if (hit != notes.size()) {
+            const auto& n = notes[hit]; const auto rectangle = noteRectangle(hit);
             if (e.mods.isShiftDown() || e.mods.isCtrlDown()) { if (selected.count(n.id)) selected.erase(n.id); else selected.insert(n.id); }
             else if (!selected.count(n.id)) selected = { n.id };
             if (!selected.count(n.id)) { refreshButtons(); grid.repaint(); return; }
-            drag.mode = e.position.x >= it->second.getRight() - 6 ? Drag::resize : Drag::move;
-            drag.anchor = e.position; drag.revision = revision; drag.before = notes; drag.activeId = n.id;
+            const bool endVisible = n.startBeats + n.lengthBeats <= firstBeat + visibleBeats();
+            drag.mode = endVisible && e.position.x >= rectangle.getRight() - juce::jmin(6.0f, rectangle.getWidth() * 0.35f) ? Drag::resize : Drag::move;
+            drag.anchor = e.position; drag.revision = revision; drag.before = notes; drag.activeId = n.id; prepareDrag();
             refreshButtons(); grid.repaint(); return;
         }
         if (e.position.y >= plot().getBottom() && e.position.x >= plot().getX()) {
-            for (const auto& v : visible) if (std::abs(e.position.x - v.second.getX()) < 6) { selected = { notes[v.first].id }; drag.mode = Drag::velocity; drag.anchor = e.position; drag.revision = revision; drag.before = notes; refreshButtons(); return; }
+            for (const auto& v : visible) if (std::abs(e.position.x - v.second.getX()) < 6) { selected = { notes[v.first].id }; drag.mode = Drag::velocity; drag.anchor = e.position; drag.revision = revision; drag.before = notes; prepareDrag(); refreshButtons(); return; }
         }
         if (plot().contains(e.position)) {
             markInsertion(atBeat(e.position.x, e.mods.isAltDown()));
             if (draw.getToggleState() && !e.mods.isShiftDown() && !e.mods.isCtrlDown()) { insert(e.position, e.mods.isAltDown()); return; }
             if (!e.mods.isShiftDown() && !e.mods.isCtrlDown()) selected.clear();
             drag.mode = Drag::box; drag.selectionBefore = selected; drag.anchor = e.position; drag.revision = revision; drag.selectionBox = { e.position, e.position }; refreshButtons(); grid.repaint();
+        }
+    }
+    void prepareDrag()
+    {
+        drag.minStart = length; drag.maxEnd = 0; drag.minPitch = 127; drag.maxPitch = 0;
+        drag.leastResize = -length; drag.mostResize = length;
+        for (std::size_t i = 0; i < notes.size(); ++i) if (selected.count(notes[i].id)) {
+            const auto& n = notes[i]; drag.indices.push_back(i);
+            drag.minStart = juce::jmin(drag.minStart, n.startBeats); drag.maxEnd = juce::jmax(drag.maxEnd, n.startBeats + n.lengthBeats);
+            drag.minPitch = juce::jmin(drag.minPitch, n.pitch); drag.maxPitch = juce::jmax(drag.maxPitch, n.pitch);
+            drag.leastResize = juce::jmax(drag.leastResize, juce::jmin(time::minimumEditGridBeats, n.lengthBeats) - n.lengthBeats);
+            drag.mostResize = juce::jmin(drag.mostResize, length - n.startBeats - n.lengthBeats);
+            if (n.id == drag.activeId) drag.activeEdge = n.startBeats + (drag.mode == Drag::resize ? n.lengthBeats : 0.0);
         }
     }
     void dragTo(const juce::MouseEvent& e)
@@ -282,31 +408,15 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
         if (drag.mode == Drag::box) {
             selected = drag.selectionBefore; drag.selectionBox = { drag.anchor, e.position }; for (const auto& v : visible) if (v.second.intersects(drag.selectionBox)) selected.insert(notes[v.first].id); grid.repaint(); refreshButtons(); return;
         }
-        notes = drag.before;
         double delta = (e.position.x - drag.anchor.x) / pixelsPerBeat;
-        if (!e.mods.isAltDown() && snapEnabled.getToggleState()) {
-            // Anchor the active edge to absolute clip beats; the other selected
-            // notes share its delta, preserving performed offsets within a group.
-            const auto active = std::find_if(notes.begin(), notes.end(), [this](const auto& n) { return n.id == drag.activeId; });
-            if (active != notes.end()) {
-                const auto anchor = active->startBeats + (drag.mode == Drag::resize ? active->lengthBeats : 0.0);
-                delta = snapped(anchor + delta) - anchor;
-            }
-        }
-        const int pitchDelta = juce::roundToInt((drag.anchor.y - e.position.y) / rowHeight);
-        double minStart = length, maxEnd = 0; int minPitch = 127, maxPitch = 0;
-        for (const auto& n : notes) if (selected.count(n.id)) { minStart = juce::jmin(minStart, n.startBeats); maxEnd = juce::jmax(maxEnd, n.startBeats + n.lengthBeats); minPitch = juce::jmin(minPitch, n.pitch); maxPitch = juce::jmax(maxPitch, n.pitch); }
-        if (drag.mode == Drag::move) delta = juce::jlimit(-minStart, length - maxEnd, delta);
-        if (drag.mode == Drag::resize) {
-            double least = -length, most = length;
-            for (const auto& n : notes) if (selected.count(n.id)) {
-                least = juce::jmax(least, juce::jmin(0.03125, length - n.startBeats) - n.lengthBeats);
-                most = juce::jmin(most, length - n.startBeats - n.lengthBeats);
-            }
-            delta = juce::jlimit(least, most, delta);
-        }
-        for (auto& n : notes) if (selected.count(n.id)) {
-            if (drag.mode == Drag::move) { n.startBeats += delta; n.pitch += juce::jlimit(-minPitch, 127 - maxPitch, pitchDelta); }
+        if (!e.mods.isAltDown() && snapEnabled.getToggleState()) delta = snapped(drag.activeEdge + delta) - drag.activeEdge;
+        const int pitchDelta = juce::jlimit(-drag.minPitch, 127 - drag.maxPitch, juce::roundToInt((drag.anchor.y - e.position.y) / rowHeight));
+        if (drag.mode == Drag::move) delta = juce::jlimit(-drag.minStart, length - drag.maxEnd, delta);
+        if (drag.mode == Drag::resize) delta = juce::jlimit(drag.leastResize, drag.mostResize, delta);
+        // Never copy or scan the entire note collection for each pointer event.
+        for (auto index : drag.indices) {
+            auto& n = notes[index]; n = drag.before[index];
+            if (drag.mode == Drag::move) { n.startBeats += delta; n.pitch += pitchDelta; }
             else if (drag.mode == Drag::resize) n.lengthBeats += delta;
             else if (drag.mode == Drag::velocity) n.velocity = juce::jlimit(1, 127, n.velocity + juce::roundToInt((drag.anchor.y - e.position.y) * 2));
         }
@@ -314,8 +424,11 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     }
     void end(const juce::MouseEvent&)
     {
-        const auto mode = drag.mode; const auto changed = drag.changed; const auto expected = drag.revision; drag = {};
-        if (changed && mode != Drag::none && mode != Drag::box) submit(expected); else grid.repaint();
+        const auto mode = drag.mode; const auto changed = drag.changed; const auto expected = drag.revision;
+        if (changed && mode == Drag::box) completeBoxSelection();
+        drag = {};
+        if (changed && mode != Drag::none && mode != Drag::box) submit(expected);
+        else { refreshButtons(); grid.repaint(); }
     }
     void paintGrid(juce::Graphics& g)
     {
@@ -330,21 +443,40 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
             g.setColour(isBlack(pitch) ? ink : paper); g.fillRect(0.0f, yy + 1, 43.0f, rowHeight - 1);
             g.setColour(isBlack(pitch) ? paper : ink); g.setFont(mono(12)); g.drawText(pitchName(pitch), 3, juce::roundToInt(yy), 38, int(rowHeight), juce::Justification::centredRight);
         }
-        const auto gridLines = [&](double step, float opacity, bool labels) {
-            const auto density = pixelsPerBeat * step;
-            if (density < (labels ? 42.0 : 6.0)) step *= std::pow(2.0, std::ceil(std::log2((labels ? 42.0 : 6.0) / density)));
+        lastPaintedTimeLines = 0;
+        const auto timeLine = [&](float xx, float opacity) {
+            ++lastPaintedTimeLines; g.setColour(rule.withAlpha(opacity));
+            if (snapEnabled.getToggleState()) g.drawVerticalLine(juce::roundToInt(xx), float(rulerHeight()), float(grid.getHeight()));
+            else { const float dashes[] { 4.0f, 4.0f }; g.drawDashedLine({ xx, float(rulerHeight()), xx, float(grid.getHeight()) }, dashes, 2); }
+        };
+        const auto gridLines = [&](double step, float opacity) {
+            const double density = pixelsPerBeat * step;
+            if (density < 6.0) step *= std::pow(2.0, std::ceil(std::log2(6.0 / density)));
             const auto first = std::ceil(firstBeat / step - 1.0e-8);
             const auto last = std::floor(juce::jmin(length, firstBeat + visibleBeats()) / step + 1.0e-8);
-            for (double i = first; i <= last; ++i) {
-                const auto beat = i * step;
-                const auto xx = x(beat);
-                g.setColour(rule.withAlpha(opacity)); g.drawVerticalLine(juce::roundToInt(xx), float(rulerHeight()), float(grid.getHeight()));
-                if (labels) { g.setColour(quiet); g.setFont(mono(11)); g.drawText(juce::String(int(std::round(beat / barBeats)) + 1), juce::roundToInt(xx) + 4, 1, 46, rulerHeight() - 3, juce::Justification::centredLeft); }
-            }
+            const int count = juce::jlimit(0, int(area.getWidth() / 6.0f) + 3, int(last - first + 1));
+            for (int i = 0; i < count; ++i) { const auto xx = x((first + i) * step); timeLine(xx, opacity); g.drawVerticalLine(juce::roundToInt(xx), float(rulerHeight() - 4), float(rulerHeight())); }
         };
-        gridLines(gridBeats, 0.35f, false);
-        gridLines(beatUnit, 0.65f, false);
-        gridLines(barBeats, 1.0f, true);
+        gridLines(gridBeats, 0.35f); gridLines(beatUnit, 0.65f); gridLines(barBeats, 1.0f);
+        const auto ruler = time::musicalRulerStep(visibleBeats(), area.getWidth(), timeSignatureNumerator, timeSignatureDenominator);
+        const double firstLabel = std::ceil(firstBeat / ruler.stepBeats - 1.0e-8);
+        const double lastLabel = std::floor(juce::jmin(length, firstBeat + visibleBeats()) / ruler.stepBeats + 1.0e-8);
+        g.setColour(quiet); g.setFont(mono(11));
+        lastPaintedLabels.clear(); float labelRight = area.getX() - 4;
+        for (double i = firstLabel; i <= lastLabel; ++i) {
+            const double beat = i * ruler.stepBeats;
+            const auto label = juce::String(time::musicalRulerLabel(beat, timeSignatureNumerator, timeSignatureDenominator, ruler.labelTier));
+            const float left = float(juce::roundToInt(x(beat)) + 4);
+            const int width = int(std::ceil(juce::GlyphArrangement::getStringWidth(g.getCurrentFont(), label))) + 2;
+            if (left < labelRight + 4 || left + width > area.getRight()) continue;
+            g.drawText(label, int(left), 1, width, rulerHeight() - 3, juce::Justification::centredLeft);
+            labelRight = left + float(width); lastPaintedLabels.push_back({ left, labelRight });
+        }
+        if (densePreview) {
+            // Visible even in the minimum dock where the lower help row is hidden.
+            g.setColour(paper); g.fillRect(int(area.getRight()) - 186, 0, 186, rulerHeight() - 2);
+            g.setColour(quiet); g.drawText("dense preview: zoom in", int(area.getRight()) - 184, 1, 182, rulerHeight() - 3, juce::Justification::centredRight);
+        }
         {
             juce::Graphics::ScopedSaveState save(g); g.reduceClipRegion(area.toNearestInt());
             for (const auto& v : visible) {
@@ -385,14 +517,20 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     std::vector<std::unique_ptr<juce::TextButton>> steps;
     std::vector<Note> notes, beforeVelocity, clipboard;
     std::vector<std::pair<std::size_t, juce::Rectangle<float>>> visible;
+    std::vector<IndexedNote> noteIndexNodes;
+    std::array<int, 128> noteIndexRoots = [] { std::array<int, 128> result {}; result.fill(-1); return result; }();
+    std::size_t indexBuilds = 0, queriedIndexNodes = 0;
+    int lastPaintedTimeLines = 0;
+    std::vector<std::pair<float, float>> lastPaintedLabels;
+    bool densePreview = false;
     std::set<juce::String> selected;
     juce::String projectId, clipId, name, clipboardProject, editError;
     std::uint64_t revision = 0, gestureRevision = 0;
     double clipStart = 0, length = 4, bpm = 120, firstBeat = 0, pixelsPerBeat = 80, gridBeats = 0.25, playheadBeat = 0, barBeats = 4, beatUnit = 1, insertionBeat = 0;
     float rowHeight = 18;
-    int topPitch = 84;
+    int topPitch = 84, timeSignatureNumerator = 4, timeSignatureDenominator = 4;
     bool updating = false, velocityGesture = false, playing = false, insertionExplicit = false;
-    struct Drag { enum Mode { none, move, resize, box, velocity } mode = none; juce::Point<float> anchor; juce::Rectangle<float> selectionBox; std::vector<Note> before; std::set<juce::String> selectionBefore; std::uint64_t revision = 0; juce::String activeId; bool changed = false; } drag;
+    struct Drag { enum Mode { none, move, resize, box, velocity } mode = none; juce::Point<float> anchor; juce::Rectangle<float> selectionBox; std::vector<Note> before; std::vector<std::size_t> indices; double minStart = 0, maxEnd = 0, leastResize = 0, mostResize = 0, activeEdge = 0; int minPitch = 0, maxPitch = 127; std::set<juce::String> selectionBefore; std::uint64_t revision = 0; juce::String activeId; bool changed = false; } drag;
 };
 
 PianoRoll::PianoRoll() : impl(std::make_unique<Impl>(*this)) { setSize(1000, 580); }
@@ -400,7 +538,7 @@ PianoRoll::~PianoRoll() = default;
 void PianoRoll::setTimeSignature(int numerator, int denominator)
 {
     const double next = time::beatsPerBar(numerator, denominator), unit = 4.0 / juce::jmax(1, denominator);
-    if (next != impl->barBeats || unit != impl->beatUnit) { impl->barBeats = next; impl->beatUnit = unit; impl->grid.repaint(); }
+    if (next != impl->barBeats || unit != impl->beatUnit) { impl->barBeats = next; impl->beatUnit = unit; impl->timeSignatureNumerator = numerator; impl->timeSignatureDenominator = denominator; impl->grid.repaint(); }
 }
 void PianoRoll::setClip(const juce::String& projectId, const juce::String& clipId, const juce::String& name,
                        std::uint64_t revision, double startBeats, double lengthBeats, double bpm,
@@ -412,7 +550,7 @@ void PianoRoll::setClip(const juce::String& projectId, const juce::String& clipI
     p.drag = {}; p.velocityGesture = false;
     if (projectId.isNotEmpty() && p.clipboardProject.isNotEmpty() && p.clipboardProject != projectId) { p.clipboard.clear(); p.clipboardProject.clear(); }
     p.projectId = projectId; p.clipId = clipId; p.name = name; p.revision = revision;
-    p.clipStart = startBeats; p.length = juce::jmax(0.001, lengthBeats); p.bpm = bpm; p.notes = notes;
+    p.clipStart = startBeats; p.length = juce::jmax(time::minimumEditGridBeats, lengthBeats); p.bpm = bpm; p.notes = notes; p.rebuildNoteIndex();
     if (other) { p.selected.clear(); p.firstBeat = 0; p.insertionExplicit = false; p.editError.clear(); p.fitPitch(); }
     // Select-all must not make a later edit perform one full note scan per ID.
     std::set<juce::String> retained;
@@ -435,7 +573,7 @@ bool PianoRoll::updateUnchangedClip(const juce::String& projectId, const juce::S
         p.drag = {}; p.velocityGesture = false;
     }
     p.name = name; p.revision = revision; p.clipStart = startBeats;
-    p.length = juce::jmax(0.001, lengthBeats); p.bpm = bpm;
+    p.length = juce::jmax(time::minimumEditGridBeats, lengthBeats); p.bpm = bpm;
     if (previewCancelled) p.refreshButtons();
     if (geometryChanged || previewCancelled) p.layout();
     return true;
@@ -453,7 +591,7 @@ void PianoRoll::resized()
     // Allow for the host's 15 px monospaced labels and 8 px button insets.
     // Keep transpose in the second row so labels fit even in the 726 px dock.
     p.draw.setBounds(top.removeFromLeft(72)); p.snapEnabled.setBounds(top.removeFromLeft(60));
-    p.snap.setBounds(top.removeFromLeft(90)); top.removeFromLeft(8);
+    p.snap.setBounds(top.removeFromLeft(102)); top.removeFromLeft(8);
     p.erase.setBounds(top.removeFromLeft(76)); p.duplicate.setBounds(top.removeFromLeft(104)); p.quantize.setBounds(top.removeFromLeft(96));
     p.zoomOut.setBounds(top.removeFromLeft(32)); p.zoomIn.setBounds(top.removeFromLeft(32)); p.fit.setBounds(top.removeFromLeft(48));
     const bool drumMode = p.drums.getToggleState();
@@ -484,15 +622,14 @@ void PianoRoll::paint(juce::Graphics& g)
     // and the main status line retain help/errors; reserve its lower area for notes.
     if (p.veryCompact()) return;
     const auto hint = juce::String(int(p.notes.size())) + " notes / " + juce::String(int(p.selected.size())) + " selected   "
-        + (p.draw.getToggleState() ? "B: draw on" : "B: draw / double-click") + "   Ctrl+C/X/V   paste @ " + juce::String(p.insertionPoint(), 3) + " beats";
+        + (p.draw.getToggleState() ? "B: draw on" : "B: draw / double-click") + "   Ctrl+C/X/V   paste @ " + juce::String(p.insertionPoint(), 3) + " beats" + (p.densePreview ? "   dense preview: zoom in" : "");
     g.drawFittedText(p.editError.isNotEmpty() ? p.editError : hint,
                     14, getHeight() - 26, getWidth() - 28, 20, juce::Justification::centredLeft, 1);
 }
 bool PianoRoll::keyPressed(const juce::KeyPress& key)
 {
     auto& p = *impl;
-    for (auto* focus = juce::Component::getCurrentlyFocusedComponent(); focus != nullptr; focus = focus->getParentComponent())
-        if (dynamic_cast<juce::TextEditor*>(focus) != nullptr) return false;
+    if (isTextInput(juce::Component::getCurrentlyFocusedComponent())) return false;
     const auto mods = key.getModifiers(); const auto code = key.getKeyCode();
     if (code == juce::KeyPress::escapeKey && p.drag.mode != Impl::Drag::none) { if (!p.drag.before.empty()) p.notes = p.drag.before; p.drag = {}; p.layout(); return true; }
     if (code == juce::KeyPress::spaceKey && !mods.isAnyModifierKeyDown()) { if (onTogglePlay) onTogglePlay(); return true; }
@@ -510,7 +647,7 @@ bool PianoRoll::keyPressed(const juce::KeyPress& key)
     if (code == juce::KeyPress::upKey || code == juce::KeyPress::downKey) { p.transpose((code == juce::KeyPress::upKey ? 1 : -1) * (mods.isShiftDown() ? 12 : 1)); return true; }
     return false;
 }
-juce::Result PianoRoll::runInteractionSmokeTest(juce::DynamicObject& report)
+juce::Result PianoRoll::runInteractionSmokeTest(juce::DynamicObject& report, const juce::File& artifactDirectory)
 {
     auto& p = *impl;
     std::uint64_t acceptedRevision = 7;
@@ -684,6 +821,166 @@ juce::Result PianoRoll::runInteractionSmokeTest(juce::DynamicObject& report)
     p.grid.mouseDown(event(selectPoint, selectPoint, false)); p.grid.mouseUp(event(selectPoint, selectPoint, false));
     if (p.draw.getToggleState() || dailyCommits != 5 || staleSubmission) return fail("Selection mode created notes or broke revision checks.");
     report.setProperty("midi_draw_toggle_and_single_click", true);
+    // Deep editing uses real component events and the production write callback.
+    // The history fixture models callback acceptance/undo; engine persistence and
+    // native Undo are separately exercised by the integration smoke suite.
+    {
+        PianoRoll fine; auto& q = *fine.impl; fine.setSize(1000, 580);
+        const double quantum = time::minimumEditGridBeats;
+        std::uint64_t fineRevision = 1; int fineCommits = 0; bool fineStale = false;
+        std::vector<Note> fineAccepted; std::vector<std::vector<Note>> undoNotes, redoNotes;
+        fine.setClip("precision", "fine-clip", "Fine MIDI", fineRevision, 0, 8, 120, fineAccepted);
+        fine.onWriteNotes = [&](const juce::String& id, const std::vector<Note>& values, std::uint64_t expected) {
+            fineStale = fineStale || id != "fine-clip" || expected != fineRevision;
+            undoNotes.push_back(fineAccepted); redoNotes.clear(); fineAccepted = values; ++fineCommits;
+            fine.setClip("precision", "fine-clip", "Fine MIDI", ++fineRevision, 0, 8, 120, fineAccepted);
+        };
+        fine.onProjectKey = [&](const juce::KeyPress& key) {
+            auto& source = key.getKeyCode() == 'Z' ? undoNotes : redoNotes;
+            auto& destination = key.getKeyCode() == 'Z' ? redoNotes : undoNotes;
+            if (source.empty()) return false;
+            destination.push_back(fineAccepted); fineAccepted = source.back(); source.pop_back();
+            fine.setClip("precision", "fine-clip", "Fine MIDI", ++fineRevision, 0, 8, 120, fineAccepted); return true;
+        };
+        const auto fineEvent = [&](juce::Point<float> position, juce::Point<float> start, bool dragged) {
+            const auto now = juce::Time::getCurrentTime();
+            return juce::MouseEvent(juce::Desktop::getInstance().getMainMouseSource(), position,
+                juce::ModifierKeys(juce::ModifierKeys::leftButtonModifier), 1, 0, 0, 0, 0,
+                &q.grid, &q.grid, now, start, now, 1, dragged);
+        };
+        q.snap.setSelectedId(16, juce::sendNotificationSync);
+        if (q.gridBeats != quantum || q.snap.getText() != "1/16384") return fail("The piano grid menu does not expose the whole-note 1/16384 grid.");
+        q.setZoom(Impl::maximumPixelsPerBeat, q.plot().getX()); q.firstBeat = 1; q.layout();
+        if (q.gridBeats * q.pixelsPerBeat < 16 || q.grid.getWidth() > fine.getWidth()) return fail("Deep piano zoom enlarged the canvas or cannot resolve the minimum edit grid.");
+        const auto point = juce::Point<float>(q.x(1 + 2 * quantum), q.y(70) + q.rowHeight * 0.5f);
+        q.insert(point);
+        if (fineCommits != 1 || fineAccepted.size() != 1 || fineAccepted[0].startBeats != 1 + 2 * quantum || fineAccepted[0].lengthBeats != quantum)
+            return fail("A 1/16384 piano note was rejected or silently enlarged.");
+        q.quantize.onClick();
+        if (fineCommits != 2 || fineAccepted[0].lengthBeats != quantum) return fail("Fine-grid quantize enlarged a one-cell note.");
+        auto startFine = q.visible.front().second.getCentre(); auto endFine = startFine + juce::Point<float>(16, 0);
+        const auto beforeDragIndexBuilds = q.indexBuilds;
+        q.grid.mouseDown(fineEvent(startFine, startFine, false)); q.grid.mouseDrag(fineEvent(endFine, startFine, true));
+        if (fineCommits != 2 || q.indexBuilds != beforeDragIndexBuilds) return fail("Fine drag rebuilt the committed note index or submitted before release.");
+        q.grid.mouseUp(fineEvent(endFine, startFine, true));
+        if (fineCommits != 3 || fineAccepted[0].startBeats != 1 + 3 * quantum || fineAccepted[0].lengthBeats != quantum)
+            return fail("Fine piano dragging lost a grid quantum or changed the duration.");
+        startFine = q.visible.front().second.getTopRight() + juce::Point<float>(-1, 5); endFine = startFine + juce::Point<float>(16, 0);
+        q.grid.mouseDown(fineEvent(startFine, startFine, false)); q.grid.mouseDrag(fineEvent(endFine, startFine, true)); q.grid.mouseUp(fineEvent(endFine, startFine, true));
+        if (fineCommits != 4 || fineAccepted[0].lengthBeats != 2 * quantum || fineStale) return fail("Fine piano resizing did not commit exactly one precise edit.");
+        fine.keyPressed(juce::KeyPress('Z', juce::ModifierKeys::ctrlModifier, 0));
+        if (fineAccepted[0].lengthBeats != quantum) return fail("Fine-note undo callback did not restore its exact one-cell duration.");
+        fine.keyPressed(juce::KeyPress('Y', juce::ModifierKeys::ctrlModifier, 0));
+        if (fineAccepted[0].lengthBeats != 2 * quantum) return fail("Fine-note redo callback lost its exact duration.");
+        startFine = q.visible.front().second.getCentre(); endFine = startFine + juce::Point<float>(16, 0);
+        q.grid.mouseDown(fineEvent(startFine, startFine, false)); q.grid.mouseDrag(fineEvent(endFine, startFine, true)); fine.keyPressed(juce::KeyPress(juce::KeyPress::escapeKey));
+        if (!equalNotes(q.notes, fineAccepted) || fineCommits != 4) return fail("Escape failed to discard a fine-note preview.");
+        fineAccepted = { { "edge", 60, 8 - quantum, quantum, 90, 1 } };
+        fine.setClip("precision", "fine-clip", "Fine boundary", ++fineRevision, 0, 8, 120, fineAccepted);
+        q.firstBeat = 8; q.layout();
+        startFine = q.visible.front().second.getTopRight() + juce::Point<float>(-1, 5); endFine = startFine + juce::Point<float>(100, 0);
+        q.grid.mouseDown(fineEvent(startFine, startFine, false)); q.grid.mouseDrag(fineEvent(endFine, startFine, true)); q.grid.mouseUp(fineEvent(endFine, startFine, true));
+        if (fineAccepted[0].startBeats + fineAccepted[0].lengthBeats != 8 || fineAccepted[0].lengthBeats != quantum)
+            return fail("Fine resizing crossed the clip end or inflated a boundary note.");
+        fine.onWriteNotes = {}; fine.onProjectKey = {};
+        report.setProperty("midi_16384_create_quantize_move_resize_exact", true);
+        report.setProperty("midi_16384_callback_undo_redo_cancel_boundary", true);
+
+        // Zoom preserves the beat under the pointer; panning never scales the
+        // component to the full project duration.
+        q.firstBeat = 2; q.pixelsPerBeat = 4096; q.layout();
+        const float anchorX = q.plot().getX() + q.plot().getWidth() * 0.37f;
+        const double anchorBeat = q.firstBeat + (anchorX - q.plot().getX()) / q.pixelsPerBeat;
+        juce::MouseWheelDetails wheel {}; wheel.deltaY = 1;
+        const auto now = juce::Time::getCurrentTime();
+        const juce::MouseEvent zoomEvent(juce::Desktop::getInstance().getMainMouseSource(), { anchorX, q.plot().getCentreY() },
+            juce::ModifierKeys(juce::ModifierKeys::ctrlModifier), 1, 0, 0, 0, 0, &q.grid, &q.grid, now, {}, now, 0, false);
+        q.grid.mouseWheelMove(zoomEvent, wheel);
+        const double afterAnchor = q.firstBeat + (anchorX - q.plot().getX()) / q.pixelsPerBeat;
+        if (std::abs(anchorBeat - afterAnchor) > 1.0e-12) return fail("Piano wheel zoom moved the pointer's musical anchor.");
+        juce::TextEditor textInput; juce::Component nestedTextChild; textInput.addChildComponent(nestedTextChild);
+        if (!isTextInput(&nestedTextChild) || isTextInput(&q.grid)) return fail("Piano shortcut focus gate does not protect nested text editing.");
+        const auto beforeToggle = q.snapEnabled.getToggleState(); const auto beforeGrid = q.gridBeats;
+        fine.keyPressed(juce::KeyPress('4', juce::ModifierKeys::ctrlModifier, 0));
+        if (q.snapEnabled.getToggleState() == beforeToggle || q.gridBeats != beforeGrid) return fail("Ctrl+4 changed piano grid precision instead of toggling Snap.");
+        fine.keyPressed(juce::KeyPress('4', juce::ModifierKeys::ctrlModifier, 0));
+        report.setProperty("midi_deep_zoom_pointer_anchor_and_ctrl4", true);
+        report.setProperty("midi_shortcut_nested_text_focus_gate", true);
+
+        fine.setClip("render", "grid", "Grid rendering", 1, 0, 8, 120, {}); fine.setTimeSignature(4, 4);
+        q.firstBeat = 0; q.setZoom(Impl::maximumPixelsPerBeat, q.plot().getX());
+        const auto renderGrid = [&] { juce::Image image(juce::Image::RGB, q.grid.getWidth(), q.grid.getHeight(), true); juce::Graphics graphics(image); q.paintGrid(graphics); return image; };
+        q.snapEnabled.setToggleState(true, juce::dontSendNotification); const auto solid = renderGrid();
+        q.snapEnabled.setToggleState(false, juce::dontSendNotification); const auto dashed = renderGrid();
+        const int lineX = juce::roundToInt(q.x(10 * quantum)); int solidPixels = 0, dashedPixels = 0;
+        for (int yy = q.rulerHeight() + 10; yy < q.grid.getHeight() - 60; ++yy) {
+            if (solid.getPixelAt(lineX, yy) != solid.getPixelAt(lineX + 3, yy)) ++solidPixels;
+            if (dashed.getPixelAt(lineX, yy) != dashed.getPixelAt(lineX + 3, yy)) ++dashedPixels;
+        }
+        if (solidPixels <= dashedPixels + 12 || dashedPixels <= 0) return fail("Snap-off piano time lines are not visibly dashed while Snap-on lines are solid.");
+        if (q.lastPaintedTimeLines > int(q.plot().getWidth() / 6) * 3 + 12) return fail("Piano time grid drawing exceeds its viewport budget.");
+        const auto writeImage = [&](const juce::Image& image, const juce::String& name) {
+            if (artifactDirectory == juce::File()) return true;
+            if (!artifactDirectory.createDirectory()) return false;
+            juce::FileOutputStream stream(artifactDirectory.getChildFile(name));
+            return stream.openedOk() && juce::PNGImageFormat().writeImageToStream(image, stream);
+        };
+        if (!writeImage(solid, "piano-fine-grid-solid.png") || !writeImage(dashed, "piano-fine-grid-dashed.png")) return fail("Could not write synthetic piano grid evidence.");
+        q.snapEnabled.setToggleState(true, juce::dontSendNotification);
+        for (const auto [scale, tier] : std::array<std::pair<double, int>, 3> { { { 12, 0 }, { 80, 1 }, { 400, 2 } } }) {
+            q.setZoom(scale, q.plot().getX());
+            if (time::musicalRulerStep(q.visibleBeats(), q.plot().getWidth(), 4, 4).labelTier != tier) return fail("Piano ruler did not select the bar/beat/sixteenth zoom tiers.");
+        }
+        fine.setClip("render", "far-grid", "Far ruler", 2, 0, 100000000.0, 120, {});
+        q.firstBeat = 99999900; q.setZoom(80, q.plot().getX()); const auto farRuler = renderGrid();
+        if (q.lastPaintedLabels.empty()) return fail("Far-time piano ruler lost all labels.");
+        for (std::size_t i = 1; i < q.lastPaintedLabels.size(); ++i)
+            if (q.lastPaintedLabels[i].first < q.lastPaintedLabels[i - 1].second + 4) return fail("Long piano bar numbers overlap at far positions.");
+        if (!writeImage(farRuler, "piano-far-ruler.png")) return fail("Could not write far-time piano ruler evidence.");
+        report.setProperty("midi_snap_grid_solid_dashed_pixels", true);
+        report.setProperty("midi_ruler_three_tiers_far_labels_no_overlap", true);
+
+        std::vector<Note> crowded; crowded.reserve(100000);
+        for (int i = 0; i < 100000; ++i) crowded.push_back({ juce::String(i), 60, double(i) * 2, 0.25, 90, 1 });
+        fine.setClip("performance", "sparse", "100000-note index", 1, 0, 200000, 120, crowded);
+        q.setZoom(Impl::maximumPixelsPerBeat, q.plot().getX()); q.firstBeat = 100000; q.layout();
+        if (q.visible.empty() || q.queriedIndexNodes > 128) return fail("Deep piano viewport scanned unrelated notes instead of pruning the interval index.");
+        const auto sparseBuilds = q.indexBuilds; std::vector<double> panTimes, dragTimes; std::size_t maxQueries = 0;
+        juce::Image frame(juce::Image::RGB, q.grid.getWidth(), q.grid.getHeight(), true);
+        for (int i = 0; i < 60; ++i) {
+            const double begin = juce::Time::getMillisecondCounterHiRes();
+            q.firstBeat = 100000 + double(i % 12) * quantum; q.layout(); juce::Graphics graphics(frame); q.paintGrid(graphics);
+            panTimes.push_back(juce::Time::getMillisecondCounterHiRes() - begin); maxQueries = juce::jmax(maxQueries, q.queriedIndexNodes);
+        }
+        q.firstBeat = 100000; q.layout(); startFine = q.visible.front().second.getCentre(); q.grid.mouseDown(fineEvent(startFine, startFine, false));
+        for (int i = 0; i < 60; ++i) {
+            const double begin = juce::Time::getMillisecondCounterHiRes(); endFine = startFine + juce::Point<float>(float(16 + i % 12 * 8), 0);
+            q.grid.mouseDrag(fineEvent(endFine, startFine, true)); juce::Graphics graphics(frame); q.paintGrid(graphics);
+            dragTimes.push_back(juce::Time::getMillisecondCounterHiRes() - begin); maxQueries = juce::jmax(maxQueries, q.queriedIndexNodes);
+        }
+        if (q.indexBuilds != sparseBuilds || maxQueries > 128 || q.notes.size() != 100000 || q.grid.getWidth() > fine.getWidth())
+            return fail("100000-note piano pan/drag rebuilt the index, scanned unrelated notes, or enlarged its viewport.");
+        const auto writeTiming = [&](const char* name, std::vector<double> times) {
+            std::sort(times.begin(), times.end()); report.setProperty(juce::String(name) + "_p50_ms", times[times.size() / 2]);
+            report.setProperty(juce::String(name) + "_p95_ms", times[std::size_t(double(times.size() - 1) * 0.95)]);
+            report.setProperty(juce::String(name) + "_worst_ms", times.back());
+        };
+        writeTiming("midi_100k_pan_paint_cpu", panTimes); writeTiming("midi_100k_drag_paint_cpu", dragTimes);
+        report.setProperty("midi_100k_max_queried_index_nodes", int(maxQueries));
+        report.setProperty("midi_100k_index_reused_during_gestures", true);
+        fine.keyPressed(juce::KeyPress(juce::KeyPress::escapeKey));
+        if (!writeImage(frame, "piano-100k-deep-zoom.png")) return fail("Could not write deep-zoom piano evidence.");
+
+        for (auto& note : crowded) { note.startBeats = 1; note.lengthBeats = 1; }
+        fine.setClip("performance", "dense", "Dense preview", 2, 0, 8, 120, crowded);
+        q.firstBeat = 0; q.pixelsPerBeat = 80; q.layout();
+        const auto densePoint = juce::Point<float>(q.x(1.5), q.y(60) + q.rowHeight * 0.5f);
+        if (!q.densePreview || q.visible.size() > Impl::maximumVisibleNotes || q.hitNote(densePoint) != 99999 || q.notes.size() != 100000)
+            return fail("Dense piano preview lost data, exceeded its display budget, or used truncated hit-testing.");
+        q.drag.mode = Impl::Drag::box; q.drag.changed = true; q.drag.selectionBox = q.plot(); q.end(fineEvent({}, {}, true));
+        if (q.selected.size() != 100000) return fail("Dense preview marquee selection silently dropped undisplayed notes.");
+        report.setProperty("midi_dense_preview_budget_full_hit_and_selection", true);
+    }
     onEditError = {}; onProjectKey = {};
     onWriteNotes = {};
     setSize(726, 224);

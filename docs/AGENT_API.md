@@ -86,7 +86,7 @@ Python中可用`Client(executable, show=True)`同时显示受控工程，Agent�
 | move_clip | clip_id, start_seconds |
 | move_clips | clip_ids, delta_seconds, target_track_id（可选，须同类型） |
 | trim_clip | clip_id, start_seconds, end_seconds；音频可选 source_offset |
-| split_clip | clip_id, at_seconds；两侧均至少1ms |
+| split_clip | clip_id, at_seconds；两侧均至少1µs（0.6.1起；仍拒绝非正/非有限范围） |
 | duplicate_clips / delete_clips | clip_ids |
 | copy_clips / cut_clips | clip_ids；非空、不重复且全部存在的完整片段ID数组；成功result含clipboard_id、clip_count |
 | paste_clips | start_seconds（0–172800）、clipboard_id（JSONL必填）；target_track_id可选字符串；详见剪贴板规则 |
@@ -222,3 +222,7 @@ MIDI导入支持SMF0/1、PPQN；导出960PPQN并包含已录入的上述controll
 JSONL单帧最大1MiB、嵌套最多32层、输入/输出队列各32项，主线程每轮最多处理8项。慢读端由独立写线程承担等待；不能把网络、JSON、文件I/O或Agent推理放进音频回调。64轨、4096片段和100,000音符是输入限制，不能解释为任意插件负载下的性能承诺。实测机器、设备和负载见验证报告。
 
 schema4另限每轨32/全工程512条send、每owner256/全工程4096条lane、全工程100,000个automation点与100,000个controller事件。单次请求仍受1MiB上限限制。原生录音委托固定Tracktion writer与输入管线；尚未证明其在所有负载下无锁/零分配，也未从合成输入通过推断M-Audio或任意ASIO设备的实时性能。
+
+## 0.6.1精度边界
+
+固定网格最细1/16384全音符，即1/4096四分音符拍。网格、吸附与标尺是界面状态；Agent命令仍直接传完整双精度秒/拍，不受屏幕绘线密度限制。`split_clip`两侧至少1µs。原生工程保留完整位置；SMF导出4096PPQN，二进制细网格准确表示，任意自由位置/三连音舍入到最近tick，正时长至少1tick。长工程使用64位绝对tick及合法SMF间隔填充，不依赖32位绝对tick。Inspector的bar:beat:tick显示仍为每分母拍960刻度，不用于截断未编辑底层值。

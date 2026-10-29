@@ -396,6 +396,122 @@ juce::Result EngineSession::runClipSmokeTest(const juce::File& directory)
             const auto musical=clipboard.snapshot().tracks.front().clips;
             check(musical.size()==4&&std::abs(musical[3].startBeats-musical[2].startBeats-4.0)<1e-9,"MIDI-only clipboard preserves beat spacing across tempo changes");
         }
+        {
+            // Exercise the finest UI grid through the actual command/model/save
+            // pipeline, including an audio edit shorter than the old 1 ms floor.
+            constexpr double grid = time::minimumEditGridBeats;
+            constexpr double tempo = 300.0;
+            const double slice = time::beatsToSeconds(grid, tempo);
+            check(slice < 0.001 && slice > time::minimumEditSpanSeconds, "finest grid crosses old split floor");
+            EngineSession fineAudio(false);
+            okay(fineAudio.importFile(wav, fineAudio.snapshot().revision), "fine-grid audio fixture");
+            const auto original = onlyClip(fineAudio);
+            okay(fineAudio.execute("split_clip", object({ {"clip_id", original.id}, {"at_seconds", slice} }), fineAudio.snapshot().revision), "sub-millisecond audio split");
+            const auto split = fineAudio.snapshot().tracks.front().clips;
+            check(split.size() == 2 && std::abs(split[0].duration - slice) < 1.0e-12
+                && std::abs(split[1].sourceOffset - slice) < 1.0e-12
+                && std::abs(split[1].timelineStart - slice) < 1.0e-12, "fine audio split retains nonzero exact source and timeline ranges");
+            const auto fineAudioFile = workspace.getChildFile("fine-grid-audio.emproj");
+            okay(fineAudio.saveProject(fineAudioFile, fineAudio.snapshot().revision), "save tiny audio split");
+            EngineSession reloadedAudio(false);
+            okay(reloadedAudio.openProject(fineAudioFile, reloadedAudio.snapshot().revision), "reopen tiny audio split");
+            const auto readAudio = reloadedAudio.snapshot().tracks.front().clips;
+            check(readAudio.size() == 2 && std::abs(readAudio[0].duration - slice) < 1.0e-12
+                && std::abs(readAudio[1].sourceOffset - slice) < 1.0e-12, "tiny audio ranges survive native save/reopen");
+            okay(fineAudio.undo(fineAudio.snapshot().revision), "undo tiny audio split once");
+            check(onlyClip(fineAudio).id == original.id && onlyClip(fineAudio).duration == original.duration, "tiny audio split Undo restores original clip");
+            okay(fineAudio.redo(fineAudio.snapshot().revision), "redo tiny audio split once");
+            check(fineAudio.snapshot().tracks.front().clips.size() == 2, "tiny audio split Redo restores both clips");
+
+            EngineSession fineMidi(false);
+            const auto command = [&](const juce::String& name, juce::var args) {
+                return fineMidi.execute(name, args, fineMidi.snapshot().revision);
+            };
+            okay(command("set_tempo", object({ {"bpm", tempo} })), "fine MIDI fastest supported tempo");
+            okay(command("create_track", object({ {"kind", "instrument"}, {"name", "Fine grid"} })), "fine MIDI track");
+            okay(command("create_midi_clip", object({ {"track_id", fineMidi.snapshot().tracks.front().id}, {"start_beats", 0.0}, {"length_beats", grid * 4} })), "fine MIDI clip");
+            const auto clipId = fineMidi.snapshot().selectedClipId;
+            const juce::Array<juce::var> notes{object({ {"pitch", 60}, {"velocity", 90}, {"channel", 1}, {"start_beats", grid}, {"length_beats", grid * 2} })};
+            okay(command("write_notes", object({ {"clip_id", clipId}, {"notes", notes} })), "fine MIDI note");
+            const auto before = fineMidi.impl->capture();
+            okay(command("split_clip", object({ {"clip_id", clipId}, {"at_seconds", slice * 2} })), "sub-millisecond MIDI split");
+            const auto pieces = fineMidi.impl->capture().tracks.front().clips;
+            check(pieces.size() == 2 && pieces[0].notes.size() == 1 && pieces[1].notes.size() == 1
+                && pieces[0].notes[0].startBeats == grid && pieces[0].notes[0].lengthBeats == grid
+                && pieces[1].notes[0].startBeats == 0 && pieces[1].notes[0].lengthBeats == grid
+                && pieces[1].startBeats == grid * 2, "fine MIDI split preserves both sides of the crossing note");
+            const auto fineMidiFile = workspace.getChildFile("fine-grid-midi.emproj");
+            okay(fineMidi.saveProject(fineMidiFile, fineMidi.snapshot().revision), "save finest-grid MIDI pieces");
+            EngineSession reloadedMidi(false);
+            okay(reloadedMidi.openProject(fineMidiFile, reloadedMidi.snapshot().revision), "reopen finest-grid MIDI pieces");
+            check(contentKey(reloadedMidi.impl->capture()) == contentKey(fineMidi.impl->capture()), "native save retains exact fine-grid notes and clip identities");
+            okay(fineMidi.undo(fineMidi.snapshot().revision), "undo finest MIDI split");
+            check(contentKey(fineMidi.impl->capture()) == contentKey(before), "one Undo restores uncut fine-grid note");
+            const auto validRevision = fineMidi.snapshot().revision;
+            check(command("split_clip", object({ {"clip_id", clipId}, {"at_seconds", time::minimumEditSpanSeconds * 0.5} })).failed()
+                && fineMidi.snapshot().revision == validRevision, "sub-microsecond split fails without changing state");
+
+            const auto job = std::make_shared<Impl::Job>();
+            const auto midiFile = workspace.getChildFile("fine-grid-export.mid");
+            okay(writeJobMidi(job, midiFile, fineMidi.impl->capture(), {}), "export fine-grid MIDI");
+            juce::FileInputStream input(midiFile); juce::MidiFile midi;
+            check(midi.readFrom(input) && midi.getTimeFormat() == 4096, "standard MIDI reader accepts high-precision export");
+            bool found = false;
+            for (int track = 0; track < midi.getNumTracks(); ++track) {
+                auto sequence = *midi.getTrack(track); sequence.updateMatchedPairs();
+                for (int index = 0; index < sequence.getNumEvents(); ++index) {
+                    const auto* event = sequence.getEventPointer(index);
+                    if (event->message.isNoteOn()) {
+                        check(event->message.getTimeStamp() == 1 && event->noteOffObject
+                            && event->noteOffObject->message.getTimeStamp() == 3, "finest-grid note onset/offset export without rounding");
+                        found = true;
+                    }
+                }
+            }
+            check(found, "fine-grid exported note present");
+            storage::StoredProject imported; imported.projectId = uid();
+            okay(readJobMidi(job, midiFile, false, imported), "strict reimport of fine-grid MIDI");
+            check(imported.tracks.size() == 1 && imported.tracks[0].clips[0].notes[0].startBeats == grid
+                && imported.tracks[0].clips[0].notes[0].lengthBeats == grid * 2
+                && imported.tracks[0].clips[0].lengthBeats == grid * 3, "MIDI roundtrip retains finest positions and exact import endpoint");
+
+            // At 48 hours/300 BPM absolute ticks exceed signed int. Long silent
+            // gaps use valid bounded VLQ + text events, not truncation or shifting.
+            auto longState = fineMidi.impl->capture();
+            auto& longClip = longState.tracks[0].clips[0];
+            longClip.startBeats = storage::maximumTimelineSeconds * tempo / 60.0 - 1.0;
+            syncMidiSeconds(longState);
+            okay(storage::validate(longState), "48-hour boundary source validates");
+            const auto longFile = workspace.getChildFile("fine-grid-48-hour.mid");
+            okay(writeJobMidi(job, longFile, longState, {}), "export fine note near 48-hour horizon");
+            juce::MemoryBlock longBytes; check(longFile.loadFileAsData(longBytes), "read long-horizon exported bytes");
+            okay(validateMidiBytes(job, longBytes), "long-gap padding passes strict SMF envelope validation");
+            storage::StoredProject longImported; longImported.projectId = uid();
+            okay(readJobMidi(job, longFile, false, longImported), "strict reimport near 48-hour horizon");
+            const auto& longNote = longImported.tracks[0].clips[0].notes[0];
+            check(longNote.startBeats == longClip.startBeats + grid && longNote.lengthBeats == grid * 2,
+                "wide absolute ticks and tiny duration survive long-horizon roundtrip");
+            for (const double bpm : {20.0, 300.0}) {
+                auto horizon = longState; horizon.bpm = bpm;
+                const double maximumBeat = storage::maximumTimelineSeconds * bpm / 60.0;
+                auto& last = horizon.tracks[0].clips[0];
+                last.startBeats = maximumBeat - 1.0; last.lengthBeats = 1.0;
+                last.notes[0].startBeats = 1.0 - grid / 4; last.notes[0].lengthBeats = grid / 8;
+                syncMidiSeconds(horizon); okay(storage::validate(horizon), "positive off-grid note fits exact project horizon");
+                const auto horizonFile = workspace.getChildFile("fine-grid-horizon-" + juce::String(int(bpm)) + ".mid");
+                okay(writeJobMidi(job, horizonFile, horizon, {}), "export positive sub-tick note at project horizon");
+                storage::StoredProject horizonImported; horizonImported.projectId = uid();
+                okay(readJobMidi(job, horizonFile, false, horizonImported), "strict reimport of rounded horizon note");
+                const auto& lastNote = horizonImported.tracks[0].clips[0].notes[0];
+                check(lastNote.startBeats == maximumBeat - grid && lastNote.lengthBeats == grid
+                    && horizonImported.tracks[0].clips[0].lengthBeats == maximumBeat,
+                    "one-tick horizon note stays inside 48 hours at actual project tempo");
+            }
+            auto invalid = longState; invalid.tracks[0].clips[0].notes[0].lengthBeats = std::numeric_limits<double>::max();
+            check(writeJobMidi(job, longFile, invalid, {}).failed(), "overflow duration rejected before integer conversion");
+            juce::MemoryBlock afterInvalid; check(longFile.loadFileAsData(afterInvalid) && afterInvalid == longBytes,
+                "failed fine-grid export preserves existing destination bytes");
+        }
         auto report = std::make_unique<juce::DynamicObject>();
         report->setProperty("status", "passed");
         report->setProperty("scope", "real Tracktion renders for WAV and both MP3 fixtures; move, undo/redo, schema 4 round trips, shared assets, schema 1 migration and recovery; no listening or realtime performance claim");
@@ -410,6 +526,8 @@ juce::Result EngineSession::runClipSmokeTest(const juce::File& directory)
         report->setProperty("schema1_backup_recovery", true);
         report->setProperty("original_audio_bytes_unchanged", true);
         report->setProperty("mixed_clip_clipboard_atomic_undo_and_media_reuse",true);
+        report->setProperty("fine_grid_native_split_save_undo_and_smf_4096_roundtrip",true);
+        report->setProperty("fine_grid_48_hour_300_bpm_smf_wide_ticks",true);
         check(directory.getChildFile("clip-report.json").replaceWithText(juce::JSON::toString(juce::var(report.release()))),
               "write clip smoke report");
         return juce::Result::ok();

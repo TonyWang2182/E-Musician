@@ -2504,3 +2504,42 @@ Plans, architecture ADR0007, API, quickstart, implementation ownership, manual c
 ## 2026-10-29 v0.6.0 repository synchronization
 
 Implementation/evidence commit9f491e71532a448cb80b46dd750e7c79166db7e0 pushed to origin/feature/daily-workflow-v060; git ls-remote confirmed the same SHA. main remainsd4ed6c898af1303918e38b6325a915befabbb575. All79 fingerprinted source inputs matched staged Git bytes; reviewed80 staged files, no user media/project/plugin or binary uploads. Follow-up documentation records this synchronization without changing tested source or executable. New-feature manual/hearing review remains next.
+
+### 2026-10-29 · 0.6.1细网格迭代开始
+
+从237c1d6创建feature/fine-grid-v061。实施1/16384、Ctrl+4线型反馈、三级标尺及可视范围缩放/拖动。详见review/2026-10-29-fine-grid/PLAN.md；用户已关闭程序，保留0.6.0备份，采用原build增量Release，未操作实体GUI或用户工程。此条仅计划/实现中，不表示通过测试。
+
+### 2026-10-29T16:17:14+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 24.902s.
+- Command: `cmake --preset windows-msvc`
+- Context: 0.6.1 fine-grid integration: source frozen across configure/build/test; fixed/adaptive1/16384, viewport geometry, indexed piano, wide-tick SMF; offline synthetic tests only.
+- Source SHA-256: `f4f5392e7f1c11f811a0e8e4a4a5d3403e9001f11feb8dcb46e7bcfb8c4670b1`; Git HEAD: `237c1d6452a35624e77c13f361ebddd489c4ea82`.
+- [Record](builds/20261029T081714.335420Z-712f11007d.json) · [Raw log](../build-logs/20261029T081714.335420Z-712f11007d.log)
+- [Exact process output](../build-logs/20261029T081714.335420Z-712f11007d.raw.log)
+
+### 2026-10-29T16:17:39+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 71.824s.
+- Command: `cmake --build --preset windows-release --parallel 2`
+- Context: 0.6.1 fine-grid integration: source frozen across configure/build/test; fixed/adaptive1/16384, viewport geometry, indexed piano, wide-tick SMF; offline synthetic tests only.
+- Source SHA-256: `f4f5392e7f1c11f811a0e8e4a4a5d3403e9001f11feb8dcb46e7bcfb8c4670b1`; Git HEAD: `237c1d6452a35624e77c13f361ebddd489c4ea82`.
+- [Record](builds/20261029T081739.357927Z-c3697d7b80.json) · [Raw log](../build-logs/20261029T081739.357927Z-c3697d7b80.log)
+- [Exact process output](../build-logs/20261029T081739.357927Z-c3697d7b80.raw.log)
+
+### 2026-10-29T16:18:51+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 99.312s.
+- Command: `ctest --preset windows-release --output-on-failure`
+- Context: 0.6.1 fine-grid integration: source frozen across configure/build/test; fixed/adaptive1/16384, viewport geometry, indexed piano, wide-tick SMF; offline synthetic tests only.
+- Source SHA-256: `f4f5392e7f1c11f811a0e8e4a4a5d3403e9001f11feb8dcb46e7bcfb8c4670b1`; Git HEAD: `237c1d6452a35624e77c13f361ebddd489c4ea82`.
+- [Record](builds/20261029T081851.245584Z-09fd8d780f.json) · [Raw log](../build-logs/20261029T081851.245584Z-09fd8d780f.log)
+- [Exact process output](../build-logs/20261029T081851.245584Z-09fd8d780f.raw.log)
+
+### 2026-10-29 · 0.6.1实现与验证完成
+
+Release首轮配置/编译/测试全部通过，5/5，Core118/片段407/DAW799/生产229。源码f4f5392e7f1c11f811a0e8e4a4a5d3403e9001f11feb8dcb46e7bcfb8c4670b1，EXE491ba101bfe1eefb48a82bacba2226c722c7e97bc87e4743ff5e45cd4e6a4cfe；源码冻结，73个用户工程/设置哈希未变。1/16384、Ctrl+4虚实线、三级标尺、可视索引和有界后台细节缓存、4096PPQN及48h端点保护完成；证据见verification/2026-10-29-v061/RESULTS.md。合成10万音符横移/拖动+绘制P95=4.0527/2.7982ms，不推断设备听感。已复查合成PNG，人工短测待用户，Debug未重建。DEVLOG追加，架构/API/计划/上下文同步，main不自动合并。
+
+### 2026-10-29 · 0.6.1提交前审查
+
+79个源码输入逐文件SHA-256与暂存Git字节及已验证构建一致。归档时发现CTest原始文本为Windows ANSI，首次UTF-8读取失败且未修改源码，已明确转为UTF-8/LF；原始命令输出另保留build-logs。合成PNG/JSON/文本证据哈希与暂存字节逐项核对。只提交本轮代码和开发档案，不包含音乐、测试工程、插件、EXE/PDB或缓存。

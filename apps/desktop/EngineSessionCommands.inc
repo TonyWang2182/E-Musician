@@ -158,7 +158,7 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
         }
     }else if(cmd=="split_clip"){
         storage::StoredTrack* parent=nullptr;c=storedClip(s,textArg(a,"clip_id"),&parent);if(!c)return bad("Clip no longer exists.");const auto at=number(a,"at_seconds");
-        if(!std::isfinite(at)||at-c->timelineStart<0.001||c->timelineStart+c->duration-at<0.001)return bad("Split must leave at least 1 ms on each side.");
+        if(!std::isfinite(at)||at-c->timelineStart<time::minimumEditSpanSeconds||c->timelineStart+c->duration-at<time::minimumEditSpanSeconds)return bad("Split must leave at least 1 microsecond on each side.");
         auto right=*c;right.id=uid();chooseAfter=right.id;double left=at-c->timelineStart;
         right.timelineStart=at;right.duration=c->duration-left;c->duration=left;
         if(c->kind=="audio"){right.sourceOffset+=left;right.fadeIn=0;right.fadeOut=juce::jmin(right.fadeOut,right.duration);c->fadeOut=0;c->fadeIn=juce::jmin(c->fadeIn,c->duration);}

@@ -1,0 +1,6 @@
+{
+  "status": "passed",
+  "checks_passed": 103,
+  "scope": "schema4 DTO/binary persistence, incremental media, conflict/cancellation, routing/automation/controllers and schema2/3 migration; no plugin instantiation or audio decode claim",
+  "workspace": "E:\\E-musician\\build\\smoke\\Release\\26dfdcf6d66c\\storage-v3-253f5a2c985e46069e865501b9ca513f"
+}

@@ -145,7 +145,7 @@ template<class J> juce::Result readJobMidi(const J& j,const juce::File& file,boo
             storage::StoredTrack track;track.id=uid();track.kind="instrument";track.name=name+" / ch "+juce::String(channel);
             storage::StoredClip clip;clip.id=uid();clip.kind="midi";clip.notes=std::move(notes);double end=0;
             for(const auto& n:clip.notes)end=juce::jmax(end,n.startBeats+n.lengthBeats);
-            clip.lengthBeats=std::ceil(end*960.0)/960.0;clip.duration=time::beatsToSeconds(clip.lengthBeats,state.bpm);track.clips.push_back(std::move(clip));state.tracks.push_back(std::move(track));
+            clip.lengthBeats=end;clip.duration=time::beatsToSeconds(clip.lengthBeats,state.bpm);track.clips.push_back(std::move(clip));state.tracks.push_back(std::move(track));
         }jobProgress(j,double(ti+1)/juce::jmax(1,midi.getNumTracks()));
     }
     if(!sawNotes)return juce::Result::fail("The MIDI file contains no notes.");
@@ -156,9 +156,59 @@ template<class J> juce::Result readJobMidi(const J& j,const juce::File& file,boo
     }
     syncMidiSeconds(state);return storage::validate(state);
 }
+// JUCE 8's writer converts absolute event timestamps to signed int. The
+// 1/16384 whole-note grid needs 4096 PPQN, whose 48-hour range exceeds int.
+// Keep absolute ticks wide and split only long SMF deltas with inert text events.
+inline constexpr int midiExportPpqn = 4096;
+template<class J> juce::Result writeMidiWideTicks(const J& job, juce::OutputStream& output, const juce::MidiFile& midi)
+{
+    constexpr std::uint64_t maximumDelta = 0x0fffffff;
+    const auto maximumTick = static_cast<std::uint64_t>(storage::maximumTimelineSeconds * storage::maximumBpm / 60.0 * midiExportPpqn);
+    const auto variable = [](juce::OutputStream& stream, std::uint32_t value) {
+        unsigned char bytes[4]; int count = 0;
+        bytes[count++] = static_cast<unsigned char>(value & 127);
+        while ((value >>= 7) != 0) bytes[count++] = static_cast<unsigned char>((value & 127) | 128);
+        while (count > 0) if (!stream.writeByte(static_cast<char>(bytes[--count]))) return false;
+        return true;
+    };
+    if (!output.writeIntBigEndian(0x4d546864) || !output.writeIntBigEndian(6)
+        || !output.writeShortBigEndian(1) || !output.writeShortBigEndian(static_cast<short>(midi.getNumTracks()))
+        || !output.writeShortBigEndian(midiExportPpqn)) return juce::Result::fail("Could not write MIDI header.");
+    for (int track = 0; track < midi.getNumTracks(); ++track) {
+        juce::MemoryOutputStream bytes; std::uint64_t previous = 0;
+        const auto* sequence = midi.getTrack(track);
+        for (int index = 0; index < sequence->getNumEvents(); ++index) {
+            if (job->cancel.load()) return juce::Result::fail("Cancelled.");
+            const auto& message = sequence->getEventPointer(index)->message;
+            const double time = message.getTimeStamp();
+            if (!std::isfinite(time) || time < 0 || time > double(maximumTick))
+                return juce::Result::fail("A MIDI event exceeds the supported timeline.");
+            const auto tick = static_cast<std::uint64_t>(std::llround(time));
+            if (tick < previous) return juce::Result::fail("MIDI events are not ordered.");
+            while (tick - previous > maximumDelta) {
+                if (!variable(bytes, static_cast<std::uint32_t>(maximumDelta))
+                    || !bytes.writeByte(static_cast<char>(0xff)) || !bytes.writeByte(1) || !bytes.writeByte(0))
+                    return juce::Result::fail("Could not write MIDI gap.");
+                previous += maximumDelta;
+            }
+            if (!variable(bytes, static_cast<std::uint32_t>(tick - previous))
+                || !bytes.write(message.getRawData(), static_cast<size_t>(message.getRawDataSize())))
+                return juce::Result::fail("Could not write MIDI event.");
+            previous = tick;
+        }
+        const unsigned char end[] = { 0, 0xff, 0x2f, 0 };
+        if (!bytes.write(end, sizeof(end)) || bytes.getDataSize() > static_cast<size_t>(std::numeric_limits<int>::max())
+            || !output.writeIntBigEndian(0x4d54726b) || !output.writeIntBigEndian(static_cast<int>(bytes.getDataSize()))
+            || !output.write(bytes.getData(), bytes.getDataSize())) return juce::Result::fail("Could not write MIDI track.");
+    }
+    return juce::Result::ok();
+}
+
 template<class J> juce::Result writeJobMidi(const J& j,const juce::File& file,const storage::StoredProject& state,const std::vector<juce::String>& selected)
 {
-    constexpr int ppqn=960;juce::MidiFile midi;midi.setTicksPerQuarterNote(ppqn);
+    if(!std::isfinite(state.bpm)||state.bpm<storage::minimumBpm||state.bpm>storage::maximumBpm)return juce::Result::fail("MIDI tempo is outside the supported range.");
+    constexpr int ppqn=midiExportPpqn;const double maximumTicks=storage::maximumTimelineSeconds*state.bpm/60.0*ppqn;
+    const auto lastTick=static_cast<std::int64_t>(std::floor(maximumTicks));juce::MidiFile midi;midi.setTicksPerQuarterNote(ppqn);
     juce::MidiMessageSequence meta;auto tempo=juce::MidiMessage::tempoMetaEvent(int(std::llround(60000000.0/state.bpm)));meta.addEvent(tempo);
     meta.addEvent(juce::MidiMessage::timeSignatureMetaEvent(state.numerator,state.denominator));midi.addTrack(meta);
     std::set<juce::String> ids(selected.begin(),selected.end());double origin=0;
@@ -173,23 +223,25 @@ template<class J> juce::Result writeJobMidi(const J& j,const juce::File& file,co
           for(const auto& n:c.notes){
             if(j->cancel.load())return juce::Result::fail("Cancelled.");
             if(!std::isfinite(n.startBeats)||!std::isfinite(n.lengthBeats)||n.startBeats<0||n.lengthBeats<=0)
-                return juce::Result::fail("A note cannot be represented safely at 960 PPQN.");
+                return juce::Result::fail("A note cannot be represented safely at 4096 PPQN.");
             const auto beginTicks=(c.startBeats+n.startBeats-origin)*ppqn, endTicks=(c.startBeats+n.startBeats+n.lengthBeats-origin)*ppqn;
             if(!std::isfinite(beginTicks)||!std::isfinite(endTicks)||beginTicks<0||endTicks<beginTicks
-                ||beginTicks>=std::numeric_limits<int>::max()||endTicks>std::numeric_limits<int>::max())
-                return juce::Result::fail("A note cannot be represented safely at 960 PPQN.");
+                ||beginTicks>=maximumTicks||endTicks>maximumTicks)
+                return juce::Result::fail("A note cannot be represented safely at 4096 PPQN.");
             auto begin=std::llround(beginTicks), end=std::llround(endTicks);
-            if(end<begin||begin>=std::numeric_limits<int>::max())return juce::Result::fail("A note cannot be represented safely at 960 PPQN.");
-            // A valid positive duration can quantise to the same tick at both edges.
-            // Preserve the event with a one-tick note-off instead of rejecting export.
-            end=std::max(end,begin+1);
+            if(end<begin)return juce::Result::fail("A note cannot be represented safely at 4096 PPQN.");
+            // Positive sub-tick notes survive as one tick. At the project horizon,
+            // move that tick inward rather than creating an unimportable note-off.
+            begin=std::min(begin,static_cast<long long>(lastTick-1));
+            end=std::min(std::max(end,begin+1),static_cast<long long>(lastTick));
             auto on=juce::MidiMessage::noteOn(n.channel,n.pitch,juce::uint8(n.velocity));on.setTimeStamp(double(begin));events.push_back(on);
             auto off=juce::MidiMessage::noteOff(n.channel,n.pitch);off.setTimeStamp(double(end));events.push_back(off);hasNotes=true;
           }
           for(const auto& e:c.controllers){
             if(j->cancel.load())return juce::Result::fail("Cancelled.");
-            const auto tick=std::llround((c.startBeats+e.beats-origin)*ppqn);
-            if(tick<0||tick>std::numeric_limits<int>::max())return juce::Result::fail("A controller cannot be represented safely at 960 PPQN.");
+            const double rawTick=(c.startBeats+e.beats-origin)*ppqn;
+            if(!std::isfinite(rawTick)||rawTick<0||rawTick>maximumTicks)return juce::Result::fail("A controller cannot be represented safely at 4096 PPQN.");
+            const auto tick=std::min(std::llround(rawTick),static_cast<long long>(lastTick));
             const int channel=c.notes.empty()?1:c.notes.front().channel;juce::MidiMessage message;
             if(e.type>=0&&e.type<=127)message=juce::MidiMessage::controllerEvent(channel,e.type,e.value>>7);
             else if(e.type==0x1001)message=juce::MidiMessage::programChange(channel,e.value>>7);
@@ -202,15 +254,15 @@ template<class J> juce::Result writeJobMidi(const J& j,const juce::File& file,co
         }
         if(!events.empty()){
             std::stable_sort(events.begin(),events.end(),[](const auto& a,const auto& b){return a.getTimeStamp()!=b.getTimeStamp()?a.getTimeStamp()<b.getTimeStamp():a.isNoteOff()&&!b.isNoteOff();});
-            juce::MidiMessageSequence sequence;sequence.addEvent(juce::MidiMessage::textMetaEvent(3,track.name));double previous=0;
-            for(const auto& event:events){if(event.getTimeStamp()-previous>0x0fffffff)return juce::Result::fail("A MIDI event gap exceeds the SMF delta-time limit.");previous=event.getTimeStamp();sequence.addEvent(event);}midi.addTrack(sequence);
+            juce::MidiMessageSequence sequence;sequence.addEvent(juce::MidiMessage::textMetaEvent(3,track.name));
+            for(const auto& event:events)sequence.addEvent(event);midi.addTrack(sequence);
         }jobProgress(j,0.8*double(ti+1)/juce::jmax(size_t(1),state.tracks.size()));
     }
     if(!hasNotes)return juce::Result::fail("There are no MIDI notes to export.");
     JobFingerprint original;if(auto r=fingerprint(file,original,[j]{return j->cancel.load();});r.failed())return r;
     if(!file.getParentDirectory().isDirectory())return juce::Result::fail("The output directory does not exist.");
     juce::TemporaryFile temp(file);auto output=temp.getFile().createOutputStream();if(!output)return juce::Result::fail("Cannot create MIDI output.");
-    if(!midi.writeTo(*output,1))return juce::Result::fail("Could not write MIDI.");output->flush();auto error=output->getStatus();output.reset();if(error.failed())return error;
+    if(auto r=writeMidiWideTicks(j,*output,midi);r.failed())return r;output->flush();auto error=output->getStatus();output.reset();if(error.failed())return error;
     return replaceExport(j,temp,original);
 }
 juce::File renderJobsRoot()

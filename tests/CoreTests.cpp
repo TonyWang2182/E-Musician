@@ -1,5 +1,6 @@
 #include "core/commands/RevisionGuard.hpp"
 #include "core/time/Time.hpp"
+#include "core/time/EditGrid.hpp"
 #include "core/time/MusicalPosition.hpp"
 
 #include <algorithm>
@@ -220,6 +221,23 @@ int main()
     }
     for(const auto* invalid:{"0:1:000","2:0:000","1:5:000","1:1:960","1:1:000junk","nan","1:1","1:1:0:0","99999999999999999999:1:0"})
         checks.expect(!parseMusicalPosition(invalid,120,4,4),"reject malformed/out-of-range musical input");
+    checks.near(editGridBeats(1.0/4096.0,false,64,1000),1.0/4096.0,"fixed finest grid survives distant zoom");
+    checks.near(editGridBeats(0,true,1.0/256.0,1000),1.0/4096.0,"adaptive grid reaches finest supported spacing");
+    checks.near(editGridBeats(0,true,1000.0/16.0/4096.0,1000),1.0/4096.0,"adaptive reaches finest grid at maximum zoom spacing");
+    checks.near(editGridBeats(0,true,864000.0,1000),64.0,"overview grid remains bounded");
+    checks.expect(musicalRulerStep(64,1000,4,4).labelTier==0,"overview labels bars");
+    checks.expect(musicalRulerStep(12,1000,4,4).labelTier==1,"medium zoom labels meter beats");
+    checks.expect(musicalRulerStep(2,1000,4,4).labelTier==2,"close zoom labels beat quarters");
+    checks.expect(musicalRulerStep(0.001,1000,4,4).labelTier==2,"deep zoom never adds a fourth label tier");
+    checks.expect(musicalRulerLabel(0,4,4,0)=="1" && musicalRulerLabel(0,4,4,1)=="1.1" && musicalRulerLabel(0,4,4,2)=="1.1.1","ruler uses three one-based dot tiers");
+    checks.expect(musicalRulerLabel(3.75,4,4,2)=="1.4.4" && musicalRulerLabel(4,4,4,2)=="2.1.1","ruler carries bars without fourth-level labels");
+    checks.expect(musicalRulerLabel(2.875,6,8,2)=="1.6.4" && musicalRulerLabel(3,6,8,2)=="2.1.1","compound meter subdivisions follow denominator beat");
+    for (double bpm : {20.0,120.0,300.0}) {
+        const auto endBeat=secondsToBeats(172800.0,bpm);
+        const auto nearEnd=endBeat-minimumEditGridBeats*5;
+        checks.near(snapEditBeat(nearEnd+minimumEditGridBeats*0.4,minimumEditGridBeats),nearEnd,"finest grid retains nearest point at48h");
+        checks.expect(beatsToSeconds(minimumEditGridBeats,bpm)>minimumEditSpanSeconds,"finest grid exceeds edit duration guard across tempo range");
+    }
     testRevisionGuard(checks);
     return checks.finish();
 }

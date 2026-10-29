@@ -711,18 +711,19 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         rulerMode.addItem("bars",1);rulerMode.addItem("seconds",2);rulerMode.addItem("both",3);
         rulerMode.setSelectedId(1,juce::dontSendNotification);
         rulerMode.onChange=[this]{arrangement.setRulerMode(rulerMode.getSelectedId()-1);owner.resetClipStartInput();owner.repaint();};
-        rulerMode.setTooltip("Ruler units only. Musical position uses bar:beat:tick (960 ticks per meter beat). Snap is independent.");
+        rulerMode.setTooltip("Ruler: bar, bar.beat, bar.beat.subdivision as you zoom. Inspector uses bar:beat:tick. Snap is independent.");
         gridMode.addItem("adaptive",1);gridMode.addItem("1 bar",2);
         gridMode.addItem("1/4", 3); gridMode.addItem("1/8", 4); gridMode.addItem("1/16", 5); gridMode.addItem("1/32", 6);
         gridMode.addItem("1/8 triplet",7);gridMode.addItem("1/16 triplet",8);
+        for (int id=9, divisor=64; id<=17; ++id, divisor*=2) gridMode.addItem("1/"+juce::String(divisor),id);
         gridMode.setSelectedId(5, juce::dontSendNotification);
         gridMode.onChange = [this] { const int n=gridMode.getSelectedId();arrangement.setAdaptiveGrid(n==1);
-            arrangement.setGridBeats(n==2?state.numerator*4.0/state.denominator:n==7?1.0/3:n==8?1.0/6:n==1?0.25:std::pow(0.5,n-3)); };
+            arrangement.setGridBeats(n==2?state.numerator*4.0/state.denominator:n==7?1.0/3:n==8?1.0/6:n==1?0.25:n>=9?std::ldexp(1.0,5-n):std::pow(0.5,n-3)); };
         gridMode.onChange();
-        gridMode.setTooltip("Edit grid. Fixed spacing survives zoom; adaptive follows zoom. Alt temporarily bypasses snapping.");
+        gridMode.setTooltip("Edit grid down to 1/16384. Fixed spacing survives zoom; adaptive follows zoom. Alt temporarily bypasses snapping.");
         snap.setClickingTogglesState(true);snap.setToggleState(true,juce::dontSendNotification);
         snap.onClick=[this]{arrangement.setSnapEnabled(snap.getToggleState());};
-        snap.setTooltip("Snap edits to grid and nearby clip edges. Ctrl+4 toggles; Alt temporarily bypasses.");
+        snap.setTooltip("Snap: solid grid when on, dashed when off. Ctrl+4 toggles; Alt temporarily bypasses. Applies to this editor.");
         follow.setClickingTogglesState(true);follow.onClick=[this]{arrangement.setFollowPlayhead(follow.getToggleState());};
         follow.setTooltip("Follow playback. Manual scrolling or editing pauses following until playback restarts.");
         metronome.onClick=[this]{owner.execute("set_recording_preferences",arguments({{"metronome_enabled",!state.metronomeEnabled}}));};
@@ -768,7 +769,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         setClipStart.setTooltip("Apply the clip start time. One move can be undone with Ctrl+Z.");
         zoomIn.setTitle("Zoom in timeline");
         zoomOut.setTitle("Zoom out timeline");
-        zoomIn.setTooltip("Zoom in (up to 32x). Ctrl + wheel also zooms around the pointer.");
+        zoomIn.setTooltip("Zoom in to the finest 1/16384 grid. Ctrl + wheel zooms around the pointer.");
         zoomOut.setTooltip("Zoom out. Ctrl + wheel also zooms around the pointer.");
         fit.setTooltip("Fit the whole project into the timeline.");
         zoomIn.onClick = [this] { arrangement.zoomIn(); };
@@ -1362,7 +1363,7 @@ juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDire
     }
     if (result.wasOk()) {
         p.arrangement.setGrid(0.0, false);
-        result = p.arrangement.runSmokeTest(*report);
+        result = p.arrangement.runSmokeTest(*report, outputDirectory);
         p.gridMode.onChange();
         p.snap.onClick();p.rulerMode.onChange();
     }
@@ -1453,7 +1454,7 @@ juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDire
     report->setProperty("inspector_matches_selection", result.wasOk());
     if (result.wasOk()) {
         PianoRoll editor; editor.setLookAndFeel(&p.look);
-        result = editor.runInteractionSmokeTest(*report);
+        result = editor.runInteractionSmokeTest(*report, outputDirectory);
         const auto captureComponent = [&outputDirectory](juce::Component& component, const char* name) {
             juce::MemoryOutputStream png;
             return juce::PNGImageFormat().writeImageToStream(component.createComponentSnapshot(component.getLocalBounds(), true), png)

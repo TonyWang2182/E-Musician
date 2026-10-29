@@ -34,7 +34,7 @@ public:
     juce::String waveformStatus(const juce::String&) const;
     void drawTrackWaveform(juce::Graphics&, juce::Rectangle<int>, const juce::String&,
                            double start, double end, float verticalZoom);
-    juce::Result runSmokeTest(juce::DynamicObject& report);
+    juce::Result runSmokeTest(juce::DynamicObject& report, const juce::File& outputDirectory = {});
     void paint(juce::Graphics&) override;
     void resized() override;
     void mouseDown(const juce::MouseEvent&) override;

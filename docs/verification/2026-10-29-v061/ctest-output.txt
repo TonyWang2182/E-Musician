@@ -1,0 +1,122 @@
+Start testing: Oct 29 16:18 中国标准时间
+----------------------------------------------------------
+1/5 Testing: development.logging
+1/5 Test: development.logging
+Command: "C:/Python314/python.exe" "-m" "unittest" "discover" "-s" "E:/E-musician/tests" "-p" "test_dev_logger.py" "-v"
+Directory: E:/E-musician/build
+"development.logging" start time: Oct 29 16:18 中国标准时间
+Output:
+----------------------------------------------------------
+test_failed_command_preserves_raw_bytes_and_source_drift (test_dev_logger.RecorderTests.test_failed_command_preserves_raw_bytes_and_source_drift) ... ok
+test_redirected_console_uses_utf8 (test_dev_logger.RecorderTests.test_redirected_console_uses_utf8) ... ok
+test_startup_failure_is_finalized (test_dev_logger.RecorderTests.test_startup_failure_is_finalized) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.757s
+
+OK
+<end of output>
+Test time =   2.73 sec
+----------------------------------------------------------
+Test Passed.
+"development.logging" end time: Oct 29 16:18 中国标准时间
+"development.logging" time elapsed: 00:00:02
+----------------------------------------------------------
+
+2/5 Testing: engine.patch_contracts
+2/5 Test: engine.patch_contracts
+Command: "C:/Python314/python.exe" "-m" "unittest" "discover" "-s" "E:/E-musician/tests" "-p" "test_engine_patches.py" "-v"
+Directory: E:/E-musician/build
+"engine.patch_contracts" start time: Oct 29 16:18 中国标准时间
+Output:
+----------------------------------------------------------
+test_context_and_declared_output_are_both_checked (test_engine_patches.EnginePatchTests.test_context_and_declared_output_are_both_checked) ... ok
+test_crlf_source_preserves_checkout_line_endings (test_engine_patches.EnginePatchTests.test_crlf_source_preserves_checkout_line_endings) ... ok
+test_escaped_path_and_extra_patch_file_are_rejected (test_engine_patches.EnginePatchTests.test_escaped_path_and_extra_patch_file_are_rejected) ... ok
+test_exact_apply_verify_idempotency_and_unrelated_bytes (test_engine_patches.EnginePatchTests.test_exact_apply_verify_idempotency_and_unrelated_bytes) ... ok
+test_patch_hash_mismatch_refuses_before_source_write (test_engine_patches.EnginePatchTests.test_patch_hash_mismatch_refuses_before_source_write) ... ok
+test_schema2_applies_all_sources_and_resumes_verified_subset (test_engine_patches.EnginePatchTests.test_schema2_applies_all_sources_and_resumes_verified_subset) ... ok
+test_schema2_preflights_later_patch_output_before_writing_first (test_engine_patches.EnginePatchTests.test_schema2_preflights_later_patch_output_before_writing_first) ... ok
+test_schema2_preflights_later_source_before_writing_first (test_engine_patches.EnginePatchTests.test_schema2_preflights_later_source_before_writing_first) ... ok
+test_schema2_rejects_duplicate_paths_and_schema1_stays_single_source (test_engine_patches.EnginePatchTests.test_schema2_rejects_duplicate_paths_and_schema1_stays_single_source) ... ok
+test_unknown_modifications_are_never_overwritten (test_engine_patches.EnginePatchTests.test_unknown_modifications_are_never_overwritten) ... ok
+test_verify_refuses_unpatched_without_changing_it (test_engine_patches.EnginePatchTests.test_verify_refuses_unpatched_without_changing_it) ... ok
+test_wrong_declared_output_hash_refuses_before_source_write (test_engine_patches.EnginePatchTests.test_wrong_declared_output_hash_refuses_before_source_write) ... ok
+test_wrong_upstream_head_refuses_before_source_write (test_engine_patches.EnginePatchTests.test_wrong_upstream_head_refuses_before_source_write) ... ok
+test_formal_patch_hash_and_base_commit_match_recorded_dependencies (test_engine_patches.RecordedPatchTests.test_formal_patch_hash_and_base_commit_match_recorded_dependencies) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.731s
+
+OK
+<end of output>
+Test time =   1.01 sec
+----------------------------------------------------------
+Test Passed.
+"engine.patch_contracts" end time: Oct 29 16:18 中国标准时间
+"engine.patch_contracts" time elapsed: 00:00:01
+----------------------------------------------------------
+
+3/5 Testing: core.contracts
+3/5 Test: core.contracts
+Command: "E:/E-musician/build/Release/emusician_core_tests.exe"
+Directory: E:/E-musician/build
+"core.contracts" start time: Oct 29 16:18 中国标准时间
+Output:
+----------------------------------------------------------
+Core checks: 118/118 passed
+<end of output>
+Test time =   0.32 sec
+----------------------------------------------------------
+Test Passed.
+"core.contracts" end time: Oct 29 16:18 中国标准时间
+"core.contracts" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/5 Testing: engine.integration_smoke
+4/5 Test: engine.integration_smoke
+Command: "C:/Python314/python.exe" "E:/E-musician/tests/RunEngineSmoke.py" "E:/E-musician/build/bin/Release/E-musician.exe" "E:/E-musician/build/smoke/Release"
+Directory: E:/E-musician/build
+"engine.integration_smoke" start time: Oct 29 16:18 中国标准时间
+Output:
+----------------------------------------------------------
+Engine render, MP3, project, arrangement and native captures passed; transport skipped: E:\E-musician\build\smoke\Release\26dfdcf6d66c
+<end of output>
+Test time =  91.25 sec
+----------------------------------------------------------
+Test Passed.
+"engine.integration_smoke" end time: Oct 29 16:20 中国标准时间
+"engine.integration_smoke" time elapsed: 00:01:31
+----------------------------------------------------------
+
+5/5 Testing: control.output_isolation
+5/5 Test: control.output_isolation
+Command: "C:/Python314/python.exe" "E:/E-musician/tests/ControlOutputSmoke.py" "--exe" "E:/E-musician/build/bin/Release/E-musician.exe"
+Directory: E:/E-musician/build
+"control.output_isolation" start time: Oct 29 16:20 中国标准时间
+Output:
+----------------------------------------------------------
+{
+  "passed": true,
+  "executable": "E:\\E-musician\\build\\bin\\Release\\E-musician.exe",
+  "executable_sha256": "491ba101bfe1eefb48a82bacba2226c722c7e97bc87e4743ff5e45cd4e6a4cfe",
+  "script_sha256": "8bb033d5662bda88a500ce4a5bbe05ce88a1532617642aaa2888774788e9182e",
+  "checks": [
+    "strict client rejects bad UTF-8, plugin text and blank lines with bounded evidence",
+    "24 ordered JSONL replies and clean EOF shutdown",
+    "printf, cout, CRT fd 1 and Win32 stdout route to stderr in parent and inherited child",
+    "dedicated protocol handle has HANDLE_FLAG_INHERIT cleared"
+  ],
+  "workspace": "E:\\E-musician\\build\\control-output-smoke\\42922800-b6b3-43b7-aaf0-da2b814c8e56",
+  "exit_code": 0,
+  "elapsed_seconds": 1.3031034000014188
+}
+<end of output>
+Test time =   1.65 sec
+----------------------------------------------------------
+Test Passed.
+"control.output_isolation" end time: Oct 29 16:20 中国标准时间
+"control.output_isolation" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Oct 29 16:20 中国标准时间
