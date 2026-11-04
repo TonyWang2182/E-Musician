@@ -1,5 +1,10 @@
 # E-musician 开发计划
 
+## 0.7.0 Focus + Mix 界面迁移（2026-11-04）
+
+用户批准在保留旧版本及全部功能的前提下应用新设计。[计划](review/2026-11-04-focus-native/PLAN.md)、[功能核查](review/2026-11-04-focus-native/FEATURE-PARITY.md)、[人工短测](review/2026-11-04-focus-native/MANUAL-CHECK.md)已建立。实现和四轮 Release 5/5 已通过；最终 101.85 秒，源码在构建/测试期间冻结，指纹一致。见[交付记录](verification/2026-11-04-v070/RESULTS.md)。新版设备、听感与 DPI 仍待人工验收。旧版在 releases/0.6.1，新版入口 build/bin/Release。此条覆盖下文历史 UI 计划，不重新开启已暂缓的扩展。
+
+
 版本：1.8。日期：2026-10-29（Asia/Shanghai）。项目：E:/E-musician。
 
 ## 0.6.1：细网格与深度缩放

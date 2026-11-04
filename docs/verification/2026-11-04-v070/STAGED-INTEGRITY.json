@@ -1,0 +1,14 @@
+{
+  "source_sha256": "79e8eff06b55bcdc75b25270be0cceb9e74fe0fd0983bec75e71597ee254cf37",
+  "input_files": 82,
+  "staged_content_matches": true,
+  "line_endings_normalized_by_gitattributes": [
+    "apps/desktop/ArrangementView.cpp",
+    "apps/desktop/MainComponent.cpp",
+    "apps/desktop/PianoRoll.cpp"
+  ],
+  "unexpected_differences": [],
+  "engine_storage_control_source_unchanged": true,
+  "user_assets_binaries_not_staged": true,
+  "exact_local_input_archive": "releases/0.7.0/source-build-inputs.zip"
+}

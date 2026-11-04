@@ -1,0 +1,33 @@
+{
+  "version": "0.7.0",
+  "date": "2026-11-04",
+  "scope": "Release offline engine and native component regression; no physical audio/DPI/OS input acceptance",
+  "status": "passed",
+  "ctest": "5/5",
+  "seconds": 101.85,
+  "build_record": "20261104T155508.416921Z-940a29deca",
+  "test_record": "20261104T155535.526844Z-66a086799d",
+  "source_sha256": "79e8eff06b55bcdc75b25270be0cceb9e74fe0fd0983bec75e71597ee254cf37",
+  "exe_sha256": "133f9139b9b56c6fc7f89613b18454bc613ba57996947fbefd868b8719773566",
+  "old_exe_sha256": "491ba101bfe1eefb48a82bacba2226c722c7e97bc87e4743ff5e45cd4e6a4cfe",
+  "preserved_user_files": 526,
+  "changed_user_file_count": 0,
+  "source_frozen_during_build_test": true,
+  "artifact_directory": "E:\\E-musician\\build\\smoke\\Release\\a3c9360dc861",
+  "draw_cpu_p95_ms": {
+    "deep_zoom_grid_iteration_p95_ms": 0.001800000667572,
+    "waveform_detail_p95_ms": 0.297200001776218,
+    "midi_100k_pan_paint_cpu_p95_ms": 1.967500001192093,
+    "midi_100k_drag_paint_cpu_p95_ms": 1.793999999761581
+  },
+  "captures": {
+    "arrangement-1280x800.png": "144816e69c50167228548907d3d9a6449f49b600a896f3e98ab7060d3c9333cb",
+    "piano-1440x900.png": "174bcebd8abefb89189b6353d1cf2b234a995e26c03c68c46d84e35472c35f27",
+    "mixer-1440x900.png": "26ed622d6894f5d96d1799dec9667f8ff3cf0e98dde1c5952b613bf2439cd456",
+    "mixer-1000x650.png": "467366a99893a8cbbbac7af923802b19371e6c23cb60877cdbe80df5ee64f8d0",
+    "io-minimum.png": "581b621af1006107d032ea16b73d79b92e29741827f94d4d043ad70395a7f823",
+    "automation-minimum.png": "5108b92e88229b0251b9c0614f4eb7a5f01a1596089d2fa28fdc6d6e76bacfa8",
+    "master-devices.png": "83efe14d1e63dab08e7d2f86e7cc616e60ef22451c186d551b0c85e10663cd4c"
+  },
+  "native_visual_review": "ship: local manual-test candidate; see FINISH-REVIEW.md"
+}

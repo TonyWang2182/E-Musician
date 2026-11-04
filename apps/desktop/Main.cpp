@@ -273,7 +273,7 @@ private:
     class Window final : public juce::DocumentWindow {
     public:
         Window(EngineSession& session, bool visible)
-            : DocumentWindow("E-musician " EMUSICIAN_APPLICATION_VERSION " - Audio workspace", juce::Colours::white, allButtons)
+            : DocumentWindow("E-musician " EMUSICIAN_APPLICATION_VERSION " - Focus + Mix", juce::Colour(0xff17191d), allButtons)
         {
             setUsingNativeTitleBar(true);
             setContentOwned(new MainComponent(session), true);

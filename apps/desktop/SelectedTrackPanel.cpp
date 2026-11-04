@@ -1,11 +1,12 @@
 #include "SelectedTrackPanel.h"
+#include "FocusTheme.h"
 #include <algorithm>
 #include <cmath>
 
 namespace emusician {
 namespace {
-const juce::Colour ink(0xff171817), quiet(0xff626560), rule(0xffc6c9c3), paper(0xfffefefd);
-juce::Font font(float size) { return juce::Font(juce::FontOptions(juce::Font::getDefaultMonospacedFontName(), size, juce::Font::plain)); }
+const juce::Colour ink = focus::text, quiet = focus::muted, rule = focus::line, paper = focus::canvas;
+juce::Font font(float size) { return focus::font(size); }
 juce::var object(std::initializer_list<std::pair<juce::Identifier, juce::var>> fields) {
     auto* result = new juce::DynamicObject; for (const auto& field : fields) result->setProperty(field.first, field.second); return juce::var(result);
 }
@@ -52,7 +53,7 @@ struct SelectedTrackPanel::Impl {
                     path.lineTo(start); path.quadraticTo(control, end); path.lineTo(b);
                 }
             }
-            g.setColour(ink); g.strokePath(path, juce::PathStrokeType(1.5f));
+            g.setColour(focus::accent); g.strokePath(path, juce::PathStrokeType(1.5f));
             for (const auto& point : values) { const auto at = position(point); if (point.id == selected) g.fillEllipse(at.x - 4, at.y - 4, 8, 8); else g.drawEllipse(at.x - 3, at.y - 3, 6, 6, 1.5f); }
         }
         void mouseDown(const juce::MouseEvent& event) override {
@@ -228,6 +229,7 @@ struct SelectedTrackPanel::Impl {
 SelectedTrackPanel::SelectedTrackPanel(EngineSession& engine) : impl(std::make_unique<Impl>(*this, engine)) {}
 SelectedTrackPanel::~SelectedTrackPanel() = default;
 void SelectedTrackPanel::showDevices() { impl->page = 0; impl->masterView = false; impl->rebuild(); }
+void SelectedTrackPanel::showMasterDevices() { impl->page = 0; impl->masterView = true; impl->rebuild(); }
 void SelectedTrackPanel::update(const EngineSession::Snapshot& state) {
     auto& p = *impl; const bool changed = state.projectId != p.state.projectId || state.revision != p.state.revision || state.selectedTrackId != p.state.selectedTrackId;
     bool recordingChanged = state.recording != p.state.recording || state.recordingFinalizing != p.state.recordingFinalizing;
@@ -268,7 +270,7 @@ void SelectedTrackPanel::paint(juce::Graphics& g) {
         g.drawText("Monitoring applies to the shared input device.", 12, getHeight() - 24, getWidth() - 24, 22, juce::Justification::centredLeft);
     }
 }
-juce::Result SelectedTrackPanel::runInteractionSmokeTest(juce::DynamicObject& report) {
+juce::Result SelectedTrackPanel::runInteractionSmokeTest(juce::DynamicObject& report, const juce::File& artifactDirectory) {
     // Called by the root harness in an isolated session with an instrument track.
     auto& p = *impl; p.page = 2; update(p.session.snapshot()); p.refreshTargets(); resized();
     if (!p.currentTarget().isObject()) return juce::Result::fail("Automation targets are not available in the selected-track panel.");
@@ -276,6 +278,30 @@ juce::Result SelectedTrackPanel::runInteractionSmokeTest(juce::DynamicObject& re
     p.writeCurve(values, p.state.revision);
     const auto* lane = p.currentLane();
     if (!lane || !lane->points || lane->points->size() != 2) return juce::Result::fail("Automation panel did not commit its curve through the shared command API.");
+    if (artifactDirectory != juce::File()) {
+        const auto original = getBounds();
+        for (const auto size : { juce::Point<int>(752,256), juce::Point<int>(1168,272) }) {
+            setSize(size.x,size.y);
+            for (int page=0;page<3;++page) {
+                p.page=page;p.rebuild();resized();
+                for (auto* child : getChildren()) if (child->isVisible() && !getLocalBounds().contains(child->getBounds()))
+                    return juce::Result::fail("Track details contain a clipped visible control at minimum dock size.");
+                juce::MemoryOutputStream png;
+                const auto name="ui-track-panel-"+juce::String(page)+"-"+juce::String(size.x)+"x"+juce::String(size.y)+".png";
+                if (!juce::PNGImageFormat().writeImageToStream(createComponentSnapshot(getLocalBounds(),true),png)
+                    || !artifactDirectory.getChildFile(name).replaceWithData(png.getData(),png.getDataSize()))
+                    return juce::Result::fail("Could not capture the native track details page.");
+            }
+        }
+        p.masterView=true;p.page=0;p.rebuild();resized();
+        juce::MemoryOutputStream masterPng;
+        if (!juce::PNGImageFormat().writeImageToStream(createComponentSnapshot(getLocalBounds(),true),masterPng)
+            || !artifactDirectory.getChildFile("ui-master-devices-1168x272.png").replaceWithData(masterPng.getData(),masterPng.getDataSize()))
+            return juce::Result::fail("Could not capture native Master devices.");
+        p.masterView=false;p.page=2;p.rebuild();setBounds(original);resized();
+        lane=p.currentLane();
+        report.setProperty("track_details_all_controls_fit_minimum_dock",true);
+    }
     p.curve.selected = lane->points->front().id; p.curve.keyPressed(juce::KeyPress(juce::KeyPress::deleteKey));
     lane = p.currentLane(); if (!lane || !lane->points || lane->points->size() != 1) return juce::Result::fail("Deleting an automation point did not commit.");
     p.deleteLane.onClick(); if (p.currentLane()) return juce::Result::fail("Automation panel could not delete its lane.");

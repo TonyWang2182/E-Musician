@@ -44,6 +44,7 @@ private:
     void showExportMenu();
     void showPlugins(const juce::String& trackId = {});
     void showPianoRoll();
+    void showWorkspace(int page);
     void showProjectTiming();
     void showMetronomeOptions();
     void clipClipboardAction(const juce::String&);

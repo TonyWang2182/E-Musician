@@ -11,11 +11,12 @@ public:
     ~SelectedTrackPanel() override;
     void update(const EngineSession::Snapshot&);
     void showDevices();
+    void showMasterDevices();
     void resized() override;
     void paint(juce::Graphics&) override;
     std::function<void(const juce::Result&)> onResult;
     std::function<void(const juce::String&)> onBrowsePlugins;
-    juce::Result runInteractionSmokeTest(juce::DynamicObject&);
+    juce::Result runInteractionSmokeTest(juce::DynamicObject&, const juce::File& artifactDirectory = {});
 private:
     struct Impl;
     std::unique_ptr<Impl> impl;

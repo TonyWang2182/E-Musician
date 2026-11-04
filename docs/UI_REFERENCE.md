@@ -1,5 +1,10 @@
 # UI 参考与交互规格
 
+## 0.7.0 当前视觉与入口（2026-11-04）
+
+用户已选定深色 Focus + Mix 并授权原生落地；根目录 [DESIGN.md](../DESIGN.md) 为新视觉依据，历史 unit~ 单色参考保留在下文。顶部三个工作区 Arrangement / Piano roll / Mixer；右侧常驻所选轨与 Master。Clip 满轨高，保留裁边、淡化和移动命中。片段起点和属性在底部 Details 条；Source、MIDI 下方 Dock、Devices/I/O/sends/Automation 完整保留。网格、三级标尺和细缩放沿用 0.6.1。功能映射见[核查表](review/2026-11-04-focus-native/FEATURE-PARITY.md)，验证状态见 CONTEXT。
+
+
 版本：0.6 · 更新日期：2026-10-29。状态：当前工作台与本页新增日常操作已实现，最终自动/人工验证状态以[CONTEXT](CONTEXT.md)为准。旧0.5的组件和原生证据不代表新增操作、所有DPI或硬件组合已通过。
 
 本轮围绕通用 DAW 的音频、MIDI、插件、工程和导出功能实现。新工程默认 120 BPM、4/4；不做和弦工具、确定性乐句模板或自有音色库。用户原图继续约束视觉方向，其中的示例模块不自动变成本轮功能需求。日常入口见[快速上手](QUICKSTART.md)；以下“当前实现”表示源码已有对应路径，具体构建、原生交互、插件兼容和性能证据统一见 [验证记录](verification/2026-10-27-v05/RESULTS.md)、[CONTEXT](CONTEXT.md) 与 [交付清单](DAW_BASELINE.md)。

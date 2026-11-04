@@ -1,0 +1,41 @@
+{
+  "status": "passed",
+  "checks_passed": 788,
+  "formats": [
+    {
+      "format": "WAV",
+      "sample_rate": 48000.0,
+      "channels": 2,
+      "trim_max_sample_difference": 0.0,
+      "block_size_max_sample_difference": 0.0,
+      "source": "source.wav"
+    },
+    {
+      "format": "MP3",
+      "sample_rate": 48000.0,
+      "channels": 2,
+      "trim_max_sample_difference": 0.0,
+      "block_size_max_sample_difference": 0.0,
+      "source": "stereo-cbr-48000.mp3"
+    },
+    {
+      "format": "MP3",
+      "sample_rate": 44100.0,
+      "channels": 1,
+      "trim_max_sample_difference": 0.0,
+      "block_size_max_sample_difference": 0.0,
+      "source": "mono-vbr-44100.mp3"
+    }
+  ],
+  "scope": "Actual Tracktion audio renders, editing/undo, schema 4, MIDI SMF jobs and in-process Agent protocol. No third-party VST binary or listening claim.",
+  "playback_edit_check": "unsupported_no_output_device",
+  "dense_midi_diagnostics": {
+    "note_count": 10001,
+    "initial_write_ms": 68.958800002932549,
+    "complete_note_edit_ms": 68.160700000822544,
+    "single_pan_command_ms": 0.210299998521805,
+    "scope": "Single control-thread command elapsed time in this smoke fixture; no realtime or sustained-performance claim."
+  },
+  "storage_report": "storage-v3-report.json",
+  "workspace": "E:\\E-musician\\build\\smoke\\Release\\a3c9360dc861\\daw-cases-a5ca0186d393416496d75c59cd000cf1"
+}

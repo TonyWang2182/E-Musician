@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(EMusician VERSION 0.6.1 LANGUAGES C CXX)
+project(EMusician VERSION 0.7.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -71,7 +71,7 @@ if(EMUSICIAN_BUILD_DESKTOP)
     target_sources(EMusician PRIVATE apps/desktop/Main.cpp apps/desktop/EngineSession.cpp
         apps/desktop/MainComponent.cpp apps/desktop/ArrangementView.cpp
         apps/desktop/ProjectStorage.cpp apps/desktop/AudioSource.cpp apps/desktop/PluginHost.cpp
-        apps/desktop/PianoRoll.cpp apps/desktop/ControlServer.cpp apps/desktop/SelectedTrackPanel.cpp tests/Vst3InactiveBusSmoke.cpp)
+        apps/desktop/PianoRoll.cpp apps/desktop/ControlServer.cpp apps/desktop/SelectedTrackPanel.cpp apps/desktop/MixerView.cpp tests/Vst3InactiveBusSmoke.cpp)
     # Keep the application-reported version and window title tied to the build version.
     set_property(SOURCE apps/desktop/Main.cpp APPEND PROPERTY COMPILE_DEFINITIONS
         "EMUSICIAN_APPLICATION_VERSION=\"${PROJECT_VERSION}\"")

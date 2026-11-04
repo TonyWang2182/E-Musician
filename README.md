@@ -1,5 +1,12 @@
 # E-musician
 
+## 0.7.0 Focus + Mix
+
+原生深色编曲、钢琴卷帘与混音工作区，常驻当前轨与 Master。继续使用原录音、插件、路由、自动化、保存导出及 Agent 命令接口。启动 `build/bin/Release/E-musician.exe`；保留的 0.6.1 从 `releases/0.6.1/E-musician.exe` 独立启动。两个版本使用同一工程格式，不要同时保存同一个工程。
+
+[本轮计划](docs/review/2026-11-04-focus-native/PLAN.md) · [功能核查](docs/review/2026-11-04-focus-native/FEATURE-PARITY.md) · [人工短测](docs/review/2026-11-04-focus-native/MANUAL-CHECK.md) · [最新状态](docs/CONTEXT.md)。以下保留历史开发说明。
+
+
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。本轮先把音频编辑、MIDI 编曲、插件宿主、工程保存和导出做成可直接操作的基础，并给后续 Agent 提供同一套控制接口。
 
 **0.6.1：最细1/16384网格、Ctrl+4吸附虚实线、三级小节标尺与深度缩放。** 保留0.6.0剪贴板、循环跟随、节拍器、录音预备拍和资源/电平显示。 当前验证状态和后续人工检查见[CONTEXT](docs/CONTEXT.md)。0.5.2基础录音保存及用户混合工程验收保留原范围，早期性能和插件矩阵见[0.5交付档案](docs/verification/2026-10-27-v05/DELIVERY.md)。

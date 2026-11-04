@@ -1,4 +1,5 @@
 #include "ArrangementView.h"
+#include "FocusTheme.h"
 #include "core/time/EditGrid.hpp"
 #include "core/time/MusicalPosition.hpp"
 #include <algorithm>
@@ -9,11 +10,11 @@
 
 namespace emusician {
 namespace {
-const juce::Colour ink { 0xff171817 }, secondary { 0xff626560 }, rule { 0xffc6c9c3 }, paper { 0xfffefefd };
+const auto ink = focus::text, secondary = focus::muted, rule = focus::line, paper = focus::canvas;
 constexpr int rulerHeight = 54, scrollSize = 12, rowHeight = 104;
 juce::Font mono(float height, int style = juce::Font::plain)
 {
-    return juce::Font(juce::FontOptions(juce::Font::getDefaultMonospacedFontName(), height, style));
+    return focus::font(height, style);
 }
 juce::String timeText(double seconds)
 {
@@ -436,8 +437,8 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
         const auto duration = drag.id == clip.id && drag.moved ? drag.duration : clip.duration;
         const auto end = juce::jlimit(viewStart, viewStart + visibleDuration(), clipStart + duration);
         const auto start = juce::jlimit(viewStart, viewStart + visibleDuration(), clipStart);
-        return { timeX(start), static_cast<float>(static_cast<int>(row) * rowHeight + (rowHeight < 104 ? 9 : 17)),
-                 juce::jmax(0.0f, timeX(end) - timeX(start)), float(rowHeight < 104 ? rowHeight - 18 : 66) };
+        return { timeX(start), static_cast<float>(static_cast<int>(row) * rowHeight),
+                 juce::jmax(0.0f, timeX(end) - timeX(start)), float(rowHeight - 1) };
     }
     const EngineSession::ClipSnapshot* hitClip(std::size_t row, juce::Point<float> point) const
     {
@@ -607,7 +608,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
     }
     void drawGridLine(juce::Graphics& g, float x, float top, float bottom, int level) const
     {
-        g.setColour(level == 2 ? secondary.withAlpha(0.75f) : rule.withAlpha(level == 1 ? 0.9f : 0.6f));
+        g.setColour(level == 2 ? focus::strong : rule.withAlpha(level == 1 ? 1.0f : 0.58f));
         const auto thickness = level == 2 ? 1.35f : 1.0f;
         const juce::Line<float> line(x, top, x, bottom);
         if (snapEnabled) g.drawLine(line, thickness);
@@ -703,12 +704,13 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
             const int y = row * rowHeight;
             const bool selected = track.id == state.selectedTrackId;
             const bool silent = track.muted || (hasSolo && !track.solo);
-            if (selected) { g.setColour(ink.withAlpha(0.045f)); g.fillRect(0, y, canvas.getWidth(), rowHeight); }
-            g.setColour(selected ? ink : rule);
-            g.drawHorizontalLine(y + rowHeight - 1, 0.0f, static_cast<float>(canvas.getWidth()));
-            if (selected) g.fillRect(0, y + 12, 2, rowHeight - 25);
-            g.setColour(ink); g.setFont(mono(13.0f, selected ? juce::Font::bold : juce::Font::plain));
-            g.drawFittedText(track.name, 10, y + (rowHeight < 104 ? 2 : 10), labelWidth() - 20, rowHeight < 104 ? 26 : 34, juce::Justification::centredLeft, rowHeight < 104 ? 1 : 2);
+            const auto identity = focus::trackColour(track.kind, row);
+            g.setColour(selected ? focus::raised : focus::panel); g.fillRect(0, y, labelWidth(), rowHeight);
+            g.setColour(rule); g.drawHorizontalLine(y + rowHeight - 1, 0.0f, static_cast<float>(canvas.getWidth()));
+            g.drawVerticalLine(labelWidth() - 1, float(y), float(y + rowHeight));
+            g.setColour(identity); g.fillRect(10, y + (rowHeight < 104 ? 11 : 18), 6, 6);
+            g.setColour(ink); g.setFont(mono(14.0f, juce::Font::bold));
+            g.drawFittedText(track.name, 23, y + (rowHeight < 104 ? 2 : 7), labelWidth() - 33, rowHeight < 104 ? 26 : 28, juce::Justification::centredLeft, 1);
             g.setColour(secondary); g.setFont(mono(11.0f));
             if (rowHeight >= 104) g.drawText(track.kind + " / " + juce::String(track.gainDb, 1) + " dB", 10, y + 39, labelWidth() - 18, 17, juce::Justification::centredLeft);
             const int meterY = y + (rowHeight < 104 ? 26 : 60);
@@ -716,9 +718,9 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
             for (int channel = 0; channel < 2; ++channel) {
                 const float level = channel == 0 ? track.peakLeftDb : track.peakRightDb;
                 g.setColour(rule.withAlpha(0.7f)); g.fillRect(10, meterY + channel * 3, meterWidth, 2);
-                g.setColour(ink); g.fillRect(10, meterY + channel * 3, juce::roundToInt(meterWidth * juce::jlimit(0.0f, 1.0f, (level + 60.0f) / 60.0f)), 2);
+                g.setColour(track.overloaded ? focus::danger : focus::green); g.fillRect(10, meterY + channel * 3, juce::roundToInt(meterWidth * juce::jlimit(0.0f, 1.0f, (level + 60.0f) / 60.0f)), 2);
             }
-            if (track.overloaded) { g.setColour(ink); g.setFont(mono(10.0f, juce::Font::bold)); g.drawText("CLIP", labelWidth() - 38, y + 1, 35, 15, juce::Justification::centredRight); }
+            if (track.overloaded) { g.setColour(focus::danger); g.setFont(mono(10.0f, juce::Font::bold)); g.drawText("CLIP", labelWidth() - 38, y + 1, 35, 15, juce::Justification::centredRight); }
             if (rowHeight >= 104 && track.armed && track.inputDeviceId.isNotEmpty()) {
                 g.setFont(mono(10.0f)); g.setColour(secondary);
                 g.drawText("IN " + (track.inputPeakDb <= -99.0f ? juce::String("--") : juce::String(track.inputPeakDb, 1)) + " dB", 80, y + 39, labelWidth() - 90, 17, juce::Justification::centredRight);
@@ -736,10 +738,13 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                 const bool selectedClip = selection.contains(clip.id);
                 const auto start = displayedStart(clip);
                 const bool moving = drag.id == clip.id && drag.moved;
-                g.setColour(paper.withAlpha(selectedClip ? 0.95f : 0.8f));
-                g.fillRect(area);
-                g.setColour(ink.withAlpha(silent ? 0.3f : 0.8f));
-                const auto waveArea = area.toNearestInt().reduced(2).withTrimmedTop(16);
+                // A clip is the lane content, not a floating card. Transparent body
+                // preserves the common time grid; the 24 px header owns the label.
+                g.setColour(identity.withAlpha(silent ? 0.09f : selectedClip ? 0.32f : 0.19f)); g.fillRect(area);
+                g.setColour(selectedClip ? focus::accent : identity.interpolatedWith(focus::canvas, 0.67f));
+                g.fillRect(area.withHeight(24.0f));
+                g.setColour(identity.brighter(0.18f).withAlpha(silent ? 0.42f : 1.0f));
+                const auto waveArea = area.toNearestInt().reduced(2).withTrimmedTop(24);
                 if (clip.kind == "midi") {
                     if (const auto overview = midiOverviews.find(clip.id); overview != midiOverviews.end()) {
                         juce::Graphics::ScopedSaveState noteClip(g); g.reduceClipRegion(waveArea);
@@ -767,15 +772,15 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                     g.drawFittedText(owner.waveformStatus(clip.id), waveArea, juce::Justification::centred, 2);
                 }
                 if (area.getWidth() >= 70.0f) {
-                    g.setColour(ink); g.setFont(mono(10.5f));
+                    g.setColour(selectedClip ? focus::base : ink); g.setFont(mono(12.0f));
                     const auto clipName = track.name + (track.clips.size() > 1
                         ? " / clip " + juce::String(static_cast<int>(&clip - track.clips.data()) + 1) : juce::String());
                     const auto caption = (moving ? "edit: " : "") + clipName
                         + " @ " + (bars ? tickText(start) : juce::String(start, 3) + " s")
                         + (moving ? "  len " + juce::String(drag.duration * state.bpm / 60.0, 3) + " beats" : "");
-                    g.drawFittedText(caption, area.toNearestInt().reduced(5, 1).withHeight(16), juce::Justification::centredLeft, 1);
+                    g.drawFittedText(caption, area.toNearestInt().reduced(8, 1).withHeight(22), juce::Justification::centredLeft, 1);
                 }
-                g.setColour(selectedClip ? ink : (silent ? rule : secondary));
+                g.setColour(selectedClip ? focus::accent : (silent ? rule : identity.withAlpha(0.7f)));
                 g.drawRect(area, selectedClip ? 1.8f : 0.7f);
                 if (selectedClip && area.getWidth() > 20) {
                     g.drawVerticalLine(juce::roundToInt(area.getX() + 4), area.getY() + 24, area.getBottom() - 8);
@@ -795,14 +800,14 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
             const auto x = timeX(juce::jlimit(viewStart, viewStart + visibleDuration(), rangeSelection.getStart()));
             const auto right = timeX(juce::jlimit(viewStart, viewStart + visibleDuration(), rangeSelection.getEnd()));
             juce::Graphics::ScopedSaveState clipped(g); g.reduceClipRegion(labelWidth(), dirty.getY(), plotWidth(), dirty.getHeight());
-            g.setColour(ink.withAlpha(0.055f)); g.fillRect(x, float(dirty.getY()), right - x, float(dirty.getHeight()));
+            g.setColour(focus::accent.withAlpha(0.12f)); g.fillRect(x, float(dirty.getY()), right - x, float(dirty.getHeight()));
         }
-        if (marquee) { g.setColour(ink.withAlpha(0.07f)); g.fillRect(marqueeArea); g.setColour(ink); g.drawRect(marqueeArea, 1.0f); }
+        if (marquee) { g.setColour(focus::accent.withAlpha(0.12f)); g.fillRect(marqueeArea); g.setColour(focus::accent); g.drawRect(marqueeArea, 1.0f); }
         if (drag.moved && drag.edge == 0 && drag.targetTrackIndex != drag.trackIndex) {
             const auto xx = timeX(juce::jlimit(viewStart, viewStart + visibleDuration(), drag.previewStart));
             const auto ww = timeX(juce::jlimit(viewStart, viewStart + visibleDuration(), drag.previewStart + drag.duration)) - xx;
-            juce::Rectangle<float> ghost(xx, float(drag.targetTrackIndex * rowHeight + (rowHeight < 104 ? 9 : 17)), ww, float(rowHeight < 104 ? rowHeight - 18 : 66));
-            g.setColour(ink.withAlpha(0.07f)); g.fillRect(ghost); g.setColour(ink); g.drawRect(ghost, 2);
+            juce::Rectangle<float> ghost(xx, float(drag.targetTrackIndex * rowHeight), ww, float(rowHeight - 1));
+            g.setColour(focus::accent.withAlpha(0.15f)); g.fillRect(ghost); g.setColour(focus::accent); g.drawRect(ghost, 2);
         }
         const auto head = timeX(state.position);
         if (head >= labelWidth() && head <= labelWidth() + plotWidth()) {
@@ -1067,8 +1072,8 @@ void ArrangementView::resized() { impl->layout(); }
 void ArrangementView::paint(juce::Graphics& g)
 {
     auto& p = *impl;
-    g.fillAll(paper);
-    g.setColour(secondary); g.setFont(mono(11.0f));
+    g.fillAll(focus::panel);
+    g.setColour(secondary); g.setFont(mono(12.0f));
     g.drawText(p.dropActive ? "drop audio / MIDI" : juce::String(p.bars ? "bars / " : "seconds / ") + juce::String(p.zoom, 0) + "x",
                10, 0, p.labelWidth() - 15, 24, juce::Justification::centredLeft);
     const auto gridDenominator = juce::roundToInt(4.0 / p.effectiveGrid());
@@ -1081,13 +1086,19 @@ void ArrangementView::paint(juce::Graphics& g)
     });
     int previousLabelRight = p.labelWidth() - 8;
     p.eachTick([&](double seconds, float x) {
-        g.setColour(secondary); g.setFont(mono(11.0f));
-        const auto width = p.bars ? 86 : 112;
-        const auto left = juce::jlimit(p.labelWidth(), p.canvas.getWidth() - width, juce::roundToInt(x) - width / 2);
-        if (left >= previousLabelRight + 8) {
-            g.drawText(p.tickText(seconds), left, 0, width, 24, juce::Justification::centred);
-            if (p.rulerMode == 2) g.drawText(timeText(seconds), left, 20, width, 17, juce::Justification::centred);
-            previousLabelRight = left + width;
+        const auto label = p.tickText(seconds);
+        g.setFont(mono(13.0f, juce::Font::bold));
+        const auto width = int(std::ceil(juce::GlyphArrangement::getStringWidth(g.getCurrentFont(), label))) + 5;
+        const auto left = juce::roundToInt(x) + 4;
+        if (left >= previousLabelRight + 8 && left + width <= p.labelWidth() + p.plotWidth()) {
+            g.setColour(ink); g.drawText(label, left, 0, width, 24, juce::Justification::centredLeft);
+            if (p.rulerMode == 2) {
+                g.setColour(secondary); g.setFont(mono(11.0f));
+                const auto timeLabel = timeText(seconds);
+                const auto timeWidth = int(std::ceil(juce::GlyphArrangement::getStringWidth(g.getCurrentFont(), timeLabel))) + 5;
+                g.drawText(timeLabel, left, 20, timeWidth, 17, juce::Justification::centredLeft);
+                previousLabelRight = left + juce::jmax(width, timeWidth);
+            } else previousLabelRight = left + width;
         }
         g.setColour(rule); g.drawLine(x, 38.0f, x, static_cast<float>(rulerHeight));
     });
@@ -1098,7 +1109,7 @@ void ArrangementView::paint(juce::Graphics& g)
         const auto left = juce::jlimit(float(p.labelWidth()), float(p.labelWidth() + p.plotWidth()), p.timeX(loopStart));
         const auto right = juce::jlimit(float(p.labelWidth()), float(p.labelWidth() + p.plotWidth()), p.timeX(loopEnd));
         if (right > left) {
-            g.setColour(p.state.looping ? ink : secondary.withAlpha(0.45f));
+            g.setColour(p.state.looping ? focus::accent : secondary.withAlpha(0.6f));
             g.drawLine(left, 47, right, 47, 2);
             g.drawLine(left, 41, left, 53, 2); g.drawLine(right, 41, right, 53, 2);
         }
@@ -1198,6 +1209,8 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
         const auto expectedX = p.labelWidth() + clip.timelineStart / initialHorizon * p.plotWidth();
         if (std::abs(actual.getWidth() - expectedWidth) > 0.1 || std::abs(actual.getX() - expectedX) > 0.1)
             return juce::Result::fail("A clip does not use the common project time scale.");
+        if (actual.getY() != float(int(row) * p.rowHeight) || actual.getHeight() != float(p.rowHeight - 1))
+            return juce::Result::fail("Clip content does not fill its lane height.");
         auto detail = new juce::DynamicObject;
         detail->setProperty("track_id", initial.tracks[row].id);
         detail->setProperty("clip_id", clip.id);
@@ -1209,6 +1222,7 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
         widths.add(juce::var(detail));
     }
     report.setProperty("clip_geometry", widths);
+    report.setProperty("clip_fills_lane_height", true);
     const auto event = [&](float x, float y, bool dragging = false, int modifiers = 0) {
         const auto now = juce::Time::getCurrentTime();
         return juce::MouseEvent(juce::Desktop::getInstance().getMainMouseSource(), { x, y },
@@ -1219,10 +1233,10 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
     p.canvas.mouseDown(event(20.0f, static_cast<float>(lastRow * rowHeight + 30)));
     if (p.engine.snapshot().selectedTrackId != initial.tracks.back().id) return juce::Result::fail("Clicking an arrangement row did not select its real track.");
     const auto halfX = static_cast<float>(p.labelWidth() + p.plotWidth() * 0.5);
-    p.canvas.mouseDown(event(halfX, static_cast<float>(lastRow * rowHeight + 5)));
+    mouseDown(event(halfX, 10.0f));
     if (std::abs(p.engine.snapshot().position - initialHorizon * 0.5) > 0.002) return juce::Result::fail("Timeline click did not seek to the shared time coordinate including trailing space.");
     // Empty-space dragging now selects clips; transport scrubbing stays in the ruler.
-    p.canvas.mouseUp(event(halfX, static_cast<float>(lastRow * rowHeight + 5)));
+    mouseUp(event(halfX, 10.0f));
     mouseDown(event(halfX, 10.0f));
     mouseDrag(event(static_cast<float>(p.labelWidth() + p.plotWidth() + 100), 10.0f, true));
     if (std::abs(p.engine.snapshot().position - initialHorizon) > 0.002) return juce::Result::fail("Timeline drag did not clamp at the displayed horizon.");
@@ -1394,9 +1408,10 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
 
     // Rectangle selection changes no musical data and can include several rows.
     const auto beforeRectangle = p.engine.snapshot();
-    p.canvas.mouseDown(event(float(p.labelWidth() + 1), 2.0f));
-    p.canvas.mouseDrag(event(float(p.labelWidth() + p.plotWidth()), float(lastRow * rowHeight + rowHeight - 2), true));
-    p.canvas.mouseUp(event(float(p.labelWidth() + p.plotWidth()), float(lastRow * rowHeight + rowHeight - 2)));
+    // Start in real trailing space, then drag backward across the full-height clips.
+    p.canvas.mouseDown(event(float(p.labelWidth() + p.plotWidth()), 2.0f));
+    p.canvas.mouseDrag(event(float(p.labelWidth() + 1), float(lastRow * rowHeight + rowHeight - 2), true));
+    p.canvas.mouseUp(event(float(p.labelWidth() + 1), float(lastRow * rowHeight + rowHeight - 2)));
     int expectedSelected = 0; for (const auto& track : p.state.tracks) expectedSelected += int(track.clips.size());
     if (p.selection.size() != expectedSelected || p.engine.snapshot().revision != beforeRectangle.revision)
         return juce::Result::fail("Rectangle selection missed clips or edited the project.");

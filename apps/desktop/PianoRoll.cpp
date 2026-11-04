@@ -1,4 +1,5 @@
 #include "PianoRoll.h"
+#include "FocusTheme.h"
 #include "core/time/EditGrid.hpp"
 #include <algorithm>
 #include <array>
@@ -8,8 +9,9 @@
 
 namespace emusician {
 namespace {
-const juce::Colour ink { 0xff171817 }, rule { 0xffc6c9c3 }, paper { 0xfffefefd }, quiet { 0xff626560 };
-juce::Font mono(float size) { return juce::Font(juce::FontOptions(juce::Font::getDefaultMonospacedFontName(), size, juce::Font::plain)); }
+const auto ink = focus::text, rule = focus::line, paper = focus::canvas, quiet = focus::muted;
+const juce::Colour noteColour { 0xffb7a6ce };
+juce::Font mono(float size) { return focus::font(size); }
 bool isTextInput(const juce::Component* focus)
 {
     for (; focus != nullptr; focus = focus->getParentComponent()) if (dynamic_cast<const juce::TextEditor*>(focus) != nullptr) return true;
@@ -433,19 +435,25 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     void paintGrid(juce::Graphics& g)
     {
         g.fillAll(paper); const auto area = plot();
+        g.setColour(focus::panel); g.fillRect(0, 0, grid.getWidth(), rulerHeight());
+        g.fillRect(0.0f, area.getBottom(), float(grid.getWidth()), float(grid.getHeight()) - area.getBottom());
         if (clipId.isEmpty()) { g.setColour(quiet); g.setFont(mono(15)); g.drawFittedText("Select a MIDI clip to edit notes.", grid.getLocalBounds(), juce::Justification::centred, 2); return; }
         const int rows = int(std::ceil(area.getHeight() / rowHeight));
         for (int r = 0; r < rows; ++r) {
             const int pitch = topPitch - r; if (pitch < 0) break;
             const auto yy = area.getY() + r * rowHeight;
-            if (isBlack(pitch)) { g.setColour(ink.withAlpha(0.035f)); g.fillRect(area.getX(), yy, area.getWidth(), rowHeight); }
-            g.setColour(rule.withAlpha(pitch % 12 == 0 ? 1.0f : 0.45f)); g.drawHorizontalLine(juce::roundToInt(yy), 0, area.getRight());
-            g.setColour(isBlack(pitch) ? ink : paper); g.fillRect(0.0f, yy + 1, 43.0f, rowHeight - 1);
-            g.setColour(isBlack(pitch) ? paper : ink); g.setFont(mono(12)); g.drawText(pitchName(pitch), 3, juce::roundToInt(yy), 38, int(rowHeight), juce::Justification::centredRight);
+            if (isBlack(pitch)) { g.setColour(focus::base); g.fillRect(area.getX(), yy, area.getWidth(), rowHeight); }
+            g.setColour(pitch % 12 == 0 ? focus::strong : rule.withAlpha(0.55f)); g.drawHorizontalLine(juce::roundToInt(yy), 0, area.getRight());
+            g.setColour(isBlack(pitch) ? focus::base : juce::Colour(0xffb5bcc3)); g.fillRect(0.0f, yy + 1, 43.0f, rowHeight - 1);
+            // At fit-to-range density, avoid cramming all 128 pitch names into tiny rows.
+            if (rowHeight >= 12.0f || pitch % 12 == 0) {
+                g.setColour(isBlack(pitch) ? ink : focus::base); g.setFont(mono(rowHeight >= 14.0f ? 11.0f : 10.0f));
+                g.drawText(pitchName(pitch), 3, juce::roundToInt(yy), 38, int(rowHeight), juce::Justification::centredRight);
+            }
         }
         lastPaintedTimeLines = 0;
         const auto timeLine = [&](float xx, float opacity) {
-            ++lastPaintedTimeLines; g.setColour(rule.withAlpha(opacity));
+            ++lastPaintedTimeLines; g.setColour(opacity >= 1.0f ? focus::strong : rule.withAlpha(opacity >= 0.6f ? 1.0f : 0.58f));
             if (snapEnabled.getToggleState()) g.drawVerticalLine(juce::roundToInt(xx), float(rulerHeight()), float(grid.getHeight()));
             else { const float dashes[] { 4.0f, 4.0f }; g.drawDashedLine({ xx, float(rulerHeight()), xx, float(grid.getHeight()) }, dashes, 2); }
         };
@@ -461,7 +469,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
         const auto ruler = time::musicalRulerStep(visibleBeats(), area.getWidth(), timeSignatureNumerator, timeSignatureDenominator);
         const double firstLabel = std::ceil(firstBeat / ruler.stepBeats - 1.0e-8);
         const double lastLabel = std::floor(juce::jmin(length, firstBeat + visibleBeats()) / ruler.stepBeats + 1.0e-8);
-        g.setColour(quiet); g.setFont(mono(11));
+        g.setColour(ink); g.setFont(mono(12));
         lastPaintedLabels.clear(); float labelRight = area.getX() - 4;
         for (double i = firstLabel; i <= lastLabel; ++i) {
             const double beat = i * ruler.stepBeats;
@@ -481,18 +489,18 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
             juce::Graphics::ScopedSaveState save(g); g.reduceClipRegion(area.toNearestInt());
             for (const auto& v : visible) {
                 const auto& n = notes[v.first]; const bool chosen = selected.count(n.id) != 0;
-                g.setColour(chosen ? ink : rule); g.fillRoundedRectangle(v.second, 2);
-                g.setColour(ink); g.drawRoundedRectangle(v.second, 2, chosen ? 1.5f : 0.8f);
-                if (v.second.getWidth() > 35) { g.setColour(chosen ? paper : ink); g.setFont(mono(10)); g.drawText(pitchName(n.pitch), v.second.toNearestInt().reduced(3, 0), juce::Justification::centredLeft); }
+                g.setColour(chosen ? focus::accent : noteColour.darker(0.25f)); g.fillRoundedRectangle(v.second, 1.5f);
+                g.setColour(chosen ? focus::accent.brighter(0.25f) : noteColour); g.drawRoundedRectangle(v.second, 1.5f, chosen ? 1.5f : 0.8f);
+                if (v.second.getWidth() > 35 && v.second.getHeight() >= 11) { g.setColour(focus::base); g.setFont(mono(10)); g.drawText(pitchName(n.pitch), v.second.toNearestInt().reduced(3, 0), juce::Justification::centredLeft); }
             }
-            if (drag.mode == Drag::box && drag.changed) { g.setColour(ink.withAlpha(0.08f)); g.fillRect(drag.selectionBox); g.setColour(ink); g.drawRect(drag.selectionBox); }
+            if (drag.mode == Drag::box && drag.changed) { g.setColour(focus::accent.withAlpha(0.12f)); g.fillRect(drag.selectionBox); g.setColour(focus::accent); g.drawRect(drag.selectionBox); }
         }
         g.setColour(rule); g.drawHorizontalLine(juce::roundToInt(area.getBottom()), 0, float(grid.getWidth()));
         const float velocityHeight = veryCompact() ? 10.0f : owner.getHeight() < 300 ? 18.0f : 35.0f;
         g.setFont(mono(10)); g.setColour(quiet); g.drawText("vel", 2, int(area.getBottom()), 40, int(velocityHeight), juce::Justification::centred);
         for (const auto& v : visible) {
             const auto& n = notes[v.first]; const float h = float(n.velocity) / 127.0f * velocityHeight;
-            g.setColour(selected.count(n.id) ? ink : quiet); g.fillRect(v.second.getX(), float(grid.getHeight()) - h - 3, 2.0f, h);
+            g.setColour(selected.count(n.id) ? focus::accent : noteColour); g.fillRect(v.second.getX(), float(grid.getHeight()) - h - 3, 2.0f, h);
         }
         const auto head = x(playheadBeat - clipStart);
         if (head >= area.getX() && head <= area.getRight()) { g.setColour(ink.withAlpha(playing ? 1.0f : 0.45f)); g.drawVerticalLine(juce::roundToInt(head), 0, float(grid.getHeight())); }
@@ -503,7 +511,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
             const auto markerBottom = float(rulerHeight() - 4);
             juce::Path marker; marker.addTriangle(insertX - 4, markerBottom - 6, insertX + 4, markerBottom - 6, insertX, markerBottom); g.fillPath(marker);
         }
-        if (grid.hasKeyboardFocus(true)) { g.setColour(ink); g.drawRect(grid.getLocalBounds().reduced(1), 1); }
+        if (grid.hasKeyboardFocus(true)) { g.setColour(focus::accent); g.drawRect(grid.getLocalBounds().reduced(1), 1); }
     }
     PianoRoll& owner;
     Grid grid;
@@ -588,7 +596,7 @@ void PianoRoll::setPlayhead(double seconds, bool playing)
 void PianoRoll::resized()
 {
     auto& p = *impl; auto top = getLocalBounds().reduced(12).removeFromTop(30);
-    // Allow for the host's 15 px monospaced labels and 8 px button insets.
+    // Preserve compact control reachability with the shared 13 px UI font.
     // Keep transpose in the second row so labels fit even in the 726 px dock.
     p.draw.setBounds(top.removeFromLeft(72)); p.snapEnabled.setBounds(top.removeFromLeft(60));
     p.snap.setBounds(top.removeFromLeft(102)); top.removeFromLeft(8);
@@ -615,7 +623,7 @@ void PianoRoll::resized()
 }
 void PianoRoll::paint(juce::Graphics& g)
 {
-    auto& p = *impl; g.fillAll(paper); g.setColour(quiet); g.setFont(mono(12));
+    auto& p = *impl; g.fillAll(focus::panel); g.setColour(quiet); g.setFont(mono(12));
     g.drawText("velocity", 12, 46, 70, 27, juce::Justification::centredLeft);
     if (p.drums.getToggleState()) g.drawText("block", 170, getHeight() - 80, 44, 18, juce::Justification::centredLeft);
     // The minimum main-window dock has only 156 px after its title bar. Tooltips
@@ -623,6 +631,7 @@ void PianoRoll::paint(juce::Graphics& g)
     if (p.veryCompact()) return;
     const auto hint = juce::String(int(p.notes.size())) + " notes / " + juce::String(int(p.selected.size())) + " selected   "
         + (p.draw.getToggleState() ? "B: draw on" : "B: draw / double-click") + "   Ctrl+C/X/V   paste @ " + juce::String(p.insertionPoint(), 3) + " beats" + (p.densePreview ? "   dense preview: zoom in" : "");
+    g.setColour(p.editError.isNotEmpty() ? focus::danger : quiet);
     g.drawFittedText(p.editError.isNotEmpty() ? p.editError : hint,
                     14, getHeight() - 26, getWidth() - 28, 20, juce::Justification::centredLeft, 1);
 }

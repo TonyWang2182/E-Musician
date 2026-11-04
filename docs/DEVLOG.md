@@ -2547,3 +2547,148 @@ Release首轮配置/编译/测试全部通过，5/5，Core118/片段407/DAW799/�
 ### 2026-10-29 · 0.6.1仓库同步
 
 实现与证据提交79f62019b3853d636c2bb8ced5761e5b46d619da已推送并经ls-remote核对feature/fine-grid-v061。远端main仍d4ed6c898af1303918e38b6325a915befabbb575。本次仅追加同步上下文，不重建或改动源码；用户人工短测仍待反馈。
+
+## 2026-11-04 ? 0.7.0 Focus + Mix ??????
+
+??????????????????????7f7eb65??EXE SHA256 491ba101bfe1eefb48a82bacba2226c722c7e97bc87e4743ff5e45cd4e6a4cfe????archive/v0.6.1-before-focus?releases/0.6.1?EXE/PDB???ZIP?????feature/focus-native-v070?526?????/???????.cache/v070/preservation-before.json???JUCE???????EngineSession?????/??/Agent??????HTML????????????????review/2026-11-04-focus-native???/??????????root?????????????????????????????????????????
+
+### 2026-11-04T23:38:55+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 26.429s.
+- Command: `cmake --preset windows-msvc`
+- Context: 0.7.0 Focus + Mix native UI migration; source frozen, original 0.6.1 preserved; offline regression and component captures, no physical device test
+- Source SHA-256: `030d316de296303248c3448fe138e5ac97c0c5c1936c550f794d9f6ddeb69c6e`; Git HEAD: `7f7eb6528bc1b7c8bb41c181a6448a5d330d239b`.
+- [Record](builds/20261104T153855.821088Z-f39410aaae.json) · [Raw log](../build-logs/20261104T153855.821088Z-f39410aaae.log)
+- [Exact process output](../build-logs/20261104T153855.821088Z-f39410aaae.raw.log)
+
+### 2026-11-04T23:39:22+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 73.097s.
+- Command: `cmake --build --preset windows-release --parallel 2`
+- Context: 0.7.0 Focus + Mix native UI migration; source frozen, original 0.6.1 preserved; offline regression and component captures, no physical device test
+- Source SHA-256: `030d316de296303248c3448fe138e5ac97c0c5c1936c550f794d9f6ddeb69c6e`; Git HEAD: `7f7eb6528bc1b7c8bb41c181a6448a5d330d239b`.
+- [Record](builds/20261104T153922.355514Z-324c28564a.json) · [Raw log](../build-logs/20261104T153922.355514Z-324c28564a.log)
+- [Exact process output](../build-logs/20261104T153922.355514Z-324c28564a.raw.log)
+
+### 2026-11-04T23:40:35+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 88.437s.
+- Command: `ctest --preset windows-release --output-on-failure`
+- Context: 0.7.0 Focus + Mix native UI migration; source frozen, original 0.6.1 preserved; offline regression and component captures, no physical device test
+- Source SHA-256: `030d316de296303248c3448fe138e5ac97c0c5c1936c550f794d9f6ddeb69c6e`; Git HEAD: `7f7eb6528bc1b7c8bb41c181a6448a5d330d239b`.
+- [Record](builds/20261104T154035.555249Z-432e15cfda.json) · [Raw log](../build-logs/20261104T154035.555249Z-432e15cfda.log)
+- [Exact process output](../build-logs/20261104T154035.555249Z-432e15cfda.raw.log)
+
+## 2026-11-04 ? 0.7.0 ???????????
+
+Release??/?????check20261104T154035.555249Z-432e15cfda 5/5???85.99???????build/smoke/Release/f2650e3fcd1f???????????MIDI??????????????????1000/1440/1920?????????????????????pwsh.exe?????MSBuild??0?EXE????????????????
+
+???????????????????????Edit MIDI??????????????????????????????????????????????JUCE??????Segoe UI???????????????????????????????????????????????
+
+### 2026-11-04T23:44:53+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 4.934s.
+- Command: `cmake --preset windows-msvc`
+- Context: 0.7.0 round 2: workspace shortcut isolation, reveal MIDI from Mixer, deferred fader readback, readable typography; frozen source and offline regression
+- Source SHA-256: `3847265e38f0cf8e0c1826555e7b26ce7986d3c37960ddbb924f0e351e83933c`; Git HEAD: `7f7eb6528bc1b7c8bb41c181a6448a5d330d239b`.
+- [Record](builds/20261104T154453.399775Z-888b33c289.json) · [Raw log](../build-logs/20261104T154453.399775Z-888b33c289.log)
+- [Exact process output](../build-logs/20261104T154453.399775Z-888b33c289.raw.log)
+
+### 2026-11-04T23:44:58+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 21.775s.
+- Command: `cmake --build --preset windows-release --parallel 2`
+- Context: 0.7.0 round 2: workspace shortcut isolation, reveal MIDI from Mixer, deferred fader readback, readable typography; frozen source and offline regression
+- Source SHA-256: `3847265e38f0cf8e0c1826555e7b26ce7986d3c37960ddbb924f0e351e83933c`; Git HEAD: `7f7eb6528bc1b7c8bb41c181a6448a5d330d239b`.
+- [Record](builds/20261104T154458.443039Z-0beb8719f6.json) · [Raw log](../build-logs/20261104T154458.443039Z-0beb8719f6.log)
+- [Exact process output](../build-logs/20261104T154458.443039Z-0beb8719f6.raw.log)
+
+### 2026-11-04T23:45:20+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 82.756s.
+- Command: `ctest --preset windows-release --output-on-failure`
+- Context: 0.7.0 round 2: workspace shortcut isolation, reveal MIDI from Mixer, deferred fader readback, readable typography; frozen source and offline regression
+- Source SHA-256: `3847265e38f0cf8e0c1826555e7b26ce7986d3c37960ddbb924f0e351e83933c`; Git HEAD: `7f7eb6528bc1b7c8bb41c181a6448a5d330d239b`.
+- [Record](builds/20261104T154520.307263Z-2b80bd6373.json) · [Raw log](../build-logs/20261104T154520.307263Z-2b80bd6373.log)
+- [Exact process output](../build-logs/20261104T154520.307263Z-2b80bd6373.raw.log)
+
+### 2026-11-04T23:47:55+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 3.973s.
+- Command: `cmake --preset windows-msvc`
+- Context: 0.7.0 final native visual adjustment: compact fader labels do not overlap; square Focus transport buttons; source frozen, full offline regression
+- Source SHA-256: `e7f620579b52252f2a5a5948824a98c009c72db98780e3a3da2285cf7649357c`; Git HEAD: `7f7eb6528bc1b7c8bb41c181a6448a5d330d239b`.
+- [Record](builds/20261104T154755.826218Z-25a9a8fc0f.json) · [Raw log](../build-logs/20261104T154755.826218Z-25a9a8fc0f.log)
+- [Exact process output](../build-logs/20261104T154755.826218Z-25a9a8fc0f.raw.log)
+
+### 2026-11-04T23:47:59+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 20.193s.
+- Command: `cmake --build --preset windows-release --parallel 2`
+- Context: 0.7.0 final native visual adjustment: compact fader labels do not overlap; square Focus transport buttons; source frozen, full offline regression
+- Source SHA-256: `e7f620579b52252f2a5a5948824a98c009c72db98780e3a3da2285cf7649357c`; Git HEAD: `7f7eb6528bc1b7c8bb41c181a6448a5d330d239b`.
+- [Record](builds/20261104T154759.879923Z-c358012c07.json) · [Raw log](../build-logs/20261104T154759.879923Z-c358012c07.log)
+- [Exact process output](../build-logs/20261104T154759.879923Z-c358012c07.raw.log)
+
+### 2026-11-04T23:48:20+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 81.727s.
+- Command: `ctest --preset windows-release --output-on-failure`
+- Context: 0.7.0 final native visual adjustment: compact fader labels do not overlap; square Focus transport buttons; source frozen, full offline regression
+- Source SHA-256: `e7f620579b52252f2a5a5948824a98c009c72db98780e3a3da2285cf7649357c`; Git HEAD: `7f7eb6528bc1b7c8bb41c181a6448a5d330d239b`.
+- [Record](builds/20261104T154820.152862Z-d47870478c.json) · [Raw log](../build-logs/20261104T154820.152862Z-d47870478c.log)
+- [Exact process output](../build-logs/20261104T154820.152862Z-d47870478c.raw.log)
+
+## 2026-11-04 ? 0.7.0 ?????????
+
+???5/5?82.61s????????????5/5?81.61s????e7f620579b52252f2a5a5948824a98c009c72db98780e3a3da2285cf7649357c?EXE afcdf7055ce53518d7048610ee099d7132345c38e9914b2bcb7153fb190edd81?????/??/??????526?????/??????????0.6.1 EXE??491ba101?releases/0.7.0?????EXE/PDB?????R1?R3???????????verification/2026-11-04-v070/RESULTS.md????????????????????????/??/???????/DPI????????Debug????computer-use?
+
+### 2026-11-04T23:55:03+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 4.375s.
+- Command: `cmake --preset windows-msvc`
+- Context: 0.7.0 evidence completion: native Devices, IO/sends, populated Automation and Master captures at minimum/standard dock; production behavior unchanged; frozen full regression
+- Source SHA-256: `79e8eff06b55bcdc75b25270be0cceb9e74fe0fd0983bec75e71597ee254cf37`; Git HEAD: `7f7eb6528bc1b7c8bb41c181a6448a5d330d239b`.
+- [Record](builds/20261104T155503.942292Z-ba2792c41a.json) · [Raw log](../build-logs/20261104T155503.942292Z-ba2792c41a.log)
+- [Exact process output](../build-logs/20261104T155503.942292Z-ba2792c41a.raw.log)
+
+### 2026-11-04T23:55:08+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 26.931s.
+- Command: `cmake --build --preset windows-release --parallel 2`
+- Context: 0.7.0 evidence completion: native Devices, IO/sends, populated Automation and Master captures at minimum/standard dock; production behavior unchanged; frozen full regression
+- Source SHA-256: `79e8eff06b55bcdc75b25270be0cceb9e74fe0fd0983bec75e71597ee254cf37`; Git HEAD: `7f7eb6528bc1b7c8bb41c181a6448a5d330d239b`.
+- [Record](builds/20261104T155508.416921Z-940a29deca.json) · [Raw log](../build-logs/20261104T155508.416921Z-940a29deca.log)
+- [Exact process output](../build-logs/20261104T155508.416921Z-940a29deca.raw.log)
+
+### 2026-11-04T23:55:35+08:00 · check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 102.155s.
+- Command: `ctest --preset windows-release --output-on-failure`
+- Context: 0.7.0 evidence completion: native Devices, IO/sends, populated Automation and Master captures at minimum/standard dock; production behavior unchanged; frozen full regression
+- Source SHA-256: `79e8eff06b55bcdc75b25270be0cceb9e74fe0fd0983bec75e71597ee254cf37`; Git HEAD: `7f7eb6528bc1b7c8bb41c181a6448a5d330d239b`.
+- [Record](builds/20261104T155535.526844Z-66a086799d.json) · [Raw log](../build-logs/20261104T155535.526844Z-66a086799d.log)
+- [Exact process output](../build-logs/20261104T155535.526844Z-66a086799d.raw.log)
+
+## 2026-11-04 ? 0.7.0 ????????????
+
+????????SelectedTrackPanel????????????????????????Devices?I/O+Send????????Automation?Master?????752?256/1168?272?????????????????????Release5/5?101.85s????20261104T155535.526844Z-66a086799d?????a3c9360dc861??????????????79e8eff06b55bcdc75b25270be0cceb9e74fe0fd0983bec75e71597ee254cf37?EXE133f9139b9b56c6fc7f89613b18454bc613ba57996947fbefd868b8719773566??526???????????????????/??/???????????????????
+
+## 2026-11-04 — 0.7.0 人工摘要编码更正及完整记录
+
+本轮部分手写中文摘要通过 Windows PowerShell 的默认 ASCII 管道传给 Python，中文被替换为问号。保留这些历史行，不重写 append-only 日志；本条给出完整更正。dev.py 生成的配置/构建/测试原始日志和机器摘要均正常。当前 CONTEXT、ARCHITECTURE、DEVELOPMENT、UI_REFERENCE、README 和结果文档已使用 UTF-8 文件路径重写本轮新增部分，旧版本内容保留。
+
+- 授权与基线：用户批准保留旧版并应用已选 Focus + Mix 界面，全部旧功能保留。基线 7f7eb65；分支 feature/focus-native-v070；旧版源码 archive/v0.6.1-before-focus，EXE/PDB/源码 ZIP 在 releases/0.6.1。原 EXE 哈希 491ba101bfe1eefb48a82bacba2226c722c7e97bc87e4743ff5e45cd4e6a4cfe 保持一致。
+- 实现：原生 JUCE 三页、常驻混音、满高 Clip、深色 PianoRoll、字体和控件；EngineSession、ProjectStorage、ControlServer 与 core 源码未改。54 项功能映射保留 Source、精确 Clip 属性、鼓步进、细网格、插件、I/O/send、Automation、录音和导出。
+- 四轮配置/构建/CTest 均成功：85.99s、82.61s、81.61s、101.85s，每轮 5/5。代码审查 R1–R3 的隐藏片段快捷键、Mixer 打开 MIDI、延迟推子读回问题已修复并通过新增断言。最后一轮只补原生 Details 四类截图与最小 Dock 控件边界。
+- 最终记录：20261104T155535.526844Z-66a086799d；源码 79e8eff06b55bcdc75b25270be0cceb9e74fe0fd0983bec75e71597ee254cf37；EXE 133f9139b9b56c6fc7f89613b18454bc613ba57996947fbefd868b8719773566。源码在每轮命令期间冻结，最终构建/测试/工作区指纹一致。
+- 526 个用户工程/设置文件的逐文件 SHA-256 无变化。新版 EXE/PDB 和精确构建输入 ZIP 存于 releases/0.7.0。原有文件、二进制、PDB、缓存和精确用户文件清单不上代码仓库。
+- 独立代码复查通过；视觉结果另见 FINISH-REVIEW。Debug 未重建，没有操作用户窗口或运行 computer-use；新版设备、听感、第三方插件窗口、Windows DPI 与实体快捷键待用户短测。
+
+完整证据与回退方式见 verification/2026-11-04-v070/RESULTS.md。上述编码问题仅影响手写文档传输，不影响 C++ 源码、程序数据、构建或测试结果。
+
+## 2026-11-05 — 0.7.0 跨日审查与归档
+
+独立视觉复核为 SHIP：可交付本机短测候选，Devices/I/O/Automation/Master 证据补齐后没有剩余阻断项；不是全部真实设备/DPI已通过的声明。DESIGN.md、PRODUCT.md 和 .impeccable/design.json 已按实际原生代码更新，token、JSON/YAML及源码样本已校验。
+
+Git 暂存审计确认所有构建输入内容与已验证工作区一致。3个C++文件按既有.gitattributes将CRLF规范化为LF，差异仅换行；精确原始构建字节保存在releases/0.7.0/source-build-inputs.zip，原始SHA-256仍对应构建/测试记录。引擎、存储、控制接口和core没有改动；用户工程、设置清单、EXE/PDB与依赖不进入提交。详见STAGED-INTEGRITY.json。只同步功能分支和旧版保留分支，main保持不变。

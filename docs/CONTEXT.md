@@ -1,3 +1,13 @@
+# 当前状态：0.7.0 Focus + Mix 原生界面（2026-11-04）
+
+用户已授权保留旧版并将选定深色设计接入真实 DAW。feature/focus-native-v070 已完成原生实现与最终 Release 5/5 自动回归（101.85 秒），入口 build/bin/Release/E-musician.exe；副本 releases/0.7.0。旧 0.6.1 的 EXE/PDB/源码 ZIP 在 releases/0.6.1，源码分支 archive/v0.6.1-before-focus，基线 7f7eb65。main 未更新。
+
+三页 Arrangement / Piano roll / Mixer、常驻所选轨与 Master、满轨高 Clip、深色编辑器和统一字体均已接入；原 MIDI Dock、Source、Clip 属性、设备/I/O/send/Automation 等功能保留。EngineSession、ProjectStorage、ControlServer 和 core 源码未修改，Agent 仍为原公共接口，未接业务模型。54 项功能盘点、构建记录、代码审查、图片和人工短测见[交付记录](verification/2026-11-04-v070/RESULTS.md)。
+
+最终源输入 SHA256 79e8eff0，EXE 133f9139；526 个用户工程/设置文件哈希未变。独立代码审查的隐藏片段快捷键、MIDI 入口和推子读回问题均修复并通过新增断言。独立视觉审查为 **SHIP：可交付本机短测候选**，详情面板证据已补齐。Debug 未重建；新版设备、第三方插件窗口、听感、Windows DPI 和实体按键仍待用户按[短测清单](review/2026-11-04-focus-native/MANUAL-CHECK.md)验收，不能从离线成功推断。
+
+后续保持用户看 GUI、开发者构建/debug，不使用 computer-use。下方章节为历史证据，不替代当前状态。
+
 # 当前状态：0.6.1细网格与缩放（2026-10-29）
 
 已实现并通过Release自动验证：1/16384固定/自适应下界、Ctrl+4当前编辑区吸附、关虚线/开实线、三级小节标尺、指针锚定深缩放及可视范围绘制。入口build/bin/Release/E-musician.exe（0.6.1），旧0.6.0备份.cache/v061。分支feature/fine-grid-v061，从237c1d6继续；main不自动合并。GUI、设备和听感仍由用户操作，不使用computer-use。

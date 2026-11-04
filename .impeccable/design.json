@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-04T15:56:10+00:00",
+  "title": "Design System: E-musician Focus + Mix",
+  "extensions": {
+    "platform": {
+      "target": "Windows desktop",
+      "framework": "C++20 / JUCE",
+      "unit": "JUCE logical pixels",
+      "sourceOfTruth": "DESIGN.md frontmatter and cited 0.7.0 native source",
+      "componentFormat": "Native C++ source excerpts. No html/css rendering payload; browser live-panel previews are unsupported.",
+      "acceptance": "Build, native component render and offline test evidence belongs in docs/CONTEXT.md. Device, listening, native GUI and Windows DPI acceptance are separate."
+    },
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "Warm amber",
+        "purpose": "Selection, active controls and keyboard focus."
+      },
+      "base": {
+        "role": "neutral",
+        "displayName": "Charcoal shell"
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Editing canvas"
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Control panel"
+      },
+      "raised": {
+        "role": "neutral",
+        "displayName": "Raised interaction surface"
+      },
+      "green": {
+        "role": "secondary",
+        "displayName": "Playback and meter green"
+      },
+      "danger": {
+        "role": "secondary",
+        "displayName": "Record and overload coral"
+      },
+      "track-midi": {
+        "role": "object",
+        "displayName": "MIDI lavender"
+      },
+      "track-bus": {
+        "role": "object",
+        "displayName": "Bus grey"
+      },
+      "mixer-master": {
+        "role": "object",
+        "displayName": "Mixer Master grey",
+        "purpose": "Explicit MixerView override of the shared theme master kind colour."
+      }
+    },
+    "typographyMeta": {
+      "title": {
+        "purpose": "Project name",
+        "helperHeight": 15
+      },
+      "object": {
+        "purpose": "Arrangement track name",
+        "helperHeight": 14
+      },
+      "control": {
+        "purpose": "TextButton and ComboBox",
+        "helperHeight": 13
+      },
+      "section": {
+        "purpose": "Mixer and clip section headings",
+        "helperHeight": 13
+      },
+      "label": {
+        "purpose": "Clip caption and Piano roll ruler",
+        "helperHeight": 12
+      },
+      "metadata": {
+        "purpose": "Track type, routes and secondary time",
+        "helperHeight": 11
+      },
+      "detail": {
+        "purpose": "Fader scale and dense note/pitch labels",
+        "helperHeight": 10
+      },
+      "position": {
+        "purpose": "Transport position",
+        "helperHeight": 17
+      }
+    },
+    "nativeTypography": {
+      "helper": "emusician::focus::font",
+      "source": "apps/desktop/FocusTheme.h",
+      "heightMultiplier": 1.15,
+      "fontSizeMeaning": "Frontmatter contains resulting JUCE logical height; pass helperHeight to the source helper, not the multiplied result.",
+      "explicitTabularNumerals": false
+    },
+    "shadows": [],
+    "motion": [],
+    "breakpoints": [
+      {
+        "name": "rail-medium",
+        "value": "1150px",
+        "condition": "MainComponent width >= 1150 and < 1650",
+        "effect": "248px persistent rail; below 1150 it is 224px."
+      },
+      {
+        "name": "rail-wide",
+        "value": "1650px",
+        "condition": "MainComponent width >= 1650",
+        "effect": "284px persistent rail."
+      },
+      {
+        "name": "inspector-short",
+        "value": "760px",
+        "condition": "MainComponent height < 760",
+        "effect": "28px inspector instead of 40px."
+      },
+      {
+        "name": "piano-compact",
+        "value": "300px",
+        "condition": "PianoRoll height < 300",
+        "effect": "Compact grid/velocity layout; drum mode displays the step row in place of the grid."
+      }
+    ],
+    "stateGeometry": {
+      "buttonFocus": "1.5px amber contour on bounds reduced by 1px; radius from rounded.control.",
+      "navigationActive": "2px amber bottom line on the shared flat button.",
+      "clipBounds": "x=timeX(start), y=row*rowHeight, width=timeX(end)-timeX(start), height=rowHeight-1; paint and hit testing share clipArea.",
+      "clipBorder": {
+        "normal": 0.7,
+        "selected": 1.8
+      },
+      "grid": {
+        "snapOn": "solid",
+        "snapOff": "4px dash / 4px gap"
+      },
+      "mixerMinimumContentHeight": 450,
+      "mixerHeadingHeight": 33
+    },
+    "paletteDerivation": "No synthetic tonal ramps: the application uses the exact frontmatter colours plus JUCE alpha, darker/brighter and interpolation operations documented in native excerpts."
+  },
+  "components": [
+    {
+      "name": "Native text button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Shared panel, hover/press, toggle and keyboard-focus painting. Excerpt requires InstrumentLook and its enclosing drawing context.",
+      "native": {
+        "language": "cpp",
+        "framework": "JUCE",
+        "sampleKind": "source-excerpt",
+        "source": "apps/desktop/MainComponent.cpp",
+        "symbol": "InstrumentLook::drawButtonBackground",
+        "code": "        const auto bounds = button.getLocalBounds().toFloat().reduced(1.0f);\n        const bool flat = static_cast<bool>(button.getProperties()[\"flat\"]);\n        g.setColour(button.getToggleState() ? focus::accent.withAlpha(0.17f) : (over || down) ? focus::raised : flat ? paper : focus::panel);\n        g.fillRoundedRectangle(bounds, 3.0f);\n        if (! flat) {\n            g.setColour(button.getToggleState() ? focus::accent : rule);\n            g.drawRoundedRectangle(bounds, 3.0f, 1.0f);\n        }\n        if (flat && button.getToggleState()) { g.setColour(focus::accent); g.fillRect(bounds.withTrimmedTop(bounds.getHeight() - 2.0f)); }\n        if (button.hasKeyboardFocus(true)) {\n            g.setColour(focus::accent);\n            g.drawRoundedRectangle(bounds, 3.0f, 1.5f);\n        }"
+      }
+    },
+    {
+      "name": "Active navigation",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Page tabs use the shared flat TextButton variant; this source line adds the active underline.",
+      "native": {
+        "language": "cpp",
+        "framework": "JUCE",
+        "sampleKind": "source-excerpt",
+        "source": "apps/desktop/MainComponent.cpp",
+        "symbol": "InstrumentLook::drawButtonBackground",
+        "code": "if (flat && button.getToggleState()) { g.setColour(focus::accent); g.fillRect(bounds.withTrimmedTop(bounds.getHeight() - 2.0f)); }"
+      }
+    },
+    {
+      "name": "Native text input",
+      "kind": "input",
+      "refersTo": "text-input",
+      "description": "LookAndFeel colours for native JUCE TextEditor, including focus and selection. Geometry remains inherited.",
+      "native": {
+        "language": "cpp",
+        "framework": "JUCE",
+        "sampleKind": "source-excerpt",
+        "source": "apps/desktop/MainComponent.cpp",
+        "symbol": "InstrumentLook::InstrumentLook",
+        "code": "        setColour(juce::TextEditor::backgroundColourId, focus::canvas);\n        setColour(juce::TextEditor::textColourId, ink);\n        setColour(juce::TextEditor::outlineColourId, rule);\n        setColour(juce::TextEditor::focusedOutlineColourId, focus::accent);\n        setColour(juce::TextEditor::highlightColourId, focus::accent);\n        setColour(juce::TextEditor::highlightedTextColourId, paper);"
+      }
+    },
+    {
+      "name": "Selected full-lane clip",
+      "kind": "custom",
+      "refersTo": "clip-label-selected",
+      "description": "The label and translucent body belong to one time-positioned rectangle. Full clip geometry is supplied by clipArea.",
+      "native": {
+        "language": "cpp",
+        "framework": "JUCE",
+        "sampleKind": "source-excerpt",
+        "source": "apps/desktop/ArrangementView.cpp",
+        "symbol": "ArrangementView::Impl::paintTracks / paintClip",
+        "code": "                g.setColour(identity.withAlpha(silent ? 0.09f : selectedClip ? 0.32f : 0.19f)); g.fillRect(area);\n                g.setColour(selectedClip ? focus::accent : identity.interpolatedWith(focus::canvas, 0.67f));\n                g.fillRect(area.withHeight(24.0f));"
+      }
+    },
+    {
+      "name": "Selected MIDI note",
+      "kind": "custom",
+      "refersTo": "note-selected",
+      "description": "Actual Piano roll note painting, with selection border and optional pitch label.",
+      "native": {
+        "language": "cpp",
+        "framework": "JUCE",
+        "sampleKind": "source-excerpt",
+        "source": "apps/desktop/PianoRoll.cpp",
+        "symbol": "PianoRoll::Impl::paintGrid",
+        "code": "                g.setColour(chosen ? focus::accent : noteColour.darker(0.25f)); g.fillRoundedRectangle(v.second, 1.5f);\n                g.setColour(chosen ? focus::accent.brighter(0.25f) : noteColour); g.drawRoundedRectangle(v.second, 1.5f, chosen ? 1.5f : 0.8f);\n                if (v.second.getWidth() > 35 && v.second.getHeight() >= 11) { g.setColour(focus::base); g.setFont(mono(10)); g.drawText(pitchName(n.pitch), v.second.toNearestInt().reduced(3, 0), juce::Justification::centredLeft); }"
+      }
+    },
+    {
+      "name": "Vertical gain fader",
+      "kind": "custom",
+      "refersTo": "fader-thumb",
+      "description": "Native vertical slider track, thumb and keyboard-focus contour.",
+      "native": {
+        "language": "cpp",
+        "framework": "JUCE",
+        "sampleKind": "source-excerpt",
+        "source": "apps/desktop/MainComponent.cpp",
+        "symbol": "InstrumentLook::drawLinearSlider",
+        "code": "        if (style == juce::Slider::LinearVertical) {\n            const auto centre = float(x) + float(width) * 0.5f;\n            g.setColour(focus::canvas); g.fillRect(centre - 2, float(y), 4.0f, float(height));\n            g.setColour(focus::strong); g.drawRect(centre - 2, float(y), 4.0f, float(height), 1.0f);\n            g.setColour(slider.isEnabled() ? ink : secondary); g.fillRoundedRectangle(centre - 11, position - 4, 22, 8, 1.0f);\n            if (slider.hasKeyboardFocus(true)) { g.setColour(focus::accent); g.drawRect(centre - 13, position - 6, 26.0f, 12.0f, 1.0f); }\n            return;\n        }"
+      }
+    },
+    {
+      "name": "Mixer channel surface",
+      "kind": "custom",
+      "refersTo": "mixer-strip",
+      "description": "Real channel painting uses track identity, type, route and actual gain/meter controls. This excerpt is the surface and type label.",
+      "native": {
+        "language": "cpp",
+        "framework": "JUCE",
+        "sampleKind": "source-excerpt",
+        "source": "apps/desktop/MixerView.cpp",
+        "symbol": "MixerView::Impl::Strip::paint",
+        "code": "            g.fillAll(focus::panel); g.setColour(focus::line); g.drawVerticalLine(getWidth() - 1, 0, float(getHeight()));\n            g.setColour(colour()); g.fillRect(0, 0, getWidth(), 2);\n            g.setColour(focus::muted); g.setFont(focus::font(11));\n            const auto* t = track();\n            g.drawText(isMaster() ? \"MAIN OUTPUT\" : !t ? \"SELECT A TRACK\" : t->kind == \"instrument\" ? \"MIDI\" : t->kind == \"bus\" ? \"BUS\" : \"AUDIO\", 10, 36, getWidth() - 20, 18, juce::Justification::centredLeft);"
+      }
+    }
+  ],
+  "narrative": {
+    "northStar": "Focus + Mix",
+    "overview": "A quiet, dark working instrument: music occupies the canvas, while selection, transport and channel controls remain easy to locate. The approved Focus + Mix direction replaces the earlier paper-and-ink appearance in the native 0.7.0 desktop application. It uses flat charcoal surfaces, warm amber states and restrained track colours.\n\nArrangement, full Piano roll and Mixer are views of the same project. The selected-track and Master rail stays visible across all three. Existing editing, recording, plugin, routing and automation operations keep their production semantics; the HTML design prototype supplies visual direction, not a replacement music model.",
+    "keyCharacteristics": [
+      "Dark tonal layers and fine boundaries separate tools from musical content.",
+      "Clips fill their track lanes; time determines their horizontal geometry.",
+      "Segoe UI, readable control text and sparse ruler labels support dense editing.",
+      "Persistent channel controls display the same engine state as the full Mixer."
+    ],
+    "rules": [
+      {
+        "name": "The State Rule",
+        "body": "Track colour identifies content; amber, labelled controls and focus contours express interaction state. Do not infer selection, record readiness or output destination from track colour alone.",
+        "section": "colors"
+      },
+      {
+        "name": "The Readable Scale Rule",
+        "body": "Reduce grid and ruler label density before reducing the established control typography. Fine snap resolution must not require a label for every subdivision.",
+        "section": "typography"
+      },
+      {
+        "name": "The Time Geometry Rule",
+        "body": "Clip and note positions derive from musical time. Selection borders, page switching and ruler-unit changes must not alter duration, snap precision or stored music.",
+        "section": "layout"
+      }
+    ],
+    "dos": [
+      "Do retain the dark Focus palette and the persistent selected-track / Master rail across all workspaces.",
+      "Do derive clip geometry, ruler marks and playheads from the shared time model.",
+      "Do use the native font helper once and preserve readable text when the window becomes smaller.",
+      "Do bind repeated controls to the same EngineSession commands, snapshots and Undo history.",
+      "Do keep Source, exact clip properties, recording, plugin management, routing and automation reachable.",
+      "Do record native GUI, device, listening and DPI acceptance separately from source and offline-test evidence."
+    ],
+    "donts": [
+      "Don't reintroduce floating clip cards, decorative shadows or a browser shell around the native editor.",
+      "Don't copy prototype demo data, font metrics, limited pitch ranges or simulated controls into production.",
+      "Don't let a hidden editing page receive destructive clip or note shortcuts.",
+      "Don't treat a colour token, screenshot or successful build as proof of hardware or accessibility acceptance."
+    ]
+  }
+}

@@ -1,5 +1,12 @@
 # E-musician 技术架构
 
+## 0.7.0：Focus + Mix 原生呈现层（2026-11-04）
+
+MainComponent 管理 Arrangement、Piano roll、Mixer 三个视图，底部 MIDI/Source/Track Dock 保留。MixerView 的 compact 实例作为常驻当前轨与 Master，另一实例显示全轨；两者只持有 EngineSession 快照，并复用原命令和 Undo 手势，不引入可写音乐模型。FocusTheme.h 统一深色调色与 Segoe UI 字体。无修订变化时只同步标量控件和电平小区域；界面工作不进入音频线程。
+
+Clip 绘制覆盖整轨高，命中和可视绘制共用原几何，1/16384 网格与区间索引继续保留。混音页不操作隐藏片段；完整 MIDI 页的音符快捷键路由到可见 PianoRoll，工程级 Save/Undo 继续共用入口。设备、I/O、Send、Automation 由 SelectedTrackPanel 负责。存储 schema4、插件序列化、ControlServer、EngineSession 实现未改。见[ADR](decisions/0012-focus-native-ui.md)、[功能核查](review/2026-11-04-focus-native/FEATURE-PARITY.md)及 CONTEXT。
+
+
 更新日期：2026-10-29（Asia/Shanghai）。0.6.0增加下述编辑/录音准备模块，验证状态见[CONTEXT](CONTEXT.md)。历史版本的硬件、插件及性能结果保持各自适用范围，不替代新版验收。
 
 ## 0.6.1：编辑精度与绘制范围
