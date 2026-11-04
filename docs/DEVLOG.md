@@ -2692,3 +2692,7 @@ Release??/?????check20261104T154035.555249Z-432e15cfda 5/5???85.99???????build/s
 独立视觉复核为 SHIP：可交付本机短测候选，Devices/I/O/Automation/Master 证据补齐后没有剩余阻断项；不是全部真实设备/DPI已通过的声明。DESIGN.md、PRODUCT.md 和 .impeccable/design.json 已按实际原生代码更新，token、JSON/YAML及源码样本已校验。
 
 Git 暂存审计确认所有构建输入内容与已验证工作区一致。3个C++文件按既有.gitattributes将CRLF规范化为LF，差异仅换行；精确原始构建字节保存在releases/0.7.0/source-build-inputs.zip，原始SHA-256仍对应构建/测试记录。引擎、存储、控制接口和core没有改动；用户工程、设置清单、EXE/PDB与依赖不进入提交。详见STAGED-INTEGRITY.json。只同步功能分支和旧版保留分支，main保持不变。
+
+## 2026-11-05 — 0.7.0 Git 同步核对
+
+实现提交 8a62003abd2071e9bb8e00941c92430412d2bd48 已推送至 origin/feature/focus-native-v070；archive/v0.6.1-before-focus 已推送为 7f7eb6528bc1b7c8bb41c181a6448a5d330d239b。`git ls-remote --heads` 核对两者相符，远端 main 仍为 d4ed6c898af1303918e38b6325a915befabbb575。EXE 产品版本回读0.7.0，19878400字节，应用未自动启动。同步后的补记仅更新档案，不重新构建、不改变已验收源输入与二进制。

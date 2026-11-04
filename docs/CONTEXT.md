@@ -8,6 +8,8 @@
 
 后续保持用户看 GUI、开发者构建/debug，不使用 computer-use。下方章节为历史证据，不替代当前状态。
 
+2026-11-05 归档：实现提交 [8a62003](https://github.com/TonyWang2182/E-Musician/commit/8a62003abd2071e9bb8e00941c92430412d2bd48)已推送并核对功能分支；旧版保留分支也已同步至 GitHub。远端 main 仍为 d4ed6c8。工作区保留已构建的原始字节，Git 按既有规则规范化三个 C++ 文件的换行，审计见 STAGED-INTEGRITY.json，精确输入 ZIP 在 releases/0.7.0。EXE 产品版本回读 0.7.0；应用没有被自动打开。
+
 # 当前状态：0.6.1细网格与缩放（2026-10-29）
 
 已实现并通过Release自动验证：1/16384固定/自适应下界、Ctrl+4当前编辑区吸附、关虚线/开实线、三级小节标尺、指针锚定深缩放及可视范围绘制。入口build/bin/Release/E-musician.exe（0.6.1），旧0.6.0备份.cache/v061。分支feature/fine-grid-v061，从237c1d6继续；main不自动合并。GUI、设备和听感仍由用户操作，不使用computer-use。
