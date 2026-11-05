@@ -6428,3 +6428,11 @@ No paid chat API call or desktop computer-use in this batch. Local model inferen
 ## 2026-11-05 ? Packaging audit
 
 Changed text/source records contain no credential-like key matches; three baseline test-fixture occurrences remain byte-equivalent after line-ending normalization, no keys were printed. Repository candidates have no files above 20 MiB, no model weights/runtimes/cache, and current/review document links resolve. git diff --check passed. Source and final executable remain frozen. New explicit launcher and VS Code JSON were checked; no GUI was launched and no user preferences were changed by packaging. Evidence: PACKAGING-CHECK.json.
+
+## 2026-11-05 — Release archive and audit-scope correction
+
+Implementation/evidence committed as c258d31daabf3acc9082af21ca0f80cd877e9abd on feature/audio-analysis. Local release E:/MusicAgent&DAW/releases/0.9.0-20261105-analysis contains final EXE/PDB, launcher, 15.85 MB source/docs ZIP and MANIFEST. All 188 raw source entries inside the ZIP match final test fingerprints; EXE matches ab72da94. Original 0.8.1 remains preserved. No model weights, environments or credentials were added to Git or the release snapshot.
+
+Correction to packaging audit: the earlier git diff --check covered tracked changes before staging and did not include new files. The full staged check found upstream SciPy LICENSE trailing spaces plus a harmless blank EOF in worker __init__.py. These are explicitly retained as formatting exceptions to preserve upstream text and the verified worker hash; excluding that verbatim license and blank-EOF rule, the full baseline-to-implementation check passes. Source code is unchanged since final tests. PACKAGING-CHECK now records both results, rather than hiding the first full-check failure.
+
+Final delivery documentation commit follows this payload commit; feature branch synchronization is performed separately. No main merge is authorized by this batch.

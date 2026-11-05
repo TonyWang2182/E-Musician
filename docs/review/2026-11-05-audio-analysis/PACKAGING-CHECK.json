@@ -1,6 +1,6 @@
 {
   "timestamp": "2026-11-05T07:57:37.510330+00:00",
-  "status": "passed",
+  "status": "passed_with_documented_formatting_exceptions",
   "scope": "Changes from preserved baseline 5eb32e7",
   "changed_files": 163,
   "credential_like_matches_in_changes": [],
@@ -10,5 +10,17 @@
   "broken_review_entry_links": [],
   "git_diff_check_exit": 0,
   "native_exe_sha256": "ab72da94a525fb3dbdc7937e355f8cc7dd8a43c2f1a3eda6e90867313a58a155",
-  "no_models_or_runtime_in_repository": true
+  "no_models_or_runtime_in_repository": true,
+  "full_staged_diff_check_exit": 1,
+  "formatting_exceptions": [
+    {
+      "path": "docs/review/2026-11-05-audio-analysis/worker-evidence/scipy-LICENSE.txt",
+      "reason": "Verbatim upstream license contains trailing spaces; retained for provenance."
+    },
+    {
+      "path": "scripts/audio_analysis/__init__.py",
+      "reason": "One extra blank line at EOF; executable worker source kept frozen, no functional difference."
+    }
+  ],
+  "check_excluding_verbatim_license_and_blank_eof_exit": 0
 }

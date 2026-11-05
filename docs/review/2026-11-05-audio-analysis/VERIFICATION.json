@@ -269,5 +269,11 @@
   "physical_audio_verified": false,
   "real_language_model_called": false,
   "model_quality_scored": false,
-  "wrapper_note": "Native E2E child exited 0 and its Recorder succeeded. A transient outer Python wrapper incorrectly SystemExit(CommandResult) and exited 1 after the success; this is logged separately, not a test/app failure."
+  "wrapper_note": "Native E2E child exited 0 and its Recorder succeeded. A transient outer Python wrapper incorrectly SystemExit(CommandResult) and exited 1 after the success; this is logged separately, not a test/app failure.",
+  "release_archive": {
+    "directory": "E:/MusicAgent&DAW/releases/0.9.0-20261105-analysis",
+    "implementation_commit": "c258d31daabf3acc9082af21ca0f80cd877e9abd",
+    "source_archive_sha256": "a993bf368b550a2b263c3c68c2c9edb133cf304619d2bf14abd4ba74a79b9703",
+    "verified_raw_source_files": 188
+  }
 }
