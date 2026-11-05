@@ -2,6 +2,9 @@
 #include "ProjectStorage.h"
 #include "AudioSource.h"
 #include "PluginHost.h"
+#include "NativeInstrument.h"
+#include "NativeEffects.h"
+#include "NativeLoadQueue.h"
 #include "EngineSessionProduction.h"
 #include "core/commands/RevisionGuard.hpp"
 #include "core/time/Time.hpp"
@@ -123,7 +126,10 @@ juce::String contentKey(const storage::StoredProject& s,const std::function<juce
     // Computed at edit/save boundaries, never during the transport poll.
     juce::MemoryOutputStream o;
     auto time=[&](double v){o.writeInt64(juce::int64(std::llround(v*1.0e9)));};
-    auto plugin=[&](const auto& p){o.writeString(p.id);o.writeString(p.format);o.writeString(p.identifier);o.writeInt(p.uniqueId);o.writeBool(p.enabled);o.writeString(p.role);};
+    auto plugin=[&](const auto& p){o.writeString(p.id);o.writeString(p.format);o.writeString(p.identifier);o.writeInt(p.uniqueId);o.writeBool(p.enabled);o.writeString(p.role);
+        // Native device state is small and authoritative. Third-party state
+        // continues using its existing generation/cache path.
+        if(p.format=="E-musician"){o.writeInt64(juce::int64(p.state.getSize()));o.write(p.state.getData(),p.state.getSize());}};
     auto lanes=[&](const auto& list){for(const auto& lane:list){o.writeString(lane.id);o.writeString(lane.target);o.writeString(lane.pluginId);o.writeString(lane.parameterId);o.writeBool(lane.enabled);for(const auto& point:lane.points){o.writeString(point.id);time(point.timeSeconds);o.writeFloat(point.value);o.writeFloat(point.curve);}}};
     o.writeString(s.projectId);o.writeInt(int(std::round(s.masterGainDb*1000)));o.writeBool(s.looping);
     time(s.bpm);o.writeInt(s.numerator);o.writeInt(s.denominator);time(s.loopStart);time(s.loopEnd);
@@ -234,10 +240,35 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     std::vector<PluginDescriptorSnapshot> catalogCache;
     double catalogReadAt=-100000.0;
     bool catalogWasScanning=false;
+    struct NativeRuntime {
+        juce::String signature, status="queued", error;
+        std::uint64_t token=0, generation=0;
+    };
+    struct NativePending {
+        std::shared_ptr<storage::StoredProject> candidate;
+        juce::String projectId, trackId, deviceId, operation, signature;
+        std::uint64_t revision=0, token=0, generation=0;
+    };
+    std::unique_ptr<native::NativeLoadQueue> nativeQueue;
+    std::map<juce::String,NativeRuntime> nativeRuntime;
+    std::map<juce::String,juce::String> nativeTrackErrors;
+    std::unique_ptr<NativePending> nativePending;
+    std::vector<JobSnapshot> nativeJobHistory;
+    std::uint64_t nativeGeneration=0;
+    std::uint64_t nativeLastScan=std::numeric_limits<std::uint64_t>::max();
+    double nativeRetireAt=0;
+    juce::String nativeQueueProject;
+    void reconcileNative();
+    void completeNative(native::NativeLoadQueue::Completion);
+    juce::Result beginNative(const juce::String&,const juce::var&);
+    void finishNativeJob(std::uint64_t,const juce::String&,const juce::String& = {});
+    juce::Result nativeAssetHashes(const storage::StoredProject&,std::map<juce::String,juce::String>&) const;
+    juce::String nativeSignature(const storage::StoredPlugin&,const std::map<juce::String,juce::File>&) const;
     struct Reply{juce::String digest;juce::var value;};std::map<juce::String,Reply> replies;
 
     explicit Impl(bool enable=true):engine(sessionProperties(enable),plugins::createUIBehaviour(),std::make_unique<OutputOnlyBehaviour>(enable)){
         if(!edit)throw std::runtime_error("Unable to create audio session");
+        nativeQueue=std::make_unique<native::NativeLoadQueue>([this](native::NativeLoadQueue::Completion result){completeNative(std::move(result));});
         edit->tempoSequence.getTempo(0)->set(te::BeatPosition::fromBeats(0),120,0,false);edit->getMasterVolumePlugin()->setVolumeDb(-6);
         transactionControl=std::make_unique<te::Edit::UndoTransactionInhibitor>(*edit);
         edit->state.addListener(this);
@@ -257,6 +288,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     }
     ~Impl() override{
         *alive=false;shuttingDown=true;stopTimer();for(auto& j:jobs)j->cancel=true;
+        nativeQueue.reset();nativePending.reset();nativeRuntime.clear();
         for(auto& j:jobs)if(j->worker.joinable())j->worker.join();
         for(auto& j:jobs)j->commit={};jobs.clear();pluginHost.cancelScan();plugins::PluginHost::closeAllEditors(*edit);
         edit->getTransport().stop(false,false);trackMeters.clear();inputMeters.clear();masterMeter.bind(nullptr);recording.detach();pluginHost.detachEdit(*edit);edit->state.removeListener(this);noteViews.clear();transactionControl.reset();bindings.clear();edit.reset();
@@ -286,7 +318,21 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         return plugin&&plugin->getAudioPluginInstance()?plugin:nullptr;
     }
     std::vector<storage::StoredPlugin> captureSlots(juce::ValueTree owner)const{
-        std::vector<storage::StoredPlugin> out;for(auto v:owner.getChildWithName("EM_PLUGINS")){auto p=readSlot(v,false);if(auto* live=loadedPlugin(*edit,p.id))plugins::PluginHost::capture(*live,p,false);out.push_back(std::move(p));}return out;
+        std::vector<storage::StoredPlugin> out;for(auto v:owner.getChildWithName("EM_PLUGINS")){auto p=readSlot(v,v["format"].toString()=="E-musician");if(auto* live=loadedPlugin(*edit,p.id))plugins::PluginHost::capture(*live,p,false);out.push_back(std::move(p));}return out;
+    }
+    juce::Result describeNativeEffect(const juce::String& trackId,const juce::String& deviceId,juce::var& data){
+        juce::ValueTree owner;
+        if(trackId=="master")owner=metadata(*edit);
+        else if(auto* binding=find(trackId))owner=binding->track->state;
+        else return juce::Result::fail("Track not found.");
+        storage::StoredProject state;
+        storage::StoredTrack track;track.id=trackId;
+        for(const auto& slot:owner.getChildWithName("EM_PLUGINS"))if(slot["id"].toString()==deviceId){
+            if(trackId=="master")state.masterPlugins.push_back(readSlot(slot));else track.plugins.push_back(readSlot(slot));
+            break;
+        }
+        if(trackId!="master")state.tracks.push_back(std::move(track));
+        return native_effects::describe(state,trackId,deviceId,data);
     }
     const NoteView& noteView(const juce::String& id,te::MidiClip& midi)const{
         auto& sequence=midi.getSequence();const int channel=midi.getMidiChannel().getChannelNumber();
@@ -340,7 +386,18 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
                 }else if(auto* audio=dynamic_cast<te::WaveAudioClip*>(c.clip.get())){a.fadeIn=audio->getFadeIn().inSeconds();a.fadeOut=audio->getFadeOut().inSeconds();if(std::none_of(s.assets.begin(),s.assets.end(),[&](const auto& x){return x.id==c.assetId;}))s.assets.push_back({c.assetId,c.source});}
                 t.clips.push_back(std::move(a));
             }s.tracks.push_back(std::move(t));
-        }production::captureGraph(*edit,s,includeControllers);return s;
+        }
+        // Native pads refer to the same asset IDs used by the saved project.
+        // Only referenced IDs enter a snapshot; stale metadata is not an asset.
+        std::set<juce::String> nativeIds;bool nativeStateInvalid=false;
+        const auto collectNative=[&](const auto& plugins){for(const auto& plugin:plugins)if(plugin.format=="E-musician"){
+            std::vector<juce::String> ids;if(storage::nativePluginAssetIds(plugin,ids).wasOk())nativeIds.insert(ids.begin(),ids.end());else nativeStateInvalid=true;}};
+        collectNative(s.masterPlugins);for(const auto& track:s.tracks)collectNative(track.plugins);
+        auto nativeAssets=m.getChildWithName("EM_NATIVE_ASSETS");
+        for(const auto& asset:nativeAssets){const auto id=asset["id"].toString();
+            if((nativeStateInvalid||nativeIds.contains(id))&&std::none_of(s.assets.begin(),s.assets.end(),[&](const auto& a){return a.id==id;}))
+                s.assets.push_back({id,juce::File(asset["source"].toString())});}
+        production::captureGraph(*edit,s,includeControllers);return s;
     }
     juce::Result capturePluginStates(storage::StoredProject& s){
         auto flush=[&](auto& list,juce::ValueTree owner){for(auto& p:list){
@@ -386,6 +443,8 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         if(auto r=prepare(s);r.failed())return r;candidate=te::createEmptyEdit(engine,{});if(!candidate)return fail("Could not create project.");candidate->getSceneList();auto r=applyTo(*candidate,s,next,true);if(r.wasOk()){te::TrackList::sortTracksByType(candidate->state,nullptr);candidate->getUndoManager().clearUndoHistory();}return r;
     }
     void adopt(std::unique_ptr<te::Edit> next,std::vector<Binding> bs,const juce::String& tid,const juce::String& cid={}){
+        if(nativeQueue&&nativeQueueProject.isNotEmpty())nativeQueue->cancelProject(nativeQueueProject);
+        nativeQueueProject.clear();nativeRuntime.clear();nativeTrackErrors.clear();nativePending.reset();nativeLastScan=std::numeric_limits<std::uint64_t>::max();
         plugins::PluginHost::closeAllEditors(*edit);edit->getTransport().stop(false,false);trackMeters.clear();inputMeters.clear();masterMeter.bind(nullptr);recording.detach();pluginHost.detachEdit(*edit);edit->state.removeListener(this);noteViews.clear();transactionControl.reset();bindings.clear();edit=std::move(next);clipClipboard={};lastPastedClipIds.clear();bindings=std::move(bs);transactionControl=std::make_unique<te::Edit::UndoTransactionInhibitor>(*edit);edit->state.addListener(this);recording.attach(*edit,recordingDirectory());
         edit->getUndoManager().setMaxNumberOfStoredUnits(1000000,64);refreshRange();choose(tid,cid);gesture=false;watchedPlugins.clear();refreshPluginWatches();currentKey=calculateCurrentKey();te::TrackList::sortTracksByType(edit->state,nullptr);cachedRevision=std::numeric_limits<std::uint64_t>::max();
     }
@@ -404,6 +463,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
 #include "EngineSessionRecording.inc"
 #include "EngineSessionParameters.inc"
 #include "EngineSessionModel.inc"
+#include "EngineSessionNative.inc"
 #include "EngineSessionCommands.inc"
 #include "EngineSessionJobs.inc"
 #include "EngineSessionTelemetry.inc"
@@ -414,6 +474,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
 #include "../../tests/EngineSessionProjectSmoke.inc"
 #include "../../tests/EngineSessionClipSmoke.inc"
 #include "../../tests/EngineSessionDawSmoke.inc"
+#include "../../tests/NativeLoadQueueTests.inc"
 #include "../../tests/EngineSessionProductionSmoke.inc"
 #include "../../tests/EngineSessionPluginNotificationSmoke.inc"
 }

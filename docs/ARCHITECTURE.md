@@ -1,5 +1,45 @@
 # E-musician 技术架构
 
+## 拟议音频分析边界（2026-11-05，未实施）
+
+拟由 DAW 分析管理层拥有独立本机 worker，GUI 和 Agent 经同一命令启动任务、分页读取候选、确认后一次导入。分析进程独立于聊天 Provider，手动操作不要求 API；实时引擎继续不做推理。原生工程仍是唯一权威状态，音符/和弦/分离音频候选均不可直接写入。完整提案见 [分析方案](review/2026-11-05-audio-analysis/PLAN.md)，本节不代表当前已有 Provider 或新命令。
+
+## 矩形编辑视图与装置图形控制（0.8.1，2026-11-05）
+
+`PianoRoll` 的音符与 `ArrangementView` 的 clip 共用各自真实时域边界，绘制和命中区覆盖音高行/轨道行；矩形化不修改音符时长、起点或吸附结果。可视范围筛选和原有深缩放保留。
+
+`DeviceControlStyle` 统一旋钮、带单位的数值输入、Shift 细调和默认值复位；`NativeEffectsGraph` 只从参数绘制有界曲线。拖动中保留面板本地预览，释放后经同一命令和版本检查一次提交；图形 Esc 取消。图示不另存一份工程，不在 paint 中读文件或调用模型。EQ 曲线使用 DSP 的同一系数；压缩器 GR 来自已有原子计量，其他响应/回声/衰减/调制图为参数示意。
+
+EQ 每段增加滤波形状；Sampler/Rack 每个 pad 增加 `attack_ms`、`release_ms`、`one_shot`，贯通宿主范围校验、序列化、能力目录、Agent 方案编译和真实回读。新程序解释旧状态的默认值；改变原有默认形状/包络/模式时写装置状态版本 2，旧程序明确拒绝，避免忽略新参数后静默变声。工程 schema 和 catalog 协议版本保持原值。
+
+Sampler/Rack 的纯参数任务在控制线程复制已发布 bank 的元数据，并共享不可变 PCM；worker 验证资产 ID/内容哈希后复用，显式换样本和工程重开仍走读取、哈希与解码。共享样本由控制线程保留，实时回调不接管销毁。**发布新 bank 仍会停止旧 voices**，参数连续自动化和无缝拓扑切换尚未实现。效果器和采样器 UI 不绕过版本、Undo 或保存规则。
+
+接口见 [AGENT_API](AGENT_API.md)，本轮证据与范围见 [结果](review/2026-11-05-device-controls/RESULTS.md)。下方保留历史架构描述；其中“参数重解码”“Agent 未开放”等以本节及较新章节为准。
+
+## 设备链与装置契约（2026-11-02）
+
+`DeviceChainStrip` 只展示当前工程权威快照的轨道或主轨有序 slot；选择使用已有的原生面板或第三方编辑器路径，添加走 `EngineSession` 命令及既有版本/事务/异步策略。面板隐藏时使用低频检测恢复轮询，显式关闭后停止。第三方编辑器声库加载由插件自身负责，当前不能由宿主推断成功或失败。
+
+效果器以版本化参数状态接入同一 slot 及保存/渲染链：压缩器 wet 路径传出原子 GR 计量，Delay/Reverb 缓冲按装置在非音频线程入图前准备，Auto Filter 使用固定状态；以上音频回调不执行文件或网络。Agent 在独立进程读取宿主能力目录，对照已实现类型、字段、范围、权限，生成可审阅方案并回读；不一致拒绝对应装置操作。注册表测试防止已登记类型的接口遗漏，但不会自动推导新 DSP 语义。真实设备、实时负载、第三方声库及完整合成器仍待验或未实现。[证据](review/2026-11-02-device-chain-agent/RESULTS.md)。
+
+## 试听与原生效果器（2026-11-02，硬件待验）
+
+波形面板在控制线程验证工程、版本、设备、鼓垫与 SHA 后，将已有不可变 PCM 交给有界后台 worker 计算概览；保留原始文件读取后备路径。设备载入时加快状态轮询，完成后降低频率。试听请求不写工程，独立渲染声音并送进原轨道效果与输出；声音是否可听仍受轨道静音、solo 和设备状态影响。
+
+自有八段 EQ 和立体声峰值压缩器作为 `E-musician` effect slot，与 Sampler/Rack instrument 按 role 区分；底部面板及 Agent 共用命令/版本/撤销边界。参数控制在线程外校验并以有界快照发布，效果器音频处理不执行文件 I/O、网络或显式堆分配；重入时该块跳过效果处理，复杂图下尚无实时性能结论。读取单个效果器只取对应轨或主轨的设备状态，避免完整工程遍历。Agent 对效果器采用批量候选与回读；Sampler/Rack 参数目前仅支持工程范围单动作异步提交并等待终态，不允许任意本地文件路径。自动化参数、侧链和实时频谱尚未实现。
+
+自动验证及限制见本轮 [结果](review/2026-11-02-audition-eq-compressor/RESULTS.md)，不能据此推断硬件或听感已验收。
+
+## MIDI / 原生装置工作区（2026-11-02）
+
+MIDI 展开保留同一 PianoRoll、选区及 Edit；NativeDevicePanel 在主窗口 dock 随所选轨更新，关闭时停止面板和波形轮询。`SampleWaveform` 使用串行后台 worker 为与已发布采样内容 SHA-256 一致的 WAV 快照生成有界峰值，编辑中仅本地预览、释放按 project/revision 走既有命令提交；paint/音频线程不读文件。`get_native_instrument` 在 ready 且非 pending 时提供各 pad 的 `sample_sha256`；波形不是第二份可写工程状态。缓存/队列均有界，慢盘及音频性能结论仍有边界。验证见[本轮记录](review/2026-11-02-device-redesign/RESULTS.md)。
+
+## 原生采样器与鼓组候选（2026-11-02）
+
+两类装置复用 `NativeSampler` 固定 voices/事件的播放核心、Tracktion `NativeInstrument` 插件封装及同一个权威 Edit；轨道设备状态是 schema 4 中版本化 `E-musician` slot，pads 用资产 ID 引用项目素材。控制层提交 native 命令，经有界后台 worker 解码不可变快照，验证项目、revision、设备、generation 和 token 后一次事务应用；UI 只读装置状态及提交命令。保存/导出使用已加载素材哈希验证实际归档文件，在 manifest 原子切换前拒绝不一致。详情、验证及限制见[本轮记录](review/2026-11-02-sampler-drum-rack/RESULTS.md)。
+
+音频 callback 不做文件 I/O、JSON 解析或显式堆分配；发布的样本由控制线程保留和回收。不能把上述设计提升为完全硬实时保证：潜在并发回调会丢块并计数，故障磁盘同步读取不可中断，参数编辑仍会重解码并截断现有发声。真实设备、复杂路由与性能待验。Agent 模型工具没有开放新装置命令。
+
 更新日期：2026-10-29（Asia/Shanghai）。当前开发为 DAW 0.8.0 / Agent 0.3 第二批，以下新增实现及自动验证已完成，实际桌面/设备听感仍待人工；已交付的0.7.0第一批证据保持原范围。最终状态见[CONTEXT](CONTEXT.md)，不能用旧硬件、插件或性能结果替代新版验收。
 
 ## Agent 0.3：依赖方案与任务边界
@@ -108,7 +148,7 @@ RecordingController管理应用级click和count-in偏好；通过统一命令更
 | `AgentSidebar.*` | 可开关 WebView2 侧栏、本机会话/认证桥与所属 Python worker 生命周期；不拥有音乐工程 |
 | `ArrangementView.*` | 唯一轨头与M/S/R/Devices、共轴音频/MIDI片段、选择/移动/裁剪手势、缩放滚动、后台波形峰值和MIDI概览 |
 | `PianoRoll.*` | 音符绘制、移动、长度、力度、多选、量化、转调、复制/删除及16步鼓点；通过回调提交命令 |
-| `SelectedTrackPanel.*` | 选轨/Master设备链、实际录音输入与设备级Monitor、Bus输出/发送、参数枚举和自动化曲线手势；只读快照与临时预览 |
+| `SelectedTrackPanel.*` | 选轨/Master设备链、实际录音输入与逐轨 Monitor、Bus输出/发送、参数枚举和自动化曲线手势；只读快照与临时预览 |
 | `EngineSession.cpp/.h` | Engine/Edit所有权、稳定ID绑定、快照、版本、事件、任务生命周期与控制线程约束 |
 | `EngineSessionModel.inc` | 候选DTO到同一Edit的增量应用；ValueTree元数据和混音标量Undo |
 | `EngineSessionCommands.inc` | 命令参数校验、候选变更、批次事务、普通编辑及Undo/Redo |
@@ -118,7 +158,7 @@ RecordingController管理应用级click和count-in偏好；通过统一命令更
 | `EngineSessionSelection.inc` | 可失效的 UI 选择投影、独立选择版本、稳定 ID 检查；不写音乐状态 |
 | `EngineSessionProduction.h` | 生产图与录音控制器的消息线程契约，不是第二个Edit |
 | `EngineSessionAutomationRouting.inc` | Bus/输出/发送的DAG校验及应用、自动化参数绑定/曲线、MIDI controller捕获/恢复与Undo |
-| `EngineSessionRecording.inc` | 实际设备枚举/配置、输入绑定与设备级监听、Arm、线性take生命周期及录音结果接纳 |
+| `EngineSessionRecording.inc` | 实际设备枚举/配置、输入绑定与逐轨监听、旧设备级命令兼容、Arm、线性take生命周期及录音结果接纳 |
 | `EngineSessionTelemetry.inc` | 控制线程低频RAM/电平采集、监听生命周期、峰值重置；不修改音乐状态 |
 | `AudioSource.*` | WAV检查，MP3完整帧扫描、顺序解码、内容寻址PCM缓存、取消与进度 |
 | `ProjectStorage.*` | schema4校验、旧版迁移备份、未变媒体复用、新媒体归档、插件状态二进制、清单替换；不修改活动Edit |
@@ -209,7 +249,9 @@ schema4额外保存引擎中已经存在或录到的MIDI controller事件：稳�
 
 ## 录音与生产信号图
 
-`RecordingController`附着在当前Edit，使用Tracktion设备实例、录音回调和音频写入线程。持久化的是选定输入ID；Arm、正在录音/收尾和设备Monitor属于运行状态。输入选择按音频/MIDI类型校验；同一输入可绑定多轨，Monitor是输入设备级off/auto/on，不能伪装成独立逐轨监听。设备实例可能在驱动切换时销毁，绑定逻辑不跨设备重配置保留裸指针。
+`RecordingController`附着在当前Edit，使用Tracktion设备实例、录音回调和音频写入线程。持久化的是选定输入ID；Arm、正在录音/收尾和逐轨 Monitor 属于运行状态。输入选择按音频/MIDI类型校验；同一输入可绑定多轨，每轨可以独立选 off/auto/on。固定版本 Tracktion 的 `InputDeviceInstance::isLivePlayEnabled` 通过本仓库严格校验的补丁读取轨道运行态，录音 arm 和采集继续使用原引擎目标，避免把监听误当录音准备；旧设备级命令仍可统一设置该设备当前绑定轨。选新输入时控制线程尝试重绑，不在音频回调中更改设备。项目重开时监听复位 off，设备实例可能在驱动切换时销毁，绑定逻辑不跨设备重配置保留裸指针。
+
+该补丁使用 `.cache/monitor-engine` 独立的固定版本 Tracktion/JUCE checkout；`python scripts/dev.py bootstrap` 准备、应用补丁，CMake 校验版本及补丁哈希，避免改动共享 `_deps` checkout。当前离线测试覆盖共享输入的逐轨模式、arm、录音、输入重绑，以及不更改 revision/Undo；真实声卡、键盘和插件听感未通过此测试验证。按住 MIDI 键时关闭监听是否会遗留长音尚待专项验证和处理；不能通过对轨道发送全局 all-notes-off 冒充精准释放，因为那会影响同轨的片段音符。
 
 开始录音前检查实际设备、输入绑定、预备轨道、活动文件任务和loop；本轮只做线性take，开启loop时拒绝并提示关闭。停止并不等于收尾结束：录音文件完成后接纳片段、补稳定ID/素材绑定、恢复准备源，再形成一个可撤销的take事务和新的revision。录音/finalizing期间暂时拒绝工程编辑和保存，Stop保持可调用；未录入前不创建虚假音符或完成状态。音频/MIDI/ASIO真机验收必须单列，hosted buffer测试不能代替硬件链路。
 

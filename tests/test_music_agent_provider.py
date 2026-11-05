@@ -67,7 +67,7 @@ class ProviderTests(unittest.TestCase):
         self.assertEqual(request.get_header("Authorization"), "Bearer " + TEST_KEY)
         self.assertEqual(payload["model"], "kimi-k2.6")
         self.assertEqual(payload["thinking"], {"type": "disabled"})
-        self.assertEqual(payload["max_tokens"], 2048)
+        self.assertEqual(payload["max_tokens"], 4096)
         self.assertFalse(payload["stream"])
         self.assertEqual(timeout, 45)
         self.assertEqual(result["usage"]["total_tokens"], 39)

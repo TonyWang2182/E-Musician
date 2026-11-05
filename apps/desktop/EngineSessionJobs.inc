@@ -294,14 +294,15 @@ void trimRenderInputs(storage::StoredProject& state,double end)
         }
     }state.looping=false;state.loopStart=0;state.loopEnd=0;pruneAssets(state);
 }
-template<class J> juce::Result renderJob(const J& j,const juce::File& target,storage::StoredProject state,double start,double end,double rate,int bits,double tail,bool realtime)
+template<class J> juce::Result renderJob(const J& j,const juce::File& target,storage::StoredProject state,double start,double end,double rate,int bits,double tail,bool realtime,std::map<juce::String,juce::String> expectedHashes)
 {
     if(!target.getParentDirectory().isDirectory())return juce::Result::fail("The output directory does not exist.");
     JobFingerprint original;if(auto r=fingerprint(target,original,[j]{return j->cancel.load();});r.failed())return r;
     OwnedRenderDirectory owned(j->id);if(auto r=owned.directory.createDirectory();r.failed())return r;
     const auto manifest=owned.directory.getChildFile("snapshot.emproj"),specFile=owned.directory.getChildFile("spec.json"),report=owned.directory.getChildFile("report.json");
     trimRenderInputs(state,end);storage::StoredProject archived;
-    if(auto r=storage::save(manifest,state,archived,jobIO(j,0,0.2));r.failed())return r;
+    auto options=jobIO(j,0,0.2);options.expectedAssetHashes=std::move(expectedHashes);
+    if(auto r=storage::save(manifest,state,archived,options);r.failed())return r;
     auto staging=target.getSiblingFile(".emusician-render-"+j->id+".wav");
     if(staging.exists())return juce::Result::fail("The render staging path already exists.");juce::TemporaryFile output(target,staging);
     auto spec=object({{"id",j->id},{"snapshot",manifest.getFullPathName()},{"output",staging.getFullPathName()},{"start",start},{"end",end},{"sample_rate",rate},{"bit_depth",bits},{"tail",tail},{"realtime",realtime}});
@@ -350,6 +351,7 @@ void EngineSession::Impl::timerCallback()
         auto step=job->preparation;step(); // Keep the callable alive if it clears itself.
     }
     reapFinishedJobs(true);
+    reconcileNative();
 }
 
 void EngineSession::Impl::reapFinishedJobs(bool applyCommits)
@@ -391,10 +393,12 @@ juce::Result EngineSession::Impl::beginSave(const juce::File& file)
     struct Capture {
         struct Slot {juce::String track,id;std::uint64_t generation=0;const te::Plugin* instance=nullptr;};
         storage::StoredProject state;std::vector<Slot> slots;size_t next=0;
+        std::map<juce::String,juce::String> expectedHashes;
         juce::String failure,failureStatus="failed";
     };
     auto captured=std::make_shared<Capture>();
     const auto began=juce::Time::getMillisecondCounterHiRes();captured->state=capture();
+    if(auto r=nativeAssetHashes(captured->state,captured->expectedHashes);r.failed())return fail(r.getErrorMessage());
     auto add=[&](auto& list,const juce::String& track,juce::ValueTree owner){for(auto& p:list){
         auto* live=loadedPlugin(*edit,p.id);
         if(!live)p.state=readSlot(owner.getChildWithName("EM_PLUGINS").getChildWithProperty("id",p.id)).state;
@@ -409,7 +413,8 @@ juce::Result EngineSession::Impl::beginSave(const juce::File& file)
         if(job->cancel.load()){jobStatus(job,"cancelled",{},0);return;}
         if(captured->failure.isNotEmpty()){jobStatus(job,captured->failureStatus,captured->failure);return;}
         storage::StoredProject archived;
-        if(auto result=storage::save(file,captured->state,archived,jobIO(job,0.1,0.9));result.failed()){jobFailure(job,result);return;}
+        auto options=jobIO(job,0.1,0.9);options.expectedAssetHashes=captured->expectedHashes;
+        if(auto result=storage::save(file,captured->state,archived,options);result.failed()){jobFailure(job,result);return;}
         const auto key=contentKey(captured->state); // Hash/serialization are not message-thread work.
         std::lock_guard lock(job->mutex);job->phase="committing";job->detail="Confirming saved project";
         job->commit=[this,job,file,captured,key,archived=std::move(archived)]{
@@ -429,7 +434,12 @@ juce::Result EngineSession::Impl::beginSave(const juce::File& file)
                             clip.source=next->source;clip.clip->state.setProperty(emSource,next->source.getFullPathName(),nullptr);
                             prepared[next->source.getFullPathName()]=clip.info;
                         }
+                    auto assets=metadata(*edit).getChildWithName("EM_NATIVE_ASSETS");
+                    if(auto item=assets.getChildWithProperty("id",original.id);item.isValid()
+                       &&item["source"].toString()==original.source.getFullPathName())
+                        item.setProperty("source",next->source.getFullPathName(),nullptr);
                 }
+                nativeLastScan=std::numeric_limits<std::uint64_t>::max();
                 cachedRevision=std::numeric_limits<std::uint64_t>::max();
             }
             jobStatus(job,"completed",{},1);
@@ -489,6 +499,8 @@ juce::Result EngineSession::Impl::performJob(const juce::String& command,const j
     if(!args.isObject())return fail("Command arguments must be an object.");
     if(command=="cancel_job"){
         const auto id=textArg(args,"job_id");if(id=="plugin-scan"){pluginHost.cancelScan();return juce::Result::ok();}
+        if(nativePending&&id=="native-"+juce::String(juce::int64(nativePending->token)))
+            return fail("The current sample decode cannot yet be cancelled; wait for it to finish.");
         for(auto& j:jobs)if(j->id==id){j->cancel=true;return juce::Result::ok();}return fail("Task not found.");
     }
     if(command=="scan_plugins"){
@@ -559,11 +571,17 @@ juce::Result EngineSession::Impl::performJob(const juce::String& command,const j
         double start=number(args,"start_seconds",0),end=number(args,"end_seconds",duration),rate=number(args,"sample_rate",48000),bits=number(args,"bit_depth",24),tail=number(args,"tail_seconds",2);auto realtime=args.getProperty("realtime",false);
         if(!std::isfinite(start)||!std::isfinite(end)||!std::isfinite(tail)||start<0||end<=start||end>storage::maximumTimelineSeconds-tail||tail<0||tail>60)return fail("Invalid export range or tail (0 to 60 seconds).");
         if((rate!=44100&&rate!=48000&&rate!=88200&&rate!=96000)||(bits!=16&&bits!=24&&bits!=32)||!realtime.isBool())return fail("Use 44.1/48/88.2/96 kHz, 16/24/32 bit, and a boolean realtime option.");
-        auto state=capture();auto check=[&](const auto& ps){for(const auto& p:ps)if(p.enabled&&!loadedPlugin(*edit,p.id))return false;return true;};
+        auto state=capture();auto check=[&](const auto& ps){for(const auto& p:ps)if(p.enabled){
+            if(p.format=="E-musician"&&p.role=="effect") {
+                if(!dynamic_cast<native_effects::Effect*>(livePlugin(*edit,p.id)))return false;
+            }else if(p.format=="E-musician"){
+                auto it=nativeRuntime.find(p.id);if(!dynamic_cast<native::Instrument*>(livePlugin(*edit,p.id))||it==nativeRuntime.end()||it->second.status!="ready")return false;
+            }else if(!loadedPlugin(*edit,p.id))return false;}return true;};
         if(!check(state.masterPlugins))return fail("Restore or disable the missing master plugin before rendering.");
         for(const auto& t:state.tracks)if(!t.muted&&!check(t.plugins))return fail("Restore or disable missing plugins before rendering.");
         if(auto r=capturePluginStates(state);r.failed())return fail(r.getErrorMessage());
-        auto j=startJob(command,[file,state=std::move(state),start,end,rate,bits,tail,realtime=bool(realtime)](const auto& job){auto r=renderJob(job,file,state,start,end,rate,int(bits),tail,realtime);if(r.failed())jobFailure(job,r);else jobStatus(job,"completed",{},1);});return j?juce::Result::ok():juce::Result::fail(status);
+        std::map<juce::String,juce::String> hashes;if(auto r=nativeAssetHashes(state,hashes);r.failed())return fail(r.getErrorMessage());
+        auto j=startJob(command,[file,state=std::move(state),start,end,rate,bits,tail,realtime=bool(realtime),hashes=std::move(hashes)](const auto& job){auto r=renderJob(job,file,state,start,end,rate,int(bits),tail,realtime,hashes);if(r.failed())jobFailure(job,r);else jobStatus(job,"completed",{},1);});return j?juce::Result::ok():juce::Result::fail(status);
     }
     return fail("Unknown file task.");
 }
@@ -586,7 +604,19 @@ int EngineSession::runRenderWorker(const juce::StringArray& arguments)
         if(auto r=storage::load(sourceFile,state);r.failed())return failed(r.getErrorMessage());
         std::unique_ptr<te::Edit> next;std::vector<Impl::Binding> bindings;if(auto r=p.build(state,next,bindings);r.failed())return failed(r.getErrorMessage());
         p.adopt(std::move(next),std::move(bindings),{});
-        auto check=[&](const auto& ps){for(const auto& plugin:ps)if(plugin.enabled&&!p.loadedPlugin(*p.edit,plugin.id))return false;return true;};
+        auto check=[&](const auto& ps){for(const auto& plugin:ps)if(plugin.enabled){
+            if(plugin.format=="E-musician"&&plugin.role=="effect") {
+                if(!dynamic_cast<native_effects::Effect*>(p.livePlugin(*p.edit,plugin.id)))return false;
+            }else if(plugin.format=="E-musician"){
+                auto* instrument=dynamic_cast<native::Instrument*>(p.livePlugin(*p.edit,plugin.id));if(!instrument)return false;
+                native::NativeLoadQueue::Request request;
+                if(auto r=nativeRequestFor(plugin,state.assets,state.projectId,state.revision,++p.nativeGeneration,request);r.failed())return false;
+                auto data=juce::JSON::parse(request.stateJson);std::unique_ptr<native::PreparedBank> bank;
+                // This process is an isolated render worker; no audio graph is
+                // running yet, and no user GUI or realtime callback is blocked.
+                if(auto r=native::prepareBank(data,request.assets,request.generation,bank);r.failed())return false;
+                instrument->publish(std::move(bank));
+            }else if(!p.loadedPlugin(*p.edit,plugin.id))return false;}return true;};
         if(!check(state.masterPlugins))return failed("A master plugin could not be restored in the render worker.");
         for(const auto& track:state.tracks)if(!track.muted&&!check(track.plugins))return failed("A track plugin could not be restored in the render worker.");
         juce::WavAudioFormat format;te::Renderer::Parameters params(*p.edit);params.destFile=output;params.audioFormat=&format;params.sampleRateForAudio=rate;params.bitDepth=int(bits);params.blockSizeForAudio=512;

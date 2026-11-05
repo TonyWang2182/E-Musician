@@ -1,0 +1,24 @@
+{
+  "version": "0.8.1",
+  "created_at": "2026-11-05T06:00:08.464643+00:00",
+  "source_sha256": "846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f",
+  "git_head": "8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0",
+  "source_file_count": 161,
+  "archive_member_count": 1016,
+  "archive_source_hashes_verified": true,
+  "files": {
+    "E-musician.exe": {
+      "size": 21230080,
+      "sha256": "c0099db16a428b04e8bda55fef6444658711c8cafa9b784a7b5a127979ab9082"
+    },
+    "E-musician.pdb": {
+      "size": 165949440,
+      "sha256": "92d1ff14727db963a8868d3566eeb1223b0f5b29567a6d8b32b5c94a4121da11"
+    },
+    "source-and-docs.zip": {
+      "size": 14347137,
+      "sha256": "d8886c47458e11ceac97dee4ccdfeeac6c8449671dbc4b60e2c1ab29c30f834a"
+    }
+  },
+  "notes": "Preservation archive, not a portable installer. Contains frozen source/documentation and EXE/PDB; excludes local API credentials, user music/projects, browser profile, dependency checkout and models. Current 0.8.1 entrypoint remains unchanged. Restore matching scripts alongside the DAW before running Agent."
+}

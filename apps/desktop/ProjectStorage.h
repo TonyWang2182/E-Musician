@@ -3,6 +3,7 @@
 #include <juce_core/juce_core.h>
 #include <cstdint>
 #include <functional>
+#include <map>
 #include <vector>
 
 namespace emusician::storage {
@@ -107,6 +108,12 @@ inline constexpr double maximumTimelineSeconds = 172800.0; // Tracktion Edit's 4
 inline constexpr juce::int64 maximumManifestBytes = 16 * 1024 * 1024;
 inline constexpr std::size_t maximumPluginStateBytes = 64 * 1024 * 1024;
 inline constexpr std::size_t maximumTotalPluginStateBytes = 256 * 1024 * 1024;
+inline constexpr std::size_t maximumNativeDeviceStateBytes = 16 * 1024;
+
+// Validates the complete native instrument state, returning its (possibly
+// repeated) nonempty sample asset IDs. For non-native plugins returns empty.
+// The returned IDs must still be resolved against the same project snapshot.
+juce::Result nativePluginAssetIds(const StoredPlugin&, std::vector<juce::String>&);
 
 // Called only on the caller's file-work thread; callbacks must not mutate Edit.
 // Cancellation before the atomic manifest switch leaves the old saved project.
@@ -114,6 +121,10 @@ struct IOOptions {
     std::function<bool()> cancelled;
     std::function<void(double fraction, const juce::String& stage)> progress;
     std::function<void(juce::int64 written, juce::int64 reused)> transferred;
+    // Optional decoded-sample snapshot hashes, keyed by project asset ID.
+    // Save verifies the actual bundled destination before manifest replacement;
+    // callers must supply every native sample that needs consistency checking.
+    std::map<juce::String, juce::String> expectedAssetHashes;
 };
 
 // Pure DTO validation: no file reads, existence checks, or plugin instantiation.

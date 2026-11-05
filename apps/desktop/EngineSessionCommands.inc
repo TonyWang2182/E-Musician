@@ -11,7 +11,16 @@ storage::StoredTrack* storedTrack(storage::StoredProject& s,const juce::String& 
 storage::StoredClip* storedClip(storage::StoredProject& s,const juce::String& id,storage::StoredTrack** parent=nullptr)
 {for(auto& t:s.tracks)for(auto& c:t.clips)if(c.id==id){if(parent)*parent=&t;return &c;}return nullptr;}
 void pruneAssets(storage::StoredProject& s)
-{std::erase_if(s.assets,[&](const auto& a){for(const auto& t:s.tracks)for(const auto& c:t.clips)if(c.assetId==a.id)return false;return true;});}
+{
+ std::set<juce::String> nativeIds;
+ const auto collect=[&](const auto& plugins){for(const auto& plugin:plugins)if(plugin.format=="E-musician"){
+     std::vector<juce::String> ids;if(storage::nativePluginAssetIds(plugin,ids).failed())return false;
+     nativeIds.insert(ids.begin(),ids.end());}return true;};
+ if(!collect(s.masterPlugins))return;
+ for(const auto& track:s.tracks)if(!collect(track.plugins))return;
+ std::erase_if(s.assets,[&](const auto& a){if(nativeIds.contains(a.id))return false;
+     for(const auto& t:s.tracks)for(const auto& c:t.clips)if(c.assetId==a.id)return false;return true;});
+}
 void syncMidiSeconds(storage::StoredProject& s)
 {for(auto& t:s.tracks)for(auto& c:t.clips)if(c.kind=="midi"){c.timelineStart=time::beatsToSeconds(c.startBeats,s.bpm);c.duration=time::beatsToSeconds(c.lengthBeats,s.bpm);c.sourceOffset=0;}}
 std::vector<storage::StoredControllerEvent> sliceControllers(const std::vector<storage::StoredControllerEvent>& source,
@@ -55,7 +64,7 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
     if(cmd=="batch"){
         auto v=a.getProperty("commands",{});auto* list=v.getArray();
         if(!list||list->isEmpty()||list->size()>100)return bad("Batch needs 1 to 100 editing commands.");
-        struct Reference {juce::String id;bool track;};
+        struct Reference {juce::String id;int type;}; // 0 clip, 1 track, 2 native effect
         std::map<juce::String,Reference> references;
         const auto validAlias=[](const juce::String& value){
             if(value.isEmpty()||value.length()>40)return false;
@@ -64,12 +73,12 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
             for(int i=1;i<value.length();++i){const auto ch=value[i];if(!letter(ch)&&!(ch>='0'&&ch<='9')&&ch!='_'&&ch!='-')return false;}
             return true;
         };
-        const auto resolveId=[&](const juce::var& value,bool track,juce::String& resolved){
+        const auto resolveId=[&](const juce::var& value,int type,juce::String& resolved){
             if(!value.isString())return bad("Batch object references must be strings.");
             resolved=value.toString();if(!resolved.startsWithChar('@'))return juce::Result::ok();
             const auto alias=resolved.substring(1);const auto found=references.find(alias);
             if(!validAlias(alias)||found==references.end())return bad("Unknown or forward batch reference: "+resolved);
-            if(found->second.track!=track)return bad("Batch reference has the wrong object type: "+resolved);
+            if(found->second.type!=type)return bad("Batch reference has the wrong object type: "+resolved);
             resolved=found->second.id;return juce::Result::ok();
         };
         for(const auto& child:*list){
@@ -84,36 +93,43 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
             if(child.hasProperty("as")){
                 if(!child["as"].isString()||!validAlias(alias=child["as"].toString()))return bad("Batch alias must match [A-Za-z][A-Za-z0-9_-]{0,39}.");
                 if(references.contains(alias))return bad("Batch aliases must be unique.");
-                if(name!="create_track"&&name!="create_midi_clip"&&name!="duplicate_clips")return bad("This command cannot produce a batch reference.");
+                if(name!="create_track"&&name!="create_midi_clip"&&name!="duplicate_clips"&&name!="add_native_effect")return bad("This command cannot produce a batch reference.");
             }
             // Only these typed object-ID positions are references. Names, note
             // payloads, plugin IDs and arbitrary nested strings stay literal.
             for(const auto* key:{"track_id","target_track_id","clip_id"})if(parameters.hasProperty(key)){
-                juce::String resolved;if(auto r=resolveId(parameters[key],juce::String(key)!="clip_id",resolved);r.failed())return r;
+                juce::String resolved;if(auto r=resolveId(parameters[key],juce::String(key)!="clip_id"?1:0,resolved);r.failed())return r;
                 parameters.getDynamicObject()->setProperty(key,resolved);
+            }
+            if(name=="set_native_effect"&&parameters.hasProperty("device_id")){
+                juce::String resolved;if(auto r=resolveId(parameters["device_id"],2,resolved);r.failed())return r;
+                parameters.getDynamicObject()->setProperty("device_id",resolved);
             }
             if(parameters.hasProperty("clip_ids")){
                 auto* values=parameters["clip_ids"].getArray();if(!values)return bad("clip_ids must be an array.");
                 juce::Array<juce::var> resolvedIds;
-                for(const auto& value:*values){juce::String resolved;if(auto r=resolveId(value,false,resolved);r.failed())return r;resolvedIds.add(resolved);}
+                for(const auto& value:*values){juce::String resolved;if(auto r=resolveId(value,0,resolved);r.failed())return r;resolvedIds.add(resolved);}
                 parameters.getDynamicObject()->setProperty("clip_ids",resolvedIds);
             }
             if(alias.isNotEmpty()&&name=="duplicate_clips"&&idsArg(parameters,"clip_ids").size()!=1)
                 return bad("A duplicate_clips alias requires exactly one source clip.");
             // All children still validate the same private candidate. Retain the
             // existing intermediate invariants; nothing reaches the live Edit.
-            if(auto r=mutate(s,name,parameters,chooseAfter);r.failed())return r;
+            juce::var childResult;
+            if(auto r=mutate(s,name,parameters,chooseAfter,&childResult);r.failed())return r;
             if(alias.isNotEmpty()){
-                const bool track=name=="create_track";
-                const auto id=track?s.tracks.back().id:chooseAfter;
-                if(id.isEmpty()||(track?storedTrack(s,id)==nullptr:storedClip(s,id)==nullptr))return bad("Batch command produced no reference target.");
-                references.emplace(alias,Reference{id,track});
+                const int type=name=="create_track"?1:name=="add_native_effect"?2:0;
+                const auto id=type==1?s.tracks.back().id:type==2?childResult["device_id"].toString():chooseAfter;
+                if(id.isEmpty()||(type==1&&storedTrack(s,id)==nullptr)||(type==0&&storedClip(s,id)==nullptr))return bad("Batch command produced no reference target.");
+                references.emplace(alias,Reference{id,type});
             }
         }
         auto refs=object({});
         for(const auto& [alias,reference]:references){
-            if(reference.track?storedTrack(s,reference.id)==nullptr:storedClip(s,reference.id)==nullptr)
-                return bad("A batch reference target was removed before commit.");
+            bool exists=reference.type==1?storedTrack(s,reference.id)!=nullptr:reference.type==0?storedClip(s,reference.id)!=nullptr:false;
+            if(reference.type==2){for(const auto& p:s.masterPlugins)if(p.id==reference.id)exists=true;
+                for(const auto& t:s.tracks)for(const auto& p:t.plugins)if(p.id==reference.id)exists=true;}
+            if(!exists)return bad("A batch reference target was removed before commit.");
             refs.getDynamicObject()->setProperty(alias,reference.id);
         }
         completedBatch=object({{"refs",refs},{"executed_commands",list->size()}});
@@ -238,6 +254,8 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
         for(auto& track:s.tracks){if(cmd=="delete_clips")std::erase_if(track.clips,[&](const auto& clip){return chosen.contains(clip.id);});
             else{auto originals=track.clips;for(auto copy:originals)if(chosen.contains(copy.id)){copy.id=uid();chooseAfter=copy.id;copy.timelineStart+=last-first;if(copy.kind=="midi"){copy.startBeats=time::secondsToBeats(copy.timelineStart,s.bpm);for(auto& n:copy.notes)n.id=uid();for(auto& event:copy.controllers)event.id=uid();}track.clips.push_back(std::move(copy));}}
         }pruneAssets(s);
+    }else if(cmd=="add_native_effect"||cmd=="set_native_effect"){
+        if(auto r=native_effects::mutate(s,cmd,a,batchResult);r.failed())return r;
     }else if(cmd=="add_plugin"||cmd=="remove_plugin"||cmd=="move_plugin"||cmd=="set_plugin_enabled"){
         auto tid=textArg(a,"track_id");if(tid.isNotEmpty()&&tid!="master"&&!t)return bad("Track no longer exists.");auto& list=t?t->plugins:s.masterPlugins;
         auto& lanes=t?t->automation:s.masterAutomation;
@@ -292,7 +310,18 @@ juce::Result EngineSession::Impl::perform(const juce::String& command,const juce
     if(command=="set_plugin_parameter")return setPluginParameter(args);
     if(command=="scan_plugins"||command=="cancel_job"||command=="import_audio"||command=="import_midi"||command=="save_project"||command=="open_project"||command=="export_wav"||command=="export_midi")return performJob(command,args);
     if(command=="open_plugin"){
-        auto* p=livePlugin(*edit,textArg(args,"plugin_id"));if(!p)return fail("Plugin is missing or no longer available.");return plugins::PluginHost::showEditor(*p);
+        const auto id=textArg(args,"plugin_id");
+        if(args.hasProperty("track_id")){
+            if(!args["track_id"].isString()||textArg(args,"track_id").isEmpty())return fail("A valid track ID is required.");
+            const auto trackId=textArg(args,"track_id");juce::ValueTree owner;
+            if(trackId=="master")owner=metadata(*edit);
+            else if(auto* binding=find(trackId))owner=binding->track->state;
+            else return fail("Track not found.");
+            bool belongs=false;
+            for(const auto& slot:owner.getChildWithName("EM_PLUGINS"))if(slot["id"].toString()==id){belongs=true;break;}
+            if(!belongs)return fail("Plugin does not belong to the specified track.");
+        }
+        auto* p=livePlugin(*edit,id);if(!p)return fail("Plugin is missing or no longer available.");return plugins::PluginHost::showEditor(*p);
     }
     if(command=="undo"||command=="redo"){
         finishGesture();auto& u=edit->getUndoManager();if(command=="undo"?!u.canUndo():!u.canRedo())return fail("No history available.");

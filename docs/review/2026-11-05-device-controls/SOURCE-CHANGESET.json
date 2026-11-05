@@ -1,0 +1,234 @@
+{
+  "date": "2026-11-05",
+  "historical_verified_source_sha256": "d89568ac055725919b63ea31000fb7b23d3dac02612a90e19f3d40896503024f",
+  "historical_record": "docs/builds/20261102T080016.766492Z-d52ce32c22.json",
+  "early_parallel_capture_sha256": "97baa3aa7c6c598002b8e8c19a8a9053c246d9d554d45b63f7510ce9d92859e2",
+  "early_capture_note": "Includes early rectangular clip edits and the shared knob style from parallel tasks; it is not a pristine start snapshot.",
+  "current_source_sha256": "846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f",
+  "input_file_count": 161,
+  "changed_since_verified_candidate": {
+    "CMakeLists.txt": {
+      "before": "8c69f351427e750e13625b2cb6c5e3313c56907d2a64a08762863704baf4881c",
+      "after": "62e7b02d5a872badb30074237e2dbe40bc44819a734053ea461ecae9edaecb6b"
+    },
+    "apps/desktop/ArrangementView.cpp": {
+      "before": "29fdf0a6ad01e13d0c5a1a82921d8cf73249351eed3f45ffcfe0d6950abedf79",
+      "after": "c2d4edcc8e63c9e60428761636bcae73bedcb44dd0a91570c07a637ed9937fb6"
+    },
+    "apps/desktop/DeviceControlStyle.h": {
+      "before": null,
+      "after": "0e7e266386a224a1d5298309b47b7fb36b3bafa14e865fadc26e478d82425e7d"
+    },
+    "apps/desktop/EngineSessionNative.inc": {
+      "before": "8ae48681b9e5b493d65d4926e8b1dc6c0aad7a307fb6445ccdc36b110311e542",
+      "after": "4802c06de98d65280906a020546afcbb1ec8f52854f0108d761439b8f2f9b786"
+    },
+    "apps/desktop/EngineSessionPublic.inc": {
+      "before": "bbfd49546ed2ba93fc21af5ff38a30c2f0f7a7e7e18643802036012b7b4444d2",
+      "after": "191d0e6c0c29950885d5821527d9afad6c455b14cecaee918a27635dc7914152"
+    },
+    "apps/desktop/MainComponent.cpp": {
+      "before": "3940229ebfcb6a7a1a53c4fdc6ee33d46092741f406d50678c920c2f61176715",
+      "after": "435f766f6f6835413d2f04ab57498b1c8f1b1abcd47d827b8cc75fccf71f0c4a"
+    },
+    "apps/desktop/NativeDevicePanel.cpp": {
+      "before": "2ccd0e894a8ea5c6ea5d2451a38502ef5a736fcdc1f8c392f37324b7afaf989b",
+      "after": "b8d6d4c583482eea5687b6e8a7b3c0db946ec5767c252f9a4cf6bbd4d08a202b"
+    },
+    "apps/desktop/NativeEffects.cpp": {
+      "before": "51866eb35f3f16362ac600e3a3a71861fef4b1c02d1b242ff7167e1114fd4714",
+      "after": "b3bc32c3e2c80bbb036eab45683da084b404b2e060fe7e69feed08840befa6f3"
+    },
+    "apps/desktop/NativeEffects.h": {
+      "before": "46b82acf4b446fc67779ca8c074f4a944fa7910bf5802441e84dcccfc845eb8e",
+      "after": "98a9cd5f10fe0f3f39a023aa75b3581aa928a7b5916df129709a1b67c39c33a2"
+    },
+    "apps/desktop/NativeEffectsGraph.inc": {
+      "before": null,
+      "after": "50deb00a17952543dbebf3a14feff4498c2777e2791f76a5b56c2bbb0c31f24b"
+    },
+    "apps/desktop/NativeEffectsPanel.cpp": {
+      "before": "eaef6e060efc43b0ccc3aca4c34e2a776cba1666a05791e24eb7cd8235f19999",
+      "after": "2f83ac0b3f017c098c1b71439ad27441f656f9e89de1b062add86940792ec60c"
+    },
+    "apps/desktop/NativeInstrument.cpp": {
+      "before": "4d6103947111c74674f915a93c9bbac75a517882e30ee0cce65283cb047ecb6c",
+      "after": "a383914083e99df4b4a6054ee81d4071a51443be5296553cbefff482dba0fe4d"
+    },
+    "apps/desktop/NativeInstrument.h": {
+      "before": "e73e8e5d7d7d4bd775c7cdc3ad0aa8e4f2c3fc1314a52ef2059b3e5e07cf88e8",
+      "after": "a521ed8006004d0f990298541bd64f914a818ea26924f26feaa31586db3b08ae"
+    },
+    "apps/desktop/NativeLoadQueue.cpp": {
+      "before": "1a4eb17590c18f7a899e917ad67901452a8af2b6e14da4816f86392e48a29e6d",
+      "after": "ee16b7663e836baf2237584fffc56b008560ad2f537392444fcd043b654925de"
+    },
+    "apps/desktop/NativeLoadQueue.h": {
+      "before": "f5eddf088841f2c7f867fdf2194bcf49b9c34d2a266f81f092f2cfc28965f01c",
+      "after": "62fc19809311f06547a8d72c31c66a00ded20d7a11f5b9c94c3950947bd7368c"
+    },
+    "apps/desktop/PianoRoll.cpp": {
+      "before": "96ff1d3432dcc1310f04158a43c30a9e4840cb783bdbba366c89acba9e05c45d",
+      "after": "13568d824371b473e7d8b460520b57d132ae0dab552dd5c05419d4a91047b637"
+    },
+    "apps/desktop/ProjectStorage.cpp": {
+      "before": "15c03891d825d166017e71ad925ca869242de955974a4ae0d366bb3933b936cb",
+      "after": "e5f0e6593517088fcaa46f7cdebcdb4cc89ca401e6c272a6ff4ea25f1d835a23"
+    },
+    "core/NativeEffects.cpp": {
+      "before": "654e58f445eb09cc8baf6eae1a581819e66514d79f2dac3ee384de72ebbc5d65",
+      "after": "a3187c20d9841e7631c2a5ee20125b789b575d13f99e320606735dc4c1ba42e5"
+    },
+    "core/NativeEffects.h": {
+      "before": "638156519ea7c8f39189c6de5da22e93fcab2c58553ed322fdeb3cfa6d17ae1a",
+      "after": "23d274334625a42438d8a433148a4a9efb34b2696beeda23d095add14d6adfe7"
+    },
+    "scripts/music_agent/bridge.py": {
+      "before": "81f5d3a067d740d6c60d626e366ff4ae66123525a438470da25683e46bc8252b",
+      "after": "81e7a73f7482a952978f868374518c2dd91c4371873e1af538f9ccff0d0c45f2"
+    },
+    "scripts/music_agent/plans.py": {
+      "before": "a88a23980f4d324ab1120307a08e60e4426ea44c1fc5b750449b4692c35fba22",
+      "after": "9955ed759476c982d312cad71be10f3e6efd655dedaa54af092fd3d7b26ca18c"
+    },
+    "tests/MusicAgentNativeEffectsIntegration.py": {
+      "before": "beff9a5c2c169704b1b00b0342f0ee5a0f7af26ded7f3657b3070322918eaf61",
+      "after": "ffc62d70ed110c745c06e937fb99aea0f65ba0bde9cf93cc1c762303882784a6"
+    },
+    "tests/NativeDeviceEndToEnd.py": {
+      "before": "759f951e7f911a3eb650993e35fe34919236c6480884b0fd81f1d9b53fc3095e",
+      "after": "36a4e556773222c595d9355cdb32d5930f7023574c54db6483cfcf31f5dc1781"
+    },
+    "tests/NativeEffectsEndToEnd.py": {
+      "before": "357eabffcfc680631d64e0027821ac8185007b3654faf4224028a92b05cb3c19",
+      "after": "e99c62074289b73a6b2be2a598415ce9d087944a3f0e16029e100d9acc26673b"
+    },
+    "tests/NativeEffectsTests.cpp": {
+      "before": "39eef6d972728f2fc872e568d3c3c051083edda3e46e12557d634ffee3527dd2",
+      "after": "74d1c768abe2819353c4e409c9b7626fe2377ff4181ddc8b768b24e4abd47ad7"
+    },
+    "tests/NativeInstrumentTests.cpp": {
+      "before": "2c691d29123f1fe49a0a2b3e3aea26297c1cf1189ef84f53d2f6d2e7a92611f5",
+      "after": "343f082db2a2feba931d20415b347d8f2def002cbaed03e16288872509259ffa"
+    },
+    "tests/StorageV3Tests.inc": {
+      "before": "826e2bd7750b4ffadf0056d3933bcb5291c162f232174c16e276441a9b2052a9",
+      "after": "88464d59068a159414633468ab5d9196cd69373f5225e069fc4d463f39f6921e"
+    },
+    "tests/test_music_agent_effect_parameters.py": {
+      "before": "81e0fb236636423144ed369862f979499869a99148b3e1d1a9b85bdf10877773",
+      "after": "6556e72d15064598b6e7889b49b744dfe5e24b4646488e2a5469bc994f8dcb97"
+    }
+  },
+  "changed_since_early_capture": {
+    "CMakeLists.txt": {
+      "before": "8c69f351427e750e13625b2cb6c5e3313c56907d2a64a08762863704baf4881c",
+      "after": "62e7b02d5a872badb30074237e2dbe40bc44819a734053ea461ecae9edaecb6b"
+    },
+    "apps/desktop/ArrangementView.cpp": {
+      "before": "4d88a61c447bbba06b5939b97393fd168e15e58a93ef465bc0140df409df7a39",
+      "after": "c2d4edcc8e63c9e60428761636bcae73bedcb44dd0a91570c07a637ed9937fb6"
+    },
+    "apps/desktop/EngineSessionNative.inc": {
+      "before": "8ae48681b9e5b493d65d4926e8b1dc6c0aad7a307fb6445ccdc36b110311e542",
+      "after": "4802c06de98d65280906a020546afcbb1ec8f52854f0108d761439b8f2f9b786"
+    },
+    "apps/desktop/EngineSessionPublic.inc": {
+      "before": "bbfd49546ed2ba93fc21af5ff38a30c2f0f7a7e7e18643802036012b7b4444d2",
+      "after": "191d0e6c0c29950885d5821527d9afad6c455b14cecaee918a27635dc7914152"
+    },
+    "apps/desktop/MainComponent.cpp": {
+      "before": "3940229ebfcb6a7a1a53c4fdc6ee33d46092741f406d50678c920c2f61176715",
+      "after": "435f766f6f6835413d2f04ab57498b1c8f1b1abcd47d827b8cc75fccf71f0c4a"
+    },
+    "apps/desktop/NativeDevicePanel.cpp": {
+      "before": "2ccd0e894a8ea5c6ea5d2451a38502ef5a736fcdc1f8c392f37324b7afaf989b",
+      "after": "b8d6d4c583482eea5687b6e8a7b3c0db946ec5767c252f9a4cf6bbd4d08a202b"
+    },
+    "apps/desktop/NativeEffects.cpp": {
+      "before": "51866eb35f3f16362ac600e3a3a71861fef4b1c02d1b242ff7167e1114fd4714",
+      "after": "b3bc32c3e2c80bbb036eab45683da084b404b2e060fe7e69feed08840befa6f3"
+    },
+    "apps/desktop/NativeEffects.h": {
+      "before": "46b82acf4b446fc67779ca8c074f4a944fa7910bf5802441e84dcccfc845eb8e",
+      "after": "98a9cd5f10fe0f3f39a023aa75b3581aa928a7b5916df129709a1b67c39c33a2"
+    },
+    "apps/desktop/NativeEffectsGraph.inc": {
+      "before": null,
+      "after": "50deb00a17952543dbebf3a14feff4498c2777e2791f76a5b56c2bbb0c31f24b"
+    },
+    "apps/desktop/NativeEffectsPanel.cpp": {
+      "before": "eaef6e060efc43b0ccc3aca4c34e2a776cba1666a05791e24eb7cd8235f19999",
+      "after": "2f83ac0b3f017c098c1b71439ad27441f656f9e89de1b062add86940792ec60c"
+    },
+    "apps/desktop/NativeInstrument.cpp": {
+      "before": "4d6103947111c74674f915a93c9bbac75a517882e30ee0cce65283cb047ecb6c",
+      "after": "a383914083e99df4b4a6054ee81d4071a51443be5296553cbefff482dba0fe4d"
+    },
+    "apps/desktop/NativeInstrument.h": {
+      "before": "e73e8e5d7d7d4bd775c7cdc3ad0aa8e4f2c3fc1314a52ef2059b3e5e07cf88e8",
+      "after": "a521ed8006004d0f990298541bd64f914a818ea26924f26feaa31586db3b08ae"
+    },
+    "apps/desktop/NativeLoadQueue.cpp": {
+      "before": "1a4eb17590c18f7a899e917ad67901452a8af2b6e14da4816f86392e48a29e6d",
+      "after": "ee16b7663e836baf2237584fffc56b008560ad2f537392444fcd043b654925de"
+    },
+    "apps/desktop/NativeLoadQueue.h": {
+      "before": "f5eddf088841f2c7f867fdf2194bcf49b9c34d2a266f81f092f2cfc28965f01c",
+      "after": "62fc19809311f06547a8d72c31c66a00ded20d7a11f5b9c94c3950947bd7368c"
+    },
+    "apps/desktop/PianoRoll.cpp": {
+      "before": "38aab303b00c284266431e21affe2f4e4c8881dcb750cd2086706eb07fb38f98",
+      "after": "13568d824371b473e7d8b460520b57d132ae0dab552dd5c05419d4a91047b637"
+    },
+    "apps/desktop/ProjectStorage.cpp": {
+      "before": "15c03891d825d166017e71ad925ca869242de955974a4ae0d366bb3933b936cb",
+      "after": "e5f0e6593517088fcaa46f7cdebcdb4cc89ca401e6c272a6ff4ea25f1d835a23"
+    },
+    "core/NativeEffects.cpp": {
+      "before": "654e58f445eb09cc8baf6eae1a581819e66514d79f2dac3ee384de72ebbc5d65",
+      "after": "a3187c20d9841e7631c2a5ee20125b789b575d13f99e320606735dc4c1ba42e5"
+    },
+    "core/NativeEffects.h": {
+      "before": "638156519ea7c8f39189c6de5da22e93fcab2c58553ed322fdeb3cfa6d17ae1a",
+      "after": "23d274334625a42438d8a433148a4a9efb34b2696beeda23d095add14d6adfe7"
+    },
+    "scripts/music_agent/bridge.py": {
+      "before": "81f5d3a067d740d6c60d626e366ff4ae66123525a438470da25683e46bc8252b",
+      "after": "81e7a73f7482a952978f868374518c2dd91c4371873e1af538f9ccff0d0c45f2"
+    },
+    "scripts/music_agent/plans.py": {
+      "before": "a88a23980f4d324ab1120307a08e60e4426ea44c1fc5b750449b4692c35fba22",
+      "after": "9955ed759476c982d312cad71be10f3e6efd655dedaa54af092fd3d7b26ca18c"
+    },
+    "tests/MusicAgentNativeEffectsIntegration.py": {
+      "before": "beff9a5c2c169704b1b00b0342f0ee5a0f7af26ded7f3657b3070322918eaf61",
+      "after": "ffc62d70ed110c745c06e937fb99aea0f65ba0bde9cf93cc1c762303882784a6"
+    },
+    "tests/NativeDeviceEndToEnd.py": {
+      "before": "759f951e7f911a3eb650993e35fe34919236c6480884b0fd81f1d9b53fc3095e",
+      "after": "36a4e556773222c595d9355cdb32d5930f7023574c54db6483cfcf31f5dc1781"
+    },
+    "tests/NativeEffectsEndToEnd.py": {
+      "before": "357eabffcfc680631d64e0027821ac8185007b3654faf4224028a92b05cb3c19",
+      "after": "e99c62074289b73a6b2be2a598415ce9d087944a3f0e16029e100d9acc26673b"
+    },
+    "tests/NativeEffectsTests.cpp": {
+      "before": "39eef6d972728f2fc872e568d3c3c051083edda3e46e12557d634ffee3527dd2",
+      "after": "74d1c768abe2819353c4e409c9b7626fe2377ff4181ddc8b768b24e4abd47ad7"
+    },
+    "tests/NativeInstrumentTests.cpp": {
+      "before": "2c691d29123f1fe49a0a2b3e3aea26297c1cf1189ef84f53d2f6d2e7a92611f5",
+      "after": "343f082db2a2feba931d20415b347d8f2def002cbaed03e16288872509259ffa"
+    },
+    "tests/StorageV3Tests.inc": {
+      "before": "826e2bd7750b4ffadf0056d3933bcb5291c162f232174c16e276441a9b2052a9",
+      "after": "88464d59068a159414633468ab5d9196cd69373f5225e069fc4d463f39f6921e"
+    },
+    "tests/test_music_agent_effect_parameters.py": {
+      "before": "81e0fb236636423144ed369862f979499869a99148b3e1d1a9b85bdf10877773",
+      "after": "6556e72d15064598b6e7889b49b744dfe5e24b4646488e2a5469bc994f8dcb97"
+    }
+  },
+  "removed_since_verified_candidate": []
+}

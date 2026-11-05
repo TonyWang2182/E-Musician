@@ -96,7 +96,7 @@ struct SelectedTrackPanel::Impl {
         juce::String selected, project, track; std::uint64_t revision = 0; bool dragging = false, changed = false; float anchorY = 0, originalCurve = 0;
     };
     Impl(SelectedTrackPanel& component, EngineSession& engine) : owner(component), session(engine), curve(*this) {
-        for (auto* c : std::initializer_list<juce::Component*>{ &devices, &io, &automation, &plugin, &open, &bypass, &removePlugin, &up, &down, &browse,
+        for (auto* c : std::initializer_list<juce::Component*>{ &devices, &io, &automation, &plugin, &open, &bypass, &removePlugin, &up, &down, &browse, &nativeFx,
                 &input, &arm, &monitor, &output, &send, &sendTarget, &sendGain, &pre, &sendEnabled, &addSend, &removeSend,
                 &target, &laneEnabled, &deleteLane, &master, &curve, &hint }) owner.addAndMakeVisible(c);
         devices.onClick = [this] { page = 0; owner.resized(); owner.repaint(); };
@@ -105,17 +105,25 @@ struct SelectedTrackPanel::Impl {
         for (auto* button : { &devices, &io, &automation }) button->getProperties().set("flat", true);
         master.setTooltip("Show master devices and automation"); master.onClick = [this] { masterView = !masterView; rebuild(); };
         plugin.onChange = [this] { refreshPlugin(); };
-        open.onClick = [this] { pluginCommand("open_plugin"); };
+        open.onClick = [this] {
+            if (const auto* slot = currentPlugin()) {
+                if (slot->format == "E-musician") {
+                    if (!masterView && slot->isInstrument && owner.onOpenNative) owner.onOpenNative(ownerId());
+                    else if (!slot->isInstrument && owner.onOpenNativeEffect) owner.onOpenNativeEffect(ownerId(), slot->id);
+                } else pluginCommand("open_plugin");
+            }
+        };
         removePlugin.onClick = [this] { pluginCommand("remove_plugin"); };
         bypass.onClick = [this] { if (const auto* slot = currentPlugin()) run("set_plugin_enabled", object({ {"track_id", ownerId()}, {"plugin_id", slot->id}, {"enabled", !slot->enabled} })); };
         up.onClick = [this] { movePlugin(-1); }; down.onClick = [this] { movePlugin(1); };
         browse.onClick = [this] { if (owner.onBrowsePlugins) owner.onBrowsePlugins(ownerId()); };
+        nativeFx.onClick = [this] { if (owner.onOpenNativeEffect) owner.onOpenNativeEffect(ownerId(), {}); };
         input.setTextWhenNothingSelected("Choose recording input");
         input.onChange = [this] { if (!updating) { const int i = input.getSelectedId() - 1; if (i >= 0 && i < int(inputs.size())) run("set_track_input", object({ {"track_id", ownerId()}, {"input_device_id", inputs[size_t(i)]["id"]} })); } };
         arm.onClick = [this] { if (const auto* t = track()) run("set_track_armed", object({ {"track_id", t->id}, {"armed", !t->armed} })); };
         monitor.addItem("monitor off", 1); monitor.addItem("monitor auto", 2); monitor.addItem("monitor on", 3);
-        monitor.setTooltip("Monitoring is shared by every track using this input device.");
-        monitor.onChange = [this] { if (!updating) if (const auto* t = track()) run("set_input_monitor", object({ {"input_device_id", t->inputDeviceId}, {"mode", monitor.getSelectedId() == 3 ? "on" : monitor.getSelectedId() == 2 ? "auto" : "off"} })); };
+        monitor.setTooltip("Monitoring applies to this track only.");
+        monitor.onChange = [this] { if (!updating) if (const auto* t = track()) run("set_input_monitor", object({ {"track_id", t->id}, {"mode", monitor.getSelectedId() == 3 ? "on" : monitor.getSelectedId() == 2 ? "auto" : "off"} })); };
         output.onChange = [this] { if (!updating && output.getSelectedId() > 0) run("set_track_output", object({ {"track_id", ownerId()}, {"target_track_id", destinations[output.getSelectedId() - 1]} })); };
         send.onChange = [this] { refreshSend(); };
         sendGain.setRange(-60, 6, 0.1); sendGain.setSliderStyle(juce::Slider::LinearHorizontal); sendGain.setTextBoxStyle(juce::Slider::TextBoxRight, false, 64, 28); sendGain.setTextValueSuffix(" dB");
@@ -216,7 +224,7 @@ struct SelectedTrackPanel::Impl {
     juce::uint32 lastInputRefresh = 0;
     juce::TextButton devices { "devices" }, io { "I/O + sends" }, automation { "automation" }, master { "master" };
     juce::ComboBox plugin, input, monitor, output, send, sendTarget, target;
-    juce::TextButton open { "open" }, bypass { "bypass" }, removePlugin { "remove" }, up { "up" }, down { "down" }, browse { "add plug-in..." };
+    juce::TextButton open { "open" }, bypass { "bypass" }, removePlugin { "remove" }, up { "up" }, down { "down" }, browse { "add plug-in..." }, nativeFx { "built-in effects..." };
     juce::TextButton arm { "arm record" }, pre { "post-fader" }, sendEnabled { "bypass send" }, addSend { "add send" }, removeSend { "remove send" };
     juce::Slider sendGain;
     juce::TextButton laneEnabled { "bypass lane" }, deleteLane { "delete lane" };
@@ -228,6 +236,7 @@ struct SelectedTrackPanel::Impl {
 SelectedTrackPanel::SelectedTrackPanel(EngineSession& engine) : impl(std::make_unique<Impl>(*this, engine)) {}
 SelectedTrackPanel::~SelectedTrackPanel() = default;
 void SelectedTrackPanel::showDevices() { impl->page = 0; impl->masterView = false; impl->rebuild(); }
+bool SelectedTrackPanel::isMasterView() const { return impl->masterView; }
 void SelectedTrackPanel::update(const EngineSession::Snapshot& state) {
     auto& p = *impl; const bool changed = state.projectId != p.state.projectId || state.revision != p.state.revision || state.selectedTrackId != p.state.selectedTrackId;
     bool recordingChanged = state.recording != p.state.recording || state.recordingFinalizing != p.state.recordingFinalizing;
@@ -241,11 +250,12 @@ void SelectedTrackPanel::update(const EngineSession::Snapshot& state) {
 void SelectedTrackPanel::resized() {
     if (!impl) return; auto& p = *impl;
     p.devices.setBounds(8, 4, 94, 28); p.io.setBounds(108, 4, 118, 28); p.automation.setBounds(232, 4, 120, 28); p.master.setBounds(getWidth() - 88, 4, 80, 28);
-    for (auto* c : std::initializer_list<juce::Component*>{ &p.plugin, &p.open, &p.bypass, &p.removePlugin, &p.up, &p.down, &p.browse }) c->setVisible(p.page == 0);
+    for (auto* c : std::initializer_list<juce::Component*>{ &p.plugin, &p.open, &p.bypass, &p.removePlugin, &p.up, &p.down, &p.browse, &p.nativeFx }) c->setVisible(p.page == 0);
     for (auto* c : std::initializer_list<juce::Component*>{ &p.input, &p.arm, &p.monitor, &p.output, &p.send, &p.sendTarget, &p.sendGain, &p.pre, &p.sendEnabled, &p.addSend, &p.removeSend }) c->setVisible(p.page == 1 && !p.masterView);
     for (auto* c : std::initializer_list<juce::Component*>{ &p.target, &p.laneEnabled, &p.deleteLane, &p.curve, &p.hint }) c->setVisible(p.page == 2);
     p.plugin.setBounds(12, 66, 270, 30); p.open.setBounds(294, 66, 76, 30); p.bypass.setBounds(376, 66, 84, 30); p.removePlugin.setBounds(466, 66, 84, 30);
     p.up.setBounds(12, 108, 60, 28); p.down.setBounds(78, 108, 60, 28); p.browse.setBounds(154, 108, 128, 28);
+    p.nativeFx.setBounds(290, 108, 150, 28); p.nativeFx.setEnabled(p.masterView || p.track() != nullptr);
     const int split = juce::jmax(310, getWidth() / 2);
     p.input.setBounds(12, 58, 212, 28); p.arm.setBounds(230, 58, 98, 28); p.monitor.setBounds(12, 98, 212, 28);
     p.output.setBounds(12, 157, 270, 28);
@@ -279,6 +289,26 @@ juce::Result SelectedTrackPanel::runInteractionSmokeTest(juce::DynamicObject& re
     p.curve.selected = lane->points->front().id; p.curve.keyPressed(juce::KeyPress(juce::KeyPress::deleteKey));
     lane = p.currentLane(); if (!lane || !lane->points || lane->points->size() != 1) return juce::Result::fail("Deleting an automation point did not commit.");
     p.deleteLane.onClick(); if (p.currentLane()) return juce::Result::fail("Automation panel could not delete its lane.");
-    report.setProperty("automation_panel_command_and_delete", true); return juce::Result::ok();
+    report.setProperty("automation_panel_command_and_delete", true);
+    // The native instrument uses the main-window device dock, not a VST editor.
+    const auto oldState = p.state; const auto oldMaster = p.masterView; const auto oldOpen = onOpenNative;
+    EngineSession::TrackSnapshot nativeTrack; nativeTrack.id = "synthetic-native-track"; nativeTrack.kind = "instrument";
+    EngineSession::PluginSlotSnapshot slot; slot.id = "synthetic-native"; slot.name = "Sampler"; slot.format = "E-musician"; slot.isInstrument = true;
+    nativeTrack.plugins.push_back(slot); p.state.tracks.clear(); p.state.tracks.push_back(nativeTrack);
+    p.state.selectedTrackId = nativeTrack.id; p.masterView = false;
+    p.plugin.clear(juce::dontSendNotification); p.plugin.addItem("Sampler", 1); p.plugin.setSelectedId(1, juce::dontSendNotification);
+    juce::String opened; onOpenNative = [&](const auto& id) { opened = id; }; p.open.onClick();
+    const auto oldEffect = onOpenNativeEffect; juce::String effectTrack, effectDevice;
+    onOpenNativeEffect = [&](const auto& track, const auto& device) { effectTrack = track; effectDevice = device; };
+    EngineSession::PluginSlotSnapshot effect; effect.id = "master-effect"; effect.name = "EQ Eight"; effect.format = "E-musician";
+    p.state.masterPlugins = {effect}; p.masterView = true; p.plugin.clear(juce::dontSendNotification);
+    p.plugin.addItem("EQ Eight", 1); p.plugin.setSelectedId(1, juce::dontSendNotification); p.open.onClick();
+    const bool masterOpen = effectTrack == "master" && effectDevice == effect.id;
+    effectTrack.clear(); effectDevice = "not-empty"; p.nativeFx.onClick();
+    const bool masterAdd = effectTrack == "master" && effectDevice.isEmpty(); onOpenNativeEffect = oldEffect;
+    onOpenNative = oldOpen; p.masterView = oldMaster; update(oldState);
+    if (opened != nativeTrack.id) return juce::Result::fail("Native instrument did not open in its track dock.");
+    if (!masterOpen || !masterAdd) return juce::Result::fail("Master native effects did not route to the master target.");
+    report.setProperty("selected_track_native_open", true); report.setProperty("master_native_effect_routing", true); return juce::Result::ok();
 }
 }

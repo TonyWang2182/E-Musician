@@ -47,6 +47,8 @@ private:
     void showAddMenu();
     void showExportMenu();
     void showPlugins(const juce::String& trackId = {});
+    void showNativeDevice(const juce::String& trackId);
+    void showNativeEffect(const juce::String& trackId, const juce::String& deviceId = {});
     void showPianoRoll();
     void showProjectTiming();
     void showMetronomeOptions();

@@ -5,6 +5,7 @@
 #include <vector>
 
 namespace emusician {
+namespace native { struct SampleData; }
 // UI/control-thread facade. No UI code owns or mutates a Tracktion Edit.
 class EngineSession final {
 public:
@@ -17,6 +18,7 @@ public:
     struct PluginSlotSnapshot {
         juce::String id, name, format;
         bool enabled = true, missing = false, isInstrument = false;
+        juce::String identifier;
     };
     struct PluginDescriptorSnapshot {
         juce::String id, name, manufacturer, format;
@@ -93,7 +95,7 @@ public:
         int channels = 0, bufferSize = 0;
         float gainDb = -6.0f;
         bool playing = false, looping = false, deviceAvailable = false;
-        bool dirty = false, canUndo = false, canRedo = false;
+        bool dirty = false, canUndo = false, canRedo = false, nativePending = false;
         juce::String deviceName, status, projectId, selectedTrackId, projectName, sourceFormat;
         juce::String selectedClipId;
         juce::String undoDescription, redoDescription;
@@ -116,6 +118,13 @@ public:
     explicit EngineSession(bool initialiseAudioDevice = true);
     ~EngineSession();
     Snapshot snapshot() const;
+    // Transient read-only UI data: matching published sample only, never a mutation.
+    std::shared_ptr<const native::SampleData> nativeSampleForDisplay(
+        const juce::String& projectId, std::uint64_t revision, const juce::String& trackId,
+        const juce::String& deviceId, int pad, const juce::String& expectedHash) const;
+    // Transient wet-path compressor meter; no project revision or Undo changes.
+    bool nativeCompressorMeter(const juce::String& projectId, const juce::String& trackId,
+                               const juce::String& deviceId, float& reductionDb, std::uint64_t& sequence) const;
     // GUI and local Agent requests share this dispatcher; all editing is serialized
     // on the message thread. Transport reads never change the project revision.
     juce::Result execute(const juce::String& command, const juce::var& args, std::uint64_t expectedRevision,

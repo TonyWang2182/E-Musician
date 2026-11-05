@@ -13,7 +13,7 @@ class ScopeError(ValueError):
 
 
 NOTE_ACTIONS = {"transpose_notes", "quantize_notes", "set_note_velocity", "set_note_length", "move_notes", "delete_notes", "add_notes"}
-TRACK_ACTIONS = {"rename_track", "set_track_gain", "set_track_pan", "set_track_muted", "set_track_solo"}
+TRACK_ACTIONS = {"rename_track", "set_track_gain", "set_track_pan", "set_track_muted", "set_track_solo", "add_native_effect", "set_native_effect", "set_native_effect_parameter"}
 MODES = {"selection", "clip", "project"}
 
 
@@ -109,6 +109,10 @@ def constrain_proposal(payload: dict, context: dict, frozen: dict) -> dict:
         tracks = {t["id"]: t for t in state.get("tracks", [])}
         clips = {c["id"]: (t, c) for t in tracks.values() for c in t.get("clips", [])}
         kind = action["type"]
+        if kind in {"add_native_effect", "set_native_effect", "set_native_effect_parameter"} and action.get("track_id") == "master":
+            raise ScopeError("主轨效果器会影响整个工程；请切换到工程范围。")
+        if kind in {"set_native_pad", "set_native_sampler"}:
+            raise ScopeError("采样器和鼓组参数目前只能在整个工程范围使用单独方案；请切换到工程范围。")
         bpm = state.get("bpm")
         if not _finite(bpm) or not 20 <= bpm <= 300:
             raise ScopeError("当前速度无效，无法计算选择范围。")

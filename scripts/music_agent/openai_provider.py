@@ -6,6 +6,12 @@ from urllib.parse import urlsplit
 from urllib.request import ProxyHandler, build_opener, getproxies
 from .provider import KimiProvider, ProviderError, MAX_COMPLETION_TOKENS, _invalid, _NoRedirect
 
+REASONING_EFFORTS = ("low", "medium", "high")
+# Explicitly verified model IDs: unknown aliases get the provider default.
+REASONING_MODELS = frozenset({"gpt-5", "gpt-5-2025-08-07", "gpt-5-mini", "gpt-5-mini-2025-08-07",
+    "gpt-5-nano", "gpt-5-nano-2025-08-07", "gpt-5.4", "gpt-5.5", "o3", "o4-mini",
+    "gpt-6-astra", "gpt-6.1-sol", "gpt-6-sol", "gpt-6-luna"})
+
 
 def _local_https_proxy(proxies):
     """Use an existing loopback proxy only; never configure a new network route.
@@ -33,8 +39,15 @@ class OpenAIProvider(KimiProvider):
     allowed_base_urls = {"https://api.openai.com/v1"}
 
     def __init__(self, model="gpt-5-mini", base_url="https://api.openai.com/v1", timeout=45,
-                 *, api_key=None, opener=None):
+                 *, api_key=None, opener=None, reasoning_effort="medium"):
+        if not isinstance(reasoning_effort, str) or reasoning_effort not in REASONING_EFFORTS:
+            raise ProviderError("configuration", "推理强度必须是 low、medium 或 high。")
+        self.reasoning_effort = reasoning_effort
         super().__init__(model, base_url, timeout, api_key=api_key, opener=opener)
+
+    @property
+    def capabilities(self):
+        return {**super().capabilities, "reasoning_effort": self.model in REASONING_MODELS}
 
     def _default_opener(self):
         try:
@@ -148,8 +161,8 @@ class OpenAIProvider(KimiProvider):
         payload = {"model": self.model, "input": self._inputs(messages), "store": False,
                    "stream": False, "max_output_tokens": MAX_COMPLETION_TOKENS,
                    "include": ["reasoning.encrypted_content"]}
-        if self.model.startswith(("gpt-5", "gpt-6", "o3", "o4")):
-            payload["reasoning"] = {"effort": "low"}
+        if self.model in REASONING_MODELS:
+            payload["reasoning"] = {"effort": self.reasoning_effort}
         if tools is not None:
             if not isinstance(tools, list) or not 1 <= len(tools) <= 32:
                 raise ProviderError("invalid_request", "工具数量超出范围。")

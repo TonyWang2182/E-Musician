@@ -117,6 +117,9 @@
     formProviderId = entry.id || $("provider").value;
     $("model").value = entry.model || entry.default_model || "";
     $("base-url").value = entry.base_url || "";
+    $("reasoning-setting").hidden = entry.id !== "openai";
+    $("reasoning-hint").hidden = entry.id !== "openai";
+    $("reasoning-effort").value = entry.reasoning_effort || "medium";
     $("model-options").replaceChildren(...(Array.isArray(entry.models) ? entry.models : []).map((value) => {
       const option = document.createElement("option"); option.value = String(value); return option;
     }));
@@ -370,6 +373,7 @@
   $("settings-form").addEventListener("submit", (event) => {
     event.preventDefault(); if ($("settings-save").disabled) return;
     const payload = {provider: $("provider").value, model: $("model").value.trim()};
+    if (payload.provider === "openai") payload.reasoning_effort = $("reasoning-effort").value;
     if ($("base-url").value.trim()) payload.base_url = $("base-url").value.trim();
     if ($("api-key").value.trim()) payload.api_key = $("api-key").value.trim();
     $("api-key").value = ""; text("settings-feedback", "");

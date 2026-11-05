@@ -34,7 +34,7 @@ def create_provider(provider_id="kimi", model=None, base_url=None, *, require_to
 
 
 def default_preferences():
-    return {key: {"model": value["default_model"], "base_url": value["base_url"]}
+    return {key: {"model": value["default_model"], "base_url": value["base_url"], **({"reasoning_effort":"medium"} if key == "openai" else {})}
             for key, value in PROVIDERS.items() if value["adapter"] is not None}
 
 
@@ -47,13 +47,14 @@ def list_providers(config=None):
         settings = preferences.get(provider_id, {})
         model = settings.get("model", spec["default_model"])
         base_url = settings.get("base_url", spec["base_url"])
-        capabilities = (spec["adapter"](model=model, base_url=base_url).capabilities if ready else
+        capabilities = (spec["adapter"](model=model, base_url=base_url, **({"reasoning_effort":settings.get("reasoning_effort","medium")} if provider_id == "openai" else {})).capabilities if ready else
                         {"text": False, "tools": False, "streaming": False,
                          "image_input": False, "audio_input": False, "audio_output": False})
         result.append({"id": provider_id, "label": spec["label"], "configured": bool(configured),
             "adapter_ready": ready, "implemented": ready,
             "status": "adapter_pending" if not ready else "available" if configured else "unconfigured",
             "default_model": spec["default_model"], "model": model, "base_url": base_url,
+            **({"reasoning_effort":settings.get("reasoning_effort","medium")} if provider_id == "openai" else {}),
             "models": list(spec["models"]), "capabilities": copy.deepcopy(capabilities),
             "availability_note": "配置状态不代表网络或账户验证通过。"})
     return result

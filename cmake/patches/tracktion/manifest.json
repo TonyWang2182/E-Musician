@@ -66,6 +66,13 @@
       "before_sha256_lf": "90b39337fadc3b942d90f632a64b1aa4806635e86daf945daf88df432d652b3c",
       "after_sha256_lf": "7b0550c31c9c00753ba600121423567d44d3e37c3ca299c21665584cb2e34b4d",
       "patch_sha256_lf": "73a5511f4326fb86d21f1a8e227f294c8eff9f177cd0ce91d4b2996949aff078"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/devices/tracktion_InputDevice.cpp",
+      "patch": "per-track-monitor.patch",
+      "before_sha256_lf": "15da708f2755f149ef0175c7149ba81ded3d99a53092767d87f47efab3d972d4",
+      "after_sha256_lf": "0cf9b78f8e05fe4ccc6a7f5a598e2b717e3374657bbd444bd57528015c0ead08",
+      "patch_sha256_lf": "46a2554233c0f7821f479e86cfcf18a28eb3dab6eb9cb8b7d5a88e2c1b601f12"
     }
   ]
 }

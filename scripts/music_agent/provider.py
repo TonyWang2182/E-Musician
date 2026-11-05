@@ -11,7 +11,7 @@ from urllib.request import Request, HTTPRedirectHandler, ProxyHandler, build_ope
 from .secrets import SecretError, load_key
 
 MAX_BODY_BYTES = 1024 * 1024
-MAX_COMPLETION_TOKENS = 2048
+MAX_COMPLETION_TOKENS = 4096
 ALLOWED_BASE_URLS = {"https://api.moonshot.cn/v1", "https://api.moonshot.ai/v1"}
 
 

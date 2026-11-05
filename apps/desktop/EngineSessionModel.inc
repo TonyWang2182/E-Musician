@@ -116,8 +116,28 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
         }return juce::Result::ok();
     };
     auto meta=metadata(target);
+    std::set<juce::String> nativeIds;
+    const auto collectNative=[&](const auto& list)->juce::Result{for(const auto& plugin:list)if(plugin.format=="E-musician"){
+        std::vector<juce::String> ids;if(auto r=storage::nativePluginAssetIds(plugin,ids);r.failed())return r;
+        nativeIds.insert(ids.begin(),ids.end());}return juce::Result::ok();};
+    if(auto r=collectNative(s.masterPlugins);r.failed())return fail(r.getErrorMessage());
+    for(const auto& track:s.tracks)if(auto r=collectNative(track.plugins);r.failed())return fail(r.getErrorMessage());
+    for(const auto& id:nativeIds)if(std::none_of(s.assets.begin(),s.assets.end(),[&](const auto& a){return a.id==id;}))
+        return fail("Native instrument sample asset is missing.");
     if(auto r=preparePlugins(s.masterPlugins,meta);r.failed())return fail(r.getErrorMessage());
     for(const auto& t:s.tracks)if(auto r=preparePlugins(t.plugins,tracks.contains(t.id)?tracks[t.id]->state:juce::ValueTree());r.failed())return fail(r.getErrorMessage());
+
+    auto nativeAssets=meta.getChildWithName("EM_NATIVE_ASSETS");
+    if(!nativeAssets.isValid()&&!nativeIds.empty())nativeAssets=meta.getOrCreateChildWithName("EM_NATIVE_ASSETS",um);
+    if(nativeAssets.isValid()){
+        for(int i=nativeAssets.getNumChildren();--i>=0;)if(!nativeIds.contains(nativeAssets.getChild(i)["id"].toString()))nativeAssets.removeChild(i,um);
+        for(const auto& id:nativeIds){
+            auto source=std::find_if(s.assets.begin(),s.assets.end(),[&](const auto& a){return a.id==id;});
+            auto item=nativeAssets.getChildWithProperty("id",id);
+            if(!item.isValid()){item=juce::ValueTree("ASSET");item.setProperty("id",id,nullptr);nativeAssets.addChild(item,-1,um);}
+            item.setProperty("source",source->source.getFullPathName(),um);
+        }
+    }
 
     target.tempoSequence.getTempo(0)->set(te::BeatPosition::fromBeats(0),s.bpm,0,false);
     auto* sig=target.tempoSequence.getTimeSig(0);sig->numerator=s.numerator;sig->denominator=s.denominator;
@@ -134,11 +154,16 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
             auto slot=slots.getChildWithProperty("id",p.id);
             if(!slot.isValid()){slot=slotTree(p);slots.addChild(slot,index,um);}else{
                 slot.setProperty("enabled",p.enabled,um);slot.setProperty("role",p.role,um);
+                if(p.format=="E-musician")slot.setProperty("data",juce::var(p.state),um);
                 slots.moveChild(slots.indexOf(slot),index,um);
             }
             te::Plugin::Ptr live=livePlugin(target,p.id);
             if(!live&&newPlugins.contains(p.id)){live=newPlugins[p.id];if(live){live->state.setProperty(emId,p.id,um);list.insertPlugin(live,index,nullptr);if(!list.contains(live.get()))return fail("Could not insert plugin into the audio chain.");}}
             if(live){
+                if(p.format=="E-musician" && p.role=="effect") {
+                    live->state.setProperty("emEffectType",p.identifier,um);
+                    live->state.setProperty("emEffectData",juce::var(p.state),um);
+                }
                 live->setEnabled(p.enabled);
                 auto parent=live->state.getParent();int first=-1;
                 for(auto* item:list)if(item->state[emId].toString().isNotEmpty()){first=parent.indexOf(item->state);break;}

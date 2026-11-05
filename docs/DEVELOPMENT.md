@@ -1,6 +1,43 @@
 # E-musician 开发计划
 
-版本：2.0。日期：2026-10-29（Asia/Shanghai）。原项目：E:/E-musician；当前 Agent 工作树：music-agent-kimi。
+版本：2.1。日期：2026-11-05（Asia/Shanghai）。原项目：E:/E-musician；当前 Agent 工作树：music-agent-kimi。
+
+## 2026-11-05：音频分析下一阶段（提案）
+
+用户新授权先做方案，0.8.1 归档已完成，程序和页面保留。计划覆盖四轨分离、有音高分轨 MIDI、独立鼓转录 Provider、和弦标签、GUI/Agent 共用任务和候选接受，以及能力清单动态显示。模型/来源/本机配置、E 盘部署、许可未决项与验收顺序统一见 [方案](review/2026-11-05-audio-analysis/PLAN.md)；尚未安装、构建或验证任何分析模型。当前真实可用能力仍见下方 0.8.1。
+
+## 2026-11-05：0.8.1 矩形片段与装置控件
+
+| 工作 | 状态与验收依据 |
+|---|---|
+| 矩形音符/片段、全行命中和未吸附时值 | 已实现；像素/几何/手势与 10 万音符局部绘制回归通过 |
+| 七装置旋钮、图示、数值、最小窗口 | 已实现；真实组件截图、600×212 控件边界、图形取消/释放和实际命令回读通过 |
+| EQ 六形状与每 pad 包络/模式 | 已实现；DSP/序列化范围、版本 1/2、音频变化与保存重开通过 |
+| Agent 新字段与原值保留 | 已实现；Python 245、真实隔离 DAW 联测 11 项通过；真实模型语义准确率待人工 |
+| 资源与实时边界 | 参数编辑共享已发布 PCM，音频回调不加入网络/文件操作；新 bank 仍截断现有声音，实际 ASIO/听感待人工 |
+| 交付和核查 | Release、最终 CTest 10/10、效果音频 11、采样器 12 通过；记录、失败修复、输入/产物 SHA、截图已归档 |
+
+范围和来源见 [计划](review/2026-11-05-device-controls/PLAN.md)，证据见 [结果](review/2026-11-05-device-controls/RESULTS.md)，下一步是 [人工短测](review/2026-11-05-device-controls/MANUAL-CHECK.md)。不扩展到未请求的新合成器、自动保存或实时频谱。
+
+## 2026-11-02：设备链与原生装置（候选）
+
+本轮完成设备链、原生面板刷新恢复、Agent 参数局部修改和注册表核对、压缩器增强、Delay/Reverb/Auto Filter；最终 CTest 10/10、Agent Python 243 与真实离线效果和 Agent 命令测试通过。Keyscape 差异、真实设备与完整合成器能力仍待处理。[结果与限制](review/2026-11-02-device-chain-agent/RESULTS.md) / [人工测试](review/2026-11-02-device-chain-agent/MANUAL-CHECK.md)。
+
+## 2026-11-02：试听、波形与原生效果器（候选）
+
+已实现波形和试听改进、8 段 EQ 与压缩器、原生装置 Agent 控制。最终 Release、CTest 8/8、Agent Python 229、离线装置和 Agent 端到端通过；真实模型、GUI 和声卡仍待验。首轮失败与修复均有构建记录。验收边界见[结果](review/2026-11-02-audition-eq-compressor/RESULTS.md)。
+
+## 2026-11-02：MIDI / 原生装置工作区视觉迭代
+
+用户确认概念图后完成工作区展开、原生设备 dock、真实后台波形及采样器边界手势；Release、离线 CTest 7/7、真实离线 DAW 端到端 11 项、Agent Python 219 项通过，真实桌面/声卡与听感待验。见[结果及限制](review/2026-11-02-device-redesign/RESULTS.md)和[人工短测](review/2026-11-02-device-redesign/MANUAL-CHECK.md)。
+
+## 2026-11-02：原生采样器与鼓组 Rack
+
+用户将采样器与鼓组提前至本轮。首版实现与离线验证通过：Release、CTest 7/7、真实离线 DAW 端到端 11 项、Agent Python 219 项；真实设备、GUI 和听感待人工测试。范围、线程边界、未解决风险和证据见[记录](review/2026-11-02-sampler-drum-rack/RESULTS.md)和[人工短测](review/2026-11-02-sampler-drum-rack/MANUAL-CHECK.md)。既有监听候选和其未解决问题继续保留。
+
+## 2026-10-30：稳定性与原生装置
+
+逐轨监听和插件面板交互：候选已实现，隔离 Release 编译与 CTest 5/5 通过；Agent Python 219 项通过。真实设备/插件验收及按住音符切监听的尾音边界待完成。待机无声根因未证实，慢插件仍可能卡住消息线程。[调查](review/2026-10-30-stability-and-devices/DIAGNOSIS.md) / [人工检查](review/2026-10-30-stability-and-devices/MANUAL-CHECK.md) / [原生装置计划](review/2026-10-30-stability-and-devices/PLAN.md)。原生装置均为后续计划，尚未开发。
 
 ## DAW 0.8.0 / Agent 0.3：第二批自动验收完成
 

@@ -157,7 +157,9 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
         if (end <= firstBeat || note.startBeats >= firstBeat + visibleBeats()) return {};
         const double left = juce::jmax(double(area.getX()) - 2.0, double(area.getX()) + (note.startBeats - firstBeat) * pixelsPerBeat);
         const double right = juce::jmin(double(area.getRight()) + 2.0, double(area.getX()) + (end - firstBeat) * pixelsPerBeat);
-        return { float(left), y(note.pitch) + 1, float(juce::jmax(2.0, right - left)), rowHeight - 2 };
+        // Note faces occupy the complete pitch cell. Time geometry is still
+        // derived from the actual note, including unsnapped starts and lengths.
+        return { float(left), y(note.pitch), float(juce::jmax(2.0, right - left)), rowHeight };
     }
     void appendVisible(std::size_t index)
     {
@@ -485,8 +487,8 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
             juce::Graphics::ScopedSaveState save(g); g.reduceClipRegion(area.toNearestInt());
             for (const auto& v : visible) {
                 const auto& n = notes[v.first]; const bool chosen = selected.count(n.id) != 0;
-                g.setColour(chosen ? ink : rule); g.fillRoundedRectangle(v.second, 2);
-                g.setColour(ink); g.drawRoundedRectangle(v.second, 2, chosen ? 1.5f : 0.8f);
+                g.setColour(chosen ? ink : rule); g.fillRect(v.second);
+                g.setColour(ink); g.drawRect(v.second, chosen ? 1.5f : 0.8f);
                 if (v.second.getWidth() > 35) { g.setColour(chosen ? paper : ink); g.setFont(mono(10)); g.drawText(pitchName(n.pitch), v.second.toNearestInt().reduced(3, 0), juce::Justification::centredLeft); }
             }
             if (drag.mode == Drag::box && drag.changed) { g.setColour(ink.withAlpha(0.08f)); g.fillRect(drag.selectionBox); g.setColour(ink); g.drawRect(drag.selectionBox); }
@@ -691,6 +693,13 @@ juce::Result PianoRoll::runInteractionSmokeTest(juce::DynamicObject& report, con
         return fail("MIDI projection reuse accepted a different project identity.");
     report.setProperty("midi_unchanged_snapshot_projection_reused", true);
     if (p.visible.empty()) return fail("Piano roll did not expose the visible note.");
+    const auto fullRowNote = p.visible.front().second;
+    const auto fullRowIndex = p.visible.front().first;
+    if (fullRowNote.getY() != p.y(p.notes[fullRowIndex].pitch) || fullRowNote.getHeight() != p.rowHeight
+        || p.hitNote({ fullRowNote.getCentreX(), fullRowNote.getY() + 0.25f }) != fullRowIndex
+        || p.hitNote({ fullRowNote.getCentreX(), fullRowNote.getBottom() - 0.25f }) != fullRowIndex)
+        return fail("A rectangular MIDI note leaves a pitch-row gap or its new edges cannot be selected.");
+    report.setProperty("midi_full_pitch_row_and_edge_hit_geometry", true);
     const auto start = p.visible.front().second.getCentre();
     const auto moved = start + juce::Point<float>(float(p.pixelsPerBeat * 0.5), -p.rowHeight);
     p.grid.mouseDown(event(start, start, false));
@@ -940,6 +949,32 @@ juce::Result PianoRoll::runInteractionSmokeTest(juce::DynamicObject& report, con
             return stream.openedOk() && juce::PNGImageFormat().writeImageToStream(image, stream);
         };
         if (!writeImage(solid, "piano-fine-grid-solid.png") || !writeImage(dashed, "piano-fine-grid-dashed.png")) return fail("Could not write synthetic piano grid evidence.");
+        {
+            PianoRoll rectangles; auto& r = *rectangles.impl; rectangles.setSize(1000, 440);
+            rectangles.setClip("rectangle-fixture", "notes", "Rectangular note faces", 1, 0, 8, 120,
+                { { "c", 60, 0, 1, 90, 1 }, { "d", 62, 1, 1, 70, 1 }, { "e", 64, 2, 1, 110, 1 },
+                  { "f", 65, 3, 1, 80, 1 }, { "g", 67, 4, 1, 100, 1 }, { "unsnapped", 69, 5.125, 0.625, 90, 1 } });
+            r.selected.insert("e"); r.selected.insert("f");
+            const auto unsnapped = r.noteRectangle(5);
+            if (std::abs(unsnapped.getX() - r.x(5.125)) > 0.001f
+                || std::abs(unsnapped.getWidth() - 0.625 * r.pixelsPerBeat) > 0.001)
+                return fail("Rectangular note styling changed an unsnapped note's displayed timing.");
+            juce::Image image(juce::Image::RGB, r.grid.getWidth(), r.grid.getHeight(), true);
+            // Flush the native drawing context before reading or encoding the
+            // image. Direct2D may defer writes until Graphics is destroyed.
+            { juce::Graphics graphics(image); r.paintGrid(graphics); }
+            const auto paintedNote = r.noteRectangle(2);
+            const int sampleX = int(std::floor(paintedNote.getRight() - 4));
+            const int firstRowPixel = int(std::ceil(paintedNote.getY()));
+            const int lastRowPixel = int(std::floor(paintedNote.getBottom())) - 1;
+            if (image.getPixelAt(1, 1).getBrightness() < .8f
+                || image.getPixelAt(sampleX, firstRowPixel).getBrightness() > .6f
+                || image.getPixelAt(sampleX, lastRowPixel).getBrightness() > .6f)
+                return fail("Rectangular piano evidence is blank or a selected note does not paint its full pitch row.");
+            if (!writeImage(image, "piano-full-row-rectangles.png")) return fail("Could not write rectangular piano note evidence.");
+            report.setProperty("midi_rectangle_unsnapped_duration_preserved", true);
+            report.setProperty("midi_rectangle_full_row_pixels", true);
+        }
         q.snapEnabled.setToggleState(true, juce::dontSendNotification);
         for (const auto [scale, tier] : std::array<std::pair<double, int>, 3> { { { 12, 0 }, { 80, 1 }, { 400, 2 } } }) {
             q.setZoom(scale, q.plot().getX());

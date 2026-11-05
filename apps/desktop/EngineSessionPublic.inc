@@ -3,6 +3,24 @@ EngineSession::EngineSession(bool enable):impl(std::make_unique<Impl>(enable&&!o
 EngineSession::~EngineSession()=default;
 bool EngineSession::isSupportedAudioFile(const juce::File& f){return f.hasFileExtension("wav;mp3");}
 
+bool EngineSession::nativeCompressorMeter(const juce::String& projectId,const juce::String& trackId,
+                                         const juce::String& deviceId,float& reductionDb,std::uint64_t& sequence)const{
+    requireControlThread();
+    if(projectId!=juce::String(impl->guard.projectId()))return false;
+    juce::ValueTree owner;
+    if(trackId=="master")owner=impl->metadata(*impl->edit);
+    else if(auto* binding=impl->find(trackId))owner=binding->track->state;
+    else return false;
+    bool match=false;
+    for(const auto& slot:owner.getChildWithName("EM_PLUGINS"))if(slot["id"].toString()==deviceId){
+        match=slot["format"].toString()=="E-musician"&&slot["identifier"].toString()=="native.compressor"&&bool(slot["enabled"]);break;
+    }
+    if(!match)return false;
+    auto* effect=dynamic_cast<native_effects::Effect*>(impl->livePlugin(*impl->edit,deviceId));
+    if(!effect)return false;
+    sequence=effect->meterSequence();reductionDb=effect->gainReductionDb();return sequence!=0;
+}
+
 namespace {
 juce::var jobSnapshotJson(const EngineSession::JobSnapshot& j)
 {
@@ -18,7 +36,7 @@ EngineSession::Snapshot EngineSession::snapshot()const
     if(p.cachedRevision!=p.guard.revision()){
         Snapshot s;auto state=p.capture(false,false);s.projectId=p.guard.projectId();s.revision=p.guard.revision();s.bpm=state.bpm;s.numerator=state.numerator;s.denominator=state.denominator;
         s.loopStart=state.loopStart;s.loopEnd=state.loopEnd;s.duration=p.duration;
-        auto slots=[&](const auto& list){std::vector<PluginSlotSnapshot> out;for(const auto& x:list)out.push_back({x.id,x.name,x.format,x.enabled,p.loadedPlugin(*p.edit,x.id)==nullptr,x.role=="instrument"});return out;};
+        auto slots=[&](const auto& list){std::vector<PluginSlotSnapshot> out;for(const auto& x:list)out.push_back({x.id,x.name,x.format,x.enabled,x.format=="E-musician" ? p.livePlugin(*p.edit,x.id)==nullptr : p.loadedPlugin(*p.edit,x.id)==nullptr,x.role=="instrument",x.format=="E-musician"?x.identifier:juce::String()});return out;};
         s.masterPlugins=slots(state.masterPlugins);
         auto lanes=[](const auto& list){std::vector<AutomationLaneSnapshot> out;for(const auto& lane:list){auto points=std::make_shared<std::vector<AutomationPointSnapshot>>();points->reserve(lane.points.size());for(const auto& point:lane.points)points->push_back({point.id,point.timeSeconds,point.value,point.curve});out.push_back({lane.id,lane.target,lane.pluginId,lane.parameterId,lane.enabled,points});}return out;};
         s.masterAutomation=lanes(state.masterAutomation);
@@ -60,6 +78,12 @@ EngineSession::Snapshot EngineSession::snapshot()const
         job.bytesWritten=j->bytesWritten;job.bytesReused=j->bytesReused;job.pluginsCaptured=j->pluginsCaptured;
         s.jobs.push_back(std::move(job));
     }
+    for(const auto& job:p.nativeJobHistory)s.jobs.push_back(job);
+    s.nativePending=bool(p.nativePending);
+    if(p.nativePending){
+        JobSnapshot job;job.id="native-"+juce::String(juce::int64(p.nativePending->token));job.kind="native_instrument";job.status="running";
+        job.phase="preparing";job.detail="Preparing sample; the edit has not been committed.";s.jobs.push_back(std::move(job));
+    }
     auto scan=p.pluginHost.scanSnapshot();s.pluginScanning=scan.running;
     if(scan.running||scan.completed>0||scan.cancelled)s.jobs.push_back({"plugin-scan","scan_plugins",scan.running?"running":scan.cancelled?"cancelled":"completed",scan.status,scan.total>0?double(scan.completed)/scan.total:-1});
     const auto now=juce::Time::getMillisecondCounterHiRes();
@@ -75,14 +99,81 @@ juce::Result EngineSession::execute(const juce::String& command,const juce::var&
 {
     requireControlThread();
     if(commandResult)*commandResult=juce::var();
+    if(command=="preview_native_sample"||command=="stop_native_preview"){
+        if(!args.isObject()||!args["track_id"].isString())return juce::Result::fail("A track ID is required.");
+        auto* binding=impl->find(args["track_id"].toString());
+        if(!binding)return juce::Result::fail("Track not found.");
+        for(const auto& slot:impl->captureSlots(binding->track->state)){
+            if(slot.format!="E-musician"||slot.role!="instrument")continue;
+            auto* instrument=dynamic_cast<native::Instrument*>(impl->livePlugin(*impl->edit,slot.id));
+            if(!instrument)continue;
+            if(command=="stop_native_preview"){instrument->stopPreview();return juce::Result::ok();}
+            if(impl->recordingBusy()||hasActiveJobs())return juce::Result::fail("Wait until recording and background jobs have finished.");
+            if(!args["pad"].isInt())return juce::Result::fail("A pad number is required.");
+            const auto runtime=impl->nativeRuntime.find(slot.id);
+            if(runtime==impl->nativeRuntime.end()||runtime->second.status!="ready")return juce::Result::fail("The sample is not ready yet.");
+            impl->edit->getTransport().ensureContextAllocated();
+            if(!instrument->previewSample(int(args["pad"])))return juce::Result::fail("This pad has no playable sample or is muted.");
+            return juce::Result::ok();
+        }
+        return juce::Result::fail("Native instrument not found.");
+    }
+    if(command=="get_native_instrument"){
+        if(!args.isObject()||!args["track_id"].isString())return impl->fail("A track ID is required.");
+        auto* binding=impl->find(args["track_id"].toString());if(!binding)return impl->fail("Track not found.");
+        storage::StoredProject state;storage::StoredTrack track;track.id=binding->id;track.plugins=impl->captureSlots(binding->track->state);state.tracks.push_back(std::move(track));
+        auto assets=impl->metadata(*impl->edit).getChildWithName("EM_NATIVE_ASSETS");
+        for(const auto& item:assets)state.assets.push_back({item["id"].toString(),juce::File(item["source"].toString())});
+        juce::var description;auto result=native::describe(state,binding->id,description);
+        if(impl->nativePending&&impl->nativePending->trackId==binding->id)
+            result=native::describe(*impl->nativePending->candidate,binding->id,description);
+        if(result.failed())return impl->fail(result.getErrorMessage());
+        if(auto* info=description.getDynamicObject()){
+            const auto deviceId=info->getProperty("device_id").toString();
+            auto found=impl->nativeRuntime.find(deviceId);
+            if(found!=impl->nativeRuntime.end()){
+                auto loadStatus=found->second.status;
+                if(loadStatus=="queued"&&impl->nativeQueue){
+                    auto queueState=impl->nativeQueue->status(juce::String(impl->guard.projectId()),deviceId);
+                    if(queueState.phase==native::NativeLoadQueue::Phase::loading||queueState.phase==native::NativeLoadQueue::Phase::prepared)loadStatus="loading";
+                }
+                info->setProperty("load_status",loadStatus);info->setProperty("error",found->second.error);
+            }else {info->setProperty("load_status","not_ready");info->setProperty("error","");}
+            if(auto error=impl->nativeTrackErrors.find(binding->id);error!=impl->nativeTrackErrors.end()){
+                info->setProperty("load_status","error");info->setProperty("error",error->second);
+            }
+            // A display waveform must describe exactly the bytes currently
+            // loaded by the instrument, not a subsequently edited source file.
+            if(info->getProperty("load_status").toString()=="ready"
+               && !(impl->nativePending&&impl->nativePending->trackId==binding->id)){
+                if(auto* instrument=dynamic_cast<native::Instrument*>(impl->livePlugin(*impl->edit,deviceId))){
+                    const auto hashes=instrument->sourceHashes();
+                    if(auto* pads=info->getProperty("pads").getArray())for(auto& pad:*pads)
+                        if(auto* value=pad.getDynamicObject()){
+                            const auto hash=hashes.find(value->getProperty("asset_id").toString());
+                            if(hash!=hashes.end())value->setProperty("sample_sha256",hash->second);
+                        }
+                }
+            }
+        }
+        if(commandResult)*commandResult=description;return juce::Result::ok();
+    }
     if(command=="stop_recording")return impl->recording.execute(command,args);
     if(command=="reset_meters"){impl->resetMeters();return juce::Result::ok();}
+    if(impl->nativePending&&(command=="save_project"||command=="open_project"||command=="export_wav"))
+        return impl->fail("Wait for the native instrument edit to finish before saving, opening, or exporting.");
     if(impl->recordingBusy()&&command!="cancel_job")return impl->fail("Stop recording and wait for the take to finish before editing.");
     if(command!="cancel_job"&&command!="scan_plugins"&&command!="open_plugin")if(auto r=impl->preflight(expected);r.failed())return r;
+    if(command=="add_native_instrument"||command=="set_native_sample"||command=="set_native_pad"||command=="set_native_sampler")
+        return impl->beginNative(command,args);
+    if(command=="get_native_effect") {
+        juce::var data;auto result=impl->describeNativeEffect(args["track_id"].toString(),args["device_id"].toString(),data);
+        if(result.failed())return impl->fail(result.getErrorMessage());if(commandResult)*commandResult=data;return result;
+    }
     if(command=="start_recording"||command=="set_track_armed"||command=="set_input_monitor"||command=="configure_audio_device"||command=="set_recording_preferences"){
         if(!args.isObject())return impl->fail("Command arguments must be an object.");
         if(command=="set_track_armed"&&(!args["track_id"].isString()||!args["armed"].isBool()))return impl->fail("Arming requires a track_id and boolean armed.");
-        if(command=="set_input_monitor"&&(!args["input_device_id"].isString()||!args["mode"].isString()))return impl->fail("Monitoring requires an input_device_id and mode.");
+        if(command=="set_input_monitor"&&((!args["input_device_id"].isString()&&!args["track_id"].isString())||!args["mode"].isString()))return impl->fail("Monitoring requires a track_id or input_device_id and mode.");
         if(command=="start_recording"){
             if(hasActiveJobs())return impl->fail("Wait for background tasks before recording.");
             impl->finishGesture();
@@ -111,6 +202,7 @@ juce::Result EngineSession::importFiles(const juce::Array<juce::File>& files,std
 }
 juce::Result EngineSession::newProject(std::uint64_t expected)
 {
+    if(impl->nativePending)return impl->fail("Wait for the native instrument edit before creating a project.");
     if(impl->recordingBusy())return impl->fail("Stop recording before creating a project.");
     requireControlThread();if(auto r=impl->preflight(expected);r.failed())return r;
     storage::StoredProject state;state.projectId=uid();std::unique_ptr<te::Edit> next;std::vector<Impl::Binding> bs;
@@ -120,15 +212,18 @@ juce::Result EngineSession::newProject(std::uint64_t expected)
 }
 juce::Result EngineSession::saveProject(const juce::File& file,std::uint64_t expected)
 {
+    if(impl->nativePending)return impl->fail("Wait for the native instrument edit before saving.");
     // Test/legacy compatibility only. GUI and Agent use the asynchronous save_project job.
     if(impl->recordingBusy())return impl->fail("Stop recording before saving a project.");
     requireControlThread();if(auto r=impl->preflight(expected);r.failed())return r;impl->finishGesture();auto state=impl->capture();
     if(auto r=impl->capturePluginStates(state);r.failed())return impl->fail(r.getErrorMessage());storage::StoredProject archived;
-    if(auto r=storage::save(file,state,archived);r.failed())return impl->fail(r.getErrorMessage());
+    storage::IOOptions options;if(auto r=impl->nativeAssetHashes(state,options.expectedAssetHashes);r.failed())return impl->fail(r.getErrorMessage());
+    if(auto r=storage::save(file,state,archived,options);r.failed())return impl->fail(r.getErrorMessage());
     impl->projectFile=file;impl->savedKey=contentKey(state);impl->pluginDirty=false;impl->status="Project saved.";return juce::Result::ok();
 }
 juce::Result EngineSession::openProject(const juce::File& file,std::uint64_t expected)
 {
+    if(impl->nativePending)return impl->fail("Wait for the native instrument edit before opening a project.");
     if(impl->recordingBusy())return impl->fail("Stop recording before opening a project.");
     requireControlThread();if(auto r=impl->preflight(expected);r.failed())return r;storage::StoredProject state;
     if(auto r=storage::load(file,state);r.failed())return impl->fail(r.getErrorMessage());
@@ -159,7 +254,7 @@ void EngineSession::seek(double seconds){requireControlThread();if(impl->recordi
 void EngineSession::setLoop(bool enabled){execute("set_loop",object({{"enabled",enabled}}),impl->guard.revision());}
 void EngineSession::setGain(float db){execute("set_master_gain",object({{"gain_db",std::isfinite(db)?stableGain(db):db}}),impl->guard.revision());}
 juce::AudioDeviceManager& EngineSession::deviceManager(){requireControlThread();return impl->engine.getDeviceManager().deviceManager;}
-bool EngineSession::hasActiveJobs()const{for(const auto& j:impl->jobs)if(j->worker.joinable())return true;return impl->pluginHost.scanSnapshot().running;}
+bool EngineSession::hasActiveJobs()const{if(impl->nativePending)return true;for(const auto& j:impl->jobs)if(j->worker.joinable())return true;return impl->pluginHost.scanSnapshot().running;}
 void EngineSession::cancelAllJobs(){for(auto& j:impl->jobs)j->cancel=true;impl->pluginHost.cancelScan();}
 
 juce::var EngineSession::capabilities()const
@@ -169,9 +264,36 @@ juce::var EngineSession::capabilities()const
     commands.add("get_selection_context");
     for(const auto* name:{"get_capabilities","get_snapshot","get_project_state","get_jobs","get_job","get_events","get_clip_notes","create_track","rename_track","reorder_track","remove_track","set_track_gain","set_track_pan","set_track_muted","set_track_solo","set_master_gain","set_loop","set_loop_range","set_tempo","set_time_signature","move_clip","move_clips","trim_clip","split_clip","duplicate_clips","delete_clips","set_clip_fades","create_midi_clip","write_notes","batch","undo","redo","import_audio","import_midi","save_project","open_project","export_wav","export_midi","scan_plugins","cancel_job","add_plugin","remove_plugin","move_plugin","set_plugin_enabled","open_plugin","new_project","play","pause","stop","seek"})commands.add(name);
     for(const auto* command:{"get_recording_preferences","set_recording_preferences","reset_meters","get_clipboard_state","copy_clips","cut_clips","paste_clips"})commands.add(command);
+    commands.add("get_native_effect");commands.add("add_native_effect");commands.add("set_native_effect");
     commands.add("get_track_clips");commands.add("get_plugin_catalog");commands.add("get_plugin_parameters");commands.add("set_plugin_parameter");commands.add("edit_notes");commands.add("get_save_diagnostics");
     for(const auto* command:{"get_recording_state","get_recording_inputs","get_audio_devices","configure_audio_device","set_track_input","set_track_armed","set_input_monitor","start_recording","stop_recording","set_track_output","add_send","update_send","remove_send","get_automation_targets","get_automation_points","set_automation_lane","remove_automation_lane","get_clip_controllers"})commands.add(command);
-    return object({{"protocol_version",1},{"batch_result_refs",true},{"batch_result_refs_version",1},{"project_schema_version",4},{"max_controller_events",100000},{"max_automation_points",100000},{"max_automation_page",1000},{"max_sends_per_track",32},{"max_sends",512},{"recording_mode","linear_take"},{"monitor_scope","input_device"},{"commands",commands},{"default_bpm",120},{"tempo_min",20},{"tempo_max",300},{"max_tracks",64},{"max_clips",4096},{"max_notes",100000},{"max_note_page",1000},{"max_clip_page",256},{"max_catalog_page",256},{"snapshot_clips_per_track",64},{"snapshot_clips_total",256},{"snapshot_includes_note_content",false},{"plugin_formats",juce::var(juce::Array<juce::var>{"VST","VST3"})},{"network_control",false},{"event_sequence",juce::int64(impl->eventSequence)}});
+    // Non-audio-thread contract consumed by Agent and release tests. Effect
+    // identities come from the same list that gates actual device creation.
+    const auto numeric=[](const char* name,double low,double high,bool band){return object({{"name",name},{"kind","number"},{"minimum",low},{"maximum",high},{"per_band",band}});};
+    const auto boolean=[](const char* name,bool band){return object({{"name",name},{"kind","boolean"},{"per_band",band}});};
+    juce::Array<juce::var> types;
+    for(const auto* registered:native_effects::supportedTypes){
+        const juce::String type(registered);juce::Array<juce::var> parameters;int bands=0;
+        if(type=="eq8") {bands=8;parameters.add(boolean("enabled",true));parameters.add(numeric("frequency",20,20000,true));parameters.add(numeric("gain_db",-24,24,true));parameters.add(numeric("q",.1,10,true));parameters.add(object({{"name","shape"},{"kind","enum"},{"values",juce::Array<juce::var>{"bell","low_shelf","high_shelf","high_pass","low_pass","notch"}},{"per_band",true}}));}
+        else if(type=="compressor") {parameters.add(numeric("threshold_db",-60,0,false));parameters.add(numeric("ratio",1,20,false));parameters.add(numeric("attack_ms",.1,200,false));parameters.add(numeric("release_ms",10,2000,false));parameters.add(numeric("makeup_db",-24,24,false));parameters.add(numeric("dry_wet",0,1,false));}
+        else if(type=="delay") {parameters.add(numeric("delay_ms",1,2000,false));parameters.add(numeric("feedback",0,.95,false));parameters.add(numeric("dry_wet",0,1,false));}
+        else if(type=="reverb") {parameters.add(numeric("decay_seconds",.1,8,false));parameters.add(numeric("damping",0,1,false));parameters.add(numeric("dry_wet",0,1,false));}
+        else if(type=="auto_filter") {parameters.add(object({{"name","mode"},{"kind","enum"},{"values",juce::Array<juce::var>{"low_pass","high_pass"}},{"per_band",false}}));parameters.add(numeric("frequency_hz",20,20000,false));parameters.add(numeric("resonance_q",.5,10,false));parameters.add(boolean("lfo_enabled",false));parameters.add(numeric("lfo_hz",.05,20,false));parameters.add(numeric("lfo_depth",0,1,false));parameters.add(numeric("dry_wet",0,1,false));}
+        types.add(object({{"type",type},{"bands",bands},{"parameters",parameters},{"readable",true},{"writable",true}}));
+    }
+    const auto integer=[](const char* name,int low,int high){return object({{"name",name},{"kind","integer"},{"minimum",low},{"maximum",high},{"per_band",false}});};
+    juce::Array<juce::var> instruments;
+    for(const auto* name:native::supportedInstrumentTypes){
+        juce::Array<juce::var> actions;
+        juce::Array<juce::var> padParameters;padParameters.add(integer("pad",0,15));padParameters.add(numeric("gain_db",-60,6,false));padParameters.add(boolean("muted",false));padParameters.add(numeric("attack_ms",.1,2000,false));padParameters.add(numeric("release_ms",1,5000,false));padParameters.add(boolean("one_shot",false));
+        actions.add(object({{"command","set_native_pad"},{"parameters",padParameters}}));
+        if(juce::String(name)=="sampler"){
+            juce::Array<juce::var> sampleParameters;sampleParameters.add(integer("root_note",0,127));sampleParameters.add(numeric("start",0,1,false));sampleParameters.add(numeric("end",0,1,false));
+            actions.add(object({{"command","set_native_sampler"},{"parameters",sampleParameters}}));
+        }
+        instruments.add(object({{"type",name},{"readable",true},{"scope","project"},{"asynchronous",true},{"single_action",true},{"sample_must_be_loaded",true},{"model_can_assign_path",false},{"model_can_create",false},{"actions",actions}}));
+    }
+    return object({{"protocol_version",1},{"batch_result_refs",true},{"batch_result_refs_version",1},{"project_schema_version",4},{"native_effect_catalog",object({{"version",1},{"types",types}})},{"native_instrument_catalog",object({{"version",1},{"types",instruments}})},{"max_controller_events",100000},{"max_automation_points",100000},{"max_automation_page",1000},{"max_sends_per_track",32},{"max_sends",512},{"recording_mode","linear_take"},{"monitor_scope","track_and_input_device"},{"commands",commands},{"default_bpm",120},{"tempo_min",20},{"tempo_max",300},{"max_tracks",64},{"max_clips",4096},{"max_notes",100000},{"max_note_page",1000},{"max_clip_page",256},{"max_catalog_page",256},{"snapshot_clips_per_track",64},{"snapshot_clips_total",256},{"snapshot_includes_note_content",false},{"plugin_formats",juce::var(juce::Array<juce::var>{"VST","VST3"})},{"network_control",false},{"event_sequence",juce::int64(impl->eventSequence)}});
 }
 namespace {
 juce::var controlClipJson(const EngineSession::ClipSnapshot& c)
@@ -184,7 +306,7 @@ juce::var controlLanesJson(const std::vector<EngineSession::AutomationLaneSnapsh
 juce::var EngineSession::snapshotJson()const
 {
     auto s=snapshot();juce::Array<juce::var> tracks,jobs,catalog;int remainingClips=256;
-    auto plugins=[](const auto& ps){juce::Array<juce::var> out;for(const auto& p:ps)out.add(object({{"id",p.id},{"name",p.name},{"format",p.format},{"enabled",p.enabled},{"missing",p.missing},{"is_instrument",p.isInstrument}}));return juce::var(out);};
+    auto plugins=[](const auto& ps){juce::Array<juce::var> out;for(const auto& p:ps)out.add(object({{"id",p.id},{"name",p.name},{"format",p.format},{"enabled",p.enabled},{"missing",p.missing},{"is_instrument",p.isInstrument},{"identifier",p.identifier}}));return juce::var(out);};
     for(const auto& t:s.tracks){juce::Array<juce::var> clips;for(const auto& c:t.clips){
         if(clips.size()>=64||remainingClips<=0)break;clips.add(controlClipJson(c));--remainingClips;}
         juce::Array<juce::var> sends;for(const auto& send:t.sends)sends.add(object({{"id",send.id},{"target_track_id",send.targetTrackId},{"gain_db",send.gainDb},{"pre_fader",send.preFader},{"enabled",send.enabled}}));
@@ -214,6 +336,7 @@ juce::var EngineSession::executeRequest(const juce::var& envelope)
             {"fresh_content_key",fresh},{"plugin_dirty",impl->pluginDirty},
             {"pending_plugin_changes",impl->pluginHost.hasPendingChanges()},{"revision",juce::int64(impl->guard.revision())}}));
     }
+    if(command=="get_native_effect") { juce::var data;auto r=impl->describeNativeEffect(textArg(args,"track_id"),textArg(args,"device_id"),data);return reply(r.wasOk()?"completed":"failed",data,r.getErrorMessage()); }
     if(command=="get_recording_preferences")return reply("completed",impl->recording.preferences());
     if(command=="get_clipboard_state")return reply("completed",object({{"clipboard_id",impl->clipClipboard.id},{"project_id",impl->clipClipboard.projectId},{"clip_count",int(impl->clipClipboard.clips.size())}}));
     if(command=="get_recording_state")return reply("completed",impl->recording.state());
@@ -242,6 +365,10 @@ juce::var EngineSession::executeRequest(const juce::var& envelope)
         auto data=impl->getPluginParameters(args);
         if(data.hasProperty("error"))return reply("failed",{},data.getProperty("error",{}).toString());
         return reply("completed",data);
+    }
+    if(command=="get_native_instrument"){
+        juce::var data;auto result=execute(command,args,impl->guard.revision(),&data);
+        return result.wasOk()?reply("completed",data):reply("failed",{},result.getErrorMessage());
     }
     if(command=="get_jobs"||command=="get_job"){
         juce::Array<juce::var> list;for(const auto& j:snapshot().jobs){auto v=jobSnapshotJson(j);
@@ -291,7 +418,9 @@ juce::var EngineSession::executeRequest(const juce::var& envelope)
     bool missingToken=missingClipboardToken(command,args);
     if(command=="batch")if(auto* children=args["commands"].getArray())
         for(const auto& child:*children)missingToken=missingToken||missingClipboardToken(textArg(child,"command"),child["args"]);
-    const auto priorJob=impl->jobs.empty()?juce::String():impl->jobs.back()->id;juce::Result result=juce::Result::ok();juce::var data;
+    const auto priorJob=impl->jobs.empty()?juce::String():impl->jobs.back()->id;
+    const auto priorNative=impl->nativePending?impl->nativePending->token:0;
+    juce::Result result=juce::Result::ok();juce::var data;
     if(impl->recordingBusy()&&(command=="play"||command=="pause"||command=="seek"))result=juce::Result::fail("Stop recording and finish the take before changing transport position or playback.");
     else if(command=="new_project")result=newProject(revision);
     else if(command=="play"){if(!snapshot().playing)togglePlay();if(!snapshot().playing)result=juce::Result::fail("Playback could not start.");}
@@ -301,6 +430,9 @@ juce::var EngineSession::executeRequest(const juce::var& envelope)
     else if(missingToken)result=juce::Result::fail("Agent paste_clips, including batch children, requires clipboard_id returned by copy_clips/cut_clips.");
     else result=execute(command,args,revision,&data);
     bool accepted=false;
+    if(result.wasOk()&&impl->nativePending&&impl->nativePending->token!=priorNative){
+        data=object({{"job_id","native-"+juce::String(juce::int64(impl->nativePending->token))}});accepted=true;
+    }
     if(result.wasOk()&&!impl->jobs.empty()&&impl->jobs.back()->id!=priorJob){data=object({{"job_id",impl->jobs.back()->id}});accepted=true;}
     if(result.wasOk()&&command=="scan_plugins"){data=object({{"job_id","plugin-scan"}});accepted=true;}
     if(result.wasOk()&&(command=="copy_clips"||command=="cut_clips"))data=object({{"clipboard_id",impl->clipClipboard.id},{"clip_count",int(impl->clipClipboard.clips.size())}});

@@ -199,8 +199,9 @@ class RecordedPatchTests(unittest.TestCase):
             "modules/tracktion_engine/model/edit/tracktion_Edit.cpp",
             "modules/tracktion_engine/playback/graph/tracktion_ClickNode.cpp",
             "modules/tracktion_engine/playback/tracktion_TransportControl.cpp",
-            "modules/tracktion_engine/playback/devices/tracktion_MidiInputDevice.cpp"})
-        self.assertEqual(len(manifest["files"]), 9)
+            "modules/tracktion_engine/playback/devices/tracktion_MidiInputDevice.cpp",
+            "modules/tracktion_engine/playback/devices/tracktion_InputDevice.cpp"})
+        self.assertEqual(len(manifest["files"]), 10)
         for entry in manifest["files"]:
             patch = patcher.inside(manifest_file.parent, entry["patch"]).read_bytes()
             self.assertEqual(patcher.digest(patch), entry["patch_sha256_lf"])

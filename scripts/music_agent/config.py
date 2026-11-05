@@ -21,11 +21,14 @@ def config_path():
     return data_directory() / "settings.json"
 
 
-def _validate(provider_id, model, base_url):
-    provider = create_provider(provider_id, model, base_url)
+def _validate(provider_id, model, base_url, reasoning_effort=None):
+    kwargs = {"reasoning_effort": "medium" if reasoning_effort is None else reasoning_effort} if provider_id == "openai" else {}
+    if provider_id != "openai" and reasoning_effort is not None:
+        raise ConfigError("该服务不支持此推理强度设置。")
+    provider = create_provider(provider_id, model, base_url, **kwargs)
     if provider.model.startswith("sk-"):
         raise ConfigError("模型名称不能填写 API 密钥。")
-    return {"model": provider.model, "base_url": provider.base_url}
+    return {"model": provider.model, "base_url": provider.base_url, **({"reasoning_effort":provider.reasoning_effort} if provider_id == "openai" else {})}
 
 
 def _unique(pairs):
@@ -50,9 +53,11 @@ def _normalize(value):
     if not isinstance(prefs, dict) or set(prefs) - set(result["providers"]):
         raise ConfigError("设置包含未知服务。")
     for provider_id, settings in prefs.items():
-        if not isinstance(settings, dict) or set(settings) != {"model", "base_url"}:
+        if not isinstance(settings, dict) or not {"model", "base_url"} <= set(settings) or set(settings) - ({"model", "base_url", "reasoning_effort"} if provider_id == "openai" else {"model", "base_url"}):
             raise ConfigError("服务设置字段无效。")
-        result["providers"][provider_id] = _validate(provider_id, settings["model"], settings["base_url"])
+        if "reasoning_effort" in settings and not isinstance(settings["reasoning_effort"], str):
+            raise ConfigError("推理强度设置无效。")
+        result["providers"][provider_id] = _validate(provider_id, settings["model"], settings["base_url"], settings.get("reasoning_effort"))
     active = value["active_provider"]
     if not isinstance(active, str) or active not in result["providers"]:
         raise ConfigError("当前服务未适配。")
@@ -79,11 +84,13 @@ def active_config(config=None):
     return {"provider": provider_id, **values["providers"][provider_id]}
 
 
-def save_config(model, base_url, path=None, *, provider="kimi"):
+def save_config(model, base_url, path=None, *, provider="kimi", reasoning_effort=None):
     """Update one provider, preserve the others and atomically activate the choice."""
-    settings = _validate(provider, model, base_url)
     destination = Path(path) if path is not None else config_path()
     value = load_config(destination)
+    if provider == "openai" and reasoning_effort is None:
+        reasoning_effort = value["providers"]["openai"].get("reasoning_effort","medium")
+    settings = _validate(provider, model, base_url, reasoning_effort)
     value["providers"][provider] = settings
     value["active_provider"] = provider
     temporary = None

@@ -444,8 +444,10 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
         const auto duration = drag.id == clip.id && drag.moved ? drag.duration : clip.duration;
         const auto end = juce::jlimit(viewStart, viewStart + visibleDuration(), clipStart + duration);
         const auto start = juce::jlimit(viewStart, viewStart + visibleDuration(), clipStart);
-        return { timeX(start), static_cast<float>(static_cast<int>(row) * rowHeight + (rowHeight < 104 ? 9 : 17)),
-                 juce::jmax(0.0f, timeX(end) - timeX(start)), float(rowHeight < 104 ? rowHeight - 18 : 66) };
+        // The clip fills its track lane; only the shared 1px row separator is
+        // excluded. Painting, selection and edge handles use this same box.
+        return { timeX(start), static_cast<float>(static_cast<int>(row) * rowHeight),
+                 juce::jmax(0.0f, timeX(end) - timeX(start)), float(rowHeight - 1) };
     }
     const EngineSession::ClipSnapshot* hitClip(std::size_t row, juce::Point<float> point) const
     {
@@ -679,7 +681,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                 for (int first = 0; first < columns;) {
                     int end = first + 1;
                     while (end < columns && minPitch[std::size_t(end)] == minPitch[std::size_t(first)] && maxPitch[std::size_t(end)] == maxPitch[std::size_t(first)]) ++end;
-                    const auto addLine = [&](int pitch) { result.lines.emplace_back(float(first) / columns, float(pitch - low + 1) / pitchRange, float(end - first) / columns, 0.0f); };
+                    const auto addLine = [&](int pitch) { result.lines.emplace_back(float(first) / columns, float(pitch - low + 1) / pitchRange, float(end - first) / columns, 1.0f / pitchRange); };
                     if (maxPitch[std::size_t(first)] >= 0) {
                         addLine(minPitch[std::size_t(first)]);
                         if (maxPitch[std::size_t(first)] != minPitch[std::size_t(first)]) addLine(maxPitch[std::size_t(first)]);
@@ -760,8 +762,9 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                             if (noteEnd <= viewStart || noteStart >= viewStart + visibleDuration()) continue;
                             const auto noteX = timeX(std::max(noteStart, viewStart));
                             const auto right = timeX(std::min(noteEnd, viewStart + visibleDuration()));
-                            const auto noteY = waveArea.getBottom() - 3.0f - line.getY() * (waveArea.getHeight() - 5);
-                            g.fillRect(noteX, noteY, juce::jmax(1.0f, right - noteX), 2.0f);
+                            const auto noteY = waveArea.getBottom() - line.getY() * waveArea.getHeight();
+                            const auto noteHeight = juce::jmax(1.0f, line.getHeight() * waveArea.getHeight());
+                            g.fillRect(noteX, noteY, juce::jmax(1.0f, right - noteX), noteHeight);
                         }
                     }
                 } else if (owner.trackWaveformReady(clip.id)) {
@@ -809,7 +812,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
         if (drag.moved && drag.edge == 0 && drag.targetTrackIndex != drag.trackIndex) {
             const auto xx = timeX(juce::jlimit(viewStart, viewStart + visibleDuration(), drag.previewStart));
             const auto ww = timeX(juce::jlimit(viewStart, viewStart + visibleDuration(), drag.previewStart + drag.duration)) - xx;
-            juce::Rectangle<float> ghost(xx, float(drag.targetTrackIndex * rowHeight + (rowHeight < 104 ? 9 : 17)), ww, float(rowHeight < 104 ? rowHeight - 18 : 66));
+            juce::Rectangle<float> ghost(xx, float(drag.targetTrackIndex * rowHeight), ww, float(rowHeight - 1));
             g.setColour(ink.withAlpha(0.07f)); g.fillRect(ghost); g.setColour(ink); g.drawRect(ghost, 2);
         }
         const auto head = timeX(state.position);
@@ -1210,6 +1213,10 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
         const auto expectedX = p.labelWidth() + clip.timelineStart / initialHorizon * p.plotWidth();
         if (std::abs(actual.getWidth() - expectedWidth) > 0.1 || std::abs(actual.getX() - expectedX) > 0.1)
             return juce::Result::fail("A clip does not use the common project time scale.");
+        if (actual.getY() != float(int(row) * p.rowHeight) || actual.getHeight() != float(p.rowHeight - 1)
+            || p.hitClip(row, { actual.getCentreX(), actual.getY() + 0.25f }) == nullptr
+            || p.hitClip(row, { actual.getCentreX(), actual.getBottom() - 0.25f }) == nullptr)
+            return juce::Result::fail("A clip does not fill its track lane or the full-height edges cannot be selected.");
         auto detail = new juce::DynamicObject;
         detail->setProperty("track_id", initial.tracks[row].id);
         detail->setProperty("clip_id", clip.id);
@@ -1221,6 +1228,14 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
         widths.add(juce::var(detail));
     }
     report.setProperty("clip_geometry", widths);
+    setCompactRows(true);
+    for (std::size_t row = 0; row < initial.tracks.size(); ++row) for (const auto& clip : initial.tracks[row].clips) {
+        const auto actual = p.clipArea(row, clip);
+        if (actual.getY() != float(int(row) * 64) || actual.getHeight() != 63.0f)
+            return juce::Result::fail("Compact clips leave an obsolete inset instead of filling their track lane.");
+    }
+    setCompactRows(false);
+    report.setProperty("clips_fill_standard_and_compact_track_lanes", true);
     const auto event = [&](float x, float y, bool dragging = false, int modifiers = 0) {
         const auto now = juce::Time::getCurrentTime();
         return juce::MouseEvent(juce::Desktop::getInstance().getMainMouseSource(), { x, y },
@@ -1246,11 +1261,13 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
     }
     report.setProperty("track_header_scope_and_clip_restore", true);
     const auto halfX = static_cast<float>(p.labelWidth() + p.plotWidth() * 0.5);
-    p.canvas.mouseDown(event(halfX, static_cast<float>(lastRow * rowHeight + 5)));
+    // The track's former blank upper strip is now part of its full-height clip.
+    // Seeking through occupied tracks is available from the ruler.
+    mouseDown(event(halfX, 10.0f));
     if (explicitSelectedTrackId().isNotEmpty()) return juce::Result::fail("Timeline selection did not leave track-only mode.");
     if (std::abs(p.engine.snapshot().position - initialHorizon * 0.5) > 0.002) return juce::Result::fail("Timeline click did not seek to the shared time coordinate including trailing space.");
     // Empty-space dragging now selects clips; transport scrubbing stays in the ruler.
-    p.canvas.mouseUp(event(halfX, static_cast<float>(lastRow * rowHeight + 5)));
+    mouseUp(event(halfX, 10.0f));
     mouseDown(event(halfX, 10.0f));
     mouseDrag(event(static_cast<float>(p.labelWidth() + p.plotWidth() + 100), 10.0f, true));
     if (std::abs(p.engine.snapshot().position - initialHorizon) > 0.002) return juce::Result::fail("Timeline drag did not clamp at the displayed horizon.");
@@ -1422,9 +1439,10 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
 
     // Rectangle selection changes no musical data and can include several rows.
     const auto beforeRectangle = p.engine.snapshot();
-    p.canvas.mouseDown(event(float(p.labelWidth() + 1), 2.0f));
-    p.canvas.mouseDrag(event(float(p.labelWidth() + p.plotWidth()), float(lastRow * rowHeight + rowHeight - 2), true));
-    p.canvas.mouseUp(event(float(p.labelWidth() + p.plotWidth()), float(lastRow * rowHeight + rowHeight - 2)));
+    // Start in the actual trailing blank timeline, not the removed clip inset.
+    p.canvas.mouseDown(event(float(p.labelWidth() + p.plotWidth() - 1), 2.0f));
+    p.canvas.mouseDrag(event(float(p.labelWidth() + 1), float(lastRow * rowHeight + rowHeight - 2), true));
+    p.canvas.mouseUp(event(float(p.labelWidth() + 1), float(lastRow * rowHeight + rowHeight - 2)));
     int expectedSelected = 0; for (const auto& track : p.state.tracks) expectedSelected += int(track.clips.size());
     if (p.selection.size() != expectedSelected || p.engine.snapshot().revision != beforeRectangle.revision)
         return juce::Result::fail("Rectangle selection missed clips or edited the project.");

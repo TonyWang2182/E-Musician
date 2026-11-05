@@ -82,8 +82,8 @@ class ResponsesTests(unittest.TestCase):
         self.assertFalse(body["tools"][0]["strict"])
         self.assertEqual(body["tools"][0]["parameters"], TOOL["function"]["parameters"])
         self.assertNotIn("function", body["tools"][0])
-        self.assertEqual(body["reasoning"], {"effort": "low"})
-        self.assertEqual(body["max_output_tokens"], 2048)
+        self.assertEqual(body["reasoning"], {"effort": "medium"})
+        self.assertEqual(body["max_output_tokens"], 4096)
         self.assertEqual(result["usage"], {"prompt_tokens": 22, "completion_tokens": 7, "total_tokens": 29})
         self.assertEqual(result["message"]["content"], "已读取工程。")
     def test_reasoning_and_call_ids_roundtrip(self):
@@ -106,6 +106,21 @@ class ResponsesTests(unittest.TestCase):
         opener = Opener([Response(text_response())])
         OpenAIProvider(model="gpt-4.1-mini", api_key=KEY, opener=opener).complete([{"role": "user", "content": "hi"}])
         self.assertNotIn("reasoning", json.loads(opener.requests[0].data))
+    def test_configured_effort_only_for_known_compatible_models(self):
+        for effort in ("low","medium","high"):
+            opener=Opener([Response(text_response())])
+            p=OpenAIProvider(model="gpt-5-mini",api_key=KEY,opener=opener,reasoning_effort=effort)
+            self.assertTrue(p.capabilities["reasoning_effort"])
+            p.complete([{"role":"user","content":"hi"}])
+            self.assertEqual(json.loads(opener.requests[0].data)["reasoning"],{"effort":effort})
+        for model in ("gpt-4.1-mini","gpt-5-chat-latest","gpt-5-unknown-model"):
+            opener=Opener([Response(text_response())])
+            p=OpenAIProvider(model=model,api_key=KEY,opener=opener,reasoning_effort="high")
+            self.assertFalse(p.capabilities["reasoning_effort"])
+            p.complete([{"role":"user","content":"hi"}])
+            self.assertNotIn("reasoning",json.loads(opener.requests[0].data))
+        for effort in (None, 2, False, "xhigh", ""):
+            with self.subTest(effort=effort),self.assertRaises(ProviderError): OpenAIProvider(reasoning_effort=effort)
     def test_incomplete_and_unsupported_output_rejected(self):
         cases = []
         for status in ("incomplete", "failed", "in_progress", None):

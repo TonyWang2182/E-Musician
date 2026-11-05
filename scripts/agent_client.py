@@ -29,7 +29,7 @@ READ_COMMANDS = {
     "get_capabilities", "get_snapshot", "get_project_state", "get_jobs",
     "get_job", "get_events", "get_clip_notes", "get_track_clips", "get_plugin_catalog", "get_plugin_parameters",
     "get_recording_state", "get_recording_inputs", "get_audio_devices",
-    "get_automation_targets", "get_automation_points", "get_clip_controllers", "get_save_diagnostics",
+    "get_automation_targets", "get_automation_points", "get_clip_controllers", "get_save_diagnostics", "get_native_instrument",
 }
 TERMINAL_JOBS = {"completed", "failed", "cancelled", "canceled", "conflict"}
 

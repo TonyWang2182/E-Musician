@@ -50,6 +50,7 @@ struct RecordingController::State final : te::TransportControl::Listener {
     bool activeTake = false, transactionStarted = false, adopted = false;
     int finishingInputs = 0;
     bool metronomeEnabled=false, recordOnly=false, countEnabled=false, cancelled=false;
+    std::map<juce::String, juce::String> monitorRebindAttempts;
     int countBars=1;
     float gainDb=-12;
     double punchTime=0;
@@ -154,11 +155,27 @@ struct RecordingController::State final : te::TransportControl::Listener {
     }
     void reconcile() {
         if (!edit || edit->getTransport().isRecording() || edit->getTransport().isRecordingStopping()) return;
+        std::map<juce::String, bool> previousArms;
         for (auto* input : edit->getAllInputDevices()) for (auto target : input->getTargets()) {
             auto* track = dynamic_cast<te::AudioTrack*>(te::findTrackForID(*edit, target));
             if (!track || selectedInput(*track) != input->getInputDevice().getDeviceID()) {
+                if (track) previousArms[track->state["emId"].toString()] |= input->isRecordingEnabled(target);
                 input->setRecordingEnabled(target, false); auto ignored = input->removeTarget(target, nullptr); juce::ignoreUnused(ignored);
             }
+        }
+        for (auto* track : te::getAudioTracks(*edit)) {
+            const auto trackId = track->state["emId"].toString(), id = selectedInput(*track);
+            const bool wasArmed = previousArms[trackId];
+            const bool wantsLive = track->state["emMonitorMode"].toString() == "on";
+            if (id.isEmpty() || (!wasArmed && !wantsLive)) { monitorRebindAttempts.erase(trackId); continue; }
+            auto* input = instance(id);
+            if (input && input->getTargets().contains(track->itemID)) { monitorRebindAttempts.erase(trackId); continue; }
+            if (!device(id) || monitorRebindAttempts[trackId] == id) continue;
+            // Try once for this selection; explicit arm/monitor changes retry.
+            // Avoid repeatedly restarting the graph if a driver cannot open.
+            monitorRebindAttempts[trackId] = id;
+            if (auto result = bind(*track, wasArmed); result.failed()) error = result.getErrorMessage();
+            else monitorRebindAttempts.erase(trackId);
         }
     }
     void recordingStarted(te::SyncPoint start, std::optional<te::TimeRange>) override {
@@ -236,12 +253,14 @@ RecordingController::~RecordingController() { detach(); }
 void RecordingController::detach() {
     if (data->edit) { data->edit->getTransport().removeListener(data.get()); data->edit = nullptr; }
     data->activeTake = false; data->finishingInputs = 0; data->transactionStarted = false;
+    data->monitorRebindAttempts.clear();
 }
 void RecordingController::attach(te::Edit& edit, const juce::File& directory) {
     detach(); data->edit = &edit; data->directory = directory; data->error.clear();
     edit.getTransport().addListener(data.get());
     // A project never starts recording/monitoring simply because it was opened.
     for (auto* i : edit.getAllInputDevices()) for (auto t : i->getTargets()) i->setRecordingEnabled(t, false);
+    for (auto* track : te::getAudioTracks(edit)) track->state.setProperty("emMonitorMode", "off", nullptr);
     data->restoreMonitorsOrDefaultOff({});
     data->applyPreferences();
 }
@@ -272,12 +291,29 @@ juce::Result RecordingController::execute(const juce::String& command, const juc
     if (command == "set_input_monitor") {
         const auto id = args["input_device_id"].toString(), mode = args["mode"].toString();
         if (mode != "off" && mode != "auto" && mode != "on") return graphError("Input monitor must be off, auto, or on.");
+        if (args.hasProperty("track_id")) {
+            auto* track = graphTrack(*s.edit, args["track_id"].toString());
+            if (!track || track->state["emKind"].toString() == "bus") return graphError("Select an audio or MIDI track for monitoring.");
+            const auto selected = s.selectedInput(*track);
+            if (!s.device(selected)) return graphError("Selected recording input is unavailable.");
+            if (mode != "off") {
+                auto* input = s.instance(selected);
+                const bool armed = input && input->isRecordingEnabled(track->itemID);
+                if (auto r = s.bind(*track, armed); r.failed()) return r;
+            }
+            track->state.setProperty("emMonitorMode", mode, nullptr);
+            te::TransportControl::restartAllTransports(s.engine, false);
+            return juce::Result::ok();
+        }
         if (mode != "off") for (auto* track : te::getAudioTracks(*s.edit)) if (s.selectedInput(*track) == id) {
             auto* i = s.instance(id); const bool armed = i && i->isRecordingEnabled(track->itemID);
             if (auto r = s.bind(*track, armed); r.failed()) return r;
         }
         auto* device = s.device(id); if (!device) return graphError("Input device not found.");
+        for (auto* track : te::getAudioTracks(*s.edit)) if (s.selectedInput(*track) == id) track->state.setProperty("emMonitorMode", mode, nullptr);
+        const auto previousMode = device->getMonitorMode();
         device->setMonitorMode(mode == "on" ? te::InputDevice::MonitorMode::on : mode == "auto" ? te::InputDevice::MonitorMode::automatic : te::InputDevice::MonitorMode::off);
+        if (previousMode == device->getMonitorMode()) te::TransportControl::restartAllTransports(s.engine, false);
         return juce::Result::ok();
     }
     if (command == "start_recording") {
@@ -304,10 +340,11 @@ juce::var RecordingController::state() const {
     const auto& s = *data; juce::Array<juce::var> tracks;
     if (s.edit) for (auto* track : te::getAudioTracks(*s.edit)) {
         const auto inputId = s.selectedInput(*track); auto* input = s.instance(inputId); auto* device = s.device(inputId);
-        tracks.add(graphObject({ {"track_id", track->state["emId"].toString()}, {"input_device_id", inputId}, {"armed", input && input->isRecordingEnabled(track->itemID)}, {"monitor", device ? State::monitor(*device) : "off"}, {"input_available", device != nullptr} }));
+        const auto overrideMode = track->state["emMonitorMode"].toString();
+        tracks.add(graphObject({ {"track_id", track->state["emId"].toString()}, {"input_device_id", inputId}, {"armed", input && input->isRecordingEnabled(track->itemID)}, {"monitor", overrideMode.isNotEmpty() ? overrideMode : "off"}, {"input_available", device != nullptr} }));
     }
     const auto remaining=s.countingIn()?juce::jlimit(0.0,double(s.countBars*s.edit->tempoSequence.getTimeSig(0)->numerator),(s.punchTime-s.position())*s.edit->tempoSequence.getTempo(0)->getBpm()/60.0*s.edit->tempoSequence.getTimeSig(0)->denominator/4.0):0.0;
-    return graphObject({ {"counting_in",s.countingIn()},{"count_in_beats_remaining",remaining},{"recording_start_seconds",s.punchTime}, {"recording", s.edit && s.edit->getTransport().isRecording()}, {"finalizing", s.edit && (s.edit->getTransport().isRecordingStopping() || s.finishingInputs > 0 || (s.activeTake && !s.edit->getTransport().isRecording()))}, {"error", s.error}, {"tracks", tracks}, {"recording_directory", s.directory.getFullPathName()}, {"monitor_scope", "input_device"} });
+    return graphObject({ {"counting_in",s.countingIn()},{"count_in_beats_remaining",remaining},{"recording_start_seconds",s.punchTime}, {"recording", s.edit && s.edit->getTransport().isRecording()}, {"finalizing", s.edit && (s.edit->getTransport().isRecordingStopping() || s.finishingInputs > 0 || (s.activeTake && !s.edit->getTransport().isRecording()))}, {"error", s.error}, {"tracks", tracks}, {"recording_directory", s.directory.getFullPathName()}, {"monitor_scope", "track_and_input_device"} });
 }
 juce::var RecordingController::preferences() const {
     const auto& s=*data;

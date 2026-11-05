@@ -1,4 +1,6 @@
 #include "PluginHost.h"
+#include "NativeInstrument.h"
+#include "NativeEffects.h"
 #include <juce_cryptography/juce_cryptography.h>
 #include <algorithm>
 #include <atomic>
@@ -107,6 +109,7 @@ public:
                 setConstrainer(editor->getBoundsConstrainer());
         }
     }
+    bool hasEditor() const { return editor != nullptr; }
 private:
     void closeButtonPressed() override { plugin.windowState->closeWindowExplicitly(); }
     void moved() override
@@ -124,7 +127,9 @@ struct NativePluginUI final : te::UIBehaviour {
         if (!window) return {};
         if (auto* external = dynamic_cast<te::ExternalPlugin*>(&window->plugin))
             if (!external->getAudioPluginInstance()) return {};
-        return std::make_unique<NativePluginWindow>(window->plugin);
+        auto result = std::make_unique<NativePluginWindow>(window->plugin);
+        if (!result->hasEditor()) return {};
+        return result;
     }
     void recreatePluginWindowContentAsync(te::Plugin& plugin) override
     {
@@ -567,7 +572,11 @@ struct PluginHost::Impl final : private juce::Thread {
     }
 };
 
-PluginHost::PluginHost(te::Engine& engine) : impl(std::make_unique<Impl>(engine)) {}
+PluginHost::PluginHost(te::Engine& engine) : impl(std::make_unique<Impl>(engine))
+{
+    engine.getPluginManager().createBuiltInType<native::Instrument>();
+    engine.getPluginManager().createBuiltInType<native_effects::Effect>();
+}
 PluginHost::~PluginHost() = default;
 juce::FileSearchPath PluginHost::defaultSearchPaths()
 {
@@ -635,6 +644,27 @@ storage::StoredPlugin PluginHost::describe(const juce::PluginDescription& descri
 te::Plugin::Ptr PluginHost::instantiate(te::Edit& edit, const storage::StoredPlugin& stored, juce::Result& result)
 {
     requireMessageThread();
+    if (stored.format == "E-musician") {
+        std::vector<juce::String> references;
+        result = storage::nativePluginAssetIds(stored, references);
+        if (result.failed()) return {};
+        if (stored.role == "effect") {
+            auto plugin=edit.getPluginCache().createNewPlugin(native_effects::Effect::xmlTypeName, {});
+            if (!plugin || !dynamic_cast<native_effects::Effect*>(plugin.get())) { result=juce::Result::fail("Could not create native effect."); return {}; }
+            if(stored.identifier=="native.delay")static_cast<native_effects::Effect*>(plugin.get())->prepareDelay();
+            if(stored.identifier=="native.reverb")static_cast<native_effects::Effect*>(plugin.get())->prepareReverb();
+            plugin->state.setProperty("emEffectType",stored.identifier,nullptr);
+            plugin->state.setProperty("emEffectData",juce::var(stored.state),nullptr);
+            plugin->state.setProperty("emId",stored.id,nullptr);plugin->setEnabled(stored.enabled);return plugin;
+        }
+        auto plugin = edit.getPluginCache().createNewPlugin(native::Instrument::xmlTypeName, {});
+        if (!plugin || dynamic_cast<native::Instrument*>(plugin.get()) == nullptr) {
+            result = juce::Result::fail("Could not create native instrument."); return {};
+        }
+        plugin->state.setProperty("emId", stored.id, nullptr);
+        plugin->setEnabled(stored.enabled);
+        return plugin;
+    }
     CapturedState saved;
     result = decodeState(stored.state, saved);
     if (result.failed()) return {};
@@ -845,6 +875,8 @@ juce::Result PluginHost::showEditor(te::Plugin& plugin)
     auto* external = dynamic_cast<te::ExternalPlugin*>(&plugin);
     if (!external || !external->getAudioPluginInstance()) return juce::Result::fail("This plugin is not loaded.");
     plugin.windowState->showWindowExplicitly();
+    if (!plugin.windowState->isWindowShowing())
+        return juce::Result::fail("The plugin editor could not open. Close any modal dialog and try again; the plugin may not provide an editor.");
     return juce::Result::ok();
 }
 void PluginHost::closeEditor(te::Plugin& plugin) { requireMessageThread(); plugin.windowState->closeWindowExplicitly(); }

@@ -4013,3 +4013,1549 @@ DAW0.8.0/Agent0.3冻结源码122输入347a75c089fe，EXE4fdb7ad2b6d6；最终构
 ### 2026-10-29 第二批提交前核查
 
 暂存源码122项与最终测试输入逐项比对：97项字节一致、25项仅既定换行转换，无其他差异；git-index-source-manifest已归档。暂存文件未检测到真实密钥形状文本，依赖/二进制/原始日志仍忽略。DEVLOG相对基线仅追加，无历史删除；用户原6条启动摘要随日志保留。人工步骤明确先验证Undo/Redo，再手动加载乐器，避免新的手动编辑阻止助手专用撤销而被误判成故障。
+
+### 2026-10-29T23:55:47+08:00 · agent-native-run · launched
+
+- Config: Release; exit code: None; elapsed: 0.567s.
+- Command: `C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build\agent-batch2\bin\Release\E-musician.exe --agent`
+- Context: Embedded Agent batch 2; physical audio acceptance remains manual
+- Source SHA-256: `347a75c089fe0cd9b17f2e32866ed977004b8aa4b35e5d86a2603cf765cfa64a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261029T155547.878748Z-781a227cb7.json) · [Raw log](../build-logs/20261029T155547.878748Z-781a227cb7.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261029T155547.878748Z-781a227cb7.raw.log)
+
+### 2026-10-29T23:55:58+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.543s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `347a75c089fe0cd9b17f2e32866ed977004b8aa4b35e5d86a2603cf765cfa64a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261029T155558.775712Z-6f68871bbf.json) · [Raw log](../build-logs/20261029T155558.775712Z-6f68871bbf.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-10-30T01:01:01+08:00 · agent-native-run · launched
+
+- Config: Release; exit code: None; elapsed: 0.337s.
+- Command: `C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build\agent-batch2\bin\Release\E-musician.exe --agent`
+- Context: Embedded Agent batch 2; physical audio acceptance remains manual
+- Source SHA-256: `347a75c089fe0cd9b17f2e32866ed977004b8aa4b35e5d86a2603cf765cfa64a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261029T170101.409778Z-f8fef22903.json) · [Raw log](../build-logs/20261029T170101.409778Z-f8fef22903.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261029T170101.409778Z-f8fef22903.raw.log)
+
+### 2026-10-30T01:01:10+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.318s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `347a75c089fe0cd9b17f2e32866ed977004b8aa4b35e5d86a2603cf765cfa64a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261029T170110.288842Z-e0e0dd834b.json) · [Raw log](../build-logs/20261029T170110.288842Z-e0e0dd834b.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-10-30T02:24:05+08:00 · agent-native-run · launched
+
+- Config: Release; exit code: None; elapsed: 0.398s.
+- Command: `C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build\agent-batch2\bin\Release\E-musician.exe --agent`
+- Context: Embedded Agent batch 2; physical audio acceptance remains manual
+- Source SHA-256: `347a75c089fe0cd9b17f2e32866ed977004b8aa4b35e5d86a2603cf765cfa64a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261029T182405.801200Z-257113a249.json) · [Raw log](../build-logs/20261029T182405.801200Z-257113a249.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261029T182405.801200Z-257113a249.raw.log)
+
+### 2026-10-30T02:24:12+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.030s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `347a75c089fe0cd9b17f2e32866ed977004b8aa4b35e5d86a2603cf765cfa64a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261029T182412.229537Z-199fad0b0d.json) · [Raw log](../build-logs/20261029T182412.229537Z-199fad0b0d.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-10-30T03:14:16+08:00 · agent-native-run · launched
+
+- Config: Release; exit code: None; elapsed: 0.204s.
+- Command: `C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build\agent-batch2\bin\Release\E-musician.exe --agent`
+- Context: Embedded Agent batch 2; physical audio acceptance remains manual
+- Source SHA-256: `347a75c089fe0cd9b17f2e32866ed977004b8aa4b35e5d86a2603cf765cfa64a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261029T191416.924277Z-4be60f594e.json) · [Raw log](../build-logs/20261029T191416.924277Z-4be60f594e.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261029T191416.924277Z-4be60f594e.raw.log)
+
+### 2026-10-30T03:14:23+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 0.917s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `347a75c089fe0cd9b17f2e32866ed977004b8aa4b35e5d86a2603cf765cfa64a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261029T191423.926507Z-e2ba6ea865.json) · [Raw log](../build-logs/20261029T191423.926507Z-e2ba6ea865.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-10-30T14:53:21+08:00 · agent-native-run · launched
+
+- Config: Release; exit code: None; elapsed: 1.769s.
+- Command: `C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build\agent-batch2\bin\Release\E-musician.exe --agent`
+- Context: Embedded Agent batch 2; physical audio acceptance remains manual
+- Source SHA-256: `347a75c089fe0cd9b17f2e32866ed977004b8aa4b35e5d86a2603cf765cfa64a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T065321.266885Z-24ded8eb8a.json) · [Raw log](../build-logs/20261030T065321.266885Z-24ded8eb8a.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261030T065321.266885Z-24ded8eb8a.raw.log)
+
+### 2026-10-30T14:53:31+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.481s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `347a75c089fe0cd9b17f2e32866ed977004b8aa4b35e5d86a2603cf765cfa64a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T065331.834777Z-bf78bfa315.json) · [Raw log](../build-logs/20261030T065331.834777Z-bf78bfa315.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-10-30T16:14:24+08:00 · agent-native-run · launched
+
+- Config: Release; exit code: None; elapsed: 0.408s.
+- Command: `C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build\agent-batch2\bin\Release\E-musician.exe --agent`
+- Context: Embedded Agent batch 2; physical audio acceptance remains manual
+- Source SHA-256: `347a75c089fe0cd9b17f2e32866ed977004b8aa4b35e5d86a2603cf765cfa64a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T081424.815700Z-c167a74d5b.json) · [Raw log](../build-logs/20261030T081424.815700Z-c167a74d5b.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261030T081424.815700Z-c167a74d5b.raw.log)
+
+### 2026-10-30T16:14:32+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.033s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `347a75c089fe0cd9b17f2e32866ed977004b8aa4b35e5d86a2603cf765cfa64a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T081432.690876Z-fa124692a2.json) · [Raw log](../build-logs/20261030T081432.690876Z-fa124692a2.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-10-30T21:32:15+08:00 · monitor-isolated-checkout · succeeded
+
+- Config: Release; exit code: 0; elapsed: 7.015s.
+- Command: `git clone --no-hardlinks E:\E-musician\_deps\tracktion_engine C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\.cache\monitor-engine`
+- Context: Copy pinned dependencies into owned checkout without modifying shared _deps
+- Source SHA-256: `9fe037c1c479452c201a097f33ea13c8549c911a3eadea293db64aed849ef772`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T133215.581179Z-8b25236f38.json) · [Raw log](../build-logs/20261030T133215.581179Z-8b25236f38.log)
+- [Exact process output](../build-logs/20261030T133215.581179Z-8b25236f38.raw.log)
+
+### 2026-10-30T21:32:22+08:00 · monitor-isolated-checkout · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.519s.
+- Command: `git -C C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\.cache\monitor-engine checkout --detach b0c7dd090a56b27fe01bb394617891906eb34daf`
+- Context: Copy pinned dependencies into owned checkout without modifying shared _deps
+- Source SHA-256: `9fe037c1c479452c201a097f33ea13c8549c911a3eadea293db64aed849ef772`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T133222.785177Z-65a2cbb7c3.json) · [Raw log](../build-logs/20261030T133222.785177Z-65a2cbb7c3.log)
+- [Exact process output](../build-logs/20261030T133222.785177Z-65a2cbb7c3.raw.log)
+
+### 2026-10-30T21:32:23+08:00 · monitor-isolated-checkout · succeeded
+
+- Config: Release; exit code: 0; elapsed: 9.625s.
+- Command: `git clone --no-hardlinks E:\E-musician\_deps\tracktion_engine\modules\juce C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\.cache\monitor-engine\modules\juce`
+- Context: Copy pinned dependencies into owned checkout without modifying shared _deps
+- Source SHA-256: `9fe037c1c479452c201a097f33ea13c8549c911a3eadea293db64aed849ef772`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T133223.452603Z-22ed0a487c.json) · [Raw log](../build-logs/20261030T133223.452603Z-22ed0a487c.log)
+- [Exact process output](../build-logs/20261030T133223.452603Z-22ed0a487c.raw.log)
+
+### 2026-10-30T21:32:33+08:00 · monitor-isolated-checkout · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.347s.
+- Command: `git -C C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\.cache\monitor-engine\modules\juce checkout --detach 19edd538429c93d277bf95b55aaa7e3eb545f951`
+- Context: Copy pinned dependencies into owned checkout without modifying shared _deps
+- Source SHA-256: `9fe037c1c479452c201a097f33ea13c8549c911a3eadea293db64aed849ef772`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T133233.195094Z-06fce0e8f3.json) · [Raw log](../build-logs/20261030T133233.195094Z-06fce0e8f3.log)
+- [Exact process output](../build-logs/20261030T133233.195094Z-06fce0e8f3.raw.log)
+
+### 2026-10-30T21:32:33+08:00 · monitor-isolated-checkout · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.220s.
+- Command: `C:\Python314\python.exe scripts/apply_engine_patches.py apply --engine-root C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\.cache\monitor-engine`
+- Context: Copy pinned dependencies into owned checkout without modifying shared _deps
+- Source SHA-256: `9fe037c1c479452c201a097f33ea13c8549c911a3eadea293db64aed849ef772`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T133233.728400Z-f6f5c8dfb6.json) · [Raw log](../build-logs/20261030T133233.728400Z-f6f5c8dfb6.log)
+- [Exact process output](../build-logs/20261030T133233.728400Z-f6f5c8dfb6.raw.log)
+
+### 2026-10-30 · 监听、待机与插件稳定性：调查中
+
+- 用户报告长待机 MIDI 无声、共享 MIDI 输入多轨监听串音，以及插件添加/打开无响应或白屏；已建立 `docs/review/2026-10-30-stability-and-devices/PLAN.md` 和 `DIAGNOSIS.md`。
+- 已确认现有引擎监听以输入设备共享，逐轨候选与独立引擎补丁正在构建及验证，尚未交付。待机无声原因尚未证实；不盲目重启输入设备。插件面板候选修改待构建和真实插件测试，不能据此声称慢插件卡死已解决。
+- 原生装置路线优先级和 Agent 参数接口见计划；目前均为规划。保留用户已有日志和工程文件。
+
+### 2026-10-30T21:33:12+08:00 · monitor-isolation-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 109.575s.
+- Command: `cmake --preset windows-msvc -B build/monitor-isolation`
+- Context: Owned patched engine; offline build only
+- Source SHA-256: `9e7ae502a17fc5ce102774d404e5d7ed5c56a717f993a6b705bbc9211b7e703a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T133312.385820Z-bf59dcc3c5.json) · [Raw log](../build-logs/20261030T133312.385820Z-bf59dcc3c5.log)
+- [Exact process output](../build-logs/20261030T133312.385820Z-bf59dcc3c5.raw.log)
+
+### 2026-10-30T21:35:02+08:00 · monitor-isolation-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 262.171s.
+- Command: `cmake --build build/monitor-isolation --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Owned patched engine; offline build only
+- Source SHA-256: `9e7ae502a17fc5ce102774d404e5d7ed5c56a717f993a6b705bbc9211b7e703a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T133502.131696Z-40180b5acb.json) · [Raw log](../build-logs/20261030T133502.131696Z-40180b5acb.log)
+- [Exact process output](../build-logs/20261030T133502.131696Z-40180b5acb.raw.log)
+
+### 2026-10-30T21:39:30+08:00 · monitor-isolation-test · failed
+
+- Config: Release; exit code: 8; elapsed: 96.758s.
+- Command: `ctest --test-dir build/monitor-isolation -C Release --output-on-failure`
+- Context: Offline hosted input monitor isolation and existing regression
+- Source SHA-256: `9e7ae502a17fc5ce102774d404e5d7ed5c56a717f993a6b705bbc9211b7e703a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T133930.984622Z-25fd2f137a.json) · [Raw log](../build-logs/20261030T133930.984622Z-25fd2f137a.log)
+- [Exact process output](../build-logs/20261030T133930.984622Z-25fd2f137a.raw.log)
+- Error: Command failed with code 8; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261030T133930.984622Z-25fd2f137a.log
+
+### 2026-10-30T21:42:36+08:00 · monitor-isolation-rebuild · succeeded
+
+- Config: Release; exit code: 0; elapsed: 44.441s.
+- Command: `cmake --build build/monitor-isolation --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Track monitor default/legacy semantics; owned dependency checkout
+- Source SHA-256: `22923abb303c712175f82648a80239618590aecf252e07971404c88bd55644c3`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T134236.563939Z-1e91684f97.json) · [Raw log](../build-logs/20261030T134236.563939Z-1e91684f97.log)
+- [Exact process output](../build-logs/20261030T134236.563939Z-1e91684f97.raw.log)
+
+### 2026-10-30T21:43:25+08:00 · monitor-isolation-retest · succeeded
+
+- Config: Release; exit code: 0; elapsed: 89.126s.
+- Command: `ctest --test-dir build/monitor-isolation -C Release --output-on-failure`
+- Context: Offline CTest with native plugin panel and shared MIDI input isolation
+- Source SHA-256: `22923abb303c712175f82648a80239618590aecf252e07971404c88bd55644c3`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T134325.447352Z-672e45e17f.json) · [Raw log](../build-logs/20261030T134325.447352Z-672e45e17f.log)
+- [Exact process output](../build-logs/20261030T134325.447352Z-672e45e17f.raw.log)
+
+### 2026-10-30T21:45:52+08:00 · monitor-rebind-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 42.278s.
+- Command: `cmake --build build/monitor-isolation --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Owned dependency, live input rebind; no physical devices
+- Source SHA-256: `7b8c5ba3986a1848bf58ec1411c6f9b31b4e849e37742fdc833717f17f743783`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T134552.595400Z-0a8bab4e47.json) · [Raw log](../build-logs/20261030T134552.595400Z-0a8bab4e47.log)
+- [Exact process output](../build-logs/20261030T134552.595400Z-0a8bab4e47.raw.log)
+
+### 2026-10-30T21:46:39+08:00 · monitor-rebind-test · succeeded
+
+- Config: Release; exit code: 0; elapsed: 91.071s.
+- Command: `ctest --test-dir build/monitor-isolation -C Release --output-on-failure`
+- Context: Offline native monitor rebind, recording, plugin panel and other contracts
+- Source SHA-256: `7b8c5ba3986a1848bf58ec1411c6f9b31b4e849e37742fdc833717f17f743783`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T134639.403666Z-b726660a40.json) · [Raw log](../build-logs/20261030T134639.403666Z-b726660a40.log)
+- [Exact process output](../build-logs/20261030T134639.403666Z-b726660a40.raw.log)
+
+### 2026-10-30T21:48:24+08:00 · stability-agent-regression · succeeded
+
+- Config: Release; exit code: 0; elapsed: 32.809s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Python agent regression only; no physical audio or live API
+- Source SHA-256: `7b8c5ba3986a1848bf58ec1411c6f9b31b4e849e37742fdc833717f17f743783`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261030T134824.855538Z-e74e3803f1.json) · [Raw log](../build-logs/20261030T134824.855538Z-e74e3803f1.log)
+- [Exact process output](../build-logs/20261030T134824.855538Z-e74e3803f1.raw.log)
+
+### 2026-10-30 · 稳定性候选：离线验证与未解决事项
+
+- 隔离 Tracktion 副本与逐轨监听候选；最终 Release 增量构建 `docs/builds/20261030T134552.595400Z-0a8bab4e47.json` 成功，CTest `docs/builds/20261030T134639.403666Z-b726660a40.json` 5/5。先前首次 `docs/builds/20261030T133930.984622Z-25fd2f137a.json` 为 4/5：新补丁未入白名单，之后补齐并复测。原始日志保留 build-logs。
+- 逐轨监听、Arm、新轨默认 off、输入重绑、旧设备级 API、录音离线回归通过；插件面板合成交互三项通过。Agent Python 219 项 `docs/builds/20261030T134824.855538Z-e74e3803f1.json` 通过。均不代表实体设备/真实插件验收。
+- 长待机静音根因仍未确认；慢插件初始化仍可能阻塞主线程；按住键关闭监听可能残留长音。未声称全部 bug 已解决。人工步骤与装置路线见 `docs/review/2026-10-30-stability-and-devices/`。
+- 候选路径 build/monitor-isolation/bin/Release/E-musician.exe；保留旧快捷方式及用户原有开发记录、工程文件。未执行实体音频、桌面自动化或模型调用。
+
+### 2026-11-01T21:45:41+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 4.673s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `7b8c5ba3986a1848bf58ec1411c6f9b31b4e849e37742fdc833717f17f743783`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261101T134541.931746Z-267d6f84f6.json) · [Raw log](../build-logs/20261101T134541.931746Z-267d6f84f6.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-02T11:07:13+08:00 · native-sampler-core-snapshot · succeeded
+
+- Config: Release; exit code: 0; elapsed: 30.379s.
+- Command: `cmake -S .cache/native-dsp-check -B .cache/native-dsp-check/build -G "Visual Studio 18 2026" -A x64`
+- Context: Frozen isolated DSP source copy; host work continues concurrently, not a full project verification
+- Source SHA-256: `8f14b3cba789a3e01651591e65eaa3db4e8cd6d339073ce6639d0ad946c2feab`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T030713.540294Z-f29ef52185.json) · [Raw log](../build-logs/20261102T030713.540294Z-f29ef52185.log)
+- [Exact process output](../build-logs/20261102T030713.540294Z-f29ef52185.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T11:07:44+08:00 · native-sampler-core-snapshot · succeeded
+
+- Config: Release; exit code: 0; elapsed: 7.892s.
+- Command: `cmake --build .cache/native-dsp-check/build --config Release --parallel 2`
+- Context: Frozen isolated DSP source copy; host work continues concurrently, not a full project verification
+- Source SHA-256: `d996c2157ee9be15020d9f91086d82869a4a7f3fb018ab1edff0a1942b0b79d0`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T030744.049415Z-f622cdeb19.json) · [Raw log](../build-logs/20261102T030744.049415Z-f622cdeb19.log)
+- [Exact process output](../build-logs/20261102T030744.049415Z-f622cdeb19.raw.log)
+
+### 2026-11-02T11:07:52+08:00 · native-sampler-core-snapshot · succeeded
+
+- Config: Release; exit code: 0; elapsed: 2.630s.
+- Command: `ctest --test-dir .cache/native-dsp-check/build -C Release --output-on-failure`
+- Context: Frozen isolated DSP source copy; host work continues concurrently, not a full project verification
+- Source SHA-256: `d996c2157ee9be15020d9f91086d82869a4a7f3fb018ab1edff0a1942b0b79d0`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T030752.067792Z-1bbf6ceb66.json) · [Raw log](../build-logs/20261102T030752.067792Z-1bbf6ceb66.log)
+- [Exact process output](../build-logs/20261102T030752.067792Z-1bbf6ceb66.raw.log)
+
+### 2026-11-02T11:10:02+08:00 · native-instrument-contract-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 10.092s.
+- Command: `cmake --preset windows-msvc -B build/monitor-isolation`
+- Context: Independent native instrument contract target; unrelated host integration remains in progress
+- Source SHA-256: `4563d4a955f650c9a9ea0d3f71da77a4e5c5cb37e91233c1c874173c213d1a2f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T031002.436438Z-877ec12056.json) · [Raw log](../build-logs/20261102T031002.436438Z-877ec12056.log)
+- [Exact process output](../build-logs/20261102T031002.436438Z-877ec12056.raw.log)
+
+### 2026-11-02T11:10:12+08:00 · native-instrument-contract-build · failed
+
+- Config: Release; exit code: 1; elapsed: 26.653s.
+- Command: `cmake --build build/monitor-isolation --config Release --target emusician_native_instrument_tests --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Independent native instrument contract target; unrelated host integration remains in progress
+- Source SHA-256: `4563d4a955f650c9a9ea0d3f71da77a4e5c5cb37e91233c1c874173c213d1a2f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T031012.711218Z-5d397fc4d8.json) · [Raw log](../build-logs/20261102T031012.711218Z-5d397fc4d8.log)
+- [Exact process output](../build-logs/20261102T031012.711218Z-5d397fc4d8.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261102T031012.711218Z-5d397fc4d8.log
+
+### 2026-11-02T11:11:03+08:00 · native-instrument-contract-rebuild · failed
+
+- Config: Release; exit code: 1; elapsed: 138.502s.
+- Command: `cmake --build build/monitor-isolation --config Release --target emusician_native_instrument_tests --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Target-specific test only; host integration remains in progress
+- Source SHA-256: `13b1ab3e0120582a74d504729c9172dcbbbb07a1016435bc621c3e09e1aa97fd`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T031103.301727Z-355e4542ff.json) · [Raw log](../build-logs/20261102T031103.301727Z-355e4542ff.log)
+- [Exact process output](../build-logs/20261102T031103.301727Z-355e4542ff.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261102T031103.301727Z-355e4542ff.log
+
+### 2026-11-02T11:14:05+08:00 · native-instrument-contract-retry · succeeded
+
+- Config: Release; exit code: 0; elapsed: 6.237s.
+- Command: `cmake --preset windows-msvc -B build/monitor-isolation`
+- Context: Target-specific contract; native host integration still in progress
+- Source SHA-256: `4b857cad1027aacd34b62e4fd3df8199b338f74f4acf822b35c27fd318dd96ed`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T031405.187392Z-4c3e5bf6d5.json) · [Raw log](../build-logs/20261102T031405.187392Z-4c3e5bf6d5.log)
+- [Exact process output](../build-logs/20261102T031405.187392Z-4c3e5bf6d5.raw.log)
+
+### 2026-11-02T11:14:11+08:00 · native-instrument-contract-retry · succeeded
+
+- Config: Release; exit code: 0; elapsed: 174.516s.
+- Command: `cmake --build build/monitor-isolation --config Release --target emusician_native_instrument_tests --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Target-specific contract; native host integration still in progress
+- Source SHA-256: `4b857cad1027aacd34b62e4fd3df8199b338f74f4acf822b35c27fd318dd96ed`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T031411.562203Z-d0607ef37c.json) · [Raw log](../build-logs/20261102T031411.562203Z-d0607ef37c.log)
+- [Exact process output](../build-logs/20261102T031411.562203Z-d0607ef37c.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T11:17:06+08:00 · native-instrument-contract-retry · succeeded
+
+- Config: Release; exit code: 0; elapsed: 2.782s.
+- Command: `ctest --test-dir build/monitor-isolation -C Release -R ^native_instrument.contracts$ --output-on-failure`
+- Context: Target-specific contract; native host integration still in progress
+- Source SHA-256: `47a9db94cf9b50acd8f7209611cfc8a26555958381c01e0d0d68292cd95a94f1`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T031706.198679Z-0e3469ca4b.json) · [Raw log](../build-logs/20261102T031706.198679Z-0e3469ca4b.log)
+- [Exact process output](../build-logs/20261102T031706.198679Z-0e3469ca4b.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T11:22:46+08:00 · native-device-integration-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 6.034s.
+- Command: `cmake --preset windows-msvc -B build/monitor-isolation`
+- Context: First complete candidate build; existing monitor binary backed up; physical device not tested
+- Source SHA-256: `1cb04d35b0bfc7145b6feb7a8338fb0731979196acd61443930bb4f3173d609d`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T032246.511638Z-8deccdf2bd.json) · [Raw log](../build-logs/20261102T032246.511638Z-8deccdf2bd.log)
+- [Exact process output](../build-logs/20261102T032246.511638Z-8deccdf2bd.raw.log)
+
+### 2026-11-02T11:22:52+08:00 · native-device-integration-build · failed
+
+- Config: Release; exit code: 1; elapsed: 58.454s.
+- Command: `cmake --build build/monitor-isolation --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: First complete candidate build; existing monitor binary backed up; physical device not tested
+- Source SHA-256: `1cb04d35b0bfc7145b6feb7a8338fb0731979196acd61443930bb4f3173d609d`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T032252.690028Z-9da89de8da.json) · [Raw log](../build-logs/20261102T032252.690028Z-9da89de8da.log)
+- [Exact process output](../build-logs/20261102T032252.690028Z-9da89de8da.raw.log)
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261102T032252.690028Z-9da89de8da.log
+
+### 2026-11-02T11:24:16+08:00 · native-device-integration-rebuild · succeeded
+
+- Config: Release; exit code: 0; elapsed: 59.876s.
+- Command: `cmake --build build/monitor-isolation --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Full integration build retry after abstract plugin fix; physical devices not used
+- Source SHA-256: `487590b9b851f192a7f1103049d17644d39739a517a670a0b05fc4419520dd64`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T032416.202276Z-07e426fdac.json) · [Raw log](../build-logs/20261102T032416.202276Z-07e426fdac.log)
+- [Exact process output](../build-logs/20261102T032416.202276Z-07e426fdac.raw.log)
+
+### 2026-11-02T11:25:36+08:00 · native-device-integration-ctest · failed
+
+- Config: Release; exit code: 8; elapsed: 122.627s.
+- Command: `ctest --test-dir build/monitor-isolation -C Release --output-on-failure`
+- Context: First full offline candidate; no physical audio
+- Source SHA-256: `487590b9b851f192a7f1103049d17644d39739a517a670a0b05fc4419520dd64`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T032536.233578Z-a7dd8195c0.json) · [Raw log](../build-logs/20261102T032536.233578Z-a7dd8195c0.log)
+- [Exact process output](../build-logs/20261102T032536.233578Z-a7dd8195c0.raw.log)
+- Error: Command failed with code 8; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261102T032536.233578Z-a7dd8195c0.log
+
+### 2026-11-02T11:28:36+08:00 · native-device-ui-crash-rebuild · succeeded
+
+- Config: Release; exit code: 0; elapsed: 19.803s.
+- Command: `cmake --build build/monitor-isolation --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Fix uninitialized panel pointer; end-to-end test file developed separately
+- Source SHA-256: `9a1fa7ac2f506f6f1beb2175cc25729ebd8edca04fd8008ceab59cc8287a8a2f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T032836.975865Z-71ffb8f95e.json) · [Raw log](../build-logs/20261102T032836.975865Z-71ffb8f95e.log)
+- [Exact process output](../build-logs/20261102T032836.975865Z-71ffb8f95e.raw.log)
+
+### 2026-11-02T11:28:56+08:00 · native-device-ui-crash-rebuild · succeeded
+
+- Config: Release; exit code: 0; elapsed: 94.670s.
+- Command: `ctest --test-dir build/monitor-isolation -C Release --output-on-failure`
+- Context: Fix uninitialized panel pointer; end-to-end test file developed separately
+- Source SHA-256: `9a1fa7ac2f506f6f1beb2175cc25729ebd8edca04fd8008ceab59cc8287a8a2f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T032856.940118Z-70b6980dca.json) · [Raw log](../build-logs/20261102T032856.940118Z-70b6980dca.log)
+- [Exact process output](../build-logs/20261102T032856.940118Z-70b6980dca.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T11:30:53+08:00 · native-device-e2e-first · failed
+
+- Config: Release; exit code: 1; elapsed: 5.785s.
+- Command: `C:\Python314\python.exe tests/NativeDeviceEndToEnd.py --exe build/monitor-isolation/bin/Release/E-musician.exe`
+- Context: Real offline DAW with isolated synthesized samples and project; no physical audio
+- Source SHA-256: `1963e4e34362e06d2419385b2a9b2b2bfbfbc70a7e118dcd7e379aaf65354488`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T033053.515611Z-909947003a.json) · [Raw log](../build-logs/20261102T033053.515611Z-909947003a.log)
+- [Exact process output](../build-logs/20261102T033053.515611Z-909947003a.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261102T033053.515611Z-909947003a.log
+
+### 2026-11-02T11:31:39+08:00 · native-device-e2e-retry · failed
+
+- Config: Release; exit code: 1; elapsed: 99.310s.
+- Command: `C:\Python314\python.exe tests/NativeDeviceEndToEnd.py --exe build/monitor-isolation/bin/Release/E-musician.exe`
+- Context: Owned offline test, retry read conflicts only; old binary before latest host edits
+- Source SHA-256: `0a55ef5b9359c457d19b51a51b91082efd5a22e6b865663c90ca0f19e0792b4e`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T033139.179477Z-97b8578b01.json) · [Raw log](../build-logs/20261102T033139.179477Z-97b8578b01.log)
+- [Exact process output](../build-logs/20261102T033139.179477Z-97b8578b01.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261102T033139.179477Z-97b8578b01.log
+
+### 2026-11-02T11:34:13+08:00 · native-device-integrity-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 57.423s.
+- Command: `cmake --build build/monitor-isolation --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Native async job semantics and source-to-archive hash consistency; no physical audio
+- Source SHA-256: `a6fc074df508d20df0bfbc9227ec8bcda22e0f0825bd9adfffa54068aa864de8`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T033413.970572Z-9a4ea9fb87.json) · [Raw log](../build-logs/20261102T033413.970572Z-9a4ea9fb87.log)
+- [Exact process output](../build-logs/20261102T033413.970572Z-9a4ea9fb87.raw.log)
+
+### 2026-11-02T11:35:32+08:00 · native-device-integrity-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 16.455s.
+- Command: `C:\Python314\python.exe tests/NativeDeviceEndToEnd.py --exe build/monitor-isolation/bin/Release/E-musician.exe`
+- Context: Owned offline fixture: actual sampler/rack export, save, reopen and undo
+- Source SHA-256: `a6fc074df508d20df0bfbc9227ec8bcda22e0f0825bd9adfffa54068aa864de8`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T033532.087789Z-dde2c4c3bb.json) · [Raw log](../build-logs/20261102T033532.087789Z-dde2c4c3bb.log)
+- [Exact process output](../build-logs/20261102T033532.087789Z-dde2c4c3bb.raw.log)
+
+### 2026-11-02T11:35:32+08:00 · native-device-integrity-ctest · succeeded
+
+- Config: Release; exit code: 0; elapsed: 92.270s.
+- Command: `ctest --test-dir build/monitor-isolation -C Release --output-on-failure`
+- Context: Full offline regression of current native build
+- Source SHA-256: `a6fc074df508d20df0bfbc9227ec8bcda22e0f0825bd9adfffa54068aa864de8`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T033532.073414Z-27d778bb2c.json) · [Raw log](../build-logs/20261102T033532.073414Z-27d778bb2c.log)
+- [Exact process output](../build-logs/20261102T033532.073414Z-27d778bb2c.raw.log)
+
+### 2026-11-02T11:37:42+08:00 · native-device-changed-source-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 15.899s.
+- Command: `C:\Python314\python.exe tests/NativeDeviceEndToEnd.py --exe build/monitor-isolation/bin/Release/E-musician.exe`
+- Context: Owned offline fixture including source mutation and atomic save/export checks
+- Source SHA-256: `e15cdd7103f48fca435ea9ffc353f5f70efeccbd1183629cf68bf3f83ed7db91`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T033742.778671Z-4e3b977ab7.json) · [Raw log](../build-logs/20261102T033742.778671Z-4e3b977ab7.log)
+- [Exact process output](../build-logs/20261102T033742.778671Z-4e3b977ab7.raw.log)
+
+### 2026-11-02T11:38:08+08:00 · native-device-final-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 15.334s.
+- Command: `cmake --build build/monitor-isolation --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Includes UI text fix and recorded source-integrity tests; offline acceptance only
+- Source SHA-256: `e15cdd7103f48fca435ea9ffc353f5f70efeccbd1183629cf68bf3f83ed7db91`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T033808.735951Z-6132d88fb3.json) · [Raw log](../build-logs/20261102T033808.735951Z-6132d88fb3.log)
+- [Exact process output](../build-logs/20261102T033808.735951Z-6132d88fb3.raw.log)
+
+### 2026-11-02T11:38:30+08:00 · native-device-final-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 18.016s.
+- Command: `C:\Python314\python.exe tests/NativeDeviceEndToEnd.py --exe build/monitor-isolation/bin/Release/E-musician.exe`
+- Context: Final native sampler/rack real offline DAW and mutated sample test
+- Source SHA-256: `e15cdd7103f48fca435ea9ffc353f5f70efeccbd1183629cf68bf3f83ed7db91`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T033830.016193Z-b216a6f128.json) · [Raw log](../build-logs/20261102T033830.016193Z-b216a6f128.log)
+- [Exact process output](../build-logs/20261102T033830.016193Z-b216a6f128.raw.log)
+
+### 2026-11-02T11:38:30+08:00 · native-device-final-agent · succeeded
+
+- Config: Release; exit code: 0; elapsed: 30.165s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Existing Python Agent regression; no live API
+- Source SHA-256: `e15cdd7103f48fca435ea9ffc353f5f70efeccbd1183629cf68bf3f83ed7db91`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T033830.034782Z-a67af2ef5a.json) · [Raw log](../build-logs/20261102T033830.034782Z-a67af2ef5a.log)
+- [Exact process output](../build-logs/20261102T033830.034782Z-a67af2ef5a.raw.log)
+
+### 2026-11-02T11:38:30+08:00 · native-device-final-ctest · succeeded
+
+- Config: Release; exit code: 0; elapsed: 92.193s.
+- Command: `ctest --test-dir build/monitor-isolation -C Release --output-on-failure`
+- Context: Final full offline regression; no real device or plugin listening
+- Source SHA-256: `e15cdd7103f48fca435ea9ffc353f5f70efeccbd1183629cf68bf3f83ed7db91`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T033830.035960Z-889a724a0b.json) · [Raw log](../build-logs/20261102T033830.035960Z-889a724a0b.log)
+- [Exact process output](../build-logs/20261102T033830.035960Z-889a724a0b.raw.log)
+
+### 2026-11-02T11:41:52+08:00 · native-device-panic-final-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 47.641s.
+- Command: `cmake --build build/monitor-isolation --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Native reset and midiPanic added; offline verification only
+- Source SHA-256: `068043d46669bbee3e5655671e69db15e1f5befae6de4545ea4f05b304276039`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T034152.931683Z-ffc2cd836b.json) · [Raw log](../build-logs/20261102T034152.931683Z-ffc2cd836b.log)
+- [Exact process output](../build-logs/20261102T034152.931683Z-ffc2cd836b.raw.log)
+
+### 2026-11-02T11:42:58+08:00 · native-device-panic-final-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 17.690s.
+- Command: `C:\Python314\python.exe tests/NativeDeviceEndToEnd.py --exe build/monitor-isolation/bin/Release/E-musician.exe`
+- Context: Owned offline sampler/rack project, rendering, persistence and source-integrity tests
+- Source SHA-256: `068043d46669bbee3e5655671e69db15e1f5befae6de4545ea4f05b304276039`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T034258.653096Z-cff659e8c4.json) · [Raw log](../build-logs/20261102T034258.653096Z-cff659e8c4.log)
+- [Exact process output](../build-logs/20261102T034258.653096Z-cff659e8c4.raw.log)
+
+### 2026-11-02T11:42:58+08:00 · native-device-panic-final-agent · succeeded
+
+- Config: Release; exit code: 0; elapsed: 33.383s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Agent Python offline regression
+- Source SHA-256: `068043d46669bbee3e5655671e69db15e1f5befae6de4545ea4f05b304276039`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T034258.640127Z-91d202136e.json) · [Raw log](../build-logs/20261102T034258.640127Z-91d202136e.log)
+- [Exact process output](../build-logs/20261102T034258.640127Z-91d202136e.raw.log)
+
+### 2026-11-02T11:42:58+08:00 · native-device-panic-final-ctest · succeeded
+
+- Config: Release; exit code: 0; elapsed: 89.302s.
+- Command: `ctest --test-dir build/monitor-isolation -C Release --output-on-failure`
+- Context: Full offline regression including native reset and panic
+- Source SHA-256: `068043d46669bbee3e5655671e69db15e1f5befae6de4545ea4f05b304276039`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T034258.639042Z-b43abe2207.json) · [Raw log](../build-logs/20261102T034258.639042Z-b43abe2207.log)
+- [Exact process output](../build-logs/20261102T034258.639042Z-b43abe2207.raw.log)
+
+### 2026-11-02 · 原生采样器和鼓组首版候选
+
+- 实现原生单样本采样器、16 pad 鼓组、统一工程命令、异步采样准备与资产归档；采样播放/状态和 UI 使用同一工程权威数据。保存和导出按解码快照校验归档素材，源文件被改时拒绝覆盖工程。
+- 最终源码指纹 `068043d46669bbee3e5655671e69db15e1f5befae6de4545ea4f05b304276039`，Release 构建 `docs/builds/20261102T034152.931683Z-ffc2cd836b.json`；CTest 7/7 `docs/builds/20261102T034258.639042Z-b43abe2207.json`，离线端到端 11 项 `docs/builds/20261102T034258.653096Z-cff659e8c4.json`，Agent Python 219 项 `docs/builds/20261102T034258.640127Z-91d202136e.json`。EXE SHA256 `b551a58f5e41936a3210169e32008715cbd77e8e99345bfd78143bbd5ea8634f`。
+- 构建/测试失败和修复全过程保留于 docs/builds 与 build-logs，包含测试目标头文件/重载错误、首轮 UI 访问冲突和早期异步状态错误。最终代码新增 reset/midiPanic 后重新构建并复测，不以先前版本通过项冒充最终证据。
+- 真实设备/GUI/听感未测；慢磁盘不可中断、每次修改重解码、复杂图重入、missing 资产降级与真实长期性能是已知限制。旧版无法打开含原生装置的工程。详见 `docs/review/2026-11-02-sampler-drum-rack/RESULTS.md` 和 `MANUAL-CHECK.md`。
+
+### 2026-11-02T12:07:24+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 5.174s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `068043d46669bbee3e5655671e69db15e1f5befae6de4545ea4f05b304276039`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T040724.071578Z-1c0ae38fec.json) · [Raw log](../build-logs/20261102T040724.071578Z-1c0ae38fec.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-02 · 钢琴卷帘和原生装置视觉提案
+
+- 用户要求参考 Ableton Live，先制作可全屏编辑的钢琴卷帘、以波形为中心的采样器和 4×4 鼓垫/选中详情的概念图；参照官方 Live 12 手册及本项目现有黑白视觉生成 3 张示意图，存于 `docs/design/2026-11-02-device-concepts/`。
+- 图像仅供讨论，不代表已实现；波形、轨道、示例音符不是真实工程，生成图刻度不作为精确规格；采样器的时间与当前 0–1 参数须正确换算。未修改应用代码，未构建或测试，用户确认前不标完成。
+
+### 2026-11-02T13:44:40+08:00 · device-redesign-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 26.124s.
+- Command: `cmake --preset windows-msvc -B build/monitor-isolation`
+- Context: Expanded piano and docked native devices with background waveform; offline only
+- Source SHA-256: `c4d84d26e9da8bd4445cd8be57100eb499d7b77407712f29fdddc8ef2f580f38`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T054440.599147Z-19525b146f.json) · [Raw log](../build-logs/20261102T054440.599147Z-19525b146f.log)
+- [Exact process output](../build-logs/20261102T054440.599147Z-19525b146f.raw.log)
+
+### 2026-11-02T13:45:06+08:00 · device-redesign-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 86.102s.
+- Command: `cmake --build build/monitor-isolation --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Expanded piano and docked native devices with background waveform; offline only
+- Source SHA-256: `c4d84d26e9da8bd4445cd8be57100eb499d7b77407712f29fdddc8ef2f580f38`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T054506.867320Z-ff8b1dff82.json) · [Raw log](../build-logs/20261102T054506.867320Z-ff8b1dff82.log)
+- [Exact process output](../build-logs/20261102T054506.867320Z-ff8b1dff82.raw.log)
+
+### 2026-11-02T13:46:56+08:00 · device-redesign-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 19.416s.
+- Command: `C:\Python314\python.exe tests/NativeDeviceEndToEnd.py --exe build/monitor-isolation/bin/Release/E-musician.exe`
+- Context: Owned offline DAW, actual native instrument render/save/reopen and sample identity
+- Source SHA-256: `c4d84d26e9da8bd4445cd8be57100eb499d7b77407712f29fdddc8ef2f580f38`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T054656.587692Z-175cac83fa.json) · [Raw log](../build-logs/20261102T054656.587692Z-175cac83fa.log)
+- [Exact process output](../build-logs/20261102T054656.587692Z-175cac83fa.raw.log)
+
+### 2026-11-02T13:46:56+08:00 · device-redesign-agent-tests · succeeded
+
+- Config: Release; exit code: 0; elapsed: 37.607s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Offline Agent Python tests only
+- Source SHA-256: `c4d84d26e9da8bd4445cd8be57100eb499d7b77407712f29fdddc8ef2f580f38`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T054656.628210Z-cadb9eb64d.json) · [Raw log](../build-logs/20261102T054656.628210Z-cadb9eb64d.log)
+- [Exact process output](../build-logs/20261102T054656.628210Z-cadb9eb64d.raw.log)
+
+### 2026-11-02T13:46:56+08:00 · device-redesign-ctest · succeeded
+
+- Config: Release; exit code: 0; elapsed: 96.998s.
+- Command: `ctest --test-dir build/monitor-isolation -C Release --output-on-failure`
+- Context: Offline full regression, waveform and native component smoke
+- Source SHA-256: `c4d84d26e9da8bd4445cd8be57100eb499d7b77407712f29fdddc8ef2f580f38`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T054656.583354Z-a2a2a4f584.json) · [Raw log](../build-logs/20261102T054656.583354Z-a2a2a4f584.log)
+- [Exact process output](../build-logs/20261102T054656.583354Z-a2a2a4f584.raw.log)
+
+### 2026-11-02T13:50:17+08:00 · device-redesign-final-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 21.063s.
+- Command: `cmake --build build/monitor-isolation --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Final integrated workspace, native reopen routes and real waveform capture; offline
+- Source SHA-256: `4d678850866dce7ffc6017aac8c95724e063d0070c48796f837f3167d8be165c`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T055017.712299Z-e48ed4b962.json) · [Raw log](../build-logs/20261102T055017.712299Z-e48ed4b962.log)
+- [Exact process output](../build-logs/20261102T055017.712299Z-e48ed4b962.raw.log)
+
+### 2026-11-02T13:50:44+08:00 · device-redesign-final-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 17.506s.
+- Command: `C:\Python314\python.exe tests/NativeDeviceEndToEnd.py --exe build/monitor-isolation/bin/Release/E-musician.exe`
+- Context: Final native sample real offline DAW and persistence test
+- Source SHA-256: `4d678850866dce7ffc6017aac8c95724e063d0070c48796f837f3167d8be165c`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T055044.892177Z-a93c2e0e39.json) · [Raw log](../build-logs/20261102T055044.892177Z-a93c2e0e39.log)
+- [Exact process output](../build-logs/20261102T055044.892177Z-a93c2e0e39.raw.log)
+
+### 2026-11-02T13:50:44+08:00 · device-redesign-final-agent · succeeded
+
+- Config: Release; exit code: 0; elapsed: 32.021s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Python Agent regression, no live API
+- Source SHA-256: `4d678850866dce7ffc6017aac8c95724e063d0070c48796f837f3167d8be165c`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T055044.901805Z-ec62ac1925.json) · [Raw log](../build-logs/20261102T055044.901805Z-ec62ac1925.log)
+- [Exact process output](../build-logs/20261102T055044.901805Z-ec62ac1925.raw.log)
+
+### 2026-11-02T13:50:44+08:00 · device-redesign-final-ctest · succeeded
+
+- Config: Release; exit code: 0; elapsed: 89.099s.
+- Command: `ctest --test-dir build/monitor-isolation -C Release --output-on-failure`
+- Context: Final workspace, waveform, and MIDI UI offline regression
+- Source SHA-256: `4d678850866dce7ffc6017aac8c95724e063d0070c48796f837f3167d8be165c`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T055044.854151Z-b28723098d.json) · [Raw log](../build-logs/20261102T055044.854151Z-b28723098d.log)
+- [Exact process output](../build-logs/20261102T055044.854151Z-b28723098d.raw.log)
+
+### 2026-11-02T13:52:43+08:00 · device-redesign-layout-final-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 22.618s.
+- Command: `cmake --build build/monitor-isolation --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Retain arrangement space at standard size; offline verification
+- Source SHA-256: `bab4ebc9fba774037b967931b082485199964f142df010529ba3be1278ade112`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T055243.918380Z-d2ed76c3a9.json) · [Raw log](../build-logs/20261102T055243.918380Z-d2ed76c3a9.log)
+- [Exact process output](../build-logs/20261102T055243.918380Z-d2ed76c3a9.raw.log)
+
+### 2026-11-02T13:53:12+08:00 · device-redesign-layout-final-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 16.686s.
+- Command: `C:\Python314\python.exe tests/NativeDeviceEndToEnd.py --exe build/monitor-isolation/bin/Release/E-musician.exe`
+- Context: Final offline sample render, project persistence and content integrity
+- Source SHA-256: `bab4ebc9fba774037b967931b082485199964f142df010529ba3be1278ade112`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T055312.502509Z-1ea995942c.json) · [Raw log](../build-logs/20261102T055312.502509Z-1ea995942c.log)
+- [Exact process output](../build-logs/20261102T055312.502509Z-1ea995942c.raw.log)
+
+### 2026-11-02T13:53:12+08:00 · device-redesign-layout-final-agent · succeeded
+
+- Config: Release; exit code: 0; elapsed: 30.514s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Offline Python Agent tests, no live model
+- Source SHA-256: `bab4ebc9fba774037b967931b082485199964f142df010529ba3be1278ade112`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T055312.505776Z-c15df4dd37.json) · [Raw log](../build-logs/20261102T055312.505776Z-c15df4dd37.log)
+- [Exact process output](../build-logs/20261102T055312.505776Z-c15df4dd37.raw.log)
+
+### 2026-11-02T13:53:12+08:00 · device-redesign-layout-final-ctest · succeeded
+
+- Config: Release; exit code: 0; elapsed: 89.372s.
+- Command: `ctest --test-dir build/monitor-isolation -C Release --output-on-failure`
+- Context: Final offline UI layout, waveform, and engine regression
+- Source SHA-256: `bab4ebc9fba774037b967931b082485199964f142df010529ba3be1278ade112`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T055312.536313Z-d9e516466f.json) · [Raw log](../build-logs/20261102T055312.536313Z-d9e516466f.log)
+- [Exact process output](../build-logs/20261102T055312.536313Z-d9e516466f.raw.log)
+
+### 2026-11-02 · MIDI 与原生装置工作区视觉实现
+
+- 按已确认概念图实现 MIDI 工作区展开/返回、原生采样器/鼓组 dock、后台真实波形与采样器边界手势；保留统一命令、既有未提交更改及用户工程。新增素材 hash 投影避免波形与已加载音源不符；工作区关闭时暂停面板轮询。
+- 最终 Release 构建 `docs/builds/20261102T055243.918380Z-d2ed76c3a9.json`；离线 CTest 7/7 `docs/builds/20261102T055312.536313Z-d9e516466f.json`，含实际合成 WAV 波形与拖动、界面截图和轨道空间；离线 DAW 端到端 11 项 `docs/builds/20261102T055312.502509Z-1ea995942c.json`；Agent Python 219 项 `docs/builds/20261102T055312.505776Z-c15df4dd37.json`。源码指纹 `bab4ebc9fba774037b967931b082485199964f142df010529ba3be1278ade112`；EXE SHA256 `d7f10276691aa91667d5399b1b6cc9d9d0d3064d2a227e852e23faf4cf291e1d`。
+- 最终证据与已知边界见 `docs/review/2026-11-02-device-redesign/RESULTS.md`，人工步骤见同目录 `MANUAL-CHECK.md`。截图是自动生成的组件及合成数据，不代表用户桌面、物理 MIDI/声卡、长期负载或听感通过；既有慢盘、插件与待机问题继续保留。
+
+### 2026-11-02T14:10:38+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.217s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `bab4ebc9fba774037b967931b082485199964f142df010529ba3be1278ade112`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T061038.864771Z-caddfab9c7.json) · [Raw log](../build-logs/20261102T061038.864771Z-caddfab9c7.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-02T14:11:09+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 0.937s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `bab4ebc9fba774037b967931b082485199964f142df010529ba3be1278ade112`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T061109.065890Z-e84645479d.json) · [Raw log](../build-logs/20261102T061109.065890Z-e84645479d.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-02T14:41:02+08:00 · configure-audition-eq · succeeded
+
+- Config: Release; exit code: 0; elapsed: 67.715s.
+- Command: `cmake --preset windows-msvc -B build/audition-effects`
+- Context: 独立目录；用户进程和已有构建保留；配置阶段
+- Source SHA-256: `04a7437bbf4006bb381b3d60d0ff5ae78568dbdf7e06b23442d06474142837c2`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T064102.011973Z-262284f649.json) · [Raw log](../build-logs/20261102T064102.011973Z-262284f649.log)
+- [Exact process output](../build-logs/20261102T064102.011973Z-262284f649.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02 · 原生效果器 Agent 早期测试记录补充
+
+- 子代理在 14:46（Asia/Shanghai）前执行 `python -m unittest discover -s tests -p 'test_music_agent*.py' -q`：219 项通过、耗时 28.160 秒；另执行 `python -m unittest discover -s tests -p 'test_music_agent_native_effects.py' -v`：4 项通过、耗时 0.014 秒。
+- 上述两次未经过 Recorder，缺少准确起止时间与原始日志，因此不作为最终验收证据；集成后需通过 Recorder 重跑并记录源指纹。
+
+### 2026-11-02T14:48:24+08:00 · effects-dsp-early · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.183s.
+- Command: `build/audition-effects/Release/emusician_effects_tests.exe`
+- Context: 中间产物；仅检查 DSP 测试，源代码可能仍在并行修改
+- Source SHA-256: `203094e238c25e721e4fae65f8a03b4a95cb8d9f02b37396adf88ad659adf52d`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T064824.374594Z-ae432a08c8.json) · [Raw log](../build-logs/20261102T064824.374594Z-ae432a08c8.log)
+- [Exact process output](../build-logs/20261102T064824.374594Z-ae432a08c8.raw.log)
+
+### 2026-11-02T14:44:56+08:00 · build-audition-effects-first · failed
+
+- Config: Release; exit code: 1; elapsed: 243.262s.
+- Command: `cmake --build build/audition-effects --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 独立目录首轮集成构建；并行开发中，最终需重新验证源指纹
+- Source SHA-256: `33de5adb6c1ea583f13b29feb517e541776d8c041f9991c72d8ec3b27b02a502`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T064456.364562Z-9aac89863f.json) · [Raw log](../build-logs/20261102T064456.364562Z-9aac89863f.log)
+- [Exact process output](../build-logs/20261102T064456.364562Z-9aac89863f.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261102T064456.364562Z-9aac89863f.log
+
+### 2026-11-02T14:49:19+08:00 · agent-native-devices-unit · succeeded
+
+- Config: Release; exit code: 0; elapsed: 2.494s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_native_effects.py -v`
+- Context: 新设备计划、异步采样任务和回读的 Python 单元测试
+- Source SHA-256: `3b22cfd512670225718bbe5560eda347cf8a9ab9fc2a1b23e21ac708d125e6a5`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T064919.412881Z-3902f98ec6.json) · [Raw log](../build-logs/20261102T064919.412881Z-3902f98ec6.log)
+- [Exact process output](../build-logs/20261102T064919.412881Z-3902f98ec6.raw.log)
+
+### 2026-11-02T14:50:20+08:00 · effects-offline-benchmark · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.629s.
+- Command: `build/audition-effects/Release/emusician_effects_benchmark.exe`
+- Context: i7-13700H, stereo 48 kHz / 256 frames, 8 active EQ + compressor, offline loop; no device or DAW workload
+- Source SHA-256: `fda797dbe89701919ba04ac013aa107c29a878c39ebc37535d7da74e5b03b48d`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T065020.509985Z-b0b0f6560b.json) · [Raw log](../build-logs/20261102T065020.509985Z-b0b0f6560b.log)
+- [Exact process output](../build-logs/20261102T065020.509985Z-b0b0f6560b.raw.log)
+
+### 2026-11-02 · 效果器早期基准更正
+
+- 记录 `20261102T065020.509985Z-b0b0f6560b` 输出中的 `cpu_seconds` 实际是 `steady_clock` 墙钟时间，而非进程 CPU 时间。该早期测试与编译并发，数值仅供排查；已将程序字段更名为 `elapsed_seconds`，将在最终构建后重测。
+
+### 2026-11-02T14:51:29+08:00 · agent-native-full-regression · succeeded
+
+- Config: Release; exit code: 0; elapsed: 33.333s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: 完整 Agent Python 回归，含新原生设备和异步任务边界
+- Source SHA-256: `f7c00b43e3e214b8a663876f27c3810ef1d357b3d591a48ba4f70bbd744e5e4a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T065129.261164Z-173bad50e2.json) · [Raw log](../build-logs/20261102T065129.261164Z-173bad50e2.log)
+- [Exact process output](../build-logs/20261102T065129.261164Z-173bad50e2.raw.log)
+
+### 2026-11-02T14:49:35+08:00 · build-audition-effects-incremental · succeeded
+
+- Config: Release; exit code: 0; elapsed: 226.974s.
+- Command: `cmake --build build/audition-effects --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 修正首轮面板编译错误并集成最新 DSP、UI 与效果器测试
+- Source SHA-256: `3b22cfd512670225718bbe5560eda347cf8a9ab9fc2a1b23e21ac708d125e6a5`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T064935.538453Z-130a604c3e.json) · [Raw log](../build-logs/20261102T064935.538453Z-130a604c3e.log)
+- [Exact process output](../build-logs/20261102T064935.538453Z-130a604c3e.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T14:53:27+08:00 · build-audition-effects-final · succeeded
+
+- Config: Release; exit code: 0; elapsed: 36.538s.
+- Command: `cmake --build build/audition-effects --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 整合主轨效果器和按设备读取，构建期间不修改源文件
+- Source SHA-256: `f7c00b43e3e214b8a663876f27c3810ef1d357b3d591a48ba4f70bbd744e5e4a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T065327.754589Z-f3d0b57df0.json) · [Raw log](../build-logs/20261102T065327.754589Z-f3d0b57df0.log)
+- [Exact process output](../build-logs/20261102T065327.754589Z-f3d0b57df0.raw.log)
+
+### 2026-11-02T14:54:08+08:00 · test-audition-effects-ctest · succeeded
+
+- Config: Release; exit code: 0; elapsed: 98.295s.
+- Command: `ctest --test-dir build/audition-effects -C Release --output-on-failure`
+- Context: 完整原生契约、界面 smoke、工程集成及隔离控制回归
+- Source SHA-256: `f7c00b43e3e214b8a663876f27c3810ef1d357b3d591a48ba4f70bbd744e5e4a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T065408.759525Z-5e603c4c0e.json) · [Raw log](../build-logs/20261102T065408.759525Z-5e603c4c0e.log)
+- [Exact process output](../build-logs/20261102T065408.759525Z-5e603c4c0e.raw.log)
+
+### 2026-11-02T14:55:54+08:00 · native-effects-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 21.776s.
+- Command: `C:\Python314\python.exe tests/NativeEffectsEndToEnd.py --exe build/audition-effects/bin/Release/E-musician.exe`
+- Context: 隔离子进程和独立合成素材，不操作用户工程或硬件
+- Source SHA-256: `f7c00b43e3e214b8a663876f27c3810ef1d357b3d591a48ba4f70bbd744e5e4a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T065554.534649Z-5606eec813.json) · [Raw log](../build-logs/20261102T065554.534649Z-5606eec813.log)
+- [Exact process output](../build-logs/20261102T065554.534649Z-5606eec813.raw.log)
+
+### 2026-11-02T14:56:16+08:00 · native-instruments-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 15.007s.
+- Command: `C:\Python314\python.exe tests/NativeDeviceEndToEnd.py --exe build/audition-effects/bin/Release/E-musician.exe`
+- Context: 隔离子进程和独立合成素材，不操作用户工程或硬件
+- Source SHA-256: `f7c00b43e3e214b8a663876f27c3810ef1d357b3d591a48ba4f70bbd744e5e4a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T065616.471039Z-fb703a5709.json) · [Raw log](../build-logs/20261102T065616.471039Z-fb703a5709.log)
+- [Exact process output](../build-logs/20261102T065616.471039Z-fb703a5709.raw.log)
+
+### 2026-11-02T14:56:31+08:00 · agent-native-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 5.770s.
+- Command: `C:\Python314\python.exe tests/MusicAgentNativeEffectsIntegration.py --exe build/audition-effects/bin/Release/E-musician.exe`
+- Context: 隔离子进程和独立合成素材，不操作用户工程或硬件
+- Source SHA-256: `f7c00b43e3e214b8a663876f27c3810ef1d357b3d591a48ba4f70bbd744e5e4a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T065631.628134Z-c291ba561d.json) · [Raw log](../build-logs/20261102T065631.628134Z-c291ba561d.log)
+- [Exact process output](../build-logs/20261102T065631.628134Z-c291ba561d.raw.log)
+
+### 2026-11-02T14:56:42+08:00 · effects-offline-benchmark-final · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.798s.
+- Command: `build/audition-effects/Release/emusician_effects_benchmark.exe`
+- Context: Lenovo 21HX i7-13700H, 48 kHz stereo, 256-frame blocks, 8 active EQ bands plus compressor, synthetic input, 106.67s offline; no device or other tracks
+- Source SHA-256: `f7c00b43e3e214b8a663876f27c3810ef1d357b3d591a48ba4f70bbd744e5e4a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T065642.016808Z-2e10e3a7ed.json) · [Raw log](../build-logs/20261102T065642.016808Z-2e10e3a7ed.log)
+- [Exact process output](../build-logs/20261102T065642.016808Z-2e10e3a7ed.raw.log)
+
+### 2026-11-02T14:57:09+08:00 · build-compressor-curve · succeeded
+
+- Config: Release; exit code: 0; elapsed: 16.279s.
+- Command: `cmake --build build/audition-effects --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 加入压缩器静态输入输出曲线及布局 smoke；最终源码固定
+- Source SHA-256: `77c2481af113d15de0308cdff01df87b4fe0b6fa2802bc51d2cfec73b2fc9cf7`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T065709.333373Z-24a364856c.json) · [Raw log](../build-logs/20261102T065709.333373Z-24a364856c.log)
+- [Exact process output](../build-logs/20261102T065709.333373Z-24a364856c.raw.log)
+
+### 2026-11-02T14:57:44+08:00 · final-ctest · succeeded
+
+- Config: Release; exit code: 0; elapsed: 108.457s.
+- Command: `ctest --test-dir build/audition-effects -C Release --output-on-failure`
+- Context: 最终独立构建：受控离线测试，素材与工程均为一次性合成
+- Source SHA-256: `77c2481af113d15de0308cdff01df87b4fe0b6fa2802bc51d2cfec73b2fc9cf7`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T065744.883744Z-6ef9badf50.json) · [Raw log](../build-logs/20261102T065744.883744Z-6ef9badf50.log)
+- [Exact process output](../build-logs/20261102T065744.883744Z-6ef9badf50.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T14:59:33+08:00 · final-effects-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 23.891s.
+- Command: `C:\Python314\python.exe tests/NativeEffectsEndToEnd.py --exe build/audition-effects/bin/Release/E-musician.exe`
+- Context: 最终独立构建：受控离线测试，素材与工程均为一次性合成
+- Source SHA-256: `557ab81e2ae8240a3b0d1e8a443c47d1d4fc0e78bebc7cf329a0f4e22285c6ff`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T065933.600782Z-31aec46dd1.json) · [Raw log](../build-logs/20261102T065933.600782Z-31aec46dd1.log)
+- [Exact process output](../build-logs/20261102T065933.600782Z-31aec46dd1.raw.log)
+
+### 2026-11-02T14:59:57+08:00 · final-agent-native-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 6.472s.
+- Command: `C:\Python314\python.exe tests/MusicAgentNativeEffectsIntegration.py --exe build/audition-effects/bin/Release/E-musician.exe`
+- Context: 最终独立构建：受控离线测试，素材与工程均为一次性合成
+- Source SHA-256: `557ab81e2ae8240a3b0d1e8a443c47d1d4fc0e78bebc7cf329a0f4e22285c6ff`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T065957.629233Z-5f327a9aa6.json) · [Raw log](../build-logs/20261102T065957.629233Z-5f327a9aa6.log)
+- [Exact process output](../build-logs/20261102T065957.629233Z-5f327a9aa6.raw.log)
+
+### 2026-11-02T15:00:34+08:00 · final-source-stable-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 2.989s.
+- Command: `cmake --build build/audition-effects --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 主轨 Agent 接口与全部文件稳定后的最终增量构建
+- Source SHA-256: `557ab81e2ae8240a3b0d1e8a443c47d1d4fc0e78bebc7cf329a0f4e22285c6ff`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T070034.284037Z-2f117bc6f6.json) · [Raw log](../build-logs/20261102T070034.284037Z-2f117bc6f6.log)
+- [Exact process output](../build-logs/20261102T070034.284037Z-2f117bc6f6.raw.log)
+
+### 2026-11-02T15:00:13+08:00 · final-agent-native-regression · succeeded
+
+- Config: Release; exit code: 0; elapsed: 32.783s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -q`
+- Context: 含主轨效果器、路径脱敏和异步参数的完整 Agent 回归
+- Source SHA-256: `557ab81e2ae8240a3b0d1e8a443c47d1d4fc0e78bebc7cf329a0f4e22285c6ff`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T070013.408746Z-84dbcb2c74.json) · [Raw log](../build-logs/20261102T070013.408746Z-84dbcb2c74.log)
+- [Exact process output](../build-logs/20261102T070013.408746Z-84dbcb2c74.raw.log)
+
+### 2026-11-02T15:00:42+08:00 · final-stable-ctest · succeeded
+
+- Config: Release; exit code: 0; elapsed: 100.810s.
+- Command: `ctest --test-dir build/audition-effects -C Release --output-on-failure`
+- Context: 最终源码稳定后的完整本机原生测试
+- Source SHA-256: `557ab81e2ae8240a3b0d1e8a443c47d1d4fc0e78bebc7cf329a0f4e22285c6ff`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T070042.219515Z-140c9e7c71.json) · [Raw log](../build-logs/20261102T070042.219515Z-140c9e7c71.log)
+- [Exact process output](../build-logs/20261102T070042.219515Z-140c9e7c71.raw.log)
+
+### 2026-11-02 · 波形、试听、原生 EQ / 压缩器与 Agent 集成候选
+
+- 完成复用已解码 PCM 的异步波形、采样器与 Rack 独立试听、自有八段 EQ 与立体声压缩器、轨道和主轨面板与命令；Agent 可审阅/回读效果器及工程范围单次采样器参数任务。新增性能基准和隔离端到端，记录首轮编译失败与修复。
+- 最终 Release 构建 [记录](builds/20261102T070034.284037Z-2f117bc6f6.json)；CTest 8/8 [记录](builds/20261102T070042.219515Z-140c9e7c71.json)；Agent Python 229 [记录](builds/20261102T070013.408746Z-84dbcb2c74.json)；离线效果器 [记录](builds/20261102T065933.600782Z-31aec46dd1.json)、原生采样 [记录](builds/20261102T065616.471039Z-fb703a5709.json)、Agent 命令桥 [记录](builds/20261102T065957.629233Z-5f327a9aa6.json)。
+- 实测设备与听感待验；性能基准仅为合成离线处理，效果器自动化、侧链、实时频谱和 Agent 采样文件加载未实现。限制、基准和人工步骤见 [结果](review/2026-11-02-audition-eq-compressor/RESULTS.md)。保留原有工程、旧版程序和既有未提交修改。
+
+### 2026-11-02T15:10:27+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 0.979s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `557ab81e2ae8240a3b0d1e8a443c47d1d4fc0e78bebc7cf329a0f4e22285c6ff`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T071027.577204Z-18dd7dafb6.json) · [Raw log](../build-logs/20261102T071027.577204Z-18dd7dafb6.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-02T15:39:56+08:00 · agent-effect-parameter-unit · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.149s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_effect_parameters.py -v`
+- Context: 局部/相对装置参数、快照保留和作用范围
+- Source SHA-256: `e0a4757d7afe0d14d467eaf128e8506e8570f3b9e508aaa98b63b80d25f2929a`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T073956.171130Z-2cf94da4e9.json) · [Raw log](../build-logs/20261102T073956.171130Z-2cf94da4e9.log)
+- [Exact process output](../build-logs/20261102T073956.171130Z-2cf94da4e9.raw.log)
+
+### 2026-11-02T15:41:25+08:00 · agent-intent-api-regression · succeeded
+
+- Config: Release; exit code: 0; elapsed: 32.130s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -q`
+- Context: 原生装置局部参数、dry/wet、模型调用和协议模拟回归
+- Source SHA-256: `a8ccfe7ad65f9674ffb3172623a424b6e27b3fe94a867937b7c4a757b9eee6fe`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T074125.300447Z-cf83162241.json) · [Raw log](../build-logs/20261102T074125.300447Z-cf83162241.log)
+- [Exact process output](../build-logs/20261102T074125.300447Z-cf83162241.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T15:43:03+08:00 · agent-parameter-drywet · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.965s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_effect_parameters.py -v`
+- Context: 局部与相对参数、旧压缩器状态及范围校验
+- Source SHA-256: `e5db255447d4ccac806da69e044083a24827f7e72b62ebee41a3b79a6b358945`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T074303.515226Z-b6ec75f3ae.json) · [Raw log](../build-logs/20261102T074303.515226Z-b6ec75f3ae.log)
+- [Exact process output](../build-logs/20261102T074303.515226Z-b6ec75f3ae.raw.log)
+
+### 2026-11-02T15:42:35+08:00 · device-chain-configure · succeeded
+
+- Config: Release; exit code: 0; elapsed: 58.887s.
+- Command: `cmake --preset windows-msvc -B build/device-chain`
+- Context: 独立目录，保留用户运行中的程序与工程
+- Source SHA-256: `fcb0d2e2774df1e75fd78a62230ece3b50fae4edb37a88c02dbc83c0cbc2849d`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T074235.905437Z-eca71a90ff.json) · [Raw log](../build-logs/20261102T074235.905437Z-eca71a90ff.log)
+- [Exact process output](../build-logs/20261102T074235.905437Z-eca71a90ff.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T15:43:32+08:00 · agent-intent-final-regression · succeeded
+
+- Config: Release; exit code: 0; elapsed: 28.899s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -q`
+- Context: 局部参数、原生压缩器兼容与模型协议回归
+- Source SHA-256: `4c928ab2c98a4ef5258797811b1f5ee9ef2baa0fdd2a1a0658fea1085152eddf`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T074332.395957Z-7315c1a702.json) · [Raw log](../build-logs/20261102T074332.395957Z-7315c1a702.log)
+- [Exact process output](../build-logs/20261102T074332.395957Z-7315c1a702.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T15:45:21+08:00 · agent-api-single-live-probe · succeeded
+
+- Config: Release; exit code: 0; elapsed: 7.122s.
+- Command: `C:\Python314\python.exe -c "import sys
+sys.path.insert(0, \"scripts\")
+from music_agent.config import load_config, active_config
+from music_agent.providers import create_provider
+from music_agent.provider import ProviderError
+c=active_config(load_config())
+p=create_provider(c[\"provider\"],c[\"model\"],c[\"base_url\"])
+print(\"provider=\",p.provider_id,\"model=\",p.model,flush=True)
+tool={\"type\":\"function\",\"function\":{\"name\":\"health_check\",\"description\":\"Return a fixed health marker.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"ok\":{\"type\":\"boolean\"}},\"required\":[\"ok\"],\"additionalProperties\":False}}}
+try:
+ r=p.complete([{\"role\":\"system\",\"content\":\"Call health_check with ok=true.\"},{\"role\":\"user\",\"content\":\"Run the health check.\"}],[tool])
+ calls=r[\"message\"].get(\"tool_calls\",[])
+ print(\"result=success\", \"tool_calls=\",len(calls),\"tool_name=\",calls[0][\"function\"][\"name\"] if calls else \"none\",\"usage=\",r.get(\"usage\",{}),flush=True)
+except ProviderError as e:
+ print(\"result=provider_error\", \"code=\",e.code,\"status=\",e.status,flush=True)
+except Exception as e:
+ print(\"result=error\", \"category=\",type(e).__name__,flush=True)
+"`
+- Context: 一次真实 API 非工程合成工具请求；仅记录服务、模型、错误类别、用量
+- Source SHA-256: `930d47df5e28e41a80c8f08b430d419cdd6d385cd30beef70391577b99ad00bb`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T074521.451380Z-77e82c1367.json) · [Raw log](../build-logs/20261102T074521.451380Z-77e82c1367.log)
+- [Exact process output](../build-logs/20261102T074521.451380Z-77e82c1367.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T15:44:07+08:00 · device-chain-first-build · failed
+
+- Config: Release; exit code: 1; elapsed: 230.674s.
+- Command: `cmake --build build/device-chain --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 并行实现中的中间构建；用于尽早发现编译问题，稍后须重建最终源码
+- Source SHA-256: `4d730516ef6403006e96749e3df636017058a2d0e0cef91e970d7ce40dfbcd26`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T074407.498560Z-a4b745c0b8.json) · [Raw log](../build-logs/20261102T074407.498560Z-a4b745c0b8.log)
+- [Exact process output](../build-logs/20261102T074407.498560Z-a4b745c0b8.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261102T074407.498560Z-a4b745c0b8.log
+
+### 2026-11-02T15:47:42+08:00 · agent-catalog-delay-reverb · succeeded
+
+- Config: Release; exit code: 0; elapsed: 35.038s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -q`
+- Context: 原生类型与参数目录不一致时禁用，延迟混响局部参数模拟
+- Source SHA-256: `f8317684befe6817b2fefeec7a852cb614def152228c92ef36a99748f693cdb1`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T074742.871015Z-91a0685985.json) · [Raw log](../build-logs/20261102T074742.871015Z-91a0685985.log)
+- [Exact process output](../build-logs/20261102T074742.871015Z-91a0685985.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T15:49:32+08:00 · agent-device-catalog-full · succeeded
+
+- Config: Release; exit code: 0; elapsed: 32.889s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -q`
+- Context: 原生装置契约校验、意图、API 协议完整回归
+- Source SHA-256: `8922717519694e5c88905100c55c80a00cc5b665bac1c758609db89c2927f633`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T074932.528845Z-c9b0c74cbc.json) · [Raw log](../build-logs/20261102T074932.528845Z-c9b0c74cbc.log)
+- [Exact process output](../build-logs/20261102T074932.528845Z-c9b0c74cbc.raw.log)
+
+### 2026-11-02T15:50:38+08:00 · reverb-dsp-integration · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.214s.
+- Command: `build/device-chain/Release/emusician_reverb_tests.exe`
+- Context: 原生混响核心：独立合成缓冲与边界测试
+- Source SHA-256: `8922717519694e5c88905100c55c80a00cc5b665bac1c758609db89c2927f633`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T075038.161156Z-f3c1052aa8.json) · [Raw log](../build-logs/20261102T075038.161156Z-f3c1052aa8.log)
+- [Exact process output](../build-logs/20261102T075038.161156Z-f3c1052aa8.raw.log)
+
+### 2026-11-02T15:51:50+08:00 · effects-dsp-integration · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.774s.
+- Command: `build/device-chain/Release/emusician_effects_tests.exe`
+- Context: 8-band EQ、压缩器干湿及 Delay 脉冲和参数的 DSP 回归
+- Source SHA-256: `8922717519694e5c88905100c55c80a00cc5b665bac1c758609db89c2927f633`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T075150.923970Z-74593d8ef7.json) · [Raw log](../build-logs/20261102T075150.923970Z-74593d8ef7.log)
+- [Exact process output](../build-logs/20261102T075150.923970Z-74593d8ef7.raw.log)
+
+### 2026-11-02T15:49:32+08:00 · device-chain-integration · succeeded
+
+- Config: Release; exit code: 0; elapsed: 265.308s.
+- Command: `cmake --build build/device-chain --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 整合设备链、轮询、压缩器、Delay、Reverb 及 Agent 目录；构建前保留所有用户修改
+- Source SHA-256: `8922717519694e5c88905100c55c80a00cc5b665bac1c758609db89c2927f633`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T074932.529083Z-4c2d394214.json) · [Raw log](../build-logs/20261102T074932.529083Z-4c2d394214.log)
+- [Exact process output](../build-logs/20261102T074932.529083Z-4c2d394214.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T15:53:24+08:00 · agent-reasoning-config · succeeded
+
+- Config: Release; exit code: 0; elapsed: 36.538s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -q`
+- Context: 推理强度设置和 OpenAI 工具请求模拟回归
+- Source SHA-256: `0c2f56373165c3873b320b4ca1b561c7332b798b08f0d2f2c0ab8414353f1774`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T075324.128067Z-181cb0f13c.json) · [Raw log](../build-logs/20261102T075324.128067Z-181cb0f13c.log)
+- [Exact process output](../build-logs/20261102T075324.128067Z-181cb0f13c.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T15:54:03+08:00 · device-chain-rebuild · succeeded
+
+- Config: Release; exit code: 0; elapsed: 21.869s.
+- Command: `cmake --build build/device-chain --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 设备条修正与当前整合代码的增量构建
+- Source SHA-256: `592d05ea2984f4543cd234f39fe352d94591b5717615a143f004d84ff7b57537`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T075403.493139Z-6de3212b9f.json) · [Raw log](../build-logs/20261102T075403.493139Z-6de3212b9f.log)
+- [Exact process output](../build-logs/20261102T075403.493139Z-6de3212b9f.raw.log)
+
+### 2026-11-02T15:54:39+08:00 · agent-settings-web-syntax · succeeded
+
+- Config: Release; exit code: 0; elapsed: 2.857s.
+- Command: `node --check scripts/music_agent/web/app.js`
+- Context: 推理强度设置 UI JavaScript 语法检查
+- Source SHA-256: `592d05ea2984f4543cd234f39fe352d94591b5717615a143f004d84ff7b57537`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T075439.180870Z-5cddc0652c.json) · [Raw log](../build-logs/20261102T075439.180870Z-5cddc0652c.log)
+- [Exact process output](../build-logs/20261102T075439.180870Z-5cddc0652c.raw.log)
+
+### 2026-11-02T15:55:02+08:00 · agent-reasoning-runtime · succeeded
+
+- Config: Release; exit code: 0; elapsed: 18.922s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_runtime.py -q`
+- Context: 运行时保存强度、无效值拒绝与凭证隔离
+- Source SHA-256: `cec9512fa091e6ae78e490d05ad2dd91af47fbbb9497bf8039edf14a467ea9fe`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T075502.068107Z-0a9f899730.json) · [Raw log](../build-logs/20261102T075502.068107Z-0a9f899730.log)
+- [Exact process output](../build-logs/20261102T075502.068107Z-0a9f899730.raw.log)
+
+### 2026-11-02T15:54:33+08:00 · device-chain-ctest-first · succeeded
+
+- Config: Release; exit code: 0; elapsed: 99.306s.
+- Command: `ctest --test-dir build/device-chain -C Release --output-on-failure`
+- Context: 包含设备链、原生采样器生命周期、压缩器/延迟/混响 DSP 和工程集成
+- Source SHA-256: `592d05ea2984f4543cd234f39fe352d94591b5717615a143f004d84ff7b57537`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T075433.617386Z-2be26dc947.json) · [Raw log](../build-logs/20261102T075433.617386Z-2be26dc947.log)
+- [Exact process output](../build-logs/20261102T075433.617386Z-2be26dc947.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T15:56:56+08:00 · effects-and-tails-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 42.077s.
+- Command: `C:\Python314\python.exe tests/NativeEffectsEndToEnd.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: 独立离线进程、合成素材和临时工程
+- Source SHA-256: `63cd25cd14e2940e70eba712d73649aec67f0f41386a612dc88046ee262bba50`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T075656.881865Z-f612783dbe.json) · [Raw log](../build-logs/20261102T075656.881865Z-f612783dbe.log)
+- [Exact process output](../build-logs/20261102T075656.881865Z-f612783dbe.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T15:57:39+08:00 · instruments-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 15.430s.
+- Command: `C:\Python314\python.exe tests/NativeDeviceEndToEnd.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: 独立离线进程、合成素材和临时工程
+- Source SHA-256: `e6d0b76aa5b3c703ba54195782e5494243d52f7a5c2823cb3636c8fda2a42f89`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T075739.099329Z-fd824dce73.json) · [Raw log](../build-logs/20261102T075739.099329Z-fd824dce73.log)
+- [Exact process output](../build-logs/20261102T075739.099329Z-fd824dce73.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T15:57:54+08:00 · agent-device-e2e · failed
+
+- Config: Release; exit code: 1; elapsed: 6.084s.
+- Command: `C:\Python314\python.exe tests/MusicAgentNativeEffectsIntegration.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: 独立离线进程、合成素材和临时工程
+- Source SHA-256: `5c3b683be4167c000c85fa8ed861dbb557c72ffb87d6cccca51293b912cd06dc`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T075754.670595Z-3a63500803.json) · [Raw log](../build-logs/20261102T075754.670595Z-3a63500803.log)
+- [Exact process output](../build-logs/20261102T075754.670595Z-3a63500803.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261102T075754.670595Z-3a63500803.log
+
+### 2026-11-02T15:58:18+08:00 · agent-auto-filter-regression · succeeded
+
+- Config: Release; exit code: 0; elapsed: 33.810s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -q`
+- Context: Auto Filter 枚举、数值、布尔、目录一致性与全部 Agent 回归
+- Source SHA-256: `7b081b1f7159ef16772e4ab0ddb8f71016403219b7857074c3112f166a8a3409`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T075818.786459Z-1681061e5b.json) · [Raw log](../build-logs/20261102T075818.786459Z-1681061e5b.log)
+- [Exact process output](../build-logs/20261102T075818.786459Z-1681061e5b.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T15:59:27+08:00 · autofilter-dsp · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.214s.
+- Command: `build/device-chain/Release/emusician_autofilter_tests.exe`
+- Context: 低通/高通、调制、干湿、参数与采样率测试
+- Source SHA-256: `d89568ac055725919b63ea31000fb7b23d3dac02612a90e19f3d40896503024f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T075927.746913Z-c5329c2d2e.json) · [Raw log](../build-logs/20261102T075927.746913Z-c5329c2d2e.log)
+- [Exact process output](../build-logs/20261102T075927.746913Z-c5329c2d2e.raw.log)
+
+### 2026-11-02T15:59:02+08:00 · device-chain-autofilter-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 70.160s.
+- Command: `cmake --build build/device-chain --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 整合 Auto Filter 与 Agent 契约后的候选增量构建
+- Source SHA-256: `ff4e0fc228873607165499e46d72919dd2fc4816accc7fc67667b249d0d6af81`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T075902.737911Z-e642246dae.json) · [Raw log](../build-logs/20261102T075902.737911Z-e642246dae.log)
+- [Exact process output](../build-logs/20261102T075902.737911Z-e642246dae.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-02T16:00:16+08:00 · device-chain-stable-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 3.222s.
+- Command: `cmake --build build/device-chain --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 合入跨设备滑块修复后的稳定候选
+- Source SHA-256: `d89568ac055725919b63ea31000fb7b23d3dac02612a90e19f3d40896503024f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T080016.766492Z-d52ce32c22.json) · [Raw log](../build-logs/20261102T080016.766492Z-d52ce32c22.log)
+- [Exact process output](../build-logs/20261102T080016.766492Z-d52ce32c22.raw.log)
+
+### 2026-11-02T16:00:27+08:00 · device-chain-final-effects · succeeded
+
+- Config: Release; exit code: 0; elapsed: 50.888s.
+- Command: `C:\Python314\python.exe tests/NativeEffectsEndToEnd.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: 稳定候选；离线 DAW、合成音频和独立工程
+- Source SHA-256: `d89568ac055725919b63ea31000fb7b23d3dac02612a90e19f3d40896503024f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T080027.930440Z-b73de8acc8.json) · [Raw log](../build-logs/20261102T080027.930440Z-b73de8acc8.log)
+- [Exact process output](../build-logs/20261102T080027.930440Z-b73de8acc8.raw.log)
+
+### 2026-11-02T16:01:19+08:00 · device-chain-final-agent · succeeded
+
+- Config: Release; exit code: 0; elapsed: 7.387s.
+- Command: `C:\Python314\python.exe tests/MusicAgentNativeEffectsIntegration.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: 稳定候选；离线 DAW、合成音频和独立工程
+- Source SHA-256: `d89568ac055725919b63ea31000fb7b23d3dac02612a90e19f3d40896503024f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T080119.020155Z-53f075daa8.json) · [Raw log](../build-logs/20261102T080119.020155Z-53f075daa8.log)
+- [Exact process output](../build-logs/20261102T080119.020155Z-53f075daa8.raw.log)
+
+### 2026-11-02T16:00:47+08:00 · device-chain-final-agent-unit · succeeded
+
+- Config: Release; exit code: 0; elapsed: 43.556s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -q`
+- Context: 稳定源码的完整 Agent Python 回归，含设置与本地契约
+- Source SHA-256: `d89568ac055725919b63ea31000fb7b23d3dac02612a90e19f3d40896503024f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T080047.699583Z-ea8d116d80.json) · [Raw log](../build-logs/20261102T080047.699583Z-ea8d116d80.log)
+- [Exact process output](../build-logs/20261102T080047.699583Z-ea8d116d80.raw.log)
+
+### 2026-11-02T16:01:26+08:00 · device-chain-final-instrument · succeeded
+
+- Config: Release; exit code: 0; elapsed: 15.165s.
+- Command: `C:\Python314\python.exe tests/NativeDeviceEndToEnd.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: 稳定候选；离线 DAW、合成音频和独立工程
+- Source SHA-256: `d89568ac055725919b63ea31000fb7b23d3dac02612a90e19f3d40896503024f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T080126.565350Z-0933beedec.json) · [Raw log](../build-logs/20261102T080126.565350Z-0933beedec.log)
+- [Exact process output](../build-logs/20261102T080126.565350Z-0933beedec.raw.log)
+
+### 2026-11-02T16:01:57+08:00 · device-chain-final-ctest · succeeded
+
+- Config: Release; exit code: 0; elapsed: 98.193s.
+- Command: `ctest --test-dir build/device-chain -C Release --output-on-failure`
+- Context: 稳定候选完整 CTest：设备链、生命周期、EQ、压缩器、延迟、混响、滤波器
+- Source SHA-256: `d89568ac055725919b63ea31000fb7b23d3dac02612a90e19f3d40896503024f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T080157.227636Z-f2c57edae9.json) · [Raw log](../build-logs/20261102T080157.227636Z-f2c57edae9.log)
+- [Exact process output](../build-logs/20261102T080157.227636Z-f2c57edae9.raw.log)
+
+### 2026-11-02T16:04:20+08:00 · device-chain-effects-benchmark · succeeded
+
+- Config: Release; exit code: 0; elapsed: 2.073s.
+- Command: `build/device-chain/Release/emusician_effects_benchmark.exe`
+- Context: Lenovo i7-13700H, stereo 48 kHz/256 frames, synthetic input, 8 enabled EQ bands + compressor, single offline chain; no ASIO or other devices
+- Source SHA-256: `d89568ac055725919b63ea31000fb7b23d3dac02612a90e19f3d40896503024f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T080420.615597Z-0bfbb1d81d.json) · [Raw log](../build-logs/20261102T080420.615597Z-0bfbb1d81d.log)
+- [Exact process output](../build-logs/20261102T080420.615597Z-0bfbb1d81d.raw.log)
+
+### 2026-11-02 · 设备链、Agent 诊断和原生效果候选
+
+- 增加基于权威轨道 slot 的底部设备链、常用内置入口、左右导航；修复原生面板父层隐藏时无法恢复轮询及临时读取不重试；第三方插件显式轨道归属校验。新增原创 Delay、Reverb、Auto Filter；压缩器新增 dry/wet 与真实 wet GR。
+- Agent 新增效果器局部／相对参数、OpenAI 推理强度设置、宿主与 Agent 版本化能力目录一致性校验；一次授权的 low 强度 OpenAI 健康工具调用成功。更多证据、失败与限制见 [结果](review/2026-11-02-device-chain-agent/RESULTS.md)。
+- 稳定构建 [记录](builds/20261102T080016.766492Z-d52ce32c22.json)；最终 CTest 10/10 [记录](builds/20261102T080157.227636Z-f2c57edae9.json)；Python 243 项 [记录](builds/20261102T080047.699583Z-ea8d116d80.json)；离线真实 DAW 效果 [记录](builds/20261102T080027.930440Z-b73de8acc8.json)、Agent [记录](builds/20261102T080119.020155Z-53f075daa8.json)、采样器 [记录](builds/20261102T080126.565350Z-0933beedec.json)。
+- 未完成全部商业装置，四类合成器及完整 Sampler/Rack 等见 [路线](review/2026-11-02-device-chain-agent/SYNTH-ROADMAP.md)。真实桌面、ASIO 听感及 Keyscape 加载差异仍待人工验证；合成完整窗口截图的数值框显示异常需重点核对。
+
+### 2026-11-02T16:07:46+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.013s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `d89568ac055725919b63ea31000fb7b23d3dac02612a90e19f3d40896503024f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T080746.165247Z-fb4018d78c.json) · [Raw log](../build-logs/20261102T080746.165247Z-fb4018d78c.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-02T20:54:04+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 6.914s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `d89568ac055725919b63ea31000fb7b23d3dac02612a90e19f3d40896503024f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261102T125404.636470Z-d541b54c0e.json) · [Raw log](../build-logs/20261102T125404.636470Z-d541b54c0e.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-05T00:58:06+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 5.243s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `d89568ac055725919b63ea31000fb7b23d3dac02612a90e19f3d40896503024f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T165806.966089Z-dc49870100.json) · [Raw log](../build-logs/20261104T165806.966089Z-dc49870100.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-05 ? ??????????? ? ???
+
+- ????????????????????????????/???EQ ??????????? Agent?
+- ???[PLAN](review/2026-11-05-device-controls/PLAN.md)?????????????????? computer-use?
+- ??????????????????? Recorder ???
+
+### 2026-11-05T01:20:49+08:00 · agent-check · succeeded
+
+- Config: Python; exit code: 0; elapsed: 45.042s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: Agent batch 2 deterministic tests; no live model calls or physical audio
+- Source SHA-256: `8e67f12b95b981794aaed05d56637cf486753593da299be7aefedac30f9e4dbd`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T172049.871787Z-11a35f85dc.json) · [Raw log](../build-logs/20261104T172049.871787Z-11a35f85dc.log)
+- [Exact process output](../build-logs/20261104T172049.871787Z-11a35f85dc.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T01:21:50+08:00 · device-controls-dsp-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 8.404s.
+- Command: `cmake --build build/device-chain --config Release --target emusician_effects_tests --parallel 2`
+- Context: Incremental core DSP build; previous DAW binary backed up; UI implementation in progress
+- Source SHA-256: `686116890e554984eb22a918597692a7033564166c55275200d5c0aa7247137d`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T172150.307382Z-4349760a57.json) · [Raw log](../build-logs/20261104T172150.307382Z-4349760a57.log)
+- [Exact process output](../build-logs/20261104T172150.307382Z-4349760a57.raw.log)
+
+### 2026-11-05T01:21:58+08:00 · device-controls-dsp-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.805s.
+- Command: `build/device-chain/Release/emusician_effects_tests.exe`
+- Context: Incremental core DSP build; previous DAW binary backed up; UI implementation in progress
+- Source SHA-256: `686116890e554984eb22a918597692a7033564166c55275200d5c0aa7247137d`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T172158.945187Z-957e646a9d.json) · [Raw log](../build-logs/20261104T172158.945187Z-957e646a9d.log)
+- [Exact process output](../build-logs/20261104T172158.945187Z-957e646a9d.raw.log)
+
+### 2026-11-05 - Correction to initial device-controls iteration entry
+
+- The first entry above was encoded incorrectly by the PowerShell-to-Python pipe; retain it as history. The intended UTF-8 Chinese plan is preserved in [PLAN](review/2026-11-05-device-controls/PLAN.md).
+- User accepted the existing project; this iteration implements rectangular MIDI/clip display, richer visual controls, EQ shapes and sampler envelope/mode parameters, with complete Agent contracts. No computer-use or paid API requests.
+- Old Release EXE backed up at `.cache/pre-device-controls-20261105/E-musician.exe`, SHA-256 `d6388702e8d08e93491f546a1edd35160dae9bf12dd5689ed268b8b1e735b4fc`; incremental `build/device-chain` retained to avoid rebuilding unchanged dependencies. Candidate version 0.8.1.
+
+### 2026-11-05T01:25:23+08:00 · device-controls-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 159.574s.
+- Command: `cmake --build build/device-chain --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.8.1 graphical native controls and rectangular clips; previous EXE backed up
+- Source SHA-256: `4d49e4a6e93e1f9a6ed12c3313af5ed72b9468d75bb085e91b23e0f0b3b38149`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T172523.521253Z-8ec5de9bc1.json) · [Raw log](../build-logs/20261104T172523.521253Z-8ec5de9bc1.log)
+- [Exact process output](../build-logs/20261104T172523.521253Z-8ec5de9bc1.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T01:28:18+08:00 · agent-check · succeeded
+
+- Config: Python; exit code: 0; elapsed: 43.137s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: Agent batch 2 deterministic tests; no live model calls or physical audio
+- Source SHA-256: `2303fc08ec5cce3d20475f5df6ce57e6d7bbf9cda25077bb2e8541884c940816`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T172818.461252Z-a094aa0dd4.json) · [Raw log](../build-logs/20261104T172818.461252Z-a094aa0dd4.log)
+- [Exact process output](../build-logs/20261104T172818.461252Z-a094aa0dd4.raw.log)
+
+### 2026-11-05T01:28:41+08:00 · device-controls-ctest · failed
+
+- Config: Release; exit code: 8; elapsed: 90.776s.
+- Command: `ctest --test-dir build/device-chain -C Release --output-on-failure`
+- Context: Integrated geometry, visual controls, storage, audio engine and DSP regression; no physical devices
+- Source SHA-256: `2303fc08ec5cce3d20475f5df6ce57e6d7bbf9cda25077bb2e8541884c940816`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T172841.644105Z-f2c10585e6.json) · [Raw log](../build-logs/20261104T172841.644105Z-f2c10585e6.log)
+- [Exact process output](../build-logs/20261104T172841.644105Z-f2c10585e6.raw.log)
+- Error: Command failed with code 8; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261104T172841.644105Z-f2c10585e6.log
+
+### 2026-11-05T01:31:21+08:00 · device-controls-agent-e2e · failed
+
+- Config: Release; exit code: 1; elapsed: 6.780s.
+- Command: `C:\Python314\python.exe tests/MusicAgentNativeEffectsIntegration.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: Real offline DAW with deterministic provider, new envelope and EQ shapes, no API requests
+- Source SHA-256: `19248b589d8b0ac2149377b34bca4ec3fd2673e5398b20d0cfb3d21d523d624b`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T173121.837881Z-4195d8b24a.json) · [Raw log](../build-logs/20261104T173121.837881Z-4195d8b24a.log)
+- [Exact process output](../build-logs/20261104T173121.837881Z-4195d8b24a.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261104T173121.837881Z-4195d8b24a.log
+
+### 2026-11-05T01:31:21+08:00 · device-controls-audio-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 46.648s.
+- Command: `C:\Python314\python.exe tests/NativeEffectsEndToEnd.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: Actual offline audio rendering and native state persistence; UI fixes still in progress
+- Source SHA-256: `19248b589d8b0ac2149377b34bca4ec3fd2673e5398b20d0cfb3d21d523d624b`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T173121.837120Z-f1f4e4839a.json) · [Raw log](../build-logs/20261104T173121.837120Z-f1f4e4839a.log)
+- [Exact process output](../build-logs/20261104T173121.837120Z-f1f4e4839a.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T01:32:08+08:00 · device-controls-audio-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 13.461s.
+- Command: `C:\Python314\python.exe tests/NativeDeviceEndToEnd.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: Actual offline audio rendering and native state persistence; UI fixes still in progress
+- Source SHA-256: `68130101cf3916e527d04d2b623ca863abb2fb7a91e9ab0b5ae3d1327e87e35c`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T173208.672850Z-b68d62bcd3.json) · [Raw log](../build-logs/20261104T173208.672850Z-b68d62bcd3.log)
+- [Exact process output](../build-logs/20261104T173208.672850Z-b68d62bcd3.raw.log)
+
+### 2026-11-05T01:32:48+08:00 · device-controls-reviewed-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 32.292s.
+- Command: `cmake --build build/device-chain --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Reviewed graph boundary and cancellation/image fixtures; source frozen for validation
+- Source SHA-256: `e15399272ac2553a016dde8b71e878af2285c691a76f4f653f1aac6d6dd9f9d8`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T173248.460345Z-c8232a13de.json) · [Raw log](../build-logs/20261104T173248.460345Z-c8232a13de.log)
+- [Exact process output](../build-logs/20261104T173248.460345Z-c8232a13de.raw.log)
+
+### 2026-11-05T01:33:20+08:00 · device-controls-reviewed-build · failed
+
+- Config: Release; exit code: 8; elapsed: 86.003s.
+- Command: `ctest --test-dir build/device-chain -C Release --output-on-failure`
+- Context: Reviewed graph boundary and cancellation/image fixtures; source frozen for validation
+- Source SHA-256: `e15399272ac2553a016dde8b71e878af2285c691a76f4f653f1aac6d6dd9f9d8`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T173320.932811Z-0d7f8c79bd.json) · [Raw log](../build-logs/20261104T173320.932811Z-0d7f8c79bd.log)
+- [Exact process output](../build-logs/20261104T173320.932811Z-0d7f8c79bd.raw.log)
+- Error: Command failed with code 8; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261104T173320.932811Z-0d7f8c79bd.log
+
+### 2026-11-05T01:35:29+08:00 · device-controls-layout-final · succeeded
+
+- Config: Release; exit code: 0; elapsed: 25.723s.
+- Command: `cmake --build build/device-chain --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Keep two compact arrangement rows at standard window size while maintaining a 250px native control body at minimum size.
+- Source SHA-256: `2b398a1f6f2c4b24ff511a5523194fcffd7e8da0310ec57d64139b048c569733`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T173529.556894Z-a33528ad43.json) · [Raw log](../build-logs/20261104T173529.556894Z-a33528ad43.log)
+- [Exact process output](../build-logs/20261104T173529.556894Z-a33528ad43.raw.log)
+
+### 2026-11-05T01:35:55+08:00 · device-controls-layout-final · succeeded
+
+- Config: Release; exit code: 0; elapsed: 86.435s.
+- Command: `ctest --test-dir build/device-chain -C Release --output-on-failure`
+- Context: Keep two compact arrangement rows at standard window size while maintaining a 250px native control body at minimum size.
+- Source SHA-256: `2b398a1f6f2c4b24ff511a5523194fcffd7e8da0310ec57d64139b048c569733`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T173555.481379Z-a1a9793946.json) · [Raw log](../build-logs/20261104T173555.481379Z-a1a9793946.log)
+- [Exact process output](../build-logs/20261104T173555.481379Z-a1a9793946.raw.log)
+
+### 2026-11-05T01:37:22+08:00 · device-controls-layout-final · succeeded
+
+- Config: Release; exit code: 0; elapsed: 6.420s.
+- Command: `python tests/MusicAgentNativeEffectsIntegration.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: Keep two compact arrangement rows at standard window size while maintaining a 250px native control body at minimum size.
+- Source SHA-256: `2b398a1f6f2c4b24ff511a5523194fcffd7e8da0310ec57d64139b048c569733`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T173722.106363Z-085578a84e.json) · [Raw log](../build-logs/20261104T173722.106363Z-085578a84e.log)
+- [Exact process output](../build-logs/20261104T173722.106363Z-085578a84e.raw.log)
+
+### 2026-11-05T01:39:37+08:00 · device-controls-delivery · succeeded
+
+- Config: Release; exit code: 0; elapsed: 36.323s.
+- Command: `cmake --build build/device-chain --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Final compact native dock preserves one full track at 1000x650 and two at 1280x800. Frozen sources; run engine and native integrations serially to avoid shared cache interference.
+- Source SHA-256: `3dedd1f4b657a63157e13a8c75dacc9ec0118fda705e1cdec4739d817a965759`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T173937.625873Z-eaa70a0adb.json) · [Raw log](../build-logs/20261104T173937.625873Z-eaa70a0adb.log)
+- [Exact process output](../build-logs/20261104T173937.625873Z-eaa70a0adb.raw.log)
+
+### 2026-11-05T01:40:14+08:00 · device-controls-delivery · succeeded
+
+- Config: Release; exit code: 0; elapsed: 86.239s.
+- Command: `ctest --test-dir build/device-chain -C Release --output-on-failure`
+- Context: Final compact native dock preserves one full track at 1000x650 and two at 1280x800. Frozen sources; run engine and native integrations serially to avoid shared cache interference.
+- Source SHA-256: `3dedd1f4b657a63157e13a8c75dacc9ec0118fda705e1cdec4739d817a965759`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T174014.151357Z-711656b723.json) · [Raw log](../build-logs/20261104T174014.151357Z-711656b723.log)
+- [Exact process output](../build-logs/20261104T174014.151357Z-711656b723.raw.log)
+
+### 2026-11-05T01:41:40+08:00 · device-controls-delivery · failed
+
+- Config: Release; exit code: 1; elapsed: 43.529s.
+- Command: `python tests/NativeEffectsEndToEnd.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: Final compact native dock preserves one full track at 1000x650 and two at 1280x800. Frozen sources; run engine and native integrations serially to avoid shared cache interference.
+- Source SHA-256: `3dedd1f4b657a63157e13a8c75dacc9ec0118fda705e1cdec4739d817a965759`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T174140.635326Z-decbe84334.json) · [Raw log](../build-logs/20261104T174140.635326Z-decbe84334.log)
+- [Exact process output](../build-logs/20261104T174140.635326Z-decbe84334.raw.log)
+- Error: Command failed with code 1; see C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build-logs\20261104T174140.635326Z-decbe84334.log
+
+### 2026-11-05T01:43:36+08:00 · device-controls-native-final · succeeded
+
+- Config: Release; exit code: 0; elapsed: 3.677s.
+- Command: `cmake --build build/device-chain --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Fixed an integration harness race: after open_project wait for all native PCM loads before exporting; no application source changed. Rebuild check and sequential final integrations.
+- Source SHA-256: `46d4a085c23136f79774a7ad533940124be07a3daa11f6b654fd01b03b342ffe`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T174336.772462Z-e861f2fa9c.json) · [Raw log](../build-logs/20261104T174336.772462Z-e861f2fa9c.log)
+- [Exact process output](../build-logs/20261104T174336.772462Z-e861f2fa9c.raw.log)
+
+### 2026-11-05T01:43:40+08:00 · device-controls-native-final · succeeded
+
+- Config: Release; exit code: 0; elapsed: 46.116s.
+- Command: `python tests/NativeEffectsEndToEnd.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: Fixed an integration harness race: after open_project wait for all native PCM loads before exporting; no application source changed. Rebuild check and sequential final integrations.
+- Source SHA-256: `46d4a085c23136f79774a7ad533940124be07a3daa11f6b654fd01b03b342ffe`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T174340.630759Z-c23b9e23f2.json) · [Raw log](../build-logs/20261104T174340.630759Z-c23b9e23f2.log)
+- [Exact process output](../build-logs/20261104T174340.630759Z-c23b9e23f2.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T01:44:26+08:00 · device-controls-native-final · succeeded
+
+- Config: Release; exit code: 0; elapsed: 13.075s.
+- Command: `python tests/NativeDeviceEndToEnd.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: Fixed an integration harness race: after open_project wait for all native PCM loads before exporting; no application source changed. Rebuild check and sequential final integrations.
+- Source SHA-256: `846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T174426.923349Z-75378a3ad0.json) · [Raw log](../build-logs/20261104T174426.923349Z-75378a3ad0.log)
+- [Exact process output](../build-logs/20261104T174426.923349Z-75378a3ad0.raw.log)
+
+### 2026-11-05T01:44:40+08:00 · device-controls-native-final · succeeded
+
+- Config: Release; exit code: 0; elapsed: 6.650s.
+- Command: `python tests/MusicAgentNativeEffectsIntegration.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: Fixed an integration harness race: after open_project wait for all native PCM loads before exporting; no application source changed. Rebuild check and sequential final integrations.
+- Source SHA-256: `846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T174440.170188Z-ab76ef503e.json) · [Raw log](../build-logs/20261104T174440.170188Z-ab76ef503e.log)
+- [Exact process output](../build-logs/20261104T174440.170188Z-ab76ef503e.raw.log)
+
+### 2026-11-05T01:45:10+08:00 · device-controls-release-verify · succeeded
+
+- Config: Release; exit code: 0; elapsed: 22.498s.
+- Command: `cmake --build build/device-chain --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Final frozen source verification after the compact-axis unit-label correction; archive matching executable, sources and regression records.
+- Source SHA-256: `846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T174510.587395Z-4b892d27f9.json) · [Raw log](../build-logs/20261104T174510.587395Z-4b892d27f9.log)
+- [Exact process output](../build-logs/20261104T174510.587395Z-4b892d27f9.raw.log)
+
+### 2026-11-05T01:45:33+08:00 · device-controls-release-verify · succeeded
+
+- Config: Release; exit code: 0; elapsed: 86.246s.
+- Command: `ctest --test-dir build/device-chain -C Release --output-on-failure`
+- Context: Final frozen source verification after the compact-axis unit-label correction; archive matching executable, sources and regression records.
+- Source SHA-256: `846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T174533.245723Z-a02903701d.json) · [Raw log](../build-logs/20261104T174533.245723Z-a02903701d.log)
+- [Exact process output](../build-logs/20261104T174533.245723Z-a02903701d.raw.log)
+
+### 2026-11-05T01:46:59+08:00 · device-controls-release-verify · succeeded
+
+- Config: Release; exit code: 0; elapsed: 45.199s.
+- Command: `python tests/NativeEffectsEndToEnd.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: Final frozen source verification after the compact-axis unit-label correction; archive matching executable, sources and regression records.
+- Source SHA-256: `846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T174659.712267Z-feb39b69b2.json) · [Raw log](../build-logs/20261104T174659.712267Z-feb39b69b2.log)
+- [Exact process output](../build-logs/20261104T174659.712267Z-feb39b69b2.raw.log)
+
+### 2026-11-05T01:47:45+08:00 · device-controls-release-verify · succeeded
+
+- Config: Release; exit code: 0; elapsed: 13.379s.
+- Command: `python tests/NativeDeviceEndToEnd.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: Final frozen source verification after the compact-axis unit-label correction; archive matching executable, sources and regression records.
+- Source SHA-256: `846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T174745.104050Z-00fbfd9c95.json) · [Raw log](../build-logs/20261104T174745.104050Z-00fbfd9c95.log)
+- [Exact process output](../build-logs/20261104T174745.104050Z-00fbfd9c95.raw.log)
+
+### 2026-11-05T01:47:58+08:00 · device-controls-release-verify · succeeded
+
+- Config: Release; exit code: 0; elapsed: 6.466s.
+- Command: `python tests/MusicAgentNativeEffectsIntegration.py --exe build/device-chain/bin/Release/E-musician.exe`
+- Context: Final frozen source verification after the compact-axis unit-label correction; archive matching executable, sources and regression records.
+- Source SHA-256: `846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261104T174758.755341Z-3cbfcfa5d9.json) · [Raw log](../build-logs/20261104T174758.755341Z-3cbfcfa5d9.log)
+- [Exact process output](../build-logs/20261104T174758.755341Z-3cbfcfa5d9.raw.log)
+
+### 2026-11-05 · 0.8.1 矩形片段与原生装置控件交付候选
+
+- MIDI 音符/clip 矩形填满行，保留真实时值；七种装置统一旋钮、数值和图形手势。新增 EQ 六形状及 Sampler/Rack AR、Gate/One-shot，贯通宿主、保存、能力目录和 Agent；参数编辑复用不可变 PCM。
+- 修复小窗口轨道被挤掉、压缩比拖点、低采样率节点和刻度单位重叠。最小窗口保留一条完整紧凑轨道，标准窗口两条。源码 846b6b2c，EXE c0099db1；最终五条 Recorder 记录的 161 个输入未变。
+- Release 构建、CTest 10/10、Agent Python 245、效果音频 11、采样器 12、模拟 Provider 经真实 DAW 11 项通过。截图已检查，git diff --check 返回 0（保留既有换行提示）。所有失败尝试仍保留；原生联测脚本补全工程重开后的采样就绪等待，未放宽宿主保护。
+- 更新 CONTEXT、DEVELOPMENT、ARCHITECTURE、UI_REFERENCE、AGENT_API 和 README；参考、ADR、变动清单、产物 SHA、日志索引及人工检查归档于 [本轮结果](review/2026-11-05-device-controls/RESULTS.md)。新增本机入口 E:/MusicAgent&DAW/Start E-musician 0.8.1.cmd；原入口及程序备份保留。
+- 本轮没有 computer-use、实体声卡验收或付费模型请求。用户下一步做新增控件/听感和一次保存重开短测；新 bank 仍停止现有声音，整机旁路尚未加入模型动作列表。已有工作树修改保留，未合并或推送 main。
+
+### 2026-11-05 · 音频分析功能选型与 0.8.1 保留（仅方案）
+
+- 用户要求先提出分离、分轨 MIDI、和弦识别的模型/来源/部署方案，手动和 Agent 共用管线，后续更新页面固定能力清单。查阅作者项目/权重与运行依赖；未下载模型、未安装环境、未修改程序或页面、未运行推理，因没有实际构建而没有新增构建成功声明。
+- 将 EXE、PDB 和源码/文档归档至 E:/MusicAgent&DAW/releases/0.8.1-20261105；ZIP 共 1016 成员、161 个源码逐项 SHA 验证，原始源码 846b6b2c、EXE c0099db1 与上一交付一致。归档不含凭证、浏览数据、用户音乐/工程或依赖，MANIFEST.json 保存产物 hash；原入口不变。这是恢复归档，不是已测试的便携安装包。
+- 本机硬件只读检测确认 i7-13700H、约32GB内存、RTX3050 Laptop 4096MiB、驱动555.99；C盘约12GB空闲、E盘约698GB，故拟隔离环境/模型/缓存到E盘。显卡枚举不代替CUDA/PyTorch可用性验证。
+- 建议 HTDemucs 评测、Basic Pitch ONNX、有明确限制的 Chroma/模板/HMM；鼓和混合多音另设路线。Demucs预训练权重许可及若干研究模型 checkpoint 使用范围未解决，不标已可商用分发。方案包含输入冻结、异步任务、CPU/GPU限额、候选预览、一次导入/撤销、来源时间映射、结果引用及能力注册表。
+- [完整方案](review/2026-11-05-audio-analysis/PLAN.md)；CONTEXT/DEVELOPMENT/ARCHITECTURE已注明提案状态。无 computer-use、无付费模型调用，未将新分析能力写成已完成。
+
+### 2026-11-05T11:06:51+08:00 · agent-native-run · launched
+
+- Config: Release; exit code: None; elapsed: 5.305s.
+- Command: `C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build\device-chain\bin\Release\E-musician.exe --agent`
+- Context: Embedded Agent batch 2; physical audio acceptance remains manual
+- Source SHA-256: `846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261105T030651.673961Z-5a1a4b9d69.json) · [Raw log](../build-logs/20261105T030651.673961Z-5a1a4b9d69.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261105T030651.673961Z-5a1a4b9d69.raw.log)
+
+### 2026-11-05T11:07:06+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.506s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261105T030706.052045Z-ae5f434d0f.json) · [Raw log](../build-logs/20261105T030706.052045Z-ae5f434d0f.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-05T12:38:53+08:00 · agent-native-run · launched
+
+- Config: Release; exit code: None; elapsed: 0.289s.
+- Command: `C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\build\device-chain\bin\Release\E-musician.exe --agent`
+- Context: Embedded Agent batch 2; physical audio acceptance remains manual
+- Source SHA-256: `846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261105T043853.427854Z-5c49f62473.json) · [Raw log](../build-logs/20261105T043853.427854Z-5c49f62473.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261105T043853.427854Z-5c49f62473.raw.log)
+
+### 2026-11-05T12:39:01+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.270s.
+- Command: `C:\Python314\python.exe C:\Users\28712\.codex\worktrees\music-agent-kimi\E-musician\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
+- [Record](builds/20261105T043901.428761Z-5740265563.json) · [Raw log](../build-logs/20261105T043901.428761Z-5740265563.log)
+- GUI process launched only; playback, interaction and performance remain unverified.

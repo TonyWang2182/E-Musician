@@ -3,10 +3,14 @@
 #include "PianoRoll.h"
 #include "AgentSidebar.h"
 #include "SelectedTrackPanel.h"
+#include "NativeDevicePanel.h"
+#include "NativeEffectsPanel.h"
+#include "DeviceChainStrip.h"
 #include "core/time/MusicalPosition.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <limits>
 #include <stdexcept>
 #include <unordered_map>
 #include <unordered_set>
@@ -22,6 +26,12 @@ const juce::Colour paper { 0xfffefefd };
 juce::Font mono(float height, int style = juce::Font::plain)
 {
     return juce::Font(juce::FontOptions(juce::Font::getDefaultMonospacedFontName(), height, style));
+}
+bool blockNativeTransition(const EngineSession::Snapshot& state, const std::function<void(const juce::String&)>& report)
+{
+    if (!state.nativePending) return false;
+    report("The sample change is still preparing and has not been committed. Wait for it to finish, then try again.");
+    return true;
 }
 juce::String clockText(double seconds)
 {
@@ -553,9 +563,9 @@ class PluginPanel final : public juce::Component, private juce::Timer {
         PluginPanel& p; bool chain;
     };
 public:
-    PluginPanel(EngineSession& engine, std::function<void(const juce::Result&)> result) : session(engine), report(std::move(result)), catalogModel(*this, false), chainModel(*this, true), catalog("Installed plugins", &catalogModel), chain("Plugin chain", &chainModel)
+    PluginPanel(EngineSession& engine, std::function<void(const juce::Result&)> result, std::function<void(const juce::String&)> openNative = {}, std::function<void(const juce::String&, const juce::String&)> openEffect = {}) : session(engine), report(std::move(result)), openNativeDevice(std::move(openNative)), openNativeEffect(std::move(openEffect)), catalogModel(*this, false), chainModel(*this, true), catalog("Installed plugins", &catalogModel), chain("Plugin chain", &chainModel)
     {
-        for (juce::Component* c : std::initializer_list<juce::Component*> { &target, &search, &catalog, &chain, &scan, &directory, &add, &remove, &open, &bypass, &up, &down, &status }) addAndMakeVisible(c);
+        for (juce::Component* c : std::initializer_list<juce::Component*> { &target, &search, &catalog, &chain, &scan, &directory, &native, &add, &remove, &open, &bypass, &up, &down, &status }) addAndMakeVisible(c);
         search.setTextToShowWhenEmpty("Find an installed instrument or effect", secondary); search.onTextChange = [this] { filter(); };
         for (auto* list : { &catalog, &chain }) { list->setRowHeight(52); list->setColour(juce::ListBox::backgroundColourId, paper); }
         target.onChange = [this] { updateSlots(); };
@@ -569,9 +579,18 @@ public:
                     juce::MessageManager::callAsync([safe, path] { if (safe) { safe->chooser.reset(); if (path.isDirectory()) safe->run("scan_plugins", arguments({ { "paths", juce::var(juce::Array<juce::var>{ path.getFullPathName() }) } })); } });
                 });
         };
-        add.onClick = [this] { const int row = catalog.getSelectedRow(); if (row >= 0 && row < int(filtered.size())) run("add_plugin", arguments({ { "track_id", targetId() }, { "catalog_id", filtered[std::size_t(row)].id } })); };
+        add.onClick = [this] { beginAdd(); };
+        native.onClick = [this] { if (openNativeDevice) openNativeDevice(targetId()); };
+        native.setTooltip("Open the built-in sampler and drum rack for the selected MIDI track.");
         remove.onClick = [this] { withSlot("remove_plugin"); };
-        open.onClick = [this] { withSlot("open_plugin"); };
+        open.onClick = [this] {
+            const int row=chain.getSelectedRow();
+            if(row>=0&&row<int(slots.size())&&slots[std::size_t(row)].format=="E-musician"){
+                const auto& slot = slots[std::size_t(row)];
+                if(slot.isInstrument) { if(openNativeDevice)openNativeDevice(targetId()); }
+                else if(openNativeEffect)openNativeEffect(targetId(),slot.id);
+            }else withSlot("open_plugin");
+        };
         bypass.onClick = [this] { const int row = chain.getSelectedRow(); if (row >= 0 && row < int(slots.size())) run("set_plugin_enabled", arguments({ { "track_id", targetId() }, { "plugin_id", slots[std::size_t(row)].id }, { "enabled", !slots[std::size_t(row)].enabled } })); };
         up.onClick = [this] { move(-1); }; down.onClick = [this] { move(1); };
         status.setFont(mono(12)); status.setColour(juce::Label::textColourId, secondary);
@@ -584,6 +603,39 @@ public:
         for (std::size_t i = 0; i < state.tracks.size(); ++i) if (state.tracks[i].id == id) chosen = int(i) + 2;
         target.setSelectedId(chosen, juce::dontSendNotification); updateSlots();
     }
+    juce::Result runInteractionSmokeTest(juce::DynamicObject& output)
+    {
+        // Exercise panel selection with synthetic slot identities, then use a
+        // deliberately missing catalog ID to check delayed error propagation.
+        slots.clear();
+        EngineSession::PluginSlotSnapshot oldSlot, newSlot;
+        oldSlot.id = "old"; oldSlot.format = "E-musician"; oldSlot.isInstrument = true; newSlot.id = "new";
+        slots.push_back(oldSlot); slots.push_back(newSlot); chain.updateContent();
+        selectAdded({ "old" });
+        if (chain.getSelectedRow() != 1) return juce::Result::fail("Added plugin was not selected in the signal chain.");
+        output.setProperty("plugin_added_slot_selected", true);
+        int openedNative=0;const auto originalOpenNative=openNativeDevice;
+        openNativeDevice=[&](const juce::String&){++openedNative;};chain.selectRow(0);open.onClick();openNativeDevice=originalOpenNative;
+        if(openedNative!=1)return juce::Result::fail("Native chain item did not open the workspace device panel.");
+        output.setProperty("plugin_chain_routes_native_to_workspace",true);
+        filtered.clear(); EngineSession::PluginDescriptorSnapshot missing;
+        missing.id = "nonexistent-smoke-catalog-id"; missing.name = "Missing smoke plugin";
+        filtered.push_back(missing); catalog.updateContent(); catalog.selectRow(0);
+        int callbacks = 0; const auto originalReport = report;
+        report = [&callbacks](const juce::Result&) { ++callbacks; };
+        beginAdd(); beginAdd();
+        const auto end = juce::Time::getMillisecondCounterHiRes() + 2000;
+        while (adding && juce::Time::getMillisecondCounterHiRes() < end)
+            juce::MessageManager::getInstance()->runDispatchLoopUntil(10);
+        report = originalReport;
+        if (adding || callbacks != 1 || !status.getText().containsIgnoreCase("not available"))
+            return juce::Result::fail("Plugin loading did not reject duplicate clicks or report failure.");
+        output.setProperty("plugin_duplicate_click_and_add_error", true);
+        const auto openResult = session.execute("open_plugin", arguments({ { "plugin_id", "nonexistent-smoke-slot" } }), session.snapshot().revision);
+        if (openResult.wasOk() || openResult.getErrorMessage().isEmpty()) return juce::Result::fail("Missing plugin editor did not report an error.");
+        output.setProperty("plugin_missing_open_error", true);
+        return juce::Result::ok();
+    }
     void paint(juce::Graphics& g) override
     {
         g.fillAll(paper); g.setColour(ink); g.setFont(mono(15));
@@ -595,14 +647,54 @@ public:
     {
         const int half = getWidth() / 2;
         search.setBounds(16, 16, half - 30, 30); target.setBounds(half + 14, 16, half - 30, 30);
-        catalog.setBounds(16, 90, half - 30, getHeight() - 210); chain.setBounds(half + 14, 90, half - 30, getHeight() - 210);
-        scan.setBounds(16, getHeight() - 110, 122, 32); directory.setBounds(146, getHeight() - 110, 125, 32); add.setBounds(half - 111, getHeight() - 110, 95, 32);
+        catalog.setBounds(16, 90, half - 30, getHeight() - 250); chain.setBounds(half + 14, 90, half - 30, getHeight() - 210);
+        scan.setBounds(16, getHeight() - 150, 110, 32); directory.setBounds(134, getHeight() - 150, 118, 32); native.setBounds(260, getHeight() - 150, half - 276, 32); add.setBounds(half - 111, getHeight() - 110, 95, 32);
         auto row = juce::Rectangle<int>(half + 14, getHeight() - 110, half - 30, 32);
         open.setBounds(row.removeFromLeft(80)); bypass.setBounds(row.removeFromLeft(85)); up.setBounds(row.removeFromLeft(38)); down.setBounds(row.removeFromLeft(38)); remove.setBounds(row);
         status.setBounds(16, getHeight() - 68, getWidth() - 32, 54);
     }
 private:
     juce::String targetId() const { const int i = target.getSelectedId() - 2; return i >= 0 && i < int(state.tracks.size()) ? state.tracks[std::size_t(i)].id : "master"; }
+    void selectAdded(const std::vector<juce::String>& before)
+    {
+        for (int i = 0; i < int(slots.size()); ++i)
+            if (std::find(before.begin(), before.end(), slots[std::size_t(i)].id) == before.end()) {
+                chain.selectRow(i);
+                return;
+            }
+    }
+    void beginAdd()
+    {
+        const int row = catalog.getSelectedRow();
+        if (adding || row < 0 || row >= int(filtered.size())) return;
+        const auto track = targetId();
+        const auto plugin = filtered[std::size_t(row)];
+        const auto snapshot = session.snapshot();
+        const auto expectedRevision = snapshot.revision;
+        const auto projectId = snapshot.projectId;
+        std::vector<juce::String> before;
+        for (const auto& slot : slots) before.push_back(slot.id);
+        adding = true; refreshButtons();
+        status.setText("Loading " + plugin.name + "... Please wait; some plugins take time to initialise.", juce::dontSendNotification);
+        // Allow the status to paint before entering the plugin's message-thread
+        // initialisation. Third-party code may still block that thread.
+        juce::Timer::callAfterDelay(50, [safe = juce::Component::SafePointer<PluginPanel>(this), track, plugin, before, expectedRevision, projectId] {
+            if (!safe) return;
+            const auto result = safe->session.snapshot().projectId != projectId
+                ? juce::Result::fail("The project changed before the plugin was added. Please try again.")
+                : safe->session.execute("add_plugin", arguments({ { "track_id", track }, { "catalog_id", plugin.id } }), expectedRevision);
+            safe->adding = false;
+            if (safe->report) safe->report(result);
+            safe->timerCallback();
+            if (result.failed()) {
+                safe->status.setText(result.getErrorMessage(), juce::dontSendNotification);
+            } else if (safe->targetId() == track) {
+                safe->selectAdded(before);
+                safe->status.setText("Added " + plugin.name + ". Select it in the signal chain and choose open to show its editor.", juce::dontSendNotification);
+            }
+            safe->refreshButtons();
+        });
+    }
     void run(const juce::String& command, const juce::var& args)
     {
         const auto result = session.execute(command, args, session.snapshot().revision);
@@ -631,7 +723,10 @@ private:
     }
     void refreshButtons()
     {
-        add.setEnabled(catalog.getSelectedRow() >= 0 && catalog.getSelectedRow() < int(filtered.size()));
+        add.setEnabled(!adding && catalog.getSelectedRow() >= 0 && catalog.getSelectedRow() < int(filtered.size()));
+        bool instrumentTrack = false;
+        for (const auto& track : state.tracks) if (track.id == targetId() && track.kind == "instrument") instrumentTrack = true;
+        native.setEnabled(instrumentTrack && bool(openNativeDevice));
         const int row = chain.getSelectedRow(); const bool chosen = row >= 0 && row < int(slots.size());
         remove.setEnabled(chosen); bypass.setEnabled(chosen); open.setEnabled(chosen && !slots[std::size_t(row)].missing);
         up.setEnabled(chosen && row > 0); down.setEnabled(chosen && row + 1 < int(slots.size()));
@@ -654,14 +749,15 @@ private:
         if (state.pluginScanning) status.setText("Scanning in a separate process. You can continue editing the project.", juce::dontSendNotification);
         else if (status.getText().isEmpty() || catalogChanged) status.setText(juce::String(int(state.pluginCatalog.size())) + " plugins. Select an instrument for a MIDI track, or add effects to a track / master.\nPlugin binaries and sample libraries stay in their installed locations.", juce::dontSendNotification);
     }
-    EngineSession& session; std::function<void(const juce::Result&)> report;
+    EngineSession& session; std::function<void(const juce::Result&)> report; std::function<void(const juce::String&)> openNativeDevice; std::function<void(const juce::String&, const juce::String&)> openNativeEffect;
     Model catalogModel, chainModel; juce::ListBox catalog, chain;
     juce::ComboBox target; juce::TextEditor search;
-    juce::TextButton scan { "scan installed" }, directory { "scan folder..." }, add { "add >" }, remove { "remove" }, open { "open" }, bypass { "bypass" }, up { "up" }, down { "dn" };
+    juce::TextButton scan { "scan installed" }, directory { "scan folder..." }, native { "native..." }, add { "add >" }, remove { "remove" }, open { "open" }, bypass { "bypass" }, up { "up" }, down { "dn" };
     juce::Label status; std::unique_ptr<juce::FileChooser> chooser;
     EngineSession::Snapshot state;
     std::vector<EngineSession::PluginDescriptorSnapshot> filtered;
     std::vector<EngineSession::PluginSlotSnapshot> slots;
+    bool adding = false;
 };
 } // namespace
 
@@ -675,8 +771,8 @@ struct MainComponent::Impl : private juce::ListBoxModel {
             &saveButton, &saveAsButton, &undoButton, &redoButton, &trackGain, &mute, &solo, &remove,
             &arrangement, &zoomOut, &zoomIn, &fit, &clipStart, &setClipStart,
             &editMenu, &exportMenu, &plugins, &tempo, &gridMode, &clipProperties, &trackPan, &cancelJob,
-            &closeEditor, &details, &saveStatus, &trackPanel, &record, &rulerMode, &snap, &follow,
-            &metronome, &metronomeOptions, &countIn, &countInBars, &resources, &meterReset, &agentButton };
+            &closeEditor, &expandEditor, &details, &saveStatus, &trackPanel, &record, &rulerMode, &snap, &follow,
+            &metronome, &metronomeOptions, &countIn, &countInBars, &resources, &meterReset, &agentButton, &deviceChain };
         for (auto* child : children) {
             owner.addAndMakeVisible(child);
             child->addKeyListener(&owner);
@@ -696,8 +792,15 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         separate.setTooltip("Inspect the selected track waveform. Source separation is not available yet.");
         compose.onClick = [this] { composeActive = true; dock = Dock::closed; owner.resized(); owner.refreshSnapshot(); owner.repaint(); };
         separate.onClick = [this] { dock = dock == Dock::source ? Dock::closed : Dock::source; owner.resized(); owner.refreshSnapshot(); owner.repaint(); };
-        closeEditor.onClick = [this] { dock = Dock::closed; owner.resized(); owner.repaint(); };
+        closeEditor.onClick = [this] { pianoExpanded = false; dock = Dock::closed; owner.resized(); owner.repaint(); };
         closeEditor.setTooltip("Close the lower editor. Double-click a MIDI clip to reopen it.");
+        expandEditor.onClick = [this] {
+            if (dock != Dock::midi || !pianoRoll) return;
+            pianoExpanded = !pianoExpanded;
+            owner.resized(); owner.repaint();
+            pianoRoll->grabKeyboardFocus();
+        };
+        expandEditor.setTooltip("Expand the MIDI editor or return to the arrangement (Ctrl+Alt+E).");
         details.onClick = [this] { inspectorVisible = !inspectorVisible; owner.resized(); owner.repaint(); };
         details.setTooltip("Show or hide selected track and clip controls.");
         arrangement.onUserStateChange = [&component] { component.refreshSnapshot(); component.synchronizeAgentSelection(); };
@@ -710,9 +813,40 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         arrangement.onOpenTrackDevices = [this](const juce::String&) { dock = Dock::track; trackPanel.showDevices(); owner.resized(); owner.repaint(); };
         trackPanel.onResult = [&component](const juce::Result& result) { component.showResult(result); };
         trackPanel.onBrowsePlugins = [&component](const juce::String& target) { component.showPlugins(target); };
+        trackPanel.onOpenNative = [&component](const juce::String& target) { component.showNativeDevice(target); };
+        trackPanel.onOpenNativeEffect = [&component](const juce::String& target, const juce::String& device) { component.showNativeEffect(target, device); };
+        deviceChain.onSelect = [this](const juce::String& target, const EngineSession::PluginSlotSnapshot& slot) {
+            const auto snapshot=owner.session.snapshot();
+            const bool master=(dock==Dock::effect && effectTrackId=="master") || (dock==Dock::track && trackPanel.isMasterView());
+            if ((target=="master")!=master || (target!="master" && target!=snapshot.selectedTrackId)) {
+                owner.showResult(juce::Result::fail("The selected track changed. Choose a device again.")); return;
+            }
+            chainSelectedId=slot.id;
+            if (slot.format=="E-musician" && slot.isInstrument) owner.showNativeDevice(target);
+            else if (slot.format=="E-musician") owner.showNativeEffect(target,slot.id);
+            else owner.execute("open_plugin",arguments({ {"track_id",target}, {"plugin_id",slot.id} }));
+        };
+        deviceChain.onBrowse = [&component](const juce::String& target) { component.showPlugins(target); };
+        deviceChain.onAdd = [this](const juce::String& target, const juce::String& type) {
+            const auto snapshot=owner.session.snapshot();
+            const bool master=(dock==Dock::effect && effectTrackId=="master") || (dock==Dock::track && trackPanel.isMasterView());
+            if ((target=="master")!=master || (target!="master" && target!=snapshot.selectedTrackId)) { owner.showResult(juce::Result::fail("Select the target track again.")); return; }
+            const bool instrument=type=="sampler" || type=="drum_rack";
+            juce::var result;
+            const auto status=owner.session.execute(instrument?"add_native_instrument":"add_native_effect",
+                arguments({ {"track_id",target}, {"type",type} }),snapshot.revision,&result);
+            owner.showResult(status);
+            if(status.failed())return;
+            if(instrument) { chainSelectedId.clear(); owner.showNativeDevice(target); }
+            else { chainSelectedId=result["device_id"].toString(); owner.showNativeEffect(target,chainSelectedId); }
+        };
         editMenu.onClick = [&component] { component.showEditMenu(); };
         exportMenu.onClick = [&component] { component.showExportMenu(); };
-        plugins.onClick = [this] { dock = dock == Dock::track ? Dock::closed : Dock::track; owner.resized(); owner.refreshSnapshot(); owner.repaint(); };
+        plugins.onClick = [this] {
+            if(dock==Dock::track||dock==Dock::native||dock==Dock::effect) dock=Dock::closed;
+            else { dock=Dock::track; trackPanel.showDevices(); }
+            owner.resized(); owner.refreshSnapshot(); owner.repaint();
+        };
         tempo.onClick = [&component] { component.showProjectTiming(); };
         clipProperties.onClick = [&component] { component.showClipProperties(); };
         rulerMode.addItem("bars",1);rulerMode.addItem("seconds",2);rulerMode.addItem("both",3);
@@ -884,6 +1018,8 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         trackList.setModel(nullptr);
         if (audioDialog != nullptr) delete audioDialog.getComponent();
         if (pluginDialog != nullptr) delete pluginDialog.getComponent();
+        dockNative.reset();
+        dockEffect.reset();
         if (pianoDialog != nullptr) delete pianoDialog.getComponent();
         for (auto& form : forms) if (form != nullptr) delete form.getComponent();
         owner.setLookAndFeel(nullptr);
@@ -919,7 +1055,11 @@ struct MainComponent::Impl : private juce::ListBoxModel {
             auto button = std::make_unique<juce::TextButton>((slot.enabled ? "" : "[off] ") + slot.name);
             button->setTooltip(slot.missing ? "This plug-in is missing. Open Devices to replace it." : "Open " + slot.name + ". Right-click the chain in Devices for other actions.");
             button->setEnabled(!slot.missing);
-            button->onClick = [this, trackId = track->id, pluginId = slot.id] { owner.execute("open_plugin", arguments({ { "track_id", trackId }, { "plugin_id", pluginId } })); };
+            button->onClick = [this, trackId = track->id, pluginId = slot.id, isNative = slot.format == "E-musician", isInstrument = slot.isInstrument] {
+                if(isNative && isInstrument)owner.showNativeDevice(trackId);
+                else if(isNative)owner.showNativeEffect(trackId, pluginId);
+                else owner.execute("open_plugin", arguments({ { "track_id", trackId }, { "plugin_id", pluginId } }));
+            };
             owner.addAndMakeVisible(*button); deviceButtons.push_back(std::move(button));
         }
         layoutDeviceButtons();
@@ -932,6 +1072,26 @@ struct MainComponent::Impl : private juce::ListBoxModel {
             button->setVisible(inspectorDisplayed && y + 28 <= footerY - 12);
             y += 34;
         }
+    }
+    void updateDeviceChain() {
+        const bool master=(dock==Dock::effect && effectTrackId=="master") || (dock==Dock::track && trackPanel.isMasterView());
+        const auto* track=selectedTrack();
+        const auto target=master?juce::String("master"):track?track->id:juce::String();
+        const bool canEdit=!state.recording&&!state.recordingFinalizing&&!state.nativePending;
+        if(chainRenderedProject==state.projectId && chainRenderedTarget==target && chainRenderedRevision==state.revision && chainRenderedEdit==canEdit
+           && chainRenderedSelected==chainSelectedId && chainRenderedNative==(dock==Dock::native)) return;
+        if (chainTrackId!=target) { chainTrackId=target; chainSelectedId.clear(); }
+        const std::vector<EngineSession::PluginSlotSnapshot> empty;
+        const auto& slots=master?state.masterPlugins:track?track->plugins:empty;
+        if(chainSelectedId.isNotEmpty() && std::none_of(slots.begin(),slots.end(),[&](const auto& item){return item.id==chainSelectedId;})) chainSelectedId.clear();
+        if(dock==Dock::effect && effectTrackId==target && dockEffect) {
+            // showNativeEffect records its stable slot ID when opened.
+        } else if(dock==Dock::native && nativeTrackId==target) {
+            for(const auto& slot:slots) if(slot.format=="E-musician" && slot.isInstrument) { chainSelectedId=slot.id; break; }
+        }
+        deviceChain.update(state.projectId,target,master?juce::String("Master"):track?track->name:juce::String(),slots,chainSelectedId,track&&track->kind=="instrument"&&!master,canEdit);
+        chainRenderedProject=state.projectId;chainRenderedTarget=target;chainRenderedRevision=state.revision;chainRenderedEdit=canEdit;
+        chainRenderedSelected=chainSelectedId;chainRenderedNative=(dock==Dock::native);
     }
     int getNumRows() override { return static_cast<int>(state.tracks.size()); }
     juce::String getTooltipForRow(int row) override
@@ -969,6 +1129,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     ArrangementView arrangement;
     WaveformView waveform;
     SelectedTrackPanel trackPanel;
+    DeviceChainStrip deviceChain;
     juce::TooltipWindow tooltips;
     juce::ListBox trackList;
     juce::TextButton settings { "audio settings" }, importButton { "add audio" }, transcribe { "transcribe" }, compose { "compose" };
@@ -981,7 +1142,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     juce::TextButton snap { "snap" }, follow { "follow" }, metronome { "click" }, metronomeOptions { "..." }, countIn { "count-in" }, meterReset { "OUT" };
     juce::Label resources;
     juce::Label filename, status, saveStatus;
-    juce::TextButton closeEditor { "close editor" }, details { "details" }, agentButton { "Agent" };
+    juce::TextButton closeEditor { "close editor" }, expandEditor { "expand" }, details { "details" }, agentButton { "Agent" };
     std::unique_ptr<AgentSidebar> agentSidebar;
     juce::String musicFocus="arrangement";
     bool agentVisible=false, inspectorDisplayed=true, syncingSelection=false;
@@ -995,6 +1156,14 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     juce::Component::SafePointer<juce::DialogWindow> pluginDialog, pianoDialog;
     juce::Component::SafePointer<PianoRoll> pianoRoll;
     std::unique_ptr<PianoRoll> dockPiano;
+    std::unique_ptr<NativeDevicePanel> dockNative;
+    std::unique_ptr<NativeEffectsPanel> dockEffect;
+    juce::String nativeTrackId, nativeProjectId;
+    juce::String effectTrackId, effectProjectId;
+    juce::String chainTrackId, chainSelectedId;
+    juce::String chainRenderedProject, chainRenderedTarget, chainRenderedSelected;
+    std::uint64_t chainRenderedRevision=std::numeric_limits<std::uint64_t>::max();
+    bool chainRenderedEdit=false, chainRenderedNative=false;
     std::vector<std::unique_ptr<juce::TextButton>> deviceButtons;
     juce::String deviceIdentity;
     std::vector<juce::Component::SafePointer<juce::DialogWindow>> forms;
@@ -1008,8 +1177,9 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     juce::String error, trackGestureId, startEditId;
     std::uint64_t startEditRevision = 0;
     juce::Rectangle<int> library, workspace, inspector, dockBounds;
-    enum class Dock { closed, source, midi, track };
+    enum class Dock { closed, source, midi, track, native, effect };
     Dock dock = Dock::closed;
+    bool pianoExpanded = false;
     bool inspectorVisible = true;
     int footerY = 0;
     bool updatingList = false, confirming = false, composeActive = true, startInputDirty = false, updatingStartInput = false;
@@ -1063,7 +1233,10 @@ void MainComponent::synchronizeAgentSelection()
 void MainComponent::showAgent(){if(!impl->agentVisible)toggleAgent();}
 void MainComponent::toggleAgent()
 {
-    auto& p=*impl;p.agentVisible=!p.agentVisible;
+    auto& p=*impl;
+    // An explicit Agent action must be visible even in the expanded editor.
+    if(p.pianoExpanded){p.pianoExpanded=false;if(p.agentVisible){resized();repaint();return;}}
+    p.agentVisible=!p.agentVisible;
     if(p.agentVisible&&!p.agentSidebar){
         p.agentSidebar=std::make_unique<AgentSidebar>([safe=juce::Component::SafePointer<MainComponent>(this)](const juce::var& request)->juce::var{
             if(!safe)return arguments({{"request_id",request["request_id"]},{"status","failed"},{"error","Project window is closed."}});
@@ -1207,15 +1380,19 @@ void MainComponent::resized()
     auto& p = *impl;
     constexpr int margin = 16;
     p.footerY = getHeight() - 110;
-    const int sidebarWidth=p.agentVisible?juce::jlimit(340,520,getWidth()/3):0;
-    const int workspaceRight=getWidth()-margin-(p.agentVisible?sidebarWidth+8:0);
-    p.inspectorDisplayed=p.inspectorVisible&&!p.agentVisible;
+    if (p.dock != Impl::Dock::midi) p.pianoExpanded = false;
+    const bool expanded = p.dock == Impl::Dock::midi && p.pianoExpanded;
+    const bool showSidebar = p.agentVisible && !expanded;
+    const int sidebarWidth=showSidebar?juce::jlimit(340,520,getWidth()/3):0;
+    const int workspaceRight=getWidth()-margin-(showSidebar?sidebarWidth+8:0);
+    p.inspectorDisplayed=p.inspectorVisible&&!p.agentVisible&&!expanded&&p.dock!=Impl::Dock::native&&p.dock!=Impl::Dock::effect;
     const int inspectorWidth = p.inspectorDisplayed ? 226 : 0;
-    if(p.agentSidebar){p.agentSidebar->setBounds(workspaceRight+8,110,sidebarWidth,p.footerY-122);p.agentSidebar->setPanelVisible(p.agentVisible);}
+    if(p.agentSidebar){p.agentSidebar->setBounds(workspaceRight+8,110,sidebarWidth,p.footerY-122);p.agentSidebar->setPanelVisible(showSidebar);}
     p.agentButton.setBounds(getWidth()-margin-208,75,80,30);
     p.agentButton.setToggleState(p.agentVisible,juce::dontSendNotification);
     p.inspector = { workspaceRight - inspectorWidth, 144, inspectorWidth, p.footerY - 156 };
-    p.workspace = { margin, 144, workspaceRight-margin - (p.inspectorDisplayed ? inspectorWidth + 16 : 0), p.footerY - 156 };
+    const int workspaceTop = expanded ? 112 : 144;
+    p.workspace = { margin, workspaceTop, workspaceRight-margin - (p.inspectorDisplayed ? inspectorWidth + 16 : 0), p.footerY - workspaceTop - 12 };
     p.library = {};
     p.trackList.setVisible(false); p.compose.setVisible(false); p.transcribe.setVisible(false); p.filename.setVisible(false);
     auto header = juce::Rectangle<int>(getWidth() - 590, 14, 574, 32);
@@ -1231,23 +1408,42 @@ void MainComponent::resized()
     p.undoButton.setBounds(x + 8, 75, 60, 30); p.redoButton.setBounds(x + 72, 75, 60, 30);
     p.rulerMode.setBounds(margin,113,102,28);p.snap.setBounds(126,113,66,28);
     p.gridMode.setBounds(200,113,128,28);p.follow.setBounds(336,113,76,28);
+    for (juce::Component* c : std::initializer_list<juce::Component*>{ &p.rulerMode, &p.snap, &p.gridMode, &p.follow }) c->setVisible(!expanded);
     p.zoomOut.setBounds(getWidth() - margin - 120, 75, 32, 30);
     p.zoomIn.setBounds(getWidth() - margin - 84, 75, 32, 30);
     p.fit.setBounds(getWidth() - margin - 48, 75, 48, 30);
-    const int dockHeight = p.dock == Impl::Dock::closed ? 0 : juce::jlimit(180, 340, p.workspace.getHeight() - 204);
+    const bool visualDevice = p.dock == Impl::Dock::native || p.dock == Impl::Dock::effect;
+    const int dockHeight = expanded ? p.workspace.getHeight() : p.dock == Impl::Dock::closed ? 0
+        : visualDevice ? juce::jlimit(248, 364, p.workspace.getHeight() - 204)
+        : p.dock == Impl::Dock::track ? juce::jlimit(278, 390, p.workspace.getHeight() - 204)
+        : juce::jlimit(180, 340, p.workspace.getHeight() - 204);
     p.dockBounds = p.workspace.withTrimmedTop(p.workspace.getHeight() - dockHeight);
     p.arrangement.setBounds(p.workspace.withTrimmedBottom(dockHeight > 0 ? dockHeight + 6 : 0));
     p.arrangement.setCompactRows(dockHeight > 0 && p.arrangement.getHeight() < 258);
-    p.arrangement.setVisible(true);
+    p.arrangement.setVisible(!expanded);
     p.closeEditor.setVisible(dockHeight > 0);
-    p.closeEditor.setBounds(p.dockBounds.getRight() - 112, p.dockBounds.getY(), 112, 26);
+    p.closeEditor.setButtonText(visualDevice ? "x" : "close editor");
+    p.closeEditor.setTooltip("Close the lower editor panel");
+    p.closeEditor.setBounds(p.dockBounds.getRight() - (visualDevice ? 32 : 112), p.dockBounds.getY() + (visualDevice ? 3 : 0), visualDevice ? 32 : 112, 26);
+    p.expandEditor.setVisible(p.dock == Impl::Dock::midi);
+    p.expandEditor.setButtonText(expanded ? "return to arrangement" : "expand");
+    p.expandEditor.setBounds(p.dockBounds.getRight() - 278, p.dockBounds.getY(), 160, 26);
     p.waveform.setVisible(p.dock == Impl::Dock::source);
     p.waveform.setBounds(p.dockBounds.reduced(0, 30));
     if (p.pianoRoll) { p.pianoRoll->setVisible(p.dock == Impl::Dock::midi); p.pianoRoll->setBounds(p.dockBounds.withTrimmedTop(24)); }
-    p.trackPanel.setVisible(p.dock == Impl::Dock::track); p.trackPanel.setBounds(p.dockBounds.withTrimmedTop(28));
+    const bool chainVisible=p.dock==Impl::Dock::track || p.dock==Impl::Dock::native || p.dock==Impl::Dock::effect;
+    p.deviceChain.setVisible(chainVisible);
+    // Native panels already name the selected device. Share their top row with
+    // the close button instead of spending another 28 px on a duplicate title.
+    p.deviceChain.setBounds(visualDevice ? p.dockBounds.withTrimmedRight(36).removeFromTop(34)
+                                        : p.dockBounds.withTrimmedTop(28).removeFromTop(34));
+    const auto deviceBody=p.dockBounds.withTrimmedTop(visualDevice?36:chainVisible?62:28);
+    p.trackPanel.setVisible(p.dock == Impl::Dock::track); p.trackPanel.setBounds(deviceBody);
+    if(p.dockNative){p.dockNative->setVisible(p.dock==Impl::Dock::native);p.dockNative->setBounds(deviceBody);}
+    if(p.dockEffect){p.dockEffect->setVisible(p.dock==Impl::Dock::effect);p.dockEffect->setBounds(deviceBody);}
     p.separate.setToggleState(p.dock == Impl::Dock::source, juce::dontSendNotification);
     p.details.setToggleState(p.inspectorDisplayed, juce::dontSendNotification);
-    p.details.setEnabled(!p.agentVisible);
+    p.details.setEnabled(!p.agentVisible&&p.dock!=Impl::Dock::native&&p.dock!=Impl::Dock::effect);
     const int ix = p.inspector.getX(), iw = p.inspector.getWidth();
     p.clipStart.setBounds(ix + 54, 206, iw - 104, 28); p.setClipStart.setBounds(ix + iw - 46, 206, 46, 28);
     p.clipProperties.setBounds(ix, 242, iw, 28);
@@ -1277,9 +1473,11 @@ void MainComponent::paint(juce::Graphics& g)
         juce::jmax(120, p.newButton.getX() - 80), 29, juce::Justification::centredLeft, 1);
     g.setColour(rule); g.drawHorizontalLine(68, 16.0f, float(getWidth() - 16));
     g.drawHorizontalLine(109, 16.0f, float(getWidth() - 16));
-    g.drawHorizontalLine(142,16.0f,float(getWidth()-16));
-    g.setColour(secondary);g.setFont(mono(11));
-    g.drawFittedText("drag empty: select clips   Shift-drag ruler: time   Ctrl+L: loop",426,115,getWidth()-442,24,juce::Justification::centredLeft,1);
+    if (!p.pianoExpanded) {
+        g.drawHorizontalLine(142,16.0f,float(getWidth()-16));
+        g.setColour(secondary);g.setFont(mono(11));
+        g.drawFittedText("drag empty: select clips   Shift-drag ruler: time   Ctrl+L: loop",426,115,getWidth()-442,24,juce::Justification::centredLeft,1);
+    }
     if (p.inspectorDisplayed) {
         const int ix = p.inspector.getX(), iw = p.inspector.getWidth();
         g.drawVerticalLine(ix - 8, 144.0f, float(p.footerY - 12));
@@ -1297,8 +1495,9 @@ void MainComponent::paint(juce::Graphics& g)
     if (p.dock != Impl::Dock::closed) {
         g.setColour(rule); g.drawHorizontalLine(p.dockBounds.getY(), float(p.dockBounds.getX()), float(p.dockBounds.getRight()));
         g.setColour(secondary); g.setFont(mono(12));
+        if (p.dock != Impl::Dock::native && p.dock != Impl::Dock::effect)
         g.drawFittedText(p.dock == Impl::Dock::track ? "track / " + (p.selectedTrack() ? p.selectedTrack()->name : juce::String("Select a track")) : (p.dock == Impl::Dock::midi ? "MIDI / " : "source / ") + p.selectedClipName(), p.dockBounds.getX() + 5, p.dockBounds.getY() + 2,
-            p.dockBounds.getWidth() - 130, 24, juce::Justification::centredLeft, 1);
+            p.dockBounds.getWidth() - (p.dock == Impl::Dock::midi ? 290 : 130), 24, juce::Justification::centredLeft, 1);
     }
     g.setColour(ink); g.drawHorizontalLine(p.footerY, 16.0f, float(getWidth() - 16));
     g.setFont(mono(14)); g.drawText(p.rulerMode.getSelectedId()==2?clockText(s.position):positionText(s.position,s,true), 382, p.footerY + 8, 110, 23, juce::Justification::centredLeft);
@@ -1325,11 +1524,22 @@ void MainComponent::refreshSnapshot()
     const auto* previousClip = p.pianoRoll ? p.selectedClip() : nullptr;
     const auto previousNotes = previousClip ? previousClip->notes : nullptr;
     p.state = std::move(next);
+    if(p.dock==Impl::Dock::native&&(p.nativeProjectId!=p.state.projectId||p.nativeTrackId!=p.state.selectedTrackId)){
+        if(const auto* track=p.selectedTrack();track&&track->kind=="instrument"){
+            const auto target=track->id;showNativeDevice(target);return;
+        }
+        // Do not show stale instrument controls for a different project/track.
+        p.dock=Impl::Dock::track;p.dockNative.reset();p.nativeTrackId.clear();p.nativeProjectId.clear();resized();
+    }
+    if(p.dock==Impl::Dock::effect&&(p.effectProjectId!=p.state.projectId||(p.effectTrackId!="master"&&p.effectTrackId!=p.state.selectedTrackId))){
+        p.dock=Impl::Dock::track;p.dockEffect.reset();p.effectTrackId.clear();p.effectProjectId.clear();resized();
+    }
     if (tracksChanged) p.updateDeviceButtons();
     if (clipChanged) { p.startInputDirty = false; p.startEditId.clear(); }
     p.trackList.setVisible(false);
     p.arrangement.update(p.state);
     p.trackPanel.update(p.state);
+    if(p.dock==Impl::Dock::track || p.dock==Impl::Dock::native || p.dock==Impl::Dock::effect) p.updateDeviceChain();
     p.waveform.update(p.state);
     p.filename.setText(p.composeActive ? "arrangement~" : p.selectedClipName(), juce::dontSendNotification);
     p.filename.setTooltip(p.composeActive ? "Audio and MIDI clips on the project timeline." : p.state.source.getFullPathName());
@@ -1405,8 +1615,10 @@ void MainComponent::refreshSnapshot()
                          &p.editMenu, &p.exportMenu, &p.plugins, &p.tempo })
         button->setEnabled(!busy);
     const bool saving = p.savePreparing || p.pendingSaveJob.isNotEmpty();
-    p.saveButton.setEnabled(!busy && !saving);
-    p.saveAsButton.setEnabled(!busy && !saving);
+    p.newButton.setEnabled(!busy && !p.state.nativePending);
+    p.openButton.setEnabled(!busy && !p.state.nativePending);
+    p.saveButton.setEnabled(!busy && !saving && !p.state.nativePending);
+    p.saveAsButton.setEnabled(!busy && !saving && !p.state.nativePending);
     p.saveButton.setButtonText(saving ? "saving..." : "save");
     p.saveStatus.setText(saving ? "Saving..." : p.saveError.isNotEmpty() ? "Save failed - retry"
         : p.state.dirty ? "Unsaved changes" : p.state.projectFile != juce::File() ? "Saved" : "New project", juce::dontSendNotification);
@@ -1417,12 +1629,12 @@ void MainComponent::refreshSnapshot()
     p.redoButton.setTooltip(p.state.canRedo ? "Redo " + p.state.redoDescription + " (Ctrl+Y)" : "Nothing to redo");
     juce::String taskText;
     for (auto it = p.state.jobs.rbegin(); it != p.state.jobs.rend(); ++it) if (it->status == "running" || it->status == "queued") {
-        taskText = it->kind == "save_project" ? "Saving project" : it->kind;
+        taskText = it->kind == "save_project" ? "Saving project" : it->kind == "native_instrument" ? "Preparing sample / edit not yet committed" : it->kind;
         if (it->kind == "save_project" && it->phase == "capturing_plugins") taskText += " / " + it->detail;
         if (it->progress >= 0) taskText += " / " + juce::String(it->progress * 100, 0) + "%";
         break;
     }
-    p.cancelJob.setVisible(taskText.isNotEmpty());
+    p.cancelJob.setVisible(taskText.isNotEmpty() && !p.state.nativePending);
     const auto statusText = p.state.countingIn ? "Count-in: "+juce::String(int(std::ceil(p.state.countInBeatsRemaining)))+" beats remaining - Stop cancels"
         : p.state.recordingFinalizing ? juce::String("Finishing recording...") : p.state.recording ? juce::String("Recording - Stop finishes the take")
         : taskText.isNotEmpty() ? taskText : p.saveError.isNotEmpty() ? p.saveError : p.error.isNotEmpty() ? p.error
@@ -1645,6 +1857,18 @@ juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDire
         result = juce::Result::fail("The track inspector does not follow arrangement selection.");
     report->setProperty("inspector_matches_selection", result.wasOk());
     if (result.wasOk()) {
+        // A preparing native edit is not dirty yet. New/Open/Close must wait,
+        // but unrelated active jobs must not inherit this special guard.
+        EngineSession::Snapshot pendingFixture; bool notified = false, proceeded = false;
+        pendingFixture.nativePending = true;
+        if (!blockNativeTransition(pendingFixture, [&](const auto& message) { notified = message.contains("not been committed"); })) proceeded = true;
+        if (!notified || proceeded) result = juce::Result::fail("Pending native edit did not block the project transition.");
+        pendingFixture.nativePending = false;
+        pendingFixture.jobs.push_back({ "other", "import_audio", "running", {}, -1.0 });
+        if (blockNativeTransition(pendingFixture, [&](const auto&) { notified = false; })) result = juce::Result::fail("A regular background job incorrectly triggered the native edit guard.");
+        report->setProperty("native_pending_transition_guard", result.wasOk());
+    }
+    if (result.wasOk()) {
         PianoRoll editor; editor.setLookAndFeel(&p.look);
         result = editor.runInteractionSmokeTest(*report, outputDirectory);
         const auto captureComponent = [&outputDirectory](juce::Component& component, const char* name) {
@@ -1659,6 +1883,30 @@ juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDire
         if (result.wasOk() && !captureComponent(browser, "ui-plugins-900x580.png")) result = juce::Result::fail("Could not capture the installed-plugin browser.");
         browser.setSize(780, 420);
         if (result.wasOk() && !captureComponent(browser, "ui-plugins-780x420.png")) result = juce::Result::fail("Could not capture the narrow plugin browser.");
+        if (result.wasOk()) result = browser.runInteractionSmokeTest(*report);
+        if (result.wasOk()) {
+            NativeDevicePanel nativeFixture(session, session.snapshot().selectedTrackId, {});
+            nativeFixture.setLookAndFeel(&p.look);
+            result = nativeFixture.runInteractionSmokeTest(*report, outputDirectory);
+        }
+        if (result.wasOk()) {
+            EngineSession effectSession(false);
+            result = effectSession.execute("create_track", arguments({ {"kind", "audio"}, {"name", "Effect UI fixture"} }), effectSession.snapshot().revision);
+            if (result.wasOk() && !effectSession.snapshot().tracks.empty()) {
+                const auto track = effectSession.snapshot().tracks.front().id;
+                effectSession.selectTrack(track);
+                NativeEffectsPanel effectFixture(effectSession, track, {}, {});
+                effectFixture.setLookAndFeel(&p.look);
+                result = effectFixture.runInteractionSmokeTest(*report, outputDirectory);
+                effectFixture.setLookAndFeel(nullptr);
+                if (result.wasOk()) {
+                    NativeEffectsPanel masterFixture(effectSession, "master", {}, {});
+                    masterFixture.setLookAndFeel(&p.look);
+                    result = masterFixture.runInteractionSmokeTest(*report, outputDirectory);
+                    masterFixture.setLookAndFeel(nullptr);
+                }
+            } else if (result.wasOk()) result = juce::Result::fail("Could not create effect UI test track.");
+        }
         ValueForm values({ { "bpm", "tempo / BPM", "120" }, { "gain", "gain / dB", "-6.0" }, { "name", "track name", "Visible text", false } }, {});
         values.setLookAndFeel(&p.look);
         if (result.wasOk()) {
@@ -1822,6 +2070,83 @@ juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDire
                     ||!outputDirectory.getChildFile("ui-midi-dock-1000x650.png").replaceWithData(png.getData(),png.getDataSize()))
                     result=juce::Result::fail("Could not capture minimum MIDI dock.");
             }
+            const auto beforeExpanded = saveSession.snapshot();
+            auto* const sameEditor = saveView.impl->pianoRoll.getComponent();
+            saveView.impl->expandEditor.onClick();
+            if (result.wasOk() && (!saveView.impl->pianoExpanded || saveView.impl->arrangement.isVisible()
+                || !sameEditor->isVisible() || sameEditor != saveView.impl->pianoRoll.getComponent()
+                || sameEditor->getHeight() < 350 || saveView.impl->inspectorDisplayed
+                || saveSession.snapshot().revision != beforeExpanded.revision
+                || saveSession.snapshot().selectedClipId != beforeExpanded.selectedClipId))
+                result = juce::Result::fail("Expanding the MIDI editor changed the project or failed to use the workspace.");
+            report->setProperty("midi_expand_preserves_clip_and_project", result.wasOk());
+            if (result.wasOk()) {
+                juce::MemoryOutputStream png;
+                if (!juce::PNGImageFormat().writeImageToStream(saveView.createComponentSnapshot(saveView.getLocalBounds(),true),png)
+                    || !outputDirectory.getChildFile("ui-midi-expanded-1000x650.png").replaceWithData(png.getData(),png.getDataSize()))
+                    result=juce::Result::fail("Could not capture expanded MIDI editor.");
+            }
+            saveView.impl->expandEditor.onClick();
+            if (result.wasOk() && (saveView.impl->pianoExpanded || !saveView.impl->arrangement.isVisible()
+                || !sameEditor->isVisible() || sameEditor != saveView.impl->pianoRoll.getComponent()))
+                result = juce::Result::fail("Returning from the expanded MIDI editor did not restore the arrangement and dock.");
+            report->setProperty("midi_expand_returns_to_arrangement", result.wasOk());
+            saveView.showNativeDevice(midiTrack);
+            if(result.wasOk()&&(!saveView.impl->dockNative||!saveView.impl->dockNative->isVisible()
+               ||saveView.impl->dock!=Impl::Dock::native||!saveView.impl->arrangement.isVisible()
+               ||saveView.impl->dockNative->getHeight()<210||saveView.impl->arrangement.getHeight()<130
+               ||saveSession.snapshot().revision!=beforeExpanded.revision))
+                result=juce::Result::fail("Native instruments must open in the main workspace without modifying the project.");
+            report->setProperty("native_instrument_opens_in_workspace",result.wasOk());
+            if(result.wasOk()){
+                juce::MemoryOutputStream png;
+                if(!juce::PNGImageFormat().writeImageToStream(saveView.createComponentSnapshot(saveView.getLocalBounds(),true),png)
+                   ||!outputDirectory.getChildFile("ui-native-dock-1000x650.png").replaceWithData(png.getData(),png.getDataSize()))
+                    result=juce::Result::fail("Could not capture native device workspace.");
+            }
+            if(result.wasOk()){
+                saveView.setSize(1280,800);
+                if(saveView.impl->arrangement.getHeight()<198)
+                    result=juce::Result::fail("Native device view must leave two compact track rows at the standard window size.");
+                juce::MemoryOutputStream png;
+                if(result.wasOk()&&(!juce::PNGImageFormat().writeImageToStream(saveView.createComponentSnapshot(saveView.getLocalBounds(),true),png)
+                   ||!outputDirectory.getChildFile("ui-native-dock-1280x800.png").replaceWithData(png.getData(),png.getDataSize()))
+                    )result=juce::Result::fail("Could not capture normal native device workspace.");
+                report->setProperty("native_dock_preserves_arrangement_at_standard_size",result.wasOk());
+                saveView.setSize(1000,650);
+            }
+            if(result.wasOk()){
+                // Exercise the real dock controls against a disposable session;
+                // ordering is the engine's plug-in order, not UI-owned state.
+                auto& chain=saveView.impl->deviceChain;
+                chain.onAdd(midiTrack,"eq8");
+                chain.onAdd(midiTrack,"compressor");
+                saveView.refreshSnapshot();
+                const auto now=saveSession.snapshot();
+                const auto track=std::find_if(now.tracks.begin(),now.tracks.end(),[&](const auto& t){return t.id==midiTrack;});
+                if(track==now.tracks.end() || track->plugins.size()!=2 || chain.deviceCount()!=2)
+                    result=juce::Result::fail("Device strip did not show the real ordered effects added through its buttons.");
+                else {
+                    const auto first=track->plugins[0].id, second=track->plugins[1].id;
+                    const auto revision=now.revision;
+                    chain.stepForTest(-1);
+                    if(chain.selectedForTest()!=first || saveView.impl->effectTrackId!=midiTrack || !saveView.impl->dockEffect)
+                        result=juce::Result::fail("Previous device did not open the preceding effect.");
+                    if(result.wasOk())chain.stepForTest(1);
+                    if(result.wasOk()&&(chain.selectedForTest()!=second || saveSession.snapshot().revision!=revision))
+                        result=juce::Result::fail("Device navigation changed the project or selected the wrong effect.");
+                }
+                report->setProperty("device_chain_add_order_navigation",result.wasOk());
+                if(result.wasOk()){
+                    juce::MemoryOutputStream png;
+                    if(!juce::PNGImageFormat().writeImageToStream(saveView.createComponentSnapshot(saveView.getLocalBounds(),true),png)
+                       ||!outputDirectory.getChildFile("ui-device-chain-1000x650.png").replaceWithData(png.getData(),png.getDataSize()))
+                        result=juce::Result::fail("Could not capture ordered device chain.");
+                }
+            }
+            saveView.showPianoRoll();
+            if(result.wasOk()&&(!sameEditor->isVisible()||sameEditor!=saveView.impl->pianoRoll.getComponent()))
+                result=juce::Result::fail("Switching from the device view did not preserve the MIDI editor.");
             saveView.impl->closeEditor.onClick();
             if (result.wasOk() && (saveView.impl->pianoRoll->isVisible() || !saveView.impl->arrangement.isVisible())) result = juce::Result::fail("Closing the dock hid the arrangement or left the editor visible.");
             saveView.impl->dock = Impl::Dock::track; saveView.resized();
@@ -1927,13 +2252,46 @@ void MainComponent::showPlugins(const juce::String& trackId)
     const auto target = trackId.isNotEmpty() ? trackId : impl->state.selectedTrackId;
     if (impl->pluginDialog) {
         if (auto* panel = dynamic_cast<PluginPanel*>(impl->pluginDialog->getContentComponent())) panel->selectTarget(target);
-        impl->pluginDialog->toFront(true); return;
+        impl->pluginDialog->setVisible(true); impl->pluginDialog->toFront(true); return;
     }
-    auto panel = std::make_unique<PluginPanel>(session, [safe = juce::Component::SafePointer<MainComponent>(this)](const juce::Result& result) { if (safe) safe->showResult(result); });
+    auto panel = std::make_unique<PluginPanel>(session, [safe = juce::Component::SafePointer<MainComponent>(this)](const juce::Result& result) { if (safe) safe->showResult(result); },
+        [safe = juce::Component::SafePointer<MainComponent>(this)](const juce::String& targetTrack) { if (safe) safe->showNativeDevice(targetTrack); },
+        [safe = juce::Component::SafePointer<MainComponent>(this)](const juce::String& targetTrack, const juce::String& deviceId) { if (safe) safe->showNativeEffect(targetTrack, deviceId); });
     panel->selectTarget(target);
     panel->setLookAndFeel(&impl->look);
     impl->pluginDialog = new ToolWindow("Plugins / VST2 + VST3", panel.release(), this);
     if (impl->pluginDialog) impl->pluginDialog->setResizeLimits(780, 420, 1600, 1000);
+}
+void MainComponent::showNativeDevice(const juce::String& targetTrack)
+{
+    auto& p=*impl;
+    const auto state=session.snapshot();
+    const auto found=std::find_if(state.tracks.begin(),state.tracks.end(),[&](const auto& track){return track.id==targetTrack&&track.kind=="instrument";});
+    if(found==state.tracks.end()){showResult(juce::Result::fail("Choose an existing MIDI track for the native instrument."));return;}
+    if(p.pluginDialog)p.pluginDialog->setVisible(false);
+    if(!p.dockNative||p.nativeTrackId!=targetTrack||p.nativeProjectId!=state.projectId){
+        p.dockNative.reset();
+        p.dockNative=std::make_unique<NativeDevicePanel>(session,targetTrack,
+            [safe=juce::Component::SafePointer<MainComponent>(this)](const juce::Result& result){if(safe)safe->showResult(result);});
+        p.nativeTrackId=targetTrack;p.nativeProjectId=state.projectId;
+        addAndMakeVisible(*p.dockNative);
+    }
+    p.chainTrackId=targetTrack; session.selectTrack(targetTrack);p.pianoExpanded=false;p.dock=Impl::Dock::native;
+    refreshSnapshot();resized();repaint();
+}
+void MainComponent::showNativeEffect(const juce::String& targetTrack, const juce::String& deviceId)
+{
+    auto& p = *impl; const auto state = session.snapshot();
+    const auto found = std::find_if(state.tracks.begin(), state.tracks.end(), [&](const auto& track) { return track.id == targetTrack; });
+    if (targetTrack != "master" && found == state.tracks.end()) { showResult(juce::Result::fail("Choose an existing track for the built-in effect.")); return; }
+    if (p.pluginDialog) p.pluginDialog->setVisible(false);
+    p.dockEffect.reset();
+    p.dockEffect = std::make_unique<NativeEffectsPanel>(session, targetTrack, deviceId,
+        [safe = juce::Component::SafePointer<MainComponent>(this)](const juce::Result& result) { if (safe) safe->showResult(result); });
+    p.effectTrackId = targetTrack; p.effectProjectId = state.projectId; addAndMakeVisible(*p.dockEffect);
+    p.chainTrackId=targetTrack; p.chainSelectedId=deviceId;
+    if (targetTrack != "master") session.selectTrack(targetTrack); p.pianoExpanded = false; p.dock = Impl::Dock::effect;
+    refreshSnapshot(); resized(); repaint();
 }
 void MainComponent::showPianoRoll()
 {
@@ -2164,6 +2522,7 @@ void MainComponent::importSources(const juce::Array<juce::File>& files, std::uin
 void MainComponent::withUnsavedGuard(std::function<void()> proceed)
 {
     const auto recordingState = session.snapshot();
+    if (blockNativeTransition(recordingState, [this](const auto& message) { showResult(juce::Result::fail(message)); })) return;
     if (recordingState.recording || recordingState.recordingFinalizing) { showResult(juce::Result::fail("Stop recording and wait for the take to finish before changing projects.")); return; }
     if (impl->savePreparing) { impl->pendingAfterSave = std::move(proceed); return; }
     if (impl->chooser != nullptr || impl->confirming || impl->pendingAfterSave || impl->saveContinuationPending) {
@@ -2189,6 +2548,7 @@ void MainComponent::withUnsavedGuard(std::function<void()> proceed)
             safe->refreshSnapshot();
             if (choice == 0) return;
             const auto current = safe->session.snapshot();
+            if (blockNativeTransition(current, [safe](const auto& message) { if (safe) safe->showResult(juce::Result::fail(message)); })) return;
             if (current.projectId != projectId || current.recording || current.recordingFinalizing) {
                 safe->impl->error = "The active project or recording state changed while the dialog was open. Try again.";
                 safe->refreshSnapshot();
@@ -2228,6 +2588,7 @@ void MainComponent::chooseProject()
             juce::MessageManager::callAsync([safe, file, expectedRevision] {
                 if (safe == nullptr) return;
                 safe->impl->chooser.reset();
+                if (blockNativeTransition(safe->session.snapshot(), [safe](const auto& message) { if (safe) safe->showResult(juce::Result::fail(message)); })) return;
                 if (file != juce::File()) {
                     const auto result = safe->session.execute("open_project", arguments({ { "path", file.getFullPathName() } }), expectedRevision);
                     if (result.wasOk()) safe->impl->waveform.invalidateSource();
@@ -2238,6 +2599,7 @@ void MainComponent::chooseProject()
 }
 void MainComponent::saveProject(bool saveAs, std::function<void()> onSaved)
 {
+    if (blockNativeTransition(session.snapshot(), [this](const auto& message) { showResult(juce::Result::fail(message)); })) return;
     if (impl->state.recording || impl->state.recordingFinalizing) { showResult(juce::Result::fail("Stop recording and wait for the take to finish before saving.")); return; }
     if (impl->savePreparing || impl->pendingSaveJob.isNotEmpty()) {
         // One follow-up captures edits made after the accepted save; repeated shortcuts never fan out jobs.
@@ -2280,6 +2642,7 @@ void MainComponent::beginSave(const juce::File& target, const juce::String& proj
 {
     auto& p = *impl;
     const auto current = session.snapshot();
+    if (blockNativeTransition(current, [this](const auto& message) { showResult(juce::Result::fail(message)); })) { p.savePreparing = false; p.pendingAfterSave = {}; return; }
     if (current.projectId != projectId || current.recording || current.recordingFinalizing) {
         p.savePreparing = false; p.pendingAfterSave = {};
         showResult(juce::Result::fail("The active project or recording state changed before saving. Retry Save when ready.")); return;
@@ -2292,6 +2655,7 @@ void MainComponent::beginSave(const juce::File& target, const juce::String& proj
         if (!safe) return;
         auto& p = *safe->impl;
         const auto current = safe->session.snapshot();
+        if (blockNativeTransition(current, [safe](const auto& message) { if (safe) safe->showResult(juce::Result::fail(message)); })) { p.savePreparing = false; p.pendingAfterSave = {}; safe->refreshSnapshot(); return; }
         if (current.projectId != projectId) {
             p.savePreparing = false; p.pendingAfterSave = {}; p.saveError = "The project changed before saving. Retry Save."; safe->refreshSnapshot(); return;
         }
@@ -2332,6 +2696,7 @@ void MainComponent::continueAfterSave(const juce::String& projectId, std::uint64
         if (!safe) return;
         safe->impl->saveContinuationPending = false;
         const auto current = safe->session.snapshot();
+        if (blockNativeTransition(current, [safe](const auto& message) { if (safe) safe->showResult(juce::Result::fail(message)); })) { safe->refreshSnapshot(); return; }
         if (current.projectId != projectId || current.revision != savedRevision || current.dirty || current.recording || current.recordingFinalizing) {
             safe->impl->error = "Changes arrived after saving. The project remains open; review them before continuing.";
             safe->refreshSnapshot(); return;
@@ -2383,6 +2748,11 @@ bool MainComponent::keyPressed(const juce::KeyPress& key)
     for (auto* focus = juce::Component::getCurrentlyFocusedComponent(); focus != nullptr; focus = focus->getParentComponent())
         if (dynamic_cast<juce::TextEditor*>(focus) != nullptr) return false;
     const auto modifiers = key.getModifiers();
+    if (modifiers.isCtrlDown() && modifiers.isAltDown() && !modifiers.isShiftDown()
+        && (key.getKeyCode() == 'E' || key.getKeyCode() == 'e')
+        && impl->dock == Impl::Dock::midi && impl->pianoRoll) {
+        impl->expandEditor.onClick(); return true;
+    }
     if (modifiers.isCommandDown() || modifiers.isCtrlDown()) {
         if (impl->chooser != nullptr || impl->confirming || impl->pendingAfterSave) return false;
         const int code = key.getKeyCode();

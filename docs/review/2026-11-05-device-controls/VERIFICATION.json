@@ -1,0 +1,106 @@
+{
+  "version": "0.8.1",
+  "status": "automated_passed_manual_pending",
+  "source_sha256": "846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f",
+  "source_file_count": 161,
+  "exe_sha256": "c0099db16a428b04e8bda55fef6444658711c8cafa9b784a7b5a127979ab9082",
+  "exe_path": "build\\device-chain\\bin\\Release\\E-musician.exe",
+  "build_and_tests": [
+    {
+      "id": "20261104T174510.587395Z-4b892d27f9",
+      "command": [
+        "cmake",
+        "--build",
+        "build/device-chain",
+        "--config",
+        "Release",
+        "--parallel",
+        "2",
+        "--",
+        "/p:UseMultiToolTask=true",
+        "/p:CL_MPCount=2",
+        "/p:EnforceProcessCountAcrossBuilds=true"
+      ],
+      "started_at": "2026-11-04T17:45:10.587+00:00",
+      "finished_at": "2026-11-04T17:45:33.085+00:00",
+      "elapsed_seconds": 22.498379,
+      "status": "succeeded",
+      "log": "build-logs/20261104T174510.587395Z-4b892d27f9.log",
+      "source_changed_during_command": false
+    },
+    {
+      "id": "20261104T174533.245723Z-a02903701d",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build/device-chain",
+        "-C",
+        "Release",
+        "--output-on-failure"
+      ],
+      "started_at": "2026-11-04T17:45:33.246+00:00",
+      "finished_at": "2026-11-04T17:46:59.491+00:00",
+      "elapsed_seconds": 86.246197,
+      "status": "succeeded",
+      "log": "build-logs/20261104T174533.245723Z-a02903701d.log",
+      "source_changed_during_command": false
+    },
+    {
+      "id": "20261104T174659.712267Z-feb39b69b2",
+      "command": [
+        "python",
+        "tests/NativeEffectsEndToEnd.py",
+        "--exe",
+        "build/device-chain/bin/Release/E-musician.exe"
+      ],
+      "started_at": "2026-11-04T17:46:59.712+00:00",
+      "finished_at": "2026-11-04T17:47:44.910+00:00",
+      "elapsed_seconds": 45.198636,
+      "status": "succeeded",
+      "log": "build-logs/20261104T174659.712267Z-feb39b69b2.log",
+      "source_changed_during_command": false
+    },
+    {
+      "id": "20261104T174745.104050Z-00fbfd9c95",
+      "command": [
+        "python",
+        "tests/NativeDeviceEndToEnd.py",
+        "--exe",
+        "build/device-chain/bin/Release/E-musician.exe"
+      ],
+      "started_at": "2026-11-04T17:47:45.104+00:00",
+      "finished_at": "2026-11-04T17:47:58.482+00:00",
+      "elapsed_seconds": 13.378841,
+      "status": "succeeded",
+      "log": "build-logs/20261104T174745.104050Z-00fbfd9c95.log",
+      "source_changed_during_command": false
+    },
+    {
+      "id": "20261104T174758.755341Z-3cbfcfa5d9",
+      "command": [
+        "python",
+        "tests/MusicAgentNativeEffectsIntegration.py",
+        "--exe",
+        "build/device-chain/bin/Release/E-musician.exe"
+      ],
+      "started_at": "2026-11-04T17:47:58.755+00:00",
+      "finished_at": "2026-11-04T17:48:05.221+00:00",
+      "elapsed_seconds": 6.46575,
+      "status": "succeeded",
+      "log": "build-logs/20261104T174758.755341Z-3cbfcfa5d9.log",
+      "source_changed_during_command": false
+    }
+  ],
+  "agent_python_record": "20261104T172818.461252Z-a094aa0dd4",
+  "agent_python_tests": 245,
+  "agent_python_runtime_inputs_unchanged": true,
+  "smoke_directory": "build\\smoke\\Release\\9e3d5fba7f82",
+  "effects_report": "build/native-effects-e2e/d2a95a81-bcfc-40c9-9837-bd3806f553ee/report.json",
+  "sampler_report": "build/native-device-e2e/a08451fb-4139-4b7d-9a74-c858d482a6e4/report.json",
+  "agent_report": "build/agent-native-e2e/efb0a80e-4030-4559-9579-32123edaf2af/report.json",
+  "physical_audio_tested": false,
+  "paid_model_requests": 0,
+  "launcher_path": "E:/MusicAgent&DAW/Start E-musician 0.8.1.cmd",
+  "launcher_sha256": "cf3bceb29719f666f46153cddc853af7a7a3d1460baa915fdaf3c59efe7b43d9",
+  "launcher_desktop_click_tested": false
+}

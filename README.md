@@ -2,13 +2,19 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
-**本分支：DAW 0.8.0 / Agent 0.3 第二批，实现和本批自动验收完成，待人工桌面短测。** 本批加入一份方案内的新轨→新片段→明确音符、片段复制/跨轨移动/裁剪/删除、音符增删和时长调整，以及规划暂停、顺序方案和执行阶段显示。本批结果以[验证记录](docs/verification/2026-10-29-agent-batch2/RESULTS.md)为准，真实界面、中文输入法和 ASIO 听感由用户按[人工检查](docs/review/2026-10-29-agent-batch2/MANUAL-CHECK.md)确认。
+**最新候选 0.8.1（2026-11-05）**：MIDI 音符与 clip 改为全行矩形；现有七种原生装置增加统一旋钮/图示，Sampler/Rack 增加 AR 和播放模式，EQ 每段可选六种形状，新声音参数支持 Agent。启动 `build/device-chain/bin/Release/E-musician.exe`，本机亦可双击 `E:/MusicAgent&DAW/Start E-musician 0.8.1.cmd`，检查标题版本。Release、CTest 10/10、Agent Python 245 和离线联测通过，实际桌面与设备听感待人工；[结果/截图](docs/review/2026-11-05-device-controls/RESULTS.md) / [人工短测](docs/review/2026-11-05-device-controls/MANUAL-CHECK.md)。新非默认装置状态使用版本 2，旧版会拒绝；旧程序备份保留。
+
+**历史候选（2026-11-02）**：下方有序设备链、原生面板轮询修复、增强的压缩器、原创 Delay/Reverb/Auto Filter 和 Agent 装置参数接口。[结果与限制](docs/review/2026-11-02-device-chain-agent/RESULTS.md) / [Agent 测试手册](docs/review/2026-11-02-agent-diagnostics/README.md)。此前提及的完整合成器和商业级装置尚未完成；当前 `build/device-chain` 入口已更新为上方 0.8.1。
+
+**历史候选（2026-11-02，试听/效果器）**：增加采样试听、波形优化、原生八段 EQ 与压缩器及相应 Agent 操作。使用独立的 `build/audition-effects/bin/Release/E-musician.exe`，双击后可用 Agent 按钮打开助手；不要用旧版覆盖包含新装置的工程。自动测试与真实设备限制见[本轮结果](docs/review/2026-11-02-audition-eq-compressor/RESULTS.md)，人工操作见[检查步骤](docs/review/2026-11-02-audition-eq-compressor/MANUAL-CHECK.md)。以下旧批次说明保留作为历史及其他构建入口。
+
+**历史：DAW 0.8.0 / Agent 0.3 第二批，实现和本批自动验收完成，待人工桌面短测。** 本批加入一份方案内的新轨→新片段→明确音符、片段复制/跨轨移动/裁剪/删除、音符增删和时长调整，以及规划暂停、顺序方案和执行阶段显示。本批结果以[验证记录](docs/verification/2026-10-29-agent-batch2/RESULTS.md)为准，真实界面、中文输入法和 ASIO 听感由用户按[人工检查](docs/review/2026-10-29-agent-batch2/MANUAL-CHECK.md)确认。
 
 0.7.0 / Agent 0.2 的原生侧栏、选择上下文和双模型验证保留在[第一批历史证据](docs/verification/2026-10-29-agent-sidebar/RESULTS.md)，不作为0.8.0新增能力的通过证明。
 
 保留0.6.1的1/16384网格、Ctrl+4吸附虚实线、三级小节标尺与深缩放，以及0.6.0剪贴板、循环跟随、节拍器、预备拍和资源/电平显示。旧录音、混合工程、性能与插件证据保持原版本范围，见[0.5交付档案](docs/verification/2026-10-27-v05/DELIVERY.md)。
 
-新工程默认 **120 BPM、4/4**。不提供和弦工具、乐句模板或自带音源；MIDI 通过用户安装的 Windows x64 VST2/VST3 乐器发声。独立运行不需要 Ableton、模型服务或 API 密钥。
+新工程默认 **120 BPM、4/4**。不提供和弦工具或乐句模板；MIDI 可通过用户安装的 Windows x64 VST2/VST3 乐器，或使用用户自行加载 WAV 的原生 Sampler／Drum Rack 发声。独立运行不需要 Ableton、模型服务或 API 密钥。
 
 既有Keyscape兼容、录音音符时间边界和保存修复继续保留。新功能沿用同一个工程、命令接口及Undo；模型请求在独立非实时进程中执行。不提供自动保存和恢复。
 

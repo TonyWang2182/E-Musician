@@ -206,7 +206,7 @@ def main() -> int:
     root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=("apply", "verify"))
-    parser.add_argument("--engine-root", type=Path, default=root / "_deps" / "tracktion_engine")
+    parser.add_argument("--engine-root", type=Path, default=root / ".cache" / "monitor-engine")
     parser.add_argument("--manifest", type=Path, default=root / "cmake" / "patches" / "tracktion" / "manifest.json")
     args = parser.parse_args()
     try:

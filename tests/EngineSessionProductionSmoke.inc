@@ -9,7 +9,96 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
     auto okay = [&](const juce::Result& r, const juce::String& context) { check(r.wasOk(), context + ": " + r.getErrorMessage()); };
     auto command = [&](EngineSession& target, const juce::String& name, juce::var args = object({})) { okay(target.execute(name, args, target.snapshot().revision), name); };
     try {
+        okay(runNativeLoadQueueTests(), "native sample loader queue");
+        {
+            storage::StoredPlugin old;old.format="E-musician";old.role="effect";old.identifier="native.compressor";
+            const juce::String json=R"({"version":1,"type":"compressor","threshold_db":-30,"ratio":10,"attack_ms":0.1,"release_ms":100,"makeup_db":0})";
+            old.state=juce::MemoryBlock(json.toRawUTF8(),json.getNumBytesAsUTF8());
+            native_effects::Settings parsed;okay(native_effects::decode(old,parsed),"legacy compressor state");
+            check(parsed.compressor.dryWet==1.0f&&double(native_effects::encode(parsed)["dry_wet"])==1.0,"legacy compressor defaults to fully wet");
+            EngineSession fixture(false);
+            auto tree=juce::ValueTree(te::IDs::PLUGIN);tree.setProperty(te::IDs::type,native_effects::Effect::xmlTypeName,nullptr);
+            tree.setProperty("emEffectType",old.identifier,nullptr);tree.setProperty("emEffectData",juce::var(old.state),nullptr);
+            te::Plugin::Ptr held=new native_effects::Effect(te::PluginCreationInfo(*fixture.impl->edit,tree,true));
+            auto* effect=dynamic_cast<native_effects::Effect*>(held.get());check(effect!=nullptr,"create compressor wrapper fixture");
+            effect->initialise({te::TimePosition::fromSeconds(0),48000.0,128});
+            juce::AudioBuffer<float> audio(2,128);audio.clear();
+            for(int ch=0;ch<2;++ch)for(int i=0;i<128;++i)audio.setSample(ch,i,.5f);
+            te::MidiMessageArray midi;
+            te::PluginRenderContext context(&audio,juce::AudioChannelSet::stereo(),0,128,&midi,0,
+                te::TimeRange{te::TimePosition::fromSeconds(0),te::TimeDuration::fromSeconds(128.0/48000)},true,false,false,false);
+            check(effect->meterSequence()==0,"meter starts unavailable before real processing");
+            effect->applyToBuffer(context);
+            check(effect->meterSequence()==1&&effect->gainReductionDb()>5,"meter reflects real rendered compressor gain reduction");
+            held=nullptr;
+        }
+        {
+            EngineSession fixture(false);
+            auto tree=juce::ValueTree(te::IDs::PLUGIN);tree.setProperty(te::IDs::type,native::Instrument::xmlTypeName,nullptr);
+            te::Plugin::Ptr held=new native::Instrument(te::PluginCreationInfo(*fixture.impl->edit,tree,true));
+            auto* instrument=dynamic_cast<native::Instrument*>(held.get());check(instrument!=nullptr,"create native wrapper fixture");
+            instrument->initialise({te::TimePosition::fromSeconds(0),48000.0,128});
+            auto data=std::make_shared<native::SampleData>();data->sampleRate=48000;data->left.assign(4096,0.5f);
+            auto bank=std::make_unique<native::PreparedBank>();bank->bank.generation=1;bank->samples[0]=data;bank->sampleHashes[0]="fixture-hash";
+            auto& slot=bank->bank.slots[0];slot.left=data->left.data();slot.frames=data->left.size();slot.endFrame=data->left.size();
+            slot.sampleRate=48000;slot.rootNote=60;slot.minNote=0;slot.maxNote=127;slot.attackSeconds=0;slot.oneShot=true;
+            instrument->publish(std::move(bank));
+            check(instrument->sampleForDisplay(0,"fixture-hash")==data,"published pad PCM is available for display");
+            check(!instrument->sampleForDisplay(0,"other-hash")&&!instrument->sampleForDisplay(1,"fixture-hash")
+                && !instrument->sampleForDisplay(-1,"fixture-hash"),"waveform PCM rejects wrong hash and pad");
+            juce::AudioBuffer<float> audio(2,128);te::MidiMessageArray midi;
+            const auto process=[&]{te::PluginRenderContext context(&audio,juce::AudioChannelSet::stereo(),0,128,&midi,0,
+                te::TimeRange{te::TimePosition::fromSeconds(0),te::TimeDuration::fromSeconds(128.0/48000)},true,false,false,false);
+                instrument->applyToBuffer(context);};
+            midi.addMidiMessage(juce::MidiMessage::noteOn(1,60,juce::uint8(127)),0.0,te::MPESourceID(0));audio.clear();process();
+            check(audio.getMagnitude(0,0,128)>0.1f,"native wrapper produces held voice");
+            midi.clear();audio.clear();instrument->reset();process();
+            check(audio.getMagnitude(0,0,128)==0.0f,"native wrapper reset stops sounding voices");
+            midi.addMidiMessage(juce::MidiMessage::noteOn(2,60,juce::uint8(127)),0.0,te::MPESourceID(0));audio.clear();process();
+            check(audio.getMagnitude(0,0,128)>0.1f,"native wrapper produces second-channel voice");
+            midi.clear();audio.clear();instrument->midiPanic();process();
+            check(audio.getMagnitude(0,0,128)==0.0f,"native wrapper panic clears all channels");
+            check(!instrument->previewSample(-1)&&!instrument->previewSample(1),"preview rejects invalid and empty pads");
+            check(instrument->previewSample(0),"ready sample accepts independent preview");
+            audio.clear();process();check(audio.getMagnitude(0,0,128)>0.1f,"preview renders without timeline MIDI");
+            instrument->stopPreview();audio.clear();process();check(audio.getMagnitude(0,0,128)==0.0f,"preview stop silences one-shot preview");
+            midi.addMidiMessage(juce::MidiMessage::noteOn(2,60,juce::uint8(127)),0.0,te::MPESourceID(0));audio.clear();process();
+            midi.clear();check(instrument->previewSample(0),"preview can coexist with MIDI playback");audio.clear();process();
+            instrument->stopPreview();audio.clear();process();check(audio.getMagnitude(0,0,128)>0.1f,"preview stop does not silence timeline voices");
+            held=nullptr;
+        }
         okay(runVst3InactiveBusSmoke(), "VST3 inactive-bus compatibility buffers");
+        {
+            // A native effect is deliberately not a third-party editor, so an
+            // accepted target reaches showEditor and fails harmlessly there.
+            // This verifies routing without opening any real plugin window.
+            EngineSession fixture(false);
+            command(fixture,"create_track",object({{"kind","audio"},{"name","Owner"}}));
+            const auto owner=fixture.snapshot().tracks.back().id;
+            command(fixture,"create_track",object({{"kind","audio"},{"name","Other"}}));
+            const auto other=fixture.snapshot().tracks.back().id;
+            juce::var added;
+            okay(fixture.execute("add_native_effect",object({{"track_id",owner},{"type","eq8"}}),fixture.snapshot().revision,&added),"add harmless target fixture");
+            const auto id=added["device_id"].toString();check(id.isNotEmpty(),"fixture has a stable device ID");
+            const auto open=[&](juce::var args){return fixture.execute("open_plugin",args,fixture.snapshot().revision);};
+            const auto wrong=open(object({{"track_id",other},{"plugin_id",id}}));
+            check(wrong.failed()&&wrong.getErrorMessage().contains("does not belong"),"wrong track cannot open another track's device");
+            const auto correct=open(object({{"track_id",owner},{"plugin_id",id}}));
+            check(correct.failed()&&correct.getErrorMessage().contains("not loaded"),"correct track reaches editor host");
+            const auto legacy=open(object({{"plugin_id",id}}));
+            check(legacy.failed()&&legacy.getErrorMessage().contains("not loaded"),"legacy ID-only open reaches editor host");
+            const auto master=open(object({{"track_id","master"},{"plugin_id",id}}));
+            check(master.failed()&&master.getErrorMessage().contains("does not belong"),"master cannot open a track device");
+            juce::var masterAdded;
+            okay(fixture.execute("add_native_effect",object({{"track_id","master"},{"type","compressor"}}),fixture.snapshot().revision,&masterAdded),"add master target fixture");
+            const auto masterId=masterAdded["device_id"].toString();check(masterId.isNotEmpty(),"master fixture has a stable device ID");
+            const auto rightMaster=open(object({{"track_id","master"},{"plugin_id",masterId}}));
+            check(rightMaster.failed()&&rightMaster.getErrorMessage().contains("not loaded"),"correct master reaches editor host");
+            const auto wrongMaster=open(object({{"track_id",owner},{"plugin_id",masterId}}));
+            check(wrongMaster.failed()&&wrongMaster.getErrorMessage().contains("does not belong"),"track cannot open master device");
+            const auto malformed=open(object({{"track_id",42},{"plugin_id",id}}));
+            check(malformed.failed()&&malformed.getErrorMessage().contains("valid track ID"),"invalid track identity rejected");
+        }
         const auto workspace = directory.getChildFile("production-" + uid()); okay(workspace.createDirectory(), "owned test workspace");
         storage::StoredProject graph; graph.projectId = uid();
         storage::StoredTrack source, busA, busB; source.id = "source"; source.name = "Source";
@@ -296,6 +385,39 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
         check(recordedFile.existsAsFile(), "Undo retains the recorded source for Redo"); command(isolated, "redo");
         check(recordingTracks[0]->getClips().size() == 1 && recordingTracks[1]->getClips().size() == 1, "one Redo restores both take clips");
         check(isolated.snapshot().tracks[0].clips.size() == 1 && isolated.snapshot().tracks[1].clips.size() == 1, "recorded clips reach public snapshots");
+        // Two destinations share one hosted MIDI input. Monitor choices must
+        // change live routing independently of the record-arm flags.
+        command(isolated, "create_track", object({ {"kind", "instrument"}, {"name", "Monitor isolation"} }));
+        const auto monitorTrackId = isolated.snapshot().tracks.back().id;
+        command(isolated, "set_track_input", object({ {"track_id", monitorTrackId}, {"input_device_id", midiId} }));
+        command(isolated, "set_track_armed", object({ {"track_id", monitorTrackId}, {"armed", true} }));
+        const auto beforeMonitorRevision = isolated.snapshot().revision;
+        const auto beforeMonitorUndo = recordingEdit->getUndoManager().getUndoDescriptions();
+        command(isolated, "set_input_monitor", object({ {"track_id", midiTrackId}, {"mode", "on"} }));
+        command(isolated, "set_input_monitor", object({ {"track_id", monitorTrackId}, {"mode", "off"} }));
+        check(isolated.snapshot().revision == beforeMonitorRevision && recordingEdit->getUndoManager().getUndoDescriptions() == beforeMonitorUndo, "monitor changes do not edit the project or pollute undo history");
+        recordingEdit->dispatchPendingUpdatesSynchronously();
+        te::InputDeviceInstance* monitoredInput = nullptr;
+        for (auto* input : recordingEdit->getAllInputDevices()) if (input->getInputDevice().getDeviceID() == midiId) monitoredInput = input;
+        auto* firstMonitorTrack = production::graphTrack(*recordingEdit, midiTrackId);
+        auto* secondMonitorTrack = production::graphTrack(*recordingEdit, monitorTrackId);
+        check(monitoredInput && firstMonitorTrack && secondMonitorTrack, "find shared input and both track targets");
+        check(monitoredInput->isRecordingEnabled(firstMonitorTrack->itemID) && monitoredInput->isRecordingEnabled(secondMonitorTrack->itemID), "monitor changes preserve independent recording arms");
+        check(monitoredInput->isLivePlayEnabled(*firstMonitorTrack) && !monitoredInput->isLivePlayEnabled(*secondMonitorTrack), "on and off isolate two armed tracks sharing one MIDI device");
+        command(isolated, "set_input_monitor", object({ {"track_id", monitorTrackId}, {"mode", "auto"} }));
+        check(monitoredInput->isLivePlayEnabled(*secondMonitorTrack), "auto monitors while the second track is armed");
+        command(isolated, "set_track_armed", object({ {"track_id", monitorTrackId}, {"armed", false} }));
+        check(!monitoredInput->isLivePlayEnabled(*secondMonitorTrack) && monitoredInput->isLivePlayEnabled(*firstMonitorTrack), "auto stops monitoring after disarm without affecting the other track");
+        command(isolated, "set_input_monitor", object({ {"track_id", monitorTrackId}, {"mode", "on"} }));
+        check(monitoredInput->isLivePlayEnabled(*secondMonitorTrack) && !monitoredInput->isRecordingEnabled(secondMonitorTrack->itemID), "on monitors without arming or recording the track");
+        command(isolated, "set_track_input", object({ {"track_id", monitorTrackId}, {"input_device_id", ""} }));
+        recorder.poll();
+        check(!monitoredInput->getTargets().contains(secondMonitorTrack->itemID) && monitoredInput->isLivePlayEnabled(*firstMonitorTrack), "clearing one input detaches only its own monitor target");
+        command(isolated, "set_track_input", object({ {"track_id", monitorTrackId}, {"input_device_id", midiId} }));
+        recorder.poll();
+        monitoredInput = nullptr;
+        for (auto* input : recordingEdit->getAllInputDevices()) if (input->getInputDevice().getDeviceID() == midiId) monitoredInput = input;
+        check(monitoredInput && monitoredInput->isLivePlayEnabled(*secondMonitorTrack) && !monitoredInput->isRecordingEnabled(secondMonitorTrack->itemID), "monitor on automatically binds a newly selected input without arming");
         command(isolated, "create_track", object({ {"kind", "bus"}, {"name", "Recorded bus"} })); const auto busId = isolated.snapshot().tracks.back().id;
         command(isolated, "set_track_output", object({ {"track_id", audioTrackId}, {"target_track_id", busId} }));
         command(isolated, "set_automation_lane", object({ {"track_id", audioTrackId}, {"lane_id", "public-gain"}, {"target", "track_gain"}, {"points", juce::var(juce::Array<juce::var>{ object({ {"id", "public-a"}, {"time_seconds", 0.0}, {"value", 0.5}, {"curve", 0.0} }), object({ {"id", "public-b"}, {"time_seconds", 1.0}, {"value", 0.8}, {"curve", 0.0} }) })} }));
@@ -304,6 +426,15 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
         command(isolated, "set_input_monitor", object({ {"input_device_id", beforeSave.tracks[0].inputDeviceId}, {"mode", "on"} }));
         command(isolated, "set_input_monitor", object({ {"input_device_id", midiId}, {"mode", "auto"} }));
         check(isolated.snapshot().tracks[0].monitorMode == "on" && isolated.snapshot().tracks[1].monitorMode == "auto", "test explicitly sets non-off monitor modes before reopening");
+        command(isolated, "set_input_monitor", object({ {"input_device_id", midiId}, {"mode", "on"} }));
+        command(isolated, "create_track", object({ {"kind", "instrument"}, {"name", "New track defaults off"} }));
+        const auto newTrackId = isolated.snapshot().tracks.back().id;
+        command(isolated, "set_track_input", object({ {"track_id", newTrackId}, {"input_device_id", midiId} }));
+        command(isolated, "set_track_armed", object({ {"track_id", newTrackId}, {"armed", true} }));
+        auto* newTrack = production::graphTrack(*recordingEdit, newTrackId);
+        te::InputDeviceInstance* newTrackInput = nullptr;
+        for (auto* input : recordingEdit->getAllInputDevices()) if (input->getInputDevice().getDeviceID() == midiId) newTrackInput = input;
+        check(newTrack && newTrackInput && !newTrackInput->isLivePlayEnabled(*newTrack), "new track defaults monitor off even when a legacy device-level command enabled monitoring");
         okay(isolated.openProject(projectFile, isolated.snapshot().revision), "reopen recorded project"); const auto afterOpen = isolated.impl->capture();
         check(afterOpen.tracks[0].outputTargetId == busId && afterOpen.tracks[0].automation.size() == 1 && afterOpen.tracks[0].automation[0].points.size() == 2, "schema4 restores public routing and curve");
         check(afterOpen.tracks[1].clips[0].controllers.size() == beforeSave.tracks[1].clips[0].controllers.size() && afterOpen.tracks[1].clips[0].notes.size() == beforeSave.tracks[1].clips[0].notes.size(), "schema4 restores recorded notes and pedal events");

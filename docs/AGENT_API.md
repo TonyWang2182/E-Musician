@@ -1,5 +1,21 @@
 # 本地 Agent 控制接口 v1
 
+## 0.8.1 原生装置参数补充（2026-11-05）
+
+EQ 每段 `shape` 为 `bell / low_shelf / high_shelf / high_pass / low_pass / notch`，高低通为 12 dB/oct，cut/notch 不使用 `gain_db`。宿主 `set_native_effect` 接收完整 state；Agent `set_native_effect_parameter` 可只给 `shape` 和 1-based `band`，本地编译器保留其余值。缺失 shape 的旧状态按首低架、尾高架、中间 bell 解读。新形状保存为装置状态 version 2，其余效果器版本不变。
+
+`set_native_pad` 宿主参数仍为 `track_id / pad / gain_db / muted`，新增可选 `attack_ms`（0.1–2000）、`release_ms`（1–5000）、`one_shot`（bool）。缺失字段保持原值，旧状态默认 3ms/30ms、sampler 为 false、rack 为 true。Agent 动作允许只指定至少一个需要改的 pad 参数；编译器用已经读取的完整 pad 状态补齐，提交和回读保持原异步路径。MIDI 36 对应 0-based pad 0，Rack 固定 0–15。使用不同于旧默认的包络/模式保存为装置 version 2，旧程序拒绝而不会静默忽略。
+
+`get_native_instrument` 返回已解析的包络/模式；模型侧移除本地 path，仅保留样本身份及允许读写的参数。仍要求 project 范围、已加载采样、单异步动作；模型不选择文件路径。`native_effect_catalog` 和 `native_instrument_catalog` 同步范围及类型，不匹配时停止装置操作。协议目录版本仍为 1，与装置存档版本分开。图形、旋钮、Agent 共用命令；它们不等于已接宿主自动化。验证与使用见[本轮人工检查](review/2026-11-05-device-controls/MANUAL-CHECK.md)。
+
+装置 UI 的整机旁路使用通用 `set_plugin_enabled` 宿主命令；该命令暂未加入模型动作 allowlist，不能把“所有新声音参数可控制”解读为 Agent 可调用全部面板按钮。EQ 单频段的 `enabled` 仍可通过效果参数方案修改。
+
+## 历史：原生采样器 / 鼓组底层命令（2026-11-02）
+
+工作区视觉迭代：`get_native_instrument` 在已发布状态 ready 且该轨无待提交候选时，可能为已加载 pad 附带 `sample_sha256`，指向当前播放 bank 的源文件内容，用于非实时波形一致性检查；缺失不等于空音频。
+
+只读 `get_native_instrument` 接收 `track_id`，返回类型、pads（采样器一个、鼓组 16 个）、asset_id/path、gain_db/muted、root_note/start/end 和 `load_status`/error。写操作 `add_native_instrument`（type 为 sampler/drum_rack）、`set_native_sample`（track_id/pad/path，空路径清除）、`set_native_pad`（pad/gain_db/muted）、`set_native_sampler`（root_note/start/end）受 project_id/revision 保护。写入提交为异步 accepted/job_id；必须观察 `get_job` 终态，不能把已受理当成已提交或可播放。当前 native job 无法取消；模型 Agent 可调用动作列表尚不含这些命令。限制与验证见[本轮记录](review/2026-11-02-sampler-drum-rack/RESULTS.md)。
+
 实现入口为 EngineSession::executeRequest，本文主要描述原生 JSONL 协议，协议仍为v1。0.8.0第二批新增类型化批次结果引用，已通过本批原生与模型闭环验证；0.7.0的选择上下文和选择版本保护继续有效。唯一Edit/Undo边界不变。当前证据见[第二批记录](verification/2026-10-29-agent-batch2/RESULTS.md)。此前Release检查见[第一批记录](verification/2026-10-29-agent-sidebar/RESULTS.md)，不能当作本批验收；助手产品入口见[快速上手](AGENT_QUICKSTART.md)。
 
 ## 0.7.0内嵌传输与选择契约
@@ -210,7 +226,7 @@ VST2/VST3只支持Windows x64。MIDI轨需要安装并加载可用乐器才发�
 | configure_audio_device | driver_type；device_name可同时指定输入/输出（ASIO）；或input_device_name/output_device_name；sample_rate、buffer_size、input_channels（可选0起索引数组） |
 | set_track_input | track_id, input_device_id；空字符串清除选择，选择保存在工程中 |
 | set_track_armed | track_id, armed（布尔）；仅音频/乐器轨；运行时状态，不写入工程 |
-| set_input_monitor | input_device_id, mode: off/auto/on；运行时设备级监听 |
+| set_input_monitor | `track_id`、`mode: off/auto/on`：逐轨运行时监听；旧版 `input_device_id` 仍支持，并同时修改该设备当前所选的全部轨道 |
 | start_recording / stop_recording | 无；线性新take，开始前须关闭loop并选择/arm输入 |
 | set_recording_preferences | 部分更新metronome_enabled、metronome_record_only、count_in_enabled（布尔）、metronome_gain_db（-36到0）、count_in_bars（1/2/4） |
 | reset_meters | 无；重置轨道、音频输入及Master电平/过载保持，不重置xruns |
@@ -235,7 +251,7 @@ VST2/VST3只支持Windows x64。MIDI轨需要安装并加载可用乐器才发�
 {"command":"stop_recording","args":{}}
 ```
 
-`monitor_scope`固定为`input_device`：共享同一输入设备的轨道共享off/auto/on，不能视作独立的每轨监听。auto在轨道arm时监听；on持续监听已连接目标；off关闭软件监听。音频采用24-bit WAV新take，MIDI录入notes及CC、程序切换、pitchbend、poly-aftertouch/channel pressure。当前每MIDI片段沿用单通道模型，尚不声明MPE/SysEx、循环叠录与comping。
+`monitor_scope`为 `track_and_input_device`。推荐使用 `track_id`：即使多轨选择同一个输入，每轨的 off/auto/on 也独立；auto 在该轨 arm 时监听，on 不依赖 arm，off 关闭该轨软件监听而不取消录音准备。新轨和重新打开的工程默认 off。旧调用 `input_device_id` 会对当前选择这个输入的所有轨统一设置，不应当用它实现逐轨控制。选择新输入时，on 轨会在控制线程重新绑定；若绑定失败会报告错误，同一次失败的选择不会无限重试，可重新设置监听或 arm 重试。监听是运行状态，离线回归覆盖共享输入、录音准备和切换输入，实体设备与听感仍需验收；按住键时关闭监听的尾音尚待专项处理。音频采用24-bit WAV新take，MIDI录入notes及CC、程序切换、pitchbend、poly-aftertouch/channel pressure。当前每MIDI片段沿用单通道模型，尚不声明MPE/SysEx、循环叠录与comping。
 
 Stop受理后继续读recording/finalizing；finalizing结束并收到recording_completed后，片段才进入工程绑定并生成一次revision。所有同时录入轨道组成一次撤销事务，Undo保留录音源供Redo。录音/结束认领期间禁止音乐编辑、换设备、工程切换与保存；先Stop并等待finalizing=false再提交。设备、arm、monitor及播放位置不按音频块推进revision；完成take才改变音乐版本。工程重开不会自动arm输入。
 

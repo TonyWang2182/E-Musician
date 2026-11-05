@@ -1,4 +1,5 @@
 #include "ProjectStorage.h"
+#include "NativeEffects.h"
 
 #include <juce_cryptography/juce_cryptography.h>
 #include <cmath>
@@ -157,6 +158,57 @@ Result checkJsonTokens(const juce::MemoryBlock& bytes)
     return finished ? Result::ok() : Result::fail("The project JSON is incomplete.");
 }
 
+Result nativeAssetIds(const StoredPlugin& plugin, std::vector<String>& result)
+{
+    result.clear();
+    if (plugin.format != "E-musician") return Result::ok();
+    if (plugin.role == "effect") {
+        if (plugin.state.getSize() == 0 || plugin.state.getSize() > maximumNativeDeviceStateBytes)
+            return Result::fail("Native effect state is empty or exceeds 16 KiB.");
+        if (auto status = checkJsonTokens(plugin.state); status.failed()) return status;
+        native_effects::Settings settings; return native_effects::decode(plugin, settings);
+    }
+    const bool sampler = plugin.identifier == "native.sampler";
+    const bool rack = plugin.identifier == "native.drum_rack";
+    if ((!sampler && !rack) || plugin.role != "instrument")
+        return Result::fail("A native instrument has an unsupported identity or role.");
+    if (plugin.state.getSize() == 0 || plugin.state.getSize() > maximumNativeDeviceStateBytes)
+        return Result::fail("Native instrument state is empty or exceeds 16 KiB.");
+    if (auto status = checkJsonTokens(plugin.state); status.failed())
+        return Result::fail("Invalid native instrument state: " + status.getErrorMessage());
+    var parsed;
+    const auto json = String::fromUTF8(static_cast<const char*>(plugin.state.getData()), static_cast<int>(plugin.state.getSize()));
+    if (auto status = juce::JSON::parse(json, parsed); status.failed())
+        return Result::fail("Cannot parse native instrument state: " + status.getErrorMessage());
+    const auto version = parsed.getProperty("version", {}), type = parsed.getProperty("type", {});
+    const auto root = parsed.getProperty("root_note", {}), start = parsed.getProperty("start", {}), end = parsed.getProperty("end", {});
+    const auto pads = parsed.getProperty("pads", {});
+    if (!parsed.isObject() || !integral(version) || (juce::int64(version) != 1 && juce::int64(version) != 2) || !type.isString()
+        || type.toString() != (sampler ? "sampler" : "drum_rack")
+        || !integral(root) || juce::int64(root) < 0 || juce::int64(root) > 127
+        || !number(start) || !number(end) || !std::isfinite(double(start)) || !std::isfinite(double(end))
+        || double(start) < 0 || double(end) > 1 || double(start) >= double(end)
+        || !pads.isArray() || pads.size() != (sampler ? 1 : 16))
+        return Result::fail("Native instrument state has an invalid version, type, range or pad count.");
+    std::vector<String> candidate;
+    for (const auto& pad : *pads.getArray()) {
+        const auto id = pad.getProperty("asset_id", {}), gain = pad.getProperty("gain_db", {}), muted = pad.getProperty("muted", {});
+        if (!pad.isObject() || !id.isString() || !number(gain) || !validGain(double(gain)) || !muted.isBool()
+            || (id.toString().isNotEmpty() && !validIdentifier(id.toString())))
+            return Result::fail("A native instrument pad has invalid asset ID, gain or mute state.");
+        for (const auto* field : {"attack_ms", "release_ms"}) if (pad.hasProperty(field)) {
+            const auto value = pad[field]; const bool attack = juce::String(field) == "attack_ms";
+            if (!number(value) || !std::isfinite(double(value)) || double(value) < (attack ? .1 : 1.0) || double(value) > (attack ? 2000.0 : 5000.0))
+                return Result::fail("A native instrument envelope is outside its supported range.");
+        }
+        if (pad.hasProperty("one_shot") && !pad["one_shot"].isBool())
+            return Result::fail("A native instrument playback mode must be boolean.");
+        if (id.toString().isNotEmpty()) candidate.push_back(id.toString());
+    }
+    result = std::move(candidate);
+    return Result::ok();
+}
+
 Result readBytes(const File& file, juce::MemoryBlock& bytes)
 {
     if (!file.existsAsFile() || file.getSize() <= 0 || file.getSize() > maximumManifestBytes)
@@ -207,7 +259,7 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
             const auto& plugin = plugins[index];
             if (!validIdentifier(plugin.id) || !pluginIds.insert(plugin.id.toLowerCase()).second)
                 return Result::fail("Plugin instance IDs must be valid and unique.");
-            if ((plugin.format != "VST" && plugin.format != "VST3")
+            if ((plugin.format != "VST" && plugin.format != "VST3" && plugin.format != "E-musician")
                 || plugin.identifier.isEmpty() || plugin.identifier.length() > 4096
                 || plugin.name.length() > 512 || plugin.manufacturer.length() > 512 || plugin.version.length() > 128)
                 return Result::fail("A plugin contains an unsupported format or invalid identity.");
@@ -222,6 +274,9 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
                 || plugin.state.getSize() > maximumTotalPluginStateBytes - pluginStateBytes)
                 return Result::fail("Plugin state exceeds the 64 MiB per-instance or 256 MiB project limit.");
             pluginStateBytes += plugin.state.getSize();
+            std::vector<String> nativeRefs;
+            if (auto status = nativeAssetIds(plugin, nativeRefs); status.failed()) return status;
+            referencedAssets.insert(nativeRefs.begin(), nativeRefs.end());
         }
         return Result::ok();
     };
@@ -297,6 +352,8 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
             } else return Result::fail("Unsupported clip kind.");
         }
     }
+    for (const auto& id : referencedAssets)
+        if (!assetIds.contains(id)) return Result::fail("A native instrument references an unknown audio asset: " + id);
     if (referencedAssets.size() != project.assets.size())
         return Result::fail("Unreferenced audio assets are not supported by this project version.");
     std::map<String, const StoredTrack*> graphTracks;
@@ -492,6 +549,49 @@ struct ReusedAsset {
             && file.getSize() == size && file.getLastModificationTime() == modified;
     }
 };
+
+// JUCE's SHA256 consumes 64-byte chunks. Buffer file reads and poll the
+// existing cancellation callback at bounded byte intervals, on the file worker.
+struct CheckedHashInput final : juce::InputStream {
+    juce::BufferedInputStream input;
+    const IOOptions& options;
+    juce::int64 consumed = 0, nextCheck = 0;
+    bool stopped = false;
+    CheckedHashInput(juce::InputStream& stream, const IOOptions& opts) : input(stream, 65536), options(opts) {}
+    juce::int64 getTotalLength() override { return input.getTotalLength(); }
+    juce::int64 getPosition() override { return input.getPosition(); }
+    bool setPosition(juce::int64 position) override { return input.setPosition(position); }
+    bool isExhausted() override { return stopped || input.isExhausted(); }
+    int read(void* destination, int bytes) override {
+        if (consumed >= nextCheck) {
+            nextCheck = consumed + 65536;
+            if (cancelled(options)) { stopped = true; return 0; }
+        }
+        const int amount = input.read(destination, bytes);
+        consumed += amount;
+        return amount;
+    }
+};
+
+Result verifyExpectedAsset(const File& file, const String& expected, const IOOptions& options)
+{
+    if (cancelled(options)) return cancellation();
+    const auto size = file.getSize();
+    const auto timestamp = file.getLastModificationTime();
+    if (size <= 0 || file.isSymbolicLink() || file.getParentDirectory().isSymbolicLink())
+        return Result::fail("A native sample archive is missing or linked.");
+    auto input = file.createInputStream();
+    if (!input || input->getTotalLength() != size) return Result::fail("Could not open native sample archive for verification.");
+    CheckedHashInput stream(*input, options);
+    const auto actual = juce::SHA256(stream, size).toHexString();
+    if (stream.stopped || cancelled(options)) return cancellation();
+    if (stream.consumed != size || input->getStatus().failed() || file.getSize() != size
+        || file.getLastModificationTime() != timestamp || file.isSymbolicLink() || file.getParentDirectory().isSymbolicLink())
+        return Result::fail("A native sample archive changed during verification.");
+    if (actual != expected.toLowerCase())
+        return Result::fail("A native sample changed since it was loaded. Reload the sample before saving.");
+    return Result::ok();
+}
 // The comparison is bounded and cancellable on the file worker. A Save As to
 // another bundle never sees these candidates, so it remains self-contained.
 Result canReuseAudio(const File& source, const File& archived, const IOOptions& options, bool& same)
@@ -701,7 +801,7 @@ Result parsePlugins(const var& values, const File& manifest, std::vector<StoredP
         plugin.uniqueId = static_cast<int>(uid); plugin.deprecatedUniqueId = static_cast<int>(oldUid);
         plugin.name = name.toString(); plugin.manufacturer = manufacturer.toString(); plugin.version = version.toString();
         plugin.enabled = static_cast<bool>(enabled); plugin.role = role.toString();
-        if ((plugin.format != "VST" && plugin.format != "VST3") || plugin.identifier.isEmpty()
+        if ((plugin.format != "VST" && plugin.format != "VST3" && plugin.format != "E-musician") || plugin.identifier.isEmpty()
             || plugin.identifier.length() > 4096 || plugin.name.length() > 512 || plugin.manufacturer.length() > 512
             || plugin.version.length() > 128 || (plugin.role != "instrument" && plugin.role != "effect"))
             return Result::fail("A plugin slot has an unsupported identity or role.");
@@ -738,6 +838,11 @@ Result serializePlugins(const std::vector<StoredPlugin>& plugins, const File& ro
 }
 } // namespace
 
+Result nativePluginAssetIds(const StoredPlugin& plugin, std::vector<String>& result)
+{
+    return nativeAssetIds(plugin, result);
+}
+
 Result validate(const StoredProject& project)
 {
     return validateProject(project, false, false);
@@ -749,6 +854,11 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
     progress(options, 0.0, "Validating project");
     if (auto result = validateLocation(target); result.failed()) return result;
     if (auto result = validateProject(project, false, true); result.failed()) return result;
+    for (const auto& [id, hash] : options.expectedAssetHashes) {
+        if (!validIdentifier(id) || hash.length() != 64 || !hash.containsOnly("0123456789abcdefABCDEF")
+            || std::none_of(project.assets.begin(), project.assets.end(), [&](const auto& asset) { return asset.id == id; }))
+            return Result::fail("Invalid or unknown expected native sample hash.");
+    }
 
     const bool hadTarget = target.existsAsFile();
     int legacySchema = 0;
@@ -922,6 +1032,12 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
             if (auto result = createLegacyBackup(target, previousBytes, legacySchema); result.failed()) return result;
     } else if (target.exists()) {
         return Result::fail("Another file appeared at the project path while saving.");
+    }
+    if (cancelled(options)) return cancellation();
+    for (const auto& asset : candidate.assets) {
+        const auto expected = options.expectedAssetHashes.find(asset.id);
+        if (expected != options.expectedAssetHashes.end())
+            if (auto result = verifyExpectedAsset(asset.source, expected->second, options); result.failed()) return result;
     }
     if (cancelled(options)) return cancellation();
     if (!temporary.overwriteTargetFileWithTemporary())

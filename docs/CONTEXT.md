@@ -1,3 +1,49 @@
+# 当前工作：音频分析功能方案（2026-11-05，尚未实施）
+
+用户要求保留当前版本，并先提出音源分离、分轨转 MIDI、和弦识别的模型/来源/部署方案，三者未来须同时支持手动和 Agent；更新固定功能清单也纳入后续实现。本轮只调研和规划，不安装模型、不修改程序/页面、不构建。完整选择、未决许可、统一异步任务/候选接受管线、部署目录和验收顺序见 [分析方案](review/2026-11-05-audio-analysis/PLAN.md)。
+
+0.8.1 的 EXE/PDB 和实际源码/文档已归档在 `E:/MusicAgent&DAW/releases/0.8.1-20261105/`，归档逐项核对 161 个源码 hash，原程序及入口保留。模型候选：HTDemucs 本机评测（预训练权重许可未明确，不能宣称已可分发）、Basic Pitch 0.4.0 ONNX、Chroma/模板/HMM 和弦基线；鼓转录另设 Provider，不让音高模型冒充鼓分类。RTX3050 4GB、驱动555.99已枚举，未验证推理运行时；环境/模型/缓存拟放 E 盘。
+
+下一步先锁候选模型及权重使用范围、隔离环境探针，再建设分析任务与四轨分离；部署就绪和效果质量分别验证。此处是提案状态，下面的 0.8.1 仍为当前可用版本。
+
+# 当前候选：0.8.1 矩形片段与图形装置控制（2026-11-05）
+
+用户最新要求是矩形 MIDI/clip 填满行、增强现有装置的旋钮/图示和接口。已实现七种装置的统一控件、Sampler/Rack AR 与 Gate/One-shot、EQ 每段六种形状，新增参数贯通宿主、保存、Agent 方案/回读/Undo；纯采样参数复用不可变 PCM。小窗口去掉重复标题，最小保留一条完整紧凑轨道。参考 Ableton/FabFilter 官方工作流，保留黑白等宽风格。
+
+Release 构建、最终 CTest 10/10、Agent Python 245、离线效果 11 / 采样器 12 / 模拟 Provider 经真实 DAW 11 项均通过。最终五条记录期间 161 个源码输入冻结，源码 `846b6b2c`、EXE `c0099db1`。早期失败、修改明细、依赖、截图、性能条件与限制均在 [本轮结果](review/2026-11-05-device-controls/RESULTS.md)；DEVLOG 只追加。保留已有工作树修改，未合并或推送 main。
+
+启动 `build/device-chain/bin/Release/E-musician.exe`，标题 0.8.1；本机新增明确入口 `E:/MusicAgent&DAW/Start E-musician 0.8.1.cmd`。原快捷入口和旧程序备份保留，避免误测旧版。下一步仅按 [人工检查](review/2026-11-05-device-controls/MANUAL-CHECK.md) 确认键鼠、DPI、听感及一次保存重开；不使用 computer-use，不重复要求已通过的旧版完整录音验收。
+
+尚未验证物理 ASIO、长期负载或真实模型自然语言成功率，本轮没有付费模型调用。Sampler/Rack 发布新 bank 仍停止旧 voices；完整 ADSR、循环/Warp、合成器、侧链/频谱等未新增。新增非旧默认参数保存为装置状态版本 2，旧版会拒绝；详见接口与 ADR。下方为历史候选及原始证据，不作为本版的新验收。
+
+# 历史候选：设备链、Agent 意图与装置增强（2026-11-02）
+
+已实现下栏真实有序设备链、原生面板恢复轮询、Agent 单参数操作与能力目录、压缩器 dry/wet 和真实 GR、原创 Delay/Reverb/Auto Filter。独立 Release 构建、最终 CTest 10/10、Python Agent 243 项、离线效果/采样/Agent 端到端通过；当前 OpenAI 低推理强度 API 健康探针成功。候选 `build/device-chain/bin/Release/E-musician.exe`；真实桌面、ASIO、Keyscape 声库问题与听感待验。此前规划的四类合成器和完整商业装置仍未实现；旧工程及旧程序保留。[本轮结果](review/2026-11-02-device-chain-agent/RESULTS.md) / [人工检查](review/2026-11-02-device-chain-agent/MANUAL-CHECK.md) / [Agent 排查与架构](review/2026-11-02-agent-diagnostics/README.md) / [合成器路线](review/2026-11-02-device-chain-agent/SYNTH-ROADMAP.md)。
+
+# 交付候选：试听、波形与原生效果器（2026-11-02）
+
+已接入基于已解码 PCM 的后台波形、独立试听、自有八段 EQ 和压缩器，以及轨道/主轨效果器 Agent 和受限的 Sampler/Rack 单动作 Agent。独立 Release 构建成功、最终 CTest 8/8、Agent Python 229 项、离线设备与 Agent 端到端均通过；真实桌面、M-Audio ASIO、MIDI 和听感待用户验收，不保证复杂工程实时性能。候选 `build/audition-effects/bin/Release/E-musician.exe`，原工程及旧版程序保留。[结果与限制](review/2026-11-02-audition-eq-compressor/RESULTS.md) / [人工短测](review/2026-11-02-audition-eq-compressor/MANUAL-CHECK.md) / [计划](review/2026-11-02-audition-eq-compressor/PLAN.md)。
+
+# 交付候选：钢琴卷帘与原生装置工作区（2026-11-02）
+
+用户已确认概念图方向。本轮实现同窗口 MIDI 编辑区展开/返回、主窗口原生采样器和鼓组 dock、后台真实波形及采样器起止手柄；保留既有音频/工程命令。最终 Release 构建、CTest 7/7、离线原生 DAW 端到端 11 项和 Agent Python 219 项通过；实体鼠标、MIDI、声卡与听感待人工验证，性能不作保证。[结果与限制](review/2026-11-02-device-redesign/RESULTS.md) / [人工短测](review/2026-11-02-device-redesign/MANUAL-CHECK.md) / [实施计划](review/2026-11-02-device-redesign/PLAN.md)。入口 `build/monitor-isolation/bin/Release/E-musician.exe --agent`；前版备份 `.cache/pre-ui-redesign/E-musician.exe`，旧快捷方式不变。
+
+# 历史设计提案：钢琴卷帘、采样器与鼓组（2026-11-02）
+
+用户反馈钢琴卷帘无法全屏、采样器和鼓组不够直观，要求先参考 Live 出设计图。已生成[三张概念图及说明](design/2026-11-02-device-concepts/README.md)：展开的钢琴卷帘、主窗口内以波形为中心的采样器、4×4 鼓垫与选中垫详情。该次仅生成概念图；其后用户已确认并进入本文顶部的实现。生成图中音高间距和时间单位不是精确规格。
+
+# 交付候选：采样器与鼓组 Rack（2026-11-02）
+
+首版已实现：单 WAV 采样器、MIDI 36–51 的 16 pad 鼓组、增益静音、统一命令和异步载入、资产打包、Undo/Redo、存档内容一致性校验。最终 Release 构建、CTest 7/7、真实离线 DAW 端到端 11 项与 Agent Python 219 项通过；实际键盘、声卡、UI 和听感待人工测试，不作性能保证。入口 `build/monitor-isolation/bin/Release/E-musician.exe --agent`；旧快捷方式未变，上一轮二进制备份 `.cache/monitor-candidate-backup/`。用户原工程和原有未提交修改保留。
+
+[本轮证据与限制](review/2026-11-02-sampler-drum-rack/RESULTS.md) / [人工短测](review/2026-11-02-sampler-drum-rack/MANUAL-CHECK.md) / [计划](review/2026-11-02-sampler-drum-rack/PLAN.md)。采样缺失降级、参数重解码、慢磁盘读取中断、复杂图重入及真实长期性能尚未解决；新装置工程旧版无法打开。历史长待机无声、慢插件及监听长音问题仍未结案。
+
+# 交付候选：监听、待机与插件稳定性（2026-10-30）
+
+逐轨监听与插件面板交互候选已实现；隔离 Release 编译通过，最终 CTest 5/5（[记录](builds/20261030T134639.403666Z-b726660a40.json)），Agent Python 219 项通过（[记录](builds/20261030T134824.855538Z-e74e3803f1.json)）。离线覆盖两轨 On/Off/Auto、Arm、新轨默认 off、输入重绑和插件面板交互；不等于实体 MIDI、ASIO、真实插件或长时间待机验收。候选程序 `build/monitor-isolation/bin/Release/E-musician.exe --agent`，不覆盖原快捷方式。
+
+**未解决**：长时间空闲后无声根因未确认；慢/挂死第三方插件仍可能阻塞消息线程；按住音符关闭监听可能残留长音，未使用影响片段播放的全轨 all-notes-off。详见[调查](review/2026-10-30-stability-and-devices/DIAGNOSIS.md)、[人工核对](review/2026-10-30-stability-and-devices/MANUAL-CHECK.md)、[原生装置路线](review/2026-10-30-stability-and-devices/PLAN.md)。用户负责真实 GUI、键盘和听感；不使用 computer-use。首次 CTest 4/5 的补丁白名单失败及后续修复均有原始记录。原有启动记录和工程保留。
+
 # 当前交付：DAW 0.8.0 / Agent 0.3 第二批（2026-10-29）
 
 工作树music-agent-kimi，分支feature/kimi-music-agent，基线55f06b7。本批实现和自动验收完成，真实桌面/中文IME/设备听感待人工短测；未自动合并main。入口 E:\\MusicAgent&DAW\\Start E-musician Agent.cmd，原生产物 build/agent-batch2/bin/Release/E-musician.exe；旧0.7的build/sidebar保留。本轮未关闭用户程序或操作其桌面。

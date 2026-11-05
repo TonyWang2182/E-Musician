@@ -395,7 +395,8 @@ def bootstrap(recorder: Recorder) -> None:
         raise ValueError("cmake/dependencies.json must contain a JSON object")
     repository, commit = dependency_spec(data, "tracktion")
     juce_repository, juce_commit = dependency_spec(data, "juce")
-    checkout = ROOT / "_deps" / "tracktion_engine"
+    # The engine is patched in an owned checkout, never the shared _deps tree.
+    checkout = ROOT / ".cache" / "monitor-engine"
     checkout.parent.mkdir(parents=True, exist_ok=True)
 
     if checkout.exists() and not checkout.is_dir():
@@ -428,7 +429,7 @@ def bootstrap(recorder: Recorder) -> None:
     verify_head(recorder, checkout / "modules" / "juce", juce_commit)
     recorder.execute([sys.executable, str(ROOT / "scripts" / "bootstrap_vst2.py")])
     recorder.execute([sys.executable, str(ROOT / "scripts" / "bootstrap_asio.py")])
-    recorder.execute([sys.executable, str(ROOT / "scripts" / "apply_engine_patches.py"), "apply"])
+    recorder.execute([sys.executable, str(ROOT / "scripts" / "apply_engine_patches.py"), "apply", "--engine-root", str(checkout)])
     print("Pinned Tracktion, JUCE and VST2 interface dependencies verified. No application build has run.", flush=True)
 
 

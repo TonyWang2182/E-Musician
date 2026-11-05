@@ -298,14 +298,14 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(state["phase"], "error")
         self.assertFalse(runtime.bridge.calls)
 
-    def test_four_call_budget_stops_read_loop(self):
-        runtime = self.make(*[tool("read_clip_notes", {"clip_id": "clip-1"}) for _ in range(4)])
+    def test_six_call_budget_stops_read_loop(self):
+        runtime = self.make(*[tool("read_clip_notes", {"clip_id": "clip-1"}) for _ in range(6)])
         runtime.plan_request("Repeated reads", scope="project")
         state = self.finish(runtime)
         self.assertEqual(state["phase"], "error")
-        self.assertIn("4", state["error"])
-        self.assertEqual(len(runtime.provider.requests), 4)
-        self.assertEqual(state["usage"], {"calls": 4, "prompt_tokens": 12, "completion_tokens": 8})
+        self.assertIn("6", state["error"])
+        self.assertEqual(len(runtime.provider.requests), 6)
+        self.assertEqual(state["usage"], {"calls": 6, "prompt_tokens": 18, "completion_tokens": 12})
         self.assertFalse(runtime.bridge.calls)
 
     def test_note_read_loop_retains_reasoning_and_actual_notes_remain_local(self):
@@ -478,7 +478,7 @@ class RuntimeTests(unittest.TestCase):
         with patch("music_agent.runtime.save_key") as save_key, patch("music_agent.runtime.save_config") as save_config:
             state=runtime.settings({"provider":"openai","model":"gpt-5-mini","api_key":"synthetic-test-only"})
         save_key.assert_called_once_with("synthetic-test-only",provider="openai")
-        save_config.assert_called_once_with("gpt-5-mini","https://api.openai.com/v1",provider="openai")
+        save_config.assert_called_once_with("gpt-5-mini","https://api.openai.com/v1",provider="openai",reasoning_effort="medium")
         self.assertEqual(state["provider"]["id"],"openai")
         self.assertEqual(state["phase"],"idle")
         self.assertIsNone(state["plan"])
@@ -493,6 +493,18 @@ class RuntimeTests(unittest.TestCase):
                 runtime.settings({"provider":"anthropic","api_key":"synthetic-test-only"})
         save_key.assert_not_called()
         save_config.assert_not_called()
+
+    def test_openai_reasoning_setting_validates_before_saving(self):
+        runtime=self.make(proposal(TEMPO))
+        with patch("music_agent.runtime.save_key") as save_key, patch("music_agent.runtime.save_config") as save_config:
+            state=runtime.settings({"provider":"openai","model":"gpt-5-mini","reasoning_effort":"high"})
+            save_config.assert_called_once_with("gpt-5-mini","https://api.openai.com/v1",provider="openai",reasoning_effort="high")
+            self.assertEqual(state["provider"]["reasoning_effort"],"high")
+            save_key.assert_not_called()
+        with patch("music_agent.runtime.save_key") as save_key, patch("music_agent.runtime.save_config") as save_config:
+            with self.assertRaises(ProviderError):
+                runtime.settings({"provider":"openai","reasoning_effort":"extreme","api_key":"synthetic-test-only"})
+            save_key.assert_not_called();save_config.assert_not_called()
 
     def test_opaque_provider_state_only_survives_inside_one_model_task(self):
         first=tool("read_clip_notes",{"clip_id":"clip-1"})

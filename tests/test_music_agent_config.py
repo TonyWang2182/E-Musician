@@ -50,6 +50,20 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(values["providers"]["kimi"]["model"], "kimi-k3.1-pro")
         save_config(**values["providers"]["kimi"], path=self.path, provider="kimi")
         self.assertEqual(load_config(self.path)["providers"]["openai"]["model"], "gpt-5-mini")
+    def test_openai_effort_migration_and_roundtrip(self):
+        old = {"schema_version":2,"active_provider":"openai","providers":{"openai":{"model":"gpt-5-mini","base_url":"https://api.openai.com/v1"}}}
+        self.write(json.dumps(old).encode())
+        self.assertEqual(active_config(load_config(self.path))["reasoning_effort"],"medium")
+        self.assertEqual(json.loads(self.path.read_text())["providers"]["openai"],old["providers"]["openai"])
+        save_config("gpt-5-mini","https://api.openai.com/v1",self.path,provider="openai",reasoning_effort="high")
+        self.assertEqual(active_config(load_config(self.path))["reasoning_effort"],"high")
+        save_config("gpt-5","https://api.openai.com/v1",self.path,provider="openai")
+        self.assertEqual(active_config(load_config(self.path))["reasoning_effort"],"high")
+        before=self.path.read_bytes()
+        for effort in ("max", "", 1, False, []):
+            with self.subTest(effort=effort), self.assertRaises((ProviderError, ConfigError)):
+                save_config("gpt-5-mini","https://api.openai.com/v1",self.path,provider="openai",reasoning_effort=effort)
+            self.assertEqual(self.path.read_bytes(),before)
     def test_corrupt_types_keys_and_values_fall_back(self):
         values = [b"{", b"[]", b"\xff", b'{"model":"a","model":"b","base_url":"x"}',
                   b'{"model":"kimi-k2.6"}', json.dumps({**KIMI, "api_key": "sk-synthetic-not-a-key"}).encode(),

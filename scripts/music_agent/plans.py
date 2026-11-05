@@ -19,6 +19,8 @@ class PlanError(ValueError):
 MAX_ACTIONS = 16
 MAX_NOTES = 2000
 MAX_SECONDS = 172800
+EFFECT_NAMES = {"eq8":"EQ Eight", "compressor":"Compressor", "delay":"Stereo Delay", "reverb":"Reverb", "auto_filter":"Auto Filter"}
+EQ_SHAPES = ["bell", "low_shelf", "high_shelf", "high_pass", "low_pass", "notch"]
 TRACK_FIELDS = ("name", "kind", "gain_db", "pan", "muted", "solo")
 CLIP_FIELDS = ("kind", "start_seconds", "duration_seconds", "start_beats", "length_beats", "note_count",
                "asset_id", "source_offset", "fade_in_seconds", "fade_out_seconds", "controller_count")
@@ -44,10 +46,49 @@ _NOTE = {"type": "object", "additionalProperties": False, "required": ["pitch", 
                         "velocity": {"type": "integer", "minimum": 1, "maximum": 127},
                         "channel": {"type": "integer", "minimum": 1, "maximum": 16}}}
 _SECONDS = {"type": "number", "minimum": 0, "maximum": MAX_SECONDS}
+_BAND = {"type":"object", "additionalProperties":False, "required":["enabled","frequency","gain_db","q"],
+         "properties":{"enabled":{"type":"boolean"}, "frequency":{"type":"number","minimum":20,"maximum":20000},
+                       "gain_db":{"type":"number","minimum":-24,"maximum":24}, "q":{"type":"number","minimum":0.1,"maximum":10},
+                       "shape":{"type":"string","enum":EQ_SHAPES}}}
+_EFFECT_STATE = {"oneOf":[
+    {"type":"object", "additionalProperties":False, "required":["version","type","bands"],
+     "properties":{"version":{"enum":[1,2]},"type":{"const":"eq8"},"bands":{"type":"array","minItems":8,"maxItems":8,"items":_BAND}}},
+    {"type":"object", "additionalProperties":False, "required":["version","type","threshold_db","ratio","attack_ms","release_ms","makeup_db"],
+     "properties":{"version":{"const":1},"type":{"const":"compressor"},
+       "threshold_db":{"type":"number","minimum":-60,"maximum":0}, "ratio":{"type":"number","minimum":1,"maximum":20},
+       "attack_ms":{"type":"number","minimum":0.1,"maximum":200}, "release_ms":{"type":"number","minimum":10,"maximum":2000},
+       "makeup_db":{"type":"number","minimum":-24,"maximum":24}, "dry_wet":{"type":"number","minimum":0,"maximum":1}}},
+    {"type":"object", "additionalProperties":False, "required":["version","type","delay_ms","feedback","dry_wet"],
+     "properties":{"version":{"const":1},"type":{"const":"delay"},
+       "delay_ms":{"type":"number","minimum":1,"maximum":2000},"feedback":{"type":"number","minimum":0,"maximum":0.95},
+       "dry_wet":{"type":"number","minimum":0,"maximum":1}}},
+    {"type":"object", "additionalProperties":False, "required":["version","type","decay_seconds","damping","dry_wet"],
+     "properties":{"version":{"const":1},"type":{"const":"reverb"},
+       "decay_seconds":{"type":"number","minimum":0.1,"maximum":8},"damping":{"type":"number","minimum":0,"maximum":1},
+       "dry_wet":{"type":"number","minimum":0,"maximum":1}}},
+    {"type":"object", "additionalProperties":False, "required":["version","type","mode","frequency_hz","resonance_q","lfo_enabled","lfo_hz","lfo_depth","dry_wet"],
+     "properties":{"version":{"const":1},"type":{"const":"auto_filter"},
+       "mode":{"type":"string","enum":["low_pass","high_pass"]},"frequency_hz":{"type":"number","minimum":20,"maximum":20000},
+       "resonance_q":{"type":"number","minimum":0.5,"maximum":10},"lfo_enabled":{"type":"boolean"},
+       "lfo_hz":{"type":"number","minimum":0.05,"maximum":20},"lfo_depth":{"type":"number","minimum":0,"maximum":1},
+       "dry_wet":{"type":"number","minimum":0,"maximum":1}}}]}
 _ACTIONS = [
     _shape("set_tempo", {"bpm": {"type": "number", "minimum": 20, "maximum": 300}}),
     _shape("rename_track", {"track_id": _ID, "name": _NAME}),
     _shape("create_track", {"kind": {"enum": ["audio", "instrument", "bus"]}, "name": _NAME, "as": _ALIAS}, ("as",)),
+    _shape("add_native_effect", {"track_id":_ID, "effect_type":{"enum":["eq8","compressor","delay","reverb","auto_filter"]}, "as":_ALIAS}, ("as",)),
+    _shape("set_native_effect", {"track_id":_ID, "device_id":_ID, "state":_EFFECT_STATE}),
+    _shape("set_native_effect_parameter", {"track_id":_ID, "device_id":_ID,
+           "parameter":{"enum":["frequency","gain_db","q","enabled","shape","threshold_db","ratio","attack_ms","release_ms","makeup_db","dry_wet","delay_ms","feedback","decay_seconds","damping","mode","frequency_hz","resonance_q","lfo_enabled","lfo_hz","lfo_depth"]},
+           "value":{"oneOf":[{"type":"number"},{"type":"boolean"},{"type":"string","enum":EQ_SHAPES}]},
+           "mode":{"enum":["absolute","delta"]},
+           "band":{"type":"integer","minimum":1,"maximum":8}}, ("mode","band")),
+    _shape("set_native_pad", {"track_id":_ID,"pad":{"type":"integer","minimum":0,"maximum":15},
+           "gain_db":{"type":"number","minimum":-60,"maximum":6},"muted":{"type":"boolean"},
+           "attack_ms":{"type":"number","minimum":0.1,"maximum":2000},
+           "release_ms":{"type":"number","minimum":1,"maximum":5000},"one_shot":{"type":"boolean"}}, ("gain_db","muted","attack_ms","release_ms","one_shot")),
+    _shape("set_native_sampler", {"track_id":_ID,"root_note":{"type":"integer","minimum":0,"maximum":127},
+           "start":{"type":"number","minimum":0,"maximum":1},"end":{"type":"number","minimum":0,"maximum":1}}),
     _shape("set_track_gain", {"track_id": _ID, "gain_db": {"type": "number", "minimum": -60, "maximum": 6}}),
     _shape("set_track_pan", {"track_id": _ID, "pan": {"type": "number", "minimum": -1, "maximum": 1}}),
     _shape("set_track_muted", {"track_id": _ID, "muted": {"type": "boolean"}}),
@@ -67,15 +108,96 @@ _ACTIONS = [
     _shape("set_note_velocity", {**_NOTE_SCOPE, "velocity": {"type": "integer", "minimum": 1, "maximum": 127}}, ("note_ids",)),
 ]
 NOTE_ACTIONS = {"add_notes", "delete_notes", "set_note_length", "move_notes", "transpose_notes", "quantize_notes", "set_note_velocity"}
-CREATIONS = {"create_track", "create_midi_clip", "duplicate_clip"}
+CREATIONS = {"create_track", "create_midi_clip", "duplicate_clip", "add_native_effect"}
 PLAN_TOOL = {"type": "function", "function": {"name": "propose_plan",
-    "description": "Propose one atomic DAW edit batch for user review, NEVER execute. Use exact existing IDs or @alias declared with as on an EARLIER create_track/create_midi_clip/duplicate_clip action. Alias names match [A-Za-z][A-Za-z0-9_-]{0,39}; aliases cannot be reused or referenced forward. Chained creation and explicit MIDI notes are supported; do not invent templates. Duplicate copies one clip immediately after itself, including controllers, and assigns fresh note IDs. trim_clip only shortens within the current clip; MIDI clips containing controllers are not supported for trim in this batch. Beat positions use quarter notes; a bar = numerator * 4 / denominator beats. GUI scope is enforced locally: selected notes never authorize whole-clip changes or unrelated additions; cross-track moves require an authorized destination. New notes require explicit pitch/start/length/velocity/channel. Omit note_ids for all authorized notes of a new clip. Quantization changes starts only and rejects overflow. Do not invent tools or claim you heard audio.",
+    "description": "Propose one atomic DAW edit batch for user review, NEVER execute. Use exact existing IDs or @alias declared with as on an EARLIER create_track/create_midi_clip/duplicate_clip/add_native_effect. Alias names match [A-Za-z][A-Za-z0-9_-]{0,39}; aliases cannot be reused or referenced forward. EQ8 and compressor state must be complete, retain unchanged parameters and use read_native_effect first for existing devices; to create use add_native_effect then set_native_effect with its @alias. Sampler/Rack edits are not available. Chained creation and explicit MIDI notes are supported; do not invent templates. Duplicate copies one clip immediately after itself, including controllers, and assigns fresh note IDs. trim_clip only shortens within the current clip; MIDI clips containing controllers are not supported for trim in this batch. Beat positions use quarter notes; a bar = numerator * 4 / denominator beats. GUI scope is enforced locally: selected notes never authorize whole-clip changes or unrelated additions; cross-track moves require an authorized destination. New notes require explicit pitch/start/length/velocity/channel. Omit note_ids for all authorized notes of a new clip. Quantization changes starts only and rejects overflow. Do not invent tools or claim you heard audio.",
     "parameters": {"type": "object", "additionalProperties": False, "required": ["summary", "actions"],
                    "properties": {"summary": {"type": "string", "minLength": 1, "maxLength": 1000},
                                   "actions": {"type": "array", "minItems": 1, "maxItems": MAX_ACTIONS,
                                               "items": {"oneOf": _ACTIONS}}}}}}
 
 _SCHEMAS = {shape["properties"]["type"]["const"]: shape for shape in _ACTIONS}
+PLAN_TOOL["function"]["description"] = PLAN_TOOL["function"]["description"].replace(
+    "Sampler/Rack edits are not available.",
+    "Sampler/Rack parameter edits require project scope and exactly one set_native_pad or set_native_sampler action per proposal; only already-loaded samples are eligible. No file paths or sample loading.")
+PLAN_TOOL["function"]["description"] += " Native EQ/Compressor on the master bus use track_id='master'; this requires project scope."
+PLAN_TOOL["function"]["description"] += (" For one effect setting prefer set_native_effect_parameter; the host fills all other values from the authoritative snapshot. "
+    "EQ needs band 1 through 8; compressor must omit band. mode absolute sets the stated value; delta adds the stated amount to the current value. "
+    "For enabled use a boolean in absolute mode. For a newly added effect refer to its @alias. Multiple parameter actions are allowed in one batch.")
+PLAN_TOOL["function"]["description"] += " Stereo Delay uses effect_type='delay', parameters delay_ms (milliseconds), feedback (0 to 0.95) and dry_wet (0 to 1)."
+PLAN_TOOL["function"]["description"] += " Reverb uses effect_type='reverb', parameters decay_seconds, damping (0 to 1), and dry_wet (0 to 1)."
+PLAN_TOOL["function"]["description"] += " Auto Filter uses effect_type='auto_filter'; mode is low_pass or high_pass, lfo_enabled is boolean, frequency_hz/resonance_q/lfo_hz/lfo_depth/dry_wet are numeric. Mode and lfo_enabled require absolute edits."
+PLAN_TOOL["function"]["description"] += " EQ shape is per-band: bell, low_shelf, high_shelf, high_pass, low_pass or notch (absolute only). High/low pass are 12 dB/octave; gain_db is inactive for pass and notch shapes. Sampler/Rack set_native_pad accepts gain_db, muted, attack_ms (0.1..2000), release_ms (1..5000), one_shot (boolean); supply at least one setting, omitted settings preserve the read current values. False one_shot is gate/release on note-off; true plays through note-off. No decay/sustain/loop/slicing controls."
+
+def _default_effect(kind):
+    if kind == "eq8":
+        return {"version":1,"type":"eq8","bands":[{"enabled":True,"frequency":f,"gain_db":0.0,"q":0.7071,
+                 "shape":"low_shelf" if i == 0 else "high_shelf" if i == 7 else "bell"}
+                for i,f in enumerate((60,120,250,500,1000,2500,6000,12000))]}
+    if kind == "compressor":
+        return {"version":1,"type":"compressor","threshold_db":-18.0,"ratio":4.0,"attack_ms":10.0,"release_ms":100.0,"makeup_db":0.0,"dry_wet":1.0}
+    if kind == "delay":
+        return {"version":1,"type":"delay","delay_ms":350.0,"feedback":0.35,"dry_wet":0.35}
+    if kind == "reverb":
+        return {"version":1,"type":"reverb","decay_seconds":1.8,"damping":0.35,"dry_wet":0.25}
+    if kind == "auto_filter":
+        return {"version":1,"type":"auto_filter","mode":"low_pass","frequency_hz":1000.0,"resonance_q":0.7071,
+                "lfo_enabled":False,"lfo_hz":1.0,"lfo_depth":0.0,"dry_wet":1.0}
+    raise PlanError("不支持的原生效果器类型。")
+
+def validate_effect_state(value):
+    if not isinstance(value, dict) or type(value.get("version")) is not int or value.get("version") not in (1,2) or (value.get("version")==2 and value.get("type")!="eq8"):
+        raise PlanError("效果器状态版本无效。")
+    kind = value.get("type")
+    if kind == "eq8":
+        if set(value) != {"version","type","bands"} or not isinstance(value["bands"], list) or len(value["bands"]) != 8:
+            raise PlanError("EQ Eight 必须包含完整的八段状态。")
+        bands=[]
+        for index,band in enumerate(value["bands"]):
+            if not isinstance(band, dict) or not {"enabled","frequency","gain_db","q"} <= set(band) or not set(band) <= {"enabled","frequency","gain_db","q","shape"} or type(band["enabled"]) is not bool:
+                raise PlanError("均衡器频段字段无效。")
+            shape = band.get("shape", "low_shelf" if index == 0 else "high_shelf" if index == 7 else "bell")
+            if not isinstance(shape,str) or shape not in EQ_SHAPES: raise PlanError("均衡器滤波形状无效。")
+            bands.append({"enabled":band["enabled"], "frequency":_number(band["frequency"],"frequency",20,20000),
+                          "gain_db":_number(band["gain_db"],"gain_db",-24,24), "q":_number(band["q"],"q",0.1,10),"shape":shape})
+        needs_shapes=any(band["shape"] != ("low_shelf" if i==0 else "high_shelf" if i==7 else "bell") for i,band in enumerate(bands))
+        return {"version":2 if needs_shapes else 1,"type":kind,"bands":bands}
+    if kind == "compressor":
+        ranges={"threshold_db":(-60,0),"ratio":(1,20),"attack_ms":(0.1,200),"release_ms":(10,2000),"makeup_db":(-24,24)}
+        if not {"version","type",*ranges} <= set(value) or not set(value) <= {"version","type",*ranges,"dry_wet"}:
+            raise PlanError("压缩器必须包含完整参数。")
+        return {"version":1,"type":kind,**{key:_number(value[key],key,*limits) for key,limits in ranges.items()},
+                "dry_wet":_number(value.get("dry_wet",1),"dry_wet",0,1)}
+    if kind == "delay":
+        ranges = {"delay_ms":(1,2000), "feedback":(0,0.95), "dry_wet":(0,1)}
+        if set(value) != {"version","type",*ranges}:
+            raise PlanError("延迟器必须包含完整参数。")
+        return {"version":1,"type":kind,**{key:_number(value[key],key,*limits) for key,limits in ranges.items()}}
+    if kind == "reverb":
+        ranges = {"decay_seconds":(0.1,8), "damping":(0,1), "dry_wet":(0,1)}
+        if set(value) != {"version","type",*ranges}:
+            raise PlanError("混响器必须包含完整参数。")
+        return {"version":1,"type":kind,**{key:_number(value[key],key,*limits) for key,limits in ranges.items()}}
+    if kind == "auto_filter":
+        ranges={"frequency_hz":(20,20000),"resonance_q":(0.5,10),"lfo_hz":(0.05,20),"lfo_depth":(0,1),"dry_wet":(0,1)}
+        if set(value) != {"version","type","mode","lfo_enabled",*ranges}:
+            raise PlanError("滤波器必须包含完整参数。")
+        if not isinstance(value["mode"],str) or value["mode"] not in {"low_pass","high_pass"} or type(value["lfo_enabled"]) is not bool:
+            raise PlanError("滤波器模式或 LFO 开关无效。")
+        return {"version":1,"type":kind,"mode":value["mode"],"lfo_enabled":value["lfo_enabled"],
+                **{key:_number(value[key],key,*limits) for key,limits in ranges.items()}}
+    raise PlanError("不支持的原生效果器类型。")
+
+def required_effect_ids(payload):
+    return sorted({(a["track_id"],a["device_id"]) for a in payload.get("actions",[])
+                   if isinstance(a,dict) and a.get("type") in {"set_native_effect","set_native_effect_parameter"}
+                   and isinstance(a.get("track_id"),str) and isinstance(a.get("device_id"),str)
+                   and not a["device_id"].startswith("@")})
+
+def required_instrument_track_ids(payload):
+    return sorted({a["track_id"] for a in payload.get("actions",[])
+                   if isinstance(a,dict) and a.get("type") in {"set_native_pad","set_native_sampler"}
+                   and isinstance(a.get("track_id"),str)})
 
 
 def _text(value: object, field: str, maximum: int = 200) -> str:
@@ -224,6 +346,9 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
     remain stable when the same frozen proposal is scoped and compiled again.
     """
     prepared = _prepare(payload)
+    native_async = any(a["type"] in {"set_native_pad","set_native_sampler"} for a in prepared["actions"])
+    if native_async and len(prepared["actions"]) != 1:
+        raise PlanError("采样器/鼓组参数使用单独异步方案，不能与其他操作混合。")
     if not isinstance(context, dict) or not isinstance(context.get("project_id"), str) or type(context.get("revision")) is not int or context["revision"] < 0:
         raise PlanError("缺少当前工程身份和版本。")
     if context.get("recording") or context.get("recording_finalizing") or context.get("counting_in"):
@@ -232,7 +357,20 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
     state.setdefault("clip_notes", {})
     tracks, clips = _maps(state)
     original_tracks, original_clips = _maps(context)
-    original_ids = set(tracks) | set(clips)
+    if "master" in tracks: raise PlanError("轨道身份与主轨保留身份冲突。")
+    master_track = {"id":"master", "name":"主轨", "plugins":state.setdefault("master_plugins",[])}
+    if not isinstance(master_track["plugins"],list): raise PlanError("主轨装置快照无效。")
+    effects = {}
+    for t in [*tracks.values(), master_track]:
+        for p in t.get("plugins", []):
+            if not isinstance(p,dict) or not isinstance(p.get("id"),str) or p["id"] in effects:
+                raise PlanError("装置身份无效或重复。")
+            effects[p["id"]] = (t,p)
+    original_ids = set(tracks) | set(clips) | set(effects)
+    state.setdefault("native_effects", {})
+    touched_effects = set()
+    touched_instruments = set()
+    state.setdefault("native_instruments", {})
     if any(i.startswith("@") for i in original_ids) or len(tracks) > 64:
         raise PlanError("工程对象身份或轨道数无效。")
     commands, changes, aliases = [], [], {}
@@ -275,7 +413,12 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
         if authorizer:
             authorizer(action, state)
         args = {k: deepcopy(v) for k, v in action.items() if k not in ("type", "as")}
-        track = existing(args["track_id"], tracks, "track_id") if "track_id" in args else None
+        track = None
+        if "track_id" in args:
+            if args["track_id"] == "master" and kind in {"add_native_effect","set_native_effect","set_native_effect_parameter"}:
+                track = master_track
+            else:
+                track = existing(args["track_id"], tracks, "track_id")
         clip = None
         if "clip_id" in args:
             track, clip = existing(args["clip_id"], clips, "clip_id")
@@ -311,6 +454,108 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
             state["tracks"].append(new)
             aliases[alias] = "track"
             description = f"新建 {args['kind']} 轨道「{args['name']}」（不自动加载插件）"
+        elif kind == "add_native_effect":
+            effect_type = args.pop("effect_type")
+            effect_state = _default_effect(effect_type)
+            plugin = {"id":new_id,"name":EFFECT_NAMES[effect_type],
+                      "format":"E-musician","is_instrument":False}
+            track.setdefault("plugins", []).append(plugin)
+            effects[new_id] = (track,plugin)
+            state["native_effects"][new_id] = effect_state
+            touched_effects.add(new_id)
+            aliases[alias] = "effect"
+            args["type"] = effect_type
+            description = f"轨道「{track['name']}」添加 {plugin['name']}（默认参数）"
+        elif kind in {"set_native_effect", "set_native_effect_parameter"}:
+            effect_track, plugin = existing(args["device_id"], effects, "device_id")
+            if effect_track["id"] != track["id"] or plugin.get("format") != "E-musician" or plugin.get("is_instrument") is not False:
+                raise PlanError("装置不属于指定轨道或不是可操作的原生效果器。")
+            old = validate_effect_state(state["native_effects"].get(args["device_id"]))
+            if kind == "set_native_effect_parameter":
+                parameter = args["parameter"]
+                mode = args.get("mode", "absolute")
+                if not isinstance(parameter, str) or not isinstance(mode, str) or mode not in {"absolute", "delta"}:
+                    raise PlanError("参数修改模式必须是 absolute 或 delta。")
+                wanted = deepcopy(old)
+                if old["type"] == "eq8":
+                    if parameter not in {"frequency", "gain_db", "q", "enabled", "shape"}:
+                        raise PlanError("该参数不属于 EQ Eight。")
+                    band = _number(args.get("band"), "band", 1, 8, True)
+                    target = wanted["bands"][band - 1]
+                else:
+                    allowed = {"compressor":{"threshold_db", "ratio", "attack_ms", "release_ms", "makeup_db", "dry_wet"},
+                               "delay":{"delay_ms","feedback","dry_wet"}, "reverb":{"decay_seconds","damping","dry_wet"},
+                               "auto_filter":{"mode","frequency_hz","resonance_q","lfo_enabled","lfo_hz","lfo_depth","dry_wet"}}[old["type"]]
+                    if "band" in args or parameter not in allowed:
+                        raise PlanError("该参数不属于当前效果器，或不支持频段编号。")
+                    target = wanted
+                value = args["value"]
+                if parameter in {"enabled","lfo_enabled"}:
+                    if type(value) is not bool or mode != "absolute":
+                        raise PlanError("频段开关必须使用 absolute 和布尔值。")
+                    target[parameter] = value
+                elif parameter == "shape":
+                    if not isinstance(value,str) or value not in EQ_SHAPES or mode != "absolute":
+                        raise PlanError("EQ 滤波形状必须使用 absolute 和支持的形状。")
+                    target[parameter] = value
+                elif parameter == "mode":
+                    if not isinstance(value,str) or value not in {"low_pass","high_pass"} or mode != "absolute":
+                        raise PlanError("滤波器模式必须使用 absolute 和 low_pass/high_pass。")
+                    target[parameter] = value
+                else:
+                    if type(value) not in (int, float) or not math.isfinite(value):
+                        raise PlanError("效果器参数必须是有限数字。")
+                    target[parameter] = target[parameter] + value if mode == "delta" else value
+                wanted = validate_effect_state(wanted)
+                args = {"track_id": args["track_id"], "device_id": args["device_id"], "state": wanted}
+                command = {"command": "set_native_effect", "args": args}
+            else:
+                wanted = validate_effect_state(args["state"])
+            expected_name = EFFECT_NAMES[wanted["type"]]
+            if plugin.get("name") != expected_name:
+                raise PlanError("效果器类型与目标装置不匹配。")
+            if old["type"] != wanted["type"]:
+                raise PlanError("效果器类型不能改变。")
+            changed = old != wanted
+            args["state"] = state["native_effects"][args["device_id"]] = wanted
+            touched_effects.add(args["device_id"])
+            description = f"轨道「{track['name']}」设置 {expected_name} 参数：{old} → {wanted}"
+        elif kind in {"set_native_pad", "set_native_sampler"}:
+            inst = state["native_instruments"].get(track["id"])
+            if not isinstance(inst,dict) or inst.get("type") not in {"sampler","drum_rack"} or inst.get("load_status") != "ready":
+                raise PlanError("需要读取准备完成的原生采样器或鼓组。")
+            if kind == "set_native_sampler":
+                if inst["type"] != "sampler": raise PlanError("该装置不是采样器。")
+                root = _number(args["root_note"],"root_note",0,127,True)
+                start = _number(args["start"],"start",0,1); end = _number(args["end"],"end",0,1)
+                if start >= end: raise PlanError("采样起点必须小于终点。")
+                pad = 0; old = {k:inst[k] for k in ("root_note","start","end")}
+                inst.update(root_note=root,start=start,end=end); args.update(root_note=root,start=start,end=end)
+                changed = old != {k:inst[k] for k in old}
+                description = f"轨道「{track['name']}」采样器 root/start/end：{old} → {root}/{start:g}/{end:g}"
+            else:
+                pad = _number(args["pad"],"pad",0,15,True)
+                if inst["type"] == "sampler" and pad != 0: raise PlanError("采样器只有一个采样位。")
+                pads=inst.get("pads",[])
+                item=next((p for p in pads if p.get("index") == pad),None)
+                if item is None: raise PlanError("鼓垫不存在。")
+                if not set(args) & {"gain_db","muted","attack_ms","release_ms","one_shot"}: raise PlanError("请至少指定一个采样参数。")
+                gain = _number(args.get("gain_db",item.get("gain_db")),"gain_db",-60,6)
+                muted = args.get("muted",item.get("muted"))
+                if type(muted) is not bool: raise PlanError("muted 必须是布尔值。")
+                old={key:item.get(key,default) for key,default in (("gain_db",0.0),("muted",False),("attack_ms",3.0),("release_ms",30.0),("one_shot",inst["type"]=="drum_rack"))}
+                desired={**old,"gain_db":gain,"muted":muted}
+                for name,low,high in (("attack_ms",0.1,2000),("release_ms",1,5000)):
+                    if name in args: desired[name]=_number(args[name],name,low,high)
+                if "one_shot" in args:
+                    if type(args["one_shot"]) is not bool: raise PlanError("one_shot 必须是布尔值。")
+                    desired["one_shot"]=args["one_shot"]
+                item.update(desired); args.update(pad=pad,**desired)
+                changed=old != desired
+                description=f"轨道「{track['name']}」采样位 {pad} 参数：{old} → {desired}"
+            if not any(p.get("index") == pad and p.get("sample_sha256") for p in inst.get("pads",[])):
+                raise PlanError("只能修改已载入、准备完成的采样。")
+            touched_instruments.add(track["id"])
         elif kind.startswith("set_track_") or kind == "rename_track":
             field = {"rename_track": "name", "set_track_gain": "gain_db", "set_track_pan": "pan",
                      "set_track_muted": "muted", "set_track_solo": "solo"}[kind]
@@ -503,7 +748,7 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
     # Native result references only bind objects that survive the atomic batch.
     # Reject an otherwise effective proposal before publishing an unusable plan.
     for alias, object_kind in aliases.items():
-        if "@" + alias not in (tracks if object_kind == "track" else clips):
+        if "@" + alias not in ({"track":tracks, "clip":clips, "effect":effects}[object_kind]):
             raise PlanError("方案中新建或复制的对象在同一批次被删除；请移除这组相互抵消的操作。")
     effective = set(tracks) != set(original_tracks) or set(clips) != set(original_clips) or not _same(state["bpm"], context["bpm"])
     effective |= any(not _same(track.get(field), original_tracks[tid].get(field), field)
@@ -512,6 +757,8 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
                      any(not _same(pair[1].get(field), original_clips[cid][1].get(field), field) for field in CLIP_FIELDS)
                      for cid, pair in clips.items() if cid in original_clips)
     effective |= any(state["clip_notes"].get(cid) != context.get("clip_notes", {}).get(cid) for cid in touched_notes)
+    effective |= any(did not in context.get("native_effects", {}) or state["native_effects"][did] != context["native_effects"][did] for did in touched_effects)
+    effective |= any(state["native_instruments"][tid] != context.get("native_instruments",{}).get(tid) for tid in touched_instruments)
     if not allow_noop and (not commands or not effective):
         raise PlanError("所有值已符合要求，没有需要应用的修改。")
     checks = [{"kind": "bpm", "value": state["bpm"]}, {"kind": "track_count", "value": len(tracks)}]
@@ -525,10 +772,14 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
     readback_notes = sorted((touched_notes | preserved_notes) & set(clips))
     for cid in readback_notes:
         checks.append({"kind": "notes", "id": cid, "value": state["clip_notes"][cid]})
+    for did in sorted(touched_effects):
+        checks.append({"kind":"effect", "id":did, "track_id":effects[did][0]["id"], "value":state["native_effects"][did]})
+    for tid in sorted(touched_instruments):
+        checks.append({"kind":"native_instrument", "id":tid, "value":state["native_instruments"][tid]})
     return {"summary": prepared["summary"], "commands": commands, "changes": changes, "checks": checks,
             "actions": prepared["actions"], "aliases": aliases, "baseline_ids": sorted(original_ids),
             "project_id": context["project_id"], "revision": context["revision"], "note_clip_ids": readback_notes,
-            "note_previews": note_previews}
+            "note_previews": note_previews, "execution_kind":"native_async" if native_async else "batch"}
 
 
 def resolve_plan_refs(plan: dict, refs: object) -> dict:
@@ -578,6 +829,14 @@ def verify_plan(plan: dict, before_context: dict, after_context: dict) -> list[s
     errors = []
     def matches(actual, expected):
         return all(key in actual and _same(actual[key], value, key) for key, value in expected.items())
+    def effect_equal(a,b):
+        if isinstance(a,dict) and isinstance(b,dict):
+            return a.keys() == b.keys() and all(effect_equal(a[k],b[k]) for k in a)
+        if isinstance(a,list) and isinstance(b,list):
+            return len(a) == len(b) and all(effect_equal(x,y) for x,y in zip(a,b))
+        if type(a) in (int,float) and type(b) in (int,float):
+            return math.isfinite(a) and math.isfinite(b) and math.isclose(a,b,rel_tol=2e-7,abs_tol=2e-5)
+        return _same(a,b,"gain_db")
     for check in plan.get("checks", []):
         kind = check["kind"]
         if kind == "bpm" and not _same(after_context.get("bpm"), check["value"]):
@@ -599,4 +858,21 @@ def verify_plan(plan: dict, before_context: dict, after_context: dict) -> list[s
             expected = {n["id"]: n for n in check["value"]}
             if not isinstance(notes, list) or any(not isinstance(n, dict) or not isinstance(n.get("id"), str) for n in notes) or len(notes) != len(expected) or {n.get("id") for n in notes} != set(expected) or any(not matches(n, expected.get(n.get("id"), {})) for n in notes):
                 errors.append(f"片段 {check['id']} 的音符回读与方案不一致。")
+        elif kind == "effect":
+            track = tracks.get(check["track_id"])
+            plugins = after_context.get("master_plugins",[]) if check["track_id"] == "master" else track.get("plugins", []) if track else []
+            actual = after_context.get("native_effects", {}).get(check["id"])
+            try:
+                actual = validate_effect_state(actual)
+                expected = validate_effect_state(check["value"])
+                ok = effect_equal(actual, expected)
+            except PlanError:
+                ok = False
+            if not any(p.get("id") == check["id"] and p.get("format") == "E-musician" and p.get("is_instrument") is False
+                       and p.get("name") == EFFECT_NAMES.get(check["value"]["type"]) for p in plugins) or not ok:
+                errors.append(f"装置 {check['id']} 的类型或参数回读与方案不一致。")
+        elif kind == "native_instrument":
+            actual = after_context.get("native_instruments", {}).get(check["id"])
+            if not effect_equal(actual,check["value"]):
+                errors.append(f"轨道 {check['id']} 的采样器/鼓组状态回读与方案不一致。")
     return errors

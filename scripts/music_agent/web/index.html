@@ -28,7 +28,9 @@
         <div class="settings-grid">
           <label>模型服务<select id="provider" name="provider"><option value="kimi">Kimi</option></select></label>
           <label>模型<input id="model" name="model" type="text" list="model-options" maxlength="100" spellcheck="false" autocomplete="off"><datalist id="model-options"></datalist></label>
+          <label id="reasoning-setting" hidden>推理强度<select id="reasoning-effort" name="reasoning_effort"><option value="low">低 · 更快</option><option value="medium">中 · 默认</option><option value="high">高 · 适合复杂任务</option></select></label>
         </div>
+        <p id="reasoning-hint" class="field-hint" hidden>仅对已支持的 OpenAI 推理模型生效；更高强度可能增加等待时间与 token 费用。</p>
         <p id="provider-status" class="field-hint"></p>
         <details id="connection-settings"><summary>连接与密钥</summary>
           <label>服务地址<input id="base-url" name="base_url" type="url" maxlength="200" spellcheck="false" autocomplete="off"></label>
