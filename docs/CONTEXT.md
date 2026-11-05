@@ -209,3 +209,8 @@ VS Code已打开E-musician，main跟踪origin/main，F5/构建任务走dev.py。
 本轮实现、指定验证、文件保护及源码发布已完成。后续优先实体MIDI演奏/听感与可见GUI交互验收，再按实际反馈扩展负载和插件矩阵；Agent业务开发仍留后续。不能把现有测试范围外能力写成已验收。
 
 不含全部插件保证、运行期插件沙箱、32位桥接、侧链/任意插件多输出、comping、TempoMap、warp、Touch/Latch/Write或LLM Agent。长跑测回调均值/最大值、xrun、CPU/内存、消息定时器/控制命令延迟；回调P99.9、物理输入到绘制未采集，通过也不等于B01全部原指标完成。
+
+
+## 0.11.0 交付同步补记（2026-11-06）
+
+实现提交 `1fb0bba` 已推送 `feature/workspace-brand-v0110`，main 未变；本地保留包经221输入和产物hash复核，见 [PUBLISH](review/2026-11-06-workspace-brand/PUBLISH.json)。

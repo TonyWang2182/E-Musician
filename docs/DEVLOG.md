@@ -7479,3 +7479,7 @@ print('PASS: unchanged baseline, 2 exact new cache files, both absent preference
 最终Release记录20261105T184209.597427Z-cf39e18746；221输入SHA c704e931d08b7f364f2a49271bb021956216bcdfa1161021bba7a215a674ae63；EXE a69f82ecaf144a7021aa1313ad23de681b407f39c93b99b06b1069d6b0503807。CTest11/11、Agent300、真实离线DAW颜色闭环8项、实际WebView/helper、双语三尺寸组件检查通过；新引擎139断言。旧0.10.0 EXE SHA 474fc082…保持不变。第一次编译失败与所有修复/中间构建记录保留；并行只读审查修复了控件越界、无效拖放、未保存打开保护及目录刷新等问题。
 
 本轮没有computer-use、付费语言模型或物理声卡验收；CPU绘制与DSP离线微测不代表真实ASIO复杂工程性能。结果/设计/架构/人工步骤见docs/review/2026-11-06-workspace-brand。新增独立0.11启动器和VS Code工作区，旧入口保留，main不自动合并。用户原有DEVLOG启动条目与两份记录保持原样。
+
+## 2026-11-06 — 0.11.0 代码同步与本地保留
+
+实现提交 1fb0bbaa48f98989bf18394e6ea08a22651ba0eb 已推送 feature/workspace-brand-v0110，远端回读一致；main 保持 d4ed6c898af1303918e38b6325a915befabbb575。本地 releases/0.11.0-20261106-workspace-brand 保留 EXE/PDB、源码文档ZIP、启动器和VS Code工作区；221输入逐一匹配最终测试指纹。归档不是独立安装器，模型和Worker运行库仍为本机依赖；见本轮 PUBLISH.json。用户既有两个启动记录及 DEVLOG 条目未改、未纳入本轮提交。
