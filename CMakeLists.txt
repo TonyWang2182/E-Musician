@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(EMusician VERSION 0.8.1 LANGUAGES C CXX)
+project(EMusician VERSION 0.9.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -115,7 +115,7 @@ if(EMUSICIAN_BUILD_DESKTOP)
             APPEND DEPENDS "${EMUSICIAN_INFO_FILE}")
     endif()
     target_sources(EMusician PRIVATE apps/desktop/Main.cpp apps/desktop/EngineSession.cpp apps/desktop/NativeDevicePanel.cpp apps/desktop/SampleWaveform.cpp apps/desktop/NativeInstrument.cpp apps/desktop/NativeLoadQueue.cpp core/NativeSampler.cpp apps/desktop/NativeEffects.cpp apps/desktop/NativeEffectsPanel.cpp core/NativeEffects.cpp core/NativeReverb.cpp core/NativeAutoFilter.cpp
-        apps/desktop/MainComponent.cpp apps/desktop/AgentSidebar.cpp apps/desktop/ArrangementView.cpp
+        apps/desktop/AnalysisPreview.cpp apps/desktop/AnalysisPanel.cpp apps/desktop/MainComponent.cpp apps/desktop/AgentSidebar.cpp apps/desktop/ArrangementView.cpp
         apps/desktop/ProjectStorage.cpp apps/desktop/AudioSource.cpp apps/desktop/PluginHost.cpp
         apps/desktop/PianoRoll.cpp apps/desktop/ControlServer.cpp apps/desktop/SelectedTrackPanel.cpp tests/Vst3InactiveBusSmoke.cpp)
     # Keep the application-reported version and window title tied to the build version.

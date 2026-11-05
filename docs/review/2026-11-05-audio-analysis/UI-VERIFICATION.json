@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-11-05T07:09:35.915227+00:00",
+  "status": "headless_visual_review_passed",
+  "build_record": "docs/builds/20261105T070335.233359Z-9595766b5c.json",
+  "source_sha256": "67c8731dd7ca1459793c040b8501c90f166485e37c001841d99c008b54c38366",
+  "report_source": "build/smoke/Release/0e125e1bf3e3/arrangement-report.json",
+  "checks": {
+    "analysis_ui_range_mapping": true,
+    "analysis_ui_read_only_navigation": true,
+    "analysis_ui_empty_saved_chords": true,
+    "analysis_ui_synthetic_stale_undo_redo_projection": true,
+    "analysis_preview_offline_decode_resample_end": true,
+    "analysis_preview_generation_stop_silence": true,
+    "analysis_preview_no_device_rejected": true,
+    "analysis_preview_publication_race_stress": true,
+    "analysis_preview_hardware_verified": false
+  },
+  "artifacts": [
+    {
+      "file": "docs/review/2026-11-05-audio-analysis/screenshots/ui-analysis-600x260.png",
+      "sha256": "0add3bab1e8be8df5d9aaa18dc0a30cafb59bb6b6cedf71cdc3592f171d8c7ff",
+      "source": "build/smoke/Release/0e125e1bf3e3/ui-analysis-600x260.png"
+    },
+    {
+      "file": "docs/review/2026-11-05-audio-analysis/screenshots/ui-analysis-930x308.png",
+      "sha256": "f7b182dad5ed69652a12e1226a1e6a5fc052fccb68dec459478fd707e6ea8dba",
+      "source": "build/smoke/Release/0e125e1bf3e3/ui-analysis-930x308.png"
+    },
+    {
+      "file": "docs/review/2026-11-05-audio-analysis/screenshots/ui-1000x650.png",
+      "sha256": "e10063f7eb303df66d252c9d100d185aa35c1dd4c45d6d13d45600d329c27a13",
+      "source": "build/smoke/Release/0e125e1bf3e3/ui-1000x650.png"
+    },
+    {
+      "file": "docs/review/2026-11-05-audio-analysis/screenshots/ui-1280x800.png",
+      "sha256": "ece073cb609f7577cef11d19811b3a1b044a5753eaddc6175af75be2a1fadb45",
+      "source": "build/smoke/Release/0e125e1bf3e3/ui-1280x800.png"
+    }
+  ],
+  "limitations": [
+    "No physical ASIO or hearing acceptance",
+    "No human mouse, keyboard or DPI acceptance",
+    "Model-ready initial UI only; screenshots do not establish model quality",
+    "Main window fixture intentionally includes a missing-plugin status"
+  ],
+  "binary_stage": "Intermediate candidate before the native MIDI-import Undo correction; UI/audition source unchanged.",
+  "ui_source_sha256": {
+    "apps/desktop/AnalysisPanel.cpp": "65d84abc4f0dc4f6255e6f988a332dadaf2cda7c30e231c9dfba8a671753496e",
+    "apps/desktop/AnalysisPanel.h": "ed9caf1e810959edcb0e1558204b4a8f18abb59308acfa47c82089e2fbe91d9a",
+    "apps/desktop/AnalysisPreview.cpp": "28c1e4446b8c603a6c01b4d6530203051d20349c67b306e5471e7cd37aabaca3",
+    "apps/desktop/AnalysisPreview.h": "eb516c23dbf91aea79e12ee91bbd05c610f9d203cd942fe2e9baecde5fb7af52",
+    "apps/desktop/MainComponent.cpp": "d4b730394e795493d8e7c217a2578bfe18f7e930c57a706f9563a5955f252d57"
+  }
+}

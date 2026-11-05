@@ -60,6 +60,7 @@ struct StoredClip {
     double fadeIn = 0.0, fadeOut = 0.0;
     std::vector<StoredNote> notes;
     std::vector<StoredControllerEvent> controllers;
+    juce::String analysisRole;
 };
 
 struct StoredTrack {
@@ -73,6 +74,18 @@ struct StoredTrack {
     juce::String inputDeviceId, outputTargetId = "master";
     std::vector<StoredSend> sends;
     std::vector<StoredAutomationLane> automation;
+};
+
+// Accepted, editable chord labels; seconds are independent of the beat ruler.
+struct StoredChordRegion {
+    juce::String id, label, analysisId;
+    double startSeconds = 0, endSeconds = 0, score = 0;
+    bool uncertain = false;
+};
+struct StoredAnalysis {
+    juce::String id, kind, modelId, modelVersion, sourceClipId, sourceAssetId;
+    juce::String sourceSha256, resultSha256, parametersJson = "{}";
+    double startSeconds = 0, durationSeconds = 0;
 };
 
 struct StoredProject {
@@ -90,6 +103,8 @@ struct StoredProject {
     double loopStart = 0.0, loopEnd = 0.0;
     std::vector<StoredPlugin> masterPlugins;
     std::vector<StoredAutomationLane> masterAutomation;
+    std::vector<StoredChordRegion> chordRegions;
+    std::vector<StoredAnalysis> analyses;
 };
 
 inline constexpr std::size_t maximumTracks = 64;
@@ -103,6 +118,8 @@ inline constexpr std::size_t maximumAutomationLanesPerTrack = 256;
 inline constexpr std::size_t maximumAutomationLanes = 4096;
 inline constexpr std::size_t maximumAutomationPoints = 100000;
 inline constexpr std::size_t maximumControllerEvents = 100000;
+inline constexpr std::size_t maximumChordRegions = 10000;
+inline constexpr std::size_t maximumAnalyses = 512;
 inline constexpr double minimumBpm = 20.0, maximumBpm = 300.0;
 inline constexpr double maximumTimelineSeconds = 172800.0; // Tracktion Edit's 48-hour bound.
 inline constexpr juce::int64 maximumManifestBytes = 16 * 1024 * 1024;
@@ -129,11 +146,12 @@ struct IOOptions {
 
 // Pure DTO validation: no file reads, existence checks, or plugin instantiation.
 juce::Result validate(const StoredProject&);
+bool isSupportedChordLabel(const juce::String&);
 
 // Reuses verified unchanged audio in this bundle, copies changed/new audio into
 // a fresh generation, then atomically replaces the schema 4 manifest.
 // Plugin state is stored in separate hashed binaries in that generation.
-// Replacing schema 1/2/3 first preserves its exact bytes in a unique sibling
+// Upgrading an existing schema first preserves its exact bytes in a unique sibling
 // <original filename>.schemaN-<UUID>.bak; restore it to the original .emproj name.
 // Older generations are retained. Outputs change only on success.
 juce::Result save(const juce::File& target, const StoredProject&, StoredProject& archived, const IOOptions& = {});

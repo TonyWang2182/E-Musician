@@ -9,6 +9,21 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
     auto okay = [&](const juce::Result& r, const juce::String& context) { check(r.wasOk(), context + ": " + r.getErrorMessage()); };
     auto command = [&](EngineSession& target, const juce::String& name, juce::var args = object({})) { okay(target.execute(name, args, target.snapshot().revision), name); };
     try {
+        {
+            EngineSession fixture(false);
+            auto analysis=std::make_shared<Impl::Job>();analysis->kind="analysis.separate";analysis->status="running";
+            std::atomic<bool> release{false};bool committed=false;
+            analysis->commit=[&]{committed=true;jobStatus(analysis,"ready");};
+            analysis->worker=std::thread([&]{while(!release.load())std::this_thread::sleep_for(std::chrono::milliseconds(1));analysis->done=true;});
+            fixture.impl->jobs.push_back(analysis);
+            for(int i=0;i<63;++i){auto retired=std::make_shared<Impl::Job>();retired->kind="save_project";retired->status="completed";fixture.impl->jobs.push_back(retired);}
+            auto next=fixture.impl->startJob("save_project",[](const auto&){});
+            const bool retained=std::find(fixture.impl->jobs.begin(),fixture.impl->jobs.end(),analysis)!=fixture.impl->jobs.end();
+            release=true;
+            while(!analysis->done.load()||(next&&!next->done.load()))std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            fixture.impl->reapFinishedJobs(true);
+            check(next&&retained&&committed,"concurrent analysis remains pumpable when completed job history is pruned");
+        }
         okay(runNativeLoadQueueTests(), "native sample loader queue");
         {
             storage::StoredPlugin old;old.format="E-musician";old.role="effect";old.identifier="native.compressor";

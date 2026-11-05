@@ -57,7 +57,8 @@
         <div id="transcript" class="conversation-scroll" tabindex="0" aria-label="对话与修改方案">
           <div id="notice" class="notice" role="alert" hidden></div>
           <section id="conversation" class="conversation" aria-label="对话记录">
-            <div id="conversation-empty" class="welcome"><h2>从一个小调整开始</h2><p>选好轨道、片段或音符，告诉我你想怎样调整。修改会先列成方案，等你确认。</p><div class="examples"><button type="button" data-prompt="概括一下当前选择的内容。">查看当前选择</button><button type="button" data-prompt="把选中的 MIDI 音符升高一个八度。">音符升八度</button></div><p class="privacy-note">发送工程结构与必要的音符数据，不上传音频文件。</p></div>
+            <div id="conversation-empty" class="welcome"><h2>从一个小调整开始</h2><p>选好轨道、片段或音符，告诉我你想怎样调整。修改会先列成方案，等你确认。</p><p class="privacy-note">发送工程结构与必要的音符数据。音频分析在本机运行，不上传音频文件。</p></div>
+            <details id="capabilities" class="capabilities" open><summary>助手能做什么</summary><div id="capability-list"><p class="muted">正在核对宿主与本机模型…</p></div></details>
             <div id="messages"></div>
           </section>
           <section id="task-progress" class="task-progress" aria-label="任务进度" hidden>
@@ -68,6 +69,7 @@
           <section id="plan" class="plan" aria-labelledby="plan-heading" hidden>
             <div class="section-heading"><h2 id="plan-heading">待应用的修改</h2><span id="plan-revision" class="muted"></span></div>
             <p id="plan-summary"></p>
+            <details id="analysis-preview" class="analysis-preview" hidden><summary id="analysis-preview-title">分析候选</summary><p id="analysis-preview-info" class="muted"></p><ol id="analysis-preview-items"></ol><p id="analysis-preview-limit" class="muted"></p></details>
             <div id="plan-sequence" class="plan-sequence" hidden><h3>执行顺序</h3><ol id="plan-steps"></ol></div>
             <h3 class="changes-heading">具体修改</h3><ol id="changes"></ol>
             <details id="note-previews" class="note-previews" hidden>

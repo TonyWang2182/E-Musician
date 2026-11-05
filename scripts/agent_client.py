@@ -30,8 +30,9 @@ READ_COMMANDS = {
     "get_job", "get_events", "get_clip_notes", "get_track_clips", "get_plugin_catalog", "get_plugin_parameters",
     "get_recording_state", "get_recording_inputs", "get_audio_devices",
     "get_automation_targets", "get_automation_points", "get_clip_controllers", "get_save_diagnostics", "get_native_instrument",
+    "get_analysis_capabilities", "get_analysis_job", "get_analysis_result", "get_chord_regions", "get_analysis_preview_status",
 }
-TERMINAL_JOBS = {"completed", "failed", "cancelled", "canceled", "conflict"}
+TERMINAL_JOBS = {"completed", "ready", "applied", "failed", "cancelled", "canceled", "conflict", "stale"}
 
 
 class ControlError(RuntimeError):
@@ -126,7 +127,7 @@ class Client:
         while time.monotonic() < deadline:
             job = self.completed(self.raw({"command": "get_job", "args": {"job_id": job_id}}))
             if job.get("status") in TERMINAL_JOBS:
-                if job["status"] != "completed":
+                if job["status"] not in {"completed", "ready", "applied"}:
                     raise ControlError("Background task did not complete: " + json.dumps(job, ensure_ascii=False))
                 return job
             time.sleep(0.05)

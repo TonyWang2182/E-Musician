@@ -5559,3 +5559,872 @@ except Exception as e:
 - Source SHA-256: `846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f`; Git HEAD: `8cfeb9f66e50b614fc3e66fe7bb52ebbd8fdd1b0`.
 - [Record](builds/20261105T043901.428761Z-5740265563.json) · [Raw log](../build-logs/20261105T043901.428761Z-5740265563.log)
 - GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-05T14:17:11+08:00 · analysis-runtime-bootstrap · succeeded
+
+- Config: Python3.10; exit code: 0; elapsed: 30.516s.
+- Command: `C:/Users/28712/.local/bin/uv.exe venv --python 3.10 E:\MusicAgent&DAW\analysis\runtimes\separation-py310`
+- Context: Create isolated ML environments on E; no global Python or driver changes.
+- Source SHA-256: `846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T061711.602296Z-f99dd561bf.json) · [Raw log](../build-logs/20261105T061711.602296Z-f99dd561bf.log)
+- [Exact process output](../build-logs/20261105T061711.602296Z-f99dd561bf.raw.log)
+
+### 2026-11-05T14:17:42+08:00 · analysis-runtime-bootstrap · succeeded
+
+- Config: Python3.10; exit code: 0; elapsed: 0.536s.
+- Command: `C:/Users/28712/.local/bin/uv.exe venv --python 3.10 E:\MusicAgent&DAW\analysis\runtimes\transcription-py310`
+- Context: Create isolated ML environments on E; no global Python or driver changes.
+- Source SHA-256: `846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T061742.498394Z-285eabb072.json) · [Raw log](../build-logs/20261105T061742.498394Z-285eabb072.log)
+- [Exact process output](../build-logs/20261105T061742.498394Z-285eabb072.raw.log)
+
+### 2026-11-05T14:17:43+08:00 · analysis-runtime-bootstrap · succeeded
+
+- Config: Python3.10; exit code: 0; elapsed: 0.454s.
+- Command: `C:/Users/28712/.local/bin/uv.exe venv --python 3.10 E:\MusicAgent&DAW\analysis\runtimes\chords-py310`
+- Context: Create isolated ML environments on E; no global Python or driver changes.
+- Source SHA-256: `846b6b2c43d7e35dc046f39f1f879b3af692066c0f9bfcd8b529018c23008a7f`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T061743.398911Z-ce74f7befd.json) · [Raw log](../build-logs/20261105T061743.398911Z-ce74f7befd.log)
+- [Exact process output](../build-logs/20261105T061743.398911Z-ce74f7befd.raw.log)
+
+### 2026-11-05T14:19:30+08:00 · analysis-runtime-install · succeeded
+
+- Config: Python3.10 CPU; exit code: 0; elapsed: 43.867s.
+- Command: `C:/Users/28712/.local/bin/uv.exe pip install --python E:\MusicAgent&DAW\analysis\runtimes\chords-py310\Scripts\python.exe numpy==1.26.4 scipy==1.13.1 librosa==0.10.2.post1 soundfile==0.13.1 psutil==7.1.0`
+- Context: Install pinned primary ML packages into E drive environments; no global environment mutation.
+- Source SHA-256: `1122bfddb04039d2fb3eb01cee0750809d504dc00847bae5a00b403fe3584043`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T061930.953970Z-6c687a563b.json) · [Raw log](../build-logs/20261105T061930.953970Z-6c687a563b.log)
+- [Exact process output](../build-logs/20261105T061930.953970Z-6c687a563b.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:20:15+08:00 · analysis-runtime-install · succeeded
+
+- Config: Python3.10 CPU; exit code: 0; elapsed: 31.670s.
+- Command: `C:/Users/28712/.local/bin/uv.exe pip install --python E:\MusicAgent&DAW\analysis\runtimes\transcription-py310\Scripts\python.exe numpy==1.26.4 scipy==1.13.1 librosa==0.10.2.post1 soundfile==0.13.1 basic-pitch==0.4.0 onnxruntime==1.20.1 psutil==7.1.0`
+- Context: Install pinned primary ML packages into E drive environments; no global environment mutation.
+- Source SHA-256: `ce0f53e7e80fab6d1ef86a91fe2aa6b7dad44787a9f21648b93d0a3be1c5df83`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062015.397688Z-a47ae44907.json) · [Raw log](../build-logs/20261105T062015.397688Z-a47ae44907.log)
+- [Exact process output](../build-logs/20261105T062015.397688Z-a47ae44907.raw.log)
+
+### 2026-11-05T14:20:47+08:00 · analysis-runtime-install · succeeded
+
+- Config: Python3.10 CPU; exit code: 0; elapsed: 142.659s.
+- Command: `C:/Users/28712/.local/bin/uv.exe pip install --python E:\MusicAgent&DAW\analysis\runtimes\separation-py310\Scripts\python.exe --index-url https://download.pytorch.org/whl/cpu torch==2.5.1+cpu`
+- Context: Install pinned primary ML packages into E drive environments; no global environment mutation.
+- Source SHA-256: `ce0f53e7e80fab6d1ef86a91fe2aa6b7dad44787a9f21648b93d0a3be1c5df83`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062047.406302Z-b4a84d318f.json) · [Raw log](../build-logs/20261105T062047.406302Z-b4a84d318f.log)
+- [Exact process output](../build-logs/20261105T062047.406302Z-b4a84d318f.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:23:10+08:00 · analysis-runtime-install · succeeded
+
+- Config: Python3.10 CPU; exit code: 0; elapsed: 24.240s.
+- Command: `C:/Users/28712/.local/bin/uv.exe pip install --python E:\MusicAgent&DAW\analysis\runtimes\separation-py310\Scripts\python.exe demucs==4.1.0 numpy==1.26.4 soundfile==0.13.1 scipy==1.13.1 psutil==7.1.0`
+- Context: Install pinned primary ML packages into E drive environments; no global environment mutation.
+- Source SHA-256: `441766c558d7c85219209c4dc2f37a80803113ee12ac9220770b337394904eae`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062310.425915Z-0a6d560a4c.json) · [Raw log](../build-logs/20261105T062310.425915Z-0a6d560a4c.log)
+- [Exact process output](../build-logs/20261105T062310.425915Z-0a6d560a4c.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:24:19+08:00 · analysis-setup · succeeded
+
+- Config: Python3.10 CPU; exit code: 0; elapsed: 9.682s.
+- Command: `E:\MusicAgent&DAW\analysis\runtimes\transcription-py310\Scripts\python.exe scripts/audio_analysis/register.py --root E:\MusicAgent&DAW\analysis --kind transcribe`
+- Context: Explicit isolated model installation/probe; weights remain outside Git.
+- Source SHA-256: `570ba727689a5b16d0943ca96487f254f3d888f3f999d42bc5aa8c32a278a694`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062419.480002Z-839cd03563.json) · [Raw log](../build-logs/20261105T062419.480002Z-839cd03563.log)
+- [Exact process output](../build-logs/20261105T062419.480002Z-839cd03563.raw.log)
+
+### 2026-11-05T14:24:18+08:00 · analysis-model-registration · succeeded
+
+- Config: CPU; exit code: 0; elapsed: 10.780s.
+- Command: `C:\Python314\python.exe scripts/setup_analysis.py --kind transcribe --register-only`
+- Context: Probe actual isolated Basic Pitch and chord runtimes, record primary-source provenance.
+- Source SHA-256: `570ba727689a5b16d0943ca96487f254f3d888f3f999d42bc5aa8c32a278a694`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062418.803795Z-a46ad3daab.json) · [Raw log](../build-logs/20261105T062418.803795Z-a46ad3daab.log)
+- [Exact process output](../build-logs/20261105T062418.803795Z-a46ad3daab.raw.log)
+
+### 2026-11-05T14:22:57+08:00 · analysis-agent-tests · succeeded
+
+- Config: Python; exit code: 0; elapsed: 94.462s.
+- Command: `python -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Initial existing Agent regression after bounded analysis integration; no model calls.
+- Source SHA-256: `441766c558d7c85219209c4dc2f37a80803113ee12ac9220770b337394904eae`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062257.775907Z-a86bb9cb59.json) · [Raw log](../build-logs/20261105T062257.775907Z-a86bb9cb59.log)
+- [Exact process output](../build-logs/20261105T062257.775907Z-a86bb9cb59.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:24:30+08:00 · analysis-setup · succeeded
+
+- Config: Python3.10 CPU; exit code: 0; elapsed: 9.022s.
+- Command: `E:\MusicAgent&DAW\analysis\runtimes\chords-py310\Scripts\python.exe scripts/audio_analysis/register.py --root E:\MusicAgent&DAW\analysis --kind chords`
+- Context: Explicit isolated model installation/probe; weights remain outside Git.
+- Source SHA-256: `570ba727689a5b16d0943ca96487f254f3d888f3f999d42bc5aa8c32a278a694`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062430.717957Z-f14a978423.json) · [Raw log](../build-logs/20261105T062430.717957Z-f14a978423.log)
+- [Exact process output](../build-logs/20261105T062430.717957Z-f14a978423.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:24:29+08:00 · analysis-model-registration · succeeded
+
+- Config: CPU; exit code: 0; elapsed: 10.168s.
+- Command: `C:\Python314\python.exe scripts/setup_analysis.py --kind chords --register-only`
+- Context: Probe actual isolated Basic Pitch and chord runtimes, record primary-source provenance.
+- Source SHA-256: `570ba727689a5b16d0943ca96487f254f3d888f3f999d42bc5aa8c32a278a694`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062429.973638Z-9e8419a630.json) · [Raw log](../build-logs/20261105T062429.973638Z-9e8419a630.log)
+- [Exact process output](../build-logs/20261105T062429.973638Z-9e8419a630.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:25:07+08:00 · analysis-agent-contract-tests · succeeded
+
+- Config: Python; exit code: 0; elapsed: 4.853s.
+- Command: `python -m unittest discover -s tests -p test_music_agent_analysis.py -v`
+- Context: Deterministic analysis scopes, immutable candidate import, local polling and cancellation; no model inference or API calls.
+- Source SHA-256: `5b9a48af39e5387a4cfe506197fd11af7e6fe5c1ddb780c9c2c3764bece315ea`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062507.573203Z-ed9193db7a.json) · [Raw log](../build-logs/20261105T062507.573203Z-ed9193db7a.log)
+- [Exact process output](../build-logs/20261105T062507.573203Z-ed9193db7a.raw.log)
+
+### 2026-11-05T06:25:15.768521+00:00 - native analysis UI implementation (not yet built)
+
+- Added AnalysisPanel and Analyze dock using EngineSession commands; bounded read-only result projection, 4 Hz visible polling, explicit import, stem preview capability gate, saved chord corrections.
+- Preserved black-and-white style, source inspection and existing device chain; Agent sidebar can remain visible.
+- Added native UI smoke hooks and screenshot cases; compilation and execution pending root integration. No model inference or audio-device acceptance claimed.
+- Details: [UI notes](review/2026-11-05-audio-analysis/UI-NOTES.md).
+
+### 2026-11-05T14:24:36+08:00 · analysis-setup · succeeded
+
+- Config: Python3.10 CPU; exit code: 0; elapsed: 104.003s.
+- Command: `E:\MusicAgent&DAW\analysis\runtimes\separation-py310\Scripts\python.exe scripts/audio_analysis/register.py --root E:\MusicAgent&DAW\analysis --kind separate`
+- Context: Explicit isolated model installation/probe; weights remain outside Git.
+- Source SHA-256: `570ba727689a5b16d0943ca96487f254f3d888f3f999d42bc5aa8c32a278a694`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062436.228611Z-c8380bc388.json) · [Raw log](../build-logs/20261105T062436.228611Z-c8380bc388.log)
+- [Exact process output](../build-logs/20261105T062436.228611Z-c8380bc388.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:24:35+08:00 · analysis-model-registration · succeeded
+
+- Config: CPU; exit code: 0; elapsed: 105.319s.
+- Command: `C:\Python314\python.exe scripts/setup_analysis.py --kind separate --register-only`
+- Context: Download pinned official HTDemucs safetensors for local evaluation; real CPU forward probe, license unresolved for redistribution.
+- Source SHA-256: `570ba727689a5b16d0943ca96487f254f3d888f3f999d42bc5aa8c32a278a694`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062435.324014Z-2983b8143c.json) · [Raw log](../build-logs/20261105T062435.324014Z-2983b8143c.log)
+- [Exact process output](../build-logs/20261105T062435.324014Z-2983b8143c.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:25:43+08:00 · audio-analysis-configure · failed
+
+- Config: Release; exit code: 1; elapsed: 65.295s.
+- Command: `cmake -S . -B build/audio-analysis -G "Visual Studio 18 2026" -A x64`
+- Context: New isolated 0.9.0 candidate; reuses pinned dependencies read-only from 0.8.1 workspace.
+- Source SHA-256: `a4b6a40150f711902cc70389102f2b41bf25463b8cf9900caa5636e3eefe61be`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062543.760088Z-b599df5cc1.json) · [Raw log](../build-logs/20261105T062543.760088Z-b599df5cc1.log)
+- [Exact process output](../build-logs/20261105T062543.760088Z-b599df5cc1.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T062543.760088Z-b599df5cc1.log
+
+### 2026-11-05T14:26:51+08:00 · analysis-ui-source-check · succeeded
+
+- Config: source; exit code: 0; elapsed: 0.500s.
+- Command: `git diff --check -- apps/desktop/MainComponent.cpp apps/desktop/AnalysisPanel.cpp apps/desktop/AnalysisPanel.h`
+- Context: Native analysis panel and MainComponent integration; compile and rendered verification are separate checks.
+- Source SHA-256: `ddd718ed589459c84e88eb755c24a1075eafc24c073c308001c0079365d5e82f`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062651.148737Z-3cd28bfbab.json) · [Raw log](../build-logs/20261105T062651.148737Z-3cd28bfbab.log)
+- [Exact process output](../build-logs/20261105T062651.148737Z-3cd28bfbab.raw.log)
+
+### 2026-11-05T14:27:03+08:00 · analysis-worker-tests · succeeded
+
+- Config: Python; exit code: 0; elapsed: 3.942s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_audio_analysis_workers.py -v`
+- Context: Protocol guards and original chord decoder tests; neural models are tested separately.
+- Source SHA-256: `ddd718ed589459c84e88eb755c24a1075eafc24c073c308001c0079365d5e82f`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062703.862320Z-b08e66af40.json) · [Raw log](../build-logs/20261105T062703.862320Z-b08e66af40.log)
+- [Exact process output](../build-logs/20261105T062703.862320Z-b08e66af40.raw.log)
+
+### 2026-11-05T14:27:08+08:00 · analysis-worker-tests · succeeded
+
+- Config: Python; exit code: 0; elapsed: 1.432s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe -m unittest discover -s tests -p test_audio_analysis_workers.py -v`
+- Context: Protocol guards and original chord decoder tests; neural models are tested separately.
+- Source SHA-256: `ddd718ed589459c84e88eb755c24a1075eafc24c073c308001c0079365d5e82f`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062708.200456Z-a3dc745357.json) · [Raw log](../build-logs/20261105T062708.200456Z-a3dc745357.log)
+- [Exact process output](../build-logs/20261105T062708.200456Z-a3dc745357.raw.log)
+
+### 2026-11-05T14:27:36+08:00 · analysis-agent-ui-smoke · succeeded
+
+- Config: Headless Edge; exit code: 0; elapsed: 3.165s.
+- Command: `node --check scripts/music_agent/web/app.js`
+- Context: Synthetic state using production HTML/CSS/JS; owned temporary browser profiles only, not user desktop.
+- Source SHA-256: `959dd361cc341c80fa398666da3b4628d7ed1130c8c34bae6ad649c36d0311f3`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062736.921924Z-2769a8f111.json) · [Raw log](../build-logs/20261105T062736.921924Z-2769a8f111.log)
+- [Exact process output](../build-logs/20261105T062736.921924Z-2769a8f111.raw.log)
+
+### 2026-11-05T14:27:40+08:00 · analysis-agent-ui-smoke · succeeded
+
+- Config: Headless Edge; exit code: 0; elapsed: 11.916s.
+- Command: `python tests/AnalysisAgentWebSmoke.py`
+- Context: Synthetic state using production HTML/CSS/JS; owned temporary browser profiles only, not user desktop.
+- Source SHA-256: `959dd361cc341c80fa398666da3b4628d7ed1130c8c34bae6ad649c36d0311f3`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062740.527707Z-4e491e9685.json) · [Raw log](../build-logs/20261105T062740.527707Z-4e491e9685.log)
+- [Exact process output](../build-logs/20261105T062740.527707Z-4e491e9685.raw.log)
+
+### 2026-11-05T14:27:16+08:00 · analysis-real-worker-probe · failed
+
+- Config: CPU 2 threads; exit code: 1; elapsed: 92.825s.
+- Command: `C:\Python314\python.exe scripts/audio_analysis/probe.py --duration 8`
+- Context: Run real HTDemucs/Basic Pitch/chroma-HMM on synthetic stereo chords with source offset. Pipeline and alignment evidence, not listening/quality acceptance.
+- Source SHA-256: `ddd718ed589459c84e88eb755c24a1075eafc24c073c308001c0079365d5e82f`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062716.954559Z-c89c74546b.json) · [Raw log](../build-logs/20261105T062716.954559Z-c89c74546b.log)
+- [Exact process output](../build-logs/20261105T062716.954559Z-c89c74546b.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T062716.954559Z-c89c74546b.log
+
+### 2026-11-05T14:29:21+08:00 · analysis-cuda-install · succeeded
+
+- Config: Python3.10 CUDA12.4; exit code: 0; elapsed: 0.681s.
+- Command: `C:/Users/28712/.local/bin/uv.exe venv --python 3.10.19 E:\MusicAgent&DAW\analysis\runtimes\separation-cuda-py310`
+- Context: Install an additional CUDA runtime on E, preserving tested CPU fallback and existing GPU driver. Runtime/device probe still required.
+- Source SHA-256: `45227f385d0113b4b9872942004c5291bb0f540eeaf02b4f8a221249e149a4dc`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062921.021574Z-6a097019b6.json) · [Raw log](../build-logs/20261105T062921.021574Z-6a097019b6.log)
+- [Exact process output](../build-logs/20261105T062921.021574Z-6a097019b6.raw.log)
+
+### 2026-11-05T14:27:41+08:00 · audio-analysis-configure · succeeded
+
+- Config: Release; exit code: 0; elapsed: 109.486s.
+- Command: `cmake -S E:/emusician-analysis-source -B E:/emusician-analysis-build -G "Visual Studio 18 2026" -A x64`
+- Context: Retry after JUCE/MSBuild regeneration failed on ampersand source path; use stable junction alias and independent E drive build.
+- Source SHA-256: `959dd361cc341c80fa398666da3b4628d7ed1130c8c34bae6ad649c36d0311f3`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062741.634205Z-216bd74d3c.json) · [Raw log](../build-logs/20261105T062741.634205Z-216bd74d3c.log)
+- [Exact process output](../build-logs/20261105T062741.634205Z-216bd74d3c.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:29:55+08:00 · analysis-agent-ui-smoke · failed
+
+- Config: Headless Edge CDP; exit code: 1; elapsed: 50.340s.
+- Command: `python tests/AnalysisAgentWebSmoke.py`
+- Context: Correct exact 400px viewport: CLI window-size capture used Edge minimum viewport; now explicit owned-process device metrics. Synthetic state, no user desktop.
+- Source SHA-256: `2f631b8fc0d4106bb889a4a99a4e1693bae09e1703a821286e7b7f22a5c19483`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062955.017470Z-bd50764e50.json) · [Raw log](../build-logs/20261105T062955.017470Z-bd50764e50.log)
+- [Exact process output](../build-logs/20261105T062955.017470Z-bd50764e50.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T062955.017470Z-bd50764e50.log
+
+### 2026-11-05T14:31:12+08:00 · analysis-transcription-runtime-fix · succeeded
+
+- Config: Python3.10 CPU; exit code: 0; elapsed: 17.555s.
+- Command: `C:/Users/28712/.local/bin/uv.exe pip install --python E:\MusicAgent&DAW\analysis\runtimes\transcription-py310\Scripts\python.exe setuptools==75.8.2`
+- Context: Real worker found resampy0.4.2 requires legacy pkg_resources; pin compatible setuptools and expand registration import probe.
+- Source SHA-256: `3f7ded0276faf0af6692430b6159a969590d5d90c50cc975350915eff7f4bf2b`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063112.790926Z-4c31631f52.json) · [Raw log](../build-logs/20261105T063112.790926Z-4c31631f52.log)
+- [Exact process output](../build-logs/20261105T063112.790926Z-4c31631f52.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:31:27+08:00 · analysis-agent-ui-smoke · succeeded
+
+- Config: Headless Edge CDP; exit code: 0; elapsed: 12.167s.
+- Command: `python tests/AnalysisAgentWebSmoke.py`
+- Context: Fix capture harness waiting for reply after Browser.close; exact viewport, production page with explicit synthetic state.
+- Source SHA-256: `da56cc79f4b943b6832a94cad62dfc296a9d829a1717fe54d4eaaeab3afb8842`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063127.302635Z-2027559453.json) · [Raw log](../build-logs/20261105T063127.302635Z-2027559453.log)
+- [Exact process output](../build-logs/20261105T063127.302635Z-2027559453.raw.log)
+
+### 2026-11-05T14:32:13+08:00 · analysis-setup · succeeded
+
+- Config: Python3.10 CPU; exit code: 0; elapsed: 16.242s.
+- Command: `E:\MusicAgent&DAW\analysis\runtimes\transcription-py310\Scripts\python.exe scripts/audio_analysis/register.py --root E:\MusicAgent&DAW\analysis --kind transcribe --device cpu`
+- Context: Explicit isolated model installation/probe; weights remain outside Git.
+- Source SHA-256: `ab8d080e131ddeca39ff825ddffe6a83f8a35faa990fae51a3a1677fe1b34d7c`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063213.913939Z-3021e80e78.json) · [Raw log](../build-logs/20261105T063213.913939Z-3021e80e78.log)
+- [Exact process output](../build-logs/20261105T063213.913939Z-3021e80e78.raw.log)
+
+### 2026-11-05T14:32:13+08:00 · analysis-transcription-probe-retry · succeeded
+
+- Config: CPU; exit code: 0; elapsed: 17.488s.
+- Command: `C:\Python314\python.exe scripts/setup_analysis.py --kind transcribe --register-only`
+- Context: Re-probe full note decoder after pinned pkg_resources compatibility repair, then run actual offset transcription and chord workers.
+- Source SHA-256: `ab8d080e131ddeca39ff825ddffe6a83f8a35faa990fae51a3a1677fe1b34d7c`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063213.129875Z-41e9f2e5ce.json) · [Raw log](../build-logs/20261105T063213.129875Z-41e9f2e5ce.log)
+- [Exact process output](../build-logs/20261105T063213.129875Z-41e9f2e5ce.raw.log)
+
+### 2026-11-05T14:32:31+08:00 · analysis-transcription-probe-retry · succeeded
+
+- Config: CPU; exit code: 0; elapsed: 68.649s.
+- Command: `C:\Python314\python.exe scripts/audio_analysis/probe.py --kind transcribe --duration 8`
+- Context: Re-probe full note decoder after pinned pkg_resources compatibility repair, then run actual offset transcription and chord workers.
+- Source SHA-256: `ab8d080e131ddeca39ff825ddffe6a83f8a35faa990fae51a3a1677fe1b34d7c`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063231.078027Z-62daed2de9.json) · [Raw log](../build-logs/20261105T063231.078027Z-62daed2de9.log)
+- [Exact process output](../build-logs/20261105T063231.078027Z-62daed2de9.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:33:44+08:00 · analysis-preview-source-check · succeeded
+
+- Config: source; exit code: 0; elapsed: 1.299s.
+- Command: `git diff --check -- apps/desktop/MainComponent.cpp apps/desktop/AnalysisPanel.cpp apps/desktop/AnalysisPanel.h apps/desktop/AnalysisPreview.cpp apps/desktop/AnalysisPreview.h`
+- Context: Native audition ring, cancellation generations, worker ownership and offline synthetic verification added. Build pending integration.
+- Source SHA-256: `18d770edd89ec14d069fff4cba7df1e06d9ed1d9af12a9b1e022289920a1c860`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063344.173055Z-f6969ce66f.json) · [Raw log](../build-logs/20261105T063344.173055Z-f6969ce66f.log)
+- [Exact process output](../build-logs/20261105T063344.173055Z-f6969ce66f.raw.log)
+
+### 2026-11-05T14:33:41+08:00 · analysis-transcription-probe-retry · succeeded
+
+- Config: CPU; exit code: 0; elapsed: 113.578s.
+- Command: `C:\Python314\python.exe scripts/audio_analysis/probe.py --kind chords --duration 8`
+- Context: Re-probe full note decoder after pinned pkg_resources compatibility repair, then run actual offset transcription and chord workers.
+- Source SHA-256: `e5fce344691c484009b7ec3b2468e97a13d6157c761b290f5186b7948792067d`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063341.769655Z-e3ce5a81eb.json) · [Raw log](../build-logs/20261105T063341.769655Z-e3ce5a81eb.log)
+- [Exact process output](../build-logs/20261105T063341.769655Z-e3ce5a81eb.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:35:35+08:00 · analysis-transcription-probe-retry · failed
+
+- Config: CPU; exit code: 1; elapsed: 28.469s.
+- Command: `C:\Python314\python.exe scripts/audio_analysis/edge_probe.py`
+- Context: Re-probe full note decoder after pinned pkg_resources compatibility repair, then run actual offset transcription and chord workers.
+- Source SHA-256: `3eeb1383e4efa258c80e4cb9cc0d2e7f940599a69723042c76a61215627439f7`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063535.772617Z-9d48587cfb.json) · [Raw log](../build-logs/20261105T063535.772617Z-9d48587cfb.log)
+- [Exact process output](../build-logs/20261105T063535.772617Z-9d48587cfb.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T063535.772617Z-9d48587cfb.log
+
+
+## 2026-11-05 - Local analysis implementation started
+
+Preserved verified 0.8.1 source hash 846b6b2c and EXE c0099db1. Copied source/docs into feature/audio-analysis, committed baseline. Added native asynchronous analysis commands, immutable candidate review/import, schema5 chord/provenance persistence, and shared GUI/Agent interfaces. Status: implementing, not yet end-to-end verified. First configure failed because upstream JUCE/MSBuild regeneration did not handle ampersand path; isolated junction alias E:/emusician-analysis-source and build E:/emusician-analysis-build fixed configure. First native compile found juce::var String subscript ambiguity; corrected, awaiting rebuild. Raw attempts recorded independently.
+
+### 2026-11-05T14:36:29+08:00 · analysis-agent-chord-tests · succeeded
+
+- Config: Python; exit code: 0; elapsed: 8.502s.
+- Command: `python -m unittest discover -s tests -p test_music_agent_analysis.py -v`
+- Context: Add persisted chord-edit scope, source deletion, analysis-role restrictions; deterministic peer tests only.
+- Source SHA-256: `7db5b886ce04763b879a818188d088d4f5e4cabbf92efecdbfe4cf37a9450cbb`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063629.211353Z-b2f55db522.json) · [Raw log](../build-logs/20261105T063629.211353Z-b2f55db522.log)
+- [Exact process output](../build-logs/20261105T063629.211353Z-b2f55db522.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:29:31+08:00 · audio-analysis-configure · failed
+
+- Config: Release; exit code: 1; elapsed: 511.024s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Retry after JUCE/MSBuild regeneration failed on ampersand source path; use stable junction alias and independent E drive build.
+- Source SHA-256: `45227f385d0113b4b9872942004c5291bb0f540eeaf02b4f8a221249e149a4dc`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062931.496679Z-f72a93e63d.json) · [Raw log](../build-logs/20261105T062931.496679Z-f72a93e63d.log)
+- [Exact process output](../build-logs/20261105T062931.496679Z-f72a93e63d.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T062931.496679Z-f72a93e63d.log
+
+### 2026-11-05T14:39:01+08:00 · analysis-chord-pipeline-optimization · succeeded
+
+- Config: CPU; exit code: 0; elapsed: 5.594s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe -m unittest discover -s tests -p test_audio_analysis_workers.py -v`
+- Context: Replace feature JIT/import-heavy pipeline with original NumPy/SciPy STFT chroma; test real features/timing and actual worker error paths.
+- Source SHA-256: `048614c520f3c6fb7d75e8136cb307288c3fe826f3fee3bed192a7fa65f8dc61`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063901.779264Z-0b8535ed47.json) · [Raw log](../build-logs/20261105T063901.779264Z-0b8535ed47.log)
+- [Exact process output](../build-logs/20261105T063901.779264Z-0b8535ed47.raw.log)
+
+### 2026-11-05T14:39:08+08:00 · analysis-setup · succeeded
+
+- Config: Python3.10 CPU; exit code: 0; elapsed: 26.237s.
+- Command: `E:\MusicAgent&DAW\analysis\runtimes\chords-py310\Scripts\python.exe scripts/audio_analysis/register.py --root E:\MusicAgent&DAW\analysis --kind chords --device cpu`
+- Context: Explicit isolated model installation/probe; weights remain outside Git.
+- Source SHA-256: `048614c520f3c6fb7d75e8136cb307288c3fe826f3fee3bed192a7fa65f8dc61`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063908.731029Z-66f5e4216a.json) · [Raw log](../build-logs/20261105T063908.731029Z-66f5e4216a.log)
+- [Exact process output](../build-logs/20261105T063908.731029Z-66f5e4216a.raw.log)
+
+### 2026-11-05T14:39:07+08:00 · analysis-chord-pipeline-optimization · succeeded
+
+- Config: CPU; exit code: 0; elapsed: 27.722s.
+- Command: `C:\Python314\python.exe scripts/setup_analysis.py --kind chords --register-only`
+- Context: Replace feature JIT/import-heavy pipeline with original NumPy/SciPy STFT chroma; test real features/timing and actual worker error paths.
+- Source SHA-256: `048614c520f3c6fb7d75e8136cb307288c3fe826f3fee3bed192a7fa65f8dc61`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063907.836951Z-dd149f1c13.json) · [Raw log](../build-logs/20261105T063907.836951Z-dd149f1c13.log)
+- [Exact process output](../build-logs/20261105T063907.836951Z-dd149f1c13.raw.log)
+
+### 2026-11-05T14:39:36+08:00 · analysis-chord-pipeline-optimization · succeeded
+
+- Config: CPU; exit code: 0; elapsed: 12.826s.
+- Command: `C:\Python314\python.exe scripts/audio_analysis/probe.py --kind chords --duration 8`
+- Context: Replace feature JIT/import-heavy pipeline with original NumPy/SciPy STFT chroma; test real features/timing and actual worker error paths.
+- Source SHA-256: `048614c520f3c6fb7d75e8136cb307288c3fe826f3fee3bed192a7fa65f8dc61`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063936.070931Z-fad740397d.json) · [Raw log](../build-logs/20261105T063936.070931Z-fad740397d.log)
+- [Exact process output](../build-logs/20261105T063936.070931Z-fad740397d.raw.log)
+
+### 2026-11-05T14:38:15+08:00 · analysis-agent-regression · succeeded
+
+- Config: Python; exit code: 0; elapsed: 113.110s.
+- Command: `python -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Full Agent regression including 15 analysis scope/import/chord tests; deterministic providers, no paid API or real audio device.
+- Source SHA-256: `4692d2caa053c9dd84e138708a1692094042b1b5d846e3d2d1918547813248f0`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063815.531257Z-92aca15232.json) · [Raw log](../build-logs/20261105T063815.531257Z-92aca15232.log)
+- [Exact process output](../build-logs/20261105T063815.531257Z-92aca15232.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:39:49+08:00 · analysis-chord-pipeline-optimization · succeeded
+
+- Config: CPU; exit code: 0; elapsed: 34.017s.
+- Command: `C:\Python314\python.exe scripts/audio_analysis/edge_probe.py`
+- Context: Replace feature JIT/import-heavy pipeline with original NumPy/SciPy STFT chroma; test real features/timing and actual worker error paths.
+- Source SHA-256: `048614c520f3c6fb7d75e8136cb307288c3fe826f3fee3bed192a7fa65f8dc61`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063949.569323Z-52f0b33362.json) · [Raw log](../build-logs/20261105T063949.569323Z-52f0b33362.log)
+- [Exact process output](../build-logs/20261105T063949.569323Z-52f0b33362.raw.log)
+
+### 2026-11-05T14:29:21+08:00 · analysis-cuda-install · succeeded
+
+- Config: Python3.10 CUDA12.4; exit code: 0; elapsed: 682.051s.
+- Command: `C:/Users/28712/.local/bin/uv.exe pip install --python E:\MusicAgent&DAW\analysis\runtimes\separation-cuda-py310\Scripts\python.exe --index-url https://download.pytorch.org/whl/cu124 torch==2.5.1+cu124`
+- Context: Install an additional CUDA runtime on E, preserving tested CPU fallback and existing GPU driver. Runtime/device probe still required.
+- Source SHA-256: `45227f385d0113b4b9872942004c5291bb0f540eeaf02b4f8a221249e149a4dc`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T062921.930360Z-7146ba88c9.json) · [Raw log](../build-logs/20261105T062921.930360Z-7146ba88c9.log)
+- [Exact process output](../build-logs/20261105T062921.930360Z-7146ba88c9.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:40:44+08:00 · analysis-cuda-install · succeeded
+
+- Config: Python3.10 CUDA12.4; exit code: 0; elapsed: 32.815s.
+- Command: `C:/Users/28712/.local/bin/uv.exe pip install --python E:\MusicAgent&DAW\analysis\runtimes\separation-cuda-py310\Scripts\python.exe anyio==4.16.0 cffi==2.1.1 click==8.5.0 colorama==0.4.6 demucs==4.1.0 einops==0.8.2 exceptiongroup==1.3.1 filelock==4.1.0 fsspec==2026.9.0 h11==0.16.0 hf-xet==1.8.0 httpcore2==2.14.0 httpx2==2.14.0 huggingface_hub==2.4.0 idna==3.20 Jinja2==3.1.6 julius==0.2.8 lameenc==1.9.0 MarkupSafe==3.0.3 mpmath==1.3.0 networkx==3.4.2 numpy==1.26.4 packaging==26.3 psutil==7.1.0 pycparser==3.11 PyYAML==6.0.3 safetensors==0.8.0 scipy==1.13.1 soundfile==0.13.1 sphn==0.2.1 sympy==1.13.1 tomli==2.5.0 tqdm==4.70.1 truststore==0.10.5 typing_extensions==4.16.0`
+- Context: Install an additional CUDA runtime on E, preserving tested CPU fallback and existing GPU driver. Runtime/device probe still required.
+- Source SHA-256: `048614c520f3c6fb7d75e8136cb307288c3fe826f3fee3bed192a7fa65f8dc61`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T064044.551358Z-f9e6c06deb.json) · [Raw log](../build-logs/20261105T064044.551358Z-f9e6c06deb.log)
+- [Exact process output](../build-logs/20261105T064044.551358Z-f9e6c06deb.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:40:24+08:00 · analysis-chord-pipeline-optimization · succeeded
+
+- Config: CPU; exit code: 0; elapsed: 71.496s.
+- Command: `C:\Python314\python.exe scripts/audio_analysis/probe.py --kind transcribe --duration 8`
+- Context: Replace feature JIT/import-heavy pipeline with original NumPy/SciPy STFT chroma; test real features/timing and actual worker error paths.
+- Source SHA-256: `048614c520f3c6fb7d75e8136cb307288c3fe826f3fee3bed192a7fa65f8dc61`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T064024.151702Z-df115a10b3.json) · [Raw log](../build-logs/20261105T064024.151702Z-df115a10b3.log)
+- [Exact process output](../build-logs/20261105T064024.151702Z-df115a10b3.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:41:11+08:00 · analysis-public-fixture-license · succeeded
+
+- Config: Source metadata; exit code: 0; elapsed: 37.077s.
+- Command: `C:\Python314\python.exe -c "from pathlib import Path; from scripts.audio_analysis.register import download; r=Path('E:/MusicAgent&DAW/analysis/cache/public-fixtures'); r.mkdir(parents=True,exist_ok=True); download('https://librosa.org/data/audio/sorohanro_-_solo-trumpet-06.txt',r/'trumpet-license.txt','750a191b9d0cc94b2f19cfbf11acc13783f75bedcccfcf562f5b076efd068aba'); download('https://librosa.org/data/audio/admiralbob77_-_Choice_-_Drum-bass.txt',r/'choice-license.txt','76525d6a4fd135053c5ff7463ae43a8ffcf064b575e8ef2fc3eb37786a45342b'); print((r/'trumpet-license.txt').read_text()); print((r/'choice-license.txt').read_text())"`
+- Context: Read official Librosa sample attribution before downloading public test audio.
+- Source SHA-256: `59a10c8c806a581c07a487d31e9087c0b7f22c897a7bb1ebf6302e73ffaaa39c`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T064111.472932Z-ae3304ef2e.json) · [Raw log](../build-logs/20261105T064111.472932Z-ae3304ef2e.log)
+- [Exact process output](../build-logs/20261105T064111.472932Z-ae3304ef2e.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:44:41+08:00 · analysis-transcription-pcm-pipeline · succeeded
+
+- Config: CPU; exit code: 0; elapsed: 13.379s.
+- Command: `C:\Python314\python.exe scripts/audio_analysis/probe.py --kind transcribe --duration 8`
+- Context: Feed frozen PCM through upstream Basic Pitch windowing/decoder; avoid redundant file decode/JIT resampler and unused pitch bends. Real fixture regression and phase timings.
+- Source SHA-256: `26b342459585b205569401673c5128e4a444cef346ba45d14b5be2501644e90f`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T064441.297027Z-e1b0e476f0.json) · [Raw log](../build-logs/20261105T064441.297027Z-e1b0e476f0.log)
+- [Exact process output](../build-logs/20261105T064441.297027Z-e1b0e476f0.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:43:39+08:00 · analysis-setup · succeeded
+
+- Config: Python3.10 CPU; exit code: 0; elapsed: 89.223s.
+- Command: `E:\MusicAgent&DAW\analysis\runtimes\separation-cuda-py310\Scripts\python.exe scripts/audio_analysis/register.py --root E:\MusicAgent&DAW\analysis --kind separate --device cuda`
+- Context: Explicit isolated model installation/probe; weights remain outside Git.
+- Source SHA-256: `635de8ebc21a08d3f2ef85efd6636f123844dd67cca048c1e01d5f2ddd83a245`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T064339.540810Z-24d2657202.json) · [Raw log](../build-logs/20261105T064339.540810Z-24d2657202.log)
+- [Exact process output](../build-logs/20261105T064339.540810Z-24d2657202.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:43:38+08:00 · analysis-cuda-probe · succeeded
+
+- Config: CUDA12.4 RTX3050; exit code: 0; elapsed: 91.087s.
+- Command: `C:\Python314\python.exe scripts/setup_analysis.py --kind separate --device cuda --register-only`
+- Context: Real model forward +7second worker inference; preserve CPU install, no driver update; do not infer ASIO stability.
+- Source SHA-256: `635de8ebc21a08d3f2ef85efd6636f123844dd67cca048c1e01d5f2ddd83a245`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T064338.230982Z-4b727521aa.json) · [Raw log](../build-logs/20261105T064338.230982Z-4b727521aa.log)
+- [Exact process output](../build-logs/20261105T064338.230982Z-4b727521aa.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:45:24+08:00 - Agent local audio-analysis integration (implementation; native E2E pending)
+
+- Added bounded local-analysis tools, scope authorization, immutable result import review, persisted chord read/edit review, async acceptance/readback/Undo, and seven host-backed capability groups. Original 16-action / 2000-note budgets remain unchanged.
+- Deterministic Agent regression: 260/260 (record 20261105T063815.531257Z-92aca15232); 15 analysis tests included. Headless production-page fixtures passed at exact 400/1000px viewports (20261105T063127.302635Z-2027559453). No paid LLM, real device or user project used.
+- Initial browser minimum-width mismatch and Browser.close harness timeout preserved in records, then corrected. See docs/review/2026-11-05-audio-analysis/AGENT-NOTES.md. Real DAW + local model integration waits for the new executable; not claimed complete.
+- Independent native boundary review sent to root: active-job eviction, chord metadata editing cost, MP3 original/prepared hash identity, imported-history versus current project presence.
+
+### 2026-11-05T14:45:09+08:00 · analysis-cuda-probe · succeeded
+
+- Config: CUDA12.4 RTX3050; exit code: 0; elapsed: 39.286s.
+- Command: `C:\Python314\python.exe scripts/audio_analysis/probe.py --kind separate --duration 8`
+- Context: Real model forward +7second worker inference; preserve CPU install, no driver update; do not infer ASIO stability.
+- Source SHA-256: `79802b12acb021dfc1a43e2e10d4a432ad80271ddf673f80e0f0e323a12a902a`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T064509.750760Z-36d8a185f2.json) · [Raw log](../build-logs/20261105T064509.750760Z-36d8a185f2.log)
+- [Exact process output](../build-logs/20261105T064509.750760Z-36d8a185f2.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:46:13+08:00 · analysis-worker-edge-regression · succeeded
+
+- Config: CPU; exit code: 0; elapsed: 38.164s.
+- Command: `C:\Python314\python.exe scripts/audio_analysis/edge_probe.py`
+- Context: Actual isolated processes: invalid audio/nonfinite/source changes/cancel/short clips and empty note results after PCM optimization.
+- Source SHA-256: `6f4fa2447d5e2e6df9611c9b35b2aa5599bf2dbe71683714e08986349b201d5c`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T064613.314684Z-79d62ebf3d.json) · [Raw log](../build-logs/20261105T064613.314684Z-79d62ebf3d.log)
+- [Exact process output](../build-logs/20261105T064613.314684Z-79d62ebf3d.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:47:27+08:00 · analysis-public-music-probe · succeeded
+
+- Config: CPU/CUDA isolated workers; exit code: 0; elapsed: 71.709s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe scripts/audio_analysis/public_probe.py`
+- Context: Attribution-first CC-BY3.0 excerpts from official Librosa fixture mirror; real-model pipeline checks only, no musical quality scores.
+- Source SHA-256: `a242b9eeab373525bad7c010455b5574072ea366b5ec49a1dc2ef8989c76c815`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T064727.473877Z-60411a1965.json) · [Raw log](../build-logs/20261105T064727.473877Z-60411a1965.log)
+- [Exact process output](../build-logs/20261105T064727.473877Z-60411a1965.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:50:15+08:00 · analysis-agent-parameter-chord-tests · succeeded
+
+- Config: Python; exit code: 0; elapsed: 11.843s.
+- Command: `python -m unittest discover -s tests -p test_music_agent_analysis.py -v`
+- Context: Shared stdlib worker parameter schema plus confirmed chord edit/readback/Undo runtime; deterministic fixtures.
+- Source SHA-256: `fbee31b2ab9ce2a28d0efdf3b44a21c9efb0f8c719c090f838480a516638e4d5`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T065015.367980Z-489f3efe20.json) · [Raw log](../build-logs/20261105T065015.367980Z-489f3efe20.log)
+- [Exact process output](../build-logs/20261105T065015.367980Z-489f3efe20.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:51:05+08:00 · analysis-running-cancel-probe · succeeded
+
+- Config: CUDA/CPU registered provider; exit code: 0; elapsed: 38.051s.
+- Command: `C:\Python314\python.exe scripts/audio_analysis/cancel_probe.py`
+- Context: Request cooperative cancellation during actual HTDemucs inference and verify exit/no immutable result; owned-process kill only on probe timeout.
+- Source SHA-256: `925d805547cf37765910e3209cb511ce65b71334b3353906a8fbf64d57a247b2`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T065105.134776Z-8ca543b072.json) · [Raw log](../build-logs/20261105T065105.134776Z-8ca543b072.log)
+- [Exact process output](../build-logs/20261105T065105.134776Z-8ca543b072.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:51:59+08:00 · analysis-worker-final-verification · succeeded
+
+- Config: Python3.10 CPU/CUDA; exit code: 0; elapsed: 2.668s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_audio_analysis_workers.py -v`
+- Context: Final worker source regression: protocol/numeric tests and real synthetic model pipeline. Independent DAW integration remains separate.
+- Source SHA-256: `b17ceb1d1750ec5dcebacb8312950c44b23c4cc5b85951595edd1822545a83a0`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T065159.135733Z-8f1aeaf33c.json) · [Raw log](../build-logs/20261105T065159.135733Z-8f1aeaf33c.log)
+- [Exact process output](../build-logs/20261105T065159.135733Z-8f1aeaf33c.raw.log)
+
+### 2026-11-05T14:52:02+08:00 · analysis-worker-final-verification · succeeded
+
+- Config: Python3.10 CPU/CUDA; exit code: 0; elapsed: 5.156s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe -m unittest discover -s tests -p test_audio_analysis_workers.py -v`
+- Context: Final worker source regression: protocol/numeric tests and real synthetic model pipeline. Independent DAW integration remains separate.
+- Source SHA-256: `b17ceb1d1750ec5dcebacb8312950c44b23c4cc5b85951595edd1822545a83a0`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T065202.283947Z-a854c5ffbb.json) · [Raw log](../build-logs/20261105T065202.283947Z-a854c5ffbb.log)
+- [Exact process output](../build-logs/20261105T065202.283947Z-a854c5ffbb.raw.log)
+
+### 2026-11-05T14:38:38+08:00 · audio-analysis-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 816.876s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Fix native var-key compile errors; integrate bounded stem audition and authoritative persisted stem roles.
+- Source SHA-256: `b28a66e661d30c5ccc17bcb12cc3df2d0e7d03dd4e4c55965254d13b92575732`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T063838.749495Z-a31bab84c3.json) · [Raw log](../build-logs/20261105T063838.749495Z-a31bab84c3.log)
+- [Exact process output](../build-logs/20261105T063838.749495Z-a31bab84c3.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T14:52:07+08:00 · analysis-worker-final-verification · succeeded
+
+- Config: Python3.10 CPU/CUDA; exit code: 0; elapsed: 45.665s.
+- Command: `C:\Python314\python.exe scripts/audio_analysis/probe.py --duration 8`
+- Context: Final worker source regression: protocol/numeric tests and real synthetic model pipeline. Independent DAW integration remains separate.
+- Source SHA-256: `b17ceb1d1750ec5dcebacb8312950c44b23c4cc5b85951595edd1822545a83a0`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T065207.928250Z-9b7c257b8b.json) · [Raw log](../build-logs/20261105T065207.928250Z-9b7c257b8b.log)
+- [Exact process output](../build-logs/20261105T065207.928250Z-9b7c257b8b.raw.log)
+
+### 2026-11-05T06:53:19.265868+00:00 - analysis UI candidate-state review (awaiting build)
+
+- Added revision-aware stale checks and historical import vs current-project presence; Undo disables duplicate import and points to Redo. Valid candidates can be retried after an unrelated apply conflict.
+- Saved chord scores are explicitly original analysis scores, not confidence in a corrected label. Label-only edits preserve exact timing; concurrent edits require a new row selection.
+- Added synthetic UI projection coverage for stale/Undo/Redo. No repeat test run before the new binary is available.
+
+### 2026-11-05T14:54:01+08:00 · analysis-agent-real-e2e · failed
+
+- Config: Release/offline; exit code: 1; elapsed: 24.980s.
+- Command: `python tests/MusicAgentAnalysisIntegration.py --exe E:/emusician-analysis-build/bin/Release/E-musician.exe --timeout 180`
+- Context: Real native DAW and local Chroma/HMM with deterministic LLM; EXE copied to owned fixture directory to avoid concurrent build file locks.
+- Source SHA-256: `b533d25061d2d21fe1a2fc553cf854c23a9bdb26a3deae24d74c471d036e3d7a`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T065401.096051Z-ff17ecfb6e.json) · [Raw log](../build-logs/20261105T065401.096051Z-ff17ecfb6e.log)
+- [Exact process output](../build-logs/20261105T065401.096051Z-ff17ecfb6e.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T065401.096051Z-ff17ecfb6e.log
+
+### 2026-11-05 Audio analysis worker implementation handoff
+
+- Implemented isolated real HTDemucs, Basic Pitch ONNX and original STFT/chroma/Viterbi workers with frozen source ranges, hashes, bounded candidates, progress/cancellation and CPU thread caps. No project editing or API credentials in worker.
+- Installed pinned Python3.10 environments/models on E only. Official model/package provenance and license notices retained. CUDA12.4 validated on existing RTX3050/555.99 driver; CPU fallback environment preserved.
+- Corrected missing legacy pkg_resources dependency discovered by real transcription; replaced redundant decoding/JIT preprocessing and removed unused pitch-bend computation. Initial failures remain in build logs.
+- Final worker execution SHA 25ecddd7a242e1484441131a70d905b318063282848032374684ee8568a5b40d: 19 isolated unit/numeric checks, 12 real-process edge cases, actual running cancellation, three real synthetic inference paths and attributed CC-BY public-music pipelines passed. System Python intentionally skips 4 optional numeric tests.
+- Review: docs/review/2026-11-05-audio-analysis/WORKER-RESULTS.md. Native DAW/Agent integration, physical ASIO and listening remain separate acceptance. No OOM stress or musical-accuracy score claimed.
+
+### 2026-11-05T14:55:24+08:00 · analysis-agent-real-e2e · succeeded
+
+- Config: Release/offline/intermediate; exit code: 0; elapsed: 32.037s.
+- Command: `python tests/MusicAgentAnalysisIntegration.py --exe E:/emusician-analysis-build/bin/Release/E-musician.exe --timeout 180`
+- Context: Correct fixture to explicit project scope: stdio has no genuine GUI selection. Copy native executable before run; real chords plus deterministic LLM.
+- Source SHA-256: `ee25ea05140751b09432c81905c44e56a763e4c3102bb0281a73f5498a98875e`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T065524.023732Z-4131701d0f.json) · [Raw log](../build-logs/20261105T065524.023732Z-4131701d0f.log)
+- [Exact process output](../build-logs/20261105T065524.023732Z-4131701d0f.raw.log)
+
+### 2026-11-05T14:54:29+08:00 · audio-analysis-build · succeeded
+
+- Config: Release; exit code: 0; elapsed: 279.204s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Integration rebuild: retain active history, direct chord edits, MP3 source-cache identity, sample-contained ranges, version upgrade backup and audition UI state.
+- Source SHA-256: `b533d25061d2d21fe1a2fc553cf854c23a9bdb26a3deae24d74c471d036e3d7a`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T065429.978825Z-ff6f8374c6.json) · [Raw log](../build-logs/20261105T065429.978825Z-ff6f8374c6.log)
+- [Exact process output](../build-logs/20261105T065429.978825Z-ff6f8374c6.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T15:01:38+08:00 · analysis-agent-real-e2e · succeeded
+
+- Config: Release/offline/rebuilt; exit code: 0; elapsed: 33.212s.
+- Command: `python tests/MusicAgentAnalysisIntegration.py --exe E:/emusician-analysis-build/bin/Release/E-musician.exe --timeout 180`
+- Context: Repeat actual Agent+native+local-chord integration after native boundary fixes, using a copied binary. No paid LLM or physical device.
+- Source SHA-256: `67c8731dd7ca1459793c040b8501c90f166485e37c001841d99c008b54c38366`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T070138.696084Z-1c52af9916.json) · [Raw log](../build-logs/20261105T070138.696084Z-1c52af9916.log)
+- [Exact process output](../build-logs/20261105T070138.696084Z-1c52af9916.raw.log)
+
+### 2026-11-05T15:02:12+08:00 · analysis-agent-real-e2e · succeeded
+
+- Config: Release/offline/rebuilt; exit code: 0; elapsed: 9.111s.
+- Command: `python -m unittest discover -s tests -p test_music_agent_analysis.py -v`
+- Context: Repeat actual Agent+native+local-chord integration after native boundary fixes, using a copied binary. No paid LLM or physical device.
+- Source SHA-256: `67c8731dd7ca1459793c040b8501c90f166485e37c001841d99c008b54c38366`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T070212.379286Z-5e3f423538.json) · [Raw log](../build-logs/20261105T070212.379286Z-5e3f423538.log)
+- [Exact process output](../build-logs/20261105T070212.379286Z-5e3f423538.raw.log)
+
+### 2026-11-05T15:01:45+08:00 · audio-analysis-final-candidate · succeeded
+
+- Config: Release; exit code: 0; elapsed: 109.105s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Final integration fixes: cancellation admission, atomic-import rollback path, active task history smoke, contained sample ranges. Run original CTest suite before real-model DAW tests.
+- Source SHA-256: `67c8731dd7ca1459793c040b8501c90f166485e37c001841d99c008b54c38366`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T070145.636407Z-f9493a8419.json) · [Raw log](../build-logs/20261105T070145.636407Z-f9493a8419.log)
+- [Exact process output](../build-logs/20261105T070145.636407Z-f9493a8419.raw.log)
+
+### 2026-11-05T15:04:29+08:00 - Agent analysis joint verification
+
+- New EXE c0f0492711157904396416d31a6cc7abbe546faaa89170894084f3ab6b714f75: 8 actual owned-DAW/local-Chroma-HMM checks passed with a deterministic language Provider (070138.696084Z-1c52af9916). No paid API, physical device or music-accuracy claim. User settings were unchanged.
+- Confirmed candidate sharing, asynchronous import/readback, deduplication, Undo/Redo, persisted chord edit/readback/Undo, save/reopen, and local progress polling with two mocked LLM calls. Final analysis contract tests 17/17 passed (070212.379286Z-5e3f423538).
+- Earlier real integration failure was an invalid test assumption about GUI selection in stdio mode (065401...); changed test to explicitly authorized project scope without fabricating selection. Intermediate and rebuilt binaries both passed after that correction.
+- Agent source/test implementation now frozen pending repository-wide final verification. Details and review evidence: docs/review/2026-11-05-audio-analysis/AGENT-NOTES.md and AGENT-E2E.json.
+
+### 2026-11-05T15:03:35+08:00 · audio-analysis-final-candidate · succeeded
+
+- Config: Release; exit code: 0; elapsed: 165.418s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Final integration fixes: cancellation admission, atomic-import rollback path, active task history smoke, contained sample ranges. Run original CTest suite before real-model DAW tests.
+- Source SHA-256: `67c8731dd7ca1459793c040b8501c90f166485e37c001841d99c008b54c38366`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T070335.233359Z-9595766b5c.json) · [Raw log](../build-logs/20261105T070335.233359Z-9595766b5c.log)
+- [Exact process output](../build-logs/20261105T070335.233359Z-9595766b5c.raw.log)
+
+### 2026-11-05T15:07:40+08:00 · audio-analysis-native-e2e · failed
+
+- Config: Release; exit code: 1; elapsed: 24.071s.
+- Command: `C:\Python314\python.exe tests/AudioAnalysisEndToEnd.py --exe E:/emusician-analysis-build/bin/Release/E-musician.exe --old-exe E:/MusicAgent&DAW/releases/0.8.1-20261105/E-musician.exe --timeout 300`
+- Context: Final candidate real local models through offline DAW: separation, transcription, chords, immutable import, one Undo, saved schema5, original0.8.1 rejection, MP3 cache identity, concurrent save, cancel. No physical sound or paid model API.
+- Source SHA-256: `67c8731dd7ca1459793c040b8501c90f166485e37c001841d99c008b54c38366`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T070740.049413Z-af7d85f6fa.json) · [Raw log](../build-logs/20261105T070740.049413Z-af7d85f6fa.log)
+- [Exact process output](../build-logs/20261105T070740.049413Z-af7d85f6fa.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T070740.049413Z-af7d85f6fa.log
+
+### 2026-11-05T15:07:46+08:00 · analysis-agent-final-regression · succeeded
+
+- Config: Python/frozen; exit code: 0; elapsed: 107.767s.
+- Command: `python -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Final complete Agent suite after source freeze; deterministic Providers and host fixtures only, no model inference or paid API.
+- Source SHA-256: `67c8731dd7ca1459793c040b8501c90f166485e37c001841d99c008b54c38366`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T070746.703832Z-703f07338e.json) · [Raw log](../build-logs/20261105T070746.703832Z-703f07338e.log)
+- [Exact process output](../build-logs/20261105T070746.703832Z-703f07338e.raw.log)
+
+
+## 2026-11-05 - Real DAW analysis import Undo correction
+
+Real-model E2E 070740-af7d85 failed after pitched MIDI import: one Undo consumed only delayed Tracktion clip properties, leaving the track. Chord import had passed. Cause matches existing batch transaction contract; analysis acceptance now calls recordEdit(false) so deferred native writes remain in the import transaction until the next explicit edit/save/Undo. Rebuild and native real-model rerun required; failed report retained under build/analysis-e2e/421de0b5-7ae4-4913-8cb6-7d6dbc9ac5fa. No user project changed.
+
+### 2026-11-05T15:10:02.523157+08:00 - analysis native UI visual review passed
+
+- Inspected existing CTest captures at 600x260, 930x308, 1000x650 and 1280x800; no extra test run or source-code change. Controls and Analyze entry remain legible without overlap.
+- Confirmed native analysis UI and offline audition flags in arrangement-report.json; physical hardware flag remains false. These captures show model-ready initial state, not inference quality.
+- Final CTest record: [20261105T070335.233359Z-9595766b5c](builds/20261105T070335.233359Z-9595766b5c.json).
+- [Review and image hashes](review/2026-11-05-audio-analysis/UI-VERIFICATION.json); [UI notes](review/2026-11-05-audio-analysis/UI-NOTES.md).
+
+- Clarification for the preceding UI review: its CTest record and captures belong to the intermediate candidate before the native MIDI-import Undo correction. UI and audition source hashes match that capture; final binary validation remains owned by the root build workflow.
+
+### 2026-11-05T15:09:47+08:00 · audio-analysis-undo-fix · succeeded
+
+- Config: Release; exit code: 0; elapsed: 108.410s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Keep deferred Tracktion clip/track initialization in the single analysis import Undo transaction; regression is real-model E2E.
+- Source SHA-256: `39b54ff3391d30e2c297dfd95684279055468c838cebc16b1aeb5020892e727e`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T070947.517301Z-76bfa3b2f8.json) · [Raw log](../build-logs/20261105T070947.517301Z-76bfa3b2f8.log)
+- [Exact process output](../build-logs/20261105T070947.517301Z-76bfa3b2f8.raw.log)
+
+### 2026-11-05T15:11:36+08:00 · audio-analysis-undo-fix · succeeded
+
+- Config: Release; exit code: 0; elapsed: 150.502s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Keep deferred Tracktion clip/track initialization in the single analysis import Undo transaction; regression is real-model E2E.
+- Source SHA-256: `39b54ff3391d30e2c297dfd95684279055468c838cebc16b1aeb5020892e727e`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T071136.339835Z-6a11c72093.json) · [Raw log](../build-logs/20261105T071136.339835Z-6a11c72093.log)
+- [Exact process output](../build-logs/20261105T071136.339835Z-6a11c72093.raw.log)
+
+### 2026-11-05T15:15:25+08:00 · audio-analysis-native-e2e · failed
+
+- Config: Release; exit code: 1; elapsed: 80.738s.
+- Command: `C:\Python314\python.exe tests/AudioAnalysisEndToEnd.py --exe E:/emusician-analysis-build/bin/Release/E-musician.exe --old-exe E:/MusicAgent&DAW/releases/0.8.1-20261105/E-musician.exe --timeout 300`
+- Context: Rerun real three-model DAW chain after atomic MIDI Undo fix; original version compatibility, upgrade backup, MP3 identity, concurrent save and cancel included.
+- Source SHA-256: `39b54ff3391d30e2c297dfd95684279055468c838cebc16b1aeb5020892e727e`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T071525.049961Z-7b04917f24.json) · [Raw log](../build-logs/20261105T071525.049961Z-7b04917f24.log)
+- [Exact process output](../build-logs/20261105T071525.049961Z-7b04917f24.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T071525.049961Z-7b04917f24.log
+
+
+## 2026-11-05 - Concurrent save admission correction
+
+Real-model E2E 071525-7b0491 passed all three imports/Undo/Redo, chord correction, schema4 upgrade backup, schema5 reopen, old0.8.1 rejection and stale mapping. It then exposed a second legacy all-file-task guard in performJob which still rejected Save during inference. Centralized both admission checks in hasBlockingFileTask; heavy inference remains separate from short project file tasks, and analysis.accept still blocks competing file commits. Rerun required; failed eight-check report retained at build/analysis-e2e/c634eb04-e4fd-4aa0-ad29-37a014a1fc62.
+
+### 2026-11-05T15:18:59+08:00 · audio-analysis-save-admission-fix · succeeded
+
+- Config: Release; exit code: 0; elapsed: 75.711s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Unify legacy performJob and startJob admission so inference does not block ordinary Save; keep acceptance commit exclusion.
+- Source SHA-256: `853e9e7adab3b594d33f1492443b02b9f3be473c172f36e6b179d05de0eaeda0`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T071859.811490Z-ed3f4fb201.json) · [Raw log](../build-logs/20261105T071859.811490Z-ed3f4fb201.log)
+- [Exact process output](../build-logs/20261105T071859.811490Z-ed3f4fb201.raw.log)
+
+### 2026-11-05T15:20:15+08:00 · audio-analysis-save-admission-fix · succeeded
+
+- Config: Release; exit code: 0; elapsed: 110.173s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Unify legacy performJob and startJob admission so inference does not block ordinary Save; keep acceptance commit exclusion.
+- Source SHA-256: `853e9e7adab3b594d33f1492443b02b9f3be473c172f36e6b179d05de0eaeda0`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T072015.784874Z-3984952ff9.json) · [Raw log](../build-logs/20261105T072015.784874Z-3984952ff9.log)
+- [Exact process output](../build-logs/20261105T072015.784874Z-3984952ff9.raw.log)
+
+### 2026-11-05T15:25:03+08:00 · analysis-agent-manual-cancel-tests · succeeded
+
+- Config: Python; exit code: 0; elapsed: 4.331s.
+- Command: `python -m unittest discover -s tests -p test_music_agent_analysis.py -v`
+- Context: Scoped cancellation of GUI-started analysis; reject other scopes/projects, terminal jobs and queued imports. No model or hardware.
+- Source SHA-256: `06a69473916ec7d6c354404bd7edf01a4e4760c7c3ea88ffaf64c06c3cbf67fc`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T072503.128511Z-f9d49b949a.json) · [Raw log](../build-logs/20261105T072503.128511Z-f9d49b949a.log)
+- [Exact process output](../build-logs/20261105T072503.128511Z-f9d49b949a.raw.log)
+
+### 2026-11-05T15:26:07+08:00 · analysis-agent-final-regression · succeeded
+
+- Config: Python; exit code: 0; elapsed: 41.304s.
+- Command: `python -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Full Agent suite after scoped manual-job cancellation; no inference, paid API, hardware or user project.
+- Source SHA-256: `06a69473916ec7d6c354404bd7edf01a4e4760c7c3ea88ffaf64c06c3cbf67fc`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T072607.750698Z-a7ef5dbf21.json) · [Raw log](../build-logs/20261105T072607.750698Z-a7ef5dbf21.log)
+- [Exact process output](../build-logs/20261105T072607.750698Z-a7ef5dbf21.raw.log)
+
+
+### 2026-11-05 Agent scoped cancellation follow-up
+
+- Added cancellation of manually started local analysis after authoritative project/clip/range checks. Active analysis only; generic job-kind guard rejects queued/running imports. A request is not reported as a completed cancellation before terminal confirmation.
+- Analysis contracts: 22/22 passed (20261105T072503.128511Z-f9d49b949a); all Agent tests: 267/267 passed in 39.844s (20261105T072607.750698Z-a7ef5dbf21). Raw logs and Recorder summaries retained.
+- Agent source frozen. Previous real DAW/Chroma E2E 8/8 used intermediate c0f04927 executable; final native candidate still awaits its own checks before Agent E2E is repeated. No paid language-model API or physical audio device test in this iteration.
+
+### 2026-11-05T15:32:23+08:00 · audio-analysis-native-e2e · failed
+
+- Config: Release; exit code: 1; elapsed: 38.462s.
+- Command: `C:\Python314\python.exe tests/AudioAnalysisEndToEnd.py --exe E:/emusician-analysis-build/bin/Release/E-musician.exe --old-exe E:/MusicAgent&DAW/releases/0.8.1-20261105/E-musician.exe --timeout 300`
+- Context: Final real-model native integration after unified save admission and single-step Undo fixes; no paid API or hardware listening.
+- Source SHA-256: `06a69473916ec7d6c354404bd7edf01a4e4760c7c3ea88ffaf64c06c3cbf67fc`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T073223.348230Z-4d49e63e3f.json) · [Raw log](../build-logs/20261105T073223.348230Z-4d49e63e3f.log)
+- [Exact process output](../build-logs/20261105T073223.348230Z-4d49e63e3f.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T073223.348230Z-4d49e63e3f.log
+
+## 2026-11-05 ? Analysis save/rebind regression
+
+Real native E2E 073223 (EXE 56609e46) passed the first eight groups, including all three models and single Undo/Redo. Concurrent Save now succeeded, exposing a second boundary: the verified archive copy updates canonical media paths, and analysisSourceMatches incorrectly treated that as an edit. Added a control-thread-only boundOriginal updated only by successful same-project/asset Save rebinding; worker source paths remain immutable. Acceptance additionally fingerprints the captured archived source. E2E now requires both save-during-inference and save-after-ready followed by successful import. Prior failure retained; pending new build/test.
+
+### 2026-11-05T15:36:24+08:00 · audio-analysis-save-rebind-fix · succeeded
+
+- Config: Release; exit code: 0; elapsed: 47.090s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Preserve candidate identity across verified archive rebinding; immutable worker paths and archived-source hash validation.
+- Source SHA-256: `2bac5f96666bd76343894cf6c799b8c8c19fdf4a2fc4d1c33498a54baf406334`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T073624.929597Z-87fd9ddf94.json) · [Raw log](../build-logs/20261105T073624.929597Z-87fd9ddf94.log)
+- [Exact process output](../build-logs/20261105T073624.929597Z-87fd9ddf94.raw.log)
+
+### 2026-11-05T15:37:12+08:00 · audio-analysis-save-rebind-fix · succeeded
+
+- Config: Release; exit code: 0; elapsed: 97.995s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Preserve candidate identity across verified archive rebinding; immutable worker paths and archived-source hash validation.
+- Source SHA-256: `2bac5f96666bd76343894cf6c799b8c8c19fdf4a2fc4d1c33498a54baf406334`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T073712.229485Z-63b3237daf.json) · [Raw log](../build-logs/20261105T073712.229485Z-63b3237daf.log)
+- [Exact process output](../build-logs/20261105T073712.229485Z-63b3237daf.raw.log)
+
+### 2026-11-05T15:39:26+08:00 · audio-analysis-native-e2e · failed
+
+- Config: Release; exit code: 1; elapsed: 33.908s.
+- Command: `C:\Python314\python.exe tests/AudioAnalysisEndToEnd.py --exe E:/emusician-analysis-build/bin/Release/E-musician.exe --old-exe E:/MusicAgent&DAW/releases/0.8.1-20261105/E-musician.exe --timeout 300`
+- Context: Real-model native integration after save path rebinding fix, including save during inference and after ready before import.
+- Source SHA-256: `2bac5f96666bd76343894cf6c799b8c8c19fdf4a2fc4d1c33498a54baf406334`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T073926.110332Z-52d25d4511.json) · [Raw log](../build-logs/20261105T073926.110332Z-52d25d4511.log)
+- [Exact process output](../build-logs/20261105T073926.110332Z-52d25d4511.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T073926.110332Z-52d25d4511.log
+
+## 2026-11-05 ? Analysis cancellation status correction
+
+Real native E2E 073926 passed nine groups on EXE 4a9a6746, including save during analysis, save after ready, and subsequent import. Its last immediate-cancel check exposed a status mapping bug: cancellation during the initial source fingerprint returned failed with a Cancelled message. Updated source/result/stem/preview fingerprint error branches to report cancelled when the owned job cancellation flag is set. No candidate was imported by this failure. This is a status correction, not proof of instantaneous cancellation during a model forward pass; worker and host cancellation evidence remain separate. Pending final rebuild and full E2E.
+
+## 2026-11-05 ? Independent native pipeline review
+
+Read-only review of task lifetime, acceptance/rollback, project switching and concurrent save confirmed the Save rebind correction. One additional performance finding: rapidly selecting stems started new full-file hash jobs without cancelling superseded ones (only their later publication was rejected). New preview requests now cancel existing owned preview jobs before starting a new hash; fingerprint checks cancellation per chunk. Bounded PCM preview generation/race tests remain in native smoke; physical long-stem ASIO load is not claimed verified. No other definite blocking issue was found in this review.
+
+### 2026-11-05T15:43:07+08:00 · audio-analysis-cancel-preview-fix · succeeded
+
+- Config: Release; exit code: 0; elapsed: 46.453s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Final cancellation status mapping and superseded-preview hash cancellation after independent review.
+- Source SHA-256: `0b1942e811c457ea55522f03dcbc9aa9620198833633df32a25a2d4a869885ee`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T074307.082810Z-67de74987c.json) · [Raw log](../build-logs/20261105T074307.082810Z-67de74987c.log)
+- [Exact process output](../build-logs/20261105T074307.082810Z-67de74987c.raw.log)
+
+### 2026-11-05T15:43:53+08:00 · audio-analysis-cancel-preview-fix · succeeded
+
+- Config: Release; exit code: 0; elapsed: 99.128s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Final cancellation status mapping and superseded-preview hash cancellation after independent review.
+- Source SHA-256: `0b1942e811c457ea55522f03dcbc9aa9620198833633df32a25a2d4a869885ee`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T074353.707616Z-6b944fe14f.json) · [Raw log](../build-logs/20261105T074353.707616Z-6b944fe14f.log)
+- [Exact process output](../build-logs/20261105T074353.707616Z-6b944fe14f.raw.log)
+
+### 2026-11-05T15:45:49+08:00 · audio-analysis-native-e2e · succeeded
+
+- Config: Release; exit code: 0; elapsed: 35.736s.
+- Command: `C:\Python314\python.exe tests/AudioAnalysisEndToEnd.py --exe E:/emusician-analysis-build/bin/Release/E-musician.exe --old-exe E:/MusicAgent&DAW/releases/0.8.1-20261105/E-musician.exe --timeout 300`
+- Context: Final real-model native integration after cancellation status and superseded-preview hash correction.
+- Source SHA-256: `0b1942e811c457ea55522f03dcbc9aa9620198833633df32a25a2d4a869885ee`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T074549.172359Z-ec1084c7eb.json) · [Raw log](../build-logs/20261105T074549.172359Z-ec1084c7eb.log)
+- [Exact process output](../build-logs/20261105T074549.172359Z-ec1084c7eb.raw.log)
+
+### 2026-11-05T15:48:02+08:00 · analysis-agent-real-e2e · succeeded
+
+- Config: Release/offline/final; exit code: 0; elapsed: 20.181s.
+- Command: `python tests/MusicAgentAnalysisIntegration.py --exe E:/emusician-analysis-build/bin/Release/E-musician.exe --timeout 180`
+- Context: Final ab72da94 candidate; real local Chroma/HMM, isolated DAW, deterministic language-provider fixture, no paid API or physical audio.
+- Source SHA-256: `0b1942e811c457ea55522f03dcbc9aa9620198833633df32a25a2d4a869885ee`; Git HEAD: `5eb32e7c8b7b2a26896691696f593fb4482e3018`.
+- [Record](builds/20261105T074802.178260Z-ae9628ca88.json) · [Raw log](../build-logs/20261105T074802.178260Z-ae9628ca88.log)
+- [Exact process output](../build-logs/20261105T074802.178260Z-ae9628ca88.raw.log)
+
+
+### 2026-11-05 Final Agent analysis integration verified
+
+- Recorder 20261105T074802.178260Z-ae9628ca88: 8/8 real isolated DAW + real local Chroma/HMM checks passed against final EXE SHA-256 ab72da94a525fb3dbdc7937e355f8cc7dd8a43c2f1a3eda6e90867313a58a155. Child test and wrapper exited 0; protected application settings unchanged.
+- Verified manual/Agent shared candidates, explicit confirmation, async import receipt/readback, deduplication, Undo/Redo, persisted chord editing, save/reopen, local progress polling without paid model calls, and actual seven-group capability state. Language provider was deterministic test data, not GPT/Kimi.
+- Final report: docs/review/2026-11-05-audio-analysis/AGENT-E2E.json; previous c0f04927 report retained separately. Contract/regression remains 267/267. Genuine GUI selection, native WebView, musical quality and physical ASIO remain manual checks; no performance or model-accuracy claim inferred from these tests.
+
+## 2026-11-05 — 0.9.0 final automated verification and handoff preparation
+
+Final build 074307 and CTest 074353 passed; native real-model E2E 074549 passed all 10 groups; final Agent E2E 074802 passed all 8 groups on the same ab72da94 EXE. Frozen source digest is 0b1942e8 (188 inputs); Agent contract sources have not changed since 267/267 regression 072607. Root independently rechecked old 0.8.1 source/EXE hashes and unchanged UI source evidence. RESULT, VERIFICATION, manual guide, context, development plan, architecture, UI reference and README now state actual status and outstanding human checks. Original C-worktree CONTEXT received only a pointer to the new worktree; original source/EXE remain unchanged.
+
+Recorder clarification: native E2E test process exited 0, report passed=true and all ten groups passed. The temporary outer shell wrapper incorrectly executed SystemExit(CommandResult), causing its outer Python process to exit 1 after successful recording. This wrapper mistake is preserved here; no DAW/test evidence was rewritten and no unnecessary model rerun was used to conceal it. Final Agent wrapper exited 0 normally.
+
+No paid chat API call or desktop computer-use in this batch. Local model inference, mocked language-provider tests and human hardware/quality acceptance remain separate. Source review/secret scan, commit and release archive are the remaining packaging steps.
+
+## 2026-11-05 ? Packaging audit
+
+Changed text/source records contain no credential-like key matches; three baseline test-fixture occurrences remain byte-equivalent after line-ending normalization, no keys were printed. Repository candidates have no files above 20 MiB, no model weights/runtimes/cache, and current/review document links resolve. git diff --check passed. Source and final executable remain frozen. New explicit launcher and VS Code JSON were checked; no GUI was launched and no user preferences were changed by packaging. Evidence: PACKAGING-CHECK.json.

@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "mode": "owned-offline-DAW-real-local-chords",
+  "physical_audio": false,
+  "external_llm": false,
+  "music_accuracy_claim": false,
+  "input_executable": "E:\\emusician-analysis-build\\bin\\Release\\E-musician.exe",
+  "exe_sha256": "c0f0492711157904396416d31a6cc7abbe546faaa89170894084f3ab6b714f75",
+  "checks": [
+    "Actual host commands and local chord runtime advertise readiness; no API key used",
+    "Manual native start executes real Chroma/HMM; Agent reads same immutable result with no project changes",
+    "Agent confirmation submits one asynchronous native import; receipt/regions verified after completion",
+    "Plan and candidate deduplicate; one Undo removes all chord regions and Redo restores them",
+    "Persisted chord label can be proposed, confirmed, independently read back and undone through Agent",
+    "Chord source provenance and labels survive real project save/reopen; original audio remains",
+    "Agent starts and locally polls real inference, then prepares review with exactly two mocked LLM requests; no automatic import",
+    "Fixed seven-group UI capability state comes from actual host, adapter and local model readiness"
+  ],
+  "initial_selection": {
+    "project_id": "102261133bb64c06915725fe524a23db",
+    "active_track_id": "",
+    "active_clip_id": "",
+    "track_ids": [],
+    "clip_ids": [],
+    "note_clip_id": "",
+    "note_ids": [],
+    "note_count": 0,
+    "notes_truncated": false,
+    "time_range": {
+      "active": false,
+      "start_seconds": 0.0,
+      "end_seconds": 0.0
+    },
+    "focus": "none",
+    "available": true,
+    "selection_revision": 1,
+    "project_revision": 1
+  },
+  "protected_settings_unchanged": true
+}

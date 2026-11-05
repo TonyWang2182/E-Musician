@@ -79,7 +79,7 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
             if(c.sourceOffset+c.duration>p->second.duration+1.0e-9)return fail("Clip exceeds its source audio.");
         }
     }
-    s.schemaVersion=4;
+    s.schemaVersion=s.analyses.empty()&&s.chordRegions.empty()?4:5;
     if(auto r=storage::validate(s);r.failed())return fail(r.getErrorMessage());
     if(auto r=production::validateGraph(s);r.failed())return fail(r.getErrorMessage());
     std::map<juce::String,te::AudioTrack*> tracks;
@@ -116,6 +116,24 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
         }return juce::Result::ok();
     };
     auto meta=metadata(target);
+    // Host-owned metadata is stored in the same authoritative Edit tree and
+    // Undo transaction as the accepted tracks, never a second writable model.
+    const auto syncMetadata=[&](const char* name,const juce::ValueTree& next){
+        auto old=meta.getChildWithName(name);
+        if(old.isValid()&&old.isEquivalentTo(next))return;
+        if(old.isValid())meta.removeChild(old,um);
+        if(next.getNumChildren()>0)meta.addChild(next,-1,um);
+    };
+    juce::ValueTree analysisTree("EM_ANALYSES"),chordTree("EM_CHORDS");
+    for(const auto& a:s.analyses){juce::ValueTree v("ANALYSIS");
+        for(const auto& [k,x]:std::initializer_list<std::pair<juce::Identifier,juce::var>>{{"id",a.id},{"kind",a.kind},{"model_id",a.modelId},{"model_version",a.modelVersion},{"source_clip_id",a.sourceClipId},{"source_asset_id",a.sourceAssetId},{"source_sha256",a.sourceSha256},{"result_sha256",a.resultSha256},{"parameters_json",a.parametersJson},{"start_seconds",a.startSeconds},{"duration_seconds",a.durationSeconds}})v.setProperty(k,x,nullptr);
+        analysisTree.addChild(v,-1,nullptr);
+    }
+    for(const auto& c:s.chordRegions){juce::ValueTree v("CHORD");
+        for(const auto& [k,x]:std::initializer_list<std::pair<juce::Identifier,juce::var>>{{"id",c.id},{"label",c.label},{"analysis_id",c.analysisId},{"start_seconds",c.startSeconds},{"end_seconds",c.endSeconds},{"score",c.score},{"uncertain",c.uncertain}})v.setProperty(k,x,nullptr);
+        chordTree.addChild(v,-1,nullptr);
+    }
+    // Defer publishing until plugin validation has succeeded below.
     std::set<juce::String> nativeIds;
     const auto collectNative=[&](const auto& list)->juce::Result{for(const auto& plugin:list)if(plugin.format=="E-musician"){
         std::vector<juce::String> ids;if(auto r=storage::nativePluginAssetIds(plugin,ids);r.failed())return r;
@@ -127,6 +145,7 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
     if(auto r=preparePlugins(s.masterPlugins,meta);r.failed())return fail(r.getErrorMessage());
     for(const auto& t:s.tracks)if(auto r=preparePlugins(t.plugins,tracks.contains(t.id)?tracks[t.id]->state:juce::ValueTree());r.failed())return fail(r.getErrorMessage());
 
+    syncMetadata("EM_ANALYSES",analysisTree);syncMetadata("EM_CHORDS",chordTree);
     auto nativeAssets=meta.getChildWithName("EM_NATIVE_ASSETS");
     if(!nativeAssets.isValid()&&!nativeIds.empty())nativeAssets=meta.getOrCreateChildWithName("EM_NATIVE_ASSETS",um);
     if(nativeAssets.isValid()){
@@ -223,7 +242,7 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
                 audio->setResamplingQuality(te::ResamplingQuality::sincMedium);
                 audio->setFadeInType(te::AudioFadeCurve::linear);audio->setFadeOutType(te::AudioFadeCurve::linear);
                 audio->setFadeIn(te::TimeDuration::fromSeconds(c.fadeIn));audio->setFadeOut(te::TimeDuration::fromSeconds(c.fadeOut));
-                clip->state.setProperty(emAsset,c.assetId,um);clip->state.setProperty(emSource,assets.at(c.assetId).source.getFullPathName(),um);
+                clip->state.setProperty("emAnalysisRole",c.analysisRole,um);clip->state.setProperty(emAsset,c.assetId,um);clip->state.setProperty(emSource,assets.at(c.assetId).source.getFullPathName(),um);
             }
         }
     }

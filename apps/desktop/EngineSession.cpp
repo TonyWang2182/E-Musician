@@ -5,6 +5,7 @@
 #include "NativeInstrument.h"
 #include "NativeEffects.h"
 #include "NativeLoadQueue.h"
+#include "AnalysisPreview.h"
 #include "EngineSessionProduction.h"
 #include "core/commands/RevisionGuard.hpp"
 #include "core/time/Time.hpp"
@@ -140,10 +141,13 @@ juce::String contentKey(const storage::StoredProject& s,const std::function<juce
         o.writeBool(t.muted);o.writeBool(t.solo);for(const auto& p:t.plugins)plugin(p);
         o.writeString(t.inputDeviceId);o.writeString(t.outputTargetId);lanes(t.automation);
         for(const auto& send:t.sends){o.writeString(send.id);o.writeString(send.targetTrackId);o.writeFloat(send.gainDb);o.writeBool(send.preFader);o.writeBool(send.enabled);}
-        for(const auto& c:t.clips){o.writeString(c.id);o.writeString(c.kind);o.writeString(c.assetId);time(c.timelineStart);time(c.sourceOffset);time(c.duration);time(c.fadeIn);time(c.fadeOut);
+        for(const auto& c:t.clips){o.writeString(c.id);o.writeString(c.kind);o.writeString(c.assetId);o.writeString(c.analysisRole);time(c.timelineStart);time(c.sourceOffset);time(c.duration);time(c.fadeIn);time(c.fadeOut);
             if(c.kind=="midi"){time(c.startBeats);time(c.lengthBeats);o.writeString(noteKey?noteKey(c.id):noteContentKey(c.notes));for(const auto& event:c.controllers){o.writeString(event.id);time(event.beats);o.writeInt(event.type);o.writeInt(event.value);o.writeInt(event.metadata);}}
         }
-    }return sessionSha256(o.getData(),o.getDataSize());
+    }
+    for(const auto& a:s.analyses){o.writeString(a.id);o.writeString(a.kind);o.writeString(a.modelId);o.writeString(a.modelVersion);o.writeString(a.sourceClipId);o.writeString(a.sourceAssetId);o.writeString(a.sourceSha256);o.writeString(a.resultSha256);o.writeString(a.parametersJson);time(a.startSeconds);time(a.durationSeconds);}
+    for(const auto& c:s.chordRegions){o.writeString(c.id);o.writeString(c.label);o.writeString(c.analysisId);time(c.startSeconds);time(c.endSeconds);time(c.score);o.writeBool(c.uncertain);}
+    return sessionSha256(o.getData(),o.getDataSize());
 }
 struct AudioInfo{double duration=0,rate=0;int channels=0;juce::String format;juce::File playbackFile;};
 juce::Result inspectAudio(const juce::File& f,AudioInfo& info){audio::PreparedSource p;auto r=audio::prepareSource(f,p);if(r.wasOk())info={p.duration,p.sampleRate,p.channels,p.format,p.playbackFile};return r;}
@@ -176,6 +180,24 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         std::atomic<bool> prepared{false};
         ~Job(){cancel=true;if(worker.joinable())worker.join();}
     };
+    struct AnalysisEntry {
+        juce::String id, kind, originalHash, resultHash;
+        juce::File original, sourceFile, directory;
+        juce::File boundOriginal; // Control-thread-only canonical path after a verified Save copy.
+        juce::var source, parameters, result, receipt;
+        std::shared_ptr<Job> job;
+        std::shared_ptr<Job> acceptJob;
+        bool applied=false;
+    };
+    std::map<juce::String,std::shared_ptr<AnalysisEntry>> analyses;
+    std::unique_ptr<AnalysisPreview> analysisPreview;
+    std::uint64_t analysisPreviewGeneration=0;
+    juce::var analysisCapabilities();
+    juce::var analysisJobs()const;
+    juce::Result analysisCommand(const juce::String&,const juce::var&,juce::var&);
+    bool analysisSourceMatches(const AnalysisEntry&)const;
+    juce::Result beginAnalysis(const juce::var&,juce::var&);
+    juce::Result acceptAnalysis(const juce::var&,juce::var&);
     te::Engine engine;
     plugins::PluginHost pluginHost{engine};commands::RevisionGuard guard{uid().toStdString()};
     production::RecordingController recording{engine};
@@ -288,7 +310,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     }
     ~Impl() override{
         *alive=false;shuttingDown=true;stopTimer();for(auto& j:jobs)j->cancel=true;
-        nativeQueue.reset();nativePending.reset();nativeRuntime.clear();
+        analysisPreview.reset();nativeQueue.reset();nativePending.reset();nativeRuntime.clear();
         for(auto& j:jobs)if(j->worker.joinable())j->worker.join();
         for(auto& j:jobs)j->commit={};jobs.clear();pluginHost.cancelScan();plugins::PluginHost::closeAllEditors(*edit);
         edit->getTransport().stop(false,false);trackMeters.clear();inputMeters.clear();masterMeter.bind(nullptr);recording.detach();pluginHost.detachEdit(*edit);edit->state.removeListener(this);noteViews.clear();transactionControl.reset();bindings.clear();edit.reset();
@@ -380,7 +402,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         s.bpm=edit->tempoSequence.getTempo(0)->getBpm();auto* sig=edit->tempoSequence.getTimeSig(0);s.numerator=sig->numerator;s.denominator=sig->denominator;
         auto m=metadata(*edit);s.loopStart=double(m.getProperty("loopStart",0.0));s.loopEnd=double(m.getProperty("loopEnd",0.0));s.masterPlugins=captureSlots(m);
         for(const auto& b:bindings){storage::StoredTrack t;t.id=b.id;t.name=b.track->getName();t.kind=b.track->state.getProperty(emKind,"audio").toString();t.gainDb=stableGain(b.track->getVolumePlugin()->getVolumeDb());t.pan=b.track->getVolumePlugin()->getPan();t.muted=b.track->isMuted(false);t.solo=b.track->isSolo(false);t.plugins=captureSlots(b.track->state);
-            for(const auto& c:b.clips){storage::StoredClip a;a.id=c.id;a.assetId=c.assetId;auto pos=c.clip->getPosition();a.timelineStart=pos.time.getStart().inSeconds();a.sourceOffset=pos.offset.inSeconds();a.duration=pos.time.getLength().inSeconds();
+            for(const auto& c:b.clips){storage::StoredClip a;a.id=c.id;a.assetId=c.assetId;a.analysisRole=c.clip->state["emAnalysisRole"].toString();auto pos=c.clip->getPosition();a.timelineStart=pos.time.getStart().inSeconds();a.sourceOffset=pos.offset.inSeconds();a.duration=pos.time.getLength().inSeconds();
                 if(auto* midi=dynamic_cast<te::MidiClip*>(c.clip.get())){a.kind="midi";a.startBeats=time::secondsToBeats(a.timelineStart,s.bpm);a.lengthBeats=time::secondsToBeats(a.duration,s.bpm);
                     if(includeNotes){const auto& notes=*noteView(c.id,*midi).notes;a.notes.reserve(notes.size());for(const auto& n:notes)a.notes.push_back({n.id,n.pitch,n.startBeats,n.lengthBeats,n.velocity,n.channel});}
                 }else if(auto* audio=dynamic_cast<te::WaveAudioClip*>(c.clip.get())){a.fadeIn=audio->getFadeIn().inSeconds();a.fadeOut=audio->getFadeOut().inSeconds();if(std::none_of(s.assets.begin(),s.assets.end(),[&](const auto& x){return x.id==c.assetId;}))s.assets.push_back({c.assetId,c.source});}
@@ -397,6 +419,9 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         for(const auto& asset:nativeAssets){const auto id=asset["id"].toString();
             if((nativeStateInvalid||nativeIds.contains(id))&&std::none_of(s.assets.begin(),s.assets.end(),[&](const auto& a){return a.id==id;}))
                 s.assets.push_back({id,juce::File(asset["source"].toString())});}
+        for(const auto& a:m.getChildWithName("EM_ANALYSES"))s.analyses.push_back({a["id"].toString(),a["kind"].toString(),a["model_id"].toString(),a["model_version"].toString(),a["source_clip_id"].toString(),a["source_asset_id"].toString(),a["source_sha256"].toString(),a["result_sha256"].toString(),a["parameters_json"].toString(),double(a["start_seconds"]),double(a["duration_seconds"])});
+        for(const auto& c:m.getChildWithName("EM_CHORDS"))s.chordRegions.push_back({c["id"].toString(),c["label"].toString(),c["analysis_id"].toString(),double(c["start_seconds"]),double(c["end_seconds"]),double(c["score"]),bool(c["uncertain"])});
+        s.schemaVersion=s.analyses.empty()&&s.chordRegions.empty()?4:5;
         production::captureGraph(*edit,s,includeControllers);return s;
     }
     juce::Result capturePluginStates(storage::StoredProject& s){
@@ -443,6 +468,8 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         if(auto r=prepare(s);r.failed())return r;candidate=te::createEmptyEdit(engine,{});if(!candidate)return fail("Could not create project.");candidate->getSceneList();auto r=applyTo(*candidate,s,next,true);if(r.wasOk()){te::TrackList::sortTracksByType(candidate->state,nullptr);candidate->getUndoManager().clearUndoHistory();}return r;
     }
     void adopt(std::unique_ptr<te::Edit> next,std::vector<Binding> bs,const juce::String& tid,const juce::String& cid={}){
+        ++analysisPreviewGeneration;if(analysisPreview)analysisPreview->stop();
+        for(const auto& j:jobs)if(j->kind.startsWith("analysis."))j->cancel=true;
         if(nativeQueue&&nativeQueueProject.isNotEmpty())nativeQueue->cancelProject(nativeQueueProject);
         nativeQueueProject.clear();nativeRuntime.clear();nativeTrackErrors.clear();nativePending.reset();nativeLastScan=std::numeric_limits<std::uint64_t>::max();
         plugins::PluginHost::closeAllEditors(*edit);edit->getTransport().stop(false,false);trackMeters.clear();inputMeters.clear();masterMeter.bind(nullptr);recording.detach();pluginHost.detachEdit(*edit);edit->state.removeListener(this);noteViews.clear();transactionControl.reset();bindings.clear();edit=std::move(next);clipClipboard={};lastPastedClipIds.clear();bindings=std::move(bs);transactionControl=std::make_unique<te::Edit::UndoTransactionInhibitor>(*edit);edit->state.addListener(this);recording.attach(*edit,recordingDirectory());
@@ -450,6 +477,10 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     }
     void timerCallback() override;
     void reapFinishedJobs(bool applyCommits);
+    bool hasBlockingFileTask()const{
+        for(const auto& job:jobs)if(job->worker.joinable()&&(!job->kind.startsWith("analysis.")||job->kind=="analysis.accept"))return true;
+        return false;
+    }
     std::shared_ptr<Job> startJob(const juce::String&,std::function<void(const std::shared_ptr<Job>&)>);
     juce::Result mutate(storage::StoredProject&,const juce::String&,const juce::var&,juce::String& selectedAfter,juce::var* batchResult=nullptr);
     juce::Result perform(const juce::String&,const juce::var&,juce::var* commandResult=nullptr);
@@ -466,6 +497,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
 #include "EngineSessionNative.inc"
 #include "EngineSessionCommands.inc"
 #include "EngineSessionJobs.inc"
+#include "EngineSessionAnalysis.inc"
 #include "EngineSessionTelemetry.inc"
 #include "EngineSessionSelection.inc"
 #include "EngineSessionPublic.inc"

@@ -324,8 +324,12 @@ template<class J> juce::Result renderJob(const J& j,const juce::File& target,sto
 
 std::shared_ptr<EngineSession::Impl::Job> EngineSession::Impl::startJob(const juce::String& kind,std::function<void(const std::shared_ptr<Job>&)> work)
 {
-    requireControlThread();for(const auto& j:jobs)if(j->worker.joinable()){fail("A file task is running or awaiting its commit. Wait for it or cancel it first.");return {};}
-    while(jobs.size()>=64)jobs.erase(jobs.begin());
+    requireControlThread();if(hasBlockingFileTask()){fail("A file task is running or awaiting its commit. Wait for it or cancel it first.");return {};}
+    while(jobs.size()>=64){
+        const auto retired=std::find_if(jobs.begin(),jobs.end(),[](const auto& j){return !j->worker.joinable();});
+        if(retired==jobs.end()){fail("Task history is busy. Wait for a task to finish.");return {};}
+        jobs.erase(retired);
+    }
     auto job=std::make_shared<Job>();job->kind=kind;job->projectId=guard.projectId();job->revision=guard.revision();jobs.push_back(job);
     publish("job_changed",object({{"job_id",job->id},{"status","queued"},{"kind",kind}}));status=kind.replaceCharacter('_',' ')+" queued.";
     job->worker=std::thread([job,work=std::move(work)]{
@@ -429,6 +433,14 @@ juce::Result EngineSession::Impl::beginSave(const juce::File& file)
                 for(const auto& original:captured->state.assets){
                     auto next=std::find_if(archived.assets.begin(),archived.assets.end(),[&](const auto& a){return a.id==original.id;});
                     if(next==archived.assets.end())continue;
+                    // Save preserves asset identity/content while rebinding its
+                    // canonical path. Keep in-flight/ready candidates valid;
+                    // never mutate the immutable paths read by their workers.
+                    for(auto& [id,analysis]:analyses)
+                        if(analysis->source["project_id"].toString()==job->projectId
+                           &&analysis->source["asset_id"].toString()==original.id
+                           &&analysis->boundOriginal==original.source)
+                            analysis->boundOriginal=next->source;
                     for(auto& track:bindings)for(auto& clip:track.clips)
                         if(clip.assetId==original.id&&clip.source==original.source){
                             clip.source=next->source;clip.clip->state.setProperty(emSource,next->source.getFullPathName(),nullptr);
@@ -516,7 +528,7 @@ juce::Result EngineSession::Impl::performJob(const juce::String& command,const j
     // A worker can publish failure between timer ticks. Permit immediate retry
     // without running the timer's recording/plugin/transport side effects.
     reapFinishedJobs(false);
-    for(const auto& j:jobs)if(j->worker.joinable())return fail("A file task is running or awaiting its commit. Wait for it or cancel it first.");
+    if(hasBlockingFileTask())return fail("A file task is running or awaiting its commit. Wait for it or cancel it first.");
     if(command=="import_audio"){
         auto value=args.getProperty("paths",{});auto* paths=value.getArray();auto state=capture();
         if(!paths||paths->isEmpty()||state.tracks.size()+size_t(paths->size())>storage::maximumTracks)return fail("Choose audio files within the 64-track limit.");

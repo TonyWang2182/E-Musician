@@ -43,6 +43,8 @@ def public_snapshot(raw):
                 del track[key]
         track["plugins"] = public_plugins(track.get("plugins",[]))
     result["clip_notes"] = {}
+    from .analysis import safe_job
+    result["analysis_jobs"] = [safe_job(j) for j in raw.get("analysis_jobs", [])[-12:] if isinstance(j, dict)]
     result["context_limits"] = "Clip preview: max 64/track, 256 total. Notes read on demand, max 2000/clip."
     return result
 
@@ -51,6 +53,8 @@ class DawBridge:
         self.lock = threading.RLock()
         self.connected = True
         self._capabilities = None
+        self._analysis_capabilities = {"providers": [], "available": False}
+        self._analysis_checked = 0.0
         self.embedded = bool(embedded or getattr(client, "embedded", False))
         if self.embedded and client is None:
             raise ValueError("Embedded mode requires a host-owned transport.")
@@ -106,6 +110,99 @@ class DawBridge:
 
     def snapshot(self):
         return public_snapshot(self._request({"command": "get_snapshot"})["result"])
+
+    def analysis_capabilities(self, refresh=False):
+        from .analysis import COMMANDS, safe_capabilities
+        with self.lock:
+            if not COMMANDS <= set(self.capabilities().get("commands", [])):
+                return {"providers": [], "available": False}
+            if refresh or time.monotonic() - self._analysis_checked > 5:
+                raw = self._request({"command": "get_analysis_capabilities"})["result"]
+                self._analysis_capabilities = safe_capabilities(raw)
+                self._analysis_checked = time.monotonic()
+            return copy.deepcopy(self._analysis_capabilities)
+
+    def start_analysis(self, context, scope, args):
+        from .analysis import authorize_start, identifier
+        with self.lock:
+            request = authorize_start(context, scope, args)
+            providers = self.analysis_capabilities().get("providers", [])
+            if not any(p["kind"] == request["kind"] and p["available"] for p in providers):
+                raise BridgeError("本地分析运行库或模型尚未就绪。请先在 DAW 分析面板检查。")
+            envelope = {"command": "start_analysis", "project_id": context["project_id"],
+                        "expected_revision": context["revision"], "args": request}
+            if scope.get("mode") != "project":
+                envelope["expected_selection_revision"] = scope["selection_revision"]
+            reply = self._request(envelope, allow_accepted=True)
+            result = reply.get("result") or {}
+            return {"job_id": identifier(result.get("job_id"))}
+
+    def analysis_job(self, job_id):
+        from .analysis import identifier, safe_job
+        value = safe_job(self._request({"command": "get_analysis_job", "args": {"job_id": identifier(job_id)}})["result"])
+        if value.get("job_id", value.get("id")) != job_id:
+            raise BridgeError("分析任务身份不匹配。")
+        return value
+
+    def analysis_result(self, result_id, offset=0, limit=24):
+        from .analysis import identifier, safe_result
+        if type(offset) is not int or not 0 <= offset <= 100000 or type(limit) is not int or not 1 <= limit <= 100:
+            raise ValueError("分析分页范围无效。")
+        value = safe_result(self._request({"command": "get_analysis_result", "args": {
+            "result_id": identifier(result_id), "offset": offset, "limit": limit}})["result"])
+        if value["result_id"] != result_id or value.get("offset", offset) != offset or len(value["items"]) != min(limit, max(0, value["total"]-offset)):
+            raise BridgeError("分析分页身份或数量不匹配。")
+        return value
+
+    def cancel_analysis(self, job_id):
+        from .analysis import identifier
+        # The generic job kind distinguishes an import even during the tiny
+        # queued/running interval before its worker publishes "applying".
+        raw = self._request({"command": "get_job", "args": {"job_id": identifier(job_id)}})["result"]
+        if not isinstance(raw, dict) or raw.get("kind") not in {"analysis.separate", "analysis.transcribe", "analysis.chords"} or raw.get("status") not in {"queued", "preparing", "running", "validating"}:
+            raise BridgeError("任务已结束或是导入任务，没有发送取消。")
+        return self._request({"command": "cancel_analysis_job", "args": {"job_id": identifier(job_id)}})
+
+    def chord_page(self, context, clip_id="", offset=0, limit=100):
+        from .analysis import identifier, safe_text, number
+        if type(offset) is not int or not 0 <= offset <= 10000 or type(limit) is not int or not 1 <= limit <= 100:
+            raise ValueError("和弦分页范围无效。")
+        with self.lock:
+            if not {"get_chord_regions", "edit_chord_region"} <= set(self.capabilities().get("commands", [])):
+                raise BridgeError("当前宿主未提供和弦读写接口。")
+            if identity(self.snapshot()) != identity(context):
+                raise BridgeError("读取和弦期间工程已变化。")
+            args = {"offset": offset, "limit": limit}
+            if clip_id: args["clip_id"] = identifier(clip_id)
+            raw = self._request({"command": "get_chord_regions", "args": args})["result"]
+            total, items = raw.get("total"), raw.get("items")
+            if type(total) is not int or not 0 <= total <= 10000 or raw.get("offset") != offset or not isinstance(items, list) or len(items) != min(limit, max(0, total-offset)):
+                raise BridgeError("和弦分页数量或身份不匹配。")
+            safe = []
+            for item in items:
+                if not isinstance(item, dict): raise BridgeError("和弦对象无效。")
+                start, end = number(item.get("start_seconds"), 0, 172800), number(item.get("end_seconds"), 0, 172800)
+                if start >= end or type(item.get("uncertain")) is not bool: raise BridgeError("和弦对象时间无效。")
+                safe.append({"id": identifier(item.get("id")), "analysis_id": identifier(item.get("analysis_id")),
+                    "label": safe_text(item.get("label"), 30), "start_seconds": start, "end_seconds": end,
+                    "score": number(item.get("score"), 0, 1), "uncertain": item["uncertain"]})
+            if len({i["id"] for i in safe}) != len(safe) or identity(self.snapshot()) != identity(context):
+                raise BridgeError("和弦读取不完整或工程已改变。")
+            return {"items": safe, "total": total, "offset": offset, "score_kind": "uncalibrated_similarity"}
+
+    def find_chord(self, context, region_id, clip_id=""):
+        from .analysis import identifier
+        identifier(region_id)
+        offset, total = 0, None
+        while total is None or offset < total:
+            page = self.chord_page(context, clip_id, offset, 100)
+            if total is not None and page["total"] != total:
+                raise BridgeError("和弦分页期间总数发生变化。")
+            total = page["total"]
+            for item in page["items"]:
+                if item["id"] == region_id: return item
+            offset += 100
+        raise BridgeError("该和弦不属于指定来源片段，或已经删除。")
 
     def resolve_clips(self, context, clip_ids):
         """Load exact requested IDs beyond the bounded preview, preserving limits.
@@ -245,6 +342,36 @@ class DawBridge:
             return copy.deepcopy(state)
 
     def apply(self, plan):
+        if plan.get("execution_kind") == "chord_edit":
+            from .analysis import compile_chord_edit
+            current = self.snapshot()
+            region = self.find_chord(current, plan["chord_before"]["id"], plan.get("chord_clip_id", ""))
+            if region != plan["chord_before"]:
+                raise BridgeError("和弦在预览后发生变化，未提交旧方案。")
+            args = plan["commands"][0]["args"]
+            compile_chord_edit({"region_id": args["id"], "clip_id": plan.get("chord_clip_id", ""), "summary": plan["summary"],
+                **{k: v for k, v in args.items() if k != "id"}}, region, current, plan["scope"])
+            envelope = {"request_id": plan["id"], "project_id": plan["project_id"], "expected_revision": plan["revision"],
+                "command": "edit_chord_region", "args": args}
+            if plan["scope"].get("mode") != "project": envelope["expected_selection_revision"] = plan["scope"]["selection_revision"]
+            return self._request(envelope)
+        if plan.get("execution_kind") == "analysis_import":
+            from .analysis import authorize_result
+            result_id = plan["analysis"]["result_id"]
+            result = self.analysis_result(result_id)
+            if result.get("result_hash") != plan["analysis"].get("result_hash") or result.get("applied"):
+                raise BridgeError("候选已变化或已导入；没有再次提交。")
+            current = self.snapshot()
+            authorize_result(current, plan["scope"], result)
+            envelope = {"request_id": plan["id"], "command": "accept_analysis_result",
+                "project_id": plan["project_id"], "expected_revision": plan["revision"],
+                "args": {"result_id": result_id}}
+            if plan["scope"].get("mode") != "project":
+                envelope["expected_selection_revision"] = plan["scope"]["selection_revision"]
+            reply = self._request(envelope, allow_accepted=True)
+            if reply.get("status") != "accepted" or not isinstance((reply.get("result") or {}).get("job_id"), str):
+                raise BridgeError("分析导入回执异常，结果未知；请检查 DAW，不要重复提交。")
+            return reply
         if any(c.get("command") in {"add_native_effect", "set_native_effect"} for c in plan.get("commands",[])):
             self.require_native_effect_catalog()
         if (plan.get("scope") or {}).get("mode") != "project" and any(
@@ -284,6 +411,20 @@ class DawBridge:
                 raise NativeJobFailed("采样器任务未提交："+str(job.get("error") or job["status"])[:300])
             time.sleep(0.05)
         raise BridgeError("已提交后台采样任务，但等待超时，结果未知；请检查 DAW，不要重复提交。")
+
+    def wait_analysis_import(self, job_id, timeout=180.0):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            job = self.analysis_job(job_id)
+            if job.get("status") == "applied":
+                receipt = job.get("receipt")
+                if not isinstance(receipt, dict) or receipt.get("applied") is not True:
+                    raise BridgeError("分析导入完成回执无效；请检查 DAW，不要重复提交。")
+                return receipt
+            if job.get("status") in {"failed", "stale", "cancelled"}:
+                raise NativeJobFailed("分析候选未导入：" + str(job.get("error") or job["status"])[:300])
+            time.sleep(0.1)
+        raise BridgeError("分析导入已受理，但等待超时；结果未知，请检查 DAW，不要重复提交。")
 
     def undo(self, project_id, revision, request_id):
         return self._request({"request_id": request_id, "project_id": project_id,

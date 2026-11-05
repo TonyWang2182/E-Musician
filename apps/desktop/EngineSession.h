@@ -58,6 +58,7 @@ public:
         double startBeats = 0.0, lengthBeats = 4.0, fadeIn = 0.0, fadeOut = 0.0;
         std::shared_ptr<const std::vector<NoteSnapshot>> notes;
         int controllerCount = 0;
+        juce::String analysisRole;
     };
     struct TrackSnapshot {
         float peakLeftDb = -100.0f, peakRightDb = -100.0f, inputPeakDb = -100.0f;

@@ -17,6 +17,7 @@
   let state = null, inFlight = false, mutating = false, online = false, stopped = false, timer = null;
   let connectionError = false;
   let messageSignature = "", trackSignature = "", localNotice = "";
+  let capabilitySignature = "", analysisPreviewSignature = "";
   let providerSignature = "", providers = [], settingsDirty = false, formProviderId = null;
   let shownPlanId = null, followResponse = false, submittedScope = null;
   let notePreviewSignature = "", notePreviewPlanId = null, notePreviewNotes = [], notePreviewPage = 0;
@@ -226,6 +227,7 @@
   }
   function updateControls() {
     const working = busy(), connected = !!state?.control?.connected && online;
+    for (const button of $("capability-list").querySelectorAll("button[data-available]")) button.disabled = working || !connected || button.dataset.available !== "true";
     $("submit").disabled = working || inFlight || !connected || !state?.provider?.configured || !$("prompt").value.trim();
     $("prompt").disabled = working;
     $("apply").disabled = working || inFlight || !connected || state?.phase !== "ready" || !state?.plan?.id || !readablePlan(state.plan);
@@ -292,6 +294,7 @@
     text("connection", online ? connected ? "DAW 已连接" : "DAW 未连接" : "连接中断");
     $("connection").classList.toggle("connected", online && connected);
     renderSnapshot(state.snapshot || {}); renderMessages(state.messages);
+    renderCapabilities(state.capability_groups);
     const plan = state.plan, visible = !!plan && ["ready", "applying"].includes(state.phase);
     $("plan").hidden = !visible;
     if (visible) {
@@ -308,6 +311,7 @@
       $("changes").replaceChildren(...(Array.isArray(plan.changes) ? plan.changes : []).map(changeItem));
     }
     renderNotePreviews(visible ? plan : null);
+    renderAnalysisPreview(visible ? plan?.analysis : null);
     $("result").hidden = !state.last_result; text("result-text", state.last_result || "");
     const usage = state.usage || {}, format = (value) => Number(value || 0).toLocaleString("zh-CN");
     text("usage", `${format(usage.calls)} 次请求 · 输入 ${format(usage.prompt_tokens)} / 输出 ${format(usage.completion_tokens)} tokens`);
@@ -321,6 +325,46 @@
     } else if (oldMessages !== messageSignature && (nearBottom || followResponse)) {
       requestAnimationFrame(() => { scroll.scrollTop = scroll.scrollHeight; });
     }
+  }
+  function renderCapabilities(groups) {
+    if (!Array.isArray(groups)) return;
+    const signature = JSON.stringify(groups);
+    if (signature === capabilitySignature) return;
+    capabilitySignature = signature;
+    const opened = new Set([...$("capability-list").querySelectorAll("details[open]")].map((row) => row.dataset.capability));
+    const rows = groups.map((group) => {
+      const row = element("details", null, "capability-row"); row.dataset.capability = group.id;
+      row.open = opened.has(group.id);
+      const heading = element("summary");
+      heading.append(element("span", group.label), element("span", group.status_label, "capability-status"));
+      const detail = element("p", group.detail);
+      const example = element("button", group.example); example.type = "button";
+      example.disabled = !group.enabled || busy();
+      example.dataset.available = group.enabled ? "true" : "false";
+      example.addEventListener("click", () => { $("prompt").value = group.example; $("prompt").focus(); updateControls(); });
+      row.append(heading, detail, example); return row;
+    });
+    $("capability-list").replaceChildren(...rows);
+  }
+  function renderAnalysisPreview(candidate) {
+    $("analysis-preview").hidden = !candidate;
+    const signature = JSON.stringify(candidate);
+    if (signature === analysisPreviewSignature) return;
+    analysisPreviewSignature = signature;
+    if (!candidate) return;
+    const names = {separate: "分离候选", transcribe: "MIDI 候选", chords: "和弦候选"};
+    text("analysis-preview-title", `${names[candidate.kind] || "分析候选"} · ${candidate.total} 项`);
+    const model = candidate.model || {}, source = candidate.source || {};
+    text("analysis-preview-info", `${model.id || model.model_id || "本机分析"} ${model.version || ""} · ${Number(source.duration_seconds || 0).toFixed(2)} 秒。尚未导入工程。`);
+    const seconds = (value) => typeof value === "number" && Number.isFinite(value) ? `${value.toFixed(3)}s` : "—";
+    const rows = (candidate.items || []).map((item) => {
+      const label = candidate.kind === "separate" ? `${item.name} · ${seconds(item.duration_seconds)} · ${item.channels} 声道`
+        : candidate.kind === "transcribe" ? `MIDI ${item.pitch} · ${seconds(item.start_seconds)} 起 · 长 ${seconds(item.duration_seconds)} · 力度 ${item.velocity}`
+        : `${item.label} · ${seconds(item.start_seconds)}–${seconds(item.end_seconds)}${item.uncertain ? " · 待核对" : ""}`;
+      return element("li", label);
+    });
+    $("analysis-preview-items").replaceChildren(...rows);
+    text("analysis-preview-limit", candidate.total > rows.length ? `此处显示前 ${rows.length} 项，确认会导入完整的 ${candidate.total} 项；可在 DAW 分析面板继续检查。` : "试听与详细检查在 DAW 分析面板进行；确认后可一次撤销。");
   }
   async function refresh() {
     if (inFlight || stopped || !token || !nativeVisible) { armPoll(); return; }

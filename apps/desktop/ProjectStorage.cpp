@@ -231,10 +231,14 @@ Result readJson(const File& file, juce::MemoryBlock& bytes, var& parsed)
     return Result::ok();
 }
 
+
+#include "ProjectStorageAnalysis.inc"
+
 Result validateProject(const StoredProject& project, bool allowLegacy, bool verifySources)
 {
-    if (project.schemaVersion != 4 && !(allowLegacy && project.schemaVersion >= 1 && project.schemaVersion <= 3))
-        return Result::fail("Saving requires a fully resolved schema 4 project.");
+    if (project.schemaVersion != 4 && project.schemaVersion != 5 && !(allowLegacy && project.schemaVersion >= 1 && project.schemaVersion <= 3))
+        return Result::fail("Saving requires a fully resolved schema 4 or 5 project.");
+    if (auto result=validateAnalysis(project);result.failed())return result;
     if (!validIdentifier(project.projectId)) return Result::fail("The project ID is missing or invalid.");
     if (project.revision > static_cast<std::uint64_t>(std::numeric_limits<juce::int64>::max()))
         return Result::fail("The project revision exceeds the supported integer range.");
@@ -306,6 +310,7 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
         for (const auto& clip : track.clips) {
             if (!validIdentifier(clip.id) || !clipIds.insert(clip.id.toLowerCase()).second)
                 return Result::fail("Clip IDs must be valid and unique across all tracks.");
+            if(clip.analysisRole.isNotEmpty()&&(project.schemaVersion!=5||clip.kind!="audio"||(clip.analysisRole!="vocals"&&clip.analysisRole!="drums"&&clip.analysisRole!="bass"&&clip.analysisRole!="other")))return Result::fail("Invalid clip analysis role.");
             if (clip.kind == "audio") {
                 if (track.kind != "audio" || !clip.notes.empty() || !clip.controllers.empty()) return Result::fail("Audio clips belong on audio tracks and cannot contain MIDI events.");
                 if (!validIdentifier(clip.assetId) || assetIds.count(clip.assetId) == 0)
@@ -848,6 +853,8 @@ Result validate(const StoredProject& project)
     return validateProject(project, false, false);
 }
 
+bool isSupportedChordLabel(const juce::String& label) { return validChordLabel(label); }
+
 Result save(const File& target, const StoredProject& project, StoredProject& archived, const IOOptions& options)
 {
     if (cancelled(options)) return cancellation();
@@ -869,9 +876,9 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
             return Result::fail("Cannot safely inspect the existing project before replacement: " + result.getErrorMessage());
         const auto* object = previous.getDynamicObject();
         const auto schema = object != nullptr ? object->getProperty("schema") : var();
-        if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 4)
+        if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 5)
             return Result::fail("Cannot replace an existing project with an unsupported schema.");
-        if (static_cast<int>(schema) < 4) legacySchema = static_cast<int>(schema);
+        if (static_cast<int>(schema) < project.schemaVersion) legacySchema = static_cast<int>(schema);
     }
 
     if (cancelled(options)) return cancellation();
@@ -951,6 +958,7 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
             if (cancelled(options)) return cancellation();
             auto item = std::make_unique<juce::DynamicObject>();
             item->setProperty("id", clip.id); item->setProperty("kind", clip.kind);
+            if(candidate.schemaVersion==5)item->setProperty("analysis_role",clip.analysisRole);
             if (clip.kind == "audio") {
                 item->setProperty("asset_id", clip.assetId); item->setProperty("source_offset", clip.sourceOffset);
                 item->setProperty("fade_in", clip.fadeIn); item->setProperty("fade_out", clip.fadeOut);
@@ -990,7 +998,8 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
     juce::Array<var> masterPlugins;
     if (auto result = serializePlugins(candidate.masterPlugins, root, cleanup, transfer, masterPlugins); result.failed()) return result;
     auto object = std::make_unique<juce::DynamicObject>();
-    object->setProperty("schema", 4);
+    object->setProperty("schema", candidate.schemaVersion);
+    if(candidate.schemaVersion==5){object->setProperty("analyses",serializeAnalyses(candidate));object->setProperty("chord_regions",serializeChords(candidate));}
     object->setProperty("project_id", candidate.projectId);
     object->setProperty("revision", static_cast<juce::int64>(candidate.revision));
     object->setProperty("master_gain_db", static_cast<double>(candidate.masterGainDb));
@@ -1065,8 +1074,8 @@ Result load(const File& manifest, StoredProject& project, const IOOptions& optio
     const auto id = object->getProperty("project_id"), revision = object->getProperty("revision");
     const auto master = object->getProperty("master_gain_db"), looping = object->getProperty("looping");
     const auto tracks = object->getProperty("tracks");
-    if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 4)
-        return Result::fail("This project schema is not supported. Expected schema 1, 2, 3 or 4.");
+    if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 5)
+        return Result::fail("This project schema is not supported. Expected schema 1 through 5.");
     if (!id.isString() || !validIdentifier(id.toString()) || !integral(revision)
         || static_cast<juce::int64>(revision) < 0 || !number(master) || !validGain(static_cast<double>(master))
         || !looping.isBool() || !tracks.isArray())
@@ -1127,7 +1136,7 @@ Result load(const File& manifest, StoredProject& project, const IOOptions& optio
             stored.kind = kind.toString(); stored.pan = static_cast<float>(static_cast<double>(pan));
             if (auto result = parsePlugins(track->getProperty("plugins"), manifest, stored.plugins, pluginCount, stateBytes, pluginIds, options); result.failed()) return result;
         }
-        if (candidate.schemaVersion == 4) {
+        if (candidate.schemaVersion >= 4) {
             if (auto result = parseRouting(*track, stored, sendCount); result.failed()) return result;
             if (auto result = parseAutomation(track->getProperty("automation"), stored.automation, laneCount, pointCount, options); result.failed()) return result;
         }
@@ -1156,6 +1165,7 @@ Result load(const File& manifest, StoredProject& project, const IOOptions& optio
                 if (!clipId.isString() || !number(start) || !number(duration))
                     return Result::fail("A clip contains missing or invalid position fields.");
                 StoredClip value;
+                if(candidate.schemaVersion==5){const auto role=clip->getProperty("analysis_role");if(!role.isString())return Result::fail("Missing clip analysis role.");value.analysisRole=role.toString();}
                 value.id = clipId.toString(); value.timelineStart = static_cast<double>(start); value.duration = static_cast<double>(duration);
                 if (candidate.schemaVersion >= 3) {
                     const auto kind = clip->getProperty("kind");
@@ -1198,7 +1208,7 @@ Result load(const File& manifest, StoredProject& project, const IOOptions& optio
                         value.notes.push_back({ noteId.toString(), static_cast<int>(pitch), static_cast<double>(noteStart),
                             static_cast<double>(noteLength), static_cast<int>(velocity), static_cast<int>(channel) });
                     }
-                    if (candidate.schemaVersion == 4)
+                    if (candidate.schemaVersion >= 4)
                         if (auto result = parseControllers(clip->getProperty("controllers"), value, controllerCount, options); result.failed()) return result;
                 } else return Result::fail("Unsupported clip kind.");
                 stored.clips.push_back(std::move(value));
@@ -1209,8 +1219,9 @@ Result load(const File& manifest, StoredProject& project, const IOOptions& optio
     }
     if (candidate.schemaVersion >= 3)
         if (auto result = parsePlugins(object->getProperty("master_plugins"), manifest, candidate.masterPlugins, pluginCount, stateBytes, pluginIds, options); result.failed()) return result;
-    if (candidate.schemaVersion == 4)
+    if (candidate.schemaVersion >= 4)
         if (auto result = parseAutomation(object->getProperty("master_automation"), candidate.masterAutomation, laneCount, pointCount, options); result.failed()) return result;
+    if(candidate.schemaVersion==5)if(auto result=parseAnalysis(parsed,candidate);result.failed())return result;
     if (auto result = validateProject(candidate, true, true); result.failed()) return result;
     if (cancelled(options)) return cancellation();
     project = std::move(candidate);

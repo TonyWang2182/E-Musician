@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-11-05T07:57:37.510330+00:00",
+  "status": "passed",
+  "scope": "Changes from preserved baseline 5eb32e7",
+  "changed_files": 163,
+  "credential_like_matches_in_changes": [],
+  "existing_test_fixture_matches": 3,
+  "existing_fixture_files_unchanged_from_baseline": true,
+  "files_above_20MiB": [],
+  "broken_review_entry_links": [],
+  "git_diff_check_exit": 0,
+  "native_exe_sha256": "ab72da94a525fb3dbdc7937e355f8cc7dd8a43c2f1a3eda6e90867313a58a155",
+  "no_models_or_runtime_in_repository": true
+}

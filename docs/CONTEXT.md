@@ -1,4 +1,16 @@
-# 当前工作：音频分析功能方案（2026-11-05，尚未实施）
+# 当前候选：0.9.0 本地音频分析（2026-11-05，自动验证通过、人工待验）
+
+用户已授权实施四轨分离、有音高分轨转 MIDI、和弦识别，以及手动/Agent 共用管线与固定能力清单。当前开发工作树是 **`E:/MusicAgent&DAW/worktrees/audio-analysis` / `feature/audio-analysis`**，不是旧 C 盘工作树。基于精确保留的 0.8.1 基线 `5eb32e7`；原程序、161 个源码输入和旧入口未改，哈希复核一致。
+
+已实现：原生 analyze 下栏、HTDemucs CUDA 四轨分离、Basic Pitch ONNX 转录、自有 Chroma/Viterbi 大小三和弦；不可变候选、分页、试听、取消、来源/范围/版本校验、一次导入/Undo/Redo；schema 5 保存重开与旧版明确拒绝；Agent 分析/确认导入/和弦编辑工具和七类能力状态。普通 Save 可在分析中执行，合法归档引用不会让候选失效。推理/文件工作在后台，本地进程进度不消耗聊天轮次。
+
+最终 Release EXE `ab72da94…`，源码输入 `0b1942e8…`：CTest **10/10**，真实本地模型 + 原生 DAW **10/10 组**，Agent Python **267/267**，最终 DAW + 本地和弦 + 模拟语言模型 **8/8**；Worker 19 项协议/数值、12 项真实进程边界和公开音乐探针通过。无本批付费 LLM 调用，无 computer-use。完整命令/失败修复/精确 SHA/源码冻结/截图范围见 [本轮结果](review/2026-11-05-audio-analysis/RESULTS.md) 和 [证据汇总](review/2026-11-05-audio-analysis/VERIFICATION.json)，DEVLOG 保持 append-only。
+
+启动 `E:/MusicAgent&DAW/Start E-musician 0.9.0 Analysis.cmd`；实际 EXE 在 `E:/emusician-analysis-build/bin/Release/`。模型/运行库/缓存均在 `E:/MusicAgent&DAW/analysis/`；VS Code 打开根目录 `E-musician-Analysis.code-workspace`。构建源使用联接 `E:/emusician-analysis-source` 绕过上游 MSBuild 的 `&` 路径限制，固定 JUCE 8.0.6 / Tracktion 3.2.0。旧 0.8.1 入口及 `releases/0.8.1-20261105/` 保留，不自动合并 main。
+
+下一步只做 [人工短测](review/2026-11-05-audio-analysis/MANUAL-CHECK.md)：短音乐分离/试听、转录后配乐器、和弦修正、保存重开、Agent 指令，再测试实际 ASIO 播放共存。物理音频、鼠标/DPI、识别准确率、长曲负载、真实模型意图理解和 GPU OOM 回退均未验收。鼓/混合 other 转录、扩展和弦和弯音/踏板未实现；最长 600 秒、一次一个重任务，录音前先完成或取消分析；未接受候选退出后不恢复。HTDemucs 权重仅本机评测部署，再分发许可未决。不要将自动化通过写成任意歌曲质量或低延迟性能保证。
+
+# 前期提案（以下保留为规划历史）
 
 用户要求保留当前版本，并先提出音源分离、分轨转 MIDI、和弦识别的模型/来源/部署方案，三者未来须同时支持手动和 Agent；更新固定功能清单也纳入后续实现。本轮只调研和规划，不安装模型、不修改程序/页面、不构建。完整选择、未决许可、统一异步任务/候选接受管线、部署目录和验收顺序见 [分析方案](review/2026-11-05-audio-analysis/PLAN.md)。
 
@@ -6,7 +18,7 @@
 
 下一步先锁候选模型及权重使用范围、隔离环境探针，再建设分析任务与四轨分离；部署就绪和效果质量分别验证。此处是提案状态，下面的 0.8.1 仍为当前可用版本。
 
-# 当前候选：0.8.1 矩形片段与图形装置控制（2026-11-05）
+# 保留版本：0.8.1 矩形片段与图形装置控制（2026-11-05）
 
 用户最新要求是矩形 MIDI/clip 填满行、增强现有装置的旋钮/图示和接口。已实现七种装置的统一控件、Sampler/Rack AR 与 Gate/One-shot、EQ 每段六种形状，新增参数贯通宿主、保存、Agent 方案/回读/Undo；纯采样参数复用不可变 PCM。小窗口去掉重复标题，最小保留一条完整紧凑轨道。参考 Ableton/FabFilter 官方工作流，保留黑白等宽风格。
 

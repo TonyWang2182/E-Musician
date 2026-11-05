@@ -1,5 +1,28 @@
 # 本地 Agent 控制接口 v1
 
+## 0.9 分析与候选导入（自动验证通过；人工验收见本轮记录）
+
+音源分离、有音高分轨转 MIDI、和弦识别通过同一宿主管线由 GUI 或 Agent 发起。手动入口不依赖 API 密钥；推理在独立本机 Python 进程执行，语言模型仅收到有界摘要，不接收音频、模型文件路径或运行库路径。
+
+| 宿主命令 | 参数与返回 |
+|---|---|
+| `get_analysis_capabilities` | `providers` 中每项为 `kind / available / model_id / version / experimental / detail`；最长单次 600 秒，单个重任务 |
+| `start_analysis` | `clip_id`、`kind=separate/transcribe/chords`，可选片段内 `start_seconds / duration_seconds`；返回 `accepted` 与 `job_id / result_id`，不修改工程 |
+| `get_analysis_job` | `job_id`；读取实际 `status / progress / phase / error / result_id`。`ready` 是候选完成，`applied` 是导入曾完成 |
+| `get_analysis_result` | `result_id / offset / limit`（1–100）；返回 `items / total / source / model / result_hash / applied / present_in_project / stale`。`applied` 表示曾导入，`present_in_project` 表示当前工程保留该结果；分离路径不会暴露在该结果页 |
+| `cancel_analysis_job` | `job_id`；取消本机计算，不删除原轨道 |
+| `accept_analysis_result` | `result_id`，顶层带工程 ID、预期 revision 和可选选择 revision；后台核对来源及候选文件后原子导入，回执含新增轨道/片段/和弦 ID |
+| `get_chord_regions` | 可选来源 `clip_id` 与 `offset / limit`（1–100）；返回已保存到工程的标签区间，不依赖候选缓存 |
+| `edit_chord_region` | 真实 `id` 和可选 `label / start_seconds / end_seconds`；秒为工程绝对时间；单次命令、Undo 与工程版本保护 |
+
+来源快照含 `project_id / clip_id / asset_id / track_id / clip_timeline_start / clip_source_offset / clip_duration / bpm / range_start_seconds / duration_seconds / timeline_start / source_sha256`。原片段不被覆盖。接受后分离新增四条音频轨，转录新增一条 MIDI 轨，和弦新增标签区间；MIDI 不自带原音色或弯音/踏板表达。`drums / other` 来源角色不可送入音高转录，改轨名不会移除该限制。和弦词表为 24 种大/小三和弦与 `N`，分数未经校准。
+
+Agent 工具为 `start_audio_analysis / read_audio_analysis / cancel_audio_analysis / propose_analysis_import / read_chord_regions / propose_chord_edit`。开始工具在助手后台本地轮询宿主，不为进度额外调用付费模型；停止会取消该助手启动的任务。显式取消工具也可取消手动界面发起的分析，但须按宿主真实来源校验当前工程、片段和冻结时间选区；导入任务、已生成候选与其他终态不冒充可取消推理。取消请求后本地等候终态，未确认终态时明确返回 `cancel_completed=false`。默认分析范围取当前片段和时间选区交集，不能由模型扩大。导入与和弦修改均产生普通审核卡，点击应用后才写入工程。导入只提交 `result_id`，不会把大量候选音符展开成旧编辑动作；原有 16 动作/2000 次音符处理预算保持不变。
+
+一次结果导入支持一次 Undo；相同候选幂等回执不创建重复对象，Undo 后使用 Redo，不重新接受旧候选。已完成不代表当前仍在工程中；查询当前和弦应使用 `get_chord_regions`。来源、速度、工程版本或选择变化会使旧审核卡失效。运行库/模型不可用、推理失败、来源过期和结果为空均不能显示为已完成的工程变更。
+
+侧栏七类能力为工程/选区、MIDI 编辑、片段编辑、原生装置、音源分离、分轨转 MIDI、和弦识别。宿主命令、Agent 适配、装置目录、本机模型 readiness 和所选音频共同决定可用性；未就绪能力的示例按钮禁用。UI 示例、模拟 Provider 测试与真实模型测试分别记录，不能互相替代。新增实现与证据在 [Agent 分析记录](review/2026-11-05-audio-analysis/AGENT-NOTES.md)。
+
 ## 0.8.1 原生装置参数补充（2026-11-05）
 
 EQ 每段 `shape` 为 `bell / low_shelf / high_shelf / high_pass / low_pass / notch`，高低通为 12 dB/oct，cut/notch 不使用 `gain_db`。宿主 `set_native_effect` 接收完整 state；Agent `set_native_effect_parameter` 可只给 `shape` 和 1-based `band`，本地编译器保留其余值。缺失 shape 的旧状态按首低架、尾高架、中间 bell 解读。新形状保存为装置状态 version 2，其余效果器版本不变。

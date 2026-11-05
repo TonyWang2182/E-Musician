@@ -2,7 +2,11 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
-**最新候选 0.8.1（2026-11-05）**：MIDI 音符与 clip 改为全行矩形；现有七种原生装置增加统一旋钮/图示，Sampler/Rack 增加 AR 和播放模式，EQ 每段可选六种形状，新声音参数支持 Agent。启动 `build/device-chain/bin/Release/E-musician.exe`，本机亦可双击 `E:/MusicAgent&DAW/Start E-musician 0.8.1.cmd`，检查标题版本。Release、CTest 10/10、Agent Python 245 和离线联测通过，实际桌面与设备听感待人工；[结果/截图](docs/review/2026-11-05-device-controls/RESULTS.md) / [人工短测](docs/review/2026-11-05-device-controls/MANUAL-CHECK.md)。新非默认装置状态使用版本 2，旧版会拒绝；旧程序备份保留。
+**最新候选 0.9.0：本地音频分析（2026-11-05）**。顶部 `analyze` 打开下栏：HTDemucs 四轨分离、Basic Pitch 有音高音频转 MIDI、Chroma/HMM 大小三和弦识别。真实模型在独立本地进程运行，先生成候选，明确导入后才修改工程；手动与 Agent 共用接口。支持取消、来源检查、一次 Undo/Redo、保存重开，Agent 固定能力清单同步更新。**识别质量、实际 ASIO 与鼠标听感仍需人工验收。** [本轮结果](docs/review/2026-11-05-audio-analysis/RESULTS.md) / [人工短测](docs/review/2026-11-05-audio-analysis/MANUAL-CHECK.md) / [模型来源与本机测量](docs/review/2026-11-05-audio-analysis/WORKER-RESULTS.md)。
+
+本机新入口：`E:/MusicAgent&DAW/Start E-musician 0.9.0 Analysis.cmd`；程序在 `E:/emusician-analysis-build/bin/Release/E-musician.exe`。模型、隔离运行库和候选缓存位于 `E:/MusicAgent&DAW/analysis/`，不进入 Git。旧版 0.8.1 程序及入口保留，两个版本分开使用。
+
+**保留版本 0.8.1（2026-11-05）**：MIDI 音符与 clip 改为全行矩形；现有七种原生装置增加统一旋钮/图示，Sampler/Rack 增加 AR 和播放模式，EQ 每段可选六种形状，新声音参数支持 Agent。启动 `build/device-chain/bin/Release/E-musician.exe`，本机亦可双击 `E:/MusicAgent&DAW/Start E-musician 0.8.1.cmd`，检查标题版本。Release、CTest 10/10、Agent Python 245 和离线联测通过，实际桌面与设备听感待人工；[结果/截图](docs/review/2026-11-05-device-controls/RESULTS.md) / [人工短测](docs/review/2026-11-05-device-controls/MANUAL-CHECK.md)。新非默认装置状态使用版本 2，旧版会拒绝；旧程序备份保留。
 
 **历史候选（2026-11-02）**：下方有序设备链、原生面板轮询修复、增强的压缩器、原创 Delay/Reverb/Auto Filter 和 Agent 装置参数接口。[结果与限制](docs/review/2026-11-02-device-chain-agent/RESULTS.md) / [Agent 测试手册](docs/review/2026-11-02-agent-diagnostics/README.md)。此前提及的完整合成器和商业级装置尚未完成；当前 `build/device-chain` 入口已更新为上方 0.8.1。
 
@@ -20,23 +24,11 @@ Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、M
 
 ## 打开与开发
 
-在 VS Code 中打开当前功能分支工作树。原 `E:\E-musician` 和 `build/bin` 保留既有 DAW 入口；本批使用独立 `build/agent-batch2`：
+本轮工作树为 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/audio-analysis`。用 VS Code 打开 [E-musician-Analysis.code-workspace](E-musician-Analysis.code-workspace)：Ctrl+Shift+B 构建 Release，运行 `Analysis: CTest with log` 测试，F5 调试 `0.9 Analysis`。这些任务通过 `scripts.dev.Recorder` 保留每次命令、时间、结果、源码指纹和日志。
 
-```powershell
-python scripts/dev_agent.py build
-python scripts/dev_agent.py test
-python scripts/dev_agent.py run
-```
+本机使用目录联接 `E:/emusician-analysis-source` 作为 CMake 源目录，构建目录 `E:/emusician-analysis-build`，避免上游 MSBuild 对路径中 `&` 的处理问题。固定 JUCE 8.0.6 / Tracktion Engine 3.2.0，具体 commit 和配置以本轮构建记录为准。其他机器需按 [BUILDING](docs/BUILDING.md) 准备依赖并调整工作区路径；现有 `dev_agent.py` 的历史默认构建目录不是这次 0.9.0 的入口。
 
-默认 Release，产物为 `build/agent-batch2/bin/Release/E-musician.exe`。本机入口为 `E:\MusicAgent&DAW\Start E-musician Agent.cmd`，工作树内为 `Start-Agent.cmd`。**等本批构建完成、准备人工验证时，由用户保存并关闭仍运行的0.7.0或其他旧版，再启动并确认标题栏为0.8.0。** 开发与离线测试不自动关闭旧窗口；旧窗口未关时，单实例机制可能把启动请求交给旧版。0.7.0的历史产物仍位于 `build/sidebar`。普通构建、F5 调试及固定依赖入口继续保留：
-
-```powershell
-python scripts/dev.py bootstrap --note "准备固定依赖"
-python scripts/dev.py check --config Debug --note "验证本轮修改"
-python scripts/dev.py run --config Debug --note "启动编辑器"
-```
-
-优化构建使用 `--config Release`，产物为 `build/bin/Release/E-musician.exe`。日常操作见 [快速上手](docs/QUICKSTART.md)，设备设置、构建和测试入口见 [BUILDING](docs/BUILDING.md)。所有构建与测试经过日志脚本，失败也保留；项目约定见 [AGENTS.md](AGENTS.md)。
+每次运行前保存并关闭旧窗口，确认新标题 **0.9.0**。模型安装/探针和重复部署命令见 [Worker 说明](docs/review/2026-11-05-audio-analysis/WORKER-RESULTS.md)。项目约定见 [AGENTS.md](AGENTS.md)，当前上下文见 [CONTEXT](docs/CONTEXT.md)。
 
 ## 基础操作
 
@@ -50,7 +42,7 @@ python scripts/dev.py run --config Debug --note "启动编辑器"
 
 0.6.0工具栏把`bars / seconds / both`、`snap`、网格和`follow`分开。拖空白处框选片段，Ctrl+C/X/V复制/剪切/粘贴；Shift拖标尺选时间，Ctrl+L设循环。钢琴卷帘用`draw`或B开启单击画笔。Transport第二行提供click、音量/仅录音选项、独立count-in开关和1/2/4小节；从停止状态开始录音才预备倒数，Stop可取消。RAM显示进程工作集，DSP/xrun反映音频引擎，OUT/CLIP可清峰值。详细边界和按键见[快速上手](docs/QUICKSTART.md)。
 
-Source 在底部查看选中音频源。真实分轨/转录、32 位插件桥接、侧链、插件任意多输出、comping、自动化 Touch/Latch/Write、TempoMap 和时间拉伸尚未实现。MP3 支持导入和播放，不支持导出。
+Source 在底部查看选中音频源；本地分析使用顶部 analyze。32 位插件桥接、侧链、插件任意多输出、comping、自动化 Touch/Latch/Write、TempoMap 和时间拉伸尚未实现。MP3 支持导入和播放，不支持导出。
 
 ## 原生编曲助手 0.3
 
@@ -60,16 +52,16 @@ Source 在底部查看选中音频源。真实分轨/转录、32 位插件桥接
 
 Kimi 与 OpenAI 适配器已实现，凭证按服务通过 Windows DPAPI 本机加密保存；Anthropic、Gemini、本地兼容服务仍预留。本机两套凭证已配置，无需重复提供。OpenAI 可沿用已有 loopback 代理，不改系统网络。界面的“已配置”只说明本地凭证存在；0.8.0的实际调用状态另见[本批验证记录](docs/verification/2026-10-29-agent-batch2/RESULTS.md)。启动、支持范围、数据和费用边界见[Agent 快速上手](docs/AGENT_QUICKSTART.md)；[0.1历史证据](docs/verification/2026-10-29-kimi-agent/RESULTS.md)仅覆盖旧伴随模式。
 
-单方案最多16项动作、2000次音符处理，每个待编辑片段的完整读取上限为2000音符；同一音符被多次处理会累计计入。摘要之外的明确片段目标通过分页补齐，超限拒绝。裁剪只保留原片段内部区间；含CC等控制器事件的MIDI片段暂不允许由Agent裁剪。当前没有音频理解/生成、任意插件自动控制或长期自主任务，Agent也不能代替用户保存工程或删除磁盘文件。旧 `run_agent.py --exe PATH` 仍供独立浏览器伴随模式兼容使用。
+单方案最多16项动作、2000次音符处理，每个待编辑片段的完整读取上限为2000音符；同一音符被多次处理会累计计入。摘要之外的明确片段目标通过分页补齐，超限拒绝。裁剪只保留原片段内部区间；含CC等控制器事件的MIDI片段暂不允许由Agent裁剪。本地分析已通过专用工具开放；仍无音频生成或长期自主任务，装置控制范围以能力目录为准。Agent也不能代替用户保存工程或删除磁盘文件。旧 `run_agent.py --exe PATH` 仍供独立浏览器伴随模式兼容使用。
 
 ## 工程与 Agent
 
-schema 4 工程由 `.emproj` 和同名 `.assets` 目录组成，保存音频归档、MIDI 音符及控制器、片段、混音、插件状态、路由和曲线。移动工程时两者一起移动并保留名称关系。schema 1/2/3 可只读迁移，首次覆盖前保留旧清单备份。普通保存复用未变素材，后台完成文件事务；界面显示状态和结果，保存期间的新编辑仍保持未保存。保存后重开工程才切到归档素材绑定，删除原素材前先重开；旧素材代次与 MP3 PCM 缓存目前不自动清理。Undo 是进程内历史，不随工程重开恢复。
+普通工程为 schema 4；包含已接受分析/和弦的工程为 schema 5，0.8.1 明确拒绝 schema 5，首次升级保存前留存原清单备份。工程由 `.emproj` 和同名 `.assets` 目录组成，保存音频归档、MIDI 音符及控制器、片段、混音、插件状态、路由和曲线。移动工程时两者一起移动并保留名称关系。schema 1/2/3 可只读迁移，首次覆盖前保留旧清单备份。普通保存复用未变素材，后台完成文件事务；界面显示状态和结果，保存期间的新编辑仍保持未保存。保存成功后更新归档引用，播放继续复用已准备素材；删除原素材前仍应重开工程核对；旧素材代次与 MP3 PCM 缓存目前不自动清理。Undo 是进程内历史，不随工程重开恢复。
 
 Agent 使用显式开启的本地 JSONL 通道，包含版本冲突保护、幂等请求、任务状态和分页读取：
 
 ```powershell
-python scripts/agent_client.py --exe build/agent-batch2/bin/Release/E-musician.exe --demo build/agent-demo
+python scripts/agent_client.py --exe E:/emusician-analysis-build/bin/Release/E-musician.exe --demo build/agent-demo
 ```
 
 此示例创建测试 MIDI、导出并验证撤销，不播放声音，也不属于产品乐句模板。协议和命令参数见 [AGENT_API](docs/AGENT_API.md)。

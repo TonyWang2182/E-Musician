@@ -2,6 +2,8 @@
 #include "ArrangementView.h"
 #include "PianoRoll.h"
 #include "AgentSidebar.h"
+#include "AnalysisPanel.h"
+#include "AnalysisPreview.h"
 #include "SelectedTrackPanel.h"
 #include "NativeDevicePanel.h"
 #include "NativeEffectsPanel.h"
@@ -772,7 +774,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
             &arrangement, &zoomOut, &zoomIn, &fit, &clipStart, &setClipStart,
             &editMenu, &exportMenu, &plugins, &tempo, &gridMode, &clipProperties, &trackPan, &cancelJob,
             &closeEditor, &expandEditor, &details, &saveStatus, &trackPanel, &record, &rulerMode, &snap, &follow,
-            &metronome, &metronomeOptions, &countIn, &countInBars, &resources, &meterReset, &agentButton, &deviceChain };
+            &metronome, &metronomeOptions, &countIn, &countInBars, &resources, &meterReset, &agentButton, &deviceChain, &analyze };
         for (auto* child : children) {
             owner.addAndMakeVisible(child);
             child->addKeyListener(&owner);
@@ -789,7 +791,22 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         compose.setVisible(false);
         separate.setButtonText("source");
         compose.setTooltip("View every audio and MIDI track on one shared timeline.");
-        separate.setTooltip("Inspect the selected track waveform. Source separation is not available yet.");
+        separate.setTooltip("Inspect the selected audio clip's original source waveform.");
+        analyze.getProperties().set("flat", true);
+        analyze.setTooltip("Local audio analysis: four stems, pitched audio to MIDI, and chord labels. No Agent or API key required.");
+        analyze.onClick = [this] {
+            if (dock == Dock::analysis) dock = Dock::closed;
+            else {
+                if (!dockAnalysis) {
+                    dockAnalysis = std::make_unique<AnalysisPanel>(owner.session, [this](const juce::Result& result) { owner.showResult(result); });
+                    owner.addAndMakeVisible(*dockAnalysis);
+                }
+                pianoExpanded = false; dock = Dock::analysis;
+                const auto range = arrangement.explicitSelectedTimeRange();
+                dockAnalysis->setSelectedTimeRange(range.getStart(), range.getEnd());
+            }
+            owner.resized(); owner.refreshSnapshot(); owner.repaint();
+        };
         compose.onClick = [this] { composeActive = true; dock = Dock::closed; owner.resized(); owner.refreshSnapshot(); owner.repaint(); };
         separate.onClick = [this] { dock = dock == Dock::source ? Dock::closed : Dock::source; owner.resized(); owner.refreshSnapshot(); owner.repaint(); };
         closeEditor.onClick = [this] { pianoExpanded = false; dock = Dock::closed; owner.resized(); owner.repaint(); };
@@ -1135,7 +1152,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     juce::TextButton settings { "audio settings" }, importButton { "add audio" }, transcribe { "transcribe" }, compose { "compose" };
     juce::TextButton newButton { "new" }, openButton { "open" }, saveButton { "save" }, saveAsButton { "save as" };
     juce::TextButton undoButton { "undo" }, redoButton { "redo" }, mute { "mute" }, solo { "solo" }, remove { "remove track" };
-    juce::TextButton separate { "separate" }, zoomOut { "-" }, zoomIn { "+" }, fit { "fit" };
+    juce::TextButton separate { "separate" }, analyze { "analyze" }, zoomOut { "-" }, zoomIn { "+" }, fit { "fit" };
     juce::TextButton editMenu { "edit" }, exportMenu { "export" }, plugins { "devices" }, tempo { "120 BPM" };
     juce::TextButton clipProperties { "clip properties..." }, cancelJob { "cancel task" };
     juce::ComboBox gridMode, rulerMode, countInBars;
@@ -1158,6 +1175,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     std::unique_ptr<PianoRoll> dockPiano;
     std::unique_ptr<NativeDevicePanel> dockNative;
     std::unique_ptr<NativeEffectsPanel> dockEffect;
+    std::unique_ptr<AnalysisPanel> dockAnalysis;
     juce::String nativeTrackId, nativeProjectId;
     juce::String effectTrackId, effectProjectId;
     juce::String chainTrackId, chainSelectedId;
@@ -1177,7 +1195,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     juce::String error, trackGestureId, startEditId;
     std::uint64_t startEditRevision = 0;
     juce::Rectangle<int> library, workspace, inspector, dockBounds;
-    enum class Dock { closed, source, midi, track, native, effect };
+    enum class Dock { closed, source, midi, track, native, effect, analysis };
     Dock dock = Dock::closed;
     bool pianoExpanded = false;
     bool inspectorVisible = true;
@@ -1385,7 +1403,7 @@ void MainComponent::resized()
     const bool showSidebar = p.agentVisible && !expanded;
     const int sidebarWidth=showSidebar?juce::jlimit(340,520,getWidth()/3):0;
     const int workspaceRight=getWidth()-margin-(showSidebar?sidebarWidth+8:0);
-    p.inspectorDisplayed=p.inspectorVisible&&!p.agentVisible&&!expanded&&p.dock!=Impl::Dock::native&&p.dock!=Impl::Dock::effect;
+    p.inspectorDisplayed=p.inspectorVisible&&!p.agentVisible&&!expanded&&p.dock!=Impl::Dock::native&&p.dock!=Impl::Dock::effect&&p.dock!=Impl::Dock::analysis;
     const int inspectorWidth = p.inspectorDisplayed ? 226 : 0;
     if(p.agentSidebar){p.agentSidebar->setBounds(workspaceRight+8,110,sidebarWidth,p.footerY-122);p.agentSidebar->setPanelVisible(showSidebar);}
     p.agentButton.setBounds(getWidth()-margin-208,75,80,30);
@@ -1402,7 +1420,7 @@ void MainComponent::resized()
     }
     p.saveStatus.setBounds(71, 45, juce::jmax(160, p.newButton.getX() - 80), 22);
     int x = margin;
-    for (auto* b : { &p.importButton, &p.editMenu, &p.plugins, &p.separate, &p.details }) {
+    for (auto* b : { &p.importButton, &p.editMenu, &p.plugins, &p.separate, &p.analyze, &p.details }) {
         b->setBounds(x, 75, b == &p.importButton ? 80 : 76, 30); x = b->getRight() + 4;
     }
     p.undoButton.setBounds(x + 8, 75, 60, 30); p.redoButton.setBounds(x + 72, 75, 60, 30);
@@ -1414,6 +1432,7 @@ void MainComponent::resized()
     p.fit.setBounds(getWidth() - margin - 48, 75, 48, 30);
     const bool visualDevice = p.dock == Impl::Dock::native || p.dock == Impl::Dock::effect;
     const int dockHeight = expanded ? p.workspace.getHeight() : p.dock == Impl::Dock::closed ? 0
+        : p.dock == Impl::Dock::analysis ? juce::jlimit(286, 390, p.workspace.getHeight() - 108)
         : visualDevice ? juce::jlimit(248, 364, p.workspace.getHeight() - 204)
         : p.dock == Impl::Dock::track ? juce::jlimit(278, 390, p.workspace.getHeight() - 204)
         : juce::jlimit(180, 340, p.workspace.getHeight() - 204);
@@ -1441,9 +1460,11 @@ void MainComponent::resized()
     p.trackPanel.setVisible(p.dock == Impl::Dock::track); p.trackPanel.setBounds(deviceBody);
     if(p.dockNative){p.dockNative->setVisible(p.dock==Impl::Dock::native);p.dockNative->setBounds(deviceBody);}
     if(p.dockEffect){p.dockEffect->setVisible(p.dock==Impl::Dock::effect);p.dockEffect->setBounds(deviceBody);}
+    if(p.dockAnalysis){p.dockAnalysis->setVisible(p.dock==Impl::Dock::analysis);p.dockAnalysis->setBounds(p.dockBounds.withTrimmedTop(28));}
     p.separate.setToggleState(p.dock == Impl::Dock::source, juce::dontSendNotification);
+    p.analyze.setToggleState(p.dock == Impl::Dock::analysis, juce::dontSendNotification);
     p.details.setToggleState(p.inspectorDisplayed, juce::dontSendNotification);
-    p.details.setEnabled(!p.agentVisible&&p.dock!=Impl::Dock::native&&p.dock!=Impl::Dock::effect);
+    p.details.setEnabled(!p.agentVisible&&p.dock!=Impl::Dock::native&&p.dock!=Impl::Dock::effect&&p.dock!=Impl::Dock::analysis);
     const int ix = p.inspector.getX(), iw = p.inspector.getWidth();
     p.clipStart.setBounds(ix + 54, 206, iw - 104, 28); p.setClipStart.setBounds(ix + iw - 46, 206, 46, 28);
     p.clipProperties.setBounds(ix, 242, iw, 28);
@@ -1496,7 +1517,7 @@ void MainComponent::paint(juce::Graphics& g)
         g.setColour(rule); g.drawHorizontalLine(p.dockBounds.getY(), float(p.dockBounds.getX()), float(p.dockBounds.getRight()));
         g.setColour(secondary); g.setFont(mono(12));
         if (p.dock != Impl::Dock::native && p.dock != Impl::Dock::effect)
-        g.drawFittedText(p.dock == Impl::Dock::track ? "track / " + (p.selectedTrack() ? p.selectedTrack()->name : juce::String("Select a track")) : (p.dock == Impl::Dock::midi ? "MIDI / " : "source / ") + p.selectedClipName(), p.dockBounds.getX() + 5, p.dockBounds.getY() + 2,
+        g.drawFittedText(p.dock == Impl::Dock::analysis ? "analyze / local audio" : p.dock == Impl::Dock::track ? "track / " + (p.selectedTrack() ? p.selectedTrack()->name : juce::String("Select a track")) : (p.dock == Impl::Dock::midi ? "MIDI / " : "source / ") + p.selectedClipName(), p.dockBounds.getX() + 5, p.dockBounds.getY() + 2,
             p.dockBounds.getWidth() - (p.dock == Impl::Dock::midi ? 290 : 130), 24, juce::Justification::centredLeft, 1);
     }
     g.setColour(ink); g.drawHorizontalLine(p.footerY, 16.0f, float(getWidth() - 16));
@@ -1884,6 +1905,19 @@ juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDire
         browser.setSize(780, 420);
         if (result.wasOk() && !captureComponent(browser, "ui-plugins-780x420.png")) result = juce::Result::fail("Could not capture the narrow plugin browser.");
         if (result.wasOk()) result = browser.runInteractionSmokeTest(*report);
+        if (result.wasOk()) {
+            const auto originalSelection = session.snapshot().selectedClipId;
+            juce::String audioSource;
+            for (const auto& track : session.snapshot().tracks) for (const auto& clip : track.clips)
+                if (audioSource.isEmpty() && clip.kind == "audio") audioSource = clip.id;
+            if (audioSource.isNotEmpty()) {
+                session.selectClip(audioSource);
+                AnalysisPanel analysisFixture(session, {}); analysisFixture.setLookAndFeel(&p.look);
+                result = analysisFixture.runInteractionSmokeTest(*report, outputDirectory);
+                analysisFixture.setLookAndFeel(nullptr); session.selectClip(originalSelection);
+                if (result.wasOk()) result = AnalysisPreview::runSmokeTest(*report, outputDirectory);
+            } else result = juce::Result::fail("No source audio for analysis UI verification.");
+        }
         if (result.wasOk()) {
             NativeDevicePanel nativeFixture(session, session.snapshot().selectedTrackId, {});
             nativeFixture.setLookAndFeel(&p.look);
