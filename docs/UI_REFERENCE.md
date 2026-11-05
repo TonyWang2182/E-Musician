@@ -1,5 +1,13 @@
 # UI 参考与交互规格
 
+## 0.10.0 日常工作流（自动验证通过，人工待验）
+
+时间线上方直接显示 Follow: on/off/paused，设置与标尺右键同样可切换；手动浏览暂停跟随，不抢回视图。Source 下栏增加固定比例 Warp 草稿：开关、原始 BPM、目标 BPM、Follow tempo、Apply，以及 Analyze beats 跳转。保持原黑白风格和可直接输入的数值，工程应用前只改草稿。
+
+Beats 为第四个分析页：真实波形上叠加拍点/小节拍，点击修正首拍；BPM 支持半倍/双倍，拍号可手动选择。Align audio 保持工程速度，Use this tempo 明确改变工程 BPM/拍号。结果状态使用简短文案，内部模型/哈希/性能信息留在诊断记录。
+
+Settings 按 Audio/MIDI、Editing、Language 分页；首次 Save/Save As 提供名称、位置、文件夹选择与覆盖确认，已有路径 Ctrl+S 直接保存。轨道、片段、编曲空白与标尺各有适用右键选项，右键不跳播放头，不误触 mute/solo/arm，不破坏已有多选。UI 测试和人工步骤见本轮 [UI 说明](review/2026-11-05-tempo-warp/UI-NOTES.md) / [短测](review/2026-11-05-tempo-warp/MANUAL-CHECK.md)。
+
 ## 0.9.1 分析结果直接进入编曲区
 
 保留黑白风格。Analyze 下栏的三个任务使用选中音频和简单配置，Options 弹出范围和转录阈值，不因窗口变小隐藏取消或参数。右侧最近分析、简短状态和图形预览；分离显示真实缩略波形，MIDI 为矩形音符，和弦为带名称矩形。Add tracks / Add MIDI track / Add chord track 明确提交，空结果只显示简短提示。详细诊断留 tooltip/日志，内部评分不占产品界面。

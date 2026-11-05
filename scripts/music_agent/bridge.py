@@ -159,7 +159,7 @@ class DawBridge:
         # The generic job kind distinguishes an import even during the tiny
         # queued/running interval before its worker publishes "applying".
         raw = self._request({"command": "get_job", "args": {"job_id": identifier(job_id)}})["result"]
-        if not isinstance(raw, dict) or raw.get("kind") not in {"analysis.separate", "analysis.transcribe", "analysis.chords"} or raw.get("status") not in {"queued", "preparing", "running", "validating"}:
+        if not isinstance(raw, dict) or raw.get("kind") not in {"analysis.separate", "analysis.transcribe", "analysis.chords", "analysis.beats"} or raw.get("status") not in {"queued", "preparing", "running", "validating"}:
             raise BridgeError("任务已结束或是导入任务，没有发送取消。")
         return self._request({"command": "cancel_analysis_job", "args": {"job_id": identifier(job_id)}})
 
@@ -341,7 +341,37 @@ class DawBridge:
             context.setdefault("native_instruments",{})[track_id]=state
             return copy.deepcopy(state)
 
+    def audio_warp(self, context, clip_ids):
+        from .tempo import safe_warp
+        with self.lock:
+            if not {"get_audio_warp","set_audio_warp"}<=set(self.capabilities().get("commands",[])):
+                raise BridgeError("当前宿主未提供音频Warp接口。")
+            if identity(self.snapshot())!=identity(context):raise BridgeError("读取Warp期间工程已变化。")
+            value=safe_warp(self._request({"command":"get_audio_warp","args":{"clip_ids":clip_ids}})["result"],clip_ids)
+            if identity(self.snapshot())!=identity(context):raise BridgeError("读取Warp期间工程已变化。")
+            return value
+
     def apply(self, plan):
+        if plan.get("execution_kind") in {"audio_warp","beat_apply"}:
+            from .tempo import compile_warp, compile_beats
+            current=self.snapshot();args=plan["commands"][0]["args"]
+            ids=[item["clip_id"] for item in plan["warp_before"]]
+            states=self.audio_warp(current,ids)
+            if states!=plan["warp_before"]:raise BridgeError("Warp在预览后已变化，没有提交旧方案。")
+            if plan["execution_kind"]=="beat_apply":
+                candidate=self.analysis_result(plan["analysis"]["result_id"])
+                if candidate.get("result_hash")!=plan["analysis"].get("result_hash"):raise BridgeError("节拍候选已变化。")
+                compile_beats({**args,"summary":plan["summary"]},candidate,current,plan["scope"],states)
+            else:
+                compile_warp({**{k:v for k,v in args.items() if k!="mode"},"summary":plan["summary"]},current,plan["scope"],states)
+            command=plan["commands"][0]["command"]
+            if command not in self.capabilities().get("commands",[]):raise BridgeError("宿主缺少本次Warp命令。")
+            envelope={"request_id":plan["id"],"project_id":plan["project_id"],"expected_revision":plan["revision"],"command":command,"args":args}
+            if plan["scope"]["mode"]!="project":envelope["expected_selection_revision"]=plan["scope"]["selection_revision"]
+            reply=self._request(envelope,allow_accepted=True)
+            if reply.get("status")!="accepted" or not isinstance((reply.get("result") or {}).get("job_id"),str):
+                raise BridgeError("Warp回执异常，结果未知；请检查DAW，不要重复提交。")
+            return reply
         if plan.get("execution_kind") == "chord_edit":
             from .analysis import compile_chord_edit
             current = self.snapshot()
@@ -399,7 +429,20 @@ class DawBridge:
         scope = plan.get("scope") or {}
         if scope.get("mode") in {"selection", "clip"}:
             envelope["expected_selection_revision"] = scope["selection_revision"]
-        return self._request(envelope)
+        return self._request(envelope,allow_accepted=True)
+
+    def wait_edit_job(self,job_id,timeout=180.0):
+        deadline=time.monotonic()+timeout
+        while time.monotonic()<deadline:
+            job=self._request({"command":"get_job","args":{"job_id":job_id}}).get("result")
+            if not isinstance(job,dict) or job.get("id")!=job_id:raise BridgeError("后台编辑任务身份不匹配。")
+            if job.get("status")=="completed":
+                if not isinstance(job.get("result"),dict):raise BridgeError("后台编辑缺少完整回执；请检查DAW。")
+                return job["result"]
+            if job.get("status") in {"failed","conflict","cancelled","stale"}:
+                raise NativeJobFailed("后台编辑未提交："+str(job.get("error") or job["status"])[:300])
+            time.sleep(.05)
+        raise BridgeError("后台编辑等待超时，结果未知；请检查DAW，不要重复提交。")
 
     def wait_native_job(self, job_id, timeout=30.0):
         deadline=time.monotonic()+timeout

@@ -76,10 +76,12 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
             auto a=assets.find(c.assetId);if(a==assets.end())return fail("Audio clip has no source asset.");
             auto p=prepared.find(a->second.source.getFullPathName());if(p==prepared.end())return fail("Audio source is not prepared.");
             if(s.schemaVersion==1)c.duration=p->second.duration;
-            if(c.sourceOffset+c.duration>p->second.duration+1.0e-9)return fail("Clip exceeds its source audio.");
+            if(c.sourceOffset+c.duration*c.warp.speedRatio()>p->second.duration+1.0e-7)return fail("Clip exceeds its source audio.");
+            if(c.warp.enabled){auto rendered=assets.find(c.warp.renderAssetId);
+                if(rendered==assets.end()||!prepared.contains(rendered->second.source.getFullPathName()))return fail("Warp render is not prepared.");}
         }
     }
-    s.schemaVersion=s.analyses.empty()&&s.chordRegions.empty()?4:5;
+    s.schemaVersion=storage::requiredSchema(s);
     if(auto r=storage::validate(s);r.failed())return fail(r.getErrorMessage());
     if(auto r=production::validateGraph(s);r.failed())return fail(r.getErrorMessage());
     std::map<juce::String,te::AudioTrack*> tracks;
@@ -210,14 +212,14 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
             if(!clip){
                 if(c.kind=="midi")clip=track->insertMIDIClip(t.name,range,nullptr);
                 else{
-                    const auto& a=assets.at(c.assetId);const auto& info=prepared.at(a.source.getFullPathName());
-                    clip=track->insertWaveClip(t.name,info.playbackFile,{range,te::TimeDuration::fromSeconds(c.sourceOffset)},false);
+                    const auto& a=assets.at(c.warp.enabled?c.warp.renderAssetId:c.assetId);const auto& info=prepared.at(a.source.getFullPathName());
+                    clip=track->insertWaveClip(t.name,info.playbackFile,{range,te::TimeDuration::fromSeconds(c.sourceOffset/c.warp.speedRatio())},false);
                 }
                 if(!clip)return fail("Could not insert clip.");
                 clip->state.setProperty(emId,c.id,um);
             }else if(clip->getTrack()!=track)clip->moveTo(*track);
             clip->state.setProperty(emKind,c.kind,um);
-            clip->setPosition({range,te::TimeDuration::fromSeconds(c.sourceOffset)});
+            clip->setPosition({range,te::TimeDuration::fromSeconds(c.sourceOffset/c.warp.speedRatio())});
             if(auto* midi=dynamic_cast<te::MidiClip*>(clip.get())){
                 midi->setSyncType(te::Clip::syncBarsBeats);midi->setUsesProxy(false);
                 if(!c.notes.empty())midi->setMidiChannel(te::MidiChannel(c.notes.front().channel));
@@ -238,6 +240,11 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
                 }
                 for(const auto& [id,n]:existing)if(!wanted.contains(id))seq.removeNote(*n,um);
             }else if(auto* audio=dynamic_cast<te::WaveAudioClip*>(clip.get())){
+                const auto& playbackAsset=assets.at(c.warp.enabled?c.warp.renderAssetId:c.assetId);
+                audio->getSourceFileReference().setToDirectFileReference(prepared.at(playbackAsset.source.getFullPathName()).playbackFile,false);
+                const auto nextWarp=storage::audioWarpToVar(c.warp);
+                if(juce::JSON::toString(clip->state["emAudioWarp"],true)!=juce::JSON::toString(nextWarp,true))clip->state.setProperty("emAudioWarp",nextWarp,um);
+                clip->state.setProperty("emWarpRenderSource",c.warp.enabled?playbackAsset.source.getFullPathName():juce::String(),um);
                 audio->setSyncType(te::Clip::syncAbsolute);audio->setAutoTempo(false);audio->setAutoPitch(false);audio->setUsesProxy(false);
                 audio->setResamplingQuality(te::ResamplingQuality::sincMedium);
                 audio->setFadeInType(te::AudioFadeCurve::linear);audio->setFadeOutType(te::AudioFadeCurve::linear);

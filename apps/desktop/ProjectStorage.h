@@ -52,6 +52,15 @@ struct StoredControllerEvent {
     int type = 0, value = 0, metadata = 0;
 };
 
+struct StoredAudioWarp {
+    bool enabled = false, followTempo = false;
+    double sourceBpm = 120.0, targetBpm = 120.0;
+    juce::String mode = "preserve_pitch", renderAssetId, sourceHash, renderHash;
+    double speedRatio() const { return enabled ? targetBpm / sourceBpm : 1.0; }
+};
+juce::var audioWarpToVar(const StoredAudioWarp&);
+juce::Result audioWarpFromVar(const juce::var&, StoredAudioWarp&);
+
 struct StoredClip {
     juce::String id, assetId;
     double timelineStart = 0.0, sourceOffset = 0.0, duration = 0.0;
@@ -61,6 +70,7 @@ struct StoredClip {
     std::vector<StoredNote> notes;
     std::vector<StoredControllerEvent> controllers;
     juce::String analysisRole;
+    StoredAudioWarp warp;
 };
 
 struct StoredTrack {
@@ -146,6 +156,7 @@ struct IOOptions {
 
 // Pure DTO validation: no file reads, existence checks, or plugin instantiation.
 juce::Result validate(const StoredProject&);
+int requiredSchema(const StoredProject&);
 bool isSupportedChordLabel(const juce::String&);
 
 // Reuses verified unchanged audio in this bundle, copies changed/new audio into

@@ -26,7 +26,7 @@ juce::var jobSnapshotJson(const EngineSession::JobSnapshot& j)
 {
     return object({{"id",j.id},{"kind",j.kind},{"status",j.status},{"progress",j.progress},{"error",j.error},
         {"phase",j.phase},{"detail",j.detail},{"capture_ms",j.captureMs},{"max_plugin_capture_ms",j.maxPluginCaptureMs},
-        {"bytes_written",j.bytesWritten},{"bytes_reused",j.bytesReused},{"plugins_captured",j.pluginsCaptured}});
+        {"bytes_written",j.bytesWritten},{"bytes_reused",j.bytesReused},{"plugins_captured",j.pluginsCaptured},{"result",j.result}});
 }
 }
 
@@ -58,7 +58,12 @@ EngineSession::Snapshot EngineSession::snapshot()const
             for(const auto& c:t.clips){
                 ClipSnapshot clip;clip.id=c.id;clip.assetId=c.assetId;clip.analysisRole=c.analysisRole;clip.kind=c.kind;clip.timelineStart=c.timelineStart;clip.sourceOffset=c.sourceOffset;clip.duration=c.duration;
                 clip.startBeats=c.startBeats;clip.lengthBeats=c.lengthBeats;clip.fadeIn=c.fadeIn;clip.fadeOut=c.fadeOut;
-                if(auto* binding=p.findClip(c.id)){clip.source=binding->source;clip.waveformSource=binding->info.playbackFile;clip.sourceDuration=binding->info.duration;clip.sampleRate=binding->info.rate;clip.channels=binding->info.channels;clip.format=binding->info.format;}
+                clip.warpEnabled=c.warp.enabled;clip.warpFollowTempo=c.warp.followTempo;clip.warpSourceBpm=c.warp.sourceBpm;
+                clip.warpTargetBpm=c.warp.targetBpm;clip.warpSpeedRatio=c.warp.speedRatio();clip.warpMode=c.warp.mode;
+                clip.playbackSourceOffset=c.sourceOffset/c.warp.speedRatio();
+                if(auto* binding=p.findClip(c.id)){clip.source=binding->source;clip.waveformSource=binding->info.playbackFile;clip.sourceDuration=binding->originalInfo.duration;
+                    clip.playbackSourceDuration=binding->info.duration;clip.originalWaveformSource=binding->originalInfo.playbackFile;
+                    clip.sampleRate=binding->info.rate;clip.channels=binding->info.channels;clip.format=binding->originalInfo.format;}
                 if(c.kind=="midi"){
                     if(auto* binding=p.findClip(c.id))if(auto* midi=dynamic_cast<te::MidiClip*>(binding->clip.get())){clip.notes=p.noteView(c.id,*midi).notes;clip.controllerCount=midi->getSequence().getNumControllerEvents();}
                     clip.format="MIDI";
@@ -87,6 +92,7 @@ EngineSession::Snapshot EngineSession::snapshot()const
         JobSnapshot job{j->id,j->kind,j->status,j->error,j->progress};
         job.phase=j->phase;job.detail=j->detail;job.captureMs=j->captureMs;job.maxPluginCaptureMs=j->maxPluginCaptureMs;
         job.bytesWritten=j->bytesWritten;job.bytesReused=j->bytesReused;job.pluginsCaptured=j->pluginsCaptured;
+        job.result=j->result.clone();
         s.jobs.push_back(std::move(job));
     }
     for(const auto& job:p.nativeJobHistory)s.jobs.push_back(job);
@@ -108,10 +114,11 @@ EngineSession::Snapshot EngineSession::snapshot()const
 
 juce::Result EngineSession::execute(const juce::String& command,const juce::var& args,std::uint64_t expected,juce::var* commandResult)
 {
+    if(command=="get_audio_warp"){juce::var data;auto r=impl->getAudioWarp(args,data);if(commandResult)*commandResult=std::move(data);return r;}
     requireControlThread();
     if(commandResult)*commandResult=juce::var();
     const bool analysisRead=command=="get_analysis_capabilities"||command=="get_analysis_job"||command=="get_analysis_result"||command=="get_chord_regions"||command=="get_analysis_preview_status"||command=="stop_analysis_preview";
-    if(analysisRead||command=="cancel_analysis_job"||command=="start_analysis"||command=="accept_analysis_result"||command=="edit_chord_region"||command=="preview_analysis_stem"){
+    if(analysisRead||command=="cancel_analysis_job"||command=="start_analysis"||command=="accept_analysis_result"||command=="apply_beat_analysis"||command=="edit_chord_region"||command=="preview_analysis_stem"){
         if(!args.isObject())return impl->fail("Analysis arguments must be an object.");
         if(!analysisRead&&command!="cancel_analysis_job"){
             if(auto r=impl->preflight(expected);r.failed())return r;
@@ -284,7 +291,7 @@ juce::var EngineSession::capabilities()const
     // Selection revision is independent from musical project revision.
     juce::Array<juce::var> commands;
     commands.add("get_selection_context");
-    for(const auto* name:{"get_analysis_capabilities","start_analysis","get_analysis_job","cancel_analysis_job","get_analysis_result","accept_analysis_result","get_chord_regions","edit_chord_region","preview_analysis_stem","stop_analysis_preview","get_analysis_preview_status"})commands.add(name);
+    for(const auto* name:{"get_analysis_capabilities","start_analysis","get_analysis_job","cancel_analysis_job","get_analysis_result","accept_analysis_result","apply_beat_analysis","get_chord_regions","edit_chord_region","preview_analysis_stem","stop_analysis_preview","get_analysis_preview_status","get_audio_warp","set_audio_warp"})commands.add(name);
     for(const auto* name:{"get_capabilities","get_snapshot","get_project_state","get_jobs","get_job","get_events","get_clip_notes","create_track","rename_track","reorder_track","remove_track","set_track_gain","set_track_pan","set_track_muted","set_track_solo","set_master_gain","set_loop","set_loop_range","set_tempo","set_time_signature","move_clip","move_clips","trim_clip","split_clip","duplicate_clips","delete_clips","set_clip_fades","create_midi_clip","write_notes","batch","undo","redo","import_audio","import_midi","save_project","open_project","export_wav","export_midi","scan_plugins","cancel_job","add_plugin","remove_plugin","move_plugin","set_plugin_enabled","open_plugin","new_project","play","pause","stop","seek"})commands.add(name);
     for(const auto* command:{"get_recording_preferences","set_recording_preferences","reset_meters","get_clipboard_state","copy_clips","cut_clips","paste_clips"})commands.add(command);
     commands.add("get_native_effect");commands.add("add_native_effect");commands.add("set_native_effect");
@@ -316,11 +323,11 @@ juce::var EngineSession::capabilities()const
         }
         instruments.add(object({{"type",name},{"readable",true},{"scope","project"},{"asynchronous",true},{"single_action",true},{"sample_must_be_loaded",true},{"model_can_assign_path",false},{"model_can_create",false},{"actions",actions}}));
     }
-    return object({{"protocol_version",1},{"batch_result_refs",true},{"batch_result_refs_version",1},{"project_schema_version",5},{"native_effect_catalog",object({{"version",1},{"types",types}})},{"native_instrument_catalog",object({{"version",1},{"types",instruments}})},{"max_controller_events",100000},{"max_automation_points",100000},{"max_automation_page",1000},{"max_sends_per_track",32},{"max_sends",512},{"recording_mode","linear_take"},{"monitor_scope","track_and_input_device"},{"commands",commands},{"default_bpm",120},{"tempo_min",20},{"tempo_max",300},{"max_tracks",64},{"max_clips",4096},{"max_notes",100000},{"max_note_page",1000},{"max_clip_page",256},{"max_catalog_page",256},{"snapshot_clips_per_track",64},{"snapshot_clips_total",256},{"snapshot_includes_note_content",false},{"plugin_formats",juce::var(juce::Array<juce::var>{"VST","VST3"})},{"network_control",false},{"event_sequence",juce::int64(impl->eventSequence)}});
+    return object({{"protocol_version",1},{"batch_result_refs",true},{"batch_result_refs_version",1},{"project_schema_version",6},{"native_effect_catalog",object({{"version",1},{"types",types}})},{"native_instrument_catalog",object({{"version",1},{"types",instruments}})},{"max_controller_events",100000},{"max_automation_points",100000},{"max_automation_page",1000},{"max_sends_per_track",32},{"max_sends",512},{"recording_mode","linear_take"},{"monitor_scope","track_and_input_device"},{"commands",commands},{"default_bpm",120},{"tempo_min",20},{"tempo_max",300},{"max_tracks",64},{"max_clips",4096},{"max_notes",100000},{"max_note_page",1000},{"max_clip_page",256},{"max_catalog_page",256},{"snapshot_clips_per_track",64},{"snapshot_clips_total",256},{"snapshot_includes_note_content",false},{"plugin_formats",juce::var(juce::Array<juce::var>{"VST","VST3"})},{"network_control",false},{"event_sequence",juce::int64(impl->eventSequence)}});
 }
 namespace {
 juce::var controlClipJson(const EngineSession::ClipSnapshot& c)
-{return object({{"id",c.id},{"asset_id",c.assetId},{"analysis_role",c.analysisRole},{"kind",c.kind},{"start_seconds",c.timelineStart},{"source_offset",c.sourceOffset},{"duration_seconds",c.duration},{"start_beats",c.startBeats},{"length_beats",c.lengthBeats},{"fade_in_seconds",c.fadeIn},{"fade_out_seconds",c.fadeOut},{"note_count",int(c.notes?c.notes->size():0)},{"controller_count",c.controllerCount}});}
+{return object({{"id",c.id},{"asset_id",c.assetId},{"analysis_role",c.analysisRole},{"kind",c.kind},{"start_seconds",c.timelineStart},{"source_offset",c.sourceOffset},{"duration_seconds",c.duration},{"start_beats",c.startBeats},{"length_beats",c.lengthBeats},{"fade_in_seconds",c.fadeIn},{"fade_out_seconds",c.fadeOut},{"note_count",int(c.notes?c.notes->size():0)},{"controller_count",c.controllerCount},{"warp_enabled",c.warpEnabled},{"warp_follow_tempo",c.warpFollowTempo},{"warp_source_bpm",c.warpSourceBpm},{"warp_target_bpm",c.warpTargetBpm},{"warp_speed_ratio",c.warpSpeedRatio},{"playback_source_offset",c.playbackSourceOffset}});}
 juce::var controlCatalogJson(const EngineSession::PluginDescriptorSnapshot& c)
 {return object({{"id",c.id},{"name",c.name},{"format",c.format},{"manufacturer",c.manufacturer},{"is_instrument",c.isInstrument}});}
 juce::var controlLanesJson(const std::vector<EngineSession::AutomationLaneSnapshot>& lanes)
@@ -349,6 +356,7 @@ juce::var EngineSession::executeRequest(const juce::var& envelope)
     auto args=envelope.getProperty("args",object({}));
     if(!args.isObject())return reply("invalid",{},"Request args must be an object.");
     if(command=="get_capabilities")return reply("completed",capabilities());
+    if(command=="get_audio_warp"){juce::var data;auto r=impl->getAudioWarp(args,data);return reply(r.wasOk()?"completed":"failed",data,r.getErrorMessage());}
     if(command=="get_analysis_capabilities"||command=="get_analysis_job"||command=="get_analysis_result"||command=="get_chord_regions"||command=="cancel_analysis_job"||command=="get_analysis_preview_status"||command=="stop_analysis_preview"){
         juce::var data;const auto result=impl->analysisCommand(command,args,data);return reply(result.wasOk()?"completed":"failed",data,result.getErrorMessage());
     }

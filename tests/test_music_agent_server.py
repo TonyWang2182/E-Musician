@@ -110,6 +110,11 @@ class ServerTests(unittest.TestCase):
         status, _, _ = self.request("POST", "/api/plan", {"prompt": "x"}, {"X-Agent-Token": "wrong"})
         self.assertEqual(status, 403)
         self.assertEqual(self.runtime.calls, [])
+    def test_repeated_rejected_post_bodies_return_403_without_dispatch(self):
+        for _ in range(20):
+            status, _, _ = self.request("POST", "/api/plan", {"prompt": "x"*2048}, {"X-Agent-Token": "wrong"})
+            self.assertEqual(status, 403)
+        self.assertEqual(self.runtime.calls, [])
     def test_nonascii_token_rejected_cleanly(self):
         status, _, _ = self.request(headers={"X-Agent-Token": "caf\xe9"})
         self.assertEqual(status, 403)

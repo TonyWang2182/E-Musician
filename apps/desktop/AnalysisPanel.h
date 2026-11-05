@@ -15,6 +15,7 @@ public:
     void visibilityChanged() override;
     void setSelectedTimeRange(double startSeconds, double endSeconds);
     void showChordRegion(const juce::String& chordId);
+    void showBeats();
     void refreshLanguage();
     juce::Result runInteractionSmokeTest(juce::DynamicObject&, const juce::File&);
 private:

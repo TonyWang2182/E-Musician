@@ -26,6 +26,8 @@ public:
     void setSnapEnabled(bool enabled);
     void setAdaptiveGrid(bool enabled);
     void setFollowPlayhead(bool enabled);
+    bool isFollowSuspended() const;
+    bool isFollowEnabled() const;
     juce::Range<double> selectedTimeRange() const;
     juce::Range<double> explicitSelectedTimeRange() const;
     void selectClipIds(const juce::StringArray&);
@@ -55,6 +57,9 @@ public:
     std::function<void(const juce::String&)> onOpenTrackDevices;
     std::function<void(const juce::String&)> onRenameTrack;
     std::function<void(const juce::String&)> onOpenChordRegion;
+    // Right-click targets are captured without moving the playback position.
+    // kind: track / clip / blank / ruler; id is a stable track or clip ID.
+    std::function<void(const juce::String& kind, const juce::String& id, double seconds)> onContextMenu;
 private:
     struct Impl;
     std::unique_ptr<Impl> impl;

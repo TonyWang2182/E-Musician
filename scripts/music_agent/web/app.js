@@ -297,6 +297,20 @@
     if (candidate.kind === "transcribe") rows.push(t("选择乐器后即可播放。"));
     return rows;
   }
+  function warpChanges(plan, snapshot) {
+    if (!["audio_warp", "beat_apply"].includes(plan.execution_kind)) return null;
+    const rows = [t("后台处理后一次提交，可一次撤销。")];
+    if (plan.tempo_check?.numerator) rows.push(t`整个工程：${Number(plan.tempo_check.bpm).toFixed(2)} BPM · ${plan.tempo_check.numerator}/${plan.tempo_check.denominator}`);
+    else rows.push(t("保持当前工程速度与拍号。"));
+    for (const check of plan.warp_checks || []) {
+      const track = (snapshot.tracks || []).find((item) => (item.clips || []).some((clip) => clip.id === check.clip_id));
+      const name = track?.name || t("音频片段");
+      rows.push(t`${name} · 起点 ${check.timeline_start_seconds.toFixed(3)} 秒 · 时长 ${check.duration_seconds.toFixed(3)} 秒`);
+      rows.push(check.enabled === false ? t("关闭 Warp，恢复原始速度。") : t`播放速度比 ${check.warp_speed_ratio.toFixed(4)} · ${check.follow_tempo ? t("跟随工程速度") : t("固定速度")}`);
+    }
+    if (plan.analysis?.tempo?.variable_tempo) rows.push(t("节奏存在波动；本次按固定比例拉伸，不会逐拍矫直。"));
+    return rows;
+  }
   function render(next) {
     const scroll = $("transcript");
     const nearBottom = scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight < 60;
@@ -316,7 +330,7 @@
       text("plan-revision", revision == null ? "" : t`基于修订 ${revision}`);
       const scope = (frozenScope && typeof frozenScope === "object" ? frozenScope.mode : frozenScope) || submittedScope;
       text("plan-scope", scope === "project" ? t("本次范围：整个工程") : scope === "selection" ? t("本次范围：发送时的选择") : scope === "clip" ? t("本次范围：整个片段") : t("范围以提交时的选择为准"));
-      const importedChanges = plan.execution_kind === "analysis_import" ? analysisChanges(plan.analysis) : null;
+      const importedChanges = warpChanges(plan, state.snapshot || {}) || (plan.execution_kind === "analysis_import" ? analysisChanges(plan.analysis) : null);
       const steps = importedChanges ? [{label: t("核对来源、候选和工程版本")}, {label: importedChanges[0]}] : Array.isArray(plan.steps) ? plan.steps : [];
       const hasSteps = steps.length > 0 && steps.every((step) => typeof step?.label === "string" && step.label.trim());
       $("plan-sequence").hidden = !hasSteps;
@@ -354,7 +368,7 @@
       row.open = opened.has(group.id);
       const heading = element("summary");
       heading.append(element("span", t(group.label)), element("span", t(group.status_label), "capability-status"));
-      const simpleDetails = {separate: "生成独立音频轨，保留原素材。", transcribe: "生成 MIDI 轨，可在钢琴卷帘中编辑。", chords: "生成时间线上的和弦轨，可修改标签。"};
+      const simpleDetails = {separate: "生成独立音频轨，保留原素材。", transcribe: "生成 MIDI 轨，可在钢琴卷帘中编辑。", chords: "生成时间线上的和弦轨，可修改标签。", beats: "检测节拍与强拍；确认后对齐或采用音频速度。", warp: "保音高拉伸、手动源速度、开启或关闭跟随工程。"};
       const detail = element("p", t(simpleDetails[group.id] || group.detail));
       const example = element("button", t(group.example)); example.type = "button";
       example.disabled = !group.enabled || busy();
@@ -370,19 +384,24 @@
     if (signature === analysisPreviewSignature) return;
     analysisPreviewSignature = signature;
     if (!candidate) return;
-    const names = {separate: t("分离候选"), transcribe: t("MIDI 候选"), chords: t("和弦候选")};
+    const names = {separate: t("分离候选"), transcribe: t("MIDI 候选"), chords: t("和弦候选"), beats: t("节拍候选")};
     text("analysis-preview-title", t`${names[candidate.kind] || t("分析候选")} · ${candidate.total} 项`);
     const source = candidate.source || {};
-    text("analysis-preview-info", `${Number(source.duration_seconds || 0).toFixed(2)} s · ${t("加入工程后可撤销。")}`);
+    if (candidate.kind === "beats") {
+      const bpm = Number.isFinite(candidate.tempo?.bpm) ? candidate.tempo.bpm.toFixed(2) : t("待指定");
+      const meter = candidate.tempo?.meter_supported ? `${candidate.tempo.meter_numerator}/${candidate.tempo.meter_denominator}` : t("拍号待确认");
+      text("analysis-preview-info", `${bpm} BPM · ${meter} · ${Number(source.duration_seconds || 0).toFixed(2)} s`);
+    } else text("analysis-preview-info", `${Number(source.duration_seconds || 0).toFixed(2)} s · ${t("加入工程后可撤销。")}`);
     const seconds = (value) => typeof value === "number" && Number.isFinite(value) ? `${value.toFixed(3)}s` : "—";
     const rows = (candidate.items || []).map((item) => {
       const label = candidate.kind === "separate" ? t`${item.name} · ${seconds(item.duration_seconds)} · ${item.channels} 声道`
         : candidate.kind === "transcribe" ? t`MIDI ${item.pitch} · ${seconds(item.start_seconds)} 起 · 长 ${seconds(item.duration_seconds)} · 力度 ${item.velocity}`
+        : candidate.kind === "beats" ? `${item.is_downbeat ? t("强拍") : t("节拍")} · ${seconds(item.time_seconds)}`
         : `${item.label} · ${seconds(item.start_seconds)}–${seconds(item.end_seconds)}${item.uncertain ? t(" · 待核对") : ""}`;
       return element("li", label);
     });
     $("analysis-preview-items").replaceChildren(...rows);
-    text("analysis-preview-limit", candidate.total > rows.length ? t`此处显示前 ${rows.length} 项，确认会导入完整的 ${candidate.total} 项；可在 DAW 分析面板继续检查。` : t("试听与详细检查在 DAW 分析面板进行；确认后可一次撤销。"));
+    text("analysis-preview-limit", candidate.kind === "beats" ? t("拍点仅供核对；确认会应用速度与对齐，不会创建音轨。") : candidate.total > rows.length ? t`此处显示前 ${rows.length} 项，确认会导入完整的 ${candidate.total} 项；可在 DAW 分析面板继续检查。` : t("试听与详细检查在 DAW 分析面板进行；确认后可一次撤销。"));
   }
   async function refresh() {
     if (inFlight || stopped || !token || !nativeVisible) { armPoll(); return; }

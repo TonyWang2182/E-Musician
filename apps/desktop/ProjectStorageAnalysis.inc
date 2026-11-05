@@ -26,12 +26,12 @@ bool validChordLabel(const juce::String& label)
 }
 Result validateAnalysis(const StoredProject& p)
 {
-    if((!p.analyses.empty()||!p.chordRegions.empty())&&p.schemaVersion!=5)return Result::fail("Analysis data requires project schema 5.");
+    if((!p.analyses.empty()||!p.chordRegions.empty())&&p.schemaVersion<5)return Result::fail("Analysis data requires project schema 5 or later.");
     if(p.analyses.size()>maximumAnalyses||p.chordRegions.size()>maximumChordRegions)return Result::fail("Analysis metadata limit exceeded.");
     std::set<juce::String> ids,chords;
     for(const auto& a:p.analyses){
         if(!validIdentifier(a.id)||!ids.insert(a.id).second||!validIdentifier(a.sourceClipId)||!validIdentifier(a.sourceAssetId)
-           ||(a.kind!="separate"&&a.kind!="transcribe"&&a.kind!="chords")||a.modelId.isEmpty()||a.modelId.length()>256||a.modelVersion.length()>128
+           ||(a.kind!="separate"&&a.kind!="transcribe"&&a.kind!="chords"&&a.kind!="beats")||(a.kind=="beats"&&p.schemaVersion<6)||a.modelId.isEmpty()||a.modelId.length()>256||a.modelVersion.length()>128
            ||a.sourceSha256.length()!=64||!a.sourceSha256.containsOnly("0123456789abcdef")||a.resultSha256.length()!=64||!a.resultSha256.containsOnly("0123456789abcdef")
            ||a.parametersJson.getNumBytesAsUTF8()>4096||!juce::JSON::parse(a.parametersJson).isObject()
            ||!validTime(a.startSeconds)||!std::isfinite(a.durationSeconds)||a.durationSeconds<=0||!validTime(a.startSeconds+a.durationSeconds))return Result::fail("Invalid analysis provenance.");

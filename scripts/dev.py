@@ -429,6 +429,7 @@ def bootstrap(recorder: Recorder) -> None:
     verify_head(recorder, checkout / "modules" / "juce", juce_commit)
     recorder.execute([sys.executable, str(ROOT / "scripts" / "bootstrap_vst2.py")])
     recorder.execute([sys.executable, str(ROOT / "scripts" / "bootstrap_asio.py")])
+    recorder.execute([sys.executable, str(ROOT / "scripts" / "bootstrap_stretch.py")])
     recorder.execute([sys.executable, str(ROOT / "scripts" / "apply_engine_patches.py"), "apply", "--engine-root", str(checkout)])
     print("Pinned Tracktion, JUCE and VST2 interface dependencies verified. No application build has run.", flush=True)
 

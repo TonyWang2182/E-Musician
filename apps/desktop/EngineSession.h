@@ -46,6 +46,7 @@ public:
         double captureMs = 0.0, maxPluginCaptureMs = 0.0;
         juce::int64 bytesWritten = 0, bytesReused = 0;
         int pluginsCaptured = 0;
+        juce::var result;
     };
     struct ClipSnapshot {
         juce::String id, assetId;
@@ -59,6 +60,11 @@ public:
         std::shared_ptr<const std::vector<NoteSnapshot>> notes;
         int controllerCount = 0;
         juce::String analysisRole;
+        bool warpEnabled = false, warpFollowTempo = false;
+        double warpSourceBpm = 120.0, warpTargetBpm = 120.0, warpSpeedRatio = 1.0;
+        double playbackSourceOffset = 0.0, playbackSourceDuration = 0.0;
+        juce::String warpMode = "preserve_pitch";
+        juce::File originalWaveformSource;
     };
     struct TrackSnapshot {
         float peakLeftDb = -100.0f, peakRightDb = -100.0f, inputPeakDb = -100.0f;
@@ -175,6 +181,7 @@ public:
     juce::Result runOfflineSmokeTest(const juce::File& outputDirectory);
     juce::Result runProjectSmokeTest(const juce::File& outputDirectory, const juce::File& fixtureDirectory);
     juce::Result runClipSmokeTest(const juce::File& outputDirectory);
+    juce::Result runAudioWarpSmokeTest(const juce::File& outputDirectory, const std::vector<juce::File>& audioFixtures);
     juce::Result runDawSmokeTest(const juce::File& outputDirectory, const juce::File& fixtureDirectory);
     juce::Result runProductionSmokeTest(const juce::File& outputDirectory);
     juce::Result runPluginNotificationSmoke(const juce::File& outputDirectory, const juce::String& catalogId);

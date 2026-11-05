@@ -12,7 +12,7 @@
         "label": "Analysis: build Release with log",
         "type": "process",
         "command": "python",
-        "args": ["-c", "from scripts.dev import Recorder; Recorder('analysis-vscode-build','Release','VS Code explicit build').execute(['cmake','--build','E:/emusician-analysis-build','--config','Release','--parallel','2','--','/p:UseMultiToolTask=true','/p:CL_MPCount=2','/p:EnforceProcessCountAcrossBuilds=true'])"],
+        "args": ["scripts/dev_tempo.py", "build"],
         "options": { "cwd": "${workspaceFolder}" },
         "group": { "kind": "build", "isDefault": true },
         "problemMatcher": "$msCompile"
@@ -21,7 +21,7 @@
         "label": "Analysis: CTest with log",
         "type": "process",
         "command": "python",
-        "args": ["-c", "from scripts.dev import Recorder; Recorder('analysis-vscode-test','Release','VS Code explicit CTest').execute(['ctest','--test-dir','E:/emusician-analysis-build','-C','Release','--output-on-failure'])"],
+        "args": ["scripts/dev_tempo.py", "ctest"],
         "options": { "cwd": "${workspaceFolder}" },
         "group": "test",
         "problemMatcher": []
@@ -31,10 +31,10 @@
   "launch": {
     "version": "0.2.0",
     "configurations": [{
-      "name": "E-musician 0.9.1 Analysis / Release",
+      "name": "E-musician 0.10.0 Tempo / Release",
       "type": "cppvsdbg",
       "request": "launch",
-      "program": "E:/emusician-analysis-build/bin/Release/E-musician.exe",
+      "program": "E:/emusician-analysis-build/bin-0.10.0/Release/E-musician.exe",
       "args": ["--agent"],
       "cwd": "${workspaceFolder}",
       "stopAtEntry": false,

@@ -19,6 +19,17 @@ inline State& state() { static State value; return value; }
 }
 inline juce::String uiLanguageCode() { return ui_language_detail::state().chinese.load() ? "zh-CN" : "en"; }
 inline unsigned uiLanguageRevision() { return ui_language_detail::state().revision.load(); }
+// View preference only: separate from project/audio state and never autosaved.
+inline juce::File followPreferenceFile() {
+    return ui_language_detail::preferenceFile().getSiblingFile("follow-playhead.txt");
+}
+inline bool loadFollowPlayheadPreference() { return followPreferenceFile().loadFileAsString().trim() == "on"; }
+inline juce::Result saveFollowPlayheadPreference(bool enabled) {
+    const auto file = followPreferenceFile();
+    if (file.getParentDirectory().createDirectory().failed() || !file.replaceWithText(enabled ? "on\n" : "off\n"))
+        return juce::Result::fail("Could not save the follow-playhead preference.");
+    return juce::Result::ok();
+}
 inline juce::Result setUiLanguage(const juce::String& code, bool persist = true) {
     if (code != "en" && code != "zh-CN") return juce::Result::fail("Unsupported interface language.");
     if (persist) {

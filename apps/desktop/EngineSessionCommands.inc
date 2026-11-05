@@ -19,7 +19,7 @@ void pruneAssets(storage::StoredProject& s)
  if(!collect(s.masterPlugins))return;
  for(const auto& track:s.tracks)if(!collect(track.plugins))return;
  std::erase_if(s.assets,[&](const auto& a){if(nativeIds.contains(a.id))return false;
-     for(const auto& t:s.tracks)for(const auto& c:t.clips)if(c.assetId==a.id)return false;return true;});
+     for(const auto& t:s.tracks)for(const auto& c:t.clips)if(c.assetId==a.id||(c.warp.enabled&&c.warp.renderAssetId==a.id))return false;return true;});
 }
 void syncMidiSeconds(storage::StoredProject& s)
 {for(auto& t:s.tracks)for(auto& c:t.clips)if(c.kind=="midi"){c.timelineStart=time::beatsToSeconds(c.startBeats,s.bpm);c.duration=time::beatsToSeconds(c.lengthBeats,s.bpm);c.sourceOffset=0;}}
@@ -155,7 +155,12 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
         else{const auto key=cmd=="set_track_muted"?"muted":"solo";auto v=a.getProperty(key,{});if(!v.isBool())return bad("Expected a boolean track setting.");if(cmd=="set_track_muted")t->muted=bool(v);else t->solo=bool(v);}
     }else if(cmd=="set_master_gain")s.masterGainDb=float(number(a,"gain_db"));
     else if(cmd=="set_loop") {auto v=a.getProperty("enabled",{});if(!v.isBool())return bad("Loop enabled must be boolean.");s.looping=bool(v);}
-    else if(cmd=="set_tempo"){s.bpm=number(a,"bpm");if(!std::isfinite(s.bpm)||s.bpm<20||s.bpm>300)return bad("Tempo must be 20 to 300 BPM.");syncMidiSeconds(s);}
+    else if(cmd=="set_tempo"){
+        const double old=s.bpm;s.bpm=number(a,"bpm");if(!std::isfinite(s.bpm)||s.bpm<20||s.bpm>300)return bad("Tempo must be 20 to 300 BPM.");
+        for(auto& track:s.tracks)for(auto& clip:track.clips)if(clip.warp.enabled&&clip.warp.followTempo){
+            const auto scale=old/s.bpm;clip.timelineStart*=scale;clip.duration*=scale;clip.fadeIn*=scale;clip.fadeOut*=scale;clip.warp.targetBpm=s.bpm;
+        }syncMidiSeconds(s);
+    }
     else if(cmd=="set_time_signature"){
         auto n=number(a,"numerator"),d=number(a,"denominator");if(!std::isfinite(n)||!std::isfinite(d)||n!=std::floor(n)||d!=std::floor(d)||n<1||n>32||d<1||d>32)return bad("Time signature must use supported integer values.");s.numerator=int(n);s.denominator=int(d);
     }else if(cmd=="set_loop_range"){s.loopStart=number(a,"start_seconds");s.loopEnd=number(a,"end_seconds");}
@@ -227,7 +232,7 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
         if(!c)return bad("Clip no longer exists.");auto start=number(a,"start_seconds"),end=number(a,"end_seconds");
         if(!std::isfinite(start)||!std::isfinite(end)||start<0||end<=start)return bad("Clip trim needs a positive range.");
         if(c->kind=="audio"){
-            c->sourceOffset=number(a,"source_offset",c->sourceOffset+start-c->timelineStart);c->timelineStart=start;c->duration=end-start;
+            c->sourceOffset=number(a,"source_offset",c->sourceOffset+(start-c->timelineStart)*c->warp.speedRatio());c->timelineStart=start;c->duration=end-start;
             c->fadeIn=juce::jmin(c->fadeIn,c->duration);c->fadeOut=juce::jmin(c->fadeOut,c->duration-c->fadeIn);
         }else{
             auto delta=time::secondsToBeats(start,s.bpm)-c->startBeats;c->startBeats=time::secondsToBeats(start,s.bpm);c->lengthBeats=time::secondsToBeats(end-start,s.bpm);
@@ -240,7 +245,7 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
         if(!std::isfinite(at)||at-c->timelineStart<time::minimumEditSpanSeconds||c->timelineStart+c->duration-at<time::minimumEditSpanSeconds)return bad("Split must leave at least 1 microsecond on each side.");
         auto right=*c;right.id=uid();chooseAfter=right.id;double left=at-c->timelineStart;
         right.timelineStart=at;right.duration=c->duration-left;c->duration=left;
-        if(c->kind=="audio"){right.sourceOffset+=left;right.fadeIn=0;right.fadeOut=juce::jmin(right.fadeOut,right.duration);c->fadeOut=0;c->fadeIn=juce::jmin(c->fadeIn,c->duration);}
+        if(c->kind=="audio"){right.sourceOffset+=left*c->warp.speedRatio();right.fadeIn=0;right.fadeOut=juce::jmin(right.fadeOut,right.duration);c->fadeOut=0;c->fadeIn=juce::jmin(c->fadeIn,c->duration);}
         else{
             double beat=time::secondsToBeats(left,s.bpm);c->lengthBeats=beat;right.startBeats+=beat;right.lengthBeats-=beat;right.notes.clear();std::vector<storage::StoredNote> leftNotes;
             right.controllers=sliceControllers(c->controllers,beat,right.lengthBeats,true);
@@ -297,6 +302,7 @@ juce::Result EngineSession::Impl::perform(const juce::String& command,const juce
                 next.clips.push_back({source.tracks[row].id,source.tracks[row].kind,int(row),clip});
                 next.firstRow=std::min(next.firstRow,int(row));next.originSeconds=std::min(next.originSeconds,clip.timelineStart);
                 if(clip.assetId.isNotEmpty())assets.insert(clip.assetId);
+                if(clip.warp.enabled)assets.insert(clip.warp.renderAssetId);
             }
             if(!chosen.empty())return fail("A selected clip no longer exists. Select it again.");
             for(const auto& asset:source.assets)if(assets.contains(asset.id))next.assets.push_back(asset);
@@ -308,6 +314,7 @@ juce::Result EngineSession::Impl::perform(const juce::String& command,const juce
     }
     if(gesture&&command!="batch"&&command!="set_track_gain"&&command!="set_master_gain"&&command!="set_track_pan")finishGesture();
     if(command=="set_plugin_parameter")return setPluginParameter(args);
+    if(command=="set_audio_warp")return beginAudioWarp(args,commandResult);
     if(command=="scan_plugins"||command=="cancel_job"||command=="import_audio"||command=="import_midi"||command=="save_project"||command=="open_project"||command=="export_wav"||command=="export_midi")return performJob(command,args);
     if(command=="open_plugin"){
         const auto id=textArg(args,"plugin_id");
@@ -463,12 +470,20 @@ juce::Result EngineSession::Impl::perform(const juce::String& command,const juce
         choose(owner->id,binding->id);recordEdit();status=command.replaceCharacter('_',' ')+" completed.";return juce::Result::ok();
     }
     auto s=capture();auto selectedAfter=selectedClip;auto before=contentKey(s);
+    std::map<juce::String,double> oldWarpRatios;
+    for(const auto& track:s.tracks)for(const auto& clip:track.clips)if(clip.warp.enabled)oldWarpRatios.emplace(clip.id,clip.warp.speedRatio());
     const auto pluginTopology=[](const auto& project){juce::StringArray ids;for(const auto& p:project.masterPlugins)ids.add("master:"+p.id);for(const auto& t:project.tracks)for(const auto& p:t.plugins)ids.add(t.id+":"+p.id);return ids;};
     const auto previousTopology=pluginTopology(s);
     juce::var candidateResult;
     try{if(auto r=mutate(s,command,args,selectedAfter,&candidateResult);r.failed())return fail(r.getErrorMessage());}
     catch(const std::exception& e){return fail(e.what());}
     if(contentKey(s)==before){if(commandResult)*commandResult=std::move(candidateResult);return juce::Result::ok();}
+    // A tempo edit with following audio must publish tempo, lengths and ready
+    // PCM in one transaction. Playback keeps the old complete graph meanwhile.
+    bool needsWarp=false;
+    for(const auto& track:s.tracks)for(const auto& clip:track.clips)if(clip.warp.enabled)
+        if(auto old=oldWarpRatios.find(clip.id);old!=oldWarpRatios.end()&&old->second!=clip.warp.speedRatio())needsWarp=true;
+    if(needsWarp)return beginWarpCandidate(std::move(s),selectedAfter,std::move(candidateResult),commandResult);
     // Large third-party instance changes are explicit structural operations.
     if(pluginTopology(s)!=previousTopology)edit->getTransport().stop(false,false);
     // A confirmed batch must not merge into an in-progress GUI gesture. Do this

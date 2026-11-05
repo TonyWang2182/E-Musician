@@ -44,6 +44,8 @@ private:
     bool keyPressed(const juce::KeyPress& key, juce::Component*) override { return keyPressed(key); }
     void showAudioSettings();
     void showSettings();
+    void setFollowPlayhead(bool enabled, bool persist = true);
+    void showArrangementMenu(const juce::String& kind, const juce::String& id, double seconds);
     juce::Result setInterfaceLanguage(const juce::String&, bool persist = true);
     void refreshInterfaceLanguage();
     void renameTrack(const juce::String& trackId);

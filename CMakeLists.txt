@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(EMusician VERSION 0.9.1 LANGUAGES C CXX)
+project(EMusician VERSION 0.10.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -92,6 +92,11 @@ if(EMUSICIAN_BUILD_DESKTOP)
     if(NOT ASIO_VERIFY_RESULT EQUAL 0)
         message(FATAL_ERROR "ASIO interfaces missing or changed. Run python scripts/dev.py bootstrap. ${ASIO_VERIFY_ERROR}")
     endif()
+    execute_process(COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/bootstrap_stretch.py" --verify-only
+        RESULT_VARIABLE STRETCH_VERIFY_RESULT OUTPUT_VARIABLE STRETCH_VERIFY_OUTPUT ERROR_VARIABLE STRETCH_VERIFY_ERROR)
+    if(NOT STRETCH_VERIFY_RESULT EQUAL 0)
+        message(FATAL_ERROR "Pinned Signalsmith dependencies missing or changed. Run python scripts/bootstrap_stretch.py. ${STRETCH_VERIFY_ERROR}")
+    endif()
     add_subdirectory("${ENGINE_ROOT}/modules" "dependencies/tracktion")
     add_executable(emusician_native_instrument_tests tests/NativeInstrumentTests.cpp
         apps/desktop/NativeInstrument.cpp core/NativeSampler.cpp)
@@ -116,12 +121,15 @@ if(EMUSICIAN_BUILD_DESKTOP)
     endif()
     target_sources(EMusician PRIVATE apps/desktop/Main.cpp apps/desktop/EngineSession.cpp apps/desktop/NativeDevicePanel.cpp apps/desktop/SampleWaveform.cpp apps/desktop/NativeInstrument.cpp apps/desktop/NativeLoadQueue.cpp core/NativeSampler.cpp apps/desktop/NativeEffects.cpp apps/desktop/NativeEffectsPanel.cpp core/NativeEffects.cpp core/NativeReverb.cpp core/NativeAutoFilter.cpp
         apps/desktop/AnalysisPreview.cpp apps/desktop/AnalysisPanel.cpp apps/desktop/MainComponent.cpp apps/desktop/AgentSidebar.cpp apps/desktop/ArrangementView.cpp
-        apps/desktop/ProjectStorage.cpp apps/desktop/AudioSource.cpp apps/desktop/PluginHost.cpp
+        apps/desktop/ProjectStorage.cpp apps/desktop/AudioSource.cpp apps/desktop/AudioWarp.cpp apps/desktop/PluginHost.cpp
         apps/desktop/PianoRoll.cpp apps/desktop/ControlServer.cpp apps/desktop/SelectedTrackPanel.cpp tests/Vst3InactiveBusSmoke.cpp)
     # Keep the application-reported version and window title tied to the build version.
     set_property(SOURCE apps/desktop/Main.cpp APPEND PROPERTY COMPILE_DEFINITIONS
         "EMUSICIAN_APPLICATION_VERSION=\"${PROJECT_VERSION}\"")
     target_include_directories(EMusician PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/_deps/asio_sdk/common")
+    target_include_directories(EMusician PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/_deps/signalsmith-stretch/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/_deps/signalsmith-linear/include")
     target_compile_definitions(EMusician PRIVATE
         EMUSICIAN_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
         EMUSICIAN_AGENT_PYTHON="${Python3_EXECUTABLE}"
@@ -138,8 +146,9 @@ if(EMUSICIAN_BUILD_DESKTOP)
     if(WIN32)
         target_link_libraries(EMusician PRIVATE bcrypt)
     endif()
+    set(EMUSICIAN_RUNTIME_OUTPUT_ROOT "${CMAKE_BINARY_DIR}/bin" CACHE PATH "Desktop output root; separate candidates may coexist")
     set_target_properties(EMusician PROPERTIES OUTPUT_NAME "E-musician"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>")
+        RUNTIME_OUTPUT_DIRECTORY "${EMUSICIAN_RUNTIME_OUTPUT_ROOT}/$<CONFIG>")
     # Keep legacy recovery fixture paths below Win32 copy limits, independent
     # of nested build names. RunEngineSmoke still creates a fresh UUID each run.
     add_test(NAME engine.integration_smoke COMMAND "${Python3_EXECUTABLE}"

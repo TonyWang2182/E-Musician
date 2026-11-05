@@ -55,7 +55,17 @@ template<class J> juce::Result prepareJobAssets(const J& j,const storage::Stored
     for(size_t i=0;i<state.assets.size();++i){const auto& a=state.assets[i];audio::PreparedSource source;
         auto r=audio::prepareSource(a.source,source,jobAudioIO(j,base+scale*double(i)/state.assets.size(),scale/state.assets.size()));
         if(r.failed())return r;out[a.source.getFullPathName()]={source.duration,source.sampleRate,source.channels,source.format,source.playbackFile};
-    }return juce::Result::ok();
+    }
+    for(const auto& track:state.tracks)for(const auto& clip:track.clips)if(clip.warp.enabled){
+        const auto original=std::find_if(state.assets.begin(),state.assets.end(),[&](const auto& a){return a.id==clip.assetId;});
+        const auto rendered=std::find_if(state.assets.begin(),state.assets.end(),[&](const auto& a){return a.id==clip.warp.renderAssetId;});
+        if(original==state.assets.end()||rendered==state.assets.end())return juce::Result::fail("Warp media reference is missing.");
+        JobFingerprint sourceHash,renderHash;const auto cancel=[j]{return j->cancel.load();};
+        if(auto r=fingerprint(original->source,sourceHash,cancel);r.failed())return r;
+        if(auto r=fingerprint(out.at(rendered->source.getFullPathName()).playbackFile,renderHash,cancel);r.failed())return r;
+        if(sourceHash.hash!=clip.warp.sourceHash||renderHash.hash!=clip.warp.renderHash)return juce::Result::fail("Warp source or rendered audio no longer matches the project.");
+    }
+    return juce::Result::ok();
 }
 // MIDI is a musical import, retaining beat positions at the current project BPM.
 // Unsupported performance events must be rejected unless notes_only is explicit.
@@ -374,7 +384,7 @@ void EngineSession::Impl::reapFinishedJobs(bool applyCommits)
         // The thread may still be destroying its work callable before exit.
         job->worker.join();std::function<void()> commit;juce::String state;
         {std::lock_guard lock(job->mutex);state=job->status;commit=std::move(job->commit);}
-        const bool writesProject=job->kind=="import_audio"||job->kind=="import_midi"||job->kind=="open_project";
+        const bool writesProject=job->kind=="import_audio"||job->kind=="import_midi"||job->kind=="open_project"||job->kind=="set_audio_warp";
         if(commit){
             if(writesProject&&(job->projectId!=juce::String(guard.projectId())||job->revision!=guard.revision()))jobStatus(job,"conflict","The project changed while this task was running. Its result was not applied.");
             else if(writesProject&&job->cancel.load())jobStatus(job,"cancelled");
@@ -444,8 +454,16 @@ juce::Result EngineSession::Impl::beginSave(const juce::File& file)
                     for(auto& track:bindings)for(auto& clip:track.clips)
                         if(clip.assetId==original.id&&clip.source==original.source){
                             clip.source=next->source;clip.clip->state.setProperty(emSource,next->source.getFullPathName(),nullptr);
+                            prepared[next->source.getFullPathName()]=clip.originalInfo;
+                        }
+                    for(auto& track:bindings)for(auto& clip:track.clips){
+                        const auto warp=clip.clip->state["emAudioWarp"];
+                        if(bool(warp["enabled"])&&warp["render_asset_id"].toString()==original.id
+                           &&clip.clip->state["emWarpRenderSource"].toString()==original.source.getFullPathName()){
+                            clip.clip->state.setProperty("emWarpRenderSource",next->source.getFullPathName(),nullptr);
                             prepared[next->source.getFullPathName()]=clip.info;
                         }
+                    }
                     auto assets=metadata(*edit).getChildWithName("EM_NATIVE_ASSETS");
                     if(auto item=assets.getChildWithProperty("id",original.id);item.isValid()
                        &&item["source"].toString()==original.source.getFullPathName())

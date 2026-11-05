@@ -2,6 +2,7 @@
 #include "UiLanguage.h"
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 #include <limits>
 
 namespace emusician {
@@ -17,10 +18,10 @@ bool succeeded(const juce::var& reply) {
     const auto status = reply["status"].toString(); return status == "completed" || status == "accepted";
 }
 bool terminal(const juce::String& state) {
-    return state == "ready" || state == "applied" || state == "failed" || state == "cancelled" || state == "stale";
+    return state == "ready" || state == "applied" || state == "failed" || state == "cancelled" || state == "stale" || state == "conflict" || state == "completed";
 }
 juce::String modeName(const juce::String& kind) {
-    return kind == "separate" ? uiText("Separate", "音源分离") : kind == "transcribe" ? uiText("Audio to MIDI", "转 MIDI") : uiText("Chords", "和弦");
+    return kind == "separate" ? uiText("Separate", "音源分离") : kind == "transcribe" ? uiText("Audio to MIDI", "转 MIDI") : kind=="beats"?uiText("Beats", "节拍"):uiText("Chords", "和弦");
 }
 juce::String chordName(const juce::String& label) {
     if(label == "N") return "-";
@@ -79,14 +80,26 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
                  &threshold, &minimumNote, &thresholdLabel, &minimumLabel, &jobs, &status, &progress,
                  &results, &emptyResults, &previous, &next, &page, &play, &stop, &accept, &guidance,
                  &showSaved, &chordLabel, &chordStart, &chordEnd, &updateChord, &correctionHelp,
-                 &canvas, &stemCount, &quality, &instrument, &vocabulary, &options }) owner.addAndMakeVisible(control);
+                 &canvas, &stemCount, &quality, &instrument, &vocabulary, &options,
+                 &beats, &beatBpm, &beatFirst, &beatMeter, &beatBpmLabel, &beatFirstLabel, &halfTempo, &doubleTempo, &useTempo }) owner.addAndMakeVisible(control);
         canvas.draw = [this](auto& g, auto bounds) { paintTimeline(g,bounds); };
-        canvas.select = [this](auto point) { for(int i=int(hitRegions.size())-1;i>=0;--i) if(hitRegions[size_t(i)].contains(point)) { results.selectRow(i); canvas.repaint(); return; } };
+        canvas.select = [this](auto point) { for(int i=int(hitRegions.size())-1;i>=0;--i) if(size_t(i)<items.size()&&hitRegions[size_t(i)].contains(point)) {
+            results.selectRow(i);if(resultKind=="beats")beatFirst.setText(juce::String(double(items[size_t(i)]["time_seconds"]),6),false);canvas.repaint();return;
+        } };
         stemCount.addItem("4",4); stemCount.addItem("6",6); stemCount.setSelectedId(4,juce::dontSendNotification);
         quality.addItem("Fast",1); quality.addItem("Quality",2); quality.setSelectedId(1,juce::dontSendNotification);
         int instrumentId=1; for(const auto* label:{"Auto","Piano","Bass","Guitar","Vocals"}) instrument.addItem(label,instrumentId++);
         instrument.setSelectedId(1,juce::dontSendNotification);
         vocabulary.addItem("Common chords",1); vocabulary.addItem("Major / minor",2); vocabulary.setSelectedId(1,juce::dontSendNotification);
+        beatMeter.addItem("Auto meter",1);beatMeter.addItem("3/4",3);beatMeter.addItem("4/4",4);beatMeter.setSelectedId(1,juce::dontSendNotification);
+        beatBpm.setTextToShowWhenEmpty("BPM",secondary);beatFirst.setTextToShowWhenEmpty("--",secondary);
+        beatBpmLabel.setText("BPM",juce::dontSendNotification);
+        for(auto* label:{&beatBpmLabel,&beatFirstLabel}){label->setFont(mono(11));label->setColour(juce::Label::textColourId,secondary);}
+        const auto scaleTempo=[this](double factor){const auto bpm=beatBpm.getText().getDoubleValue()*factor;if(bpm>=20&&bpm<=300)beatBpm.setText(juce::String(bpm,3),false);};
+        halfTempo.onClick=[scaleTempo]{scaleTempo(.5);};doubleTempo.onClick=[scaleTempo]{scaleTempo(2);};
+        useTempo.onClick=[this]{applyBeats(true);};
+        beatBpm.setTooltip(uiText("Detected playback tempo. Correct half/double tempo before aligning.","当前听到的速度；对齐前可修正半速或倍速。"));
+        beatFirst.setTooltip(uiText("First bar beat, seconds within the analyzed range. Click a beat line to choose it.","小节首拍在分析选区中的秒数；点击拍线可重新选择。"));
         options.onClick=[this]{
             auto content=std::make_unique<AnalysisOptions>(from.getText(),length.getText(),threshold.getValue(),minimumNote.getValue(),kind=="transcribe",
                 [safe=juce::Component::SafePointer<AnalysisPanel>(&owner),sourceId=clipId,project=projectId](const auto& begin,const auto& duration,double onset,double minimum){
@@ -101,11 +114,12 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         stemCount.setTooltip(uiText("Number of separated tracks", "分离轨道数量"));
         quality.setTooltip(uiText("Quality takes longer; the original audio stays unchanged.", "高质量模式耗时更长，原音频保持不变。"));
         instrument.setTooltip(uiText("Choose the instrument to limit the detected note range.", "选择乐器，限制识别音域。"));
-        for (auto* button : { &separate, &transcribe, &chords }) button->getProperties().set("flat", true);
+        for (auto* button : { &separate, &transcribe, &chords, &beats }) button->getProperties().set("flat", true);
         separate.onClick = [this] { chooseMode("separate"); };
         transcribe.onClick = [this] { chooseMode("transcribe"); };
         chords.onClick = [this] { chooseMode("chords"); };
-        for (auto* button : { &separate, &transcribe, &chords })
+        beats.onClick = [this] { chooseMode("beats"); };
+        for (auto* button : { &separate, &transcribe, &chords, &beats })
             button->setTooltip("Configure the next analysis. Use the task list on the right to review existing results.");
         source.setFont(mono()); source.setColour(juce::Label::textColourId, ink);
         for (auto* label : { &availability, &status, &guidance, &page, &thresholdLabel, &minimumLabel, &correctionHelp, &emptyResults }) {
@@ -116,7 +130,7 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         guidance.setJustificationType(juce::Justification::topLeft);
         emptyResults.setJustificationType(juce::Justification::centred);
         emptyResults.setInterceptsMouseClicks(false, false);
-        for (auto* field : { &from, &length, &chordStart, &chordEnd }) {
+        for (auto* field : { &from, &length, &chordStart, &chordEnd, &beatBpm, &beatFirst }) {
             field->setFont(mono()); field->setInputRestrictions(16, "0123456789.");
             field->setColour(juce::TextEditor::backgroundColourId, paper);
             field->setColour(juce::TextEditor::textColourId, ink);
@@ -208,6 +222,7 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         separate.setToggleState(kind == "separate", juce::dontSendNotification);
         transcribe.setToggleState(kind == "transcribe", juce::dontSendNotification);
         chords.setToggleState(kind == "chords", juce::dontSendNotification);
+        beats.setToggleState(kind == "beats", juce::dontSendNotification);
         if (savedView && kind != "chords") { savedView = false; savedAnalysisId.clear(); pageOffset = 0; fetchPage(); }
         applyCapabilities(); owner.resized(); owner.repaint();
     }
@@ -221,7 +236,7 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         if (snapshot.projectId != projectId) {
             savedAnalysisId.clear();
             if (previewing) { request("stop_analysis_preview", object({})); previewing = false; previewJobId.clear(); }
-            projectId = snapshot.projectId; jobId.clear(); displayJobId.clear(); resultId.clear(); items.clear(); jobState.clear();
+            projectId = snapshot.projectId; jobId.clear(); displayJobId.clear(); resultId.clear(); items.clear(); jobState.clear();beatResultId.clear();
             savedView = false; pageOffset = total = 0; results.updateContent(); error.clear();
             applied = presentInProject = resultStale = resultLoaded = false;
             resultCheckedRevision = std::numeric_limits<std::uint64_t>::max();
@@ -242,7 +257,7 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         source.setTooltip(source.getText());
         recording = snapshot.recording || snapshot.recordingFinalizing;
         juce::StringArray nextIds, names;
-        for (const auto& job : snapshot.jobs) if (job.kind=="analysis.separate"||job.kind=="analysis.transcribe"||job.kind=="analysis.chords") {
+        for (const auto& job : snapshot.jobs) if (job.kind=="analysis.separate"||job.kind=="analysis.transcribe"||job.kind=="analysis.chords"||job.kind=="analysis.beats") {
             nextIds.add(job.id); names.add(modeName(job.kind.fromFirstOccurrenceOf(".", false, false)) + " " + juce::String(nextIds.size()));
         }
         if (nextIds != jobIds || names != jobNames) {
@@ -290,8 +305,11 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
     void applyLanguage() {
         if(languageRevision==uiLanguageRevision())return;
         languageRevision=uiLanguageRevision();
-        const int qualityId=quality.getSelectedId(),instrumentId=instrument.getSelectedId(),vocabularyId=vocabulary.getSelectedId();
+        const int qualityId=quality.getSelectedId(),instrumentId=instrument.getSelectedId(),vocabularyId=vocabulary.getSelectedId(),meterId=beatMeter.getSelectedId();
         separate.setButtonText(modeName("separate")); transcribe.setButtonText(modeName("transcribe")); chords.setButtonText(modeName("chords"));
+        beats.setButtonText(modeName("beats"));useTempo.setButtonText(uiText("Use this tempo", "采用此速度"));
+        beatFirstLabel.setText(uiText("First / s", "首拍 / 秒"),juce::dontSendNotification);
+        beatMeter.changeItemText(1,uiText("Auto meter", "自动拍号"));beatMeter.setSelectedId(meterId,juce::dontSendNotification);
         start.setButtonText(uiText("Analyze", "分析"));cancel.setButtonText(uiText("Cancel", "取消"));
         play.setButtonText(uiText("Listen", "试听"));stop.setButtonText(uiText("Stop", "停止"));
         showSaved.setButtonText(uiText("Chord track", "和弦轨"));updateChord.setButtonText(uiText("Apply", "应用"));
@@ -322,26 +340,29 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         cancel.setEnabled(busy&&jobState!="applying");cancel.setVisible(busy);
         const bool ready=resultLoaded&&terminal(jobState)&&resultId.isNotEmpty()&&!savedView;
         accept.setEnabled(ready&&total>0&&!recording&&!applied&&!resultStale);
-        accept.setButtonText(applied ? (presentInProject?uiText("Added", "已添加"):uiText("Undone", "已撤销"))
+        accept.setButtonText(applied ? (presentInProject?(resultKind=="beats"?uiText("Aligned", "已对齐"):uiText("Added", "已添加")):uiText("Undone", "已撤销"))
+            : resultKind=="beats"?uiText("Align audio", "对齐音频")
             : resultKind=="transcribe"?uiText("Add MIDI track", "添加 MIDI 轨")
             : resultKind=="chords"?uiText("Add chord track", "添加和弦轨"):uiText("Add tracks", "添加轨道"));
         accept.setVisible(!savedView);
+        useTempo.setVisible(resultKind=="beats"&&!savedView);useTempo.setEnabled(accept.isEnabled());
         accept.setTooltip(resultStale?uiText("Source changed. Analyze again.", "来源已改变，请重新分析。")
+            :resultKind=="beats"?uiText("Align the first downbeat to a bar; preserve pre-roll. Undo restores the original timing.", "将首个小节拍对齐到小节线，保留前奏；可撤销还原。")
             :uiText("Add the result to the arrangement. Undo removes this import.", "将结果添加到编曲区；可一次撤销。"));
-        for(juce::Component* c:std::initializer_list<juce::Component*>{&from,&length,&threshold,&minimumNote,&stemCount,&quality,&instrument,&vocabulary})c->setEnabled(!busy);
+        for(juce::Component* c:std::initializer_list<juce::Component*>{&from,&length,&threshold,&minimumNote,&stemCount,&quality,&instrument,&vocabulary,&beatBpm,&beatFirst,&beatMeter,&halfTempo,&doubleTempo})c->setEnabled(!busy);
         const bool canPreview=bool(capabilities["preview_stems"])&&resultKind=="separate"&&!savedView&&!resultId.isEmpty()&&!resultStale;
         play.setVisible(canPreview);stop.setVisible(canPreview);play.setEnabled(canPreview&&results.getSelectedRow()>=0);stop.setEnabled(canPreview&&previewing);
         showSaved.setVisible(kind=="chords");showSaved.setToggleState(savedView,juce::dontSendNotification);
         updateChord.setEnabled(savedView&&!selectedChordId.isEmpty()&&!recording);
         emptyResults.setText(savedView?uiText("No chords yet", "暂无和弦")
-            :jobState=="ready"?uiText("No notes or chords found", "未检测到音符或和弦")
+            :jobState=="ready"?(resultKind=="beats"?uiText("No steady beats found. Try a rhythmic section.", "未找到稳定节拍，请选择节奏明显的段落。"):uiText("No notes or chords found", "未检测到音符或和弦"))
             :busy?uiText("Analyzing…", "正在分析…"):uiText("Select audio, then Analyze", "选择音频，然后点击分析"),juce::dontSendNotification);
         emptyResults.setVisible(items.empty());
         if(items.empty())emptyResults.toFront(false);
         previous.setEnabled(pageOffset>0);next.setEnabled(pageOffset+int(items.size())<total);
         previous.setVisible(total>pageSize);next.setVisible(total>pageSize);
         page.setText(total>pageSize?juce::String(pageOffset+1)+"-"+juce::String(pageOffset+int(items.size()))+" / "+juce::String(total)
-            :total>0?juce::String(total)+" "+(resultKind=="separate"?uiText("tracks", "轨道"):resultKind=="transcribe"?uiText("notes", "音符"):uiText("chords", "和弦")):juce::String(),juce::dontSendNotification);
+            :total>0?juce::String(total)+" "+(resultKind=="separate"?uiText("tracks", "轨道"):resultKind=="transcribe"?uiText("notes", "音符"):resultKind=="beats"?uiText("beats", "拍"):uiText("chords", "和弦")):juce::String(),juce::dontSendNotification);
         options.setButtonText(uiText("Options", "选项"));options.setEnabled(!busy&&!recording);
         results.setRowHeight(resultKind=="separate"?44:28);
         results.setVisible(resultKind=="separate");canvas.setVisible(resultKind!="separate");
@@ -354,6 +375,30 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
     void paintTimeline(juce::Graphics& g,juce::Rectangle<int> bounds) {
         g.fillAll(paper);hitRegions.clear();
         if(items.empty())return;
+        if(resultKind=="beats"){
+            const auto plot=plotBounds(bounds);if(plot.getWidth()<1||plot.getHeight()<1)return;
+            const double begin=pageOffset==0?0:double(items.front()["time_seconds"]);
+            const double end=juce::jmax(begin+.001,double(items.back()["time_seconds"])+.25);
+            const auto x=[&](double t){return plot.getX()+float((t-begin)/(end-begin))*plot.getWidth();};
+            g.setFont(mono(10));g.setColour(secondary);
+            for(int i=0;i<=4;++i){const double t=begin+(end-begin)*i/4.;const int px=juce::jlimit(0,juce::jmax(0,bounds.getWidth()-64),int(x(t))-(i==4?58:i==0?0:30));g.drawText(juce::String(t,2)+" s",px,0,64,18,juce::Justification::centredLeft);}
+            if(const auto* peaks=beatPeaks.getArray();peaks&&!peaks->isEmpty()&&beatDuration>0){
+                float maximum=.001f;for(const auto& v:*peaks)maximum=juce::jmax(maximum,float(v));
+                g.setColour(rule);const float middle=plot.getCentreY();
+                for(int px=int(plot.getX());px<int(plot.getRight());++px){
+                    const double t=begin+(end-begin)*(px-plot.getX())/plot.getWidth();
+                    const int index=juce::jlimit(0,peaks->size()-1,int(t/beatDuration*peaks->size()));
+                    const float h=juce::jlimit(0.f,1.f,float((*peaks)[index])/maximum)*plot.getHeight()*.4f;g.drawVerticalLine(px,middle-h,middle+h);
+                }
+            }
+            const bool firstSet=beatFirst.getText().isNotEmpty();const double first=beatFirst.getText().getDoubleValue();
+            for(const auto& beat:items){const double t=double(beat["time_seconds"]);const float px=x(t);const bool down=bool(beat["is_downbeat"]),chosen=firstSet&&std::abs(t-first)<.000001;
+                const auto hit=juce::Rectangle<float>(px-5,plot.getY(),10,plot.getHeight()).getIntersection(plot);hitRegions.push_back(hit);
+                g.setColour(down||chosen?ink:secondary.withAlpha(.55f));g.fillRect(px,plot.getY()+(down?0:plot.getHeight()*.22f),down||chosen?2.f:1.f,plot.getHeight()*(down?1.f:.78f));
+                if(chosen){juce::Path marker;marker.addTriangle(px-5,plot.getY(),px+5,plot.getY(),px,plot.getY()+7);g.fillPath(marker);}
+            }
+            g.setColour(rule);g.drawRect(plot,1.f);return;
+        }
         double first=std::numeric_limits<double>::max(),last=0;
         int low=127,high=0;
         for(const auto& item:items){const double a=double(item["start_seconds"]),b=resultKind=="transcribe"?a+double(item["duration_seconds"]):double(item["end_seconds"]);
@@ -400,6 +445,7 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         static const char* instruments[]{"auto","piano","bass","guitar","vocals"};
         auto parameters = kind=="separate"?object({{"stems",stemCount.getSelectedId()},{"quality",quality.getSelectedId()==2?"quality":"fast"}})
             :kind=="transcribe"?object({{"onset_threshold",threshold.getValue()},{"minimum_note_ms",minimumNote.getValue()},{"instrument",instruments[juce::jlimit(0,4,instrument.getSelectedId()-1)]}})
+            :kind=="beats"?object({{"meter",beatMeter.getSelectedId()==3?"3/4":beatMeter.getSelectedId()==4?"4/4":"auto"}})
             :object({{"vocabulary",vocabulary.getSelectedId()==2?"triads":"extended"}});
         const auto reply = request("start_analysis", object({ {"clip_id", clipId}, {"kind", kind}, {"start_seconds", begin}, {"duration_seconds", duration}, {"parameters", parameters} }));
         if (!check(reply)) return;
@@ -411,22 +457,23 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         jobId = id; displayJobId=id; resultId.clear(); resultKind.clear(); jobState.clear(); resultVersion.clear(); error.clear();
         savedView = false; applied = presentInProject = resultStale = resultLoaded = false;
         resultCheckedRevision = std::numeric_limits<std::uint64_t>::max(); items.clear(); total = pageOffset = 0; results.updateContent();
-        results.deselectAllRows(); refreshJob();
+        results.deselectAllRows(); refreshJob();if(resultKind.isNotEmpty())chooseMode(resultKind);
     }
     void refreshJob() {
         if (jobId.isEmpty()) return;
         const auto reply = request("get_analysis_job", object({ {"job_id", jobId} }));
         if (!succeeded(reply)) { check(reply); jobId.clear(); updateControls(); return; }
         const auto job = reply["result"]; jobState = job["status"].toString();
+        if(resultKind.isEmpty())resultKind=job["kind"].toString();
         const bool justApplied = jobState == "applied" && !applied;
         const auto phase = job["phase"].toString(), detail = job["detail"].toString();
         progressValue = juce::jlimit(0.0, 1.0, double(job["progress"]));
         const auto failure = job["error"].toString();
         const auto message=failure.isNotEmpty()?uiText("Analysis failed. Try again.", "分析失败，请重试。")
-            :jobState=="ready"?uiText("Ready to add", "可添加到编曲")
-            :jobState=="applied"?uiText("Added to arrangement", "已添加到编曲")
+            :jobState=="ready"?(kind=="beats"?uiText("Review tempo and first beat", "确认速度与首拍"):uiText("Ready to add", "可添加到编曲"))
+            :jobState=="applied"?(kind=="beats"?uiText("Aligned", "已对齐"):uiText("Added to arrangement", "已添加到编曲"))
             :jobState=="cancelled"?uiText("Cancelled", "已取消")
-            :jobState=="applying"?uiText("Adding tracks…", "正在添加轨道…")
+            :jobState=="applying"?(kind=="beats"?uiText("Aligning audio…", "正在对齐音频…"):uiText("Adding tracks…", "正在添加轨道…"))
             :uiText("Analyzing…", "正在分析…")+" "+juce::String(int(progressValue*100))+"%";
         const auto jobSource = job["source"];
         auto sourceName = jobSource.getProperty("source_name", jobSource["clip_name"]).toString();
@@ -459,6 +506,13 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
     void applyResultState(const juce::var& data) {
         applied = bool(data["applied"]); presentInProject = bool(data["present_in_project"]);
         resultStale = bool(data["stale"]); resultLoaded = true; resultCheckedRevision = revision;
+        if(data["kind"].toString()=="beats"&&beatResultId!=resultId){
+            beatResultId=resultId;const auto tempo=data["tempo"];
+            beatBpm.setText(tempo["bpm"].isVoid()?juce::String():juce::String(double(tempo["bpm"]),3),false);
+            beatFirst.setText(tempo["first_downbeat_seconds"].isVoid()?juce::String():juce::String(double(tempo["first_downbeat_seconds"]),6),false);
+            const int meter=int(tempo["meter_numerator"]);beatMeter.setSelectedId(meter==3||meter==4?meter:1,juce::dontSendNotification);
+            beatPeaks=data["waveform_peaks"];beatDuration=double(data["source"]["duration_seconds"]);
+        }
         if (resultStale && previewing) { request("stop_analysis_preview", object({})); previewing = false; previewJobId.clear(); }
     }
     void fetchPage() {
@@ -473,7 +527,7 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         if (!check(reply)) return;
         revision = std::uint64_t(juce::int64(reply["revision"]));
         const auto data = reply["result"];
-        items.clear();
+        items.clear();hitRegions.clear();
         if (const auto* list = data["items"].getArray()) for (const auto& value : *list) items.push_back(value);
         total = int(data["total"]); resultKind = savedView ? "chords" : data["kind"].toString();
         if (!savedView) applyResultState(data);
@@ -485,6 +539,7 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
     }
     void acceptResult() {
         if (resultId.isEmpty() || applied || resultStale || !resultLoaded) return;
+        if(resultKind=="beats"){applyBeats(false);return;}
         if (previewing) { request("stop_analysis_preview", object({})); previewing = false; previewJobId.clear(); }
         const auto reply = request("accept_analysis_result", object({ {"result_id", resultId}, {"expected_revision", juce::int64(session.snapshot().revision)} }));
         if (!check(reply)) return;
@@ -492,6 +547,27 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         if (newJobId.isNotEmpty()) { jobId = newJobId; jobState = "applying"; refreshJob(); }
         else { applied = true; jobState = "applied"; updateControls(); }
         if (report) report(juce::Result::ok());
+    }
+    void applyBeats(bool projectTempo) {
+        if(resultKind!="beats"||resultId.isEmpty()||applied||resultStale||!resultLoaded)return;
+        const auto bpmText=beatBpm.getText().trim(),firstText=beatFirst.getText().trim();
+        const auto parse=[](const juce::String& text){char* end=nullptr;const auto* start=text.toRawUTF8();const double value=std::strtod(start,&end);
+            return end!=start&&*end=='\0'&&std::isfinite(value)?value:std::numeric_limits<double>::quiet_NaN();};
+        const double bpm=parse(bpmText),first=parse(firstText);
+        if(!std::isfinite(bpm)||bpm<20||bpm>300||!std::isfinite(first)||first<0||first>=beatDuration){
+            check(object({{"status","invalid"},{"error",uiText("Enter BPM and choose the first bar beat on the graph.","填写 BPM，并在图中选择小节第一拍。")}}));return;
+        }
+        const int meter=beatMeter.getSelectedId();
+        if(projectTempo&&meter!=3&&meter!=4){check(object({{"status","invalid"},{"error",uiText("Choose 3/4 or 4/4 before changing the project tempo.","修改工程速度前，请选择 3/4 或 4/4。")}}));return;}
+        auto args=object({{"result_id",resultId},{"mode",projectTempo?"project_to_audio":"audio_to_project"},
+            {"bpm",bpm},{"first_beat_seconds",first},{"follow_tempo",true}});
+        if(projectTempo){args.getDynamicObject()->setProperty("numerator",meter);args.getDynamicObject()->setProperty("denominator",4);}
+        const auto reply=request("apply_beat_analysis",args);
+        if(!check(reply))return;
+        const auto nextJob=reply["result"]["job_id"].toString();
+        if(nextJob.isNotEmpty()){jobId=nextJob;jobState="applying";refreshJob();}
+        else{applied=true;jobState="applied";updateControls();}
+        if(report)report(juce::Result::ok());
     }
     void correctChord() {
         if (selectedChordId.isEmpty()) return;
@@ -545,7 +621,9 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
     }
 
     AnalysisPanel& owner; EngineSession& session; std::function<void(const juce::Result&)> report;
-    juce::TextButton separate { "separate" }, transcribe { "audio to MIDI" }, chords { "chords" };
+    juce::TextButton separate { "separate" }, transcribe { "audio to MIDI" }, chords { "chords" }, beats { "beats" };
+    juce::TextEditor beatBpm,beatFirst;juce::ComboBox beatMeter;juce::Label beatBpmLabel,beatFirstLabel;
+    juce::TextButton halfTempo{"/2"},doubleTempo{"x2"},useTempo;juce::String beatResultId;juce::var beatPeaks;double beatDuration=0;
     juce::Label source, availability, thresholdLabel, minimumLabel, status, guidance, page, correctionHelp, emptyResults;
     juce::TextEditor from, length, chordStart, chordEnd;
     juce::Slider threshold, minimumNote;
@@ -587,6 +665,7 @@ void AnalysisPanel::visibilityChanged() {
 }
 void AnalysisPanel::timerCallback() { impl->refresh(); }
 void AnalysisPanel::refreshLanguage() { impl->applyLanguage(); impl->refresh(); repaint(); }
+void AnalysisPanel::showBeats() { impl->refresh(); impl->chooseMode("beats"); }
 void AnalysisPanel::setSelectedTimeRange(double startSeconds, double endSeconds) {
     impl->refresh();
     const auto begin = juce::jmax(0.0, startSeconds - impl->clipTimelineStart);
@@ -601,15 +680,24 @@ void AnalysisPanel::paint(juce::Graphics& g) {
 void AnalysisPanel::resized() {
     if(!impl)return;auto& p=*impl;const int width=getWidth(),height=getHeight();
     p.separate.setBounds(4,2,91,28);p.transcribe.setBounds(99,2,118,28);p.chords.setBounds(221,2,78,28);
-    p.showSaved.setBounds(305,2,112,28);
+    p.beats.setBounds(303,2,74,28);p.showSaved.setBounds(381,2,112,28);
     const int leftWidth=juce::jlimit(164,208,width/3);
     p.left={8,42,leftWidth,height-50};p.right={leftWidth+25,42,juce::jmax(0,width-leftWidth-33),height-50};
     p.source.setBounds(p.left.getX(),42,p.left.getWidth(),27);
-    const bool separation=p.kind=="separate",transcription=p.kind=="transcribe";
-    p.stemCount.setVisible(separation);p.quality.setVisible(separation);p.instrument.setVisible(transcription);p.vocabulary.setVisible(!separation&&!transcription);
+    const bool separation=p.kind=="separate",transcription=p.kind=="transcribe",beatMode=p.kind=="beats",beatResult=p.resultKind=="beats"&&!p.savedView;
+    p.stemCount.setVisible(separation);p.quality.setVisible(separation);p.instrument.setVisible(transcription);p.vocabulary.setVisible(p.kind=="chords");
     p.stemCount.setBounds(p.left.getX(),76,52,26);p.quality.setBounds(p.left.getX()+58,76,p.left.getWidth()-58,26);
     p.instrument.setBounds(p.left.getX(),76,p.left.getWidth(),26);p.vocabulary.setBounds(p.instrument.getBounds());
     p.options.setBounds(p.left.getX(),108,82,25);p.availability.setBounds(p.left.getX()+84,109,p.left.getWidth()-84,24);
+    if(width<600)p.showSaved.setBounds(p.left.getX(),142,p.left.getWidth(),26);
+    for(juce::Component* c:std::initializer_list<juce::Component*>{&p.beatBpm,&p.beatFirst,&p.beatBpmLabel,&p.beatFirstLabel,&p.beatMeter,&p.halfTempo,&p.doubleTempo})c->setVisible(beatMode);
+    if(beatMode){
+        p.beatMeter.setBounds(p.left.getX(),76,p.left.getWidth()-80,26);p.options.setBounds(p.beatMeter.getRight()+4,76,76,26);
+        p.beatBpmLabel.setBounds(p.left.getX(),108,32,26);p.beatBpm.setBounds(p.left.getX()+32,108,p.left.getWidth()-100,26);
+        p.halfTempo.setBounds(p.left.getRight()-64,108,30,26);p.doubleTempo.setBounds(p.left.getRight()-31,108,31,26);
+        p.beatFirstLabel.setBounds(p.left.getX(),140,72,26);p.beatFirst.setBounds(p.left.getX()+74,140,p.left.getWidth()-74,26);
+        p.availability.setBounds(p.left.getX(),168,p.left.getWidth(),20);p.availability.setVisible(height>=236);
+    }else p.availability.setVisible(true);
     // Range and note options live in a compact popover at every dock size.
     for(juce::Component* c:std::initializer_list<juce::Component*>{&p.from,&p.length,&p.threshold,&p.minimumNote,&p.thresholdLabel,&p.minimumLabel})c->setVisible(false);
     p.start.setVisible(true);p.cancel.setVisible(p.jobId.isNotEmpty()&&!terminal(p.jobState));
@@ -617,7 +705,7 @@ void AnalysisPanel::resized() {
     p.jobs.setBounds(p.right.getX(),42,juce::jmax(90,p.right.getWidth()-138),25);p.status.setBounds(p.jobs.getRight()+5,42,p.right.getRight()-p.jobs.getRight()-5,25);
     p.progress.setBounds(p.right.getX(),71,p.right.getWidth(),3);
     const int correctionHeight=p.savedView?32:0;
-    const int top=82,bottom=height-42-correctionHeight;
+    const int top=82,bottom=height-(beatResult?70:42)-correctionHeight;
     p.results.setBounds(p.right.getX(),top,p.right.getWidth(),juce::jmax(26,bottom-top));p.canvas.setBounds(p.results.getBounds());
     p.emptyResults.setBounds(p.results.getBounds().reduced(5));
     for(juce::Component* c:std::initializer_list<juce::Component*>{&p.chordLabel,&p.chordStart,&p.chordEnd,&p.updateChord})c->setVisible(p.savedView);
@@ -628,6 +716,12 @@ void AnalysisPanel::resized() {
     const int pageX=p.right.getX()+(p.total>p.pageSize?56:0);
     p.page.setBounds(pageX,height-32,juce::jmax(30,p.right.getWidth()- (pageX-p.right.getX())-140),25);
     p.accept.setBounds(p.right.getRight()-138,height-33,138,27);
+    if(beatResult){
+        const int actionWidth=(p.right.getWidth()-6)/2;
+        p.accept.setBounds(p.right.getX(),height-33,actionWidth,27);p.useTempo.setBounds(p.accept.getRight()+6,height-33,p.right.getWidth()-actionWidth-6,27);
+        p.previous.setTopLeftPosition(p.right.getX(),height-63);p.next.setTopLeftPosition(p.right.getX()+28,height-63);
+        p.page.setBounds(pageX,height-63,juce::jmax(30,p.right.getRight()-pageX),25);
+    }
     p.play.setBounds(p.right.getX(),height-33,65,27);p.stop.setBounds(p.right.getX()+69,height-33,58,27);
     if(p.resultKind=="separate")p.page.setVisible(false);else p.page.setVisible(true);
 }
@@ -673,12 +767,19 @@ juce::Result AnalysisPanel::runInteractionSmokeTest(juce::DynamicObject& report,
     // quality are separate process tests. No music is written by a screenshot.
     const auto oldLanguage=uiLanguageCode();
     struct RestoreLanguage{juce::String value;~RestoreLanguage(){setUiLanguage(value,false);}} restore{oldLanguage};
-    for(const auto* language:{"en","zh-CN"})for(const auto* visualKind:{"transcribe","chords"}){
+    for(const auto* language:{"en","zh-CN"})for(const auto* visualKind:{"transcribe","chords","beats"}){
         setUiLanguage(language,false);setSize(600,260);p.chooseMode(visualKind);p.resultKind=visualKind;p.items.clear();
         p.savedView=false;p.jobState="ready";p.resultLoaded=true;p.resultId="synthetic-view-only";
-        const bool notes=p.resultKind=="transcribe";
+        const bool notes=p.resultKind=="transcribe",beatView=p.resultKind=="beats";
         for(int i=0;i<(notes?32:8);++i)p.items.push_back(notes?object({{"pitch",60+i%12},{"start_seconds",i*.25},{"duration_seconds",.2},{"velocity",80},{"channel",1}})
+            :beatView?object({{"time_seconds",i*.5+.125},{"is_downbeat",i%4==0}})
             :object({{"id","synthetic-"+juce::String(i)},{"label",i%2?"G:7":"C:maj7"},{"start_seconds",i*1.0},{"end_seconds",i+1.0},{"score",.6},{"uncertain",false}}));
+        if(beatView){
+            p.beatDuration=4.;p.beatBpm.setText("120",false);p.beatFirst.setText("0.125000",false);p.beatMeter.setSelectedId(4,juce::dontSendNotification);
+            juce::Array<juce::var> peaks;for(int i=0;i<128;++i)peaks.add(.2+.5*std::abs(std::sin(i*.23)));p.beatPeaks=peaks;
+            p.halfTempo.onClick();if(p.beatBpm.getText().getDoubleValue()!=60)return juce::Result::fail("Beat half-tempo correction failed.");
+            p.doubleTempo.onClick();if(p.beatBpm.getText().getDoubleValue()!=120)return juce::Result::fail("Beat double-tempo correction failed.");
+        }
         p.total=int(p.items.size());p.results.updateContent();p.updateControls();
         const auto capture=createComponentSnapshot(getLocalBounds());
         auto output=directory.getChildFile("ui-analysis-"+p.resultKind+"-"+language+"-synthetic.png").createOutputStream();
@@ -687,6 +788,18 @@ juce::Result AnalysisPanel::runInteractionSmokeTest(juce::DynamicObject& report,
         for(const auto& bounds:p.hitRegions)if(!p.canvas.getLocalBounds().toFloat().expanded(1.f).contains(bounds))return juce::Result::fail("Analysis visual escaped its viewport.");
         p.canvas.select(p.hitRegions.front().getCentre());
         if(p.results.getSelectedRow()!=0)return juce::Result::fail("Analysis visual selection does not target the real page item.");
+        if(beatView){
+            if(std::abs(p.beatFirst.getText().getDoubleValue()-.125)>1e-8)return juce::Result::fail("Beat line selection did not correct the first beat.");
+            for(const auto size:{juce::Point<int>(540,210),juce::Point<int>(930,308)}){
+                setSize(size.x,size.y);p.updateControls();
+                if(p.accept.getBounds().intersects(p.useTempo.getBounds())||p.beatFirst.getBounds().intersects(p.start.getBounds())||p.beats.getBounds().getRight()>getWidth()-92)
+                    return juce::Result::fail("Beat controls overlap at a supported dock size.");
+                auto shot=directory.getChildFile("ui-analysis-beats-"+juce::String(size.x)+"x"+juce::String(size.y)+"-"+language+"-synthetic.png").createOutputStream();
+                if(!shot||!juce::PNGImageFormat().writeImageToStream(createComponentSnapshot(getLocalBounds()),*shot))return juce::Result::fail("Cannot capture beat panel fixture.");
+            }
+            const auto previousHit=p.hitRegions.back().getCentre();p.items.clear();p.canvas.select(previousHit);
+            report.setProperty("analysis_ui_stale_beat_hit_is_bounded",true);
+        }
     }
     setUiLanguage(oldLanguage,false);p.items.clear();p.total=0;p.resultId.clear();p.resultLoaded=false;p.jobState.clear();p.updateControls();
     const auto after = p.session.snapshot();
@@ -695,6 +808,7 @@ juce::Result AnalysisPanel::runInteractionSmokeTest(juce::DynamicObject& report,
     report.setProperty("analysis_ui_empty_saved_chords", true);
     report.setProperty("analysis_ui_synthetic_stale_undo_redo_projection", true);
     report.setProperty("analysis_ui_bilingual_piano_and_chord_visual_fixtures",true);
+    report.setProperty("analysis_ui_beats_first_downbeat_half_double_and_compact_actions",true);
     if (!rangeApplied || before.revision != after.revision || before.projectId != after.projectId)
         return juce::Result::fail("Analysis navigation changed the project or mapped the range incorrectly.");
     return juce::Result::ok();

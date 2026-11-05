@@ -48,9 +48,22 @@ class Handler(BaseHTTPRequestHandler):
     def setup(self):
         super().setup()
         self.connection.settimeout(5)
+        self._body_consumed = False
     def log_message(self, *_):
         pass
     def _send(self, status, value, mime="application/json; charset=utf-8"):
+        # Windows may reset a connection closed with an unread POST body,
+        # hiding an otherwise valid 403/415 response from the local client.
+        # Discard only a bounded, explicitly sized body; never parse it or
+        # dispatch an unauthorized request. The socket timeout still applies.
+        if status in (403, 415) and self.command == "POST" and not self._body_consumed:
+            self._body_consumed = True
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                if 0 < length <= 32768 and not self.headers.get("Transfer-Encoding"):
+                    self.rfile.read(length)
+            except (ValueError, OSError):
+                pass
         if not isinstance(value, bytes):
             value = redact(json.dumps(value, ensure_ascii=False, allow_nan=False)).encode("utf-8")
         self.send_response(status)
@@ -109,6 +122,7 @@ class Handler(BaseHTTPRequestHandler):
             if not 1 <= length <= 32768:
                 self._send(413, {"error":"请求大小超限。"})
                 return
+            self._body_consumed = True
             raw = self.rfile.read(length)
             if len(raw) != length:
                 raise ValueError("请求不完整。")

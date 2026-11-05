@@ -113,7 +113,9 @@ def execute(job):
     with ResourceSampler() as resources:
         audio, rate, source = prepare(job)
         kind = job.request["kind"]
-        if kind == "chords":
+        if kind == "beats":
+            from scripts.audio_analysis.beats import analyze
+        elif kind == "chords":
             from scripts.audio_analysis.chords import analyze
         else:
             from scripts.audio_analysis import providers
@@ -124,9 +126,9 @@ def execute(job):
                                              "license_status", "source_url", "experimental") if key in entry}
         model["id"] = model.pop("model_id", kind)
         implementation = hashlib.sha256()
-        for filename in ("__init__.py", "common.py", "chords.py", "providers.py", "run.py"):
+        for filename in ("__init__.py", "common.py", "chords.py", "providers.py", "beats.py", "run.py"):
             implementation.update((filename + "\0" + sha256_file(Path(__file__).with_name(filename)) + "\n").encode("utf-8"))
-        model["worker_version"] = "1.1.0"
+        model["worker_version"] = "1.2.0"
         if kind == "chords":
             # This algorithm ships with the worker, not with external weights;
             # do not report a stale v1 registry as the executed algorithm.
@@ -135,7 +137,7 @@ def execute(job):
         runtime_metrics = result.pop("runtime_metrics", {})
         packages = ["numpy", "scipy", "soundfile"] + {
             "separate": ["torch", "demucs"], "transcribe": ["basic-pitch", "onnxruntime", "librosa"],
-            "chords": []}[kind]
+            "chords": [], "beats": ["torch", "torchaudio", "beat-this"]}[kind]
         result.update(schema_version=1, job_id=job.request["job_id"], result_id=job.request["job_id"],
                       kind=kind, model=model, source=source, duration_seconds=len(audio) / rate,
                       parameters=job.request["parameters"], stems=result.get("stems", []),

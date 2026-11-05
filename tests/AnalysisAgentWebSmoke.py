@@ -19,16 +19,19 @@ from music_agent.analysis import capability_groups, COMMANDS, compile_import
 from music_agent.selection import freeze_scope
 from test_music_agent_analysis import context, result
 from test_music_agent_native_effects import fake_effect_catalog, fake_instrument_catalog
+from music_agent.tempo import compile_beats
+from test_music_agent_tempo import candidate as beat_candidate, warp
 
 OUTPUT = ROOT / "build" / "analysis-agent-web"
 WEB = ROOT / "scripts" / "music_agent" / "web"
 
 def fixture(ready):
     ctx = context(); ctx["name"] = "Synthetic UI fixture / no inference"
-    host = {"commands": sorted(COMMANDS | {"get_snapshot", "get_selection_context", "get_clip_notes", "edit_notes", "move_clip", "duplicate_clips", "trim_clip", "get_native_effect", "set_native_effect", "get_native_instrument"}),
+    host = {"commands": sorted(COMMANDS | {"get_snapshot", "get_selection_context", "get_clip_notes", "edit_notes", "move_clip", "duplicate_clips", "trim_clip", "get_native_effect", "set_native_effect", "get_native_instrument", "get_audio_warp", "set_audio_warp", "apply_beat_analysis"}),
             "native_effect_catalog": fake_effect_catalog(), "native_instrument_catalog": fake_instrument_catalog()}
-    caps = {"providers": [{"kind": k, "available": k != "separate", "detail": "合成界面状态，未执行模型推理。"} for k in ("separate", "transcribe", "chords")]}
+    caps = {"providers": [{"kind": k, "available": k != "separate", "detail": "合成界面状态，未执行模型推理。"} for k in ("separate", "transcribe", "chords", "beats")]}
     plan = compile_import(result(), ctx, freeze_scope(ctx), "把候选音符导入到新的 MIDI 轨道") if ready else None
+    if ready == "beats":plan=compile_beats({"result_id":"r","mode":"audio_to_project","summary":"Synthetic beat review fixture / no inference"},beat_candidate(),ctx,freeze_scope(ctx),[warp()])
     if plan: plan["id"] = "synthetic-preview"
     return {"phase": "ready" if ready else "idle", "busy": False, "snapshot": ctx,
             "provider": {"id": "kimi", "configured": True, "model": "synthetic-no-model", "base_url": "https://api.moonshot.cn/v1"},
@@ -39,7 +42,7 @@ def fixture(ready):
 HARNESS = r"""<script>
 window.__smokeErrors=[]; window.addEventListener('error',e=>window.__smokeErrors.push(e.message));
 let attempt=0; const checker=setInterval(()=>{
- const rows=[...document.querySelectorAll('.capability-row')]; if(rows.length!==7 && ++attempt<30)return;
+ const rows=[...document.querySelectorAll('.capability-row')]; if(rows.length!==9 && ++attempt<30)return;
  clearInterval(checker);
  const target=rows.find(r=>r.dataset.capability==='transcribe'); if(target)target.open=true;
  const btn=target?.querySelector('button'); if(btn&&!btn.disabled)btn.click();
@@ -87,8 +90,8 @@ def main():
     browser = Path("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
     if not browser.is_file(): raise RuntimeError("Headless Edge unavailable")
     OUTPUT.mkdir(parents=True,exist_ok=True)
-    for ready, width, height, language in ((False,400,800,"en"),(True,400,800,"en"),(False,1000,800,"en"),(False,400,800,"zh-CN")):
-        label = ("ready" if ready else "empty") + f"-{width}x{height}" + ("-zh" if language=="zh-CN" else "")
+    for ready, width, height, language in ((False,400,800,"en"),(True,400,800,"en"),(False,1000,800,"en"),(False,400,800,"zh-CN"),("beats",400,800,"en")):
+        label = ("beats" if ready == "beats" else "ready" if ready else "empty") + f"-{width}x{height}" + ("-zh" if language=="zh-CN" else "")
         server = ThreadingHTTPServer(("127.0.0.1",0),Handler); server.fixture=fixture(ready)
         thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
         try:
@@ -106,10 +109,13 @@ def main():
             match=re.search(r'data-analysis-smoke="([^"]*)"',output)
             if not match: raise RuntimeError(f"No completed UI check in {label}")
             checks=json.loads(html.unescape(match.group(1)))
-            assert checks['rows']==7 and checks['disabledUnavailable'] and checks['examplePopulates'] and checks['widthOK'] and not checks['errors'],checks
+            assert checks['rows']==9 and checks['disabledUnavailable'] and checks['examplePopulates'] and checks['widthOK'] and not checks['errors'],checks
             assert checks['viewportWidth']==width,checks
             assert checks['initialLanguage']==language and all(checks[key] for key in ('englishLabel','chineseLabel','restoresEnglish','localePreservesDraft','localePreservesProject','literalValues','newAnalysisCopy')),checks
-            assert checks['previewRows']==(2 if ready else 0),checks
+            assert checks['previewRows']==(20 if ready == "beats" else 2 if ready else 0),checks
+            if ready == "beats":
+                assert 'Keep the current project tempo and meter.' in output
+                assert 'Confirmation applies tempo and alignment without creating a track.' in output
             assert screenshot.read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
             print(label,json.dumps(checks),str(screenshot))
         finally: server.shutdown();server.server_close();thread.join(2)

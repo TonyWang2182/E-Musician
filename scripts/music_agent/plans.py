@@ -23,7 +23,8 @@ EFFECT_NAMES = {"eq8":"EQ Eight", "compressor":"Compressor", "delay":"Stereo Del
 EQ_SHAPES = ["bell", "low_shelf", "high_shelf", "high_pass", "low_pass", "notch"]
 TRACK_FIELDS = ("name", "kind", "gain_db", "pan", "muted", "solo")
 CLIP_FIELDS = ("kind", "start_seconds", "duration_seconds", "start_beats", "length_beats", "note_count",
-               "asset_id", "source_offset", "fade_in_seconds", "fade_out_seconds", "controller_count")
+               "asset_id", "source_offset", "fade_in_seconds", "fade_out_seconds", "controller_count",
+               "warp_enabled", "warp_follow_tempo", "warp_source_bpm", "warp_target_bpm", "warp_speed_ratio", "playback_source_offset")
 NOTE_FIELDS = ("id", "pitch", "start_beats", "length_beats", "velocity", "channel")
 
 
@@ -441,7 +442,17 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
             old = state["bpm"]
             state["bpm"] = args["bpm"] = value
             changed = not _same(old, value)
-            description = f"速度：{old:g} → {value:g} BPM（音频保持原速，MIDI 随速度变化）"
+            following=0
+            for _,audio in clips.values():
+                if audio.get("kind")=="audio" and audio.get("warp_enabled") is True and audio.get("warp_follow_tempo") is True:
+                    source_bpm=_number(audio.get("warp_source_bpm"),"warp_source_bpm",20,300)
+                    scale=old/value;audio["start_seconds"]*=scale;audio["duration_seconds"]*=scale
+                    for fade in ("fade_in_seconds","fade_out_seconds"):
+                        if fade in audio:audio[fade]*=scale
+                    audio.update(warp_target_bpm=value,warp_speed_ratio=value/source_bpm)
+                    audio["playback_source_offset"]=audio.get("source_offset",0)/(value/source_bpm)
+                    following+=1
+            description = f"速度：{old:g} → {value:g} BPM；MIDI 与 {following} 个跟随音频片段同步，其他音频保持原速。"
         elif kind == "create_track":
             if args["kind"] not in ("audio", "instrument", "bus"):
                 raise PlanError("轨道类型必须是 audio、instrument 或 bus。")
@@ -657,7 +668,9 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
                 state["clip_notes"][clip["id"]] = remaining
                 touched_notes.add(clip["id"])
             else:
-                clip["source_offset"] = clip.get("source_offset", 0.0) + start-old_start
+                ratio=_number(clip.get("warp_speed_ratio",1.),"warp_speed_ratio",1/15,15)
+                clip["source_offset"] = clip.get("source_offset", 0.0) + (start-old_start)*ratio
+                if "playback_source_offset" in clip:clip["playback_source_offset"]=clip["source_offset"]/ratio
                 duration = end-start
                 clip["fade_in_seconds"] = min(clip.get("fade_in_seconds", 0.0), duration)
                 clip["fade_out_seconds"] = min(clip.get("fade_out_seconds", 0.0), duration-clip["fade_in_seconds"])

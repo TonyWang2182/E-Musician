@@ -2,6 +2,8 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
+**0.10.0 节拍与 Warp（2026-11-05，自动验证通过，人工待验）**：可选播放头视图跟随；真实节拍分析、BPM/拍号/首拍修正；Source 固定比例保音高拉伸；Agent 等价方案与确认回读；新的 Save/Settings 和情境右键。保留原件及 0.9.1 程序，局部 Warp 点和变速 Tempo Map 尚未实现。入口 `E:/MusicAgent&DAW/Start E-musician 0.10.0 Tempo.cmd`。[结果](docs/review/2026-11-05-tempo-warp/RESULTS.md) / [人工短测](docs/review/2026-11-05-tempo-warp/MANUAL-CHECK.md)。
+
 **0.9.1 分析工作区（2026-11-05）**：和弦结果在编曲区显示为和弦轨，分离和转录结果添加到普通音频/MIDI 轨。下栏显示波形、音符和和弦预览；Settings → Language 切换 English / 简体中文。轨道标题旁 rename、双击名称、F2、右键均可改名。分析新增可选四／六轨和品质档、乐器音域、七和弦等常用类型；具体算法和识别局限见 [Worker 记录](docs/review/2026-11-05-analysis-workspace/WORKER-NOTES.md)。
 
 新入口：`E:/MusicAgent&DAW/Start E-musician 0.9.1 Analysis.cmd`，确认窗口标题 0.9.1；[人工短测](docs/review/2026-11-05-analysis-workspace/MANUAL-CHECK.md)。本轮工作树同下，新分支 `feature/analysis-workspace-v091`；构建/测试证据见 [结果](docs/review/2026-11-05-analysis-workspace/RESULTS.md)。旧 0.8.1 程序与 0.9.0 发布归档保留，未自动合并 main。以下 0.9.0 为历史基线。
@@ -28,11 +30,11 @@ Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、M
 
 ## 打开与开发
 
-本轮工作树为 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/analysis-workspace-v091`。用 VS Code 打开 [E-musician-Analysis.code-workspace](E-musician-Analysis.code-workspace)：Ctrl+Shift+B 构建 Release，运行 `Analysis: CTest with log` 测试，F5 调试 `0.9.1 Analysis`。任务通过 `scripts.dev.Recorder` 保留命令、时间、结果、源码指纹和日志。
+本轮工作树为 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/tempo-warp-workspace-v0100`。用 VS Code 打开 [E-musician-Analysis.code-workspace](E-musician-Analysis.code-workspace)：Ctrl+Shift+B 构建 Release，运行 `Analysis: CTest with log` 测试，F5 调试 `0.10.0 Tempo`。任务通过 `scripts/dev_tempo.py` 与 Recorder 保留命令、时间、退出码、源码指纹和日志。
 
 本机使用目录联接 `E:/emusician-analysis-source` 作为 CMake 源目录，构建目录 `E:/emusician-analysis-build`，避免上游 MSBuild 对路径中 `&` 的处理问题。固定 JUCE 8.0.6 / Tracktion Engine 3.2.0，具体 commit 和配置以本轮构建记录为准。其他机器需按 [BUILDING](docs/BUILDING.md) 准备依赖并调整工作区路径；现有 `dev_agent.py` 的历史默认构建目录不是这次 0.9.0 的入口。
 
-每次运行前保存并关闭旧窗口，确认新标题 **0.9.1**。新增模型及复现实验见 [Worker 说明](docs/review/2026-11-05-analysis-workspace/WORKER-NOTES.md)。项目约定见 [AGENTS.md](AGENTS.md)，当前上下文见 [CONTEXT](docs/CONTEXT.md)。
+新程序独立输出到 `E:/emusician-analysis-build/bin-0.10.0/Release/E-musician.exe`，旧 `bin/Release` 保留 0.9.1。每次运行前保存并关闭旧窗口，确认新标题 **0.10.0**，避免单实例逻辑返回旧窗口。新增模型及复现实验见 [Worker 说明](docs/review/2026-11-05-tempo-warp/WORKER-AGENT-NOTES.md)。项目约定见 [AGENTS.md](AGENTS.md)，当前上下文见 [CONTEXT](docs/CONTEXT.md)。
 
 ## 基础操作
 

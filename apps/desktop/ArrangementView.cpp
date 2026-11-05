@@ -170,11 +170,32 @@ private:
 }
 
 struct ArrangementView::Impl : private juce::ScrollBar::Listener {
+    struct HeaderButton final : juce::TextButton {
+        using juce::TextButton::TextButton;
+        std::function<void()> onContext;
+        void mouseDown(const juce::MouseEvent& event) override {
+            contextGesture = event.mods.isPopupMenu();
+            if (contextGesture) { if (onContext) onContext(); return; }
+            juce::TextButton::mouseDown(event);
+        }
+        void mouseDrag(const juce::MouseEvent& event) override { if (!contextGesture) juce::TextButton::mouseDrag(event); }
+        void mouseUp(const juce::MouseEvent& event) override {
+            if (contextGesture) { contextGesture = false; return; }
+            juce::TextButton::mouseUp(event);
+        }
+    private:
+        bool contextGesture = false;
+    };
     struct TrackControls final : juce::Component {
         TrackControls(Impl& view, juce::String trackId) : p(view), id(std::move(trackId))
         {
             setInterceptsMouseClicks(false, true);
-            for (auto* button : { &mute, &solo, &arm, &devices, &rename }) addAndMakeVisible(button);
+            for (auto* button : { &mute, &solo, &arm, &devices, &rename }) {
+                addAndMakeVisible(button);
+                // JUCE Button treats any mouse button as a click by default.
+                // Secondary clicks must never arm/mute/open a device implicitly.
+                button->onContext = [this] { if (p.owner.onContextMenu) p.owner.onContextMenu("track", id, p.state.position); };
+            }
             mute.setTooltip("Mute this track"); solo.setTooltip("Solo this track"); devices.setTooltip("Show this track's devices");
             arm.setTooltip("Arm this track for recording. Choose an input in Devices / I/O first.");
             rename.setTooltip(uiText("Rename track (F2). You can also double-click the track name.", "重命名轨道 (F2)，也可双击轨道名称。"));
@@ -200,7 +221,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
         }
         void resized() override { const int y = getHeight() - 34; mute.setBounds(8, y, 28, 27); solo.setBounds(40, y, 28, 27); arm.setBounds(72, y, 28, 27); devices.setBounds(106, y, getWidth() - 114, 27); rename.setBounds(getWidth() - 62, 3, 56, 24); }
         Impl& p; juce::String id;
-        juce::TextButton mute { "M" }, solo { "S" }, arm { "R" }, devices { "devices" }, rename { "rename" };
+        HeaderButton mute { "M" }, solo { "S" }, arm { "R" }, devices { "devices" }, rename { "rename" };
     };
     struct Canvas final : juce::Component, juce::TooltipClient {
         explicit Canvas(Impl& view) : p(view) { setWantsKeyboardFocus(true); setTitle("Audio arrangement tracks"); }
@@ -209,6 +230,25 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
         {
             if (!isEnabled()) return;
             if (isShowing()) grabKeyboardFocus();
+            if (e.mods.isPopupMenu()) {
+                p.cancelDrag(); seeking = false;
+                const int row = int(e.position.y) / p.rowHeight;
+                juce::String kind = "blank", id;
+                if (row >= 0 && row < int(p.state.tracks.size())) {
+                    const auto& track = p.state.tracks[std::size_t(row)];
+                    if (e.position.x < p.labelWidth()) { kind = "track"; id = track.id; }
+                    else if (const auto* clip = p.hitClip(std::size_t(row), e.position)) {
+                        kind = "clip"; id = clip->id;
+                        // A selected group stays selected. A different clip becomes
+                        // the target without starting a drag or seeking playback.
+                        if (!p.selection.contains(id)) { p.selection = { id }; p.rangeSelection = {}; }
+                        p.explicitTrackSelection.clear();
+                        p.selecting = true; p.engine.selectClip(id); p.notifyState(); p.selecting = false;
+                    } else id = track.id;
+                }
+                if (p.owner.onContextMenu) p.owner.onContextMenu(kind, id, p.snapTime(p.timeAt(e.position.x), e.mods.isAltDown()));
+                return;
+            }
             p.cancelDrag();
             p.followSuspended = true;
             p.rangeSelection = {};
@@ -241,8 +281,8 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                 p.drag.originalStart = p.drag.previewStart = picked.timelineStart;
                 p.drag.duration = picked.duration;
                 p.drag.originalDuration = picked.duration;
-                p.drag.sourceOffset = picked.sourceOffset;
-                p.drag.sourceDuration = picked.sourceDuration;
+                p.drag.sourceOffset = picked.playbackSourceOffset;
+                p.drag.sourceDuration = picked.playbackSourceDuration;
                 p.drag.fadeIn = p.drag.originalFadeIn = picked.fadeIn;
                 p.drag.fadeOut = p.drag.originalFadeOut = picked.fadeOut;
                 p.drag.midi = picked.kind == "midi";
@@ -280,7 +320,6 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                 p.engine.selectTrack(p.explicitTrackSelection);
                 if (p.owner.onTrackFocus) p.owner.onTrackFocus(p.explicitTrackSelection);
                 p.notifyState();
-                if (e.mods.isPopupMenu()) p.showTrackMenu(p.explicitTrackSelection, this);
                 return;
             }
             else if (!e.mods.isCtrlDown() && !e.mods.isCommandDown()) p.selection.clear();
@@ -938,7 +977,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                         }
                     }
                 } else if (owner.trackWaveformReady(clip.id)) {
-                    const double previewOffset = clip.sourceOffset + (drag.id == clip.id && drag.edge == -1 ? drag.previewStart - drag.originalStart : 0.0);
+                    const double previewOffset = clip.playbackSourceOffset + (drag.id == clip.id && drag.edge == -1 ? drag.previewStart - drag.originalStart : 0.0);
                     const double previewDuration = drag.id == clip.id && drag.moved ? drag.duration : clip.duration;
                     owner.drawTrackWaveform(g, waveArea, clip.id,
                         previewOffset + juce::jmax(0.0, viewStart - start),
@@ -1207,6 +1246,8 @@ void ArrangementView::setGridBeats(double beats) { if (std::isfinite(beats) && b
 void ArrangementView::setSnapEnabled(bool enabled) { impl->snapEnabled = enabled; impl->canvas.repaint(); repaint(); }
 void ArrangementView::setAdaptiveGrid(bool enabled) { impl->adaptiveGrid = enabled; impl->canvas.repaint(); repaint(); }
 void ArrangementView::setFollowPlayhead(bool enabled) { impl->follow = enabled; impl->followSuspended = false; }
+bool ArrangementView::isFollowSuspended() const { return impl->follow && impl->followSuspended; }
+bool ArrangementView::isFollowEnabled() const { return impl->follow; }
 void ArrangementView::selectClipIds(const juce::StringArray& ids)
 {
     auto& p = *impl; p.explicitTrackSelection.clear(); p.selection = ids; p.rangeSelection = {}; p.selecting = true;
@@ -1311,6 +1352,10 @@ void ArrangementView::mouseDown(const juce::MouseEvent& e)
 {
     if (!isEnabled() || e.position.x < impl->labelWidth()) return;
     if (isShowing()) grabKeyboardFocus();
+    if (e.mods.isPopupMenu()) {
+        if (onContextMenu) onContextMenu("ruler", {}, impl->snapTime(impl->timeAt(e.position.x), e.mods.isAltDown()));
+        return;
+    }
     auto& p = *impl; p.cancelDrag(); p.followSuspended = true; p.explicitTrackSelection.clear();
     p.rulerRevision = p.state.revision; p.rulerDownTime = p.snapTime(p.timeAt(e.position.x), e.mods.isAltDown());
     p.loopBeforeStart = p.loopPreviewStart = p.state.loopStart; p.loopBeforeEnd = p.loopPreviewEnd = p.state.loopEnd;
@@ -1427,6 +1472,33 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
             &p.canvas, &p.canvas, now, { x, y }, now, 1, dragging);
     };
     const auto lastRow = static_cast<int>(initial.tracks.size()) - 1;
+    {
+        const auto originalContext = onContextMenu;
+        juce::String contextKind, contextId; int calls = 0;
+        onContextMenu = [&](const auto& kind, const auto& id, double) { contextKind = kind; contextId = id; ++calls; };
+        juce::StringArray group;
+        for (const auto& track : initial.tracks) for (const auto& clip : track.clips) if (group.size() < 2) group.add(clip.id);
+        selectClipIds(group); const auto beforeContext = p.engine.snapshot();
+        for (std::size_t row = 0; row < initial.tracks.size(); ++row) for (const auto& clip : initial.tracks[row].clips) if (clip.id == group[0]) {
+            const auto area = p.clipArea(row, clip);
+            p.canvas.mouseDown(event(area.getCentreX(), area.getCentreY(), false, juce::ModifierKeys::rightButtonModifier));
+        }
+        const bool clipSelectionPreserved = selectedClipIds() == group && contextKind == "clip" && contextId == group[0] && p.drag.id.isEmpty();
+        p.canvas.mouseDown(event(20, 30, false, juce::ModifierKeys::rightButtonModifier));
+        const bool headerPreserved = selectedClipIds() == group && contextKind == "track";
+        if (!p.headers.empty()) {
+            p.headers.front()->mute.mouseDown(event(12, 12, false, juce::ModifierKeys::rightButtonModifier));
+            p.headers.front()->mute.mouseUp(event(12, 12, false, juce::ModifierKeys::rightButtonModifier));
+        }
+        mouseDown(event(float(p.labelWidth() + 40), 12, false, juce::ModifierKeys::rightButtonModifier));
+        const bool rulerPreserved = selectedClipIds() == group && contextKind == "ruler" && p.rulerDrag == 0;
+        p.canvas.mouseDown(event(float(p.labelWidth() + 40), float(initial.tracks.size() * rowHeight + 20), false, juce::ModifierKeys::rightButtonModifier));
+        onContextMenu = originalContext;
+        if (calls != 5 || !clipSelectionPreserved || !headerPreserved || !rulerPreserved || contextKind != "blank"
+            || selectedClipIds() != group || p.engine.snapshot().revision != beforeContext.revision || p.engine.snapshot().position != beforeContext.position)
+            return juce::Result::fail("Context menus sought playback, started a drag, or destroyed a selected clip group.");
+        report.setProperty("context_track_clip_blank_ruler_preserves_position_and_group", true);
+    }
     const auto headerRevision = p.engine.snapshot().revision;
     p.canvas.mouseDown(event(20.0f, static_cast<float>(lastRow * rowHeight + 30)));
     if (p.engine.snapshot().selectedTrackId != initial.tracks.back().id) return juce::Result::fail("Clicking an arrangement row did not select its real track.");

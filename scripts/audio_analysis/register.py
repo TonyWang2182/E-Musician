@@ -122,6 +122,36 @@ def register(root, kind, device="cpu", stems=4):
                          probe_peak_cuda_allocated_bytes=torch.cuda.max_memory_allocated(),
                          probe_peak_cuda_reserved_bytes=torch.cuda.max_memory_reserved(), fallback_device="cpu")
         provenance.append(package_manifest("demucs", manifest_dir))
+    elif kind == "beats":
+        import torch
+        import beat_this
+        from beat_this.inference import Audio2Beats
+        from scripts.audio_analysis.beats import CODE_REVISION, CHECKPOINT_URL, CHECKPOINT_SHA256
+        torch.set_num_threads(2);torch.set_num_interop_threads(1)
+        if device == "cuda" and not torch.cuda.is_available():
+            raise ValueError("CUDA is not available; existing provider registrations remain unchanged")
+        directory = root / "models/beat-this" / CODE_REVISION
+        model_path = directory / "final0.ckpt"
+        download(CHECKPOINT_URL, model_path, CHECKPOINT_SHA256)
+        for filename in ("LICENSE", "README.md"):
+            download(f"https://raw.githubusercontent.com/CPJKU/beat_this/{CODE_REVISION}/{filename}", directory / filename)
+        distribution = importlib.metadata.distribution("beat-this")
+        direct_url = json.loads(distribution.read_text("direct_url.json") or "{}")
+        if CODE_REVISION not in direct_url.get("url", ""):
+            raise ValueError("Beat This code installation must use the pinned official commit archive")
+        model = Audio2Beats(str(model_path), device=device, float16=False, dbn=False)
+        with torch.inference_mode():
+            beats, downbeats = model(np.zeros(22050*2,dtype=np.float32),22050)
+        if not np.isfinite(beats).all() or not np.isfinite(downbeats).all():
+            raise ValueError("Beat This real forward probe returned invalid timestamps")
+        entry.update(model_id="beat-this-final0",version=distribution.version,source_revision=CODE_REVISION,
+            source_url="https://github.com/CPJKU/beat_this",model_path=str(model_path),weight_sha256=CHECKPOINT_SHA256,
+            license_status="MIT-code-and-published-weights; training-recording-rights-not-transferred",
+            reason=f"Official final0 real {device.upper()} forward probe passed; beat/downbeat candidates require review.")
+        provenance.append({"source_url":entry["source_url"],"commit":CODE_REVISION,"weight_url":CHECKPOINT_URL,
+            "weight_sha256":CHECKPOINT_SHA256,"weight_bytes":model_path.stat().st_size,"direct_url":direct_url,
+            "installed_python_sha256":{p.relative_to(Path(beat_this.__file__).parent).as_posix():sha256_file(p)
+                for p in Path(beat_this.__file__).parent.rglob("*.py")},"license_sha256":sha256_file(directory/"LICENSE")})
     elif kind == "transcribe":
         import basic_pitch
         import onnxruntime as ort
@@ -201,12 +231,12 @@ def register(root, kind, device="cpu", stems=4):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
-    parser.add_argument("--kind", choices=("separate", "transcribe", "chords"), required=True)
+    parser.add_argument("--kind", choices=("separate", "transcribe", "chords", "beats"), required=True)
     parser.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
     parser.add_argument("--stems", type=int, choices=(4, 6), default=4)
     args = parser.parse_args()
-    if args.device == "cuda" and args.kind != "separate":
-        parser.error("CUDA is only supported for separation")
+    if args.device == "cuda" and args.kind not in ("separate", "beats"):
+        parser.error("CUDA is only supported for separation and beat tracking")
     if args.stems == 6 and args.kind != "separate":
         parser.error("--stems applies only to separation")
     register(args.root.resolve(), args.kind, args.device, args.stems)

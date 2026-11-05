@@ -1,0 +1,147 @@
+{
+  "status": "passed",
+  "checks_passed": 188,
+  "pitch_measurements": [
+    {
+      "speed_ratio": 0.8,
+      "channel": 0,
+      "measured_hz": 440.007982004208714
+    },
+    {
+      "speed_ratio": 0.8,
+      "channel": 1,
+      "measured_hz": 660.011973006313042
+    },
+    {
+      "speed_ratio": 1.25,
+      "channel": 0,
+      "measured_hz": 440.012472008843815
+    },
+    {
+      "speed_ratio": 1.25,
+      "channel": 1,
+      "measured_hz": 660.018708013265723
+    },
+    {
+      "speed_ratio": 2.0,
+      "channel": 0,
+      "measured_hz": 440.01995555353983
+    },
+    {
+      "speed_ratio": 2.0,
+      "channel": 1,
+      "measured_hz": 660.029933330309746
+    }
+  ],
+  "transient_timing": [
+    {
+      "speed_ratio": 0.8,
+      "source_seconds": 0.08,
+      "expected_seconds": 0.1,
+      "measured_energy_centroid_seconds": 0.099570463494286,
+      "error_ms": -0.429536505713757
+    },
+    {
+      "speed_ratio": 0.8,
+      "source_seconds": 1.0,
+      "expected_seconds": 1.25,
+      "measured_energy_centroid_seconds": 1.249650232779415,
+      "error_ms": -0.349767220584773
+    },
+    {
+      "speed_ratio": 0.8,
+      "source_seconds": 1.92,
+      "expected_seconds": 2.4,
+      "measured_energy_centroid_seconds": 2.399788806256027,
+      "error_ms": -0.211193743972604
+    },
+    {
+      "speed_ratio": 1.0,
+      "source_seconds": 0.08,
+      "expected_seconds": 0.08,
+      "measured_energy_centroid_seconds": 0.079955520971852,
+      "error_ms": -0.04447902814822
+    },
+    {
+      "speed_ratio": 1.0,
+      "source_seconds": 1.0,
+      "expected_seconds": 1.0,
+      "measured_energy_centroid_seconds": 0.999976105448832,
+      "error_ms": -0.023894551168246
+    },
+    {
+      "speed_ratio": 1.0,
+      "source_seconds": 1.92,
+      "expected_seconds": 1.92,
+      "measured_energy_centroid_seconds": 1.920031758016069,
+      "error_ms": 0.031758016068917
+    },
+    {
+      "speed_ratio": 1.25,
+      "source_seconds": 0.08,
+      "expected_seconds": 0.064,
+      "measured_energy_centroid_seconds": 0.064229074762291,
+      "error_ms": 0.229074762290629
+    },
+    {
+      "speed_ratio": 1.25,
+      "source_seconds": 1.0,
+      "expected_seconds": 0.8,
+      "measured_energy_centroid_seconds": 0.800071174368578,
+      "error_ms": 0.071174368577731
+    },
+    {
+      "speed_ratio": 1.25,
+      "source_seconds": 1.92,
+      "expected_seconds": 1.536,
+      "measured_energy_centroid_seconds": 1.53611588778596,
+      "error_ms": 0.115887785959501
+    },
+    {
+      "speed_ratio": 2.0,
+      "source_seconds": 0.08,
+      "expected_seconds": 0.04,
+      "measured_energy_centroid_seconds": 0.039910415710787,
+      "error_ms": -0.089584289212893
+    },
+    {
+      "speed_ratio": 2.0,
+      "source_seconds": 1.0,
+      "expected_seconds": 0.5,
+      "measured_energy_centroid_seconds": 0.500073293654746,
+      "error_ms": 0.07329365474551
+    },
+    {
+      "speed_ratio": 2.0,
+      "source_seconds": 1.92,
+      "expected_seconds": 0.96,
+      "measured_energy_centroid_seconds": 0.960147620539282,
+      "error_ms": 0.147620539281745
+    }
+  ],
+  "isolated_export_pcm_comparisons": [
+    {
+      "fixture": "trimmed-wav",
+      "rate": 44100.0,
+      "relative_pcm_error": 1.3728587297635e-6,
+      "source_offset": 0.2,
+      "playback_offset": 0.16
+    },
+    {
+      "fixture": "mp3-1",
+      "rate": 48000.0,
+      "relative_pcm_error": 1.765368890309425e-6,
+      "source_offset": 0.1,
+      "playback_offset": 0.08
+    },
+    {
+      "fixture": "mp3-2",
+      "rate": 44100.0,
+      "relative_pcm_error": 2.891899530276089e-6,
+      "source_offset": 0.1,
+      "playback_offset": 0.08
+    }
+  ],
+  "mp3_cases": 2,
+  "scope": "generated stereo tones, broadband transients, actual CBR/VBR MP3 and isolated export process; offline exact lengths, pitch, onset latency, async atomic tempo/Warp, offsets, trim/split, Undo/Redo, save/reopen, cancellation/conflict/source integrity; no physical audio or subjective quality claim"
+}

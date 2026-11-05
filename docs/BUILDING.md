@@ -1,5 +1,21 @@
 # 本地构建、使用与 VS Code 调试
 
+## 当前 0.10.0 工作树（2026-11-05）
+
+实际源码在 `E:/MusicAgent&DAW/worktrees/audio-analysis`，CMake 使用联接 `E:/emusician-analysis-source`，构建目录 `E:/emusician-analysis-build`。新 EXE 单独输出到 `bin-0.10.0/Release`，保留仍运行的 0.9.1 `bin/Release`。不要把历史脚本默认目录误当作当前产物。
+
+```powershell
+python scripts/dev_tempo.py configure
+python scripts/dev_tempo.py build
+python scripts/dev_tempo.py ctest
+python scripts/dev_tempo.py agent
+python scripts/dev_tempo.py tempo-e2e
+```
+
+命令通过 Recorder 记录开始/结束、退出码、原始日志及源码指纹；失败会返回非零。VS Code 打开 E-musician-Analysis.code-workspace，Ctrl+Shift+B 编译，F5 使用明确的 0.10.0 路径；最终构建证据以本轮 review 为准。首次依赖准备增加 `python scripts/bootstrap_stretch.py`，CMake 只验证固定 commit/文件 hash，不自行联网安装。其他机器通过脚本 --source-dir/--build-dir 调整路径，并准备原有引擎/WebView/ASIO 依赖。
+
+真实本地节拍环境通过 `scripts/setup_analysis.py` 的 beats 步骤配置，精确来源和部署在本轮 WORKER-AGENT-NOTES。离线集成会使用本机模型，不调用付费语言模型；物理声卡和音乐听感仍需人工测试。下方为历史流程。
+
 更新日期：2026-10-29。本页保留通用构建流程与历史0.5入口；当前0.7.0 Agent功能工作树使用下面的独立入口。日常助手操作见[快速上手](AGENT_QUICKSTART.md)，实际验证边界见[CONTEXT](CONTEXT.md)。
 
 ## 0.7.0 Agent工作树入口（2026-10-29）

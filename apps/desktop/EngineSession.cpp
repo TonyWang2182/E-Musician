@@ -1,6 +1,8 @@
 #include "EngineSession.h"
 #include "ProjectStorage.h"
 #include "AudioSource.h"
+#include "AudioWarp.h"
+#include "AudioTimeMap.h"
 #include "PluginHost.h"
 #include "NativeInstrument.h"
 #include "NativeEffects.h"
@@ -141,7 +143,7 @@ juce::String contentKey(const storage::StoredProject& s,const std::function<juce
         o.writeBool(t.muted);o.writeBool(t.solo);for(const auto& p:t.plugins)plugin(p);
         o.writeString(t.inputDeviceId);o.writeString(t.outputTargetId);lanes(t.automation);
         for(const auto& send:t.sends){o.writeString(send.id);o.writeString(send.targetTrackId);o.writeFloat(send.gainDb);o.writeBool(send.preFader);o.writeBool(send.enabled);}
-        for(const auto& c:t.clips){o.writeString(c.id);o.writeString(c.kind);o.writeString(c.assetId);o.writeString(c.analysisRole);time(c.timelineStart);time(c.sourceOffset);time(c.duration);time(c.fadeIn);time(c.fadeOut);
+        for(const auto& c:t.clips){o.writeString(c.id);o.writeString(c.kind);o.writeString(c.assetId);o.writeString(c.analysisRole);time(c.timelineStart);time(c.sourceOffset);time(c.duration);time(c.fadeIn);time(c.fadeOut);o.writeString(juce::JSON::toString(storage::audioWarpToVar(c.warp),true));
             if(c.kind=="midi"){time(c.startBeats);time(c.lengthBeats);o.writeString(noteKey?noteKey(c.id):noteContentKey(c.notes));for(const auto& event:c.controllers){o.writeString(event.id);time(event.beats);o.writeInt(event.type);o.writeInt(event.value);o.writeInt(event.metadata);}}
         }
     }
@@ -166,7 +168,7 @@ storage::StoredPlugin readSlot(const juce::ValueTree& v,bool includeState=true)
 }
 
 struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listener {
-    struct ClipBinding{juce::String id,assetId;juce::File source;AudioInfo info;te::Clip::Ptr clip;};
+    struct ClipBinding{juce::String id,assetId;juce::File source;AudioInfo info;te::Clip::Ptr clip;AudioInfo originalInfo;};
     struct Binding{juce::String id;te::AudioTrack* track=nullptr;std::vector<ClipBinding> clips;};
     struct Job{
         juce::String id=uid(),kind,status="queued",error,projectId;std::uint64_t revision=0;double progress=-1;
@@ -174,6 +176,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         double captureMs=0,maxPluginCaptureMs=0;
         juce::int64 bytesWritten=0,bytesReused=0;
         int pluginsCaptured=0;
+        juce::var result;
         std::atomic<bool> cancel{false},done{false};std::mutex mutex;std::thread worker;std::function<void()> commit;
         std::function<void()> preparation;
         std::condition_variable preparationReady;
@@ -405,7 +408,15 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
             for(const auto& c:b.clips){storage::StoredClip a;a.id=c.id;a.assetId=c.assetId;a.analysisRole=c.clip->state["emAnalysisRole"].toString();auto pos=c.clip->getPosition();a.timelineStart=pos.time.getStart().inSeconds();a.sourceOffset=pos.offset.inSeconds();a.duration=pos.time.getLength().inSeconds();
                 if(auto* midi=dynamic_cast<te::MidiClip*>(c.clip.get())){a.kind="midi";a.startBeats=time::secondsToBeats(a.timelineStart,s.bpm);a.lengthBeats=time::secondsToBeats(a.duration,s.bpm);
                     if(includeNotes){const auto& notes=*noteView(c.id,*midi).notes;a.notes.reserve(notes.size());for(const auto& n:notes)a.notes.push_back({n.id,n.pitch,n.startBeats,n.lengthBeats,n.velocity,n.channel});}
-                }else if(auto* audio=dynamic_cast<te::WaveAudioClip*>(c.clip.get())){a.fadeIn=audio->getFadeIn().inSeconds();a.fadeOut=audio->getFadeOut().inSeconds();if(std::none_of(s.assets.begin(),s.assets.end(),[&](const auto& x){return x.id==c.assetId;}))s.assets.push_back({c.assetId,c.source});}
+                }else if(auto* audio=dynamic_cast<te::WaveAudioClip*>(c.clip.get())){
+                    const auto warp=c.clip->state.getProperty("emAudioWarp",{});
+                    if(!warp.isVoid())storage::audioWarpFromVar(warp,a.warp);
+                    a.sourceOffset*=a.warp.speedRatio();
+                    a.fadeIn=audio->getFadeIn().inSeconds();a.fadeOut=audio->getFadeOut().inSeconds();
+                    if(std::none_of(s.assets.begin(),s.assets.end(),[&](const auto& x){return x.id==c.assetId;}))s.assets.push_back({c.assetId,c.source});
+                    if(a.warp.enabled&&std::none_of(s.assets.begin(),s.assets.end(),[&](const auto& x){return x.id==a.warp.renderAssetId;}))
+                        s.assets.push_back({a.warp.renderAssetId,juce::File(c.clip->state["emWarpRenderSource"].toString())});
+                }
                 t.clips.push_back(std::move(a));
             }s.tracks.push_back(std::move(t));
         }
@@ -421,7 +432,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
                 s.assets.push_back({id,juce::File(asset["source"].toString())});}
         for(const auto& a:m.getChildWithName("EM_ANALYSES"))s.analyses.push_back({a["id"].toString(),a["kind"].toString(),a["model_id"].toString(),a["model_version"].toString(),a["source_clip_id"].toString(),a["source_asset_id"].toString(),a["source_sha256"].toString(),a["result_sha256"].toString(),a["parameters_json"].toString(),double(a["start_seconds"]),double(a["duration_seconds"])});
         for(const auto& c:m.getChildWithName("EM_CHORDS"))s.chordRegions.push_back({c["id"].toString(),c["label"].toString(),c["analysis_id"].toString(),double(c["start_seconds"]),double(c["end_seconds"]),double(c["score"]),bool(c["uncertain"])});
-        s.schemaVersion=s.analyses.empty()&&s.chordRegions.empty()?4:5;
+        s.schemaVersion=storage::requiredSchema(s);
         production::captureGraph(*edit,s,includeControllers);return s;
     }
     juce::Result capturePluginStates(storage::StoredProject& s){
@@ -445,7 +456,10 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     void choose(const juce::String& tid,const juce::String& cid={}){auto* t=find(tid);if(!t&&!bindings.empty())t=&bindings.front();selected=t?t->id:juce::String();selectedClip={};if(t&&!t->clips.empty()){auto i=std::find_if(t->clips.begin(),t->clips.end(),[&](const auto& c){return c.id==cid;});selectedClip=i==t->clips.end()?t->clips.front().id:i->id;}}
     void rebuild(te::Edit& target,std::vector<Binding>& out){
         out.clear();for(auto* t:te::getAudioTracks(target)){auto id=t->state[emId].toString();if(id.isEmpty())continue;Binding b{id,t,{}};
-            for(auto* clip:t->getClips()){auto cid=clip->state[emId].toString();if(cid.isEmpty())continue;const auto source=clip->state[emSource].toString();AudioInfo info;if(auto i=prepared.find(source);i!=prepared.end())info=i->second;b.clips.push_back({cid,clip->state[emAsset].toString(),source.isEmpty()?juce::File():juce::File(source),info,clip});}out.push_back(std::move(b));}
+            for(auto* clip:t->getClips()){auto cid=clip->state[emId].toString();if(cid.isEmpty())continue;const auto source=clip->state[emSource].toString();AudioInfo info,original;
+                if(auto i=prepared.find(source);i!=prepared.end())info=original=i->second;
+                const auto rendered=clip->state["emWarpRenderSource"].toString();if(rendered.isNotEmpty())if(auto i=prepared.find(rendered);i!=prepared.end())info=i->second;
+                b.clips.push_back({cid,clip->state[emAsset].toString(),source.isEmpty()?juce::File():juce::File(source),info,clip,original});}out.push_back(std::move(b));}
         if(&target==edit.get())std::erase_if(noteViews,[&](const auto& entry){for(const auto& b:out)for(const auto& c:b.clips)if(c.id==entry.first)return false;return true;});
     }
     void refreshRange(){
@@ -486,6 +500,11 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     juce::Result perform(const juce::String&,const juce::var&,juce::var* commandResult=nullptr);
     juce::Result performJob(const juce::String&,const juce::var&);
     juce::Result beginSave(const juce::File&);
+    using WarpFileValidation=std::function<juce::Result(const std::function<bool()>&)>;
+    juce::Result getAudioWarp(const juce::var&,juce::var&);
+    juce::Result beginAudioWarp(const juce::var&,juce::var* = nullptr,WarpFileValidation = {},
+        std::shared_ptr<const storage::StoredAnalysis> = {},std::function<void(const juce::var&)> = {});
+    juce::Result beginWarpCandidate(storage::StoredProject,juce::String,juce::var,juce::var*,WarpFileValidation = {},std::function<void(const juce::var&)> = {});
     juce::Result setPluginParameter(const juce::var&);
     juce::var getPluginParameters(const juce::var&)const;
 };
@@ -497,10 +516,12 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
 #include "EngineSessionNative.inc"
 #include "EngineSessionCommands.inc"
 #include "EngineSessionJobs.inc"
+#include "EngineSessionWarp.inc"
 #include "EngineSessionAnalysis.inc"
 #include "EngineSessionTelemetry.inc"
 #include "EngineSessionSelection.inc"
 #include "EngineSessionPublic.inc"
+#include "../../tests/EngineSessionWarpSmoke.inc"
 #include "../../tests/EngineSessionBatchRefsSmoke.inc"
 #include "../../tests/EngineSessionSmoke.inc"
 #include "../../tests/EngineSessionProjectSmoke.inc"

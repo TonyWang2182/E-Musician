@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "mode": "real-offline-native-and-BeatThis-with-mocked-language-provider",
+  "physical_audio": false,
+  "external_llm": false,
+  "recognition_accuracy_claim": false,
+  "exe_sha256": "474fc0824600c4aeb99ff4b617b890220d9b9a20e9dafde0f9ed6abe0bbfb5d6",
+  "source_sha256": "bd482f4759f294447059bbae0df5c4cbd06ed1b5cf6827461c34800acdbd1dee",
+  "checks": [
+    "Actual native commands and pinned local Beat This provider advertise readiness",
+    "Real beat inference becomes an Agent review in two mocked language calls without changing the project",
+    "Confirmed audio-to-project Warp commits once, preserves project tempo/meter and passes actual state readback without a fake track",
+    "One Agent Undo and one native Redo restore the exact pre/post Warp mappings",
+    "Warp source identity, timing and enabled/follow settings survive a real save/reopen",
+    "Manual Agent Warp-off restores the original duration; one Undo restores the warped clip",
+    "Existing set_tempo DSL waits for asynchronous follow-audio processing, checks final geometry and supports one Undo",
+    "Agent trims a warped clip using original-source and playback offsets consistently; next analysis exercises nonzero cropped offsets",
+    "A second real analysis of warped audio supports explicit manual tempo/meter correction; project adoption retains source playback speed and undoes atomically"
+  ],
+  "beat_model": {
+    "version": "1.1.0",
+    "weight_sha256": "8c328b45f59d8dd3dff219253ff6a8d6482be57d0133a29140e2febbf8eb8331",
+    "license_status": "MIT-code-and-published-weights; training-recording-rights-not-transferred",
+    "id": "beat-this-final0"
+  },
+  "detected_tempo": {
+    "bpm": 65.21739130434784,
+    "first_beat_seconds": 0.06,
+    "first_downbeat_seconds": 0.06,
+    "meter_numerator": 0,
+    "meter_denominator": 4,
+    "meter_supported": false,
+    "variable_tempo": true,
+    "tempo_candidates": [
+      32.60869565217392,
+      65.21739130434784,
+      130.43478260869568
+    ],
+    "confidence_kind": "uncalibrated_beat_consistency"
+  },
+  "audio_to_project_args": {
+    "result_id": "0875a5691777460391cb4c23649c822c",
+    "mode": "audio_to_project",
+    "bpm": 65.21739130434784,
+    "first_beat_seconds": 0.06,
+    "target_start_seconds": 2.0,
+    "follow_tempo": true
+  },
+  "protected_file_changes": {
+    "unchanged": true,
+    "changed_or_removed": [],
+    "unexpected_additions": [],
+    "allowed_new_warp_cache": []
+  },
+  "protected_settings_unchanged": true,
+  "original_source_unchanged": true
+}

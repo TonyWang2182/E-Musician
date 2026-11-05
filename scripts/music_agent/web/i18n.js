@@ -173,7 +173,20 @@
     "新建 4 条音频轨并导入候选分轨": "Create 4 audio tracks and add the separated stems",
     "新建 6 条音频轨并导入候选分轨": "Create 6 audio tracks and add the separated stems",
     "新建 {0} 条音频轨并导入候选分轨": "Create {0} audio tracks and add the separated stems",
-    "添加和弦轨，可直接修正标签和时间。": "Add a chord lane with editable labels and timing."
+    "添加和弦轨，可直接修正标签和时间。": "Add a chord lane with editable labels and timing.",
+    "节拍 / 速度":"Beats / Tempo","音频 Warp":"Audio Warp","节拍候选":"Beat candidates","强拍":"Downbeat","节拍":"Beat","待指定":"Set tempo","拍号待确认":"Review meter",
+    "分析选中音频的节拍和速度，先让我确认首拍，再对齐工程。":"Analyze beats and tempo in the selected audio. Let me review the first downbeat before aligning it.",
+    "读取选中音频的 Warp 设置，先列出对齐当前工程的方案。":"Read Warp settings for the selected audio and propose alignment to the current project.",
+    "检测节拍与强拍；确认后对齐或采用音频速度。":"Find beats and downbeats. Review before aligning audio or adopting its tempo.",
+    "保音高拉伸、手动源速度、开启或关闭跟随工程。":"Stretch without changing pitch, set source tempo and toggle tempo follow.",
+    "后台处理后一次提交，可一次撤销。":"Prepare audio in the background, then apply in one undoable edit.",
+    "整个工程：{0} BPM · {1}/{2}":"Entire project: {0} BPM · {1}/{2}",
+    "保持当前工程速度与拍号。":"Keep the current project tempo and meter.","音频片段":"Audio clip",
+    "{0} · 起点 {1} 秒 · 时长 {2} 秒":"{0} · Start {1} s · Duration {2} s",
+    "关闭 Warp，恢复原始速度。":"Disable Warp and restore the original speed.",
+    "播放速度比 {0} · {1}":"Playback ratio {0} · {1}","跟随工程速度":"Follow project tempo","固定速度":"Fixed tempo",
+    "节奏存在波动；本次按固定比例拉伸，不会逐拍矫直。":"Tempo varies; this edit uses a fixed ratio and does not straighten individual beats.",
+    "拍点仅供核对；确认会应用速度与对齐，不会创建音轨。":"Beat markers are for review. Confirmation applies tempo and alignment without creating a track."
   });
   const reverse = new Map(Object.entries(en).map(([zh, english]) => [english, zh]));
   let locale = new URLSearchParams(window.location.search).get("lang") === "zh-CN" ? "zh-CN" : "en";

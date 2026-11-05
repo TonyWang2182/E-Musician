@@ -9,7 +9,9 @@
 #include "NativeEffectsPanel.h"
 #include "DeviceChainStrip.h"
 #include "UiLanguage.h"
+#include "WorkflowPanels.h"
 #include "core/time/MusicalPosition.hpp"
+#include "core/time/EditGrid.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -25,17 +27,6 @@ const juce::Colour ink { 0xff171817 };
 const juce::Colour secondary { 0xff626560 };
 const juce::Colour rule { 0xffc6c9c3 };
 const juce::Colour paper { 0xfffefefd };
-juce::PopupMenu interfaceSettingsMenu(bool audioAvailable)
-{
-    juce::PopupMenu menu, languages;
-    menu.addItem(1, uiText("Audio and MIDI settings...", "音频与 MIDI 设置..."), audioAvailable);
-    languages.addItem(101, "English", true, uiLanguageCode() == "en");
-    languages.addItem(102, juce::String::fromUTF8("简体中文"), true, uiLanguageCode() == "zh-CN");
-    menu.addSeparator();
-    menu.addSubMenu(uiText("Language", "语言"), languages);
-    return menu;
-}
-
 juce::Font mono(float height, int style = juce::Font::plain)
 {
     return juce::Font(juce::FontOptions(juce::Font::getDefaultMonospacedFontName(), height, style));
@@ -195,20 +186,62 @@ public:
         setWantsKeyboardFocus(true);
         setTitle("Source waveform");
         setDescription("Click to seek. Left and right arrow keys seek five seconds; Home returns to the start.");
+        for (auto* control : std::initializer_list<juce::Component*>{ &warp, &sourceBpm, &targetBpm, &followTempo, &applyWarp, &analyzeBeats, &sourceLabel, &targetLabel }) addAndMakeVisible(control);
+        for (auto* editor : { &sourceBpm, &targetBpm }) {
+            editor->setFont(mono(14)); editor->setColour(juce::TextEditor::textColourId, ink); editor->setInputRestrictions(8, "0123456789."); editor->setSelectAllWhenFocused(true);
+            editor->onTextChange = [this] { draftDirty = true; };
+        }
+        sourceLabel.setFont(mono(11)); targetLabel.setFont(mono(11));
+        warp.setClickingTogglesState(true); followTempo.setClickingTogglesState(true);
+        warp.onClick = [this] { draftDirty = true; updateControls(); };
+        followTempo.onClick = [this] { draftDirty = true; updateControls(); };
+        applyWarp.onClick = [this] { submitWarp(); };
+        analyzeBeats.onClick = [this] { if (onAnalyzeBeats) onAnalyzeBeats(); };
+    }
+    std::function<void()> onAnalyzeBeats;
+    void resized() override {
+        const int x = 14, y = 52;
+        analyzeBeats.setBounds(getWidth() - 172, 10, 158, 28);
+        warp.setBounds(x, y, 84, 30); sourceLabel.setBounds(108, 32, 76, 18); sourceBpm.setBounds(108, y, 64, 30);
+        targetLabel.setBounds(188, 32, 90, 18); targetBpm.setBounds(188, y, 64, 30);
+        followTempo.setBounds(266, y, juce::jmax(116, getWidth() - 372), 30); applyWarp.setBounds(getWidth() - 94, y, 80, 30);
     }
     void invalidateSource() { provider.invalidateSources(); }
     void update(const EngineSession::Snapshot& next)
     {
         source = next.waveformSource; duration = next.sourceDuration;
         projectPosition = next.position; projectDuration = next.duration;
-        trackId = next.selectedClipId;
+        const bool different = trackId != next.selectedClipId || projectId != next.projectId;
+        if (projectId != next.projectId) pendingJob.clear();
+        trackId = next.selectedClipId; projectId = next.projectId; revision = next.revision; projectBpm = next.bpm;
         clipStart = sourceOffset = 0.0;
-        clipDuration = duration;
+        clipDuration = duration; hasSource = false;
         for (const auto& track : next.tracks) for (const auto& clip : track.clips)
-            if (clip.id == next.selectedClipId) { clipStart = clip.timelineStart; sourceOffset = clip.sourceOffset; clipDuration = clip.duration; }
-        position = sourceOffset + next.position - clipStart;
-        hasSource = next.sourceDuration > 0.0 && source != juce::File();
+            if (clip.id == next.selectedClipId && clip.kind == "audio") {
+                clipStart = clip.timelineStart; sourceOffset = clip.playbackSourceOffset; clipDuration = duration = clip.duration;
+                source = clip.source; hasSource = duration > 0.0 && clip.waveformSource != juce::File();
+                if (different || !draftDirty) {
+                    warp.setToggleState(clip.warpEnabled, juce::dontSendNotification); followTempo.setToggleState(clip.warpFollowTempo, juce::dontSendNotification);
+                    sourceBpm.setText(juce::String(clip.warpSourceBpm > 0 ? clip.warpSourceBpm : next.bpm, 2), false);
+                    targetBpm.setText(juce::String(clip.warpTargetBpm > 0 ? clip.warpTargetBpm : next.bpm, 2), false);
+                }
+            }
+        if (different) { draftDirty = false; error.clear(); }
+        if (pendingJob.isNotEmpty()) for (const auto& job : next.jobs) if (job.id == pendingJob) {
+            // Every non-running state is terminal, including revision conflicts
+            // and stale candidates. They must not leave the editor locked.
+            if (job.status != "queued" && job.status != "running") {
+                if (job.status == "completed" || job.status == "cancelled") error.clear();
+                else error = job.error.isNotEmpty() ? job.error : (job.status == "conflict" || job.status == "stale")
+                    ? uiText("The project changed while Warp was preparing. Review this clip and Apply again.", "准备 Warp 时工程已更改，请检查此片段并重新应用。")
+                    : uiText("Warp could not finish. Review this clip and try again.", "Warp 未完成，请检查此片段后重试。" );
+                pendingJob.clear(); draftDirty = false;
+            }
+        }
+        position = next.position - clipStart;
         sourceRate = next.sourceSampleRate; sourceChannels = next.channels;
+        locked = next.recording || next.recordingFinalizing || next.nativePending || pendingJob.isNotEmpty();
+        updateControls();
         repaint();
     }
     void paint(juce::Graphics& g) override
@@ -218,11 +251,12 @@ public:
         if (hasKeyboardFocus(true)) openCorners(g, bounds.reduced(4.0f), ink);
         if (! hasSource) {
             g.setColour(ink); g.setFont(mono(22.0f));
-            g.drawFittedText(dropActive ? "Drop audio here." : "Start with a sound.", getLocalBounds().reduced(24).withTrimmedBottom(getHeight() / 2 - 12), juce::Justification::centredBottom, 2);
+            g.drawFittedText(dropActive ? uiText("Drop audio here.", "拖入音频。") : uiText("Select an audio clip", "选择一个音频片段"), getLocalBounds().reduced(24).withTrimmedTop(76), juce::Justification::centred, 2);
             g.setColour(secondary); g.setFont(mono(14.0f));
-            g.drawFittedText("Drop WAV or MP3 files here,\nor choose add audio above.", 24, getHeight() / 2 + 15, getWidth() - 48, 52, juce::Justification::centredTop, 2);
             return;
         }
+        g.setColour(ink); g.setFont(mono(14));
+        g.drawFittedText(source.getFileName(), 14, 8, getWidth() - 196, 28, juce::Justification::centredLeft, 1);
         const auto area = waveArea();
         g.setColour(rule.withAlpha(0.7f));
         const auto channels = juce::jmax(1, sourceChannels);
@@ -232,12 +266,17 @@ public:
         }
         if (provider.trackWaveformReady(trackId)) {
             g.setColour(ink);
-            provider.drawTrackWaveform(g, area.toNearestInt(), trackId, 0.0, duration, 0.86f);
+            provider.drawTrackWaveform(g, area.toNearestInt(), trackId, sourceOffset, sourceOffset + duration, 0.86f);
         } else {
             g.setColour(secondary); g.setFont(mono(14.0f));
             g.drawText(provider.waveformStatus(trackId), area.toNearestInt(), juce::Justification::centred);
         }
         const auto axis = static_cast<float>(getHeight() - 34);
+        if (pendingJob.isNotEmpty() || error.isNotEmpty()) {
+            g.setColour(paper.withAlpha(0.94f)); g.fillRect(area);
+            g.setColour(ink); g.setFont(mono(12));
+            g.drawFittedText(error.isNotEmpty() ? error : uiText("Preparing warped audio...", "正在准备变速音频..."), area.toNearestInt().reduced(8), juce::Justification::centred, 3);
+        }
         g.setColour(rule);
         g.drawLine(area.getX(), axis, area.getRight(), axis, 1.0f);
         constexpr int intervals = 4;
@@ -262,10 +301,11 @@ public:
     }
     void mouseDown(const juce::MouseEvent& event) override
     {
+        if (event.mods.isPopupMenu() || !waveArea().contains(event.position)) return;
         if (isShowing()) grabKeyboardFocus();
         if (hasSource) {
             const auto sourceTime = duration * juce::jlimit(0.0, 1.0, static_cast<double>((event.position.x - waveArea().getX()) / waveArea().getWidth()));
-            engine.seek(juce::jlimit(clipStart, clipStart + clipDuration, clipStart + sourceTime - sourceOffset));
+            engine.seek(juce::jlimit(clipStart, clipStart + clipDuration, clipStart + sourceTime));
         }
     }
     void mouseDrag(const juce::MouseEvent& event) override { mouseDown(event); }
@@ -281,15 +321,73 @@ public:
     }
     void focusGained(FocusChangeType) override { repaint(); }
     void focusLost(FocusChangeType) override { repaint(); }
+    juce::Result runDraftSmoke(juce::DynamicObject& report) {
+        auto fixture = engine.snapshot(); const auto revisionBefore = fixture.revision;
+        fixture.projectId = "source-ui-fixture";
+        bool found = false;
+        for (auto& track : fixture.tracks) for (auto& clip : track.clips) if (!found && clip.kind == "audio") {
+            fixture.selectedClipId = clip.id; clip.warpEnabled = true; clip.warpSourceBpm = 100; clip.warpTargetBpm = 120;
+            clip.warpFollowTempo = true; found = true;
+        }
+        if (!found) return juce::Result::fail("Source UI smoke requires a real imported audio fixture.");
+        update(fixture);
+        if (!warp.getToggleState() || targetBpm.isEnabled() || !analyzeBeats.isEnabled()) return juce::Result::fail("Warp controls did not reflect the mapped clip or follow-tempo lock.");
+        sourceBpm.setText("0", false); draftDirty = true; submitWarp();
+        if (error.isEmpty() || pendingJob.isNotEmpty() || engine.snapshot().revision != revisionBefore) return juce::Result::fail("Invalid Warp BPM reached the engine or was not shown.");
+        for (const auto* terminal : { "conflict", "stale" }) {
+            EngineSession::JobSnapshot job; job.id = "warp-ui-terminal"; job.kind = "set_audio_warp"; job.status = terminal;
+            fixture.jobs = { job }; pendingJob = job.id; update(fixture);
+            if (pendingJob.isNotEmpty() || locked || error.isEmpty() || !warp.isEnabled())
+                return juce::Result::fail("A terminal Warp conflict left the Source controls locked or hid the error.");
+        }
+        update(engine.snapshot());
+        report.setProperty("source_warp_draft_validation_and_follow_target", true);
+        report.setProperty("source_warp_conflict_and_stale_unlock", true); return juce::Result::ok();
+    }
     double sourceRate = 0.0;
     int sourceChannels = 0;
     bool dropActive = false;
 private:
-    juce::Rectangle<float> waveArea() const { return getLocalBounds().toFloat().reduced(16.0f, 0.0f).withTrimmedTop(28.0f).withTrimmedBottom(47.0f); }
+    void updateControls() {
+        warp.setButtonText(warp.getToggleState() ? uiText("Warp on", "Warp 开") : uiText("Warp off", "Warp 关"));
+        sourceLabel.setText(uiText("Source BPM", "原始 BPM"), juce::dontSendNotification); targetLabel.setText(uiText("Target BPM", "目标 BPM"), juce::dontSendNotification);
+        followTempo.setButtonText(uiText("Follow tempo", "跟随工程速度")); analyzeBeats.setButtonText(uiText("Analyze beats", "分析节拍")); applyWarp.setButtonText(uiText("Apply", "应用"));
+        warp.setEnabled(hasSource && !locked); sourceBpm.setEnabled(hasSource && !locked && warp.getToggleState());
+        followTempo.setEnabled(hasSource && !locked && warp.getToggleState()); targetBpm.setEnabled(hasSource && !locked && warp.getToggleState() && !followTempo.getToggleState());
+        if (followTempo.getToggleState()) targetBpm.setText(juce::String(projectBpm, 2), false);
+        applyWarp.setEnabled(hasSource && !locked && draftDirty); analyzeBeats.setEnabled(hasSource && !locked);
+        sourceBpm.setTooltip(uiText("Tempo of the original recording (20–300 BPM). Analyze beats can estimate it.", "原录音的速度（20–300 BPM），可通过分析节拍估计。"));
+        followTempo.setTooltip(uiText("Keep this clip in time when the project tempo changes. Pitch is preserved.", "工程速度变化时同步调整此片段，并保持音高。"));
+    }
+    void submitWarp() {
+        const auto readTempo = [](const juce::String& text) { const auto value = text.trim(); char* end = nullptr; const auto result = std::strtod(value.toRawUTF8(), &end); return end != value.toRawUTF8() && *end == '\0' && std::isfinite(result) ? result : 0.0; };
+        const auto sourceTempo = warp.getToggleState() ? readTempo(sourceBpm.getText()) : projectBpm;
+        const auto targetTempo = warp.getToggleState() && !followTempo.getToggleState() ? readTempo(targetBpm.getText()) : projectBpm;
+        if (sourceTempo < 20 || sourceTempo > 300 || targetTempo < 20 || targetTempo > 300) {
+            error = uiText("Enter a tempo between 20 and 300 BPM.", "请输入 20 至 300 之间的 BPM。"); repaint(); return;
+        }
+        auto* args = new juce::DynamicObject; args->setProperty("clip_ids", juce::Array<juce::var>{ trackId });
+        args->setProperty("enabled", warp.getToggleState()); args->setProperty("source_bpm", sourceTempo); args->setProperty("target_bpm", targetTempo);
+        args->setProperty("follow_tempo", followTempo.getToggleState()); args->setProperty("mode", "preserve_pitch");
+        auto* request = new juce::DynamicObject; request->setProperty("command", "set_audio_warp"); request->setProperty("args", juce::var(args)); request->setProperty("expected_revision", juce::int64(revision));
+        request->setProperty("project_id", projectId); request->setProperty("request_id", juce::Uuid().toString());
+        const auto response = engine.executeRequest(juce::var(request));
+        if (response["status"].toString() == "accepted") { pendingJob = response["job_id"].toString(); if (pendingJob.isEmpty()) pendingJob = response["result"]["job_id"].toString(); error = pendingJob.isEmpty() ? uiText("The Warp task could not be tracked. Refresh the selected clip.", "无法跟踪 Warp 任务，请重新选择片段。") : juce::String(); }
+        else if (response["status"].toString() == "completed") { error.clear(); draftDirty = false; }
+        else error = response["error"].toString();
+        locked = pendingJob.isNotEmpty(); updateControls(); repaint();
+    }
+    juce::Rectangle<float> waveArea() const { return getLocalBounds().toFloat().reduced(16.0f, 0.0f).withTrimmedTop(102.0f).withTrimmedBottom(47.0f); }
     EngineSession& engine;
     ArrangementView& provider;
     juce::File source;
-    juce::String trackId;
+    juce::String trackId, projectId, pendingJob, error;
+    juce::TextButton warp, followTempo, applyWarp, analyzeBeats;
+    juce::TextEditor sourceBpm, targetBpm;
+    juce::Label sourceLabel, targetLabel;
+    std::uint64_t revision = 0;
+    double projectBpm = 120.0;
+    bool draftDirty = false, locked = false;
     double duration = 0.0, position = 0.0;
     double projectPosition = 0.0, projectDuration = 0.0, clipStart = 0.0, sourceOffset = 0.0, clipDuration = 0.0;
     bool hasSource = false;
@@ -816,6 +914,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         };
         compose.onClick = [this] { composeActive = true; dock = Dock::closed; owner.resized(); owner.refreshSnapshot(); owner.repaint(); };
         separate.onClick = [this] { dock = dock == Dock::source ? Dock::closed : Dock::source; owner.resized(); owner.refreshSnapshot(); owner.repaint(); };
+        waveform.onAnalyzeBeats = [&component] { component.showAnalysisDock(); if (component.impl->dockAnalysis) component.impl->dockAnalysis->showBeats(); };
         closeEditor.onClick = [this] { pianoExpanded = false; dock = Dock::closed; owner.resized(); owner.repaint(); };
         closeEditor.setTooltip("Close the lower editor. Double-click a MIDI clip to reopen it.");
         expandEditor.onClick = [this] {
@@ -828,6 +927,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         details.onClick = [this] { inspectorVisible = !inspectorVisible; owner.resized(); owner.repaint(); };
         details.setTooltip("Show or hide selected track and clip controls.");
         arrangement.onUserStateChange = [&component] { component.refreshSnapshot(); component.synchronizeAgentSelection(); };
+        arrangement.onContextMenu = [&component](const auto& kind, const auto& id, double at) { component.showArrangementMenu(kind, id, at); };
         arrangement.onFocus = [&component] { if(component.impl){component.impl->musicFocus="arrangement";if(component.impl->agentSidebar)component.impl->agentSidebar->clearKeyboardFocusHint();component.synchronizeAgentSelection();} };
         arrangement.onTrackFocus = [&component](const juce::String&) { if(component.impl){component.impl->musicFocus="track";component.synchronizeAgentSelection();} };
         agentButton.setTooltip("Show or hide the music assistant (Ctrl+Shift+A). Closing the panel preserves its task.");
@@ -891,7 +991,8 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         snap.setClickingTogglesState(true);snap.setToggleState(true,juce::dontSendNotification);
         snap.onClick=[this]{arrangement.setSnapEnabled(snap.getToggleState());};
         snap.setTooltip("Snap: solid grid when on, dashed when off. Ctrl+4 toggles; Alt temporarily bypasses. Applies to this editor.");
-        follow.setClickingTogglesState(true);follow.onClick=[this]{arrangement.setFollowPlayhead(follow.getToggleState());};
+        follow.setClickingTogglesState(true); follow.setToggleState(loadFollowPlayheadPreference(), juce::dontSendNotification);
+        follow.onClick=[this]{owner.setFollowPlayhead(follow.getToggleState());};
         follow.setTooltip("Follow playback. Manual scrolling or editing pauses following until playback restarts.");
         metronome.onClick=[this]{owner.execute("set_recording_preferences",arguments({{"metronome_enabled",!state.metronomeEnabled}}));};
         metronome.setTooltip("Metronome on/off. Its sound is for monitoring and is excluded from export.");
@@ -1048,6 +1149,8 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         chooser.reset();
         trackList.setModel(nullptr);
         if (audioDialog != nullptr) delete audioDialog.getComponent();
+        if (settingsDialog != nullptr) delete settingsDialog.getComponent();
+        if (saveDialog != nullptr) delete saveDialog.getComponent();
         if (pluginDialog != nullptr) delete pluginDialog.getComponent();
         dockNative.reset();
         dockEffect.reset();
@@ -1184,6 +1287,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     TransportButton record { "rec", TransportButton::record };
     std::unique_ptr<juce::FileChooser> chooser;
     juce::Component::SafePointer<juce::DialogWindow> audioDialog;
+    juce::Component::SafePointer<juce::DialogWindow> settingsDialog, saveDialog;
     juce::Component::SafePointer<juce::DialogWindow> pluginDialog, pianoDialog;
     juce::Component::SafePointer<PianoRoll> pianoRoll;
     std::unique_ptr<PianoRoll> dockPiano;
@@ -1227,7 +1331,7 @@ MainComponent::MainComponent(EngineSession& engine) : session(engine), impl(std:
     refreshSnapshot();
     // Combo defaults use dontSendNotification while Impl is constructed.
     // Apply them only after impl exists, so a fresh view matches its toolbar.
-    impl->rulerMode.onChange();impl->gridMode.onChange();impl->snap.onClick();impl->follow.onClick();
+    impl->rulerMode.onChange();impl->gridMode.onChange();impl->snap.onClick();setFollowPlayhead(impl->follow.getToggleState(), false);
     startTimerHz(30);
 }
 MainComponent::~MainComponent() { stopTimer(); }
@@ -1413,14 +1517,14 @@ void MainComponent::resized()
 {
     auto& p = *impl;
     constexpr int margin = 16;
-    p.compactAnalysisFooter = p.dock == Impl::Dock::analysis && getHeight() < 720;
+    p.compactAnalysisFooter = (p.dock == Impl::Dock::analysis || p.dock == Impl::Dock::source) && getHeight() < 720;
     p.footerY = getHeight() - (p.compactAnalysisFooter ? 86 : 110);
     if (p.dock != Impl::Dock::midi) p.pianoExpanded = false;
     const bool expanded = p.dock == Impl::Dock::midi && p.pianoExpanded;
     const bool showSidebar = p.agentVisible && !expanded;
     const int sidebarWidth=showSidebar?juce::jlimit(340,520,getWidth()/3):0;
     const int workspaceRight=getWidth()-margin-(showSidebar?sidebarWidth+8:0);
-    p.inspectorDisplayed=p.inspectorVisible&&!p.agentVisible&&!expanded&&p.dock!=Impl::Dock::native&&p.dock!=Impl::Dock::effect&&p.dock!=Impl::Dock::analysis;
+    p.inspectorDisplayed=p.inspectorVisible&&!p.agentVisible&&!expanded&&p.dock!=Impl::Dock::native&&p.dock!=Impl::Dock::effect&&p.dock!=Impl::Dock::analysis&&p.dock!=Impl::Dock::source;
     const int inspectorWidth = p.inspectorDisplayed ? 226 : 0;
     if(p.agentSidebar){p.agentSidebar->setBounds(workspaceRight+8,110,sidebarWidth,p.footerY-122);p.agentSidebar->setPanelVisible(showSidebar);}
     p.agentButton.setBounds(getWidth()-margin-208,75,80,30);
@@ -1442,7 +1546,7 @@ void MainComponent::resized()
     }
     p.undoButton.setBounds(x + 8, 75, 60, 30); p.redoButton.setBounds(x + 72, 75, 60, 30);
     p.rulerMode.setBounds(margin,113,102,28);p.snap.setBounds(126,113,66,28);
-    p.gridMode.setBounds(200,113,128,28);p.follow.setBounds(336,113,76,28);
+    p.gridMode.setBounds(200,113,128,28);p.follow.setBounds(336,113,194,28);
     for (juce::Component* c : std::initializer_list<juce::Component*>{ &p.rulerMode, &p.snap, &p.gridMode, &p.follow }) c->setVisible(!expanded);
     p.zoomOut.setBounds(getWidth() - margin - 120, 75, 32, 30);
     p.zoomIn.setBounds(getWidth() - margin - 84, 75, 32, 30);
@@ -1452,6 +1556,7 @@ void MainComponent::resized()
     const int minimumArrangement = 54 + (chordLaneVisible ? 56 : 0) + 64 + 16;
     const int dockHeight = expanded ? p.workspace.getHeight() : p.dock == Impl::Dock::closed ? 0
         : p.dock == Impl::Dock::analysis ? juce::jlimit(210, 330, p.workspace.getHeight() - minimumArrangement - 6)
+        : p.dock == Impl::Dock::source ? juce::jlimit(210, 360, p.workspace.getHeight() - minimumArrangement - 6)
         : visualDevice ? juce::jlimit(248, 364, p.workspace.getHeight() - 204)
         : p.dock == Impl::Dock::track ? juce::jlimit(278, 390, p.workspace.getHeight() - 204)
         : juce::jlimit(180, 340, p.workspace.getHeight() - 204);
@@ -1469,7 +1574,7 @@ void MainComponent::resized()
     p.expandEditor.setButtonText(uiText(expanded ? "return to arrangement" : "expand"));
     p.expandEditor.setBounds(p.dockBounds.getRight() - 278, p.dockBounds.getY(), 160, 26);
     p.waveform.setVisible(p.dock == Impl::Dock::source);
-    p.waveform.setBounds(p.dockBounds.reduced(0, 30));
+    p.waveform.setBounds(p.dockBounds.withTrimmedTop(28));
     if (p.pianoRoll) { p.pianoRoll->setVisible(p.dock == Impl::Dock::midi); p.pianoRoll->setBounds(p.dockBounds.withTrimmedTop(24)); }
     const bool chainVisible=p.dock==Impl::Dock::track || p.dock==Impl::Dock::native || p.dock==Impl::Dock::effect;
     p.deviceChain.setVisible(chainVisible);
@@ -1486,7 +1591,7 @@ void MainComponent::resized()
     p.separate.setToggleState(p.dock == Impl::Dock::source, juce::dontSendNotification);
     p.analyze.setToggleState(p.dock == Impl::Dock::analysis, juce::dontSendNotification);
     p.details.setToggleState(p.inspectorDisplayed, juce::dontSendNotification);
-    p.details.setEnabled(!p.agentVisible&&p.dock!=Impl::Dock::native&&p.dock!=Impl::Dock::effect&&p.dock!=Impl::Dock::analysis);
+    p.details.setEnabled(!p.agentVisible&&p.dock!=Impl::Dock::native&&p.dock!=Impl::Dock::effect&&p.dock!=Impl::Dock::analysis&&p.dock!=Impl::Dock::source);
     const int ix = p.inspector.getX(), iw = p.inspector.getWidth();
     p.clipStart.setBounds(ix + 54, 206, iw - 104, 28); p.setClipStart.setBounds(ix + iw - 46, 206, 46, 28);
     p.clipProperties.setBounds(ix, 242, iw, 28);
@@ -1520,7 +1625,11 @@ void MainComponent::paint(juce::Graphics& g)
     if (!p.pianoExpanded) {
         g.drawHorizontalLine(142,16.0f,float(getWidth()-16));
         g.setColour(secondary);g.setFont(mono(11));
-        g.drawFittedText(uiText("drag empty: select clips   Shift-drag ruler: time   Ctrl+L: loop", "空白处拖动：框选   Shift 拖动标尺：选时间   Ctrl+L：循环"),426,115,getWidth()-442,24,juce::Justification::centredLeft,1);
+        const int hintX = p.follow.getRight() + 12;
+        const int hintRight = p.agentVisible && p.agentSidebar ? p.agentSidebar->getX() - 8 : getWidth() - 16;
+        const int hintWidth = hintRight - hintX;
+        if (hintWidth >= 420)
+            g.drawFittedText(uiText("drag empty: select clips   Shift-drag ruler: time   Ctrl+L: loop", "空白处拖动：框选   Shift 拖动标尺：选时间   Ctrl+L：循环"),hintX,115,hintWidth,24,juce::Justification::centredLeft,1);
     }
     if (p.inspectorDisplayed) {
         const int ix = p.inspector.getX(), iw = p.inspector.getWidth();
@@ -1589,14 +1698,20 @@ void MainComponent::refreshSnapshot()
     p.trackPanel.update(p.state);
     if(p.dock==Impl::Dock::track || p.dock==Impl::Dock::native || p.dock==Impl::Dock::effect) p.updateDeviceChain();
     p.waveform.update(p.state);
+    const bool followPaused = p.arrangement.isFollowSuspended();
+    p.follow.setButtonText(p.follow.getToggleState() ? (followPaused ? uiText("Follow: paused", "跟随：已暂停") : uiText("Follow: on", "跟随：开启")) : uiText("Follow: off", "跟随：关闭"));
+    p.follow.setTooltip(followPaused ? uiText("Manual navigation paused following. Turn Follow off/on or restart playback to resume.", "手动浏览已暂停跟随。重新开关跟随或重新开始播放即可恢复。")
+                                   : uiText("Scroll the arrangement with the playhead. Manual scrolling pauses following until playback restarts.", "编曲视图随播放头滚动。手动滚动后暂停跟随，重新播放后恢复。"));
     p.filename.setText(p.composeActive ? "arrangement~" : p.selectedClipName(), juce::dontSendNotification);
     p.filename.setTooltip(p.composeActive ? "Audio and MIDI clips on the project timeline." : p.state.source.getFullPathName());
     const bool playable = p.state.duration > 0.0 || p.state.metronomeEnabled;
     const bool recordingBusy = p.state.recording || p.state.recordingFinalizing;
-    const bool busy = p.chooser != nullptr || p.confirming || bool(p.pendingAfterSave) || p.saveContinuationPending || recordingBusy;
+    if (p.settingsDialog) if (auto* panel = dynamic_cast<WorkspaceSettingsPanel*>(p.settingsDialog->getContentComponent()))
+        panel->update(p.state.deviceName, p.state.sampleRate, p.state.bufferSize, p.follow.getToggleState(), recordingBusy);
+    const bool busy = p.chooser != nullptr || p.saveDialog != nullptr || p.confirming || bool(p.pendingAfterSave) || p.saveContinuationPending || recordingBusy;
     p.play.setEnabled(playable && p.state.deviceAvailable && !recordingBusy);
     p.stop.setEnabled(playable || recordingBusy);
-    p.record.setEnabled(p.state.deviceAvailable && !p.state.recordingFinalizing && p.audioDialog == nullptr && p.chooser == nullptr && !p.confirming && p.pendingSaveJob.isEmpty() && !p.savePreparing && !p.saveContinuationPending);
+    p.record.setEnabled(p.state.deviceAvailable && !p.state.recordingFinalizing && p.audioDialog == nullptr && p.chooser == nullptr && p.saveDialog == nullptr && !p.confirming && p.pendingSaveJob.isEmpty() && !p.savePreparing && !p.saveContinuationPending);
     p.record.setToggleState(p.state.recording, juce::dontSendNotification);
     p.metronome.setToggleState(p.state.metronomeEnabled,juce::dontSendNotification);
     p.countIn.setToggleState(p.state.countInEnabled,juce::dontSendNotification);
@@ -1670,7 +1785,7 @@ void MainComponent::refreshSnapshot()
     p.saveButton.setButtonText(uiText(saving ? "saving..." : "save"));
     p.saveStatus.setText(uiText(saving ? "Saving..." : p.saveError.isNotEmpty() ? "Save failed - retry"
         : p.state.dirty ? "Unsaved changes" : p.state.projectFile != juce::File() ? "Saved" : "New project"), juce::dontSendNotification);
-    p.saveStatus.setTooltip(p.saveError.isNotEmpty() ? p.saveError : p.saveFeedback);
+    p.saveStatus.setTooltip(p.saveError.isNotEmpty() ? p.saveError : p.state.projectFile != juce::File() ? p.state.projectFile.getFullPathName() + "\n" + p.saveFeedback : uiText("Save to choose a project name and folder.", "点击保存以选择工程名称与文件夹。"));
     p.undoButton.setEnabled(!busy && p.state.canUndo);
     p.redoButton.setEnabled(!busy && p.state.canRedo);
     p.undoButton.setTooltip(p.state.canUndo ? "Undo " + p.state.undoDescription + " (Ctrl+Z)" : "Nothing to undo");
@@ -1798,23 +1913,27 @@ juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDire
         return juce::PNGImageFormat().writeImageToStream(image, png)
             && outputDirectory.getChildFile(name).replaceWithData(png.getData(), png.getDataSize());
     };
+    const auto capturePanel = [&outputDirectory](juce::Component& panel, const juce::String& name) {
+        juce::MemoryOutputStream png;
+        return juce::PNGImageFormat().writeImageToStream(panel.createComponentSnapshot(panel.getLocalBounds(), true), png)
+            && outputDirectory.getChildFile(name).replaceWithData(png.getData(), png.getDataSize());
+    };
     if (!p.composeActive || !p.arrangement.isVisible() || p.waveform.isVisible())
         result = juce::Result::fail("Compose is not the default visible arrangement page.");
     if (result.wasOk()) {
         const auto preference = ui_language_detail::preferenceFile();
         const bool preferenceExisted = preference.existsAsFile();
         const auto preferenceBefore = preference.loadFileAsString();
+        const auto followPreferenceBefore = followPreferenceFile().loadFileAsString();
+        const bool followPreferenceExisted = followPreferenceFile().existsAsFile();
         const auto stateBefore = session.snapshot();
-        const auto menu = interfaceSettingsMenu(false);
-        bool audioDisabled = false, englishPresent = false, chinesePresent = false;
-        for (juce::PopupMenu::MenuItemIterator it(menu, true); it.next();) {
-            const auto& item = it.getItem();
-            if (item.itemID == 1) audioDisabled = !item.isEnabled;
-            if (item.itemID == 101) englishPresent = item.isEnabled;
-            if (item.itemID == 102) chinesePresent = item.isEnabled;
-        }
-        if (!audioDisabled || !englishPresent || !chinesePresent)
-            result = juce::Result::fail("Settings must retain language choices while audio reconfiguration is unavailable.");
+        WorkspaceSettingsPanel settingsFixture;
+        settingsFixture.update("Fixture ASIO", 48000, 256, false, true);
+        if (settingsFixture.audioAvailableForTest()) result = juce::Result::fail("Settings exposed audio reconfiguration while recording.");
+        int followChanges = 0;
+        settingsFixture.onFollow = [&](bool value) { if (value) ++followChanges; };
+        settingsFixture.selectPage(1); settingsFixture.toggleFollowForTest();
+        if (followChanges != 1) result = juce::Result::fail("Settings did not expose a distinct follow-playhead preference.");
         const auto originalDock = p.dock;
         const int rulerId = p.rulerMode.getSelectedId(), gridId = p.gridMode.getSelectedId(), countInId = p.countInBars.getSelectedId();
         showAnalysisDock();
@@ -1852,6 +1971,24 @@ juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDire
                                                        : "ui-analysis-workspace-zh-1000x650-synthetic-chords.png")) {
                 result = juce::Result::fail("Could not capture the localized analysis workspace."); break;
             }
+            const auto suffix = juce::String(language) + ".png";
+            settingsFixture.setLookAndFeel(&p.look); settingsFixture.setSize(640, 360);
+            settingsFixture.update("Fixture ASIO", 48000, 256, false, false);
+            for (int page = 0; page < 3; ++page) {
+                settingsFixture.selectPage(page);
+                if (!capturePanel(settingsFixture, "ui-settings-" + juce::String(page) + "-" + suffix)) result = juce::Result::fail("Could not capture Settings pages.");
+            }
+            ProjectSavePanel saveFixture(outputDirectory.getChildFile("Morning study.emproj"), uiText("Unsaved changes"));
+            saveFixture.setLookAndFeel(&p.look); juce::File submitted;
+            saveFixture.onSave = [&](const juce::File& file) { submitted = file; }; saveFixture.submitForTest();
+            if (submitted != outputDirectory.getChildFile("Morning study.emproj") || !capturePanel(saveFixture, "ui-save-project-" + suffix))
+                result = juce::Result::fail("Save sheet lost the exact name/folder or could not be captured.");
+            p.dock = Impl::Dock::source; resized(); p.waveform.update(p.state);
+            if (p.waveform.getWidth() < 580 || p.waveform.getHeight() < 175 || p.arrangement.getHeight() < 180)
+                result = juce::Result::fail("Source controls or chord track do not fit the minimum window.");
+            if (!capture(juce::String(language) == "en" ? "ui-source-warp-en-1000x650.png" : "ui-source-warp-zh-1000x650.png"))
+                result = juce::Result::fail("Could not capture Source and Warp.");
+            p.dock = Impl::Dock::analysis; resized();
             p.state = session.snapshot(); p.arrangement.update(p.state);
         }
         setInterfaceLanguage("en", false); p.dock = originalDock; setSize(1280, 800); resized(); refreshSnapshot();
@@ -1859,10 +1996,13 @@ juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDire
         if (result.wasOk() && (stateAfter.projectId != stateBefore.projectId || stateAfter.revision != stateBefore.revision
             || stateAfter.playing != stateBefore.playing || stateAfter.deviceName != stateBefore.deviceName
             || stateAfter.bufferSize != stateBefore.bufferSize || stateAfter.sampleRate != stateBefore.sampleRate
-            || preference.existsAsFile() != preferenceExisted || preference.loadFileAsString() != preferenceBefore))
+            || preference.existsAsFile() != preferenceExisted || preference.loadFileAsString() != preferenceBefore
+            || followPreferenceFile().existsAsFile() != followPreferenceExisted || followPreferenceFile().loadFileAsString() != followPreferenceBefore))
             result = juce::Result::fail("Interface language modified project/audio state or the isolated test changed the saved preference.");
         report->setProperty("settings_language_menu_without_audio_reconfiguration", result.wasOk());
         report->setProperty("language_switch_preserves_project_audio_and_persistent_preference", result.wasOk());
+        report->setProperty("settings_pages_and_save_destination_bilingual_minimum_layout", result.wasOk());
+        if (result.wasOk()) result = p.waveform.runDraftSmoke(*report);
         report->setProperty("language_switch_refreshes_selected_combo_labels", result.wasOk());
         report->setProperty("analysis_minimum_layout_keeps_chord_and_compact_track_synthetic", result.wasOk());
     }
@@ -2368,6 +2508,94 @@ void MainComponent::showAddMenu()
         }
     });
 }
+void MainComponent::setFollowPlayhead(bool enabled, bool persist)
+{
+    if (persist) { const auto result = saveFollowPlayheadPreference(enabled); if (result.failed()) { impl->follow.setToggleState(impl->arrangement.isFollowEnabled(), juce::dontSendNotification); showResult(result); return; } }
+    impl->follow.setToggleState(enabled, juce::dontSendNotification);
+    impl->arrangement.setFollowPlayhead(enabled);
+    refreshSnapshot();
+}
+void MainComponent::showArrangementMenu(const juce::String& kind, const juce::String& id, double at)
+{
+    const auto state = session.snapshot();
+    const bool editable = !state.recording && !state.recordingFinalizing && !state.nativePending;
+    const EngineSession::TrackSnapshot* track = nullptr;
+    const EngineSession::ClipSnapshot* clip = nullptr;
+    for (const auto& t : state.tracks) {
+        if (t.id == id) track = &t;
+        for (const auto& c : t.clips) if (c.id == id) { clip = &c; track = &t; }
+    }
+    const auto clipboard = session.executeRequest(arguments({ { "command", "get_clipboard_state" }, { "args", arguments({}) } }))["result"];
+    const bool canPaste = editable && int(clipboard["clip_count"]) > 0 && clipboard["project_id"].toString() == state.projectId && track;
+    juce::PopupMenu menu;
+    if (kind == "track" && track) {
+        menu.addSectionHeader(track->name);
+        if (editable) menu.addItem(1, uiText("Rename track...", "重命名轨道...") + "\tF2");
+        menu.addItem(2, uiText("Mute", "静音"), editable, track->muted);
+        menu.addItem(3, uiText("Solo", "独奏"), editable, track->solo);
+        if (track->kind != "bus") menu.addItem(4, uiText("Arm recording", "准备录音"), editable, track->armed);
+        menu.addItem(5, uiText("Devices and I/O", "装置与输入输出"));
+        if (editable) { menu.addSeparator(); menu.addItem(6, uiText("Delete track", "删除轨道")); }
+    } else if (kind == "clip" && clip) {
+        menu.addSectionHeader(clip->kind == "midi" ? track->name + " / MIDI" : clip->source.getFileName());
+        if (editable) {
+            menu.addItem(11, uiText("Cut", "剪切") + "\tCtrl+X"); menu.addItem(12, uiText("Copy", "复制") + "\tCtrl+C");
+            if (canPaste) menu.addItem(13, uiText("Paste at clicked position", "在点击位置粘贴"));
+            menu.addItem(14, uiText("Duplicate", "重复") + "\tCtrl+D");
+            if (at > clip->timelineStart + time::minimumEditSpanSeconds && at < clip->timelineStart + clip->duration - time::minimumEditSpanSeconds)
+                menu.addItem(15, uiText("Split here", "在此切分"));
+            menu.addItem(16, uiText("Delete clips", "删除片段") + "\tDelete"); menu.addSeparator();
+            menu.addItem(17, uiText("Loop selection", "循环选区") + "\tCtrl+L");
+            menu.addItem(18, uiText("Clip properties...", "片段属性..."));
+        }
+        if (clip->kind == "midi") menu.addItem(19, uiText("Edit MIDI notes", "编辑 MIDI 音符"));
+        else { menu.addItem(20, uiText("Source and Warp", "音源与 Warp")); menu.addItem(21, uiText("Analyze audio", "分析音频")); }
+    } else if (kind == "ruler") {
+        menu.addItem(31, uiText("Follow playhead", "跟随播放头"), true, impl->follow.getToggleState());
+        if (impl->arrangement.isFollowSuspended()) menu.addItem(32, uiText("Resume following", "恢复跟随"));
+        menu.addSeparator(); menu.addItem(33, uiText("Snap to grid", "吸附到网格") + "\tCtrl+4", true, impl->snap.getToggleState());
+        menu.addItem(34, uiText("Bars", "小节"), true, impl->rulerMode.getSelectedId() == 1);
+        menu.addItem(35, uiText("Seconds", "时间"), true, impl->rulerMode.getSelectedId() == 2);
+        menu.addItem(36, uiText("Bars and seconds", "小节与时间"), true, impl->rulerMode.getSelectedId() == 3);
+        if (editable && !impl->arrangement.selectedTimeRange().isEmpty()) menu.addItem(17, uiText("Loop selection", "循环选区"));
+    } else if (editable) {
+        menu.addItem(41, uiText("New audio track", "新建音频轨道")); menu.addItem(42, uiText("New MIDI track", "新建 MIDI 轨道"));
+        menu.addItem(43, uiText("Import audio...", "导入音频...")); menu.addItem(44, uiText("Import MIDI...", "导入 MIDI..."));
+        if (canPaste) { menu.addSeparator(); menu.addItem(13, uiText("Paste at clicked position", "在点击位置粘贴")); }
+        if (track && track->kind == "instrument") menu.addItem(45, uiText("New 4-bar MIDI clip here", "在此新建 4 小节 MIDI 片段"));
+    }
+    if (menu.getNumItems() == 0) return;
+    const auto trackId = track ? track->id : juce::String();
+    const bool muted = track && track->muted, solo = track && track->solo, armed = track && track->armed;
+    const auto selected = impl->arrangement.selectedClipIds();
+    menu.showMenuAsync(juce::PopupMenu::Options().withMousePosition(),
+        [safe = juce::Component::SafePointer<MainComponent>(this), state, id, trackId, selected, at, muted, solo, armed](int action) {
+            if (!safe || action == 0 || safe->session.snapshot().projectId != state.projectId) return;
+            const auto run = [&](const char* cmd, const juce::var& args) { safe->showResult(safe->session.execute(cmd, args, state.revision)); };
+            auto& p = *safe->impl;
+            if (action == 1) safe->renameTrack(trackId);
+            if (action == 2) run("set_track_muted", arguments({ { "track_id", trackId }, { "muted", !muted } }));
+            if (action == 3) run("set_track_solo", arguments({ { "track_id", trackId }, { "solo", !solo } }));
+            if (action == 4) run("set_track_armed", arguments({ { "track_id", trackId }, { "armed", !armed } }));
+            if (action == 5) { safe->session.selectTrack(trackId); p.dock = Impl::Dock::track; safe->resized(); safe->refreshSnapshot(); }
+            if (action == 6) run("remove_track", arguments({ { "track_id", trackId } }));
+            if (action == 11 || action == 12 || action == 14 || action == 16)
+                run(action == 11 ? "cut_clips" : action == 12 ? "copy_clips" : action == 14 ? "duplicate_clips" : "delete_clips", arguments({ { "clip_ids", idsValue(selected) } }));
+            if (action == 13) run("paste_clips", arguments({ { "target_track_id", trackId }, { "start_seconds", at } }));
+            if (action == 15) run("split_clip", arguments({ { "clip_id", id }, { "at_seconds", at } }));
+            if (action == 17) safe->showResult(p.arrangement.loopSelection());
+            if (action == 18) safe->showClipProperties();
+            if (action == 19) safe->showPianoRoll();
+            if (action == 20) { p.dock = Impl::Dock::source; safe->resized(); safe->refreshSnapshot(); }
+            if (action == 21) safe->showAnalysisDock();
+            if (action == 31 || action == 32) safe->setFollowPlayhead(action == 32 || !p.follow.getToggleState());
+            if (action == 33) { p.snap.setToggleState(!p.snap.getToggleState(), juce::dontSendNotification); p.snap.onClick(); }
+            if (action >= 34 && action <= 36) { p.rulerMode.setSelectedId(action - 33, juce::dontSendNotification); p.rulerMode.onChange(); }
+            if (action == 41 || action == 42) run("create_track", arguments({ { "kind", action == 42 ? "instrument" : "audio" }, { "name", action == 42 ? "MIDI track" : "Audio track" } }));
+            if (action == 43) safe->chooseSource(); if (action == 44) safe->chooseMidi();
+            if (action == 45) { run("create_midi_clip", arguments({ { "track_id", trackId }, { "start_beats", at * state.bpm / 60.0 }, { "length_beats", 4.0 * state.numerator * 4.0 / state.denominator } })); safe->showPianoRoll(); }
+        });
+}
 void MainComponent::showEditMenu()
 {
     const auto* clip = impl->selectedClip(); const auto* track = impl->selectedTrack();
@@ -2686,6 +2914,7 @@ void MainComponent::importSources(const juce::Array<juce::File>& files, std::uin
 }
 void MainComponent::withUnsavedGuard(std::function<void()> proceed)
 {
+    if (impl->saveDialog) { impl->saveDialog->toFront(true); return; }
     const auto recordingState = session.snapshot();
     if (blockNativeTransition(recordingState, [this](const auto& message) { showResult(juce::Result::fail(message)); })) return;
     if (recordingState.recording || recordingState.recordingFinalizing) { showResult(juce::Result::fail("Stop recording and wait for the take to finish before changing projects.")); return; }
@@ -2764,6 +2993,7 @@ void MainComponent::chooseProject()
 }
 void MainComponent::saveProject(bool saveAs, std::function<void()> onSaved)
 {
+    if (impl->saveDialog) { impl->saveDialog->toFront(true); return; }
     if (blockNativeTransition(session.snapshot(), [this](const auto& message) { showResult(juce::Result::fail(message)); })) return;
     if (impl->state.recording || impl->state.recordingFinalizing) { showResult(juce::Result::fail("Stop recording and wait for the take to finish before saving.")); return; }
     if (impl->savePreparing || impl->pendingSaveJob.isNotEmpty()) {
@@ -2781,27 +3011,31 @@ void MainComponent::saveProject(bool saveAs, std::function<void()> onSaved)
     }
     const auto initial = state.projectFile == juce::File()
         ? juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getChildFile("Untitled.emproj") : state.projectFile;
-    impl->chooser = std::make_unique<juce::FileChooser>("Save E-musician project", initial, "*.emproj", true);
-    refreshSnapshot();
-    impl->chooser->launchAsync(juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles
-                              | juce::FileBrowserComponent::warnAboutOverwriting,
-        [safe = juce::Component::SafePointer<MainComponent>(this), projectId = state.projectId,
-         onSaved = std::move(onSaved)](const juce::FileChooser& chooser) mutable {
-            const auto selectedFile = chooser.getResult();
-            juce::MessageManager::callAsync([safe, selectedFile, projectId, onSaved = std::move(onSaved)]() mutable {
-                if (safe == nullptr) return;
-                safe->impl->chooser.reset();
-                if (selectedFile == juce::File()) { safe->refreshSnapshot(); return; }
-                const auto target = selectedFile.hasFileExtension("emproj") ? selectedFile : selectedFile.withFileExtension(".emproj");
-                // Native overwrite confirmation applies to the chosen name, not a changed extension.
-                if (target != selectedFile && target.existsAsFile()) {
-                    safe->impl->error = "That .emproj file already exists. Choose its exact name to confirm replacement.";
-                    safe->refreshSnapshot();
-                    return;
-                }
-                safe->beginSave(target, projectId, std::move(onSaved));
+    auto panel = std::make_unique<ProjectSavePanel>(initial, impl->saveStatus.getText());
+    panel->setLookAndFeel(&impl->look);
+    panel->onCancel = [safe = juce::Component::SafePointer<MainComponent>(this)] {
+        juce::MessageManager::callAsync([safe] { if (safe && safe->impl->saveDialog) delete safe->impl->saveDialog.getComponent(); });
+    };
+    panel->onSave = [safe = juce::Component::SafePointer<MainComponent>(this), projectId = state.projectId, onSaved = std::move(onSaved)](const juce::File& target) {
+        if (!safe || safe->impl->confirming) return;
+        const auto submit = [safe, projectId, target, onSaved] {
+            juce::MessageManager::callAsync([safe, projectId, target, onSaved] {
+                if (!safe) return;
+                if (safe->impl->saveDialog) delete safe->impl->saveDialog.getComponent();
+                safe->beginSave(target, projectId, onSaved);
             });
-        });
+        };
+        if (!target.existsAsFile()) { submit(); return; }
+        safe->impl->confirming = true;
+        juce::AlertWindow::showAsync(juce::MessageBoxOptions().withIconType(juce::MessageBoxIconType::QuestionIcon)
+            .withTitle(uiText("Replace saved project?", "替换已有工程？"))
+            .withMessage(target.getFullPathName()).withButton(uiText("Replace", "替换")).withButton(uiText("Cancel", "取消"))
+            .withAssociatedComponent(safe->impl->saveDialog), [safe, submit](int choice) {
+                if (!safe) return; safe->impl->confirming = false; if (choice == 1) submit();
+            });
+    };
+    impl->saveDialog = new ToolWindow(uiText("Save project", "保存工程"), panel.release(), this);
+    impl->saveDialog->setResizable(false, false);
 }
 void MainComponent::beginSave(const juce::File& target, const juce::String& projectId, std::function<void()> onSaved, bool allowFollowup)
 {
@@ -2892,6 +3126,8 @@ void MainComponent::refreshInterfaceLanguage()
     p.analyze.setTooltip(uiText("Local audio analysis: four or six stems, pitched audio to MIDI, and chord labels. No Agent or API key required.",
                                "本地音频分析：四轨或六轨分离、音频转 MIDI、和弦识别。无需 Agent 或 API 密钥。"));
     p.settings.setTooltip(uiText("Audio/MIDI devices and interface language.", "音频／MIDI 设备与界面语言。"));
+    if (p.settingsDialog) { p.settingsDialog->setName(uiText("Settings", "设置")); if (auto* panel = dynamic_cast<WorkspaceSettingsPanel*>(p.settingsDialog->getContentComponent())) panel->refreshLanguage(); }
+    if (p.saveDialog) { p.saveDialog->setName(uiText("Save project", "保存工程")); if (auto* panel = dynamic_cast<ProjectSavePanel*>(p.saveDialog->getContentComponent())) panel->refreshLanguage(uiText(p.state.dirty ? "Unsaved changes" : "Saved")); }
     if (p.agentSidebar) p.agentSidebar->refreshLanguage();
     if (p.dockAnalysis) p.dockAnalysis->refreshLanguage();
     repaint();
@@ -2905,14 +3141,14 @@ juce::Result MainComponent::setInterfaceLanguage(const juce::String& code, bool 
 }
 void MainComponent::showSettings()
 {
-    const auto current = session.snapshot();
-    auto menu = interfaceSettingsMenu(!current.recording && !current.recordingFinalizing);
-    menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&impl->settings),
-        [safe = juce::Component::SafePointer<MainComponent>(this)](int choice) {
-            if (!safe) return;
-            if (choice == 1) safe->showAudioSettings();
-            else if (choice == 101 || choice == 102) safe->showResult(safe->setInterfaceLanguage(choice == 101 ? "en" : "zh-CN"));
-        });
+    if (impl->settingsDialog) { impl->settingsDialog->toFront(true); return; }
+    auto panel = std::make_unique<WorkspaceSettingsPanel>(); panel->setLookAndFeel(&impl->look);
+    panel->onAudio = [safe = juce::Component::SafePointer<MainComponent>(this)] { if (safe) safe->showAudioSettings(); };
+    panel->onFollow = [safe = juce::Component::SafePointer<MainComponent>(this)](bool enabled) { if (safe) safe->setFollowPlayhead(enabled); };
+    panel->onLanguage = [safe = juce::Component::SafePointer<MainComponent>(this)](const auto& language) { if (safe) safe->showResult(safe->setInterfaceLanguage(language)); };
+    const auto state = session.snapshot(); panel->update(state.deviceName, state.sampleRate, state.bufferSize, impl->follow.getToggleState(), state.recording || state.recordingFinalizing);
+    impl->settingsDialog = new ToolWindow(uiText("Settings", "设置"), panel.release(), this);
+    impl->settingsDialog->setResizeLimits(640, 360, 1100, 680);
 }
 void MainComponent::showAudioSettings()
 {

@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "checks": [
+    "chords: real inference, no premature edit, range mapping, import, idempotency, one Undo/Redo",
+    "transcribe: real inference, no premature edit, range mapping, import, idempotency, one Undo/Redo",
+    "separate: real inference, no premature edit, range mapping, import, idempotency, one Undo/Redo",
+    "Persistent chord correction validates labels and Undo/Redo",
+    "Schema4 upgrade preserves exact old manifest backup",
+    "Schema5 save/new/open retains accepted assets, notes, chords and provenance",
+    "Moved source rejects stale candidate",
+    "MP3 replacement rejected; save during analysis and after ready preserves candidate identity and import",
+    "Cancellation terminates owned worker without project edit"
+  ],
+  "fixture": "synthetic C/Am signal, no music-quality claim",
+  "exe_sha256": "474fc0824600c4aeb99ff4b617b890220d9b9a20e9dafde0f9ed6abe0bbfb5d6",
+  "physical_audio": false,
+  "offline_control_snapshot_ms_10_samples": [
+    12.959300001966767,
+    8.830299993860535,
+    10.611799996695481,
+    10.664900008123368,
+    9.960199997294694,
+    10.96250000409782,
+    10.620899993227795,
+    9.998800000175834,
+    11.65289999335073,
+    10.733000002801418
+  ],
+  "protected_unchanged": true
+}

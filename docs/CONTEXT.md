@@ -1,4 +1,12 @@
-# 当前候选：0.9.1 可视分析工作区（2026-11-05，自动验证通过、人工待验）
+# 当前候选：0.10.0 节拍、Warp 与日常操作（2026-11-05，自动验证通过、人工待验）
+
+实际工作树 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/tempo-warp-workspace-v0100`，基线 be47b65。已实现视图跟随开关、真实 Beat This 候选与首拍修正、固定比例保音高 Source Warp、Agent 等价方案/回读、保存/设置重设计和情境右键。原件保留，后台准备后一次提交，schema 6；局部 Warp 和完整 Tempo Map 未实现。范围见 [PLAN](review/2026-11-05-tempo-warp/PLAN.md)，最终证据见 [RESULTS](review/2026-11-05-tempo-warp/RESULTS.md) / [VERIFICATION](review/2026-11-05-tempo-warp/VERIFICATION.json)。
+
+最终 Release EXE `474fc082…`、207 个输入 `47f05894…`；CTest 10/10（Warp 188 项）、Worker 34、Agent 291、Web 5、原有真实分析原生 9组/Agent 12组、新真实节拍/Warp整链9组通过。最终构建与三组整链期间源码冻结，相关较早测试逐文件匹配。实际组件截图发现并修复 Follow 重叠及中文小字；失败/中断均保留，未用文档代替验证。真实 ASIO、长曲/极端拉伸听感、鼠标/DPI及付费模型理解率仍待人工。
+
+新入口 `E:/MusicAgent&DAW/Start E-musician 0.10.0 Tempo.cmd`；EXE 单独在 `E:/emusician-analysis-build/bin-0.10.0/Release/`；VS Code 打开 `E:/MusicAgent&DAW/E-musician-Tempo.code-workspace`。先保存关闭旧窗口，避免单实例返回旧版。旧 bin/Release 0.9.1 EXE 及 0.8.1/0.9.0/0.9.1 归档哈希均保持不变，未关闭用户原程序。下一步按 [人工短测](review/2026-11-05-tempo-warp/MANUAL-CHECK.md) 使用已准备的 120 BPM 素材验收；不自动合并 main。本轮无付费 LLM 和 computer-use。下方为历史状态。
+
+# 历史候选：0.9.1 可视分析工作区（2026-11-05，自动验证通过、人工待验）
 
 工作树 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/analysis-workspace-v091`，基线 `f0d95b3`；不要编辑旧 C 盘工作树。用户要求独立和弦轨、简单图形结果、易发现改名、Settings 中英文切换和分析优化。本轮已实现和弦轨/来源切换/修正跳转，波形与矩形 MIDI 预览，四个改名入口，英文默认及中文偏好，真实四/六轨与质量档、转录音域和扩展和弦模板；手动/Agent 共享候选、参数、轨数预算、确认和完成回读。
 

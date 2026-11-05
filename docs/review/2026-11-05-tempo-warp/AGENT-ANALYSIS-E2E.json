@@ -1,0 +1,85 @@
+{
+  "passed": true,
+  "mode": "owned-offline-DAW-real-local-chords-and-six-stems",
+  "physical_audio": false,
+  "external_llm": false,
+  "music_accuracy_claim": false,
+  "input_executable": "E:\\emusician-analysis-build\\bin-0.10.0\\Release\\E-musician.exe",
+  "exe_sha256": "474fc0824600c4aeb99ff4b617b890220d9b9a20e9dafde0f9ed6abe0bbfb5d6",
+  "checks": [
+    "Actual host commands and local chord runtime advertise readiness; no API key used",
+    "Manual native start executes real Chroma/HMM; Agent reads same immutable result with no project changes",
+    "Agent confirmation submits one asynchronous native import; receipt/regions verified after completion",
+    "Plan and candidate deduplicate; one Undo removes all chord regions and Redo restores them",
+    "Persisted chord label can be proposed, confirmed, independently read back and undone through Agent",
+    "Chord source provenance and labels survive real project save/reopen; original audio remains",
+    "Agent starts and locally polls real inference, then prepares review with exactly two mocked LLM requests; no automatic import",
+    "Fixed UI capability state comes from actual host, adapter and local model readiness",
+    "Agent starts actual six-stem HTDemucs, polls locally and prepares a six-track review in two mocked LLM calls; no premature mutation",
+    "Explicit Agent confirmation imports exactly six named audio tracks; runtime readback verifies IDs, audio kinds, positions and instrument roles",
+    "One Agent Undo removes all six imported tracks; one native Redo restores the same six track/clip IDs and roles",
+    "Six-stem project saves/reopens with roles intact; piano/guitar Auto and explicit other profile pass Agent authorization without another model run"
+  ],
+  "initial_selection": {
+    "project_id": "60ecfc82d76b4056aaeae25bc6dcda4a",
+    "active_track_id": "",
+    "active_clip_id": "",
+    "track_ids": [],
+    "clip_ids": [],
+    "note_clip_id": "",
+    "note_ids": [],
+    "note_count": 0,
+    "notes_truncated": false,
+    "time_range": {
+      "active": false,
+      "start_seconds": 0.0,
+      "end_seconds": 0.0
+    },
+    "focus": "none",
+    "available": true,
+    "selection_revision": 1,
+    "project_revision": 1
+  },
+  "six_stems": {
+    "result_id": "48bebfdd80f94b6cbcf6175288546495",
+    "model": {
+      "version": "4.1.0",
+      "weight_sha256": "d2a1745f0744721f6b8ca5bf469b67c651ea5ed1b52998cab033b2158609d411",
+      "license_status": "code-MIT; checkpoint-redistribution-not-cleared-local-evaluation",
+      "id": "htdemucs_6s"
+    },
+    "parameters": {
+      "quality": "fast",
+      "segment_seconds": 4.0,
+      "stems": 6
+    },
+    "source_sha256": "b168c622c976f572424cf67a0c464921ac96dd142b8d9d8d4fdd98dc0b2e970d",
+    "role_ids": {
+      "vocals": [
+        "41ba8ab36566423b9a41b382c181ec53",
+        "765dc43a6cf747c3bb03b6fb48cc89c8"
+      ],
+      "drums": [
+        "020497b14f3b436a859b4df8b03d1e72",
+        "09dff927f048425fbaf3e376539c3180"
+      ],
+      "bass": [
+        "76a331e93d4146258699a391ad484efe",
+        "23d3c8bef279477b88d1cba33f7479f1"
+      ],
+      "piano": [
+        "d44579e814e94b47b5bdf06edea6be96",
+        "1dd1f2baa8b64a8e9004dd69b4953d29"
+      ],
+      "guitar": [
+        "7c589e5d02a543399990b902acbcf13e",
+        "ccea17801d054306b8feced0a47cf868"
+      ],
+      "other": [
+        "5f7e979465c641acb2c5d1ebdbfa6f9d",
+        "314b27ce58a74a089293e01518a13591"
+      ]
+    }
+  },
+  "protected_settings_unchanged": true
+}

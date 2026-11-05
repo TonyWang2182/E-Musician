@@ -1,0 +1,44 @@
+{
+  "mode": "actual native components, offscreen; beat/chord/device fixture data explicitly synthetic",
+  "record": "20261105T123111.303806Z-a0dca19eac",
+  "source_directory": "E:\\MusicAgent&DAW\\worktrees\\audio-analysis\\build\\smoke\\Release\\f87397cf889d",
+  "screenshots": {
+    "ui-settings-0-en.png": "c5749f54ed4bce6b9ade41c915bf0803eaf4de0052ba63d0357aa38a6ceb61f4",
+    "ui-settings-0-zh-CN.png": "3f4d5ddcd14f5299b88c2e0c6cf586984f12cf05ffbf3d56183503f7a9483308",
+    "ui-settings-1-en.png": "114b377cecc856d3f1694fbb83437cb4de85db7c0c74898d1508318d99ea6a64",
+    "ui-settings-1-zh-CN.png": "b8b99f14b7d15058868bed3bfcc36fcb3e95108b58b763084f045edf1a0fb42b",
+    "ui-settings-2-en.png": "dc09ba15d65840e15e52b9c08018f216871d2cf9bf4ad9760de4b40dcd60b48f",
+    "ui-settings-2-zh-CN.png": "7aab989d4921d9564a082e11c0537935f070f96008177d7db87e3abe73b05dae",
+    "ui-save-project-en.png": "2c962f3b168cde875205d336917220b9ecc15afd0c3160e1204e247876e5ede5",
+    "ui-save-project-zh-CN.png": "2400740cda45cef73ea75ac84d006eddef4e01e60df4b265225564311c802ace",
+    "ui-source-warp-en-1000x650.png": "ac16543bce1c77e6b4c284dc3fe4d645670006f21b20e1a417de7538e64ae8a3",
+    "ui-source-warp-zh-1000x650.png": "8f462cef05c730df1c6fed17fdde5c70d264f4ac2e83f40ae6f5258dfa12a773",
+    "ui-analysis-beats-540x210-en-synthetic.png": "f5e993f739cf82ad4c8117777c9a2f2a5960ecdc4cc865ebcab03adf6403520a",
+    "ui-analysis-beats-540x210-zh-CN-synthetic.png": "7298de77333a29cfbd04025881742412e922b04e69f408314f5be5da743678f2",
+    "ui-analysis-beats-930x308-en-synthetic.png": "2191f5fb9c5b041608e0971eb991799a0508e5974dabcc3f4122b9ebf92b093d",
+    "ui-analysis-beats-930x308-zh-CN-synthetic.png": "993c8612ee612e0497bc759ac5c7408f9e943a9f93fb9edae71a8bb7bc160555"
+  },
+  "visually_reviewed_final": [
+    "ui-source-warp-en-1000x650.png",
+    "ui-source-warp-zh-1000x650.png",
+    "ui-settings-0-zh-CN.png",
+    "ui-settings-1-zh-CN.png",
+    "ui-settings-2-zh-CN.png",
+    "ui-save-project-en.png",
+    "ui-save-project-zh-CN.png"
+  ],
+  "prior_candidate_beats_review": [
+    "ui-analysis-beats-540x210-en-synthetic.png",
+    "ui-analysis-beats-540x210-zh-CN-synthetic.png",
+    "ui-analysis-beats-930x308-en-synthetic.png"
+  ],
+  "prior_candidate_beats_source_unchanged": true,
+  "observations": [
+    "Follow hint no longer overlaps the button at minimum width",
+    "Chinese Settings hints now wrap explicitly at readable size",
+    "Save destination and actions visible in both languages",
+    "Beat first-point/BPM/meter and both apply actions fit at compact width"
+  ],
+  "physical_desktop_test": false,
+  "device_label_is_synthetic": true
+}

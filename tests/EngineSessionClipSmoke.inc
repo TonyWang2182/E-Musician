@@ -512,6 +512,7 @@ juce::Result EngineSession::runClipSmokeTest(const juce::File& directory)
             juce::MemoryBlock afterInvalid; check(longFile.loadFileAsData(afterInvalid) && afterInvalid == longBytes,
                 "failed fine-grid export preserves existing destination bytes");
         }
+        okay(runAudioWarpSmokeTest(directory, inputs), "offline Warp lifecycle and audio verification");
         auto report = std::make_unique<juce::DynamicObject>();
         report->setProperty("status", "passed");
         report->setProperty("scope", "real Tracktion renders for WAV and both MP3 fixtures; move, undo/redo, schema 4 round trips, shared assets, schema 1 migration and recovery; no listening or realtime performance claim");

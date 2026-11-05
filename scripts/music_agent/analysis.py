@@ -12,15 +12,15 @@ from audio_analysis.common import PARAMETERS as ANALYSIS_PARAMETERS
 from audio_analysis.common import OPTIONS as ANALYSIS_OPTIONS
 from audio_analysis.common import INSTRUMENT_RANGES
 
-KINDS = {"separate": "音源分离", "transcribe": "分轨转 MIDI", "chords": "和弦识别"}
+KINDS = {"separate": "音源分离", "transcribe": "分轨转 MIDI", "chords": "和弦识别", "beats": "节拍 / 速度"}
 COMMANDS = {"get_analysis_capabilities", "start_analysis", "get_analysis_job",
             "get_analysis_result", "cancel_analysis_job", "accept_analysis_result"}
 TERMINAL = {"ready", "applied", "failed", "cancelled", "stale"}
 SOURCE_FIELDS = {"project_id", "clip_id", "asset_id", "track_id", "clip_timeline_start",
                  "clip_source_offset", "clip_duration", "bpm", "range_start_seconds",
-                 "duration_seconds", "timeline_start", "sample_rate", "source_sha256", "input_role"}
+                 "duration_seconds", "timeline_start", "sample_rate", "source_sha256", "input_role", "warp_speed_ratio"}
 ITEM_FIELDS = {"name", "sample_rate", "channels", "duration_seconds", "sha256", "pitch",
-               "start_seconds", "end_seconds", "velocity", "channel", "label", "score", "uncertain"}
+               "start_seconds", "end_seconds", "velocity", "channel", "label", "score", "uncertain", "time_seconds", "is_downbeat"}
 
 def _tool(name, description, properties, required):
     return {"type": "function", "function": {"name": name, "description": description,
@@ -28,11 +28,11 @@ def _tool(name, description, properties, required):
                        "additionalProperties": False}}}
 
 ANALYSIS_TOOLS = [
-    _tool("start_audio_analysis", "对真实音频片段启动本机分析。不会修改工程，不上传音频。工具本地等候，勿重复开始；完成后提出导入方案。separate=四轨或六轨(六轨需separation_six_stems就绪)，transcribe=有音高乐器音符(不是鼓)，chords=三和弦/七和弦/挂留等模板识别，不承诺复杂爵士准确率。时间为片段内秒；省略采用允许选区。",
+    _tool("start_audio_analysis", "对真实音频片段启动本机分析。不会修改工程，不上传音频。工具本地等候，勿重复开始；完成后提出确认方案。separate=四/六轨，transcribe=有音高乐器音符，chords=和弦模板，beats=真实BeatThis节拍/强拍/速度候选(3/4或4/4，非变速自动矫直)。beats完成后用propose_beat_application，不能普通导入。时间为片段内秒；省略采用允许选区。",
           {"clip_id": {"type": "string"}, "kind": {"type": "string", "enum": list(KINDS)},
            "start_seconds": {"type": "number", "minimum": 0},
            "duration_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 600},
-           "parameters": {"type": "object", "description": "按类型选择：separate用stems=4/6、quality=fast/quality、segment_seconds；transcribe用instrument=auto/piano/bass/guitar/vocals及音符阈值/音域；chords用vocabulary=triads/extended、sensitivity/min_region_seconds。instrument是同一模型音域预设，不是独立专用模型。",
+           "parameters": {"type": "object", "description": "按类型选择：separate用stems=4/6、quality=fast/quality、segment_seconds；transcribe用instrument=auto/piano/bass/guitar/vocals及音域；chords用vocabulary=triads/extended；beats用meter=auto/3/4/4/4。instrument只是同一模型音域预设。",
                "properties": {**{key: {"type": "integer" if key in {"min_pitch", "max_pitch", "stems"} else "number", "minimum": bounds[0], "maximum": bounds[1], **({"enum": [4, 6]} if key == "stems" else {})}
                               for parameters in ANALYSIS_PARAMETERS.values() for key, bounds in parameters.items()},
                               **{key: {"type": "string", "enum": list(choices)} for options in ANALYSIS_OPTIONS.values() for key, choices in options.items()}}, "additionalProperties": False}}, ["clip_id", "kind"]),
@@ -122,6 +122,9 @@ def safe_result(raw):
     result["items"] = [{k: safe_text(v, 100) if k in {"name", "label"} else deepcopy(v) for k, v in item.items() if k in ITEM_FIELDS} for item in items]
     result["notes_only"] = result["kind"] == "transcribe"
     result["parameters"] = validate_parameters(result["kind"], raw.get("parameters", {}))
+    if result["kind"] == "beats":
+        from .tempo import safe_tempo
+        result["tempo"] = safe_tempo(raw.get("tempo"))
     return result
 
 def validate_parameters(kind, parameters):
@@ -210,8 +213,11 @@ def authorize_result(context, frozen, result):
             raise ScopeError("候选来源位置、长度或速度已改变，请在 DAW 重新分析。")
     if "asset_id" in clip and clip["asset_id"] != source.get("asset_id"):
         raise ScopeError("候选源素材已替换，请重新分析。")
-    if "source_offset" in clip and abs(number(clip["source_offset"], 0, 172800) - number(source.get("clip_source_offset"), 0, 172800)) > 1e-8:
+    offset_key="playback_source_offset" if "warp_speed_ratio" in source and "playback_source_offset" in clip else "source_offset"
+    if offset_key in clip and abs(number(clip[offset_key], 0, 172800) - number(source.get("clip_source_offset"), 0, 172800)) > 1e-8:
         raise ScopeError("候选源裁剪已改变，请重新分析。")
+    if "warp_speed_ratio" in source and abs(number(clip.get("warp_speed_ratio",1),1/15,15)-number(source["warp_speed_ratio"],1/15,15))>1e-8:
+        raise ScopeError("候选源Warp已改变，请重新分析。")
 
 def authorize_cancel(context, frozen, job):
     """GUI and Agent jobs share scope, but completed/import operations do not."""
@@ -229,6 +235,8 @@ def authorize_cancel(context, frozen, job):
 
 def compile_import(result, context, frozen, summary):
     authorize_result(context, frozen, result)
+    if result["kind"] == "beats":
+        raise ValueError("节拍候选需提出速度或对齐方案，不创建音轨；请使用 propose_beat_application。")
     if result.get("stale"):
         raise ValueError("候选来源已改变，请在 DAW 重新分析。")
     if result.get("applied"):
@@ -345,13 +353,19 @@ def capability_groups(context, host, analysis):
         status = "experimental" if installed and applicable else "not_applicable" if installed else "unavailable"
         example = {"separate": "把选中音频分为人声、鼓、贝斯、钢琴、吉他和其他，先预览。" if analysis.get("separation_six_stems") else "把选中音频分成人声、鼓、贝斯、其他，先生成候选。",
                    "transcribe": "把选中的有音高分轨转成 MIDI，保持原时间位置，先预览。",
-                   "chords": "识别选中音频的常用和弦，添加到和弦轨之前让我确认。"}[kind]
+                   "chords": "识别选中音频的常用和弦，添加到和弦轨之前让我确认。",
+                   "beats": "分析选中音频的节拍和速度，先让我确认首拍，再对齐工程。"}[kind]
         detail = p.get("detail") or "请先安装本地分析运行库和模型。"
         if kind == "transcribe": detail += " 只适合有音高乐器；鼓转录待支持。"
         if kind == "chords": detail = "识别三和弦、七和弦及挂留和弦，可在和弦轨修正。"
         if kind == "separate": detail = "分离后添加为独立音频轨。"
         if kind == "transcribe": detail = "选择乐器音域，生成可编辑 MIDI。"
+        if kind == "beats": detail = "检测节拍与强拍；确认后对齐或采用音频速度。"
         groups.append({"id": kind, "label": label, "status": status,
                        "status_label": "实验中" if status == "experimental" else "选择音频" if status == "not_applicable" else "未就绪",
                        "enabled": installed and applicable, "example": example, "detail": detail})
+    warp_ready={"get_audio_warp","set_audio_warp"} <= commands
+    groups.append({"id":"warp","label":"音频 Warp","status":"available" if warp_ready and audio else "not_applicable" if warp_ready else "unavailable",
+        "status_label":"可用" if warp_ready and audio else "选择音频" if warp_ready else "未就绪","enabled":warp_ready and audio,
+        "example":"读取选中音频的 Warp 设置，先列出对齐当前工程的方案。","detail":"保音高拉伸、手动源速度、开启或关闭跟随工程。"})
     return groups

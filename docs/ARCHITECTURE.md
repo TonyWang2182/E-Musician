@@ -1,5 +1,13 @@
 # E-musician 技术架构
 
+## 0.10.0 节拍与固定比例 Warp（自动验证通过，人工待验）
+
+`AnalysisPanel / Agent → start_analysis(kind=beats) → Beat This! 独立进程 → 拍点与速度候选 → apply_beat_analysis → beginAudioWarp → 后台原件校验/Signalsmith 渲染 → revision 校验 → Edit 一次提交`。普通 Source 设置也进入 `set_audio_warp`，与分析应用共享后台任务、Undo 和资产流程。GUI 不另存音乐状态；Agent 使用候选 ID 和数值回读，不直接生成或执行 DSP。
+
+原件与渲染 PCM 分开保留。`AudioTimeMap` 定义 sourceOffset 为原件坐标，运行时 playbackOffset 为 sourceOffset/speedRatio；speedRatio=targetBPM/sourceBPM。工程存 schema 6（无 Warp/节拍信息仍使用既有 4/5）；播放、波形、裁剪、切分、分析和导出共享映射。跟随速度的音频变速先准备再一次提交，已有独立 MIDI/分离轨不擅自改写，关联和弦区间按源片段映射更新。
+
+设置、跟随视图和保存路径选择是工作流组件，不改变音频线程职责。跟随偏好与工程分开持久化；保存窗口只提供目的路径，继续调用原异步保存；右键菜单复用命令与版本保护。详细取舍、线程与精确依赖见 [ADR](decisions/2026-11-05-fixed-tempo-warp.md)。固定比例不等于局部 Warp 或任意音频完全无损；测量和验收以本轮 RESULTS 为准。
+
 ## 0.9.1 可视分析、语言和模型配置
 
 和弦轨是 `EM_CHORDS → revision 缓存的共享只读 ChordRegionSnapshot → ArrangementView` 投影，不是音频轨、不参与混音图。共用标尺、缩放、水平滚动；多个分析按 analysisId 切换，绘制用排序区间索引裁剪到可视范围。双击按稳定 region ID 打开 AnalysisPanel 的来源过滤分页，修改继续走 `edit_chord_region`，保存/Undo 仍由 Edit 负责。和弦选择是视图状态，Agent 可按来源读取/编辑，未把它冒充音频/MIDI 选轨上下文。

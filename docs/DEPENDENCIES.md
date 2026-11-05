@@ -1,5 +1,12 @@
 # 依赖版本与来源记录
 
+## 0.10.0 新增固定依赖
+
+- Signalsmith Stretch 1.3.2：commit `88061fd4eda56a2353c5d65c74aa3f4ccf76f9da`；Linear 0.6.6：`7bb1c8f36794d6980080ce817c91f8da8fe56a66`。来源、所有使用头文件 SHA256 和 MIT 原文由 [signalsmith.json](../cmake/signalsmith.json)、[许可证](licenses/signalsmith/) 固定。安装在忽略的 `_deps/signalsmith-*`；`bootstrap_stretch.py --verify-only` 是配置必要检查，不覆盖已有未知修改。
+- Beat This!：官方 CPJKU commit `b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c`，final0 权重 SHA256 `8c328b45f59d8dd3dff219253ff6a8d6482be57d0133a29140e2febbf8eb8331`。独立本机 `beats-cuda-py310` 环境、锁定来源和探针结果见本轮 [Worker 记录](review/2026-11-05-tempo-warp/WORKER-AGENT-NOTES.md)。既有分离/转录环境保持独立。
+
+当前原生依赖的实际引擎目录为 `.cache/monitor-engine`，仍是下方固定 JUCE/Tracktion 组合；机器日志中的位置优先于历史示例路径。
+
 更新日期：2026-10-29。机器可读基线为 [cmake/dependencies.json](../cmake/dependencies.json)。Tracktion/JUCE按完整提交固定；VST2接口按固定提交中的三个blob固定；ASIO按官方SDK包及逐文件SHA-256固定。依赖工作区位于被忽略的`_deps/`，不进入本项目版本管理。实现与本轮验证进度分别见 [ARCHITECTURE](ARCHITECTURE.md) 与 [CONTEXT](CONTEXT.md)。
 
 ## 固定组合

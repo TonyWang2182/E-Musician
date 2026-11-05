@@ -6780,3 +6780,497 @@ Branch feature/analysis-workspace-v091 from f0d95b3; preserved existing 0.9.0 ar
 
 - 实现/测试/截图/日志已提交 a6447ccc621b39c07909fb0589d65a3033afa5e1（feature/analysis-workspace-v091）。本地归档 E:/MusicAgent&DAW/releases/0.9.1-20261105-analysis-workspace 包含最终 EXE/PDB/启动器及该提交的原始源码文档，1229条目中190个构建输入逐项核对冻结hash通过；完整产物SHA见PACKAGING-CHECK和归档MANIFEST。
 - Git staged diff --check通过，新增行凭证模式扫描无匹配；未提交依赖、模型、缓存、用户音频/工程或原始日志。代码运行入口、人工短测、状态上下文和旧版保留说明完整。随后只提交本条和归档说明，不改已验证源码或EXE；将两个提交同步功能分支，main保持不变。
+
+### 2026-11-05T19:05:07+08:00 · agent-native-run · launched
+
+- Config: Release; exit code: None; elapsed: 0.230s.
+- Command: `E:\emusician-analysis-build\bin\Release\E-musician.exe --agent`
+- Context: Embedded Agent batch 2; physical audio acceptance remains manual
+- Source SHA-256: `f58b075d0a5bef535899599382ad368ac41cf2058d02a1c07f5e75e6e2ec7b5d`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T110507.500685Z-4154418b5e.json) · [Raw log](../build-logs/20261105T110507.500685Z-4154418b5e.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261105T110507.500685Z-4154418b5e.raw.log)
+
+### 2026-11-05T19:05:16+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.446s.
+- Command: `C:\Python314\python.exe E:\emusician-analysis-source\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `f58b075d0a5bef535899599382ad368ac41cf2058d02a1c07f5e75e6e2ec7b5d`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T110516.460323Z-cfb92ef745.json) · [Raw log](../build-logs/20261105T110516.460323Z-cfb92ef745.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+
+### 2026-11-05 · 0.10.0 开始实施
+
+- 创建 feature/tempo-warp-workspace-v0100，保留已有启动日志和0.9.1归档。先核对工程时间模型、分析候选与异步保存；用户确认第1项为视图跟随播放头滚动。任务与代理文件归属已写PLAN，固定速度Warp为本轮范围，完整Tempo Map后续。
+- 本轮不使用computer-use；真实GUI和听感留人工。模型/DSP来源锁定、真实运行与编译分别记录，未实现项不当作完成。
+
+### 2026-11-05T19:47:25+08:00 · beat-model-download · failed
+
+- Config: official final0 checkpoint; ~78 MB expected; exit code: 1; elapsed: 0.639s.
+- Command: `C:\Python314\python.exe -c "from pathlib import Path
+import json, urllib.request, hashlib
+url=https://cloud.cp.jku.at/public.php/dav/files/7ik4RrBKTS273gp/final0.ckpt
+p=Path(E:/MusicAgent&DAW/analysis/models/beat-this/b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c/final0.ckpt)
+p.parent.mkdir(parents=True,exist_ok=True)
+if not p.exists():
+    with urllib.request.urlopen(url,timeout=180) as response,p.with_suffix(.part).open(wb) as out:
+        print(official_content_length,response.headers.get(Content-Length),flush=True)
+        while True:
+            b=response.read(1048576)
+            if not b:break
+            out.write(b)
+    p.with_suffix(.part).replace(p)
+print(json.dumps({url:url,bytes:p.stat().st_size,sha256:hashlib.file_digest(p.open(rb),sha256).hexdigest()}))
+"`
+- Context: First pinned Beat This official checkpoint download; prior providers preserved. SHA locked after this recorded download; no quality claim.
+- Source SHA-256: `271976bbd2b9ad6ef13787fc8e48fa6e780a07a160d3eafce9d52a9e51563376`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T114725.032340Z-502cd55238.json) · [Raw log](../build-logs/20261105T114725.032340Z-502cd55238.log)
+- [Exact process output](../build-logs/20261105T114725.032340Z-502cd55238.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T114725.032340Z-502cd55238.log
+
+### 2026-11-05T19:47:38+08:00 · beat-model-download · succeeded
+
+- Config: official final0 checkpoint; ~78 MB expected; exit code: 0; elapsed: 7.933s.
+- Command: `C:\Python314\python.exe -c "from pathlib import Path
+import json, urllib.request, hashlib
+url=\"https://cloud.cp.jku.at/public.php/dav/files/7ik4RrBKTS273gp/final0.ckpt\"
+p=Path(\"E:/MusicAgent&DAW/analysis/models/beat-this/b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c/final0.ckpt\")
+p.parent.mkdir(parents=True,exist_ok=True)
+if not p.exists():
+    with urllib.request.urlopen(url,timeout=180) as response,p.with_suffix(\".part\").open(\"wb\") as out:
+        print(\"official_content_length\",response.headers.get(\"Content-Length\"),flush=True)
+        while True:
+            b=response.read(1048576)
+            if not b:break
+            out.write(b)
+    p.with_suffix(\".part\").replace(p)
+print(json.dumps({\"url\":url,\"bytes\":p.stat().st_size,\"sha256\":hashlib.file_digest(p.open(\"rb\"),\"sha256\").hexdigest()}))
+"`
+- Context: Retry after shell argument quoting error; first pinned official download, providers unchanged.
+- Source SHA-256: `271976bbd2b9ad6ef13787fc8e48fa6e780a07a160d3eafce9d52a9e51563376`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T114738.958965Z-a1942e27d5.json) · [Raw log](../build-logs/20261105T114738.958965Z-a1942e27d5.log)
+- [Exact process output](../build-logs/20261105T114738.958965Z-a1942e27d5.raw.log)
+
+### 2026-11-05T19:48:17+08:00 · analysis-setup · succeeded
+
+- Config: Python3.10 CUDA; exit code: 0; elapsed: 4.914s.
+- Command: `C:\Users\28712\.local\bin\uv.EXE venv --python 3.10.19 E:\MusicAgent&DAW\analysis\runtimes\beats-cuda-py310`
+- Context: Explicit isolated model installation/probe; weights remain outside Git.
+- Source SHA-256: `e78dce3346aeca690710f203b1022fb0a0e752121354a0aed4f9c0a7d8860598`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T114817.762814Z-6cff8a61c3.json) · [Raw log](../build-logs/20261105T114817.762814Z-6cff8a61c3.log)
+- [Exact process output](../build-logs/20261105T114817.762814Z-6cff8a61c3.raw.log)
+
+### 2026-11-05T19:48:22+08:00 · analysis-setup · succeeded
+
+- Config: Python3.10 CUDA; exit code: 0; elapsed: 15.642s.
+- Command: `C:\Users\28712\.local\bin\uv.EXE pip install --python E:\MusicAgent&DAW\analysis\runtimes\beats-cuda-py310\Scripts\python.exe --index-url https://download.pytorch.org/whl/cu124 torch==2.5.1+cu124 torchaudio==2.5.1+cu124`
+- Context: Explicit isolated model installation/probe; weights remain outside Git.
+- Source SHA-256: `e78dce3346aeca690710f203b1022fb0a0e752121354a0aed4f9c0a7d8860598`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T114822.982600Z-03f607d86d.json) · [Raw log](../build-logs/20261105T114822.982600Z-03f607d86d.log)
+- [Exact process output](../build-logs/20261105T114822.982600Z-03f607d86d.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T19:48:38+08:00 · analysis-setup · succeeded
+
+- Config: Python3.10 CUDA; exit code: 0; elapsed: 15.976s.
+- Command: `C:\Users\28712\.local\bin\uv.EXE pip install --python E:\MusicAgent&DAW\analysis\runtimes\beats-cuda-py310\Scripts\python.exe numpy==1.26.4 scipy==1.13.1 soundfile==0.13.1 psutil==7.1.0 einops==0.8.0 rotary-embedding-torch==0.6.4 soxr==0.3.7 tqdm==4.66.4 "beat-this @ https://github.com/CPJKU/beat_this/archive/b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c.zip"`
+- Context: Explicit isolated model installation/probe; weights remain outside Git.
+- Source SHA-256: `ec5880f99095144abb7fd28a8564837f9eb51dc27c4c5d5e3466ae9deb2a0409`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T114838.829630Z-86ef5b620d.json) · [Raw log](../build-logs/20261105T114838.829630Z-86ef5b620d.log)
+- [Exact process output](../build-logs/20261105T114838.829630Z-86ef5b620d.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T19:48:55+08:00 · analysis-setup · succeeded
+
+- Config: Python3.10 CUDA; exit code: 0; elapsed: 60.208s.
+- Command: `E:\MusicAgent&DAW\analysis\runtimes\beats-cuda-py310\Scripts\python.exe scripts/audio_analysis/register.py --root E:\MusicAgent&DAW\analysis --kind beats --device cuda --stems 4`
+- Context: Explicit isolated model installation/probe; weights remain outside Git.
+- Source SHA-256: `b17ecff6fcd120d08f0a754d9676c1ecf70d1c9a67374d1eb7407fe8498ad138`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T114855.153333Z-540235db40.json) · [Raw log](../build-logs/20261105T114855.153333Z-540235db40.log)
+- [Exact process output](../build-logs/20261105T114855.153333Z-540235db40.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T19:55:32+08:00 · beat-worker-check · succeeded
+
+- Config: Python3.10 CUDA BeatThis / CPython3.14 unit runner; exit code: 0; elapsed: 3.941s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_audio_analysis*.py -v`
+- Context: Real pinned model public/silent/cancel probes and numerical tests; no paid LLM or DAW audio callback. Integration source still in progress.
+- Source SHA-256: `f20090ff7dae2e07b517d4b40d8da2305b8ed49b9429e8621d2da7138eb39f46`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T115532.451104Z-0903537b1a.json) · [Raw log](../build-logs/20261105T115532.451104Z-0903537b1a.log)
+- [Exact process output](../build-logs/20261105T115532.451104Z-0903537b1a.raw.log)
+
+### 2026-11-05T19:55:36+08:00 · beat-worker-check · succeeded
+
+- Config: Python3.10 CUDA BeatThis / CPython3.14 unit runner; exit code: 0; elapsed: 26.702s.
+- Command: `C:\Python314\python.exe scripts/audio_analysis/beat_probe.py`
+- Context: Real pinned model public/silent/cancel probes and numerical tests; no paid LLM or DAW audio callback. Integration source still in progress.
+- Source SHA-256: `f20090ff7dae2e07b517d4b40d8da2305b8ed49b9429e8621d2da7138eb39f46`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T115536.577292Z-11a2801906.json) · [Raw log](../build-logs/20261105T115536.577292Z-11a2801906.log)
+- [Exact process output](../build-logs/20261105T115536.577292Z-11a2801906.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T19:59:03+08:00 · tempo-agent-unit · succeeded
+
+- Config: CPython3.14 deterministic tests; exit code: 0; elapsed: 3.467s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_tempo.py -v`
+- Context: Beat/Warp tools, explicit scopes, async confirmation/readback/Undo, numerical defaults; no paid provider or native host. Not source freeze.
+- Source SHA-256: `4fd65f6c1e3d6aea3c47674a96363fb6f4f4fcd594f497efd473d640766621bb`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T115903.850437Z-e8d89a5a6a.json) · [Raw log](../build-logs/20261105T115903.850437Z-e8d89a5a6a.log)
+- [Exact process output](../build-logs/20261105T115903.850437Z-e8d89a5a6a.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T19:59:07+08:00 · tempo-agent-unit · succeeded
+
+- Config: CPython3.14 deterministic tests; exit code: 0; elapsed: 13.083s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/beats-cuda-py310/Scripts/python.exe -m unittest discover -s tests -p test_audio_analysis*.py -v`
+- Context: Beat/Warp tools, explicit scopes, async confirmation/readback/Undo, numerical defaults; no paid provider or native host. Not source freeze.
+- Source SHA-256: `d4baf59d952f47c3d89040eabf78094c1a77c78d1e12c5c32899b22090073fe6`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T115907.496827Z-c6185301fc.json) · [Raw log](../build-logs/20261105T115907.496827Z-c6185301fc.log)
+- [Exact process output](../build-logs/20261105T115907.496827Z-c6185301fc.raw.log)
+
+### 2026-11-05T20:05:04+08:00 · tempo-warp-native-ui-static · succeeded
+
+- Config: source-review; exit code: 0; elapsed: 0.513s.
+- Command: `git diff --check -- apps/desktop/MainComponent.cpp apps/desktop/MainComponent.h apps/desktop/ArrangementView.cpp apps/desktop/ArrangementView.h apps/desktop/UiLanguage.h`
+- Context: Native UI whitespace check; no build or runtime claim
+- Source SHA-256: `beb184d9f0d4131a16ac0bdd21a4ec179eaa939d9260f6bf51faa2aa7f12fab9`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T120504.888251Z-7a14704c36.json) · [Raw log](../build-logs/20261105T120504.888251Z-7a14704c36.log)
+- [Exact process output](../build-logs/20261105T120504.888251Z-7a14704c36.raw.log)
+
+### 2026-11-05T20:04:11+08:00 · tempo-agent-regression · failed
+
+- Config: CPython3.14 and JS browser fixtures; exit code: 1; elapsed: 63.197s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: Beat/Warp implementation candidate: complete Agent regression and integration script import. Root native code still evolving; no overall freeze.
+- Source SHA-256: `c1a5e207102f50096b0d7420b6fd8e60c8b8b18340b3540793c1c3466fbe12ad`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T120411.353536Z-16b3ab8568.json) · [Raw log](../build-logs/20261105T120411.353536Z-16b3ab8568.log)
+- [Exact process output](../build-logs/20261105T120411.353536Z-16b3ab8568.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T120411.353536Z-16b3ab8568.log
+
+### 2026-11-05T20:07:07+08:00 · tempo-warp-configure · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 11.687s.
+- Command: `cmake -S E:/emusician-analysis-source -B E:/emusician-analysis-build`
+- Context: 0.10.0 fixed-tempo beat/Warp and workspace integration; offline checks, no physical audio or quality claim
+- Source SHA-256: `ee1ffbc8bee90fc98d989b70c5f3120607b4e4add6eeba0d9a3cb3b04b267cf8`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T120707.259779Z-c4efe9fe35.json) · [Raw log](../build-logs/20261105T120707.259779Z-c4efe9fe35.log)
+- [Exact process output](../build-logs/20261105T120707.259779Z-c4efe9fe35.raw.log)
+
+### 2026-11-05T20:07:21+08:00 · tempo-agent-regression · failed
+
+- Config: CPython3.14 unit tests and browser fixtures; exit code: 1; elapsed: 46.722s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: Retry after bounded unread POST rejection fix for observed Windows10053; retain initial failed record. Models/native not running here.
+- Source SHA-256: `faf9d174be14ca26906e9c775551a86824eb9200120075278e5394919c08d2de`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T120721.801123Z-fc038a1a15.json) · [Raw log](../build-logs/20261105T120721.801123Z-fc038a1a15.log)
+- [Exact process output](../build-logs/20261105T120721.801123Z-fc038a1a15.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T120721.801123Z-fc038a1a15.log
+
+### 2026-11-05T20:08:03+08:00 · tempo-warp-configure · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 7.991s.
+- Command: `cmake -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.10.0`
+- Context: 0.10.0 fixed-tempo beat/Warp and workspace integration; offline checks, no physical audio or quality claim
+- Source SHA-256: `69916d332a525bee2bbd23e121186c83ee80e6437b9fa043f489c1c34a90579d`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T120803.026191Z-0688cfed6f.json) · [Raw log](../build-logs/20261105T120803.026191Z-0688cfed6f.log)
+- [Exact process output](../build-logs/20261105T120803.026191Z-0688cfed6f.raw.log)
+
+### 2026-11-05T20:08:56+08:00 · beat-grid-probe · succeeded
+
+- Config: Python3.10 CUDA, 16s synthetic 120 BPM / 4-4; no audio device; exit code: 0; elapsed: 14.089s.
+- Command: `C:\Python314\python.exe scripts/audio_analysis/beat_probe.py --case grid`
+- Context: Actual pinned checkpoint inference on deterministic percussion; measured timestamp tolerance is fixture-specific, not real-music accuracy.
+- Source SHA-256: `a67aaa039496ddd374caa66b2c076f19f3073b7efd88a9f2921eebb5360fbd94`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T120856.374852Z-a77ede5b4b.json) · [Raw log](../build-logs/20261105T120856.374852Z-a77ede5b4b.log)
+- [Exact process output](../build-logs/20261105T120856.374852Z-a77ede5b4b.raw.log)
+
+### 2026-11-05T20:09:44+08:00 · tempo-agent-targeted · succeeded
+
+- Config: CPython3.14 / isolated Edge fixture; exit code: 0; elapsed: 2.363s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_server.py -v`
+- Context: Corrected rejection drain excludes invalid declared sizes (413); only bounded403/415 input bodies discarded. Test server regression, tempo contract and UI; full final suite by root after freeze.
+- Source SHA-256: `3fb972081e5d0400a5764dc09a1ce25c91b9be566aa08f9f8da1970bd8f12931`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T120944.357489Z-853f2a79f8.json) · [Raw log](../build-logs/20261105T120944.357489Z-853f2a79f8.log)
+- [Exact process output](../build-logs/20261105T120944.357489Z-853f2a79f8.raw.log)
+
+### 2026-11-05T20:09:47+08:00 · tempo-agent-targeted · succeeded
+
+- Config: CPython3.14 / isolated Edge fixture; exit code: 0; elapsed: 3.733s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_tempo.py -v`
+- Context: Corrected rejection drain excludes invalid declared sizes (413); only bounded403/415 input bodies discarded. Test server regression, tempo contract and UI; full final suite by root after freeze.
+- Source SHA-256: `3fb972081e5d0400a5764dc09a1ce25c91b9be566aa08f9f8da1970bd8f12931`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T120947.009984Z-daa7e5b9c5.json) · [Raw log](../build-logs/20261105T120947.009984Z-daa7e5b9c5.log)
+- [Exact process output](../build-logs/20261105T120947.009984Z-daa7e5b9c5.raw.log)
+
+### 2026-11-05T20:09:50+08:00 · tempo-agent-targeted · succeeded
+
+- Config: CPython3.14 / isolated Edge fixture; exit code: 0; elapsed: 1.137s.
+- Command: `C:\Python314\python.exe tests/MusicAgentTempoIntegration.py --help`
+- Context: Corrected rejection drain excludes invalid declared sizes (413); only bounded403/415 input bodies discarded. Test server regression, tempo contract and UI; full final suite by root after freeze.
+- Source SHA-256: `3fb972081e5d0400a5764dc09a1ce25c91b9be566aa08f9f8da1970bd8f12931`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T120950.921057Z-63b3d3d56d.json) · [Raw log](../build-logs/20261105T120950.921057Z-63b3d3d56d.log)
+- [Exact process output](../build-logs/20261105T120950.921057Z-63b3d3d56d.raw.log)
+
+### 2026-11-05T20:09:52+08:00 · tempo-agent-targeted · succeeded
+
+- Config: CPython3.14 / isolated Edge fixture; exit code: 0; elapsed: 11.403s.
+- Command: `C:\Python314\python.exe tests/AnalysisAgentWebSmoke.py`
+- Context: Corrected rejection drain excludes invalid declared sizes (413); only bounded403/415 input bodies discarded. Test server regression, tempo contract and UI; full final suite by root after freeze.
+- Source SHA-256: `3fb972081e5d0400a5764dc09a1ce25c91b9be566aa08f9f8da1970bd8f12931`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T120952.454888Z-bc31046b35.json) · [Raw log](../build-logs/20261105T120952.454888Z-bc31046b35.log)
+- [Exact process output](../build-logs/20261105T120952.454888Z-bc31046b35.raw.log)
+
+### 2026-11-05T20:10:23+08:00 · beat-worker-final-probe · succeeded
+
+- Config: PyTorch2.5.1+cu124 / RTX3050Laptop4GB / 2 CPU threads / offline no device; exit code: 0; elapsed: 35.780s.
+- Command: `C:\Python314\python.exe scripts/audio_analysis/beat_probe.py`
+- Context: Final beats implementation: real public excerpt, deterministic 120 BPM grid, silence, too-short range and cancellation. No recognition benchmark claim.
+- Source SHA-256: `3fb972081e5d0400a5764dc09a1ce25c91b9be566aa08f9f8da1970bd8f12931`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T121023.579051Z-74933b593c.json) · [Raw log](../build-logs/20261105T121023.579051Z-74933b593c.log)
+- [Exact process output](../build-logs/20261105T121023.579051Z-74933b593c.raw.log)
+
+### 2026-11-05T20:11:31+08:00 · tempo-agent-web · succeeded
+
+- Config: Headless owned Edge / 400 and1000px / English-Chinese; exit code: 0; elapsed: 14.520s.
+- Command: `C:\Python314\python.exe tests/AnalysisAgentWebSmoke.py`
+- Context: Five explicit synthetic fixtures; added Beat/Warp proposal renders numeric geometry and no-track explanation, not fake inference.
+- Source SHA-256: `edad17b5f4d6121a15a65e95a4cd306903c0d00cb6a4dd8e89c7ea9acd31bc40`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T121131.417131Z-7a4e1436cc.json) · [Raw log](../build-logs/20261105T121131.417131Z-7a4e1436cc.log)
+- [Exact process output](../build-logs/20261105T121131.417131Z-7a4e1436cc.raw.log)
+
+### 2026-11-05T20:11:51+08:00 · tempo-warp-build · failed
+
+- Config: Release/Python; exit code: 1; elapsed: 119.575s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.10.0 fixed-tempo beat/Warp and workspace integration; offline checks, no physical audio or quality claim
+- Source SHA-256: `edad17b5f4d6121a15a65e95a4cd306903c0d00cb6a4dd8e89c7ea9acd31bc40`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T121151.406749Z-0236ee2ec9.json) · [Raw log](../build-logs/20261105T121151.406749Z-0236ee2ec9.log)
+- [Exact process output](../build-logs/20261105T121151.406749Z-0236ee2ec9.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T121151.406749Z-0236ee2ec9.log
+
+### 2026-11-05T20:13:19+08:00 · tempo-agent-final-unit · succeeded
+
+- Config: CPython3.14 / Headless Edge; exit code: 0; elapsed: 45.462s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: Agent/worker source frozen for this check; root native files still evolving. Final291Agent tests plus fiveUI fixtures after typed contracts, mapping and boundedHTTP rejection fix.
+- Source SHA-256: `eb1935a1201e77b86daa7b4f95633cc2cda8a6e6b982c6a05e4df6f3de9f541f`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T121319.800459Z-6a0ef91df1.json) · [Raw log](../build-logs/20261105T121319.800459Z-6a0ef91df1.log)
+- [Exact process output](../build-logs/20261105T121319.800459Z-6a0ef91df1.raw.log)
+
+### 2026-11-05T20:14:05+08:00 · tempo-agent-final-unit · succeeded
+
+- Config: CPython3.14 / Headless Edge; exit code: 0; elapsed: 12.942s.
+- Command: `C:\Python314\python.exe tests/AnalysisAgentWebSmoke.py`
+- Context: Agent/worker source frozen for this check; root native files still evolving. Final291Agent tests plus fiveUI fixtures after typed contracts, mapping and boundedHTTP rejection fix.
+- Source SHA-256: `eb1935a1201e77b86daa7b4f95633cc2cda8a6e6b982c6a05e4df6f3de9f541f`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T121405.452925Z-40bd183c86.json) · [Raw log](../build-logs/20261105T121405.452925Z-40bd183c86.log)
+- [Exact process output](../build-logs/20261105T121405.452925Z-40bd183c86.raw.log)
+
+### 2026-11-05T20:16:48+08:00 · tempo-warp-build · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 331.162s.
+- Command: `cmake --build E:\emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.10.0 fixed-tempo beat/Warp and workspace; offline checks, no physical audio or quality claim
+- Source SHA-256: `15a0319fd3eac38c993163e0f050193427a202788b9b9186dcd15699dcc10263`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T121648.574805Z-5de2d58db6.json) · [Raw log](../build-logs/20261105T121648.574805Z-5de2d58db6.log)
+- [Exact process output](../build-logs/20261105T121648.574805Z-5de2d58db6.raw.log)
+
+### 2026-11-05T20:23:52+08:00 · tempo-warp-worker · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 4.398s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/beats-cuda-py310/Scripts/python.exe -m unittest discover -s tests -p test_audio_analysis*.py -v`
+- Context: 0.10.0 fixed-tempo beat/Warp and workspace; offline checks, no physical audio or quality claim
+- Source SHA-256: `512e6ff1ef4551cfebfa8ebae0123c6a2143c2a7e400055a4b29da0be5cbb42d`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T122352.437526Z-e875178300.json) · [Raw log](../build-logs/20261105T122352.437526Z-e875178300.log)
+- [Exact process output](../build-logs/20261105T122352.437526Z-e875178300.raw.log)
+
+### 2026-11-05T20:23:04+08:00 · tempo-warp-ctest · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 116.542s.
+- Command: `ctest --test-dir E:\emusician-analysis-build -C Release --output-on-failure`
+- Context: 0.10.0 fixed-tempo beat/Warp and workspace; offline checks, no physical audio or quality claim
+- Source SHA-256: `512e6ff1ef4551cfebfa8ebae0123c6a2143c2a7e400055a4b29da0be5cbb42d`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T122304.024625Z-d718d888d5.json) · [Raw log](../build-logs/20261105T122304.024625Z-d718d888d5.log)
+- [Exact process output](../build-logs/20261105T122304.024625Z-d718d888d5.raw.log)
+
+### 2026-11-05T20:25:16+08:00 · tempo-warp-tempo-e2e · failed
+
+- Config: Release/Python; exit code: 1; elapsed: 34.285s.
+- Command: `C:\Python314\python.exe tests/MusicAgentTempoIntegration.py --exe E:\emusician-analysis-build\bin-0.10.0\Release\E-musician.exe --timeout 300`
+- Context: 0.10.0 fixed-tempo beat/Warp and workspace; offline checks, no physical audio or quality claim
+- Source SHA-256: `512e6ff1ef4551cfebfa8ebae0123c6a2143c2a7e400055a4b29da0be5cbb42d`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T122516.602108Z-02c38c1328.json) · [Raw log](../build-logs/20261105T122516.602108Z-02c38c1328.log)
+- [Exact process output](../build-logs/20261105T122516.602108Z-02c38c1328.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T122516.602108Z-02c38c1328.log
+
+### 2026-11-05T20:29:09+08:00 · tempo-e2e-guard-regression · failed
+
+- Config: Python3.14 / isolated temporary files; exit code: 1; elapsed: 0.985s.
+- Command: `C:\Python314\python.exe -c "
+import sys,tempfile
+from pathlib import Path
+from copy import deepcopy
+from unittest.mock import patch
+sys.path.insert(0,'tests')
+import MusicAgentTempoIntegration as m
+with tempfile.TemporaryDirectory() as folder:
+    app=Path(folder).resolve()/'E-musician';app.mkdir()
+    with patch.dict(m.os.environ,{'APPDATA':folder}),patch.object(m,'protected',return_value={}):
+        before=m.protected_snapshot()
+        assert before['hashes'][str(app/'ui-language.txt')] is None
+        assert before['hashes'][str(app/'follow-playhead.txt')] is None
+        assert m.protected_changes(before,before)['unchanged']
+        cache=app/'cache'/'warp-v1';cache.mkdir(parents=True)
+        good=cache/('a'*64+'.wav');good.write_bytes(b'new generated waveform')
+        sidecar=cache/('a'*64+'.json');sidecar.write_text('{}')
+        after=m.protected_snapshot();changes=m.protected_changes(before,after)
+        assert changes['unchanged'] and len(changes['allowed_new_warp_cache'])==2
+        for filename in ('ui-language.txt','follow-playhead.txt'):
+            pref=app/filename;pref.write_text('changed')
+            changes=m.protected_changes(before,m.protected_snapshot())
+            assert not changes['unchanged'] and any(filename in p for p in changes['changed_or_removed'])
+            pref.unlink()
+        for path in (app/'new.txt',cache/'bad.wav',cache/('b'*64+'.bin'),app/'cache'/'other'/('b'*64+'.wav'),cache/'nested'/('b'*64+'.json')):
+            path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(b'unexpected')
+            changes=m.protected_changes(before,m.protected_snapshot())
+            assert not changes['unchanged'] and changes['unexpected_additions']
+            path.unlink()
+        old=deepcopy(before);old['hashes'][str(good)]='original-hash';old['files'].add(str(good))
+        changed=deepcopy(old);changed['hashes'][str(good)]='different-hash'
+        assert not m.protected_changes(old,changed)['unchanged']
+        removed=deepcopy(old);del removed['hashes'][str(good)];removed['files'].remove(str(good))
+        assert not m.protected_changes(old,removed)['unchanged']
+        outside=deepcopy(before);outside['files'].add(str(Path(folder)/'external'/('b'*64+'.wav')))
+        diff=m.protected_changes(before,outside)
+        assert not diff['unchanged'] and diff['unexpected_additions'][0].startswith('<outside-protected-root>/')
+print('PASS: unchanged baseline, 2 exact new cache files, both absent preferences, unexpected extensions/directories, changed/removed prior cache, safe external diagnostics')
+"`
+- Context: Only tempo E2E guard changed; permit canonical new 64hex Warp files, protect all prior hashes and absent UI prefs; no product code change.
+- Source SHA-256: `f3c399a72342468dcffcaa4dfd5a43a3c1e2dbf42c2066b0b73ce0e8c742bf3d`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T122909.316898Z-f9e1242a34.json) · [Raw log](../build-logs/20261105T122909.316898Z-f9e1242a34.log)
+- [Exact process output](../build-logs/20261105T122909.316898Z-f9e1242a34.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T122909.316898Z-f9e1242a34.log
+
+### 2026-11-05T20:29:21+08:00 · tempo-e2e-guard-regression · succeeded
+
+- Config: Python3.14 / isolated temporary files; exit code: 0; elapsed: 1.447s.
+- Command: `C:\Python314\python.exe -c "
+import sys,tempfile
+from pathlib import Path
+from copy import deepcopy
+from unittest.mock import patch
+sys.path.insert(0,'tests')
+import MusicAgentTempoIntegration as m
+with tempfile.TemporaryDirectory() as folder:
+    app=Path(folder).resolve()/'E-musician';app.mkdir()
+    with patch.dict(m.os.environ,{'APPDATA':folder}),patch.object(m,'protected',return_value={}):
+        before=m.protected_snapshot()
+        assert before['hashes'][str(app/'ui-language.txt')] is None
+        assert before['hashes'][str(app/'follow-playhead.txt')] is None
+        assert m.protected_changes(before,before)['unchanged']
+        cache=app/'cache'/'warp-v1';cache.mkdir(parents=True)
+        good=cache/('a'*64+'.wav');good.write_bytes(b'new generated waveform')
+        sidecar=cache/('a'*64+'.json');sidecar.write_text('{}')
+        after=m.protected_snapshot();changes=m.protected_changes(before,after)
+        assert changes['unchanged'] and len(changes['allowed_new_warp_cache'])==2
+        for filename in ('ui-language.txt','follow-playhead.txt'):
+            pref=app/filename;pref.write_text('changed')
+            changes=m.protected_changes(before,m.protected_snapshot())
+            assert not changes['unchanged'] and any(filename in p for p in changes['changed_or_removed'])
+            pref.unlink()
+        for path in (app/'new.txt',cache/'bad.wav',cache/('b'*64+'.bin'),app/'cache'/'other'/('b'*64+'.wav'),cache/'nested'/('b'*64+'.json')):
+            path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(b'unexpected')
+            changes=m.protected_changes(before,m.protected_snapshot())
+            assert not changes['unchanged'] and changes['unexpected_additions']
+            path.unlink()
+        old=deepcopy(before);old['hashes'][str(good)]='original-hash';old['files'].add(str(good))
+        changed=deepcopy(old);changed['hashes'][str(good)]='different-hash'
+        assert not m.protected_changes(old,changed)['unchanged']
+        removed=deepcopy(old);del removed['hashes'][str(good)];removed['files'].remove(str(good))
+        assert not m.protected_changes(old,removed)['unchanged']
+        outside=deepcopy(before);outside['files'].add(str(Path(folder)/'external'/('b'*64+'.wav')))
+        diff=m.protected_changes(before,outside)
+        assert not diff['unchanged'] and diff['unexpected_additions'][0].startswith('<outside-protected-root>/')
+print('PASS: unchanged baseline, 2 exact new cache files, both absent preferences, unexpected extensions/directories, changed/removed prior cache, safe external diagnostics')
+"`
+- Context: After failed fixture reused mock dict, snapshot copies original hashes; regression checks same protections without shared mutable fixture state.
+- Source SHA-256: `47f058946b48a3020181aecee86b1e4ea7193247b5505751a67c147ed71df08e`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T122921.727480Z-f853646556.json) · [Raw log](../build-logs/20261105T122921.727480Z-f853646556.log)
+- [Exact process output](../build-logs/20261105T122921.727480Z-f853646556.raw.log)
+
+### 2026-11-05T20:29:23+08:00 · tempo-warp-build · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 26.660s.
+- Command: `cmake --build E:\emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.10.0 fixed-tempo beat/Warp and workspace; offline checks, no physical audio or quality claim
+- Source SHA-256: `47f058946b48a3020181aecee86b1e4ea7193247b5505751a67c147ed71df08e`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T122923.060202Z-17681fb951.json) · [Raw log](../build-logs/20261105T122923.060202Z-17681fb951.log)
+- [Exact process output](../build-logs/20261105T122923.060202Z-17681fb951.raw.log)
+
+### 2026-11-05T20:31:11+08:00 · tempo-warp-ctest · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 103.436s.
+- Command: `ctest --test-dir E:\emusician-analysis-build -C Release --output-on-failure`
+- Context: 0.10.0 fixed-tempo beat/Warp and workspace; offline checks, no physical audio or quality claim
+- Source SHA-256: `47f058946b48a3020181aecee86b1e4ea7193247b5505751a67c147ed71df08e`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T123111.303806Z-a0dca19eac.json) · [Raw log](../build-logs/20261105T123111.303806Z-a0dca19eac.log)
+- [Exact process output](../build-logs/20261105T123111.303806Z-a0dca19eac.raw.log)
+
+### 2026-11-05T20:33:24+08:00 · tempo-warp-e2e · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 32.018s.
+- Command: `C:\Python314\python.exe tests/AudioAnalysisEndToEnd.py --exe E:\emusician-analysis-build\bin-0.10.0\Release\E-musician.exe --six-stems`
+- Context: 0.10.0 fixed-tempo beat/Warp and workspace; offline checks, no physical audio or quality claim
+- Source SHA-256: `47f058946b48a3020181aecee86b1e4ea7193247b5505751a67c147ed71df08e`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T123324.627484Z-086c4cd1a9.json) · [Raw log](../build-logs/20261105T123324.627484Z-086c4cd1a9.log)
+- [Exact process output](../build-logs/20261105T123324.627484Z-086c4cd1a9.raw.log)
+
+### 2026-11-05T20:33:57+08:00 · tempo-warp-agent-e2e · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 28.550s.
+- Command: `C:\Python314\python.exe tests/MusicAgentAnalysisIntegration.py --exe E:\emusician-analysis-build\bin-0.10.0\Release\E-musician.exe --six-stems`
+- Context: 0.10.0 fixed-tempo beat/Warp and workspace; offline checks, no physical audio or quality claim
+- Source SHA-256: `47f058946b48a3020181aecee86b1e4ea7193247b5505751a67c147ed71df08e`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T123357.039432Z-31d7ed47a9.json) · [Raw log](../build-logs/20261105T123357.039432Z-31d7ed47a9.log)
+- [Exact process output](../build-logs/20261105T123357.039432Z-31d7ed47a9.raw.log)
+
+### 2026-11-05T20:34:25+08:00 · tempo-warp-tempo-e2e · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 32.205s.
+- Command: `C:\Python314\python.exe tests/MusicAgentTempoIntegration.py --exe E:\emusician-analysis-build\bin-0.10.0\Release\E-musician.exe --timeout 300`
+- Context: 0.10.0 fixed-tempo beat/Warp and workspace; offline checks, no physical audio or quality claim
+- Source SHA-256: `47f058946b48a3020181aecee86b1e4ea7193247b5505751a67c147ed71df08e`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T123425.976574Z-2876c627cc.json) · [Raw log](../build-logs/20261105T123425.976574Z-2876c627cc.log)
+- [Exact process output](../build-logs/20261105T123425.976574Z-2876c627cc.raw.log)
+
+### 2026-11-05T20:36:47+08:00 · tempo-warp-final-evidence · succeeded
+
+- Config: Release; exit code: 0; elapsed: 2.125s.
+- Command: `C:\Python314\python.exe .cache/finalize_0100_evidence.py`
+- Context: Verify frozen input hashes, final reports, UI artifacts and preserved version archives
+- Source SHA-256: `47f058946b48a3020181aecee86b1e4ea7193247b5505751a67c147ed71df08e`; Git HEAD: `be47b65771e32359c3c225092709330820952b0d`.
+- [Record](builds/20261105T123647.416719Z-ef5416c2c0.json) · [Raw log](../build-logs/20261105T123647.416719Z-ef5416c2c0.log)
+- [Exact process output](../build-logs/20261105T123647.416719Z-ef5416c2c0.raw.log)
+
+## 2026-11-05 ? 0.10.0 ??/Warp????????
+
+- ?????1????????????????be47b65?feature/tempo-warp-workspace-v0100?????Beat This?????/BPM/?????Signalsmith???????Warp???/??/?????schema6?Agent??/??/????????????????
+- ?????????????????????????/????/revision??????????????????????????????Warp????Tempo Map?
+- ????17681fb951?CTest a0dca19eac 10/10?Warp188???Worker34?Agent291?Web5???????9/Agent12????Warp??9??????207??47f05894??EXE474fc082???????????ef5416c2c0???????/??/?????SHA???RESULTS/VERIFICATION?
+- ???????HTTP?????????????????????????????????????????????/CTest????????????????????????????????
+- ?EXE?bin-0.10.0/Release??bin/Release 0.9.1??????hash??????????????????VS Code Tempo????120BPM???????????????/DPI?ASIO?????????/???????LLM????????LLM????computer-use?
+
+## 2026-11-05 — 0.10.0 交付候选与日志编码更正
+
+更正：上一条中文追加经过PowerShell默认ASCII管道，中文字被替换为问号。本条使用UTF-8脚本直接写入；按append-only约定保留乱码历史，不将其当作有效说明。其他三个可编辑说明文件的乱码追加段已恢复为中文。
+
+本轮基于be47b65，在feature/tempo-warp-workspace-v0100实现：用户确认的跟随播放头开关、真实Beat This节拍/BPM/拍号候选及首拍修正、Signalsmith固定比例保音高Warp、原源/播放/工程映射、schema6、Agent方案/确认/回读、保存设置重设计和情境右键。原件保留，后台准备完成后一次提交；取消、文件变化、revision冲突不提交。未做局部Warp点或完整Tempo Map。
+
+最终构建17681fb951、CTest a0dca19eac 10/10（Warp188项）、Worker34、Agent291、Web5、真实分析原生9/Agent12、新节拍Warp整链9组通过。207输入47f05894…、EXE474fc082…；冻结及旧版归档复核ef5416c2c0通过。完整命令/时间/原始失败/精确SHA见本轮RESULTS与VERIFICATION；首轮编译、HTTP和缓存保护断言失败均保留。实际截图问题修正后已复核。
+
+新程序独立在bin-0.10.0/Release；旧bin/Release 0.9.1和三份旧归档hash不变，未关闭用户原程序。已提供启动器、VS Code Tempo工作区与120BPM自制人工素材。真实鼠标/DPI、ASIO共存、复杂音乐识别/拉伸听感与真实模型理解仍待人工。本轮没有付费LLM或computer-use。

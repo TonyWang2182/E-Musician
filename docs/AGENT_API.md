@@ -1,5 +1,21 @@
 # 本地 Agent 控制接口 v1
 
+## 0.10.0 节拍与 Warp 增量（自动验证通过，人工待验）
+
+`start_analysis(kind="beats", preset="beat_this", parameters={"meter":"auto"|"3/4"|"4/4"})` 沿用片段内 start_seconds/duration_seconds（最多 600 秒）。候选 beat_events 采用分析区间相对秒，tempo 含 bpm、first_beat_seconds、first_downbeat_seconds、meter_numerator/denominator、meter_supported、tempo_candidates、variable_tempo；未知值为 null 或 numerator=0，不能当成已识别。波形峰值只给 UI，不放入语言模型上下文。
+
+| 命令 | 语义 |
+|---|---|
+| get_audio_warp | clip_ids 查询真实音频映射，返回 enabled、source_bpm、target_bpm、follow_tempo、warp_speed_ratio、原源及播放偏移、位置/长度 |
+| set_audio_warp | clip_ids、enabled；开启时 source_bpm 为原始录音速度、target_bpm 默认工程速度、follow_tempo；mode=preserve_pitch。可同时指定 first_beat_seconds（操作前当前片段相对秒）及 align_start_seconds（工程秒），返回后台 job_id |
+| apply_beat_analysis | result_id、mode=audio_to_project/project_to_audio；可修正 bpm、first_beat_seconds（分析范围相对秒）、target_start_seconds（工程首拍目标）、follow_tempo。project_to_audio 采用全局 BPM 和明确 3/4、4/4 拍号，并保留所选音频当前速度 |
+
+默认首拍取 first_downbeat_seconds，缺失必须明确指定。默认目标是能容纳片段前奏的下一小节；负起点拒绝。audio_to_project 的 BPM 修正指当前可听音频速度，宿主除以已有 Warp 比率换算为永久原源 BPM。project_to_audio 冻结所选音频的现有速度，并异步更新其他随工程变速的片段。两个动作不创建虚假音频轨或节拍轨。
+
+新模型工具 read_audio_warp / propose_audio_warp / propose_beat_application 采用读取、范围检查、方案、确认、异步等待、回读、一次撤销。改变全局速度/拍号要求 project scope；Warp 需要包含整个片段的授权范围。现有 set_tempo 方案会等待跟随音频准备完成，不把 accepted 当作已完成。过期候选、文件改变和 revision 冲突拒绝提交。已接受的候选一次使用；撤销后通过 Redo 恢复。
+
+Snapshot source_offset 保持**原始音频秒**；新增 playback_source_offset、warp_speed_ratio 等字段提供实际播放缓存映射。分析 source.clip_source_offset 是实际播放 PCM 偏移，Agent 对照 playback_source_offset 校验，并核对 warp_speed_ratio，不能直接拿它与原始偏移比较。
+
 ## 0.9.1 分析参数增量
 
 `start_analysis` 与模型工具 `start_audio_analysis` 共用下列 parameters，kind 不变：
