@@ -6,6 +6,8 @@
 
 新入口 `E:/MusicAgent&DAW/Start E-musician 0.10.0 Tempo.cmd`；EXE 单独在 `E:/emusician-analysis-build/bin-0.10.0/Release/`；VS Code 打开 `E:/MusicAgent&DAW/E-musician-Tempo.code-workspace`。先保存关闭旧窗口，避免单实例返回旧版。旧 bin/Release 0.9.1 EXE 及 0.8.1/0.9.0/0.9.1 归档哈希均保持不变，未关闭用户原程序。下一步按 [人工短测](review/2026-11-05-tempo-warp/MANUAL-CHECK.md) 使用已准备的 120 BPM 素材验收；不自动合并 main。本轮无付费 LLM 和 computer-use。下方为历史状态。
 
+实现提交 `8936038` 已推送该功能分支，远端 main 未变；本地 `releases/0.10.0-20261105-tempo-warp` 的源码/EXE/PDB/入口归档已复核，见 [PUBLISH](review/2026-11-05-tempo-warp/PUBLISH.json)。归档为本机保留包，仍需对应 Worker 脚本和已安装模型运行库。
+
 # 历史候选：0.9.1 可视分析工作区（2026-11-05，自动验证通过、人工待验）
 
 工作树 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/analysis-workspace-v091`，基线 `f0d95b3`；不要编辑旧 C 盘工作树。用户要求独立和弦轨、简单图形结果、易发现改名、Settings 中英文切换和分析优化。本轮已实现和弦轨/来源切换/修正跳转，波形与矩形 MIDI 预览，四个改名入口，英文默认及中文偏好，真实四/六轨与质量档、转录音域和扩展和弦模板；手动/Agent 共享候选、参数、轨数预算、确认和完成回读。

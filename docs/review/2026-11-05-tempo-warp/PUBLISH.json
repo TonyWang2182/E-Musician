@@ -1,0 +1,35 @@
+{
+  "verified_at": "2026-11-05T12:46:41.632982+00:00",
+  "repository": "https://github.com/TonyWang2182/E-Musician",
+  "branch": "feature/tempo-warp-workspace-v0100",
+  "implementation_commit": "89360380b0742ee0760fdf4a1183c7f96de0b7cd",
+  "remote_branch_at_implementation_publish": "89360380b0742ee0760fdf4a1183c7f96de0b7cd",
+  "remote_main_unchanged": "d4ed6c898af1303918e38b6325a915befabbb575",
+  "release_directory": "E:\\MusicAgent&DAW\\releases\\0.10.0-20261105-tempo-warp",
+  "archive_source_entries": 1317,
+  "verified_source_inputs": 207,
+  "artifacts": {
+    "E-musician-Tempo.code-workspace": {
+      "bytes": 3502,
+      "sha256": "da362b32d119760a74dad978fe6c91b94fe318c392fddf73b6dcfadcdb634535"
+    },
+    "E-musician.exe": {
+      "bytes": 21918720,
+      "sha256": "474fc0824600c4aeb99ff4b617b890220d9b9a20e9dafde0f9ed6abe0bbfb5d6"
+    },
+    "E-musician.pdb": {
+      "bytes": 170151936,
+      "sha256": "4e8cdc204d10d03b847d5ba986900a7899fad637fa007b651f6f77a2e88498b5"
+    },
+    "source-and-docs.zip": {
+      "bytes": 17344353,
+      "sha256": "331c2abc0ed85e2ae79e2918bca029b8f6fa3bf6418a8b3b89ee54c9ca1ab77b"
+    },
+    "Start E-musician 0.10.0 Tempo.cmd": {
+      "bytes": 207,
+      "sha256": "981a4e983e7b28fc9a71abf1cbe7a1fe90e9f260a4f4ab8a00908cba7b9078b4"
+    }
+  },
+  "status": "implementation_pushed_archive_verified_human_acceptance_pending",
+  "note": "Publication metadata follows the implementation commit; archive freezes exact implementation and docs. No main merge, no paid model calls, no desktop automation."
+}

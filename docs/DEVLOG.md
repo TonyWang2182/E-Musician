@@ -7274,3 +7274,7 @@ print('PASS: unchanged baseline, 2 exact new cache files, both absent preference
 最终构建17681fb951、CTest a0dca19eac 10/10（Warp188项）、Worker34、Agent291、Web5、真实分析原生9/Agent12、新节拍Warp整链9组通过。207输入47f05894…、EXE474fc082…；冻结及旧版归档复核ef5416c2c0通过。完整命令/时间/原始失败/精确SHA见本轮RESULTS与VERIFICATION；首轮编译、HTTP和缓存保护断言失败均保留。实际截图问题修正后已复核。
 
 新程序独立在bin-0.10.0/Release；旧bin/Release 0.9.1和三份旧归档hash不变，未关闭用户原程序。已提供启动器、VS Code Tempo工作区与120BPM自制人工素材。真实鼠标/DPI、ASIO共存、复杂音乐识别/拉伸听感与真实模型理解仍待人工。本轮没有付费LLM或computer-use。
+
+## 2026-11-05 — 0.10.0 代码同步与本地保留
+
+实现提交89360380b0742ee0760fdf4a1183c7f96de0b7cd已推送feature/tempo-warp-workspace-v0100，远端精确回读一致；main仍为d4ed6c898af1303918e38b6325a915befabbb575，未合并。保留目录E:/MusicAgent&DAW/releases/0.10.0-20261105-tempo-warp包含EXE/PDB、源码文档ZIP、启动器及VS Code工作区；1317个归档条目中207个源码输入逐一匹配测试指纹，全部产物hash复核。精确记录见本轮PUBLISH.json。该保留包不是可移植安装器，模型与运行库仍为本机独立依赖。
