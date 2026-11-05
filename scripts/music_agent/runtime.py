@@ -600,12 +600,16 @@ class AgentRuntime:
                              revision=after["revision"],status="verified" if not errors else "verification_failed")
 
     def _verify_analysis_import(self, plan, receipt, after):
-        result = self.bridge.analysis_result(plan["analysis"]["result_id"])
+        approved = plan["analysis"]
+        result = self.bridge.analysis_result(approved["result_id"])
         errors = []
-        if result.get("applied") is not True or result.get("result_hash") != plan["analysis"]["result_hash"]:
+        if (result.get("applied") is not True or result.get("result_hash") != approved["result_hash"]
+                or result.get("kind") != approved["kind"] or result.get("total") != approved["total"]):
             errors.append("宿主未确认相同候选已导入")
         ids = receipt.get("track_ids", [])
-        expected = 4 if result["kind"] == "separate" else 1 if result["kind"] == "transcribe" else 0
+        # compile_import already validated the immutable candidate's four/six
+        # names and count. Verify against the approved count, not a fixed four.
+        expected = approved["total"] if approved["kind"] == "separate" else 1 if approved["kind"] == "transcribe" else 0
         if not isinstance(ids, list) or len(ids) != expected or len(set(ids)) != len(ids) or not set(ids) <= {t["id"] for t in after.get("tracks", [])}:
             errors.append("新增轨道回读不完整")
         clip_ids = receipt.get("clip_ids", [])
@@ -626,6 +630,8 @@ class AgentRuntime:
                         errors.append("转录片段类型或音符数量不匹配")
                     if result["kind"] == "separate" and clip.get("kind") != "audio":
                         errors.append("分离片段类型不匹配")
+                if approved["kind"] == "separate" and {clips[cid].get("analysis_role") for cid in clip_ids} != {item["name"] for item in approved["items"]}:
+                    errors.append("分离片段声部标识不匹配")
         if result["kind"] == "chords" and len(receipt.get("chord_ids", [])) != result["total"]:
             errors.append("和弦标签回执数量不匹配")
         return errors

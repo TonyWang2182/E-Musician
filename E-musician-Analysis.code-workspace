@@ -31,7 +31,7 @@
   "launch": {
     "version": "0.2.0",
     "configurations": [{
-      "name": "E-musician 0.9 Analysis / Release",
+      "name": "E-musician 0.9.1 Analysis / Release",
       "type": "cppvsdbg",
       "request": "launch",
       "program": "E:/emusician-analysis-build/bin/Release/E-musician.exe",

@@ -45,8 +45,10 @@ class AnalysisScopeTests(unittest.TestCase):
     def test_parameters_use_worker_contract_and_reject_cross_kind_values(self):
         ctx=context(); args={"clip_id":"c","kind":"transcribe","parameters":{"onset_threshold":.7,"min_pitch":36,"max_pitch":84,"minimum_note_ms":40}}
         self.assertEqual(authorize_start(ctx,freeze_scope(ctx),args)["parameters"],args["parameters"])
-        for params in ({"device":"cuda"},{"sensitivity":.5},{"min_pitch":40.5},{"min_pitch":80,"max_pitch":60},{"minimum_note_ms":-1}):
+        for params in ({"device":"cuda"},{"sensitivity":.5},{"min_pitch":40.5},{"min_pitch":80,"max_pitch":60},{"minimum_note_ms":-1},{"instrument":"bass","min_pitch":80}):
             with self.subTest(params=params),self.assertRaises(ValueError): authorize_start(ctx,freeze_scope(ctx),{**args,"parameters":params})
+        ctx["tracks"][0]["clips"][0]["analysis_role"]="bass"
+        with self.assertRaises(ValueError):authorize_start(ctx,freeze_scope(ctx),{**args,"parameters":{"instrument":"auto","min_pitch":80}})
 
     def test_unselected_audio_and_paths_not_authorized(self):
         ctx = context(); ctx["tracks"][0]["clips"].append({"id": "else", "kind": "audio", "start_seconds": 0, "duration_seconds": 2})
@@ -71,8 +73,79 @@ class AnalysisScopeTests(unittest.TestCase):
         args={"region_id":"ch","clip_id":"c","label":"D:min","summary":"修正标签"}
         plan=compile_chord_edit(args,chord,ctx,freeze_scope(ctx))
         self.assertEqual(plan["commands"],[{"command":"edit_chord_region","args":{"id":"ch","label":"D:min"}}])
-        for change in ({"start_seconds":9}, {"end_seconds":14}, {"label":"C:maj7"}, {"label":"C:maj"}):
+        for change in ({"start_seconds":9}, {"end_seconds":14}, {"label":"C:maj9"}, {"label":"C:maj"}):
             with self.subTest(change=change),self.assertRaises(ValueError): compile_chord_edit({**args,**change},chord,ctx,freeze_scope(ctx))
+
+    def test_extended_chord_edits_use_canonical_supported_labels(self):
+        ctx=context(); chord={"id":"ch", "analysis_id":"r", "label":"C:maj", "start_seconds":10, "end_seconds":12, "score":.8,"uncertain":False}
+        for label in ("C:maj7", "D:min7", "G:7", "B:hdim7", "F:sus4", "C:dim7"):
+            plan=compile_chord_edit({"region_id":"ch","clip_id":"c","label":label,"summary":"修正"},chord,ctx,freeze_scope(ctx))
+            self.assertEqual(plan["commands"][0]["args"]["label"],label)
+
+    def test_other_profile_survives_start_result_import_and_cancel(self):
+        ctx=context();ctx["tracks"][0]["clips"][0]["analysis_role"]="other";scope=freeze_scope(ctx)
+        for profile in ("piano","bass","guitar","vocals"):
+            parameters={"instrument":profile}
+            started=authorize_start(ctx,scope,{"clip_id":"c","kind":"transcribe","parameters":parameters})
+            self.assertEqual(started["parameters"],parameters)
+            candidate=safe_result({**result(),"parameters":parameters})
+            authorize_result(ctx,scope,candidate)
+            plan=compile_import(candidate,ctx,scope,"导入音符")
+            self.assertEqual(plan["commands"][0]["command"],"accept_analysis_result")
+            job=safe_job({"job_id":"manual","kind":"transcribe","status":"running","source":candidate["source"],"parameters":parameters})
+            self.assertEqual(authorize_cancel(ctx,scope,job),"manual")
+        with self.assertRaises(ScopeError):authorize_result(ctx,scope,result())
+        with self.assertRaises(ScopeError):authorize_cancel(ctx,scope,{"job_id":"j","kind":"transcribe","status":"running","source":result()["source"]})
+        ctx["tracks"][0]["clips"][0]["analysis_role"]="drums"
+        with self.assertRaises(ScopeError):authorize_start(ctx,freeze_scope(ctx),{"clip_id":"c","kind":"transcribe","parameters":{"instrument":"piano"}})
+
+    def test_malformed_instrument_is_value_error_not_type_error(self):
+        ctx=context();ctx["tracks"][0]["clips"][0]["analysis_role"]="other";scope=freeze_scope(ctx)
+        for value in ([],{},["piano"],{"name":"piano"},True,None,"unknown"):
+            with self.subTest(value=value),self.assertRaises(ValueError):
+                authorize_start(ctx,scope,{"clip_id":"c","kind":"transcribe","parameters":{"instrument":value}})
+
+    def test_six_stem_import_counts_validates_names_and_track_budget(self):
+        ctx=context();scope=freeze_scope(ctx)
+        candidate=result("separate",6)
+        candidate["parameters"]={"stems":6,"quality":"quality"}
+        names=("vocals","drums","bass","piano","guitar","other")
+        candidate["items"]=[{"name":name,"duration_seconds":10,"sample_rate":44100,"channels":2,"waveform_peaks":[.1]*128} for name in names]
+        candidate=safe_result(candidate)
+        self.assertNotIn("waveform_peaks",str(candidate))
+        plan=compile_import(candidate,ctx,scope,"导入六轨")
+        self.assertIn("6",plan["changes"][0])
+        self.assertEqual([item["name"] for item in plan["analysis"]["items"]],list(names))
+        ctx["tracks"] += [{"id":f"other-{i}","clips":[]} for i in range(57)]
+        compile_import(candidate,ctx,scope,"导入六轨")
+        ctx["tracks"].append({"id":"one-too-many","clips":[]})
+        with self.assertRaisesRegex(ValueError,"64"):
+            compile_import(candidate,ctx,scope,"导入六轨")
+        for mutation in ({"total":5},{"parameters":{"stems":4}}, {"offset":1},
+                         {"items":candidate["items"][:-1]}, {"items":[{"name":"vocals"}]*6},
+                         {"items":[{"name":name} for name in ("vocals","drums","bass","piano","synth","other")] }):
+            with self.subTest(mutation=mutation),self.assertRaises(ValueError):
+                compile_import({**candidate,**mutation},context(),freeze_scope(context()),"导入")
+
+    def test_four_stem_import_retains_original_contract(self):
+        candidate=result("separate",4)
+        candidate["items"]=[{"name":name} for name in ("vocals","drums","bass","other")]
+        plan=compile_import(candidate,context(),freeze_scope(context()),"导入四轨")
+        self.assertIn("4",plan["changes"][0])
+
+    def test_capability_option_lists_filter_malformed_and_unknown_values(self):
+        base={"providers":[{"kind":"separate","available":True},{"kind":[]}],"separation_six_stems":True}
+        result=safe_capabilities({**base,"separation_quality_modes":["fast",{},[],"quality","fast","unknown"],
+            "transcription_instruments":["piano",None,{},"drums"],"chord_vocabularies":["triads",[],"extended"]})
+        self.assertEqual(result["separation_quality_modes"],["fast","quality"])
+        self.assertEqual(result["transcription_instruments"],["piano"])
+        self.assertEqual(result["chord_vocabularies"],["triads","extended"])
+        self.assertTrue(result["separation_six_stems"])
+        for malformed in (None,{},"fast",3):
+            clean=safe_capabilities({**base,"separation_quality_modes":malformed,"transcription_instruments":malformed,"chord_vocabularies":malformed})
+            self.assertEqual(clean["separation_quality_modes"],[])
+            self.assertEqual(clean["transcription_instruments"],[])
+            self.assertEqual(clean["chord_vocabularies"],[])
 
     def test_project_chord_edit_survives_deleted_source(self):
         ctx=context();ctx["tracks"]=[]
@@ -149,7 +222,7 @@ class AnalysisBridge(FakeBridge):
         self.last_chords = None
 
     def capabilities(self): return {"commands": list(COMMANDS)}
-    def analysis_capabilities(self): return {"providers": [{"kind": "transcribe", "available": True}]}
+    def analysis_capabilities(self): return {"providers": [{"kind": self.candidate["kind"], "available": True}], "separation_six_stems": True}
     def start_analysis(self, context, frozen, args):
         authorize_start(context, frozen, args); self.calls.append(("start", args)); self.started.set(); return {"job_id": "j"}
     def analysis_job(self, jid):
@@ -173,11 +246,16 @@ class AnalysisBridge(FakeBridge):
         self.calls.append(("apply", deepcopy(plan))); self.last_before = deepcopy(self.data); self.last_notes = deepcopy(self.notes)
         return {"status": "accepted", "result": {"job_id": "import", "result_id": "r"}}
     def wait_analysis_import(self, jid):
-        self.data["tracks"].append({"id": "new-track", "kind": "instrument", "name": "Transcription", "clips": [
-            {"id": "new-clip", "kind": "midi", "start_seconds": 8, "duration_seconds": 10, "note_count": 2}]})
+        if self.candidate["kind"] == "separate":
+            added = [{"id": "track-"+item["name"], "kind": "audio", "name": "Separated / "+item["name"], "clips": [
+                {"id": "clip-"+item["name"], "kind": "audio", "analysis_role": item["name"], "start_seconds": 8, "duration_seconds": 10}]} for item in self.candidate["items"]]
+        else:
+            added = [{"id": "new-track", "kind": "instrument", "name": "Transcription", "clips": [
+                {"id": "new-clip", "kind": "midi", "start_seconds": 8, "duration_seconds": 10, "note_count": 2}]}]
+        self.data["tracks"].extend(added)
         self.data.update(revision=4, can_undo=True)
         self.candidate["applied"] = True
-        return {"result_id": "r", "applied": True, "revision": 4, "track_ids": ["new-track"], "clip_ids": ["new-clip"], "chord_ids": []}
+        return {"result_id": "r", "applied": True, "revision": 4, "track_ids": [t["id"] for t in added], "clip_ids": [t["clips"][0]["id"] for t in added], "chord_ids": []}
     def undo(self,*args):
         reply=super().undo(*args)
         if self.last_chords is not None:self.chords=deepcopy(self.last_chords)
@@ -230,6 +308,39 @@ class AnalysisRuntimeTests(unittest.TestCase):
         self.assertTrue(runtime.bridge.cancelled)
         self.assertEqual(len(runtime.provider.requests), 1)
         self.assertFalse(any(c[0] == "apply" for c in runtime.bridge.calls))
+
+    def test_four_and_six_stem_confirmation_readback_and_one_undo(self):
+        for count in (4, 6):
+            with self.subTest(count=count):
+                runtime = self.make(tool("propose_analysis_import", {"result_id": "r", "summary": "导入分离候选"}))
+                names = ("vocals", "drums", "bass", "other") + (("piano", "guitar") if count == 6 else ())
+                runtime.bridge.candidate = {**result("separate", count), "parameters": {"stems": count}, "items": [{"name": name} for name in names]}
+                runtime.plan_request("导入已有分离候选", "selection"); state = self.finish(runtime)
+                self.assertEqual(state["phase"], "ready", state)
+                self.assertEqual(len(runtime.bridge.data["tracks"]), 1)
+                runtime.apply(state["plan"]["id"]); state = self.finish(runtime)
+                self.assertEqual(state["phase"], "done", state)
+                self.assertTrue(state["can_undo"])
+                self.assertEqual(len(runtime.bridge.data["tracks"]), count + 1)
+                self.assertEqual({t["clips"][0]["analysis_role"] for t in runtime.bridge.data["tracks"][1:]}, set(names))
+                runtime.undo(); self.finish(runtime)
+                self.assertEqual(len(runtime.bridge.data["tracks"]), 1)
+
+    def test_separation_readback_rejects_changed_count_missing_clip_and_wrong_role(self):
+        runtime = self.make()
+        names = ("vocals", "drums", "bass", "piano", "guitar", "other")
+        candidate = {**result("separate", 6), "parameters": {"stems": 6}, "items": [{"name": name} for name in names]}
+        plan = compile_import(candidate, context(), freeze_scope(context()), "导入六轨")
+        runtime.bridge.candidate = deepcopy(candidate)
+        receipt = runtime.bridge.wait_analysis_import("import")
+        after = runtime.bridge.snapshot()
+        self.assertEqual(runtime._verify_analysis_import(plan, receipt, after), [])
+        runtime.bridge.candidate["total"] = 4
+        self.assertTrue(runtime._verify_analysis_import(plan, receipt, after))
+        runtime.bridge.candidate["total"] = 6
+        self.assertTrue(runtime._verify_analysis_import(plan, {**receipt, "clip_ids": receipt["clip_ids"][:-1]}, after))
+        after["tracks"][-1]["clips"][0]["analysis_role"] = "piano"
+        self.assertIn("分离片段声部标识不匹配", runtime._verify_analysis_import(plan, receipt, after))
 
     def test_scope_changed_after_preview_prevents_import(self):
         runtime = self.make(tool("propose_analysis_import", {"result_id": "r", "summary": "导入"}))

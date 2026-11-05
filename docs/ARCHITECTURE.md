@@ -1,5 +1,17 @@
 # E-musician 技术架构
 
+## 0.9.1 可视分析、语言和模型配置
+
+和弦轨是 `EM_CHORDS → revision 缓存的共享只读 ChordRegionSnapshot → ArrangementView` 投影，不是音频轨、不参与混音图。共用标尺、缩放、水平滚动；多个分析按 analysisId 切换，绘制用排序区间索引裁剪到可视范围。双击按稳定 region ID 打开 AnalysisPanel 的来源过滤分页，修改继续走 `edit_chord_region`，保存/Undo 仍由 Edit 负责。和弦选择是视图状态，Agent 可按来源读取/编辑，未把它冒充音频/MIDI 选轨上下文。
+
+分析下栏直接画候选音符/和弦矩形；分轨 128 点幅度包络由 Worker 计算，原生 paint 不读盘。下栏不展示评分、设备、算法版本等报告，这些继续保留在结果和日志。用户明确 Add 后普通分轨/MIDI 轨或和弦轨才写入工程；同一来源重复分析保持独立。
+
+六轨通过独立 `separate_6s` 注册与固定权重接入原任务管线；quality 使用更高重叠和两次移位平均，fast 保持默认。转录仍为同一 Basic Pitch ONNX，instrument 只选音域；已知 other 只有显式指定音高乐器才允许尝试，drums 仍拒绝。和弦可选 24 或 132 类 + N，自有确定性模板/Viterbi，不是爵士训练模型。发布候选时记录 Worker 规范化参数，GUI/Agent 四/六轨数量、音域、标签及保存校验一致。schema 保持 5；旧 0.9.0 无法解释新扩展标签时明确拒绝，不静默改名。
+
+`UiLanguage.h` 管理 en/zh-CN 偏好和变更计数，Settings 持久化到本机用户目录。组件只翻译标记的静态文案，用户轨名、素材名、插件名与模型内容保持原文；语言切换不更改工程、设备或播放图。AgentSidebar 用 locale 和 WebView JS 切换语言，不重启 worker 或清空草稿。第三方插件自身语言及部分历史底层诊断不在翻译范围。
+
+源码实现与验收分开：来源和实测见 [Worker 记录](review/2026-11-05-analysis-workspace/WORKER-NOTES.md)，本轮总体证据见 [RESULTS](review/2026-11-05-analysis-workspace/RESULTS.md)，取舍见 [ADR](decisions/2026-11-05-analysis-workspace-language.md)。不能从本段结构推断识别准确率或 ASIO 性能。
+
 ## 0.9.0 本地分析管线（已实现，硬件/听感待人工）
 
 `AnalysisPanel / Agent tools → EngineSession 分析命令 → 文件线程 → 注册 Python worker → 不可变候选 → 后台哈希/DTO 校验 → 控制线程一次提交`。实时图仅播放已导入素材；模型推理完全独立。`AnalysisPreview` 用专用后台流读取候选，回调仅消费有界 PCM 环形缓冲。

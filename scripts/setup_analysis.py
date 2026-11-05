@@ -30,13 +30,14 @@ def main():
     parser.add_argument("--uv", default=shutil.which("uv") or str(Path.home() / ".local/bin/uv.exe"))
     parser.add_argument("--register-only", action="store_true")
     parser.add_argument("--device", choices=("cpu", "cuda"), default="cpu", help="CUDA applies only to separation; keeps the CPU environment.")
+    parser.add_argument("--stems", type=int, choices=(4, 6), default=4, help="Six stems registers an additional model and preserves the four-stem model.")
     args = parser.parse_args()
     root = args.root.resolve()
     for name in ("runtimes", "models", "cache/downloads", "cache/tmp", "manifests", "logs"):
         (root / name).mkdir(parents=True, exist_ok=True)
     os.environ.update(UV_CACHE_DIR=str(root / "cache/downloads/uv"), UV_PYTHON_INSTALL_DIR=str(root / "runtimes/python"),
                       TEMP=str(root / "cache/tmp"), TMP=str(root / "cache/tmp"))
-    recorder = Recorder("analysis-setup", "Python3.10 CPU", "Explicit isolated model installation/probe; weights remain outside Git.")
+    recorder = Recorder("analysis-setup", "Python3.10 " + args.device.upper(), "Explicit isolated model installation/probe; weights remain outside Git.")
     for kind in NAMES if args.kind == "all" else (args.kind,):
         device = args.device if kind == "separate" else "cpu"
         environment = root / "runtimes" / ("separation-cuda-py310" if device == "cuda" else NAMES[kind])
@@ -52,7 +53,8 @@ def main():
             requirements = [line.strip() for line in lock.read_text(encoding="utf-8").splitlines()
                             if line.strip() and not line.startswith(("#", "torch=="))]
             recorder.execute([args.uv, "pip", "install", "--python", str(python), *requirements])
-        recorder.execute([str(python), "scripts/audio_analysis/register.py", "--root", str(root), "--kind", kind, "--device", device])
+        recorder.execute([str(python), "scripts/audio_analysis/register.py", "--root", str(root), "--kind", kind, "--device", device,
+                          "--stems", str(args.stems if kind == "separate" else 4)])
     return 0
 
 

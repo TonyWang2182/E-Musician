@@ -15,8 +15,13 @@ MAX_NOTES = 100_000
 MAX_CHORDS = 10_000
 MAX_JSON_BYTES = 16 * 1024 * 1024
 PRESETS = {"separate": "htdemucs", "transcribe": "basic-pitch", "chords": "chroma-hmm"}
+INSTRUMENT_RANGES = {"auto": (21, 108), "piano": (21, 108), "bass": (23, 72),
+                     "guitar": (28, 96), "vocals": (36, 96)}
+OPTIONS = {"separate": {"quality": ("fast", "quality")},
+           "transcribe": {"instrument": tuple(INSTRUMENT_RANGES)},
+           "chords": {"vocabulary": ("extended", "triads")}}
 PARAMETERS = {
-    "separate": {"segment_seconds": (3., 4., 4.)},
+    "separate": {"segment_seconds": (3., 4., 4.), "stems": (4., 6., 4.)},
     "transcribe": {"onset_threshold": (0., 1., .5), "frame_threshold": (0., 1., .3),
                    "minimum_note_ms": (10., 2000., 80.), "min_pitch": (21., 108., 21.),
                    "max_pitch": (21., 108., 108.)},
@@ -79,19 +84,43 @@ def validate_request(request: Any) -> dict:
     if not isinstance(job_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,96}", job_id):
         raise AnalysisError("invalid_request", "Invalid job ID.")
     kind = request.get("kind")
-    if kind not in PRESETS or request.get("preset", "") not in ("", "default", PRESETS[kind]):
+    if kind not in PRESETS or request.get("preset", "") not in (
+            "", "default", PRESETS[kind], *( ("htdemucs_6s",) if kind == "separate" else ())):
         raise AnalysisError("unsupported_provider", "Unknown analysis kind or preset.")
     source = request.get("source", {})
     if not isinstance(source, dict):
         raise AnalysisError("invalid_request", "source must be an object.")
-    if kind == "transcribe" and source.get("input_role") in ("drums", "other"):
-        raise AnalysisError("unsupported_input", "Basic Pitch is for pitched instruments, not drum classification or a mixed other stem.")
     params = request.get("parameters", {})
-    if not isinstance(params, dict) or set(params) - set(PARAMETERS[kind]):
+    if not isinstance(params, dict) or set(params) - (set(PARAMETERS[kind]) | set(OPTIONS[kind])):
         raise AnalysisError("invalid_parameter", "Unknown analysis parameter.")
     normalized = {}
+    for name, choices in OPTIONS[kind].items():
+        choice = params.get(name, choices[0])
+        if not isinstance(choice, str) or choice not in choices:
+            raise AnalysisError("invalid_parameter", f"Unsupported {name} option.")
+        normalized[name] = choice
+    if kind == "transcribe" and (source.get("input_role") == "drums" or (
+            source.get("input_role") == "other" and normalized["instrument"] == "auto")):
+        raise AnalysisError("unsupported_input", "Basic Pitch is for pitched instruments, not drum classification. Choose a pitched instrument profile for a mixed other stem.")
+    defaults = {}
+    if kind == "transcribe":
+        instrument = normalized["instrument"]
+        # Auto selects only from trustworthy source roles supplied by our own
+        # separation importer. It is not another instrument classifier.
+        if instrument == "auto" and source.get("input_role") in INSTRUMENT_RANGES:
+            instrument = source["input_role"]
+        low, high = INSTRUMENT_RANGES[instrument]
+        defaults.update(min_pitch=low, max_pitch=high)
+    if kind == "separate" and request.get("preset") == "htdemucs_6s":
+        if "stems" in params and params["stems"] != 6:
+            raise AnalysisError("invalid_parameter", "Six-stem preset conflicts with the requested stem count.")
+        defaults["stems"] = 6
     for name, (low, high, default) in PARAMETERS[kind].items():
-        normalized[name] = finite_number(params.get(name, default), name, low, high)
+        normalized[name] = finite_number(params.get(name, defaults.get(name, default)), name, low, high)
+    if kind == "separate":
+        if normalized["stems"] not in (4, 6):
+            raise AnalysisError("invalid_parameter", "Choose four or six stems.")
+        normalized["stems"] = int(normalized["stems"])
     if kind == "transcribe":
         if any(normalized[k] != int(normalized[k]) for k in ("min_pitch", "max_pitch")):
             raise AnalysisError("invalid_parameter", "Pitch limits must be integers.")

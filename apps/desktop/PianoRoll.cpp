@@ -1,4 +1,5 @@
 #include "PianoRoll.h"
+#include "UiLanguage.h"
 #include "core/time/EditGrid.hpp"
 #include <algorithm>
 #include <array>
@@ -46,6 +47,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
                 &grid, &horizontal, &vertical, &snap, &snapEnabled, &draw, &copy, &cut, &paste, &erase, &duplicate, &quantize,
                 &down, &up, &velocity, &zoomOut, &zoomIn, &fit, &drums, &drumPitch, &drumBar }) owner.addAndMakeVisible(item);
         for (auto* button : { &draw, &snapEnabled, &copy, &cut, &paste, &erase, &duplicate, &quantize, &down, &up, &zoomOut, &zoomIn, &fit, &drums }) button->getProperties().set("flat", true);
+        for (auto* button : { &draw, &snapEnabled, &copy, &cut, &paste, &erase, &duplicate, &quantize, &down, &up, &zoomOut, &zoomIn, &fit, &drums }) uiButton(*button, button->getButtonText());
         snap.addItem("1/4", 2); snap.addItem("1/8", 3); snap.addItem("1/16", 4); snap.addItem("1/32", 5);
         snap.addItem("1/64", 6);
         for (int power = 7; power <= 14; ++power) snap.addItem("1/" + juce::String(1 << power), power + 2);
@@ -80,8 +82,8 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
         };
         velocity.onDragEnd = [this] { if (velocityGesture) { velocityGesture = false; submit(gestureRevision); } };
         drums.setClickingTogglesState(true); drums.onClick = [this] { refreshSteps(); owner.resized(); };
-        drumPitch.addItem("kick / 36", 36); drumPitch.addItem("snare / 38", 38); drumPitch.addItem("closed hat / 42", 42);
-        drumPitch.addItem("open hat / 46", 46); drumPitch.addItem("clap / 39", 39); drumPitch.addItem("tom / 45", 45);
+        uiComboItem(drumPitch, 36, "kick / 36"); uiComboItem(drumPitch, 38, "snare / 38"); uiComboItem(drumPitch, 42, "closed hat / 42");
+        uiComboItem(drumPitch, 46, "open hat / 46"); uiComboItem(drumPitch, 39, "clap / 39"); uiComboItem(drumPitch, 45, "tom / 45");
         drumPitch.setSelectedId(36, juce::dontSendNotification); drumPitch.onChange = [this] { refreshSteps(); };
         drumBar.setFont(mono(13)); drumBar.setInputRestrictions(6, "0123456789");
         drumBar.setColour(juce::TextEditor::textColourId, ink); drumBar.setText("1", false);
@@ -439,7 +441,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     void paintGrid(juce::Graphics& g)
     {
         g.fillAll(paper); const auto area = plot();
-        if (clipId.isEmpty()) { g.setColour(quiet); g.setFont(mono(15)); g.drawFittedText("Select a MIDI clip to edit notes.", grid.getLocalBounds(), juce::Justification::centred, 2); return; }
+        if (clipId.isEmpty()) { g.setColour(quiet); g.setFont(mono(15)); g.drawFittedText(uiText("Select a MIDI clip to edit notes."), grid.getLocalBounds(), juce::Justification::centred, 2); return; }
         const int rows = int(std::ceil(area.getHeight() / rowHeight));
         for (int r = 0; r < rows; ++r) {
             const int pitch = topPitch - r; if (pitch < 0) break;
@@ -603,6 +605,7 @@ void PianoRoll::setPlayhead(double seconds, bool playing)
 }
 void PianoRoll::resized()
 {
+    refreshUiButtons(*this);
     auto& p = *impl; auto top = getLocalBounds().reduced(12).removeFromTop(30);
     // Allow for the host's 15 px monospaced labels and 8 px button insets.
     // Keep transpose in the second row so labels fit even in the 726 px dock.
@@ -632,8 +635,8 @@ void PianoRoll::resized()
 void PianoRoll::paint(juce::Graphics& g)
 {
     auto& p = *impl; g.fillAll(paper); g.setColour(quiet); g.setFont(mono(12));
-    g.drawText("velocity", 12, 46, 70, 27, juce::Justification::centredLeft);
-    if (p.drums.getToggleState()) g.drawText("block", 170, getHeight() - 80, 44, 18, juce::Justification::centredLeft);
+    g.drawText(uiText("velocity"), 12, 46, 70, 27, juce::Justification::centredLeft);
+    if (p.drums.getToggleState()) g.drawText(uiText("block"), 170, getHeight() - 80, 44, 18, juce::Justification::centredLeft);
     // The minimum main-window dock has only 156 px after its title bar. Tooltips
     // and the main status line retain help/errors; reserve its lower area for notes.
     if (p.veryCompact()) return;

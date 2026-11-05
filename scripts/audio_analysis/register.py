@@ -57,9 +57,10 @@ def package_manifest(name, destination):
     return provenance
 
 
-def register(root, kind, device="cpu"):
+def register(root, kind, device="cpu", stems=4):
     configure_environment(root)
-    manifest_dir = root / "manifests" / (kind + ("-cuda" if device == "cuda" else ""))
+    provider_key = "separate_6s" if kind == "separate" and stems == 6 else kind
+    manifest_dir = root / "manifests" / (provider_key + ("-cuda" if device == "cuda" else ""))
     manifest_dir.mkdir(parents=True, exist_ok=True)
     started = time.perf_counter()
     import numpy as np
@@ -79,17 +80,20 @@ def register(root, kind, device="cpu"):
                 raise ValueError("CUDA runtime/device is not available; existing CPU registration remains unchanged")
             torch.cuda.reset_peak_memory_stats()
         info_path = manifest_dir / "huggingface-model.json"
-        if device == "cuda" and not info_path.exists() and (root / "manifests/separate/huggingface-model.json").exists():
-            shutil.copy2(root / "manifests/separate/huggingface-model.json", info_path)
+        cpu_manifest = root / "manifests" / provider_key / "huggingface-model.json"
+        if device == "cuda" and not info_path.exists() and cpu_manifest.exists():
+            shutil.copy2(cpu_manifest, info_path)
+        model_id = "htdemucs_6s" if stems == 6 else "htdemucs"
+        repository = "adefossez/HTDemucs-6s" if stems == 6 else "adefossez/HTDemucs"
         # The first explicit install resolves main once, then saves a permanent
         # revision. Re-running setup never silently upgrades the checkpoint.
         if info_path.exists():
             info = read_json(info_path)
         else:
-            info = fetch_json("https://huggingface.co/api/models/adefossez/HTDemucs/revision/main?blobs=true")
+            info = fetch_json(f"https://huggingface.co/api/models/{repository}/revision/main?blobs=true")
             atomic_json(info_path, info)
         revision = info["sha"]
-        directory = root / "models/demucs/htdemucs" / revision
+        directory = root / "models/demucs" / model_id / revision
         weights = [item for item in info["siblings"] if item["rfilename"].endswith(".safetensors")]
         if len(weights) != 1:
             raise ValueError("Expected exactly one HTDemucs checkpoint")
@@ -98,20 +102,21 @@ def register(root, kind, device="cpu"):
         expected = weight.get("lfs", {}).get("sha256")
         if not expected:
             raise ValueError("Official model metadata omitted the weight SHA-256")
-        download(f"https://huggingface.co/adefossez/HTDemucs/resolve/{revision}/{weight['rfilename']}", model_path, expected)
-        for filename in ("README.md", "htdemucs.yaml"):
-            download(f"https://huggingface.co/adefossez/HTDemucs/resolve/{revision}/{filename}", directory / filename)
+        download(f"https://huggingface.co/{repository}/resolve/{revision}/{weight['rfilename']}", model_path, expected)
+        for filename in ("README.md", model_id + ".yaml"):
+            download(f"https://huggingface.co/{repository}/resolve/{revision}/{filename}", directory / filename)
         model = load_safetensors_model(model_path).eval()
         # Tiny zero signal still executes the real network, not the worker's
         # silence fast path. This establishes CPU compatibility, not quality.
         with torch.inference_mode():
             outputs = apply_model(model, torch.zeros(1, 2, 11025), shifts=0, split=False, segment=4, device=device)
-        if tuple(outputs.shape) != (1, 4, 2, 11025) or not torch.isfinite(outputs).all():
+        if tuple(outputs.shape) != (1, stems, 2, 11025) or not torch.isfinite(outputs).all():
             raise ValueError("HTDemucs forward probe failed")
-        entry.update(model_id="htdemucs", version="4.1.0", source_revision=revision,
-                     source_url="https://huggingface.co/adefossez/HTDemucs", model_path=str(model_path),
+        entry.update(model_id=model_id, version="4.1.0", source_revision=revision,
+                     source_url="https://huggingface.co/" + repository, model_path=str(model_path),
                      weight_sha256=expected, license_status="code-MIT; checkpoint-redistribution-not-cleared-local-evaluation",
-                     reason=f"Local evaluation checkpoint; {device.upper()} probe passed. Four stems only.")
+                     sources=list(model.sources),
+                     reason=f"Local evaluation checkpoint; {device.upper()} probe passed. {stems} stems.")
         if device == "cuda":
             entry.update(gpu_name=torch.cuda.get_device_name(), cuda_version=torch.version.cuda,
                          probe_peak_cuda_allocated_bytes=torch.cuda.max_memory_allocated(),
@@ -156,9 +161,9 @@ def register(root, kind, device="cpu"):
             raise ValueError("Chord Viterbi probe failed")
         chroma, energy = pitch_class_features(np.zeros(22050, dtype=np.float32))
         assert chroma.shape[0] == 12 and np.isfinite(energy).all()
-        entry.update(model_id="chroma-hmm", version="1.0.0", source_revision="emusician-chroma-hmm-1",
+        entry.update(model_id="chroma-hmm", version="2.0.0", source_revision="emusician-chroma-hmm-2",
                      source_url="https://www.audiolabs-erlangen.de/resources/MIR/FMP/C5/C5S3_ChordRec_HMM.html",
-                     license_status="original-baseline; NumPy/SciPy-BSD", reason="CPU baseline ready; 24 triads + N, uncalibrated similarity.")
+                     license_status="original-baseline; NumPy/SciPy-BSD", reason="CPU template baseline ready; triad/extended vocabularies, uncalibrated similarity.")
         provenance.append(package_manifest("scipy", manifest_dir))
     entry.update(available=True, probe_elapsed_seconds=time.perf_counter() - started)
     versions = {distribution.metadata["Name"]: distribution.version for distribution in importlib.metadata.distributions()}
@@ -181,7 +186,11 @@ def register(root, kind, device="cpu"):
             time.sleep(.1)
     try:
         registry = read_json(registry_path) if registry_path.exists() else {"schema_version": 1, "providers": {}}
-        registry["providers"][kind] = entry
+        if registry_path.exists():
+            backup = root / "manifests/registry-history" / (str(time.time_ns()) + ".json")
+            backup.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(registry_path, backup)
+        registry["providers"][provider_key] = entry
         atomic_json(registry_path, registry)
     finally:
         lock.unlink()
@@ -194,7 +203,10 @@ if __name__ == "__main__":
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--kind", choices=("separate", "transcribe", "chords"), required=True)
     parser.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
+    parser.add_argument("--stems", type=int, choices=(4, 6), default=4)
     args = parser.parse_args()
     if args.device == "cuda" and args.kind != "separate":
         parser.error("CUDA is only supported for separation")
-    register(args.root.resolve(), args.kind, args.device)
+    if args.stems == 6 and args.kind != "separate":
+        parser.error("--stems applies only to separation")
+    register(args.root.resolve(), args.kind, args.device, args.stems)

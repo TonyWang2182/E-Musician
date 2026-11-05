@@ -1,101 +1,102 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>E-musician · 编曲助手</title>
+  <title data-i18n="E-musician · 编曲助手">E-musician · Music assistant</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/style.css">
+  <script src="/i18n.js" defer></script>
   <script src="/app.js" defer></script>
 </head>
 <body>
-  <a class="skip-link" href="#prompt">跳到输入框</a>
+  <a class="skip-link" href="#prompt" data-i18n="跳到输入框">Skip to message</a>
   <div class="app-shell">
     <header class="topbar">
-      <div class="title-block"><span class="brand" aria-hidden="true">e~</span><h1>编曲助手</h1></div>
+      <div class="title-block"><span class="brand" aria-hidden="true">e~</span><h1 data-i18n="编曲助手">Music assistant</h1></div>
       <div class="header-actions">
-        <span id="connection" class="connection">连接中</span>
-        <button id="collapse" class="icon-button" type="button" aria-label="收起助手" title="收起助手 · Esc" hidden><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M6 4l6 6-6 6M15 4v12"/></svg></button>
+        <span id="connection" class="connection" data-i18n="连接中">Connecting</span>
+        <button id="collapse" class="icon-button" type="button" aria-label="Close sidebar" data-i18n-aria-label="收起助手" title="Close sidebar · Esc" data-i18n-title="收起助手 · Esc" hidden><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M6 4l6 6-6 6M15 4v12"/></svg></button>
       </div>
     </header>
     <div class="model-bar">
-      <button id="settings-toggle" class="model-toggle" type="button" aria-controls="settings" aria-expanded="false"><span id="current-model">模型设置</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></button>
-      <button id="refresh" class="quiet" type="button" aria-label="刷新工程状态">刷新</button>
+      <button id="settings-toggle" class="model-toggle" type="button" aria-controls="settings" aria-expanded="false"><span id="current-model" data-i18n="模型设置">Model settings</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></button>
+      <button id="refresh" class="quiet" type="button" aria-label="Refresh project" data-i18n-aria-label="刷新工程状态" data-i18n="刷新">Refresh</button>
     </div>
-    <section id="settings" class="settings" aria-label="模型设置" hidden>
+    <section id="settings" class="settings" aria-label="Model settings" data-i18n-aria-label="模型设置" hidden>
       <form id="settings-form">
         <div class="settings-grid">
-          <label>模型服务<select id="provider" name="provider"><option value="kimi">Kimi</option></select></label>
-          <label>模型<input id="model" name="model" type="text" list="model-options" maxlength="100" spellcheck="false" autocomplete="off"><datalist id="model-options"></datalist></label>
-          <label id="reasoning-setting" hidden>推理强度<select id="reasoning-effort" name="reasoning_effort"><option value="low">低 · 更快</option><option value="medium">中 · 默认</option><option value="high">高 · 适合复杂任务</option></select></label>
+          <label><span data-i18n="模型服务">Provider</span><select id="provider" name="provider"><option value="kimi">Kimi</option></select></label>
+          <label><span data-i18n="模型">Model</span><input id="model" name="model" type="text" list="model-options" maxlength="100" spellcheck="false" autocomplete="off"><datalist id="model-options"></datalist></label>
+          <label id="reasoning-setting" hidden><span data-i18n="推理强度">Reasoning effort</span><select id="reasoning-effort" name="reasoning_effort"><option value="low" data-i18n="低 · 更快">Low · faster</option><option value="medium" data-i18n="中 · 默认">Medium · default</option><option value="high" data-i18n="高 · 适合复杂任务">High · complex tasks</option></select></label>
         </div>
-        <p id="reasoning-hint" class="field-hint" hidden>仅对已支持的 OpenAI 推理模型生效；更高强度可能增加等待时间与 token 费用。</p>
+        <p id="reasoning-hint" class="field-hint" hidden data-i18n="仅对已支持的 OpenAI 推理模型生效；更高强度可能增加等待时间与 token 费用。">Supported OpenAI reasoning models only. Higher effort may take longer and use more tokens.</p>
         <p id="provider-status" class="field-hint"></p>
-        <details id="connection-settings"><summary>连接与密钥</summary>
-          <label>服务地址<input id="base-url" name="base_url" type="url" maxlength="200" spellcheck="false" autocomplete="off"></label>
-          <label>API 密钥<span id="key-state" class="field-hint">检查中</span><input id="api-key" name="api_key" type="password" placeholder="留空则保留此服务的密钥" autocomplete="new-password" maxlength="4096" spellcheck="false"></label>
-          <p class="privacy-note">密钥由本机保管，不保存在浏览器中。</p>
+        <details id="connection-settings"><summary data-i18n="连接与密钥">Connection and API key</summary>
+          <label><span data-i18n="服务地址">Base URL</span><input id="base-url" name="base_url" type="url" maxlength="200" spellcheck="false" autocomplete="off"></label>
+          <label><span data-i18n="API 密钥">API key</span><span id="key-state" class="field-hint" data-i18n="检查中">Checking</span><input id="api-key" name="api_key" type="password" placeholder="Leave blank to keep the saved key" data-i18n-placeholder="留空则保留此服务的密钥" autocomplete="new-password" maxlength="4096" spellcheck="false"></label>
+          <p class="privacy-note" data-i18n="密钥由本机保管，不保存在浏览器中。">Your key is stored on this computer, not in the browser.</p>
         </details>
-        <div class="settings-footer"><p id="settings-feedback" class="feedback" role="status"></p><button id="settings-save" type="submit">保存设置</button></div>
+        <div class="settings-footer"><p id="settings-feedback" class="feedback" role="status"></p><button id="settings-save" type="submit" data-i18n="保存设置">Save settings</button></div>
       </form>
     </section>
     <div class="work-area">
       <aside class="project-panel">
         <details id="project-details">
-          <summary><span id="project-title">正在连接工程…</span><span class="project-meta"><span id="tempo">—</span> · <span id="meter">—</span></span></summary>
+          <summary><span id="project-title" data-i18n="正在连接工程…">Connecting to project…</span><span class="project-meta"><span id="tempo">—</span> · <span id="meter">—</span></span></summary>
           <div class="project-content">
-            <p class="revision-line">修订 <span id="revision">—</span></p>
-            <p id="selection-text">尚未读取选择</p>
-            <div class="section-heading"><h2>轨道</h2><span id="track-count" class="muted">0</span></div>
-            <ul id="tracks" class="tracks"><li class="empty">连接后显示轨道。</li></ul>
-            <p id="scope-note" class="scope-note">只连接本助手启动的 DAW。请在那个窗口打开工程、选择片段。</p>
+            <p class="revision-line"><span data-i18n="修订">Revision</span> <span id="revision">—</span></p>
+            <p id="selection-text" data-i18n="尚未读取选择">Reading selection</p>
+            <div class="section-heading"><h2 data-i18n="轨道">Tracks</h2><span id="track-count" class="muted">0</span></div>
+            <ul id="tracks" class="tracks"><li class="empty" data-i18n="连接后显示轨道。">Tracks appear when connected.</li></ul>
+            <p id="scope-note" class="scope-note" data-i18n="只连接本助手启动的 DAW。请在那个窗口打开工程、选择片段。">Open your project and select clips in the connected DAW.</p>
           </div>
         </details>
       </aside>
       <main class="conversation-panel">
-        <div id="transcript" class="conversation-scroll" tabindex="0" aria-label="对话与修改方案">
+        <div id="transcript" class="conversation-scroll" tabindex="0" aria-label="Conversation and plan" data-i18n-aria-label="对话与修改方案">
           <div id="notice" class="notice" role="alert" hidden></div>
-          <section id="conversation" class="conversation" aria-label="对话记录">
-            <div id="conversation-empty" class="welcome"><h2>从一个小调整开始</h2><p>选好轨道、片段或音符，告诉我你想怎样调整。修改会先列成方案，等你确认。</p><p class="privacy-note">发送工程结构与必要的音符数据。音频分析在本机运行，不上传音频文件。</p></div>
-            <details id="capabilities" class="capabilities" open><summary>助手能做什么</summary><div id="capability-list"><p class="muted">正在核对宿主与本机模型…</p></div></details>
+          <section id="conversation" class="conversation" aria-label="Conversation" data-i18n-aria-label="对话记录">
+            <div id="conversation-empty" class="welcome"><h2 data-i18n="从一个小调整开始">What would you like to change?</h2><p data-i18n="选好轨道、片段或音符，告诉我你想怎样调整。修改会先列成方案，等你确认。">Select tracks, clips or notes and describe the change. Review the plan before applying it.</p><p class="privacy-note" data-i18n="发送工程结构与必要的音符数据。音频分析在本机运行，不上传音频文件。">Uses project structure and relevant notes. Audio analysis runs locally.</p></div>
+            <details id="capabilities" class="capabilities" open><summary data-i18n="助手能做什么">What the assistant can do</summary><div id="capability-list"><p class="muted" data-i18n="正在核对宿主与本机模型…">Checking available tools…</p></div></details>
             <div id="messages"></div>
           </section>
-          <section id="task-progress" class="task-progress" aria-label="任务进度" hidden>
-            <div class="task-heading"><span class="activity-dot" aria-hidden="true"></span><span id="phase" role="status" aria-live="polite">准备就绪</span><div class="task-actions"><button id="pause-work" class="quiet" type="button" hidden>暂停</button><button id="cancel-work" class="quiet" type="button" hidden>停止</button></div></div>
-            <ol id="execution-stages" class="execution-stages" aria-label="应用阶段" hidden><li data-stage="preflight">检查</li><li data-stage="submitting">提交</li><li data-stage="verifying">核对</li><li data-stage="done">完成</li></ol>
-            <p id="busy-detail" class="muted"></p><p id="commit-hint" class="muted" hidden>应用期间不能暂停或取消；成功后可整体撤销。</p>
+          <section id="task-progress" class="task-progress" aria-label="Task progress" data-i18n-aria-label="任务进度" hidden>
+            <div class="task-heading"><span class="activity-dot" aria-hidden="true"></span><span id="phase" role="status" aria-live="polite" data-i18n="准备就绪">Ready</span><div class="task-actions"><button id="pause-work" class="quiet" type="button" hidden data-i18n="暂停">Pause</button><button id="cancel-work" class="quiet" type="button" hidden data-i18n="停止">Stop</button></div></div>
+            <ol id="execution-stages" class="execution-stages" aria-label="Apply progress" data-i18n-aria-label="应用阶段" hidden><li data-stage="preflight" data-i18n="检查">Check</li><li data-stage="submitting" data-i18n="提交">Apply</li><li data-stage="verifying" data-i18n="核对">Verify</li><li data-stage="done" data-i18n="完成">Done</li></ol>
+            <p id="busy-detail" class="muted"></p><p id="commit-hint" class="muted" hidden data-i18n="应用期间不能暂停或取消；成功后可整体撤销。">Apply finishes as one operation. Undo is available afterward.</p>
           </section>
           <section id="plan" class="plan" aria-labelledby="plan-heading" hidden>
-            <div class="section-heading"><h2 id="plan-heading">待应用的修改</h2><span id="plan-revision" class="muted"></span></div>
+            <div class="section-heading"><h2 id="plan-heading" data-i18n="待应用的修改">Review changes</h2><span id="plan-revision" class="muted"></span></div>
             <p id="plan-summary"></p>
-            <details id="analysis-preview" class="analysis-preview" hidden><summary id="analysis-preview-title">分析候选</summary><p id="analysis-preview-info" class="muted"></p><ol id="analysis-preview-items"></ol><p id="analysis-preview-limit" class="muted"></p></details>
-            <div id="plan-sequence" class="plan-sequence" hidden><h3>执行顺序</h3><ol id="plan-steps"></ol></div>
-            <h3 class="changes-heading">具体修改</h3><ol id="changes"></ol>
+            <details id="analysis-preview" class="analysis-preview" hidden><summary id="analysis-preview-title" data-i18n="分析候选">Analysis result</summary><p id="analysis-preview-info" class="muted"></p><ol id="analysis-preview-items"></ol><p id="analysis-preview-limit" class="muted"></p></details>
+            <div id="plan-sequence" class="plan-sequence" hidden><h3 data-i18n="执行顺序">Steps</h3><ol id="plan-steps"></ol></div>
+            <h3 class="changes-heading" data-i18n="具体修改">Changes</h3><ol id="changes"></ol>
             <details id="note-previews" class="note-previews" hidden>
-              <summary id="note-preview-summary">新增音符明细</summary>
-              <p class="note-preview-help">这是新增时的音符；后续变化见方案步骤。起点从片段内 0 开始，起点和长度以四分音符拍计。音高使用 MIDI 编号。</p>
+              <summary id="note-preview-summary" data-i18n="新增音符明细">New notes</summary>
+              <p class="note-preview-help" data-i18n="这是新增时的音符；后续变化见方案步骤。起点从片段内 0 开始，起点和长度以四分音符拍计。音高使用 MIDI 编号。">New notes before later plan steps. Start and length use quarter-note beats within the clip; pitch uses MIDI numbers.</p>
               <div id="note-preview-rows"></div>
-              <div id="note-preview-pager" class="note-preview-pager" hidden><p id="note-preview-page" role="status"></p><div><button id="note-preview-prev" type="button">上一页</button><button id="note-preview-next" type="button">下一页</button></div></div>
+              <div id="note-preview-pager" class="note-preview-pager" hidden><p id="note-preview-page" role="status"></p><div><button id="note-preview-prev" type="button" data-i18n="上一页">Previous</button><button id="note-preview-next" type="button" data-i18n="下一页">Next</button></div></div>
             </details>
             <p id="plan-scope" class="plan-hint"></p>
-            <p class="plan-hint">工程或选区改变后，请重新生成方案。</p>
-            <p class="plan-hint">按以上顺序整批应用；成功后可一次撤销。</p>
-            <div class="plan-actions"><button id="apply" class="primary" type="button">应用全部修改</button><button id="discard" type="button">放弃</button></div>
+            <p class="plan-hint" data-i18n="工程或选区改变后，请重新生成方案。">Generate a new plan if the project or selection changes.</p>
+            <p class="plan-hint" data-i18n="按以上顺序整批应用；成功后可一次撤销。">Applies all steps together, with one Undo.</p>
+            <div class="plan-actions"><button id="apply" class="primary" type="button" data-i18n="应用全部修改">Apply changes</button><button id="discard" type="button" data-i18n="放弃">Discard</button></div>
           </section>
-          <section id="result" class="result" aria-label="执行结果" hidden><h2>执行结果</h2><p id="result-text"></p><button id="undo" type="button" disabled>撤销这次修改</button></section>
+          <section id="result" class="result" aria-label="Result" data-i18n-aria-label="执行结果" hidden><h2 data-i18n="执行结果">Result</h2><p id="result-text"></p><button id="undo" type="button" disabled data-i18n="撤销这次修改">Undo this change</button></section>
         </div>
         <div class="composer-dock">
-          <div class="scope-row"><label for="scope">操作范围</label><select id="scope"><option value="selection" selected>当前选择</option><option value="project">整个工程</option></select></div>
-          <div id="context-pills" class="context-pills" aria-label="当前选择上下文"></div>
-          <p id="scope-hint" class="scope-hint">正在读取选择…</p>
-          <form id="prompt-form" class="composer"><label class="sr-only" for="prompt">告诉助手你想做的调整</label><textarea id="prompt" name="prompt" rows="2" maxlength="4000" placeholder="描述想做的调整…" required></textarea><div class="composer-footer"><span id="composer-hint">Ctrl + Enter 发送</span><button id="submit" class="primary" type="submit" disabled>发送</button></div></form>
-          <p id="usage" class="usage">本次会话 · 0 次请求</p>
+          <div class="scope-row"><label for="scope" data-i18n="操作范围">Scope</label><select id="scope"><option value="selection" selected data-i18n="当前选择">Current selection</option><option value="project" data-i18n="整个工程">Whole project</option></select></div>
+          <div id="context-pills" class="context-pills" aria-label="Current selection" data-i18n-aria-label="当前选择上下文"></div>
+          <p id="scope-hint" class="scope-hint" data-i18n="正在读取选择…">Reading selection…</p>
+          <form id="prompt-form" class="composer"><label class="sr-only" for="prompt" data-i18n="告诉助手你想做的调整">Describe your change</label><textarea id="prompt" name="prompt" rows="2" maxlength="4000" placeholder="Describe what you want to change…" data-i18n-placeholder="描述想做的调整…" required></textarea><div class="composer-footer"><span id="composer-hint" data-i18n="Ctrl + Enter 发送">Ctrl + Enter to send</span><button id="submit" class="primary" type="submit" disabled data-i18n="发送">Send</button></div></form>
+          <p id="usage" class="usage" data-i18n="本次会话 · 0 次请求">This session · 0 requests</p>
         </div>
       </main>
     </div>
-    <footer id="standalone-footer" class="footer"><span>关闭助手前，请在 DAW 保存工程</span><button id="shutdown" class="quiet" type="button">关闭助手</button></footer>
+    <footer id="standalone-footer" class="footer"><span data-i18n="关闭助手前，请在 DAW 保存工程">Save your project before closing the assistant</span><button id="shutdown" class="quiet" type="button" data-i18n="关闭助手">Close assistant</button></footer>
   </div>
-  <dialog id="shutdown-dialog" aria-labelledby="shutdown-title"><h2 id="shutdown-title">已在 DAW 保存工程？</h2><p>关闭助手会结束它连接的 DAW 进程。请先回到 DAW 保存；仅关闭网页不会结束服务。</p><p id="shutdown-feedback" role="alert"></p><div class="dialog-actions"><button id="shutdown-cancel" type="button" autofocus>返回保存</button><button id="shutdown-confirm" class="primary" type="button">已保存，关闭助手</button></div></dialog>
+  <dialog id="shutdown-dialog" aria-labelledby="shutdown-title"><h2 id="shutdown-title" data-i18n="已在 DAW 保存工程？">Have you saved your project?</h2><p data-i18n="关闭助手会结束它连接的 DAW 进程。请先回到 DAW 保存；仅关闭网页不会结束服务。">Closing the assistant ends its DAW process. Save in the DAW first. Closing only this page leaves the service running.</p><p id="shutdown-feedback" role="alert"></p><div class="dialog-actions"><button id="shutdown-cancel" type="button" autofocus data-i18n="返回保存">Go back</button><button id="shutdown-confirm" class="primary" type="button" data-i18n="已保存，关闭助手">Saved · close assistant</button></div></dialog>
 </body>
 </html>

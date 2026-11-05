@@ -40,6 +40,17 @@ EngineSession::Snapshot EngineSession::snapshot()const
         s.masterPlugins=slots(state.masterPlugins);
         auto lanes=[](const auto& list){std::vector<AutomationLaneSnapshot> out;for(const auto& lane:list){auto points=std::make_shared<std::vector<AutomationPointSnapshot>>();points->reserve(lane.points.size());for(const auto& point:lane.points)points->push_back({point.id,point.timeSeconds,point.value,point.curve});out.push_back({lane.id,lane.target,lane.pluginId,lane.parameterId,lane.enabled,points});}return out;};
         s.masterAutomation=lanes(state.masterAutomation);
+        if(!state.chordRegions.empty()){
+            std::map<juce::String,juce::String> chordSources;
+            for(const auto& analysis:state.analyses)if(analysis.kind=="chords"){
+                juce::String name;
+                for(const auto& track:state.tracks)for(const auto& clip:track.clips)if(clip.id==analysis.sourceClipId)name=track.name;
+                chordSources.emplace(analysis.id,name);
+            }
+            auto chords=std::make_shared<std::vector<ChordRegionSnapshot>>();chords->reserve(state.chordRegions.size());
+            for(const auto& chord:state.chordRegions)chords->push_back({chord.id,chord.label,chord.analysisId,chordSources[chord.analysisId],chord.startSeconds,chord.endSeconds});
+            s.chordRegions=std::move(chords);
+        }
         for(const auto& t:state.tracks){
             TrackSnapshot track;track.id=t.id;track.name=t.name;track.kind=t.kind;track.pan=t.pan;track.gainDb=t.gainDb;track.muted=t.muted;track.solo=t.solo;track.plugins=slots(t.plugins);
             track.inputDeviceId=t.inputDeviceId;track.outputTargetId=t.outputTargetId;track.automation=lanes(t.automation);

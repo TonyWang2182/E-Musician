@@ -1,4 +1,5 @@
 #include "NativeEffectsPanel.h"
+#include "UiLanguage.h"
 #include "NativeEffects.h"
 #include "DeviceControlStyle.h"
 #include <complex>
@@ -21,6 +22,7 @@ struct NativeEffectsPanel::Impl {
          std::function<void(const juce::Result&)> callback)
         : owner(component), session(engine), trackId(std::move(track)), deviceId(std::move(device)), report(std::move(callback)), graph(*this) {
         for (auto* c : std::initializer_list<juce::Component*>{ &title, &status, &meter, &addEq, &addComp, &addDelay, &addReverb, &addFilter, &filterMode, &filterLfo, &graph, &bandOn, &shape, &bypass, &reset }) owner.addAndMakeVisible(c);
+        for (auto* button : { &addEq, &addComp, &addDelay, &addReverb, &addFilter, &filterMode, &filterLfo, &bandOn, &bypass, &reset }) uiButton(*button, button->getButtonText());
         title.setFont(mono(15)); status.setFont(mono(11)); status.setColour(juce::Label::textColourId, quiet);
         meter.setFont(mono(11)); meter.setColour(juce::Label::textColourId, quiet); meter.setJustificationType(juce::Justification::centredRight);
         meter.setText("GR --", juce::dontSendNotification);
@@ -45,7 +47,7 @@ struct NativeEffectsPanel::Impl {
                 if (selectedBand < list->size()) list->set(selectedBand, next["bands"].getArray()->getReference(selectedBand)); next = std::move(copy); }
             commit(next, revision, projectId);
         };
-        shape.addItemList({"Bell", "Low shelf", "High shelf", "High pass", "Low pass", "Notch"}, 1);
+        { int id = 1; for (const auto* name : {"Bell", "Low shelf", "High shelf", "High pass", "Low pass", "Notch"}) uiComboItem(shape, id++, name); }
         shape.setTooltip("Filter shape of the selected EQ band. Cut and notch shapes do not use the gain control.");
         shape.onChange = [this] {
             if (updating || !valid || dragging) return; auto next = state.clone();
@@ -67,7 +69,7 @@ struct NativeEffectsPanel::Impl {
         const std::array<double, 14> defaults {1000,0,.7071,-18,4,10,100,0,100,350,35,35,0,100};
         for (int i = 0; i < 14; ++i) {
             auto& slider = sliders[std::size_t(i)]; auto& label = names[std::size_t(i)]; owner.addAndMakeVisible(slider); owner.addAndMakeVisible(label);
-            label.setText(labels[std::size_t(i)], juce::dontSendNotification); label.setFont(mono(11)); label.setColour(juce::Label::textColourId, quiet); label.setJustificationType(juce::Justification::centred);
+            uiLabel(label, labels[std::size_t(i)]); label.setFont(mono(11)); label.setColour(juce::Label::textColourId, quiet); label.setJustificationType(juce::Justification::centred);
             slider.setRange(low[std::size_t(i)], high[std::size_t(i)], step[std::size_t(i)]);
             deviceui::configureKnob(slider, controlLook, defaults[std::size_t(i)], suffix[std::size_t(i)]);
             slider.setTitle(labels[std::size_t(i)]);
@@ -91,6 +93,7 @@ struct NativeEffectsPanel::Impl {
         status.setText(message, juce::dontSendNotification); status.setTooltip(message);
     }
     void update() {
+        if (languageRevision != uiLanguageRevision()) { languageRevision = uiLanguageRevision(); refreshUiButtons(owner); owner.repaint(); }
         const auto snapshot = session.snapshot(); if (sampleRate != snapshot.sampleRate) graph.invalidate(); sampleRate = snapshot.sampleRate;
         if (projectId.isEmpty()) projectId = snapshot.projectId;
         if (snapshot.projectId != projectId || (trackId != "master" && snapshot.selectedTrackId != trackId)) { valid = false; setError("Project or track changed. Reopen this panel."); refreshControls(); return; }
@@ -100,7 +103,7 @@ struct NativeEffectsPanel::Impl {
         const auto updateEnabledSlot = [&](const auto& slots) { for (const auto& slot : slots) if (slot.id == deviceId) deviceEnabled = slot.enabled; };
         if (trackId == "master") updateEnabledSlot(snapshot.masterPlugins);
         else for (const auto& track : snapshot.tracks) if (track.id == trackId) updateEnabledSlot(track.plugins);
-        bypass.setButtonText(deviceEnabled ? "on" : "bypassed");
+        uiButton(bypass, deviceEnabled ? "on" : "bypassed");
         valid = !snapshot.recording && !snapshot.recordingFinalizing && !snapshot.nativePending;
         if (deviceId.isEmpty()) { revision = snapshot.revision; state = juce::var(); refreshControls(); return; }
         if (snapshot.revision == revision && state.isObject()) { refreshEnabled(); return; }
@@ -140,14 +143,14 @@ struct NativeEffectsPanel::Impl {
         title.setText(prefix + (empty ? "Add a built-in effect" : eq ? "EQ Eight / " + juce::String(selectedBand + 1) : comp ? "Compressor" : delay ? "Stereo Delay" : reverb ? "Reverb" : filter ? "Auto Filter" : "Effect unavailable"), juce::dontSendNotification);
         addEq.setVisible(empty); addComp.setVisible(empty); addDelay.setVisible(empty); addReverb.setVisible(empty); addFilter.setVisible(empty); filterMode.setVisible(filter); filterLfo.setVisible(filter);
         graph.setVisible(eq || comp || delay || reverb || filter); bandOn.setVisible(eq); shape.setVisible(eq); meter.setVisible(comp); bypass.setVisible(!empty); reset.setVisible(!empty);
-        reset.setButtonText(eq ? "reset band" : "reset");
-        if(filter){filterMode.setButtonText(state["mode"].toString()=="low_pass"?"low pass":"high pass");filterLfo.setButtonText(bool(state["lfo_enabled"])?"LFO on":"LFO off");}
+        uiButton(reset, eq ? "reset band" : "reset");
+        if(filter){uiButton(filterMode, state["mode"].toString()=="low_pass"?"low pass":"high pass");uiButton(filterLfo, bool(state["lfo_enabled"])?"LFO on":"LFO off");}
         graph.setTitle(comp ? "Compressor static input output curve" : delay ? "Delay echoes guide" : reverb ? "Reverb decay guide" : filter ? "Filter response" : "Equalizer response");
         graph.setDescription("Parameter response preview, not a live spectrum. Drag labeled points; Escape cancels. Knobs and value boxes provide keyboard alternatives.");
         for (int i = 0; i < 8; ++i) { bands[std::size_t(i)].setVisible(eq); bands[std::size_t(i)].setToggleState(i == selectedBand, juce::dontSendNotification); }
         for (int i = 0; i < 14; ++i) { names[std::size_t(i)].setVisible((i < 3 && eq) || (i >= 3 && i<9 && comp) || (i>=9 && i<12 && (delay || reverb)) || (i>=9&&filter)); sliders[std::size_t(i)].setVisible(names[std::size_t(i)].isVisible()); }
         if (eq) { if (auto* list = state["bands"].getArray()) if (selectedBand < list->size()) { const auto b = list->getReference(selectedBand);
-            bandOn.setButtonText(bool(b["enabled"]) ? "band on" : "band off");
+            uiButton(bandOn, bool(b["enabled"]) ? "band on" : "band off");
             sliders[0].setValue(double(b["frequency"]), juce::dontSendNotification); sliders[1].setValue(double(b["gain_db"]), juce::dontSendNotification); sliders[2].setValue(double(b["q"]), juce::dontSendNotification);
             sliders[0].setDoubleClickReturnValue(true, effects::EqSettings().bands[std::size_t(selectedBand)].frequency);
             const auto currentShape = b["shape"].toString(); const char* shapes[] {"bell", "low_shelf", "high_shelf", "high_pass", "low_pass", "notch"};
@@ -156,7 +159,7 @@ struct NativeEffectsPanel::Impl {
         }}
         if (comp) { const char* keys[] = {"threshold_db", "ratio", "attack_ms", "release_ms", "makeup_db", "dry_wet"}; for (int i = 0; i < 6; ++i) sliders[std::size_t(i + 3)].setValue(double(state[keys[i]])*(i==5?100.0:1.0), juce::dontSendNotification); }
         if (delay || reverb) {
-            names[9].setText(reverb?"decay":"delay",juce::dontSendNotification); names[10].setText(reverb?"damping":"feedback",juce::dontSendNotification);names[11].setText("dry/wet",juce::dontSendNotification);
+            uiLabel(names[9], reverb?"decay":"delay"); uiLabel(names[10], reverb?"damping":"feedback");uiLabel(names[11], "dry/wet");
             sliders[9].setRange(reverb?.1:1.0,reverb?8.0:2000.0,reverb?.01:1.0);sliders[9].setTextValueSuffix(reverb?" s":" ms");
             sliders[9].setSkewFactorFromMidPoint(reverb ? 1.8 : 350); sliders[9].setDoubleClickReturnValue(true,reverb?1.8:350);
             sliders[10].setRange(0,reverb?100:95,1);sliders[10].setTextValueSuffix(" %");sliders[11].setRange(0,100,1);sliders[11].setTextValueSuffix(" %");
@@ -168,7 +171,7 @@ struct NativeEffectsPanel::Impl {
             const char* labels[]={"cutoff","resonance","LFO rate","LFO depth","dry/wet"};
             const char* suffixes[]={" Hz",""," Hz"," %"," %"};
             const double min[]={20,.5,.05,0,0},max[]={20000,10,20,100,100},step[]={1,.01,.01,1,1};
-            for(int i=0;i<5;++i){auto& slider=sliders[std::size_t(i+9)];names[std::size_t(i+9)].setText(labels[i],juce::dontSendNotification);slider.setRange(min[i],max[i],step[i]);slider.setTextValueSuffix(suffixes[i]);slider.setValue(double(state[keys[i]])*(i>=3?100.0:1.0),juce::dontSendNotification);}
+            for(int i=0;i<5;++i){auto& slider=sliders[std::size_t(i+9)];uiLabel(names[std::size_t(i+9)], labels[i]);slider.setRange(min[i],max[i],step[i]);slider.setTextValueSuffix(suffixes[i]);slider.setValue(double(state[keys[i]])*(i>=3?100.0:1.0),juce::dontSendNotification);}
             sliders[9].setSkewFactorFromMidPoint(1000); sliders[10].setSkewFactorFromMidPoint(2); sliders[11].setSkewFactorFromMidPoint(1);
             const double defaults[] {1000,.7071,1,0,100}; for (int i=0;i<5;++i) sliders[std::size_t(i+9)].setDoubleClickReturnValue(true,defaults[i]);
         }
@@ -178,6 +181,7 @@ struct NativeEffectsPanel::Impl {
     NativeEffectsPanel& owner; EngineSession& session; juce::String trackId, deviceId, projectId, gestureProject;
     std::function<void(const juce::Result&)> report; juce::var state; std::uint64_t revision = 0, gestureRevision = 0; double sampleRate = 0;
     bool valid = false, updating = false, dragging = false, gestureChanged = false, deviceEnabled = true; int selectedBand = 0;
+    unsigned languageRevision = 0;
     juce::Label title, status, meter; juce::TextButton addEq {"add EQ Eight"}, addComp {"add Compressor"}, addDelay {"add Stereo Delay"}, addReverb {"add Reverb"}, addFilter {"add Auto Filter"}, filterMode {"low pass"}, filterLfo {"LFO off"}, bandOn {"band on"};
     std::uint64_t meterSequence = 0; int staleMeterPolls = 0;
     float reductionDb = 0; bool meterAvailable = false;

@@ -108,7 +108,8 @@ def prepare(job):
 
 def execute(job):
     configure_environment(job.root)
-    entry = provider_entry(job.root, job.request["kind"])
+    kind = job.request["kind"]
+    entry = provider_entry(job.root, "separate_6s" if kind == "separate" and job.request["parameters"]["stems"] == 6 else kind)
     with ResourceSampler() as resources:
         audio, rate, source = prepare(job)
         kind = job.request["kind"]
@@ -125,7 +126,11 @@ def execute(job):
         implementation = hashlib.sha256()
         for filename in ("__init__.py", "common.py", "chords.py", "providers.py", "run.py"):
             implementation.update((filename + "\0" + sha256_file(Path(__file__).with_name(filename)) + "\n").encode("utf-8"))
-        model["worker_version"] = "1.0.0"
+        model["worker_version"] = "1.1.0"
+        if kind == "chords":
+            # This algorithm ships with the worker, not with external weights;
+            # do not report a stale v1 registry as the executed algorithm.
+            model.update(version="2.0.0", source_revision="emusician-chroma-hmm-2")
         model["worker_source_sha256"] = implementation.hexdigest()
         runtime_metrics = result.pop("runtime_metrics", {})
         packages = ["numpy", "scipy", "soundfile"] + {

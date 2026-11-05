@@ -1,4 +1,14 @@
-# 当前候选：0.9.0 本地音频分析（2026-11-05，自动验证通过、人工待验）
+# 当前候选：0.9.1 可视分析工作区（2026-11-05，自动验证通过、人工待验）
+
+工作树 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/analysis-workspace-v091`，基线 `f0d95b3`；不要编辑旧 C 盘工作树。用户要求独立和弦轨、简单图形结果、易发现改名、Settings 中英文切换和分析优化。本轮已实现和弦轨/来源切换/修正跳转，波形与矩形 MIDI 预览，四个改名入口，英文默认及中文偏好，真实四/六轨与质量档、转录音域和扩展和弦模板；手动/Agent 共享候选、参数、轨数预算、确认和完成回读。
+
+最终 Release EXE `a91c6394…`，190 个源码输入 `f58b075d…`。CTest 10/10、真实本地模型原生整链 9/9、Agent Python 275/275、最终 DAW + 本地和弦/六轨 + 模拟语言模型 12/12、网页四夹具均通过；Worker 28 项、12 真实进程边界与公开短音乐探针通过。实际组件中英文/小窗口截图已看，原始失败和修复均保留。原生构建后仅三个 Agent Python/测试文件变化，原生/Worker/网页逐文件匹配验证版本；最终 Agent 全回归与宿主整链期间全部冻结。[计划](review/2026-11-05-analysis-workspace/PLAN.md) / [结果](review/2026-11-05-analysis-workspace/RESULTS.md) / [证据](review/2026-11-05-analysis-workspace/VERIFICATION.json)。
+
+入口 `E:/MusicAgent&DAW/Start E-musician 0.9.1 Analysis.cmd`，EXE 仍在 `E:/emusician-analysis-build/bin/Release/`，VS Code 使用 `E-musician-Analysis.code-workspace`。Settings → Language；选轨标题 rename、双击名称、F2 或右键可改名。0.8.1 独立程序及入口、0.8.1/0.9.0 发布归档已复核 hash 保留。0.9.0 Analysis 脚本指向同一构建目录，会打开最新候选，旧版本以归档为准；不自动合并 main。依赖仍为固定 JUCE 8.0.6 / Tracktion 3.2.0。
+
+下一步只做 [人工短测](review/2026-11-05-analysis-workspace/MANUAL-CHECK.md)：语言/改名、短音乐结果轨道、试听、修正、保存重开和 Agent 等价指令，再验证真实 ASIO 播放共存。本轮无付费 LLM 调用、无 computer-use；鼠标/DPI、长期负载、识别质量与模型理解仍待验。六轨钢琴/吉他串音未解决；乐器 profile 只是 Basic Pitch 音域；扩展和弦是模板算法，不是爵士训练模型。和弦视图选区尚未进入 Agent 通用 selection_context。权重仅本机评测，未确认再分发许可。未接受候选退出不恢复，录音前先结束分析。以下为历史状态，不作为 0.9.1 新验收。
+
+# 历史候选：0.9.0 本地音频分析（2026-11-05，自动验证通过、人工待验）
 
 用户已授权实施四轨分离、有音高分轨转 MIDI、和弦识别，以及手动/Agent 共用管线与固定能力清单。当前开发工作树是 **`E:/MusicAgent&DAW/worktrees/audio-analysis` / `feature/audio-analysis`**，不是旧 C 盘工作树。基于精确保留的 0.8.1 基线 `5eb32e7`；原程序、161 个源码输入和旧入口未改，哈希复核一致。
 

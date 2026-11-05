@@ -310,7 +310,7 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
         for (const auto& clip : track.clips) {
             if (!validIdentifier(clip.id) || !clipIds.insert(clip.id.toLowerCase()).second)
                 return Result::fail("Clip IDs must be valid and unique across all tracks.");
-            if(clip.analysisRole.isNotEmpty()&&(project.schemaVersion!=5||clip.kind!="audio"||(clip.analysisRole!="vocals"&&clip.analysisRole!="drums"&&clip.analysisRole!="bass"&&clip.analysisRole!="other")))return Result::fail("Invalid clip analysis role.");
+            if(clip.analysisRole.isNotEmpty()&&(project.schemaVersion!=5||clip.kind!="audio"||(clip.analysisRole!="vocals"&&clip.analysisRole!="drums"&&clip.analysisRole!="bass"&&clip.analysisRole!="other"&&clip.analysisRole!="piano"&&clip.analysisRole!="guitar")))return Result::fail("Invalid clip analysis role.");
             if (clip.kind == "audio") {
                 if (track.kind != "audio" || !clip.notes.empty() || !clip.controllers.empty()) return Result::fail("Audio clips belong on audio tracks and cannot contain MIDI events.");
                 if (!validIdentifier(clip.assetId) || assetIds.count(clip.assetId) == 0)

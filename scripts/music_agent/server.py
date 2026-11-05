@@ -90,6 +90,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(500, {"error":"无法读取本地状态，请稍后重试。"})
             return
         assets = {"/":("index.html","text/html; charset=utf-8"),
+                  "/i18n.js":("i18n.js","text/javascript; charset=utf-8"),
                   "/app.js":("app.js","text/javascript; charset=utf-8"),
                   "/style.css":("style.css","text/css; charset=utf-8")}
         if path not in assets:

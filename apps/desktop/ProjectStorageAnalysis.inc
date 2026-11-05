@@ -20,7 +20,8 @@ bool validChordLabel(const juce::String& label)
 {
     if(label=="N")return true;
     for(const auto* root:{"C","C#","D","D#","E","F","F#","G","G#","A","A#","B"})
-        if(label==juce::String(root)+":maj"||label==juce::String(root)+":min")return true;
+        for(const auto* quality:{"maj","min","7","maj7","min7","dim","aug","sus2","sus4","hdim7","dim7"})
+            if(label==juce::String(root)+":"+quality)return true;
     return false;
 }
 Result validateAnalysis(const StoredProject& p)

@@ -26,6 +26,8 @@ def main():
     import soundfile as sf
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path("E:/MusicAgent&DAW/analysis"))
+    parser.add_argument("--stems", type=int, choices=(4, 6), default=4)
+    parser.add_argument("--quality", choices=("fast", "quality"), default="fast")
     args = parser.parse_args()
     root = args.root.resolve()
     registry = read_json(root / "registry.json")
@@ -60,8 +62,11 @@ def main():
             request = {"schema_version": 1, "job_id": job_id, "kind": job_kind, "analysis_root": str(root),
                        "source_path": str(wave_file), "source_offset_seconds": 0, "duration_seconds": len(data) / rate,
                        "source": {"project_id": "public-fixture-probe", "clip_id": name, "input_role": "instrument" if job_kind == "transcribe" else "mix"}}
+            if job_kind == "separate":
+                request["parameters"] = {"stems": args.stems, "quality": args.quality}
             atomic_json(job_dir / "request.json", request)
-            command = [registry["providers"][job_kind]["python_executable"], str(Path(__file__).with_name("run.py")),
+            provider_key = "separate_6s" if job_kind == "separate" and args.stems == 6 else job_kind
+            command = [registry["providers"][provider_key]["python_executable"], str(Path(__file__).with_name("run.py")),
                        "--request", str(job_dir / "request.json")]
             print("RUN", subprocess.list2cmdline(command), flush=True)
             start = time.perf_counter()
@@ -70,7 +75,12 @@ def main():
                 print((job_dir / "worker.log").read_text(encoding="utf-8"), flush=True)
                 raise RuntimeError(read_json(job_dir / "error.json"))
             output = read_json(job_dir / "result.json")
+            if job_kind == "separate":
+                assert len(output["stems"]) == args.stems
+                assert all(len(stem["waveform_peaks"]) == 128 and stem["sha256"] == sha256_file(job_dir / stem["path"])
+                           for stem in output["stems"])
             observation = {"fixture": name, "kind": job_kind, "job_id": job_id, "attribution": attribution,
+                           "model": output["model"], "parameters": output["parameters"],
                            "elapsed_wall_seconds": time.perf_counter() - start, "performance": output["performance"],
                            "notes": len(output["notes"]), "stems": len(output["stems"]), "chord_regions": len(output["chord_regions"]),
                            "result_sha256": sha256_file(job_dir / "result.json")}

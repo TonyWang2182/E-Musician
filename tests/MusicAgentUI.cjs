@@ -53,7 +53,7 @@ const server = http.createServer(async (req,res) => {
     }
     res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify(state));return;
   }
-  const file={'/':'index.html','/app.js':'app.js','/style.css':'style.css'}[pathname];
+  const file={'/':'index.html','/app.js':'app.js','/i18n.js':'i18n.js','/style.css':'style.css'}[pathname];
   if (!file) {res.writeHead(404);res.end();return;}
   res.writeHead(200,{'Content-Type':file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'text/html; charset=utf-8'});res.end(fs.readFileSync(path.join(asset,file)));
 });
@@ -87,7 +87,7 @@ async function capture(page,name,width,height) {
   const origin='http://127.0.0.1:'+server.address().port;
   try {
     await page.setViewportSize({width:340,height:740});
-    await page.goto(origin+'/?embedded=1#token=fixture-session');await waitReady(page);
+    await page.goto(origin+'/?embedded=1&lang=zh-CN#token=fixture-session');await waitReady(page);
     assert.equal(new URL(page.url()).hash,'');assert.equal(await page.locator('#scope').inputValue(),'selection');
     assert.equal(await page.locator('#standalone-footer').isVisible(),false);
     assert.equal(await page.locator('#collapse').isVisible(),true);
@@ -96,7 +96,7 @@ async function capture(page,name,width,height) {
     await page.locator('#project-details summary').click();
     assert.equal(await page.locator('.track-name').nth(1).textContent(),'<img src=x onerror=alert(1)>');assert.equal(await page.locator('.tracks img').count(),0);
     await page.locator('#project-details summary').click();
-    await page.reload();await waitReady(page);assert.equal(new URL(page.url()).search,'?embedded=1');
+    await page.reload();await waitReady(page);assert.equal(new URL(page.url()).search,'?embedded=1&lang=zh-CN');
     await page.locator('#prompt').fill('把所选两个音符升高一个八度');await page.locator('#submit').click();await page.locator('#apply').waitFor({state:'visible'});
     assert.equal(lastPlan.scope,'selection');assert.equal(count.apply,0);
     assert.equal(await page.locator('#plan-sequence').isVisible(),true);assert.deepEqual(await page.locator('#plan-steps li').allTextContents(),['移调选中的两个音符']);
@@ -180,7 +180,7 @@ async function capture(page,name,width,height) {
     await page.close();
     state=structuredClone(initial);
     const standalone=await context.newPage();standalone.on('pageerror',e=>errors.push(e.message));
-    await standalone.setViewportSize({width:1280,height:800});await standalone.goto(origin+'/#token=fixture-session');await waitReady(standalone);
+    await standalone.setViewportSize({width:1280,height:800});await standalone.goto(origin+'/?lang=zh-CN#token=fixture-session');await waitReady(standalone);
     assert.equal(await standalone.locator('#collapse').isVisible(),false);assert.equal(await standalone.locator('#standalone-footer').isVisible(),true);
     await standalone.locator('#scope').selectOption('project');await standalone.locator('#prompt').fill('把工程速度改为100 BPM');await standalone.locator('#submit').click();await standalone.locator('#apply').waitFor({state:'visible'});
     await capture(standalone,'standalone-1280',1280,800);

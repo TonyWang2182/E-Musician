@@ -81,6 +81,10 @@ public:
         std::vector<SendSnapshot> sends;
         std::vector<AutomationLaneSnapshot> automation;
     };
+    struct ChordRegionSnapshot {
+        juce::String id, label, analysisId, sourceName;
+        double startSeconds = 0.0, endSeconds = 0.0;
+    };
     struct Snapshot {
         bool metronomeEnabled = false, metronomeRecordOnly = false, countInEnabled = false, countingIn = false;
         int countInBars = 1;
@@ -102,6 +106,9 @@ public:
         juce::String undoDescription, redoDescription;
         juce::File projectFile;
         std::vector<TrackSnapshot> tracks;
+        // Immutable projection rebuilt only when the authoritative edit revision changes.
+        // Chord annotations never become audio/MIDI tracks or a second writable model.
+        std::shared_ptr<const std::vector<ChordRegionSnapshot>> chordRegions;
         std::uint64_t revision = 0;
         double bpm = 120.0, loopStart = 0.0, loopEnd = 0.0, cpuUsage = 0.0;
         int numerator = 4, denominator = 4, xruns = 0;

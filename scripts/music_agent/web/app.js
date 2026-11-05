@@ -1,12 +1,13 @@
 "use strict";
 (() => {
+  const t = window.emusicianI18n.t;
   const $ = (id) => document.getElementById(id);
   const embedded = new URLSearchParams(window.location.search).get("embedded") === "1";
   document.body.classList.toggle("embedded", embedded);
   $("collapse").hidden = !embedded;
   $("standalone-footer").hidden = embedded;
   $("project-details").open = !embedded && window.innerWidth >= 920;
-  if (embedded) text("scope-note", "上下文来自当前 DAW 工程。收起侧栏会保留输入内容，不会关闭工程。");
+  if (embedded) text("scope-note", t("上下文来自当前 DAW 工程。收起侧栏会保留输入内容，不会关闭工程。"));
   const sessionTokenKey = "e-musician-session-token";
   let token = new URLSearchParams(window.location.hash.slice(1)).get("token") || "";
   try {
@@ -24,9 +25,9 @@
   const notePreviewPageSize = 50;
   let nativeVisible = true;
   const busyPhases = new Set(["planning", "paused", "applying"]);
-  const phaseText = {idle: "准备就绪", planning: "正在生成方案", paused: "已暂停", ready: "等待你确认", applying: "正在应用并检查", done: "已完成", error: "需要处理", cancelled: "已停止"};
+  const phaseText = {idle: t("准备就绪"), planning: t("正在生成方案"), paused: t("已暂停"), ready: t("等待你确认"), applying: t("正在应用并检查"), done: t("已完成"), error: t("需要处理"), cancelled: t("已停止")};
   const executionStages = ["preflight", "submitting", "verifying", "done"];
-  const stageText = {preflight: "正在检查方案", submitting: "正在提交修改", verifying: "正在核对结果", done: "已完成核对"};
+  const stageText = {preflight: t("正在检查方案"), submitting: t("正在提交修改"), verifying: t("正在核对结果"), done: t("已完成核对")};
   function text(id, value) { $(id).textContent = value == null ? "" : String(value); }
   function element(tag, value, className) {
     const node = document.createElement(tag);
@@ -41,7 +42,7 @@
   }
   function changeItem(change) {
     const row = element("li");
-    if (typeof change !== "string") { row.textContent = "此项缺少可读说明，请放弃并重新生成方案。"; return row; }
+    if (typeof change !== "string") { row.textContent = t("此项缺少可读说明，请放弃并重新生成方案。"); return row; }
     // Highlight the action word without inferring which objects will be deleted.
     const pattern = /删除|移除|\b(?:delete|remove)\b/gi;
     let offset = 0;
@@ -68,9 +69,9 @@
         list.start = item.index + 1; section.append(list); content.append(section);
       }
       const row = element("li", null, "note-preview-row"), heading = element("div", null, "note-preview-heading");
-      heading.append(element("span", `音符 ${item.index + 1}`), element("strong", `MIDI 音高 ${number(item.note.pitch)}`));
+      heading.append(element("span", t`音符 ${item.index + 1}`), element("strong", t`MIDI 音高 ${number(item.note.pitch)}`));
       const values = element("dl");
-      for (const [key, label, unit] of [["start_beats", "起点", " 拍"], ["length_beats", "长度", " 拍"], ["velocity", "力度", ""], ["channel", "通道", ""]]) {
+      for (const [key, label, unit] of [["start_beats", t("起点"), t(" 拍")], ["length_beats", t("长度"), t(" 拍")], ["velocity", t("力度"), ""], ["channel", t("通道"), ""]]) {
         const field = element("div");
         field.append(element("dt", label), element("dd", number(item.note[key]) + unit)); values.append(field);
       }
@@ -78,7 +79,7 @@
     }
     $("note-preview-rows").replaceChildren(content);
     $("note-preview-pager").hidden = notePreviewNotes.length <= notePreviewPageSize;
-    text("note-preview-page", `第 ${start + 1}–${end} 个，共 ${notePreviewNotes.length} 个`);
+    text("note-preview-page", t`第 ${start + 1}–${end} 个，共 ${notePreviewNotes.length} 个`);
     $("note-preview-prev").disabled = notePreviewPage === 0;
     $("note-preview-next").disabled = end === notePreviewNotes.length;
   }
@@ -91,7 +92,7 @@
     notePreviewNotes = [];
     for (const [group, preview] of (Array.isArray(plan?.note_previews) ? plan.note_previews : []).entries()) {
       if (!Array.isArray(preview?.notes)) continue;
-      const label = typeof preview.label === "string" && preview.label.trim() ? preview.label : "新增音符的片段";
+      const label = typeof preview.label === "string" && preview.label.trim() ? preview.label : t("新增音符的片段");
       preview.notes.forEach((note, index) => notePreviewNotes.push({group, label, index, note: note || {}}));
     }
     notePreviewPage = 0;
@@ -99,7 +100,7 @@
     details.open = retainOpen && notePreviewNotes.length > 0;
     $("note-preview-rows").replaceChildren();
     $("note-preview-pager").hidden = true;
-    text("note-preview-summary", `新增音符明细（${notePreviewNotes.length}）`);
+    text("note-preview-summary", t`新增音符明细（${notePreviewNotes.length}）`);
     if (details.open) renderNotePreviewPage();
   }
   $("note-previews").addEventListener("toggle", () => {
@@ -124,8 +125,8 @@
     $("model-options").replaceChildren(...(Array.isArray(entry.models) ? entry.models : []).map((value) => {
       const option = document.createElement("option"); option.value = String(value); return option;
     }));
-    text("key-state", entry.configured ? "本机已配置" : "尚未配置");
-    text("provider-status", !providerReady(entry) ? "此服务尚未接入，暂不可选择。" : entry.configured ? "已配置本机密钥；模型可用性以实际请求为准。" : "此服务还没有密钥，请展开“连接与密钥”配置。");
+    text("key-state", entry.configured ? t("本机已配置") : t("尚未配置"));
+    text("provider-status", !providerReady(entry) ? t("此服务尚未接入，暂不可选择。") : entry.configured ? t("已配置本机密钥；模型可用性以实际请求为准。") : t("此服务还没有密钥，请展开“连接与密钥”配置。"));
     $("connection-settings").open = providerReady(entry) && !entry.configured;
   }
   function renderProviders() {
@@ -136,7 +137,7 @@
       providerSignature = signature;
       $("provider").replaceChildren(...providers.map((entry) => {
         const option = document.createElement("option"); option.value = entry.id;
-        option.textContent = `${entry.label || entry.id}${!providerReady(entry) ? " · 待接入" : !entry.configured ? " · 未配置" : ""}`;
+        option.textContent = `${entry.label || entry.id}${!providerReady(entry) ? t(" · 待接入") : !entry.configured ? t(" · 未配置") : ""}`;
         option.disabled = !providerReady(entry); return option;
       }));
     }
@@ -145,7 +146,7 @@
       if ($("settings").hidden || formProviderId !== selected) populateProviderFields({...currentProviderEntry(), ...(selected === active.id || !active.id ? active : {})});
     } else if (providers.some((entry) => entry.id === selected)) $("provider").value = selected;
     const label = active.label || providers.find((entry) => entry.id === active.id)?.label || active.id || "Kimi";
-    text("current-model", active.model ? `${label} · ${active.model}` : "选择模型");
+    text("current-model", active.model ? `${label} · ${active.model}` : t("选择模型"));
     $("current-model").title = $("current-model").textContent;
   }
   function scopeContext() {
@@ -155,30 +156,30 @@
     const pills = [];
     const add = (label) => { const pill = element("span", label, "context-pill"); pill.title = label; pills.push(pill); };
     if ($("scope").value === "project") {
-      add("整个工程"); add(`${tracks.length} 条轨道`);
-      text("scope-hint", "范围已扩大到整个工程；修改仍需你确认。");
+      add(t("整个工程")); add(t`${tracks.length} 条轨道`);
+      text("scope-hint", t("范围已扩大到整个工程；修改仍需你确认。"));
     } else if (context?.notes_truncated) {
       const count = Number(context.note_count);
-      add(Number.isSafeInteger(count) && count > 0 ? `${count} 个音符 · 超出上限` : "音符选择超出上限");
-      text("scope-hint", "单次选择最多 2000 个音符；请缩小选区后重试。");
+      add(Number.isSafeInteger(count) && count > 0 ? t`${count} 个音符 · 超出上限` : t("音符选择超出上限"));
+      text("scope-hint", t("单次选择最多 2000 个音符；请缩小选区后重试。"));
     } else if (!context?.available) {
-      add("完整选区不可用");
-      text("scope-hint", "当前 DAW 未提供完整选区；可先提问，或明确切换到整个工程。");
+      add(t("完整选区不可用"));
+      text("scope-hint", t("当前 DAW 未提供完整选区；可先提问，或明确切换到整个工程。"));
     } else {
       const trackIds = Array.isArray(context.track_ids) ? context.track_ids : [];
       const clipIds = Array.isArray(context.clip_ids) ? context.clip_ids : [];
       const notes = Array.isArray(context.note_ids) ? context.note_ids : [];
-      if (trackIds.length) add(trackIds.length === 1 ? `轨道：${tracks.find((t) => t.id === trackIds[0])?.name || trackIds[0]}` : `${trackIds.length} 条轨道`);
+      if (trackIds.length) add(trackIds.length === 1 ? t`轨道：${tracks.find((t) => t.id === trackIds[0])?.name || trackIds[0]}` : t`${trackIds.length} 条轨道`);
       const focusedTrack = !trackIds.length && context.focus === "track" && context.active_track_id;
-      if (focusedTrack) add(`轨道：${tracks.find((t) => t.id === focusedTrack)?.name || focusedTrack}`);
-      if (clipIds.length) add(clipIds.length === 1 ? `片段：${clips.find((c) => c.id === clipIds[0])?.name || clipIds[0]}` : `${clipIds.length} 个片段`);
-      if (context.note_clip_id) add(notes.length ? `${notes.length} 个音符` : "未选中音符");
+      if (focusedTrack) add(t`轨道：${tracks.find((t) => t.id === focusedTrack)?.name || focusedTrack}`);
+      if (clipIds.length) add(clipIds.length === 1 ? t`片段：${clips.find((c) => c.id === clipIds[0])?.name || clipIds[0]}` : t`${clipIds.length} 个片段`);
+      if (context.note_clip_id) add(notes.length ? t`${notes.length} 个音符` : t("未选中音符"));
       const range = context.time_range;
       const hasRange = range?.active && Number.isFinite(range.start_seconds) && Number.isFinite(range.end_seconds);
-      if (hasRange) add(`选区 ${Number(range.start_seconds.toFixed(3))}–${Number(range.end_seconds.toFixed(3))} 秒`);
+      if (hasRange) add(t`选区 ${Number(range.start_seconds.toFixed(3))}–${Number(range.end_seconds.toFixed(3))} 秒`);
       const hasSelection = trackIds.length || focusedTrack || clipIds.length || notes.length || hasRange;
-      if (!pills.length) add("尚未选择对象");
-      text("scope-hint", hasSelection ? "只针对当前选择；发送后改变选区，需要重新生成。" : "先在 DAW 选择对象，或明确切换到整个工程。");
+      if (!pills.length) add(t("尚未选择对象"));
+      text("scope-hint", hasSelection ? t("只针对当前选择；发送后改变选区，需要重新生成。") : t("先在 DAW 选择对象，或明确切换到整个工程。"));
     }
     $("context-pills").replaceChildren(...pills);
   }
@@ -192,11 +193,11 @@
     try {
       const response = await fetch(path, {method: body === undefined ? "GET" : "POST", headers: {"X-Agent-Token": token, ...(body === undefined ? {} : {"Content-Type": "application/json"})}, body: body === undefined ? undefined : JSON.stringify(body), credentials: "omit", cache: "no-store", redirect: "error", signal: controller.signal});
       const data = await response.json();
-      if (!response.ok || data.error && !data.phase) throw new Error(data.error || `请求失败（HTTP ${response.status}）`);
+      if (!response.ok || data.error && !data.phase) throw new Error(data.error || t`请求失败（HTTP ${response.status}）`);
       return data;
     } catch (error) {
-      if (error.name === "AbortError") throw new Error("连接超时。先刷新状态确认结果，再决定是否重试。");
-      if (error instanceof TypeError) throw new Error("无法连接本机助手。请确认启动窗口仍在运行，再点击刷新。");
+      if (error.name === "AbortError") throw new Error(t("连接超时。先刷新状态确认结果，再决定是否重试。"));
+      if (error instanceof TypeError) throw new Error(t("无法连接本机助手。请确认启动窗口仍在运行，再点击刷新。"));
       throw error;
     } finally { clearTimeout(timeout); }
   }
@@ -213,11 +214,11 @@
       item.dataset.status = showStages && (stage === "done" || index < activeIndex) ? "complete" : "pending";
       if (current) item.setAttribute("aria-current", "step"); else item.removeAttribute("aria-current");
     }
-    if (state) text("phase", phase === "applying" && stageText[stage] ? stageText[stage] : phaseText[phase] || "处理中");
-    const fallback = phase === "paused" ? "已在步骤之间暂停。继续后再进行下一步。"
-      : state?.pause_requested ? "当前步骤结束后暂停，不会继续下一步。"
-      : working ? phase === "applying" ? "正在应用整份方案并核对结果。"
-      : phase === "cancelled" ? "正在结束当前请求，完成后可以继续。" : "正在读取工程并生成方案，尚未修改工程。" : "";
+    if (state) text("phase", phase === "applying" && stageText[stage] ? t(stageText[stage]) : t(phaseText[phase]) || t("处理中"));
+    const fallback = phase === "paused" ? t("已在步骤之间暂停。继续后再进行下一步。")
+      : state?.pause_requested ? t("当前步骤结束后暂停，不会继续下一步。")
+      : working ? phase === "applying" ? t("正在应用整份方案并核对结果。")
+      : phase === "cancelled" ? t("正在结束当前请求，完成后可以继续。") : t("正在读取工程并生成方案，尚未修改工程。") : "";
     text("busy-detail", typeof progress.label === "string" && progress.label.trim() ? progress.label
       : typeof state?.detail === "string" && state.detail ? state.detail : fallback);
     $("commit-hint").hidden = phase !== "applying";
@@ -238,19 +239,19 @@
     $("scope").disabled = working;
     $("cancel-work").hidden = !["planning", "paused"].includes(state?.phase);
     $("cancel-work").disabled = inFlight || state?.phase === "applying" || !online;
-    text("cancel-work", "停止");
+    text("cancel-work", t("停止"));
     const canPause = state?.phase === "paused" || Object.prototype.hasOwnProperty.call(state || {}, "pause_requested");
     $("pause-work").hidden = !canPause || !["planning", "paused"].includes(state?.phase);
     $("pause-work").disabled = !canPause || inFlight || !online || !["planning", "paused"].includes(state?.phase)
       || (state?.phase === "planning" && state?.pause_requested === true);
-    text("pause-work", state?.phase === "paused" ? "继续" : state?.pause_requested ? "等待暂停" : "暂停");
+    text("pause-work", state?.phase === "paused" ? t("继续") : state?.pause_requested ? t("等待暂停") : t("暂停"));
     $("shutdown").disabled = working || inFlight || !online;
-    text("submit", state?.phase === "planning" ? "生成中…" : "发送");
+    text("submit", state?.phase === "planning" ? t("生成中…") : t("发送"));
     document.querySelectorAll("[data-prompt]").forEach((button) => { button.disabled = working; });
     renderProgress(working);
   }
   function renderSnapshot(snapshot) {
-    text("project-title", `${snapshot.name || "未命名工程"}${snapshot.dirty ? " · 未保存" : ""}`);
+    text("project-title", `${snapshot.name || t("未命名工程")}${snapshot.dirty ? t(" · 未保存") : ""}`);
     const bpm = snapshot.bpm ?? snapshot.tempo_bpm;
     text("tempo", typeof bpm === "number" ? `${Number(bpm.toFixed(3))} BPM` : "—");
     text("meter", snapshot.numerator && snapshot.denominator ? `${snapshot.numerator}/${snapshot.denominator}` : "—");
@@ -258,18 +259,18 @@
     const tracks = Array.isArray(snapshot.tracks) ? snapshot.tracks : [];
     const selectedTrack = tracks.find((track) => track.id === snapshot.selected_track_id);
     const selectedClip = tracks.flatMap((track) => track.clips || []).find((clip) => clip.id === snapshot.selected_clip_id);
-    text("selection-text", selectedClip ? `${selectedTrack?.name || "片段"} / ${selectedClip.name || selectedClip.id}` : selectedTrack ? selectedTrack.name : "未选择轨道或片段");
+    text("selection-text", selectedClip ? `${selectedTrack?.name || t("片段")} / ${selectedClip.name || selectedClip.id}` : selectedTrack ? selectedTrack.name : t("未选择轨道或片段"));
     text("track-count", tracks.length);
     const signature = JSON.stringify([tracks.map((track) => [track.id, track.name, track.kind, track.clip_count ?? track.clips?.length ?? 0]), snapshot.selected_track_id]);
     if (signature !== trackSignature) {
       trackSignature = signature;
       const list = $("tracks"); list.replaceChildren();
-      if (!tracks.length) list.append(element("li", "工程还是空的。可以让助手新建轨道，也可在 DAW 中导入素材。", "empty"));
+      if (!tracks.length) list.append(element("li", t("工程还是空的。可以让助手新建轨道，也可在 DAW 中导入素材。"), "empty"));
       tracks.forEach((track) => {
         const row = element("li", null, track.id === snapshot.selected_track_id ? "selected" : "");
-        row.append(element("div", track.name || "未命名轨道", "track-name"));
-        const kind = {instrument: "MIDI", audio: "音频", bus: "总线"}[track.kind] || "轨道";
-        row.append(element("div", `${kind} · ${track.clip_count ?? track.clips?.length ?? 0} 个片段`, "track-meta")); list.append(row);
+        row.append(element("div", track.name || t("未命名轨道"), "track-name"));
+        const kind = {instrument: "MIDI", audio: t("音频"), bus: t("总线")}[track.kind] || t("轨道");
+        row.append(element("div", t`${kind} · ${track.clip_count ?? track.clips?.length ?? 0} 个片段`, "track-meta")); list.append(row);
       });
     }
     scopeContext();
@@ -281,9 +282,20 @@
     const list = $("messages"); list.replaceChildren();
     items.forEach((message) => {
       const isUser = message.role === "user", article = element("article", null, `message ${isUser ? "user" : "assistant"}`);
-      article.append(element("div", isUser ? "你" : "编曲助手", "message-label"));
+      article.append(element("div", isUser ? t("你") : t("编曲助手"), "message-label"));
       article.append(element("div", message.content || "", "message-body")); list.append(article);
     });
+  }
+  function analysisChanges(candidate) {
+    if (!candidate) return null;
+    const total = Number(candidate.total), start = Number(candidate.source?.timeline_start || 0).toFixed(3);
+    const title = candidate.kind === "separate" ? t`创建 ${total} 条音频轨。`
+      : candidate.kind === "transcribe" ? t`创建一条 MIDI 轨，包含 ${total} 个音符。`
+      : candidate.kind === "chords" ? t`在和弦轨上添加 ${total} 个和弦。` : null;
+    if (!title) return null;
+    const rows = [title, t`起点 ${start} 秒，保留原音频。`];
+    if (candidate.kind === "transcribe") rows.push(t("选择乐器后即可播放。"));
+    return rows;
   }
   function render(next) {
     const scroll = $("transcript");
@@ -291,33 +303,38 @@
     const oldMessages = messageSignature;
     state = next;
     const connected = !!state.control?.connected;
-    text("connection", online ? connected ? "DAW 已连接" : "DAW 未连接" : "连接中断");
+    text("connection", online ? connected ? t("DAW 已连接") : t("DAW 未连接") : t("连接中断"));
     $("connection").classList.toggle("connected", online && connected);
     renderSnapshot(state.snapshot || {}); renderMessages(state.messages);
     renderCapabilities(state.capability_groups);
     const plan = state.plan, visible = !!plan && ["ready", "applying"].includes(state.phase);
     $("plan").hidden = !visible;
     if (visible) {
-      text("plan-summary", plan.summary || "请核对以下修改。");
+      text("plan-summary", plan.summary || t("请核对以下修改。"));
       const frozenScope = plan.scope;
       const revision = plan.revision ?? plan.expected_revision ?? frozenScope?.project_revision;
-      text("plan-revision", revision == null ? "" : `基于修订 ${revision}`);
+      text("plan-revision", revision == null ? "" : t`基于修订 ${revision}`);
       const scope = (frozenScope && typeof frozenScope === "object" ? frozenScope.mode : frozenScope) || submittedScope;
-      text("plan-scope", scope === "project" ? "本次范围：整个工程" : scope === "selection" ? "本次范围：发送时的选择" : scope === "clip" ? "本次范围：整个片段" : "范围以提交时的选择为准");
-      const steps = Array.isArray(plan.steps) ? plan.steps : [];
+      text("plan-scope", scope === "project" ? t("本次范围：整个工程") : scope === "selection" ? t("本次范围：发送时的选择") : scope === "clip" ? t("本次范围：整个片段") : t("范围以提交时的选择为准"));
+      const importedChanges = plan.execution_kind === "analysis_import" ? analysisChanges(plan.analysis) : null;
+      const steps = importedChanges ? [{label: t("核对来源、候选和工程版本")}, {label: importedChanges[0]}] : Array.isArray(plan.steps) ? plan.steps : [];
       const hasSteps = steps.length > 0 && steps.every((step) => typeof step?.label === "string" && step.label.trim());
       $("plan-sequence").hidden = !hasSteps;
       $("plan-steps").replaceChildren(...(hasSteps ? steps.map((step) => element("li", step.label)) : []));
-      $("changes").replaceChildren(...(Array.isArray(plan.changes) ? plan.changes : []).map(changeItem));
+      const chord = plan.execution_kind === "chord_edit" && plan.chord_before && plan.chord_after;
+      const changes = importedChanges || (chord ? [t`和弦 ${plan.chord_before.label} → ${plan.chord_after.label}`,
+        t`时间 ${plan.chord_before.start_seconds}–${plan.chord_before.end_seconds} 秒 → ${plan.chord_after.start_seconds}–${plan.chord_after.end_seconds} 秒`]
+        : Array.isArray(plan.changes) ? plan.changes : []);
+      $("changes").replaceChildren(...changes.map(changeItem));
     }
     renderNotePreviews(visible ? plan : null);
     renderAnalysisPreview(visible ? plan?.analysis : null);
     $("result").hidden = !state.last_result; text("result-text", state.last_result || "");
-    const usage = state.usage || {}, format = (value) => Number(value || 0).toLocaleString("zh-CN");
-    text("usage", `${format(usage.calls)} 次请求 · 输入 ${format(usage.prompt_tokens)} / 输出 ${format(usage.completion_tokens)} tokens`);
+    const usage = state.usage || {}, format = (value) => Number(value || 0).toLocaleString(window.emusicianI18n.locale);
+    text("usage", t`${format(usage.calls)} 次请求 · 输入 ${format(usage.prompt_tokens)} / 输出 ${format(usage.completion_tokens)} tokens`);
     renderProviders();
-    notice(localNotice || state.error || (visible && !readablePlan(plan) ? "方案说明不完整，请放弃并重新生成。" : "")
-      || (!state.provider?.configured ? "先展开顶部模型设置，配置所选服务的密钥。" : "")); updateControls();
+    notice(localNotice || state.error || (visible && !readablePlan(plan) ? t("方案说明不完整，请放弃并重新生成。") : "")
+      || (!state.provider?.configured ? t("先展开顶部模型设置，配置所选服务的密钥。") : "")); updateControls();
     if (visible && plan.id !== shownPlanId) {
       shownPlanId = plan.id;
       requestAnimationFrame(() => $("plan").scrollIntoView({block: "start"}));
@@ -336,12 +353,13 @@
       const row = element("details", null, "capability-row"); row.dataset.capability = group.id;
       row.open = opened.has(group.id);
       const heading = element("summary");
-      heading.append(element("span", group.label), element("span", group.status_label, "capability-status"));
-      const detail = element("p", group.detail);
-      const example = element("button", group.example); example.type = "button";
+      heading.append(element("span", t(group.label)), element("span", t(group.status_label), "capability-status"));
+      const simpleDetails = {separate: "生成独立音频轨，保留原素材。", transcribe: "生成 MIDI 轨，可在钢琴卷帘中编辑。", chords: "生成时间线上的和弦轨，可修改标签。"};
+      const detail = element("p", t(simpleDetails[group.id] || group.detail));
+      const example = element("button", t(group.example)); example.type = "button";
       example.disabled = !group.enabled || busy();
       example.dataset.available = group.enabled ? "true" : "false";
-      example.addEventListener("click", () => { $("prompt").value = group.example; $("prompt").focus(); updateControls(); });
+      example.addEventListener("click", () => { $("prompt").value = t(group.example); $("prompt").focus(); updateControls(); });
       row.append(heading, detail, example); return row;
     });
     $("capability-list").replaceChildren(...rows);
@@ -352,25 +370,25 @@
     if (signature === analysisPreviewSignature) return;
     analysisPreviewSignature = signature;
     if (!candidate) return;
-    const names = {separate: "分离候选", transcribe: "MIDI 候选", chords: "和弦候选"};
-    text("analysis-preview-title", `${names[candidate.kind] || "分析候选"} · ${candidate.total} 项`);
-    const model = candidate.model || {}, source = candidate.source || {};
-    text("analysis-preview-info", `${model.id || model.model_id || "本机分析"} ${model.version || ""} · ${Number(source.duration_seconds || 0).toFixed(2)} 秒。尚未导入工程。`);
+    const names = {separate: t("分离候选"), transcribe: t("MIDI 候选"), chords: t("和弦候选")};
+    text("analysis-preview-title", t`${names[candidate.kind] || t("分析候选")} · ${candidate.total} 项`);
+    const source = candidate.source || {};
+    text("analysis-preview-info", `${Number(source.duration_seconds || 0).toFixed(2)} s · ${t("加入工程后可撤销。")}`);
     const seconds = (value) => typeof value === "number" && Number.isFinite(value) ? `${value.toFixed(3)}s` : "—";
     const rows = (candidate.items || []).map((item) => {
-      const label = candidate.kind === "separate" ? `${item.name} · ${seconds(item.duration_seconds)} · ${item.channels} 声道`
-        : candidate.kind === "transcribe" ? `MIDI ${item.pitch} · ${seconds(item.start_seconds)} 起 · 长 ${seconds(item.duration_seconds)} · 力度 ${item.velocity}`
-        : `${item.label} · ${seconds(item.start_seconds)}–${seconds(item.end_seconds)}${item.uncertain ? " · 待核对" : ""}`;
+      const label = candidate.kind === "separate" ? t`${item.name} · ${seconds(item.duration_seconds)} · ${item.channels} 声道`
+        : candidate.kind === "transcribe" ? t`MIDI ${item.pitch} · ${seconds(item.start_seconds)} 起 · 长 ${seconds(item.duration_seconds)} · 力度 ${item.velocity}`
+        : `${item.label} · ${seconds(item.start_seconds)}–${seconds(item.end_seconds)}${item.uncertain ? t(" · 待核对") : ""}`;
       return element("li", label);
     });
     $("analysis-preview-items").replaceChildren(...rows);
-    text("analysis-preview-limit", candidate.total > rows.length ? `此处显示前 ${rows.length} 项，确认会导入完整的 ${candidate.total} 项；可在 DAW 分析面板继续检查。` : "试听与详细检查在 DAW 分析面板进行；确认后可一次撤销。");
+    text("analysis-preview-limit", candidate.total > rows.length ? t`此处显示前 ${rows.length} 项，确认会导入完整的 ${candidate.total} 项；可在 DAW 分析面板继续检查。` : t("试听与详细检查在 DAW 分析面板进行；确认后可一次撤销。"));
   }
   async function refresh() {
     if (inFlight || stopped || !token || !nativeVisible) { armPoll(); return; }
     inFlight = true; updateControls();
     try { const data = await request("/api/state"); online = true; if (connectionError) localNotice = ""; connectionError = false; render(data); }
-    catch (error) { online = false; connectionError = true; localNotice = error.message; notice(localNotice); text("connection", "连接中断"); $("connection").classList.remove("connected"); }
+    catch (error) { online = false; connectionError = true; localNotice = error.message; notice(localNotice); text("connection", t("连接中断")); $("connection").classList.remove("connected"); }
     finally { inFlight = false; updateControls(); armPoll(); }
   }
   async function mutate(path, body, onSuccess) {
@@ -421,13 +439,13 @@
     if ($("base-url").value.trim()) payload.base_url = $("base-url").value.trim();
     if ($("api-key").value.trim()) payload.api_key = $("api-key").value.trim();
     $("api-key").value = ""; text("settings-feedback", "");
-    mutate("/api/settings", payload, () => { settingsDirty = false; formProviderId = null; renderProviders(); text("settings-feedback", "设置已保存，下次请求使用此模型。"); });
+    mutate("/api/settings", payload, () => { settingsDirty = false; formProviderId = null; renderProviders(); text("settings-feedback", t("设置已保存，下次请求使用此模型。")); });
   });
   function collapseNative() {
     if (!embedded) return;
     const backend = window.__JUCE__?.backend;
     if (typeof backend?.emitEvent === "function") { reportNativeFocus(false); backend.emitEvent("agentClose", {}); }
-    else { localNotice = "请使用 DAW 中的助手按钮收起侧栏。"; notice(localNotice); }
+    else { localNotice = t("请使用 DAW 中的助手按钮收起侧栏。"); notice(localNotice); }
   }
   $("collapse").addEventListener("click", collapseNative);
   document.addEventListener("keydown", (event) => {
@@ -477,10 +495,18 @@
     mutate("/api/shutdown", {confirm: true}, () => {
       stopped = true; online = false; state = null; clearTimeout(timer); $("shutdown-dialog").close();
       try { sessionStorage.removeItem(sessionTokenKey); } catch (_) { /* No persistent credential is stored. */ }
-      text("connection", "助手已关闭"); $("connection").classList.remove("connected"); text("phase", "已关闭");
-      notice("助手已关闭，可以关闭此网页。下次请从启动入口重新打开。"); $("plan").hidden = true;
+      text("connection", t("助手已关闭")); $("connection").classList.remove("connected"); text("phase", t("已关闭"));
+      notice(t("助手已关闭，可以关闭此网页。下次请从启动入口重新打开。")); $("plan").hidden = true;
     }).finally(() => { $("shutdown-confirm").disabled = false; });
   });
-  if (!token) { stopped = true; text("connection", "未授权连接"); text("phase", "等待启动"); notice("请使用助手启动器打开的完整链接。这个页面没有连接令牌；重新启动助手后，需要使用新的启动链接。"); updateControls(); }
+  window.emusicianSetLanguage = (language) => {
+    window.emusicianI18n.setLanguage(language);
+    messageSignature = trackSignature = capabilitySignature = providerSignature = analysisPreviewSignature = notePreviewSignature = "";
+    // Re-render authored UI only. Drafts, project names, model answers and API
+    // configuration fields remain unchanged; the worker is not restarted.
+    if (state) render(state); else updateControls();
+    if (embedded) text("scope-note", t("上下文来自当前 DAW 工程。收起侧栏会保留输入内容，不会关闭工程。"));
+  };
+  if (!token) { stopped = true; text("connection", t("未授权连接")); text("phase", t("等待启动")); notice(t("请使用助手启动器打开的完整链接。这个页面没有连接令牌；重新启动助手后，需要使用新的启动链接。")); updateControls(); }
   else refresh();
 })();

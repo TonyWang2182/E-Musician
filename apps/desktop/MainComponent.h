@@ -43,6 +43,11 @@ private:
     void showResult(const juce::Result&);
     bool keyPressed(const juce::KeyPress& key, juce::Component*) override { return keyPressed(key); }
     void showAudioSettings();
+    void showSettings();
+    juce::Result setInterfaceLanguage(const juce::String&, bool persist = true);
+    void refreshInterfaceLanguage();
+    void renameTrack(const juce::String& trackId);
+    void showAnalysisDock(const juce::String& chordId = {});
     void showEditMenu();
     void showAddMenu();
     void showExportMenu();

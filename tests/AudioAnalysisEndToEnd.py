@@ -25,6 +25,7 @@ def main():
     parser.add_argument("--exe", required=True, type=Path)
     parser.add_argument("--timeout", default=300, type=float)
     parser.add_argument("--skip-separation", action="store_true")
+    parser.add_argument("--six-stems", action="store_true", help="Exercise the installed six-stem model and new profile contract")
     parser.add_argument("--old-exe", type=Path)
     args = parser.parse_args()
     directory = ROOT / "build/analysis-e2e" / str(uuid.uuid4())
@@ -61,6 +62,7 @@ def main():
         client = Client(args.exe, timeout=args.timeout, show=False, offline_test=True)
         caps = read("get_analysis_capabilities")
         assert all(p["available"] for p in caps["providers"]), caps
+        if args.six_stems: assert caps.get("separation_six_stems") is True, caps
         write("import_audio", {"paths": [str(source)]})
         state = client.state(); original = state["tracks"][0]["clips"][0]["id"]
         write("move_clip", {"clip_id": original, "start_seconds": 12.5})
@@ -70,7 +72,8 @@ def main():
         kinds = ["chords", "transcribe"] + ([] if args.skip_separation else ["separate"])
         for kind in kinds:
             state = client.state(); revision = state["revision"]; count = len(state["tracks"])
-            response = write("start_analysis", {"clip_id": original, "kind": kind, "start_seconds": .5, "duration_seconds": 4}, False)
+            parameters = {"stems": 6 if args.six_stems else 4, "quality": "fast"} if kind == "separate" else {"instrument": "piano"} if kind == "transcribe" else {"vocabulary": "extended"}
+            response = write("start_analysis", {"clip_id": original, "kind": kind, "start_seconds": .5, "duration_seconds": 4, "parameters": parameters}, False)
             ready = wait_job(response["result"]["job_id"])
             result_id = ready["result_id"]
             result = read("get_analysis_result", {"result_id": result_id, "limit": 3})
@@ -88,14 +91,20 @@ def main():
                 saved = read("get_chord_regions", {"clip_id": original})
                 assert saved["total"] == result["total"]
                 assert all(13 <= c["start_seconds"] < c["end_seconds"] <= 17.000001 for c in saved["items"])
+                assert read("get_chord_regions", {"analysis_id": result_id})["total"] == result["total"]
+                assert read("get_chord_regions", {"analysis_id": "unrelated"})["total"] == 0
+                assert read("get_chord_regions", {"clip_id": original, "latest_only": True})["total"] == result["total"]
             else:
-                assert len(state["tracks"]) == count + (4 if kind == "separate" else 1)
+                assert len(state["tracks"]) == count + ((6 if args.six_stems else 4) if kind == "separate" else 1)
                 created = [c for t in state["tracks"] for c in t["clips"] if c["id"] in receipt["clip_ids"]]
                 assert all(abs(c["start_seconds"]-13) < 1e-8 and abs(c["duration_seconds"]-4) < .002 for c in created)
                 if kind == "transcribe":
                     notes = read("get_clip_notes", {"clip_id": created[0]["id"], "limit": 1000})
                     assert notes["total"] == result["total"]
                 else:
+                    all_stems = read("get_analysis_result", {"result_id": result_id, "limit": 100})["items"]
+                    assert {s["name"] for s in all_stems} == {"vocals", "drums", "bass", "other"} | ({"piano", "guitar"} if args.six_stems else set())
+                    assert all(len(s["waveform_peaks"]) == 128 and all(math.isfinite(p) and p >= 0 for p in s["waveform_peaks"]) for s in all_stems)
                     drums = next(c for c in created if c["analysis_role"] == "drums")
                     drum_track = next(t for t in state["tracks"] if any(c["id"] == drums["id"] for c in t["clips"]))
                     # Role survives user-facing renames; never infer permissions
@@ -113,8 +122,8 @@ def main():
             check(kind + ": real inference, no premature edit, range mapping, import, idempotency, one Undo/Redo")
         regions = read("get_chord_regions")["items"]
         first = regions[0]
-        write("edit_chord_region", {"id": first["id"], "label": "F#:min"})
-        assert read("get_chord_regions")["items"][0]["label"] == "F#:min"
+        write("edit_chord_region", {"id": first["id"], "label": "F#:min7"})
+        assert read("get_chord_regions")["items"][0]["label"] == "F#:min7"
         failed("edit_chord_region", {"id": first["id"], "label": "Invented"})
         write("undo"); assert read("get_chord_regions")["items"][0]["label"] == first["label"]
         write("redo"); check("Persistent chord correction validates labels and Undo/Redo")
@@ -134,7 +143,7 @@ def main():
         check("Schema4 upgrade preserves exact old manifest backup")
         before_open = client.state(); write("new_project"); write("open_project", {"path": str(project)})
         assert len(client.state()["tracks"]) == len(before_open["tracks"])
-        assert read("get_chord_regions")["items"][0]["label"] == "F#:min"
+        assert read("get_chord_regions")["items"][0]["label"] == "F#:min7"
         check("Schema5 save/new/open retains accepted assets, notes, chords and provenance")
         if args.old_exe:
             old = Client(args.old_exe, timeout=args.timeout, show=False, offline_test=True)

@@ -9,6 +9,8 @@ import math
 import re
 from .selection import ScopeError, assert_scope_unchanged
 from audio_analysis.common import PARAMETERS as ANALYSIS_PARAMETERS
+from audio_analysis.common import OPTIONS as ANALYSIS_OPTIONS
+from audio_analysis.common import INSTRUMENT_RANGES
 
 KINDS = {"separate": "音源分离", "transcribe": "分轨转 MIDI", "chords": "和弦识别"}
 COMMANDS = {"get_analysis_capabilities", "start_analysis", "get_analysis_job",
@@ -26,13 +28,14 @@ def _tool(name, description, properties, required):
                        "additionalProperties": False}}}
 
 ANALYSIS_TOOLS = [
-    _tool("start_audio_analysis", "对真实音频片段启动本机分析。不会修改工程，不上传音频。工具在本地等候任务，不要反复调用开始；完成后读取候选并提出导入方案。separate=四轨，transcribe=有音高乐器音符(不是鼓)，chords=24种大/小三和弦及无和弦基线。时间以片段内秒计，省略范围时采用当前允许选区。",
+    _tool("start_audio_analysis", "对真实音频片段启动本机分析。不会修改工程，不上传音频。工具本地等候，勿重复开始；完成后提出导入方案。separate=四轨或六轨(六轨需separation_six_stems就绪)，transcribe=有音高乐器音符(不是鼓)，chords=三和弦/七和弦/挂留等模板识别，不承诺复杂爵士准确率。时间为片段内秒；省略采用允许选区。",
           {"clip_id": {"type": "string"}, "kind": {"type": "string", "enum": list(KINDS)},
            "start_seconds": {"type": "number", "minimum": 0},
            "duration_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 600},
-           "parameters": {"type": "object", "description": "按分析类型选择参数；transcribe用 onset_threshold/frame_threshold/minimum_note_ms/min_pitch/max_pitch，chords用sensitivity/min_region_seconds，separate用segment_seconds。省略保持默认。",
-               "properties": {key: {"type": "integer" if key in {"min_pitch", "max_pitch"} else "number", "minimum": bounds[0], "maximum": bounds[1]}
-                              for parameters in ANALYSIS_PARAMETERS.values() for key, bounds in parameters.items()}, "additionalProperties": False}}, ["clip_id", "kind"]),
+           "parameters": {"type": "object", "description": "按类型选择：separate用stems=4/6、quality=fast/quality、segment_seconds；transcribe用instrument=auto/piano/bass/guitar/vocals及音符阈值/音域；chords用vocabulary=triads/extended、sensitivity/min_region_seconds。instrument是同一模型音域预设，不是独立专用模型。",
+               "properties": {**{key: {"type": "integer" if key in {"min_pitch", "max_pitch", "stems"} else "number", "minimum": bounds[0], "maximum": bounds[1], **({"enum": [4, 6]} if key == "stems" else {})}
+                              for parameters in ANALYSIS_PARAMETERS.values() for key, bounds in parameters.items()},
+                              **{key: {"type": "string", "enum": list(choices)} for options in ANALYSIS_OPTIONS.values() for key, choices in options.items()}}, "additionalProperties": False}}, ["clip_id", "kind"]),
     _tool("read_audio_analysis", "读取真实分析任务状态和最多100项候选。传 job_id 或 result_id 中一个；offset用于结果分页。ready只代表候选完成，applied才表示已写入工程。", {
         "job_id": {"type": "string"}, "result_id": {"type": "string"},
         "offset": {"type": "integer", "minimum": 0}, "limit": {"type": "integer", "minimum": 1, "maximum": 100}}, []),
@@ -41,7 +44,7 @@ ANALYSIS_TOOLS = [
         "result_id": {"type": "string"}, "summary": {"type": "string", "maxLength": 500}}, ["result_id", "summary"]),
     _tool("read_chord_regions", "读取工程中已经导入的和弦标签，最多100项。clip_id按真实分析来源筛选；selection范围必须指定已选音频的clip_id，只有project范围可以省略。候选未导入时使用read_audio_analysis。", {
         "clip_id": {"type": "string"}, "offset": {"type": "integer", "minimum": 0}, "limit": {"type": "integer", "minimum": 1, "maximum": 100}}, []),
-    _tool("propose_chord_edit", "单独提出一个已有和弦标签的修改方案，待界面确认。时间是工程绝对秒。label只接受N或C/C#/D/D#/E/F/F#/G/G#/A/A#/B加:maj或:min。不生成MIDI。selection范围必须给出来源clip_id，先read_chord_regions获得真实region_id。", {
+    _tool("propose_chord_edit", "单独提出已有和弦标签修改，待确认。时间为工程绝对秒。label=N，或根音C/C#/D/D#/E/F/F#/G/G#/A/A#/B加冒号及maj/min/7/maj7/min7/dim/aug/sus2/sus4/hdim7/dim7。不生成MIDI。selection范围须给来源clip_id，先read_chord_regions取得region_id。", {
         "region_id": {"type": "string"}, "clip_id": {"type": "string"}, "label": {"type": "string"},
         "start_seconds": {"type": "number", "minimum": 0}, "end_seconds": {"type": "number", "exclusiveMinimum": 0},
         "summary": {"type": "string", "maxLength": 500}}, ["region_id", "summary"]),
@@ -70,18 +73,26 @@ def safe_capabilities(raw):
         return {"providers": [], "available": False}
     providers = []
     for item in raw["providers"]:
-        if not isinstance(item, dict) or item.get("kind") not in KINDS:
+        if not isinstance(item, dict) or not isinstance(item.get("kind"), str) or item["kind"] not in KINDS:
             continue
         providers.append({"kind": item["kind"], "available": item.get("available") is True,
             "model_id": safe_text(item.get("model_id"), 100), "version": safe_text(item.get("version"), 80),
             "detail": safe_text(item.get("detail")), "experimental": item.get("experimental", True) is True})
+    def options(key, allowed):
+        values = raw.get(key, [])
+        if not isinstance(values, list): return []
+        return list(dict.fromkeys(v for v in values[:32] if isinstance(v, str) and v in allowed))
     return {"providers": providers, "available": any(p["available"] for p in providers),
+            "separation_six_stems": raw.get("separation_six_stems") is True,
+            "separation_quality_modes": options("separation_quality_modes", {"fast", "quality"}),
+            "transcription_instruments": options("transcription_instruments", ANALYSIS_OPTIONS["transcribe"]["instrument"]),
+            "chord_vocabularies": options("chord_vocabularies", {"triads", "extended"}),
             "max_duration_seconds": min(600, number(raw.get("max_duration_seconds", 600), 1, 172800))}
 
 def safe_job(raw):
     if not isinstance(raw, dict):
         raise ValueError("分析任务回执无效。")
-    result = {key: deepcopy(raw[key]) for key in ("job_id", "id", "result_id", "clip_id", "kind", "status", "progress", "receipt") if key in raw}
+    result = {key: deepcopy(raw[key]) for key in ("job_id", "id", "result_id", "clip_id", "kind", "status", "progress", "receipt", "operation") if key in raw}
     for field in ("phase", "detail", "error", "summary"):
         if field in raw:
             result[field] = safe_text(raw[field], 500)
@@ -91,10 +102,12 @@ def safe_job(raw):
         result["source"] = {k: deepcopy(v) for k, v in raw["source"].items() if k in SOURCE_FIELDS}
     if isinstance(raw.get("summary"), dict):
         result["summary"] = {k: deepcopy(v) for k, v in raw["summary"].items() if k in {"kind", "total"}}
+    if "parameters" in raw:
+        result["parameters"] = validate_parameters(raw.get("kind"), raw["parameters"])
     return result
 
 def safe_result(raw):
-    if not isinstance(raw, dict) or raw.get("kind") not in KINDS:
+    if not isinstance(raw, dict) or not isinstance(raw.get("kind"), str) or raw["kind"] not in KINDS:
         raise ValueError("分析候选类型无效。")
     result = {key: deepcopy(raw[key]) for key in ("result_id", "kind", "total", "offset", "result_hash", "applied", "present_in_project", "score_kind", "stale") if key in raw}
     identifier(result.get("result_id"))
@@ -112,17 +125,26 @@ def safe_result(raw):
     return result
 
 def validate_parameters(kind, parameters):
-    if not isinstance(parameters, dict) or set(parameters)-set(ANALYSIS_PARAMETERS[kind]):
+    if not isinstance(kind, str) or kind not in KINDS or not isinstance(parameters, dict) or set(parameters)-(set(ANALYSIS_PARAMETERS[kind]) | set(ANALYSIS_OPTIONS[kind])):
         raise ValueError("该分析类型不支持这些参数。")
     values = {}
     for key, value in parameters.items():
+        if key in ANALYSIS_OPTIONS[kind]:
+            if not isinstance(value, str) or value not in ANALYSIS_OPTIONS[kind][key]:
+                raise ValueError("不支持这种分析选项。")
+            values[key] = value
+            continue
         bounds = ANALYSIS_PARAMETERS[kind][key]
         values[key] = number(value, bounds[0], bounds[1])
-        if key in {"min_pitch", "max_pitch"}:
+        if key in {"min_pitch", "max_pitch", "stems"}:
             if value != int(value): raise ValueError("音域边界必须是 MIDI 整数。")
             values[key] = int(value)
-    if kind == "transcribe" and values.get("min_pitch", 21) > values.get("max_pitch", 108):
-        raise ValueError("最低音不能高于最高音。")
+        if key == "stems" and value not in (4, 6):
+            raise ValueError("分离支持四轨或六轨。")
+    if kind == "transcribe":
+        low, high = INSTRUMENT_RANGES[values.get("instrument", "auto")]
+        if values.get("min_pitch", low) > values.get("max_pitch", high):
+            raise ValueError("最低音不能高于最高音。")
     return values
 
 def authorize_start(context, frozen, args):
@@ -132,13 +154,18 @@ def authorize_start(context, frozen, args):
         raise ValueError("分析参数无效；只接受已选片段、类型和时间范围。")
     cid = identifier(args["clip_id"])
     kind = args["kind"]
-    if kind not in KINDS:
+    if not isinstance(kind, str) or kind not in KINDS:
         raise ValueError("不支持这种分析。鼓组转录尚未提供。")
+    parameters = validate_parameters(kind, args.get("parameters", {}))
     owner, clip = next(((t, c) for t in context.get("tracks", []) for c in t.get("clips", []) if c.get("id") == cid), (None, None))
     if not clip or clip.get("kind") != "audio":
         raise ScopeError("请选择真实音频片段；MIDI 片段不能作为音频分析输入。")
-    if kind == "transcribe" and clip.get("analysis_role") in {"drums", "other"}:
-        raise ScopeError("鼓和混合 other 分轨不适用音高转录；请选人声、贝斯或其他独立有音高乐器。")
+    explicit_instrument = parameters.get("instrument")
+    role = clip.get("analysis_role")
+    if kind == "transcribe" and explicit_instrument in (None, "auto") and isinstance(role, str) and role in INSTRUMENT_RANGES:
+        validate_parameters(kind, {**parameters, "instrument": role})
+    if kind == "transcribe" and (clip.get("analysis_role") == "drums" or (clip.get("analysis_role") == "other" and explicit_instrument not in {"piano", "bass", "guitar", "vocals"})):
+        raise ScopeError("鼓组尚不支持音高转录；混合 other 分轨请先明确选择乐器音域。")
     clip_start = number(clip.get("start_seconds"), 0, 172800)
     clip_length = number(clip.get("duration_seconds"), 0.000001, 172800)
     lower, upper = 0.0, clip_length
@@ -165,7 +192,7 @@ def authorize_start(context, frozen, args):
     if start < lower - 1e-9 or start + length > upper + 1e-9:
         raise ScopeError("分析范围超出片段或已确认的时间选区。")
     request = {"clip_id": cid, "kind": kind, "start_seconds": start, "duration_seconds": length}
-    if "parameters" in args: request["parameters"] = validate_parameters(kind, args["parameters"])
+    if "parameters" in args: request["parameters"] = parameters
     return request
 
 def authorize_result(context, frozen, result):
@@ -173,7 +200,8 @@ def authorize_result(context, frozen, result):
     if source.get("project_id") != context.get("project_id"):
         raise ScopeError("候选来自其他工程，不能导入。")
     request = {"clip_id": source.get("clip_id"), "kind": result["kind"],
-               "start_seconds": source.get("range_start_seconds"), "duration_seconds": source.get("duration_seconds")}
+               "start_seconds": source.get("range_start_seconds"), "duration_seconds": source.get("duration_seconds"),
+               "parameters": result.get("parameters", {})}
     authorize_start(context, frozen, request)
     clip = next(c for t in context["tracks"] for c in t.get("clips", []) if c["id"] == source["clip_id"])
     for a, b in ((context.get("bpm"), source.get("bpm")), (clip.get("start_seconds"), source.get("clip_timeline_start")),
@@ -188,14 +216,15 @@ def authorize_result(context, frozen, result):
 def authorize_cancel(context, frozen, job):
     """GUI and Agent jobs share scope, but completed/import operations do not."""
     assert_scope_unchanged(frozen, context)
-    if not isinstance(job, dict) or job.get("kind") not in KINDS or job.get("status") not in {"queued", "preparing", "running", "validating"} or job.get("operation") == "import":
+    if not isinstance(job, dict) or not isinstance(job.get("kind"), str) or job["kind"] not in KINDS or job.get("status") not in {"queued", "preparing", "running", "validating"} or job.get("operation") == "import":
         raise ValueError("任务已经结束或进入导入阶段，不能再作为分析任务取消。")
     source = job.get("source") or {}
     if source.get("project_id") != context.get("project_id"):
         raise ScopeError("该分析任务不属于当前工程。")
     if frozen["mode"] != "project":
         authorize_start(context, frozen, {"clip_id": source.get("clip_id"), "kind": job["kind"],
-            "start_seconds": source.get("range_start_seconds"), "duration_seconds": source.get("duration_seconds")})
+            "start_seconds": source.get("range_start_seconds"), "duration_seconds": source.get("duration_seconds"),
+            "parameters": job.get("parameters", {})})
     return identifier(job.get("job_id", job.get("id")))
 
 def compile_import(result, context, frozen, summary):
@@ -209,22 +238,29 @@ def compile_import(result, context, frozen, summary):
     kind, total = result["kind"], result["total"]
     if not total:
         raise ValueError("候选为空，没有可导入内容。")
-    if kind == "separate" and total != 4:
-        raise ValueError("四轨分离候选不完整。")
-    new_tracks = 4 if kind == "separate" else 1 if kind == "transcribe" else 0
+    if kind == "separate":
+        expected = result.get("parameters", {}).get("stems", 4)
+        names = {"vocals", "drums", "bass", "other"} | ({"piano", "guitar"} if expected == 6 else set())
+        items = result.get("items", [])
+        if total not in (4, 6) or total != expected or result.get("offset", 0) != 0 or not isinstance(items, list) or len(items) != total or any(not isinstance(item, dict) for item in items):
+            raise ValueError("分离候选轨数不完整，请重新读取完整候选。")
+        actual = [item.get("name") for item in items]
+        if any(not isinstance(name, str) for name in actual) or len(set(actual)) != total or set(actual) != names:
+            raise ValueError("分离候选声部名称不匹配。")
+    new_tracks = total if kind == "separate" else 1 if kind == "transcribe" else 0
     if len(context.get("tracks", [])) + new_tracks > 64:
         raise ValueError("导入后会超过 64 轨上限，请先整理工程。")
     result_hash = result.get("result_hash")
     if not isinstance(result_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", result_hash):
         raise ValueError("候选缺少不可变内容标识，不能提交导入。")
     source = result["source"]
-    label = {"separate": f"新建 4 条音频轨并导入候选分轨", "transcribe": f"新建 1 条 MIDI 轨，导入 {total} 个候选音符",
+    label = {"separate": f"新建 {total} 条音频轨并导入候选分轨", "transcribe": f"新建 1 条 MIDI 轨，导入 {total} 个候选音符",
              "chords": f"添加 {total} 个和弦标签区间"}[kind]
     changes = [label, f"保持原时间位置：{source['timeline_start']:.3f} 秒起；原音频保留"]
     if kind == "transcribe":
         changes.append("仅导入音符；不恢复原插件音色、弯音和踏板。新 MIDI 轨需选择乐器才能发声。")
     elif kind == "chords":
-        changes.append("模板/HMM 基线：大三/小三/无和弦；分数不是正确概率，不生成伴奏音符。")
+        changes.append("添加和弦轨，可直接修正标签和时间。")
     return {"project_id": context["project_id"], "revision": context["revision"], "summary": summary.strip(),
             "execution_kind": "analysis_import", "commands": [{"command": "accept_analysis_result", "args": {"result_id": result["result_id"]}}],
             "changes": changes, "steps": [{"index": 1, "label": "核对来源、候选和工程版本"}, {"index": 2, "label": label}],
@@ -260,8 +296,8 @@ def compile_chord_edit(args, region, context, frozen):
     if not changes:
         raise ValueError("没有提出和弦修改。")
     after = deepcopy(region); after.update(changes)
-    if not isinstance(after.get("label"), str) or not re.fullmatch(r"(?:N|(?:C#?|D#?|E|F#?|G#?|A#?|B):(?:maj|min))", after["label"]):
-        raise ValueError("首版和弦标签只支持大三、小三和 N（无和弦）。")
+    if not isinstance(after.get("label"), str) or not re.fullmatch(r"(?:N|(?:C#?|D#?|E|F#?|G#?|A#?|B):(?:maj|min|7|maj7|min7|dim|aug|sus2|sus4|hdim7|dim7))", after["label"]):
+        raise ValueError("和弦标签须为支持的三和弦、七和弦、挂留和弦或 N。")
     start, end = number(after.get("start_seconds"), 0, 172800), number(after.get("end_seconds"), 0, 172800)
     if start >= end:
         raise ValueError("和弦终点必须大于起点。")
@@ -305,13 +341,16 @@ def capability_groups(context, host, analysis):
     for kind, label in KINDS.items():
         p = providers.get(kind, {})
         installed = COMMANDS <= commands and p.get("available") is True
-        applicable = audio and (kind != "transcribe" or any(c.get("id") in selected and c.get("kind") == "audio" and c.get("analysis_role") not in {"drums", "other"} for c in clips))
+        applicable = audio and (kind != "transcribe" or any(c.get("id") in selected and c.get("kind") == "audio" and c.get("analysis_role") != "drums" for c in clips))
         status = "experimental" if installed and applicable else "not_applicable" if installed else "unavailable"
-        example = {"separate": "把选中音频分成人声、鼓、贝斯、其他，先生成候选。", "transcribe": "把选中的有音高分轨转成 MIDI，保持原时间位置，先预览。",
-                   "chords": "识别选中音频的和弦，低分结果标出来，先给我候选。"}[kind]
+        example = {"separate": "把选中音频分为人声、鼓、贝斯、钢琴、吉他和其他，先预览。" if analysis.get("separation_six_stems") else "把选中音频分成人声、鼓、贝斯、其他，先生成候选。",
+                   "transcribe": "把选中的有音高分轨转成 MIDI，保持原时间位置，先预览。",
+                   "chords": "识别选中音频的常用和弦，添加到和弦轨之前让我确认。"}[kind]
         detail = p.get("detail") or "请先安装本地分析运行库和模型。"
         if kind == "transcribe": detail += " 只适合有音高乐器；鼓转录待支持。"
-        if kind == "chords": detail += " 24 种大/小三和弦与无和弦基线；分数未经校准。"
+        if kind == "chords": detail = "识别三和弦、七和弦及挂留和弦，可在和弦轨修正。"
+        if kind == "separate": detail = "分离后添加为独立音频轨。"
+        if kind == "transcribe": detail = "选择乐器音域，生成可编辑 MIDI。"
         groups.append({"id": kind, "label": label, "status": status,
                        "status_label": "实验中" if status == "experimental" else "选择音频" if status == "not_applicable" else "未就绪",
                        "enabled": installed and applicable, "example": example, "detail": detail})

@@ -14,6 +14,7 @@ public:
     void clearKeyboardFocusHint();
     juce::String diagnostic() const;
     void restartWorker();
+    void refreshLanguage();
     void stopWorkerForTest();
     void evaluateForTest(const juce::String&, juce::WebBrowserComponent::EvaluationCallback);
     void probeStateForTest(juce::WebBrowserComponent::EvaluationCallback);

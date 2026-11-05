@@ -43,10 +43,27 @@ let attempt=0; const checker=setInterval(()=>{
  clearInterval(checker);
  const target=rows.find(r=>r.dataset.capability==='transcribe'); if(target)target.open=true;
  const btn=target?.querySelector('button'); if(btn&&!btn.disabled)btn.click();
+ const draft=document.getElementById('prompt').value, project=document.getElementById('project-title').textContent;
+ const initialLanguage=document.documentElement.lang;
+ window.emusicianSetLanguage('en');
+ const englishLabel=document.getElementById('submit').textContent==='Send';
+ window.emusicianSetLanguage('zh-CN');
+ const chineseLabel=document.getElementById('submit').textContent==='发送';
+ window.emusicianSetLanguage('en');
+ const localePreservesDraft=document.getElementById('prompt').value===draft;
+ const localePreservesProject=document.getElementById('project-title').textContent===project;
+ const restoresEnglish=document.documentElement.lang==='en'&&document.getElementById('submit').textContent==='Send';
+ const rawValue='发送 <b>track</b>';
+ const literalValues=window.emusicianI18n.t`轨道：${rawValue}`===`Track: ${rawValue}`;
+ const newAnalysisCopy=window.emusicianI18n.t('新建 4 条音频轨并导入候选分轨').startsWith('Create 4 audio tracks')
+  &&window.emusicianI18n.t('新建 6 条音频轨并导入候选分轨').startsWith('Create 6 audio tracks')
+  &&window.emusicianI18n.t('添加和弦轨，可直接修正标签和时间。')==='Add a chord lane with editable labels and timing.';
+ window.emusicianSetLanguage(initialLanguage);
  const offline=rows.find(r=>r.dataset.capability==='separate')?.querySelector('button');
  const preview=document.getElementById('analysis-preview'); if(preview&&!preview.hidden)preview.open=true;
  const checks={rows:rows.length,disabledUnavailable:!!offline?.disabled,examplePopulates:document.getElementById('prompt').value.includes('MIDI'),
  widthOK:document.documentElement.scrollWidth<=innerWidth,viewportWidth:innerWidth,errors:window.__smokeErrors,
+ initialLanguage,englishLabel,chineseLabel,restoresEnglish,localePreservesDraft,localePreservesProject,literalValues,newAnalysisCopy,
  previewRows:preview&&!preview.hidden?document.querySelectorAll('#analysis-preview-items li').length:0};
  document.body.setAttribute('data-analysis-smoke',JSON.stringify(checks));
  if(preview&&!preview.hidden)document.getElementById('plan').scrollIntoView({block:'start'});
@@ -59,7 +76,7 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0]
         if path == "/api/state":
             body = json.dumps(self.server.fixture, ensure_ascii=False).encode("utf-8"); mime = "application/json"
-        elif path in ("/", "/app.js", "/style.css"):
+        elif path in ("/", "/app.js", "/i18n.js", "/style.css"):
             file = WEB / ("index.html" if path == "/" else path[1:]); body = file.read_bytes()
             mime = "text/html" if path == "/" else "text/javascript" if path.endswith("js") else "text/css"
             if path == "/": body = body.replace(b"</body>", HARNESS.encode("utf-8")+b"</body>")
@@ -70,12 +87,12 @@ def main():
     browser = Path("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
     if not browser.is_file(): raise RuntimeError("Headless Edge unavailable")
     OUTPUT.mkdir(parents=True,exist_ok=True)
-    for ready, width, height in ((False,400,800),(True,400,800),(False,1000,800)):
-        label = ("ready" if ready else "empty") + f"-{width}x{height}"
+    for ready, width, height, language in ((False,400,800,"en"),(True,400,800,"en"),(False,1000,800,"en"),(False,400,800,"zh-CN")):
+        label = ("ready" if ready else "empty") + f"-{width}x{height}" + ("-zh" if language=="zh-CN" else "")
         server = ThreadingHTTPServer(("127.0.0.1",0),Handler); server.fixture=fixture(ready)
         thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
         try:
-            url=f"http://127.0.0.1:{server.server_port}/?embedded=1#token=synthetic-ui-test"
+            url=f"http://127.0.0.1:{server.server_port}/?embedded=1&lang={language}#token=synthetic-ui-test"
             screenshot=OUTPUT/f"{label}.png"
             import uuid
             args=['node',str(ROOT/'tests'/'analysis_agent_web_capture.mjs'),str(browser),str(OUTPUT/(label+'-'+uuid.uuid4().hex+'-profile')),
@@ -91,6 +108,7 @@ def main():
             checks=json.loads(html.unescape(match.group(1)))
             assert checks['rows']==7 and checks['disabledUnavailable'] and checks['examplePopulates'] and checks['widthOK'] and not checks['errors'],checks
             assert checks['viewportWidth']==width,checks
+            assert checks['initialLanguage']==language and all(checks[key] for key in ('englishLabel','chineseLabel','restoresEnglish','localePreservesDraft','localePreservesProject','literalValues','newAnalysisCopy')),checks
             assert checks['previewRows']==(2 if ready else 0),checks
             assert screenshot.read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
             print(label,json.dumps(checks),str(screenshot))

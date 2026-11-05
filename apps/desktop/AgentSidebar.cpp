@@ -1,4 +1,5 @@
 #include "AgentSidebar.h"
+#include "UiLanguage.h"
 #include <array>
 #include <atomic>
 #include <cstring>
@@ -243,11 +244,13 @@ struct AgentSidebar::Impl {
     juce::TextButton retry{"Retry assistant"};
     juce::String loaded;
     bool keyboardFocusHint = false;
+    unsigned languageRevision = 0;
     explicit Impl(AgentSidebar& o, std::function<juce::var(const juce::var&)> d) : owner(o), dispatch(std::move(d)) {
         owner.addAndMakeVisible(status); owner.addAndMakeVisible(retry);
         status.setJustificationType(juce::Justification::centred);
         status.setColour(juce::Label::textColourId, juce::Colour(0xff202020));
         retry.onClick = [this] { owner.restartWorker(); };
+        uiButton(retry, "Retry assistant");
     }
 };
 AgentSidebar::AgentSidebar(std::function<juce::var(const juce::var&)> dispatch)
@@ -259,7 +262,7 @@ void AgentSidebar::restartWorker() {
     clearKeyboardFocusHint();
     state.browser.reset(); state.loaded.clear();
     state.service = std::make_unique<Service>(state.dispatch); state.service->startThread();
-    state.status.setText("Starting assistant...", juce::dontSendNotification);
+    state.status.setText(uiText("Starting assistant..."), juce::dontSendNotification);
     state.status.setVisible(true); state.retry.setVisible(false);
 }
 void AgentSidebar::setPanelVisible(bool visible) {
@@ -278,6 +281,15 @@ bool AgentSidebar::capturesKeyboard() const {
 }
 void AgentSidebar::clearKeyboardFocusHint() { impl->keyboardFocusHint = false; }
 bool AgentSidebar::isReady() const { return isWorkerRunning() && impl->browser != nullptr && impl->browser->pageLoaded; }
+void AgentSidebar::refreshLanguage() {
+    refreshUiButtons(*this);
+    if (impl->browser && impl->browser->pageLoaded) {
+        impl->browser->evaluateJavascript("window.emusicianSetLanguage && window.emusicianSetLanguage("
+            + juce::JSON::toString(juce::var(uiLanguageCode())) + ");");
+        impl->languageRevision = uiLanguageRevision();
+    }
+    repaint();
+}
 juce::String AgentSidebar::diagnostic() const { return isReady() ? "Ready" : impl->service ? impl->service->status() : "Not started"; }
 void AgentSidebar::evaluateForTest(const juce::String& script, juce::WebBrowserComponent::EvaluationCallback callback) {
     if (impl->browser) {
@@ -314,14 +326,20 @@ void AgentSidebar::timerCallback() {
             });
         const juce::URL parsed(url);
         state.browser->origin = "http://127.0.0.1:" + juce::String(parsed.getPort());
-        addAndMakeVisible(*state.browser); state.loaded = url; state.browser->goToURL(url); resized();
+        const auto fragment = url.indexOfChar('#');
+        const auto base = fragment >= 0 ? url.substring(0, fragment) : url;
+        const auto suffix = fragment >= 0 ? url.substring(fragment) : juce::String();
+        const auto localisedUrl = base + (base.containsChar('?') ? "&" : "?") + "lang=" + uiLanguageCode() + suffix;
+        addAndMakeVisible(*state.browser); state.loaded = url; state.languageRevision = 0;
+        state.browser->goToURL(localisedUrl); resized();
     }
     if (state.browser && state.browser->failed && state.service->isThreadRunning()) state.service->stopOwnedWorker();
     const bool running = state.service->isThreadRunning();
     const bool pageReady = state.browser && state.browser->pageLoaded;
+    if (pageReady && state.languageRevision != uiLanguageRevision()) refreshLanguage();
     state.status.setVisible(!pageReady || !running);
     state.retry.setVisible(!running);
-    state.status.setText(state.browser && state.browser->failed ? "Assistant page could not load. Reopen the panel after restarting the assistant." : state.service->status(), juce::dontSendNotification);
+    state.status.setText(state.browser && state.browser->failed ? uiText("Assistant page could not load. Reopen the panel after restarting the assistant.", "助手页面加载失败。请重新连接助手。") : uiText(state.service->status()), juce::dontSendNotification);
     if (!running && state.browser) { clearKeyboardFocusHint(); state.browser->setVisible(false); state.status.toFront(false); state.retry.toFront(false); }
 }
 void AgentSidebar::resized() {

@@ -53,6 +53,8 @@ public:
     std::function<void(const juce::Result&)> onEditResult;
     std::function<void(const juce::String&)> onOpenMidiClip;
     std::function<void(const juce::String&)> onOpenTrackDevices;
+    std::function<void(const juce::String&)> onRenameTrack;
+    std::function<void(const juce::String&)> onOpenChordRegion;
 private:
     struct Impl;
     std::unique_ptr<Impl> impl;

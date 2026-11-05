@@ -1,0 +1,29 @@
+{
+  "mode": "real-native-component-offscreen-render; explicitly synthetic chord/note fixtures",
+  "record": "20261105T104645.093782Z-ae1748427c",
+  "source_directory": "E:\\MusicAgent&DAW\\worktrees\\audio-analysis\\build\\smoke\\Release\\1f6e1a0f0cb1",
+  "visually_inspected": [
+    "ui-analysis-workspace-en-1000x650-synthetic-chords.png",
+    "ui-analysis-workspace-zh-1000x650-synthetic-chords.png",
+    "ui-analysis-chords-zh-CN-synthetic.png",
+    "ui-analysis-transcribe-en-synthetic.png",
+    "ui-analysis-540x210.png"
+  ],
+  "observations": [
+    "UTF-8 Chinese rendered correctly after explicit literal conversion",
+    "minimum full window retains chord lane, one music track and analysis controls",
+    "MIDI/chord candidates are rectangular; no confidence/model report in normal panel",
+    "empty-state label is visible; Options remains available at narrow width"
+  ],
+  "artifacts": {
+    "ui-analysis-workspace-en-1000x650-synthetic-chords.png": "7c2bb67924f8a6d95cf46f6d8daece4ac4ba8156ce50efc42c922fae48098788",
+    "ui-analysis-workspace-zh-1000x650-synthetic-chords.png": "9767be79e5dbab86933769b4d07b477aadd895298e69de770720c6cd420c2e31",
+    "ui-analysis-chords-en-synthetic.png": "8f8a91d7790e26673455fb55851c6f65255bd70a06db4365eae5ab2188ace83d",
+    "ui-analysis-chords-zh-CN-synthetic.png": "5eabd53ee6e5acd734663fb2b529bf016c4e60d8ecedd4357beaef39cca982cb",
+    "ui-analysis-transcribe-en-synthetic.png": "81bce82c97df902d042a07b0e78db4821025f578e667d2a8404f58df2c8ef35e",
+    "ui-analysis-transcribe-zh-CN-synthetic.png": "ff05bf7720fa43b1a0ac80cefcfec059bab770ed3f6e225158b6eddfe3be5ce5",
+    "ui-analysis-540x210.png": "c6fc31d1033766d03251a21533a481e20283b0d898a7334e23f76417491b51a8"
+  },
+  "physical_desktop_test": false,
+  "recognition_quality_claim": false
+}

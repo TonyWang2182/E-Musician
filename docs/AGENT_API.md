@@ -1,5 +1,17 @@
 # 本地 Agent 控制接口 v1
 
+## 0.9.1 分析参数增量
+
+`start_analysis` 与模型工具 `start_audio_analysis` 共用下列 parameters，kind 不变：
+
+- separate：`stems=4|6`、`quality=fast|quality`、`segment_seconds=3..4`。能力 `separation_six_stems` 独立报告安装状态。六轨结果必须为 vocals/drums/bass/piano/guitar/other，按实际轨数检查导入预算。
+- transcribe：`instrument=auto|piano|bass|guitar|vocals`，保留 onset/frame/minimum_note_ms/min_pitch/max_pitch。这是同一 Basic Pitch 的音域选项；other 仅显式选择音高乐器才允许尝试，drums 一直拒绝。
+- chords：`vocabulary=extended|triads`。标签 N 或根音 C/C#/D/D#/E/F/F#/G/G#/A/A#/B 加冒号及 maj/min/7/maj7/min7/dim/aug/sus2/sus4/hdim7/dim7。显示 Cm7/G7，协议仍是 C:min7/G:7；未新增转位/9/11/13。
+
+`get_analysis_job`、结果和保存 provenance 保留参数，完成后使用 Worker 规范化值。Agent 开始、取消、预览、接受均保留配置。`get_chord_regions` 增加可选 `analysis_id` 和 `latest_only` 供和弦轨分页，默认原行为不变。GUI 和弦选择未扩展 Agent 的音符/片段 selection_context；Agent 按授权来源读取真实 region ID 后编辑。
+
+结果 `waveform_peaks` 是 128 点真实幅度概览，仅供原生绘制；Agent safe_result 将其剔除。本地语言设置不改命令、ID、参数、音乐数据或模型回答。
+
 ## 0.9 分析与候选导入（自动验证通过；人工验收见本轮记录）
 
 音源分离、有音高分轨转 MIDI、和弦识别通过同一宿主管线由 GUI 或 Agent 发起。手动入口不依赖 API 密钥；推理在独立本机 Python 进程执行，语言模型仅收到有界摘要，不接收音频、模型文件路径或运行库路径。

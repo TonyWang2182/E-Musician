@@ -8,6 +8,7 @@
 #include "NativeDevicePanel.h"
 #include "NativeEffectsPanel.h"
 #include "DeviceChainStrip.h"
+#include "UiLanguage.h"
 #include "core/time/MusicalPosition.hpp"
 #include <algorithm>
 #include <cmath>
@@ -24,6 +25,16 @@ const juce::Colour ink { 0xff171817 };
 const juce::Colour secondary { 0xff626560 };
 const juce::Colour rule { 0xffc6c9c3 };
 const juce::Colour paper { 0xfffefefd };
+juce::PopupMenu interfaceSettingsMenu(bool audioAvailable)
+{
+    juce::PopupMenu menu, languages;
+    menu.addItem(1, uiText("Audio and MIDI settings...", "音频与 MIDI 设置..."), audioAvailable);
+    languages.addItem(101, "English", true, uiLanguageCode() == "en");
+    languages.addItem(102, juce::String::fromUTF8("简体中文"), true, uiLanguageCode() == "zh-CN");
+    menu.addSeparator();
+    menu.addSubMenu(uiText("Language", "语言"), languages);
+    return menu;
+}
 
 juce::Font mono(float height, int style = juce::Font::plain)
 {
@@ -170,7 +181,7 @@ public:
             g.strokePath(arrow, juce::PathStrokeType(1.4f));
         }
         g.setColour(colour); g.setFont(mono(15.0f));
-        g.drawText(kind == play && active ? "pause" : getName(), 45, 0, getWidth() - 45, getHeight(), juce::Justification::centredLeft);
+        g.drawText(uiText(kind == play && active ? "pause" : getName()), 45, 0, getWidth() - 45, getHeight(), juce::Justification::centredLeft);
         if (hasKeyboardFocus(true)) g.drawRoundedRectangle(bounds.reduced(0.5f), 3.0f, 1.0f);
     }
 private:
@@ -308,7 +319,7 @@ public:
     ValueForm(std::vector<Field> fields, std::function<juce::Result(const juce::var&)> callback) : data(std::move(fields)), submit(std::move(callback))
     {
         for (const auto& field : data) {
-            auto label = std::make_unique<juce::Label>(); label->setText(field.label, juce::dontSendNotification); label->setFont(mono(14)); addAndMakeVisible(*label); labels.push_back(std::move(label));
+            auto label = std::make_unique<juce::Label>(); label->setText(uiText(field.label), juce::dontSendNotification); label->setFont(mono(14)); addAndMakeVisible(*label); labels.push_back(std::move(label));
             auto editor = std::make_unique<juce::TextEditor>(); editor->setFont(mono(14));
             // TextEditor stores the insertion colour in its text runs. These
             // fields are populated before the form inherits InstrumentLook.
@@ -318,7 +329,7 @@ public:
             addAndMakeVisible(*editor); editors.push_back(std::move(editor));
         }
         addAndMakeVisible(error); error.setFont(mono(12));
-        addAndMakeVisible(apply); apply.onClick = [this] {
+        addAndMakeVisible(apply); uiButton(apply, "apply"); apply.onClick = [this] {
             auto values = juce::var(new juce::DynamicObject);
             for (std::size_t i = 0; i < data.size(); ++i) {
                 if (!data[i].numeric) { values.getDynamicObject()->setProperty(data[i].key, editors[i]->getText()); continue; }
@@ -372,11 +383,11 @@ public:
             addAndMakeVisible(*label); label->setFont(mono(13)); label->setColour(juce::Label::textColourId, ink);
             label->setJustificationType(juce::Justification::centredLeft);
         }
-        driverLabel.setText("Driver", juce::dontSendNotification); inputLabel.setText("Input", juce::dontSendNotification);
-        rateLabel.setText("Sample rate", juce::dontSendNotification); bufferLabel.setText("Buffer size", juce::dontSendNotification);
+        driverLabel.setText(uiText("Driver", "驱动"), juce::dontSendNotification); inputLabel.setText(uiText("Input", "输入"), juce::dontSendNotification);
+        rateLabel.setText(uiText("Sample rate", "采样率"), juce::dontSendNotification); bufferLabel.setText(uiText("Buffer size", "缓冲区"), juce::dontSendNotification);
         driver.setTitle("Audio driver"); output.setTitle("Audio output device"); input.setTitle("Audio input device");
         rate.setTitle("Audio sample rate"); buffer.setTitle("Audio buffer size");
-        addAndMakeVisible(refresh); addAndMakeVisible(apply);
+        addAndMakeVisible(refresh); addAndMakeVisible(apply); refresh.setButtonText(uiText("refresh devices", "刷新设备")); apply.setButtonText(uiText("apply"));
         driver.onChange = [this] { if (!updating) rebuildDevices(); };
         output.onChange = input.onChange = [this] { if (!updating) rebuildTiming(); };
         refresh.onClick = [this] { read(true); };
@@ -462,7 +473,7 @@ private:
         actual.setText(name.isEmpty() ? "No audio device is open." : "Active: " + name + "\n" + juce::String(double(devices["sample_rate"]), 0) + " Hz / "
             + juce::String(int(devices["buffer_size"])) + " samples / input " + juce::String(int(devices["input_latency_samples"])) + " + output "
             + juce::String(int(devices["output_latency_samples"])) + " latency samples", juce::dontSendNotification);
-        if (scan) status.setText("Choose devices, then Apply. MIDI inputs are selected and armed in Devices / I/O.", juce::dontSendNotification);
+        if (scan) status.setText(uiText("Choose devices, then Apply. MIDI inputs are selected and armed in Devices / I/O.", "选择设备后点击应用。MIDI 输入在轨道的装置／输入输出面板中设置。"), juce::dontSendNotification);
         return true;
     }
     void rebuildDevices()
@@ -474,13 +485,13 @@ private:
             if (sameDriver && name.toString() == devices["output_device_name"].toString()) outputId = id;
         }
         output.setSelectedId(outputId > 0 ? outputId : output.getNumItems() > 0 ? 1 : 0, juce::dontSendNotification);
-        output.setTextWhenNothingSelected("No output device available"); input.clear(juce::dontSendNotification); input.addItem(separateDevices() ? "None" : "Uses selected device", 1);
+        output.setTextWhenNothingSelected(uiText("No output device available", "暂无输出设备")); input.clear(juce::dontSendNotification); input.addItem(separateDevices() ? uiText("None", "无") : uiText("Uses selected device", "使用当前设备"), 1);
         int inputId = 1;
         if (separateDevices()) if (const auto* list = selected["inputs"].getArray()) for (const auto& name : *list) {
             const int id = input.getNumItems() + 1; input.addItem(name.toString(), id);
             if (sameDriver && name.toString() == devices["input_device_name"].toString()) inputId = id;
         }
-        input.setSelectedId(inputId, juce::dontSendNotification); outputLabel.setText(separateDevices() ? "Output" : "Device", juce::dontSendNotification);
+        input.setSelectedId(inputId, juce::dontSendNotification); outputLabel.setText(separateDevices() ? uiText("Output", "输出") : uiText("Device", "设备"), juce::dontSendNotification);
         updating = false; rebuildTiming();
     }
     void rebuildTiming()
@@ -496,10 +507,10 @@ private:
             for (size_t i = 0; i < rates.size(); ++i) { rate.addItem(juce::String(rates[i], 0) + " Hz", int(i) + 1); if (rates[i] == currentRate) rate.setSelectedId(int(i) + 1, juce::dontSendNotification); }
             for (size_t i = 0; i < buffers.size(); ++i) { buffer.addItem(juce::String(buffers[i]) + " samples", int(i) + 1); if (buffers[i] == currentBuffer) buffer.setSelectedId(int(i) + 1, juce::dontSendNotification); }
         } else {
-            rate.addItem("Device default", 1); buffer.addItem("Device default", 1); rate.setSelectedId(1, juce::dontSendNotification); buffer.setSelectedId(1, juce::dontSendNotification);
+            rate.addItem(uiText("Device default", "设备默认值"), 1); buffer.addItem(uiText("Device default", "设备默认值"), 1); rate.setSelectedId(1, juce::dontSendNotification); buffer.setSelectedId(1, juce::dontSendNotification);
         }
-        hint.setText(active ? "Choose the rate and buffer supported by the active device. New inputs start with monitoring off."
-            : "Apply this device first, then choose its supported sample rate and buffer. New inputs start with monitoring off.", juce::dontSendNotification);
+        hint.setText(active ? uiText("Choose the rate and buffer supported by the active device. New inputs start with monitoring off.", "选择设备支持的采样率与缓冲区。新输入默认关闭监听。")
+            : uiText("Apply this device first, then choose its supported sample rate and buffer. New inputs start with monitoring off.", "先应用设备，再选择它支持的采样率与缓冲区。新输入默认关闭监听。"), juce::dontSendNotification);
         updating = false; updateEnabled();
     }
     void updateEnabled()
@@ -507,7 +518,7 @@ private:
         driver.setEnabled(!applying); output.setEnabled(!applying); input.setEnabled(!applying && separateDevices());
         rate.setEnabled(!applying && activeSelection() && !rates.empty()); buffer.setEnabled(!applying && activeSelection() && !buffers.empty());
         refresh.setEnabled(!applying); apply.setEnabled(!applying && driver.getSelectedId() > 0 && output.getSelectedId() > 0);
-        apply.setButtonText(applying ? "applying..." : "apply");
+        apply.setButtonText(applying ? uiText("applying...", "正在应用...") : uiText("apply"));
     }
     void beginApply()
     {
@@ -568,7 +579,11 @@ public:
     PluginPanel(EngineSession& engine, std::function<void(const juce::Result&)> result, std::function<void(const juce::String&)> openNative = {}, std::function<void(const juce::String&, const juce::String&)> openEffect = {}) : session(engine), report(std::move(result)), openNativeDevice(std::move(openNative)), openNativeEffect(std::move(openEffect)), catalogModel(*this, false), chainModel(*this, true), catalog("Installed plugins", &catalogModel), chain("Plugin chain", &chainModel)
     {
         for (juce::Component* c : std::initializer_list<juce::Component*> { &target, &search, &catalog, &chain, &scan, &directory, &native, &add, &remove, &open, &bypass, &up, &down, &status }) addAndMakeVisible(c);
-        search.setTextToShowWhenEmpty("Find an installed instrument or effect", secondary); search.onTextChange = [this] { filter(); };
+        search.setTextToShowWhenEmpty(uiText("Find an installed instrument or effect", "查找已安装的乐器或效果器"), secondary); search.onTextChange = [this] { filter(); };
+        scan.setButtonText(uiText("scan installed", "扫描已安装")); directory.setButtonText(uiText("scan folder...", "扫描文件夹..."));
+        native.setButtonText(uiText("native...", "原生装置...")); add.setButtonText(uiText("add >", "添加 >"));
+        for (auto* button : {&remove, &open, &bypass, &up}) button->setButtonText(uiText(button->getButtonText()));
+        down.setButtonText(uiText("dn", "下移"));
         for (auto* list : { &catalog, &chain }) { list->setRowHeight(52); list->setColour(juce::ListBox::backgroundColourId, paper); }
         target.onChange = [this] { updateSlots(); };
         scan.onClick = [this] { run("scan_plugins", arguments({ { "paths", juce::var(juce::Array<juce::var>()) } })); };
@@ -641,8 +656,8 @@ public:
     void paint(juce::Graphics& g) override
     {
         g.fillAll(paper); g.setColour(ink); g.setFont(mono(15));
-        g.drawText("installed plugins", 16, 58, getWidth() / 2 - 30, 28, juce::Justification::centredLeft);
-        g.drawText("signal chain", getWidth() / 2 + 14, 58, getWidth() / 2 - 30, 28, juce::Justification::centredLeft);
+        g.drawText(uiText("installed plugins", "已安装插件"), 16, 58, getWidth() / 2 - 30, 28, juce::Justification::centredLeft);
+        g.drawText(uiText("signal chain", "装置链"), getWidth() / 2 + 14, 58, getWidth() / 2 - 30, 28, juce::Justification::centredLeft);
         g.setColour(rule); g.drawVerticalLine(getWidth() / 2, 58, float(getHeight() - 75));
     }
     void resized() override
@@ -732,7 +747,7 @@ private:
         const int row = chain.getSelectedRow(); const bool chosen = row >= 0 && row < int(slots.size());
         remove.setEnabled(chosen); bypass.setEnabled(chosen); open.setEnabled(chosen && !slots[std::size_t(row)].missing);
         up.setEnabled(chosen && row > 0); down.setEnabled(chosen && row + 1 < int(slots.size()));
-        bypass.setButtonText(chosen && !slots[std::size_t(row)].enabled ? "enable" : "bypass");
+        bypass.setButtonText(chosen && !slots[std::size_t(row)].enabled ? uiText("enable", "启用") : uiText("bypass"));
     }
     void timerCallback() override
     {
@@ -742,7 +757,7 @@ private:
         const auto oldTarget = targetId(); const bool first = target.getNumItems() == 0; state = std::move(next);
         setEnabled(!state.recording && !state.recordingFinalizing);
         if (tracksChanged || first) {
-            target.clear(juce::dontSendNotification); target.addItem("Master output", 1); int chosen = 1;
+            target.clear(juce::dontSendNotification); target.addItem(uiText("Master output", "主轨输出"), 1); int chosen = 1;
             for (std::size_t i = 0; i < state.tracks.size(); ++i) { target.addItem(state.tracks[i].name, int(i) + 2); if (state.tracks[i].id == (first ? state.selectedTrackId : oldTarget)) chosen = int(i) + 2; }
             target.setSelectedId(chosen, juce::dontSendNotification); updateSlots();
         }
@@ -793,18 +808,10 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         compose.setTooltip("View every audio and MIDI track on one shared timeline.");
         separate.setTooltip("Inspect the selected audio clip's original source waveform.");
         analyze.getProperties().set("flat", true);
-        analyze.setTooltip("Local audio analysis: four stems, pitched audio to MIDI, and chord labels. No Agent or API key required.");
+        analyze.setTooltip("Local audio analysis: four or six stems, pitched audio to MIDI, and chord labels. No Agent or API key required.");
         analyze.onClick = [this] {
-            if (dock == Dock::analysis) dock = Dock::closed;
-            else {
-                if (!dockAnalysis) {
-                    dockAnalysis = std::make_unique<AnalysisPanel>(owner.session, [this](const juce::Result& result) { owner.showResult(result); });
-                    owner.addAndMakeVisible(*dockAnalysis);
-                }
-                pianoExpanded = false; dock = Dock::analysis;
-                const auto range = arrangement.explicitSelectedTimeRange();
-                dockAnalysis->setSelectedTimeRange(range.getStart(), range.getEnd());
-            }
+            if (dock != Dock::analysis) { owner.showAnalysisDock(); return; }
+            dock = Dock::closed;
             owner.resized(); owner.refreshSnapshot(); owner.repaint();
         };
         compose.onClick = [this] { composeActive = true; dock = Dock::closed; owner.resized(); owner.refreshSnapshot(); owner.repaint(); };
@@ -828,6 +835,8 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         arrangement.onEditResult = [&component](const juce::Result& result) { component.showResult(result); };
         arrangement.onOpenMidiClip = [&component](const juce::String&) { component.showPianoRoll(); };
         arrangement.onOpenTrackDevices = [this](const juce::String&) { dock = Dock::track; trackPanel.showDevices(); owner.resized(); owner.repaint(); };
+        arrangement.onRenameTrack = [&component](const juce::String& target) { component.renameTrack(target); };
+        arrangement.onOpenChordRegion = [&component](const juce::String& target) { component.showAnalysisDock(target); };
         trackPanel.onResult = [&component](const juce::Result& result) { component.showResult(result); };
         trackPanel.onBrowsePlugins = [&component](const juce::String& target) { component.showPlugins(target); };
         trackPanel.onOpenNative = [&component](const juce::String& target) { component.showNativeDevice(target); };
@@ -935,13 +944,13 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         fit.onClick = [this] { arrangement.fitToProject(); };
         importButton.setButtonText("add...");
         importButton.setTooltip("Add audio files, import MIDI, or create an empty track.");
-        settings.setTooltip("Choose the output device, sample rate, and buffer size.");
+        settings.setTooltip(uiText("Audio/MIDI devices and interface language.", "音频／MIDI 设备与界面语言。"));
         newButton.setTooltip("New project (Ctrl+N). Unsaved changes will be checked.");
         openButton.setTooltip("Open an .emproj project (Ctrl+O).");
         saveButton.setTooltip("Save the project and copies of its source audio (Ctrl+S).");
         saveAsButton.setTooltip("Save a copy to another .emproj file (Ctrl+Shift+S).");
         remove.setTooltip("Remove the selected track. Undo restores it.");
-        settings.onClick = [&component] { component.showAudioSettings(); };
+        settings.onClick = [&component] { component.showSettings(); };
         importButton.onClick = [&component] { component.showAddMenu(); };
         newButton.onClick = [&component] { component.newProject(); };
         openButton.onClick = [&component] { component.openProject(); };
@@ -1027,6 +1036,11 @@ struct MainComponent::Impl : private juce::ListBoxModel {
         trackList.setMultipleSelectionEnabled(false);
         trackList.setTitle("Audio tracks");
         trackList.setDescription("Select a track to inspect its waveform, gain, mute and solo controls.");
+        for (auto* button : { &settings, &importButton, &transcribe, &compose, &newButton, &openButton,
+                &saveAsButton, &undoButton, &redoButton, &remove, &separate, &analyze, &zoomOut, &zoomIn, &fit,
+                &editMenu, &exportMenu, &plugins, &clipProperties, &cancelJob, &snap, &follow, &metronome,
+                &metronomeOptions, &countIn, &details, &agentButton, &setClipStart })
+            uiButton(*button, button->getButtonText());
     }
     ~Impl()
     {
@@ -1149,7 +1163,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     DeviceChainStrip deviceChain;
     juce::TooltipWindow tooltips;
     juce::ListBox trackList;
-    juce::TextButton settings { "audio settings" }, importButton { "add audio" }, transcribe { "transcribe" }, compose { "compose" };
+    juce::TextButton settings { "settings" }, importButton { "add audio" }, transcribe { "transcribe" }, compose { "compose" };
     juce::TextButton newButton { "new" }, openButton { "open" }, saveButton { "save" }, saveAsButton { "save as" };
     juce::TextButton undoButton { "undo" }, redoButton { "redo" }, mute { "mute" }, solo { "solo" }, remove { "remove track" };
     juce::TextButton separate { "separate" }, analyze { "analyze" }, zoomOut { "-" }, zoomIn { "+" }, fit { "fit" };
@@ -1198,6 +1212,8 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     enum class Dock { closed, source, midi, track, native, effect, analysis };
     Dock dock = Dock::closed;
     bool pianoExpanded = false;
+    bool compactAnalysisFooter = false;
+    unsigned languageRevision = 0;
     bool inspectorVisible = true;
     int footerY = 0;
     bool updatingList = false, confirming = false, composeActive = true, startInputDirty = false, updatingStartInput = false;
@@ -1397,7 +1413,8 @@ void MainComponent::resized()
 {
     auto& p = *impl;
     constexpr int margin = 16;
-    p.footerY = getHeight() - 110;
+    p.compactAnalysisFooter = p.dock == Impl::Dock::analysis && getHeight() < 720;
+    p.footerY = getHeight() - (p.compactAnalysisFooter ? 86 : 110);
     if (p.dock != Impl::Dock::midi) p.pianoExpanded = false;
     const bool expanded = p.dock == Impl::Dock::midi && p.pianoExpanded;
     const bool showSidebar = p.agentVisible && !expanded;
@@ -1431,8 +1448,10 @@ void MainComponent::resized()
     p.zoomIn.setBounds(getWidth() - margin - 84, 75, 32, 30);
     p.fit.setBounds(getWidth() - margin - 48, 75, 48, 30);
     const bool visualDevice = p.dock == Impl::Dock::native || p.dock == Impl::Dock::effect;
+    const bool chordLaneVisible = p.state.chordRegions && !p.state.chordRegions->empty();
+    const int minimumArrangement = 54 + (chordLaneVisible ? 56 : 0) + 64 + 16;
     const int dockHeight = expanded ? p.workspace.getHeight() : p.dock == Impl::Dock::closed ? 0
-        : p.dock == Impl::Dock::analysis ? juce::jlimit(286, 390, p.workspace.getHeight() - 108)
+        : p.dock == Impl::Dock::analysis ? juce::jlimit(210, 330, p.workspace.getHeight() - minimumArrangement - 6)
         : visualDevice ? juce::jlimit(248, 364, p.workspace.getHeight() - 204)
         : p.dock == Impl::Dock::track ? juce::jlimit(278, 390, p.workspace.getHeight() - 204)
         : juce::jlimit(180, 340, p.workspace.getHeight() - 204);
@@ -1441,11 +1460,13 @@ void MainComponent::resized()
     p.arrangement.setCompactRows(dockHeight > 0 && p.arrangement.getHeight() < 258);
     p.arrangement.setVisible(!expanded);
     p.closeEditor.setVisible(dockHeight > 0);
-    p.closeEditor.setButtonText(visualDevice ? "x" : "close editor");
-    p.closeEditor.setTooltip("Close the lower editor panel");
-    p.closeEditor.setBounds(p.dockBounds.getRight() - (visualDevice ? 32 : 112), p.dockBounds.getY() + (visualDevice ? 3 : 0), visualDevice ? 32 : 112, 26);
+    const bool analysisDock = p.dock == Impl::Dock::analysis;
+    p.closeEditor.setButtonText(visualDevice ? "x" : analysisDock ? uiText("close", "关闭") : uiText("close editor"));
+    p.closeEditor.setTooltip(uiText("Close the lower editor panel", "关闭下方编辑面板"));
+    const int closeWidth = visualDevice ? 32 : analysisDock ? 88 : 112;
+    p.closeEditor.setBounds(p.dockBounds.getRight() - closeWidth - (analysisDock ? 4 : 0), p.dockBounds.getY() + ((visualDevice || analysisDock) ? 3 : 0), closeWidth, 26);
     p.expandEditor.setVisible(p.dock == Impl::Dock::midi);
-    p.expandEditor.setButtonText(expanded ? "return to arrangement" : "expand");
+    p.expandEditor.setButtonText(uiText(expanded ? "return to arrangement" : "expand"));
     p.expandEditor.setBounds(p.dockBounds.getRight() - 278, p.dockBounds.getY(), 160, 26);
     p.waveform.setVisible(p.dock == Impl::Dock::source);
     p.waveform.setBounds(p.dockBounds.reduced(0, 30));
@@ -1460,7 +1481,8 @@ void MainComponent::resized()
     p.trackPanel.setVisible(p.dock == Impl::Dock::track); p.trackPanel.setBounds(deviceBody);
     if(p.dockNative){p.dockNative->setVisible(p.dock==Impl::Dock::native);p.dockNative->setBounds(deviceBody);}
     if(p.dockEffect){p.dockEffect->setVisible(p.dock==Impl::Dock::effect);p.dockEffect->setBounds(deviceBody);}
-    if(p.dockAnalysis){p.dockAnalysis->setVisible(p.dock==Impl::Dock::analysis);p.dockAnalysis->setBounds(p.dockBounds.withTrimmedTop(28));}
+    if(p.dockAnalysis){p.dockAnalysis->setVisible(analysisDock);p.dockAnalysis->setBounds(p.dockBounds);}
+    if (analysisDock) p.closeEditor.toFront(false);
     p.separate.setToggleState(p.dock == Impl::Dock::source, juce::dontSendNotification);
     p.analyze.setToggleState(p.dock == Impl::Dock::analysis, juce::dontSendNotification);
     p.details.setToggleState(p.inspectorDisplayed, juce::dontSendNotification);
@@ -1480,8 +1502,9 @@ void MainComponent::resized()
     p.metronome.setBounds(margin,p.footerY+50,80,30);p.metronomeOptions.setBounds(100,p.footerY+50,38,30);
     p.countIn.setBounds(152,p.footerY+50,104,30);p.countInBars.setBounds(264,p.footerY+50,100,30);
     p.resources.setBounds(380,p.footerY+50,getWidth()-396,30);
-    p.cancelJob.setBounds(getWidth() - margin - 116, p.footerY + 85, 116, 22);
-    p.status.setBounds(margin, p.footerY + 86, getWidth() - margin * 2 - 125, 20);
+    p.cancelJob.setBounds(getWidth() - margin - 116, p.footerY + (p.compactAnalysisFooter ? 54 : 85), 116, 22);
+    p.status.setBounds(p.compactAnalysisFooter ? 380 : margin, p.footerY + (p.compactAnalysisFooter ? 54 : 86),
+        getWidth() - (p.compactAnalysisFooter ? 380 + margin + 125 : margin * 2 + 125), 20);
 }
 
 void MainComponent::paint(juce::Graphics& g)
@@ -1497,26 +1520,26 @@ void MainComponent::paint(juce::Graphics& g)
     if (!p.pianoExpanded) {
         g.drawHorizontalLine(142,16.0f,float(getWidth()-16));
         g.setColour(secondary);g.setFont(mono(11));
-        g.drawFittedText("drag empty: select clips   Shift-drag ruler: time   Ctrl+L: loop",426,115,getWidth()-442,24,juce::Justification::centredLeft,1);
+        g.drawFittedText(uiText("drag empty: select clips   Shift-drag ruler: time   Ctrl+L: loop", "空白处拖动：框选   Shift 拖动标尺：选时间   Ctrl+L：循环"),426,115,getWidth()-442,24,juce::Justification::centredLeft,1);
     }
     if (p.inspectorDisplayed) {
         const int ix = p.inspector.getX(), iw = p.inspector.getWidth();
         g.drawVerticalLine(ix - 8, 144.0f, float(p.footerY - 12));
         g.setColour(ink); g.setFont(mono(14.0f, juce::Font::bold));
-        g.drawFittedText(p.selectedTrack() ? p.selectedTrack()->name : "Select a track", ix, 158, iw, 30, juce::Justification::centredLeft, 1);
+        g.drawFittedText(p.selectedTrack() ? p.selectedTrack()->name : uiText("Select a track", "选择轨道"), ix, 158, iw, 30, juce::Justification::centredLeft, 1);
         g.setColour(secondary); g.setFont(mono(12.0f));
-        g.drawText(p.rulerMode.getSelectedId()==2?"start/s":"start", ix, 206, 54, 28, juce::Justification::centredLeft);
-        g.drawText("track volume", ix, 276, iw, 22, juce::Justification::centredLeft);
-        g.drawText("pan / L - R", ix, 334, iw, 22, juce::Justification::centredLeft);
-        g.drawText("devices", ix, 439, iw, 24, juce::Justification::centredLeft);
+        g.drawText(p.rulerMode.getSelectedId()==2?uiText("start/s", "起点/秒"):uiText("start"), ix, 206, 54, 28, juce::Justification::centredLeft);
+        g.drawText(uiText("track volume", "轨道音量"), ix, 276, iw, 22, juce::Justification::centredLeft);
+        g.drawText(uiText("pan / L - R", "声像 / 左 - 右"), ix, 334, iw, 22, juce::Justification::centredLeft);
+        g.drawText(uiText("devices"), ix, 439, iw, 24, juce::Justification::centredLeft);
         if (const auto* track = p.selectedTrack()) {
-            if (track->plugins.empty()) g.drawFittedText(track->kind == "instrument" ? "Add an instrument in Devices." : "No effects. Add in Devices.", ix, 470, iw, 44, juce::Justification::topLeft, 2);
+            if (track->plugins.empty()) g.drawFittedText(track->kind == "instrument" ? uiText("Add an instrument in Devices.", "在装置面板中添加乐器。") : uiText("No effects. Add in Devices.", "暂无效果器，可在装置面板添加。"), ix, 470, iw, 44, juce::Justification::topLeft, 2);
         }
     }
     if (p.dock != Impl::Dock::closed) {
         g.setColour(rule); g.drawHorizontalLine(p.dockBounds.getY(), float(p.dockBounds.getX()), float(p.dockBounds.getRight()));
         g.setColour(secondary); g.setFont(mono(12));
-        if (p.dock != Impl::Dock::native && p.dock != Impl::Dock::effect)
+        if (p.dock != Impl::Dock::native && p.dock != Impl::Dock::effect && p.dock != Impl::Dock::analysis)
         g.drawFittedText(p.dock == Impl::Dock::analysis ? "analyze / local audio" : p.dock == Impl::Dock::track ? "track / " + (p.selectedTrack() ? p.selectedTrack()->name : juce::String("Select a track")) : (p.dock == Impl::Dock::midi ? "MIDI / " : "source / ") + p.selectedClipName(), p.dockBounds.getX() + 5, p.dockBounds.getY() + 2,
             p.dockBounds.getWidth() - (p.dock == Impl::Dock::midi ? 290 : 130), 24, juce::Justification::centredLeft, 1);
     }
@@ -1524,7 +1547,7 @@ void MainComponent::paint(juce::Graphics& g)
     g.setFont(mono(14)); g.drawText(p.rulerMode.getSelectedId()==2?clockText(s.position):positionText(s.position,s,true), 382, p.footerY + 8, 110, 23, juce::Justification::centredLeft);
     g.setColour(secondary); g.setFont(mono(11)); g.drawText("/ " + clockText(s.duration), 382, p.footerY + 30, 110, 17, juce::Justification::centredLeft);
     g.drawText(juce::String(s.numerator) + "/" + juce::String(s.denominator), 602, p.footerY + 13, 40, 24, juce::Justification::centred);
-    if (getWidth() >= 1200) g.drawFittedText(s.deviceAvailable ? s.deviceName : "No audio device", 652, p.footerY + 13, getWidth() - 1030, 24, juce::Justification::centredLeft, 1);
+    if (getWidth() >= 1200) g.drawFittedText(s.deviceAvailable ? s.deviceName : uiText("No audio device", "未连接音频设备"), 652, p.footerY + 13, getWidth() - 1030, 24, juce::Justification::centredLeft, 1);
     for(int channel=0;channel<2;++channel){const auto db=channel?s.masterPeakRightDb:s.masterPeakLeftDb;
         const float height=juce::jlimit(0.0f,1.0f,(db+60.0f)/60.0f)*28.0f;
         const float x=float(p.gain.getX()-74+channel*10);g.setColour(rule);g.fillRect(x,float(p.footerY+12),6.0f,28.0f);
@@ -1534,7 +1557,10 @@ void MainComponent::paint(juce::Graphics& g)
 void MainComponent::refreshSnapshot()
 {
     auto& p = *impl;
+    if (p.languageRevision != uiLanguageRevision()) refreshInterfaceLanguage();
     auto next = session.snapshot();
+    const bool hadChordLane = p.state.chordRegions && !p.state.chordRegions->empty();
+    const bool hasChordLane = next.chordRegions && !next.chordRegions->empty();
     const bool clipChanged = next.selectedClipId != p.state.selectedClipId;
     const bool tracksChanged = next.revision != p.state.revision || next.selectedTrackId != p.state.selectedTrackId || clipChanged
         || next.tracks.size() != p.state.tracks.size();
@@ -1545,6 +1571,7 @@ void MainComponent::refreshSnapshot()
     const auto* previousClip = p.pianoRoll ? p.selectedClip() : nullptr;
     const auto previousNotes = previousClip ? previousClip->notes : nullptr;
     p.state = std::move(next);
+    if (hadChordLane != hasChordLane) resized();
     if(p.dock==Impl::Dock::native&&(p.nativeProjectId!=p.state.projectId||p.nativeTrackId!=p.state.selectedTrackId)){
         if(const auto* track=p.selectedTrack();track&&track->kind=="instrument"){
             const auto target=track->id;showNativeDevice(target);return;
@@ -1584,7 +1611,7 @@ void MainComponent::refreshSnapshot()
     p.meterReset.setButtonText(p.state.masterOverloaded?"CLIP":"OUT");
     p.meterReset.setTooltip("Master L "+juce::String(p.state.masterPeakLeftDb,1)+" dB / R "+juce::String(p.state.masterPeakRightDb,1)+" dB. Click to reset peak overload indicators.");
     if(p.gridMode.getSelectedId()==2)p.arrangement.setGridBeats(p.state.numerator*4.0/p.state.denominator);
-    p.settings.setEnabled(!recordingBusy);
+    p.settings.setEnabled(true); // Language is a view preference and never reconfigures audio.
     if (p.pianoRoll) p.pianoRoll->setEnabled(!busy);
     p.loop.setEnabled(playable && !busy);
     p.play.setToggleState(p.state.playing, juce::dontSendNotification);
@@ -1630,8 +1657,8 @@ void MainComponent::refreshSnapshot()
     if (!p.trackGain.isMouseButtonDown()) p.trackGain.setValue(selected != nullptr ? selected->gainDb : 0.0, juce::dontSendNotification);
     p.mute.setToggleState(selected != nullptr && selected->muted, juce::dontSendNotification);
     p.solo.setToggleState(selected != nullptr && selected->solo, juce::dontSendNotification);
-    p.mute.setButtonText(selected != nullptr && selected->muted ? "mute on" : "mute");
-    p.solo.setButtonText(selected != nullptr && selected->solo ? "solo on" : "solo");
+    p.mute.setButtonText(uiText(selected != nullptr && selected->muted ? "mute on" : "mute"));
+    p.solo.setButtonText(uiText(selected != nullptr && selected->solo ? "solo on" : "solo"));
     for (auto* button : { &p.newButton, &p.openButton, &p.importButton,
                          &p.editMenu, &p.exportMenu, &p.plugins, &p.tempo })
         button->setEnabled(!busy);
@@ -1640,9 +1667,9 @@ void MainComponent::refreshSnapshot()
     p.openButton.setEnabled(!busy && !p.state.nativePending);
     p.saveButton.setEnabled(!busy && !saving && !p.state.nativePending);
     p.saveAsButton.setEnabled(!busy && !saving && !p.state.nativePending);
-    p.saveButton.setButtonText(saving ? "saving..." : "save");
-    p.saveStatus.setText(saving ? "Saving..." : p.saveError.isNotEmpty() ? "Save failed - retry"
-        : p.state.dirty ? "Unsaved changes" : p.state.projectFile != juce::File() ? "Saved" : "New project", juce::dontSendNotification);
+    p.saveButton.setButtonText(uiText(saving ? "saving..." : "save"));
+    p.saveStatus.setText(uiText(saving ? "Saving..." : p.saveError.isNotEmpty() ? "Save failed - retry"
+        : p.state.dirty ? "Unsaved changes" : p.state.projectFile != juce::File() ? "Saved" : "New project"), juce::dontSendNotification);
     p.saveStatus.setTooltip(p.saveError.isNotEmpty() ? p.saveError : p.saveFeedback);
     p.undoButton.setEnabled(!busy && p.state.canUndo);
     p.redoButton.setEnabled(!busy && p.state.canRedo);
@@ -1650,19 +1677,25 @@ void MainComponent::refreshSnapshot()
     p.redoButton.setTooltip(p.state.canRedo ? "Redo " + p.state.redoDescription + " (Ctrl+Y)" : "Nothing to redo");
     juce::String taskText;
     for (auto it = p.state.jobs.rbegin(); it != p.state.jobs.rend(); ++it) if (it->status == "running" || it->status == "queued") {
-        taskText = it->kind == "save_project" ? "Saving project" : it->kind == "native_instrument" ? "Preparing sample / edit not yet committed" : it->kind;
+        taskText = it->kind == "save_project" ? uiText("Saving project", "正在保存工程")
+            : it->kind == "native_instrument" ? uiText("Loading sample", "正在加载采样")
+            : it->kind.startsWith("analysis.") ? uiText("Analyzing audio", "正在分析音频") : it->kind;
         if (it->kind == "save_project" && it->phase == "capturing_plugins") taskText += " / " + it->detail;
         if (it->progress >= 0) taskText += " / " + juce::String(it->progress * 100, 0) + "%";
         break;
     }
     p.cancelJob.setVisible(taskText.isNotEmpty() && !p.state.nativePending);
-    const auto statusText = p.state.countingIn ? "Count-in: "+juce::String(int(std::ceil(p.state.countInBeatsRemaining)))+" beats remaining - Stop cancels"
-        : p.state.recordingFinalizing ? juce::String("Finishing recording...") : p.state.recording ? juce::String("Recording - Stop finishes the take")
+    const auto statusText = p.state.countingIn ? uiText("Count-in: ", "预备拍：")+juce::String(int(std::ceil(p.state.countInBeatsRemaining)))+uiText(" beats remaining - Stop cancels", " 拍剩余，停止可取消")
+        : p.state.recordingFinalizing ? uiText("Finishing recording...", "正在完成录音...") : p.state.recording ? uiText("Recording - Stop finishes the take", "正在录音，点击停止完成录制")
         : taskText.isNotEmpty() ? taskText : p.saveError.isNotEmpty() ? p.saveError : p.error.isNotEmpty() ? p.error
         : p.state.recordingError.isNotEmpty() ? p.state.recordingError : p.state.status;
     p.status.setText(statusText, juce::dontSendNotification);
     p.status.setTooltip(statusText);
     p.status.setColour(juce::Label::textColourId, p.error.isEmpty() ? secondary : ink);
+    const bool compactStatus = p.compactAnalysisFooter && (p.error.isNotEmpty() || p.saveError.isNotEmpty()
+        || p.state.recordingError.isNotEmpty() || taskText.isNotEmpty() || recordingBusy);
+    p.status.setVisible(!p.compactAnalysisFooter || compactStatus);
+    p.resources.setVisible(!compactStatus);
     repaint(380, p.footerY + 8, 114, 40);
     repaint(p.gain.getX()-78,p.footerY+8,25,36);
     if (repaintChrome) repaint();
@@ -1685,10 +1718,10 @@ void MainComponent::refreshSnapshot()
                     continueAfterSave(p.saveProjectId, p.state.revision, std::move(callback));
                 } else if (callback) p.saveError = "New changes remain unsaved. Save again before closing.";
             } else { p.saveError = job.error.isNotEmpty() ? job.error : "Save did not complete. The project remains open; retry Save."; }
-            p.saveButton.setButtonText(p.savePreparing ? "saving..." : "save");
+            p.saveButton.setButtonText(uiText(p.savePreparing ? "saving..." : "save"));
             p.saveButton.setEnabled(p.chooser == nullptr && !p.confirming && !p.savePreparing && !p.saveContinuationPending);
             p.saveAsButton.setEnabled(p.saveButton.isEnabled());
-            p.saveStatus.setText(p.savePreparing ? "Saving..." : p.saveError.isNotEmpty() ? "Save failed - retry" : p.state.dirty ? "Unsaved changes" : "Saved", juce::dontSendNotification);
+            p.saveStatus.setText(uiText(p.savePreparing ? "Saving..." : p.saveError.isNotEmpty() ? "Save failed - retry" : p.state.dirty ? "Unsaved changes" : "Saved"), juce::dontSendNotification);
             p.status.setText(p.savePreparing ? "Saving the requested changes..." : p.saveError.isNotEmpty() ? p.saveError : p.saveFeedback, juce::dontSendNotification);
             break;
         }
@@ -1743,6 +1776,13 @@ bool MainComponent::arrangementWaveformsReady() const { return impl->arrangement
 juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDirectory)
 {
     auto& p = *impl;
+    // Do not change the user's persistent language during offline UI fixtures.
+    const auto originalLanguage = uiLanguageCode();
+    struct LanguageRestore {
+        std::function<void()> restore;
+        ~LanguageRestore() { if (restore) restore(); }
+    } restoreLanguage { [this, originalLanguage] { setInterfaceLanguage(originalLanguage, false); } };
+    setInterfaceLanguage("en", false);
     const juce::Point<int> originalSize { getWidth(), getHeight() };
     setSize(1280, 800);
     refreshSnapshot();
@@ -1760,6 +1800,72 @@ juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDire
     };
     if (!p.composeActive || !p.arrangement.isVisible() || p.waveform.isVisible())
         result = juce::Result::fail("Compose is not the default visible arrangement page.");
+    if (result.wasOk()) {
+        const auto preference = ui_language_detail::preferenceFile();
+        const bool preferenceExisted = preference.existsAsFile();
+        const auto preferenceBefore = preference.loadFileAsString();
+        const auto stateBefore = session.snapshot();
+        const auto menu = interfaceSettingsMenu(false);
+        bool audioDisabled = false, englishPresent = false, chinesePresent = false;
+        for (juce::PopupMenu::MenuItemIterator it(menu, true); it.next();) {
+            const auto& item = it.getItem();
+            if (item.itemID == 1) audioDisabled = !item.isEnabled;
+            if (item.itemID == 101) englishPresent = item.isEnabled;
+            if (item.itemID == 102) chinesePresent = item.isEnabled;
+        }
+        if (!audioDisabled || !englishPresent || !chinesePresent)
+            result = juce::Result::fail("Settings must retain language choices while audio reconfiguration is unavailable.");
+        const auto originalDock = p.dock;
+        const int rulerId = p.rulerMode.getSelectedId(), gridId = p.gridMode.getSelectedId(), countInId = p.countInBars.getSelectedId();
+        showAnalysisDock();
+        for (const auto* language : {"en", "zh-CN"}) {
+            if (result.failed()) break;
+            result = setInterfaceLanguage(language, false);
+            if (result.failed()) break;
+            if(juce::String(language)=="zh-CN"&&(uiText("Chords","和弦")!=juce::String::fromUTF8("和弦")
+                ||uiText(juce::String("Options"),"选项")!=juce::String::fromUTF8("选项"))){
+                result=juce::Result::fail("Literal UI translations are not decoded as UTF-8.");break;
+            }
+            if (p.settings.getButtonText() != uiText("settings") || p.newButton.getButtonText() != uiText("new")) {
+                result = juce::Result::fail("Changing language did not update the main static controls."); break;
+            }
+            const auto selectedLabelMatches = [](const juce::ComboBox& combo, int expectedId) {
+                return expectedId != 0 && combo.getSelectedId() == expectedId
+                    && combo.getText() == combo.getItemText(combo.indexOfItemId(expectedId));
+            };
+            if (!selectedLabelMatches(p.rulerMode, rulerId) || !selectedLabelMatches(p.gridMode, gridId)
+                || !selectedLabelMatches(p.countInBars, countInId)) {
+                result = juce::Result::fail("Changing language did not refresh selected combo labels while preserving their values."); break;
+            }
+            auto projected = session.snapshot();
+            auto regions = std::make_shared<std::vector<EngineSession::ChordRegionSnapshot>>();
+            regions->push_back({"layout-1", "C:maj7", "layout-analysis", "Visual fixture", 0.0, 2.0});
+            regions->push_back({"layout-2", "A:min7", "layout-analysis", "Visual fixture", 2.0, 4.0});
+            projected.chordRegions = regions; p.state = projected; p.arrangement.update(projected);
+            setSize(1000, 650); resized();
+            const int visibleTrackHeight = p.arrangement.getHeight() - 54 - 56 - 16;
+            if (!p.dockAnalysis || p.dockAnalysis->getHeight() < 210 || visibleTrackHeight < 64
+                || p.closeEditor.getBounds().getIntersection(p.dockAnalysis->getBounds()) != p.closeEditor.getBounds()) {
+                result = juce::Result::fail("Minimum analysis layout hides its actions or a full compact track below the chord lane."); break;
+            }
+            if (!capture(juce::String(language) == "en" ? "ui-analysis-workspace-en-1000x650-synthetic-chords.png"
+                                                       : "ui-analysis-workspace-zh-1000x650-synthetic-chords.png")) {
+                result = juce::Result::fail("Could not capture the localized analysis workspace."); break;
+            }
+            p.state = session.snapshot(); p.arrangement.update(p.state);
+        }
+        setInterfaceLanguage("en", false); p.dock = originalDock; setSize(1280, 800); resized(); refreshSnapshot();
+        const auto stateAfter = session.snapshot();
+        if (result.wasOk() && (stateAfter.projectId != stateBefore.projectId || stateAfter.revision != stateBefore.revision
+            || stateAfter.playing != stateBefore.playing || stateAfter.deviceName != stateBefore.deviceName
+            || stateAfter.bufferSize != stateBefore.bufferSize || stateAfter.sampleRate != stateBefore.sampleRate
+            || preference.existsAsFile() != preferenceExisted || preference.loadFileAsString() != preferenceBefore))
+            result = juce::Result::fail("Interface language modified project/audio state or the isolated test changed the saved preference.");
+        report->setProperty("settings_language_menu_without_audio_reconfiguration", result.wasOk());
+        report->setProperty("language_switch_preserves_project_audio_and_persistent_preference", result.wasOk());
+        report->setProperty("language_switch_refreshes_selected_combo_labels", result.wasOk());
+        report->setProperty("analysis_minimum_layout_keeps_chord_and_compact_track_synthetic", result.wasOk());
+    }
     if (result.wasOk()) {
         p.separate.onClick();
         if (!p.arrangement.isVisible() || !p.waveform.isVisible() || p.dock != Impl::Dock::source)
@@ -2206,14 +2312,49 @@ void MainComponent::execute(const juce::String& command, const juce::var& args)
 {
     showResult(session.execute(command, args, impl->state.revision));
 }
+void MainComponent::showAnalysisDock(const juce::String& chordId)
+{
+    auto& p = *impl;
+    if (!p.dockAnalysis) {
+        p.dockAnalysis = std::make_unique<AnalysisPanel>(session,
+            [safe = juce::Component::SafePointer<MainComponent>(this)](const juce::Result& result) { if (safe) safe->showResult(result); });
+        addAndMakeVisible(*p.dockAnalysis);
+    }
+    p.pianoExpanded = false; p.dock = Impl::Dock::analysis;
+    if (chordId.isNotEmpty()) p.dockAnalysis->showChordRegion(chordId);
+    else {
+        const auto range = p.arrangement.explicitSelectedTimeRange();
+        p.dockAnalysis->setSelectedTimeRange(range.getStart(), range.getEnd());
+    }
+    resized(); refreshSnapshot(); repaint();
+}
+void MainComponent::renameTrack(const juce::String& trackId)
+{
+    const auto current = session.snapshot();
+    if (current.recording || current.recordingFinalizing) return;
+    const auto found = std::find_if(current.tracks.begin(), current.tracks.end(), [&](const auto& track) { return track.id == trackId; });
+    if (found == current.tracks.end()) return;
+    const auto expected = current.revision; const auto project = current.projectId;
+    auto content = std::make_unique<ValueForm>(std::vector<ValueForm::Field>{ { "name", uiText("Track name", "轨道名称"), found->name, false } },
+        [safe = juce::Component::SafePointer<MainComponent>(this), trackId, expected, project](const juce::var& values) {
+            if (!safe) return juce::Result::fail("The project window is closed.");
+            if (safe->session.snapshot().projectId != project) return juce::Result::fail(uiText("The project changed. Rename the track again.", "工程已更改，请重新选择轨道命名。"));
+            const auto result = safe->session.execute("rename_track", arguments({ { "track_id", trackId }, { "name", values["name"] } }), expected);
+            safe->showResult(result); return result;
+        });
+    content->setLookAndFeel(&impl->look);
+    juce::DialogWindow::LaunchOptions options; options.dialogTitle = uiText("Rename track", "重命名轨道"); options.dialogBackgroundColour = paper;
+    options.content.setOwned(content.release()); options.componentToCentreAround = this; options.useNativeTitleBar = true;
+    options.escapeKeyTriggersCloseButton = true; options.resizable = false; impl->forms.emplace_back(options.launchAsync());
+}
 void MainComponent::showAddMenu()
 {
     juce::PopupMenu menu;
-    menu.addItem(1, "Import audio... (WAV / MP3)"); menu.addItem(2, "Import MIDI..."); menu.addSeparator();
-    menu.addItem(3, "New audio track"); menu.addItem(4, "New MIDI / instrument track");
-    menu.addItem(6, "New bus / group track");
+    menu.addItem(1, uiText("Import audio... (WAV / MP3)", "导入音频... (WAV / MP3)")); menu.addItem(2, uiText("Import MIDI...", "导入 MIDI...")); menu.addSeparator();
+    menu.addItem(3, uiText("New audio track", "新建音频轨道")); menu.addItem(4, uiText("New MIDI / instrument track", "新建 MIDI／乐器轨道"));
+    menu.addItem(6, uiText("New bus / group track", "新建总线／编组轨道"));
     const auto* track = impl->selectedTrack();
-    menu.addItem(5, "New 4-bar MIDI clip at playhead", track && track->kind == "instrument");
+    menu.addItem(5, uiText("New 4-bar MIDI clip at playhead", "在播放位置新建 4 小节 MIDI 片段"), track && track->kind == "instrument");
     menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&impl->importButton), [safe = juce::Component::SafePointer<MainComponent>(this)](int id) {
         if (!safe) return;
         if (id == 1) safe->chooseSource();
@@ -2231,18 +2372,19 @@ void MainComponent::showEditMenu()
 {
     const auto* clip = impl->selectedClip(); const auto* track = impl->selectedTrack();
     juce::PopupMenu menu;
-    menu.addItem(1, "Split selected clip at playhead (S)", clip != nullptr);
-    menu.addItem(2, "Duplicate selected clips (Ctrl+D)", clip != nullptr);
-    menu.addItem(3, "Delete selected clips (Delete)", clip != nullptr);
-    menu.addItem(4, "Clip properties...", clip != nullptr);
-    menu.addItem(5, "Edit MIDI notes...", clip && clip->kind == "midi");
-    menu.addSeparator();menu.addItem(11,"Copy selected clips (Ctrl+C)",clip!=nullptr);
-    menu.addItem(12,"Cut selected clips (Ctrl+X)",clip!=nullptr);menu.addItem(13,"Paste clips at playhead (Ctrl+V)",track!=nullptr);
-    menu.addItem(14,"Loop selection (Ctrl+L)",clip!=nullptr||!impl->arrangement.selectedTimeRange().isEmpty());
-    menu.addSeparator(); menu.addItem(6, "Rename selected track...", track != nullptr);
-    menu.addItem(7, "Move track up", track != nullptr); menu.addItem(8, "Move track down", track != nullptr);
-    menu.addSeparator(); menu.addItem(9, "Tempo, meter and loop range...");
-    menu.addSeparator(); menu.addItem(10, "Remove selected track", track != nullptr);
+    menu.addItem(1, uiText("Split selected clip at playhead (S)", "在播放位置切分片段 (S)"), clip != nullptr);
+    menu.addItem(2, uiText("Duplicate selected clips (Ctrl+D)", "重复选中片段 (Ctrl+D)"), clip != nullptr);
+    menu.addItem(3, uiText("Delete selected clips (Delete)", "删除选中片段 (Delete)"), clip != nullptr);
+    menu.addItem(4, uiText("Clip properties...", "片段属性..."), clip != nullptr);
+    menu.addItem(5, uiText("Edit MIDI notes...", "编辑 MIDI 音符..."), clip && clip->kind == "midi");
+    menu.addSeparator();menu.addItem(11,uiText("Copy selected clips (Ctrl+C)", "复制选中片段 (Ctrl+C)"),clip!=nullptr);
+    menu.addItem(12,uiText("Cut selected clips (Ctrl+X)", "剪切选中片段 (Ctrl+X)"),clip!=nullptr);
+    menu.addItem(13,uiText("Paste clips at playhead (Ctrl+V)", "在播放位置粘贴 (Ctrl+V)"),track!=nullptr);
+    menu.addItem(14,uiText("Loop selection (Ctrl+L)", "循环选区 (Ctrl+L)"),clip!=nullptr||!impl->arrangement.selectedTimeRange().isEmpty());
+    menu.addSeparator(); menu.addItem(6, uiText("Rename selected track... (F2)", "重命名选中轨道... (F2)"), track != nullptr);
+    menu.addItem(7, uiText("Move track up", "轨道上移"), track != nullptr); menu.addItem(8, uiText("Move track down", "轨道下移"), track != nullptr);
+    menu.addSeparator(); menu.addItem(9, uiText("Tempo, meter and loop range...", "速度、拍号与循环范围..."));
+    menu.addSeparator(); menu.addItem(10, uiText("Remove selected track", "移除选中轨道"), track != nullptr);
     menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&impl->editMenu), [safe = juce::Component::SafePointer<MainComponent>(this)](int id) {
         if (!safe) return; auto& p = *safe->impl;
         if(id>=11&&id<=13){safe->clipClipboardAction(id==11?"copy_clips":id==12?"cut_clips":"paste_clips");return;}
@@ -2250,18 +2392,7 @@ void MainComponent::showEditMenu()
         if (id == 1) safe->execute("split_clip", arguments({ { "clip_id", p.state.selectedClipId }, { "at_seconds", p.state.position } }));
         if (id == 2 || id == 3) safe->execute(id == 2 ? "duplicate_clips" : "delete_clips", arguments({ { "clip_ids", idsValue(p.arrangement.selectedClipIds()) } }));
         if (id == 4) safe->showClipProperties(); if (id == 5) safe->showPianoRoll();
-        if (id == 6) {
-            const auto* t = p.selectedTrack(); if (!t) return; const auto target = t->id; const auto expected = p.state.revision;
-            auto content = std::make_unique<ValueForm>(std::vector<ValueForm::Field>{ { "name", "track name", t->name, false } }, [safe, target, expected](const juce::var& values) {
-                if (!safe) return juce::Result::fail("The project window is closed.");
-                const auto result = safe->session.execute("rename_track", arguments({ { "track_id", target }, { "name", values["name"] } }), expected);
-                safe->showResult(result); return result;
-            });
-            content->setLookAndFeel(&p.look);
-            juce::DialogWindow::LaunchOptions options; options.dialogTitle = "Rename track"; options.dialogBackgroundColour = paper;
-            options.content.setOwned(content.release()); options.componentToCentreAround = safe; options.useNativeTitleBar = true;
-            options.escapeKeyTriggersCloseButton = true; options.resizable = false; p.forms.emplace_back(options.launchAsync());
-        }
+        if (id == 6) safe->renameTrack(p.state.selectedTrackId);
         if (id == 7 || id == 8) for (std::size_t i = 0; i < p.state.tracks.size(); ++i) if (p.state.tracks[i].id == p.state.selectedTrackId) {
             safe->execute("reorder_track", arguments({ { "track_id", p.state.selectedTrackId }, { "index", juce::jlimit(0, int(p.state.tracks.size()) - 1, int(i) + (id == 7 ? -1 : 1)) } })); break;
         }
@@ -2272,11 +2403,11 @@ void MainComponent::showEditMenu()
 void MainComponent::showExportMenu()
 {
     juce::PopupMenu menu;
-    menu.addItem(1, "Export project WAV...", impl->state.duration > 0);
-    menu.addItem(2, "Export loop range WAV...", impl->state.loopEnd > impl->state.loopStart);
-    menu.addItem(3, "Export project WAV at real-time speed...", impl->state.duration > 0);
-    menu.addSeparator(); menu.addItem(4, "Export project MIDI...");
-    menu.addItem(5, "Export selected MIDI clips...", impl->selectedClip() && impl->selectedClip()->kind == "midi");
+    menu.addItem(1, uiText("Export project WAV...", "导出工程 WAV..."), impl->state.duration > 0);
+    menu.addItem(2, uiText("Export loop range WAV...", "导出循环范围 WAV..."), impl->state.loopEnd > impl->state.loopStart);
+    menu.addItem(3, uiText("Export project WAV at real-time speed...", "以实时速度导出 WAV..."), impl->state.duration > 0);
+    menu.addSeparator(); menu.addItem(4, uiText("Export project MIDI...", "导出工程 MIDI..."));
+    menu.addItem(5, uiText("Export selected MIDI clips...", "导出选中 MIDI 片段..."), impl->selectedClip() && impl->selectedClip()->kind == "midi");
     menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&impl->exportMenu), [safe = juce::Component::SafePointer<MainComponent>(this)](int id) {
         if (safe && id > 0) safe->chooseExport(id >= 4, id == 2 || id == 5, id == 3);
     });
@@ -2397,9 +2528,9 @@ void MainComponent::clipClipboardAction(const juce::String& command)
 void MainComponent::showMetronomeOptions()
 {
     juce::PopupMenu menu;
-    menu.addItem(1,"Only sound while recording",true,impl->state.metronomeRecordOnly);
+    menu.addItem(1,uiText("Only sound while recording", "仅录音时开启节拍器"),true,impl->state.metronomeRecordOnly);
     menu.addSeparator();const int volumes[]{-36,-30,-24,-18,-12,-6,0};
-    for(int i=0;i<7;++i)menu.addItem(10+i,"Click volume "+juce::String(volumes[i])+" dB",true,std::abs(impl->state.metronomeGainDb-volumes[i])<0.01f);
+    for(int i=0;i<7;++i)menu.addItem(10+i,uiText("Click volume ", "节拍器音量 ")+juce::String(volumes[i])+" dB",true,std::abs(impl->state.metronomeGainDb-volumes[i])<0.01f);
     menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&impl->metronomeOptions),[safe=juce::Component::SafePointer<MainComponent>(this)](int id){
         if(!safe)return;
         if(id==1)safe->execute("set_recording_preferences",arguments({{"metronome_record_only",!safe->impl->state.metronomeRecordOnly}}));
@@ -2437,7 +2568,7 @@ void MainComponent::showProjectTiming()
             safe->showResult(result); return result;
         });
     content->setLookAndFeel(&impl->look);
-    juce::DialogWindow::LaunchOptions options; options.dialogTitle = "Tempo, meter and loop"; options.dialogBackgroundColour = paper;
+    juce::DialogWindow::LaunchOptions options; options.dialogTitle = uiText("Tempo, meter and loop", "速度、拍号与循环"); options.dialogBackgroundColour = paper;
     options.content.setOwned(content.release()); options.componentToCentreAround = this; options.useNativeTitleBar = true;
     options.escapeKeyTriggersCloseButton = true; options.resizable = false; impl->forms.emplace_back(options.launchAsync());
 }
@@ -2476,7 +2607,7 @@ void MainComponent::showClipProperties()
             safe->showResult(result); return result;
         });
     content->setLookAndFeel(&impl->look);
-    juce::DialogWindow::LaunchOptions options; options.dialogTitle = midi?"MIDI clip properties":"Audio clip / non-destructive edit"; options.dialogBackgroundColour = paper;
+    juce::DialogWindow::LaunchOptions options; options.dialogTitle = midi?uiText("MIDI clip properties", "MIDI 片段属性"):uiText("Audio clip / non-destructive edit", "音频片段／无损编辑"); options.dialogBackgroundColour = paper;
     options.content.setOwned(content.release()); options.componentToCentreAround = this; options.useNativeTitleBar = true;
     options.escapeKeyTriggersCloseButton = true; options.resizable = false; impl->forms.emplace_back(options.launchAsync());
 }
@@ -2738,6 +2869,51 @@ void MainComponent::continueAfterSave(const juce::String& projectId, std::uint64
         next();
     });
 }
+void MainComponent::refreshInterfaceLanguage()
+{
+    auto& p = *impl; p.languageRevision = uiLanguageRevision();
+    refreshUiButtons(*this);
+    // JUCE getSelectedId() checks the displayed text against the item text, so
+    // preserve IDs before translating items and refresh labels without callbacks.
+    const int rulerId = p.rulerMode.getSelectedId(), gridId = p.gridMode.getSelectedId(), countInId = p.countInBars.getSelectedId();
+    p.rulerMode.changeItemText(1, uiText("bars", "小节"));
+    p.rulerMode.changeItemText(2, uiText("seconds", "时间"));
+    p.rulerMode.changeItemText(3, uiText("both", "两者"));
+    p.gridMode.changeItemText(1, uiText("adaptive", "自适应"));
+    p.gridMode.changeItemText(2, uiText("1 bar", "1 小节"));
+    p.gridMode.changeItemText(7, uiText("1/8 triplet", "1/8 三连音"));
+    p.gridMode.changeItemText(8, uiText("1/16 triplet", "1/16 三连音"));
+    p.countInBars.changeItemText(1, uiText("1 bar", "1 小节"));
+    p.countInBars.changeItemText(2, uiText("2 bars", "2 小节"));
+    p.countInBars.changeItemText(4, uiText("4 bars", "4 小节"));
+    p.rulerMode.setSelectedId(rulerId, juce::dontSendNotification);
+    p.gridMode.setSelectedId(gridId, juce::dontSendNotification);
+    p.countInBars.setSelectedId(countInId, juce::dontSendNotification);
+    p.analyze.setTooltip(uiText("Local audio analysis: four or six stems, pitched audio to MIDI, and chord labels. No Agent or API key required.",
+                               "本地音频分析：四轨或六轨分离、音频转 MIDI、和弦识别。无需 Agent 或 API 密钥。"));
+    p.settings.setTooltip(uiText("Audio/MIDI devices and interface language.", "音频／MIDI 设备与界面语言。"));
+    if (p.agentSidebar) p.agentSidebar->refreshLanguage();
+    if (p.dockAnalysis) p.dockAnalysis->refreshLanguage();
+    repaint();
+}
+juce::Result MainComponent::setInterfaceLanguage(const juce::String& code, bool persist)
+{
+    const auto result = setUiLanguage(code, persist);
+    if (result.failed()) return result;
+    refreshInterfaceLanguage(); refreshSnapshot(); resized(); repaint();
+    return juce::Result::ok();
+}
+void MainComponent::showSettings()
+{
+    const auto current = session.snapshot();
+    auto menu = interfaceSettingsMenu(!current.recording && !current.recordingFinalizing);
+    menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&impl->settings),
+        [safe = juce::Component::SafePointer<MainComponent>(this)](int choice) {
+            if (!safe) return;
+            if (choice == 1) safe->showAudioSettings();
+            else if (choice == 101 || choice == 102) safe->showResult(safe->setInterfaceLanguage(choice == 101 ? "en" : "zh-CN"));
+        });
+}
 void MainComponent::showAudioSettings()
 {
     if (impl->audioDialog != nullptr) { impl->audioDialog->toFront(true); return; }
@@ -2756,7 +2932,7 @@ void MainComponent::showAudioSettings()
         });
     selector->setLookAndFeel(&impl->look);
     juce::DialogWindow::LaunchOptions options;
-    options.dialogTitle = "Audio and MIDI devices";
+    options.dialogTitle = uiText("Audio and MIDI devices", "音频与 MIDI 设备");
     options.dialogBackgroundColour = paper;
     options.content.setOwned(selector.release());
     options.componentToCentreAround = this;

@@ -42,9 +42,13 @@ def main():
     parser.add_argument("--root", type=Path, default=Path("E:/MusicAgent&DAW/analysis"))
     parser.add_argument("--kind", choices=("all", "separate", "transcribe", "chords"), default="all")
     parser.add_argument("--duration", type=float, default=8.)
+    parser.add_argument("--stems", type=int, choices=(4, 6), default=4)
+    parser.add_argument("--quality", choices=("fast", "quality"), default="fast")
+    parser.add_argument("--instrument", choices=("auto", "piano", "bass", "guitar", "vocals"), default="auto")
+    parser.add_argument("--vocabulary", choices=("triads", "extended"), default="extended")
     args = parser.parse_args()
     root = args.root.resolve()
-    fixtures = root / "cache/probe-fixtures"
+    fixtures = root / "cache/probe-fixtures" / uuid.uuid4().hex[:12]
     fixtures.mkdir(parents=True, exist_ok=True)
     audio = fixtures / "synthetic-c-major-a-minor.wav"
     write_fixture(audio, args.duration)
@@ -58,8 +62,12 @@ def main():
                    "source_path": str(audio), "source_offset_seconds": .5, "duration_seconds": args.duration - 1.,
                    "source": {"project_id": "synthetic-probe", "clip_id": "synthetic-clip", "bpm": 120,
                               "timeline_start": 3., "input_role": "instrument"}}
+        request["parameters"] = {"separate": {"stems": args.stems, "quality": args.quality},
+                                  "transcribe": {"instrument": args.instrument},
+                                  "chords": {"vocabulary": args.vocabulary}}[kind]
         atomic_json(directory / "request.json", request)
-        command = [registry["providers"][kind]["python_executable"], str(Path(__file__).with_name("run.py")),
+        key = "separate_6s" if kind == "separate" and args.stems == 6 else kind
+        command = [registry["providers"][key]["python_executable"], str(Path(__file__).with_name("run.py")),
                    "--request", str(directory / "request.json")]
         print("RUN", subprocess.list2cmdline(command), flush=True)
         started = time.perf_counter()
@@ -73,10 +81,14 @@ def main():
         assert abs(result["duration_seconds"] - (args.duration - 1.)) < 1e-8
         assert read_json(directory / "progress.json")["status"] == "ready"
         if kind == "separate":
-            assert {item["name"] for item in result["stems"]} == {"vocals", "drums", "bass", "other"}
+            expected = {"vocals", "drums", "bass", "other"} | ({"piano", "guitar"} if args.stems == 6 else set())
+            assert {item["name"] for item in result["stems"]} == expected
             for item in result["stems"]:
                 assert item["sha256"] == sha256_file(directory / item["path"])
                 assert item["frames"] == round((args.duration - 1.) * item["sample_rate"])
+                assert len(item["waveform_peaks"]) == 128
+                assert max(item["waveform_peaks"]) == item["peak"]
+                assert all(math.isfinite(peak) and peak >= 0 for peak in item["waveform_peaks"])
         if kind == "transcribe":
             assert len(result["notes"]) > 0, "Synthetic pitched fixture should yield note candidates"
             assert all(note["start_seconds"] + note["duration_seconds"] <= result["duration_seconds"] + 1e-8 for note in result["notes"])

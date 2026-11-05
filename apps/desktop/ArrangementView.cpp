@@ -1,4 +1,5 @@
 #include "ArrangementView.h"
+#include "UiLanguage.h"
 #include "core/time/EditGrid.hpp"
 #include "core/time/MusicalPosition.hpp"
 #include <algorithm>
@@ -10,7 +11,7 @@
 namespace emusician {
 namespace {
 const juce::Colour ink { 0xff171817 }, secondary { 0xff626560 }, rule { 0xffc6c9c3 }, paper { 0xfffefefd };
-constexpr int rulerHeight = 54, scrollSize = 12, rowHeight = 104;
+constexpr int rulerHeight = 54, chordLaneHeight = 56, scrollSize = 12, rowHeight = 104;
 juce::Font mono(float height, int style = juce::Font::plain)
 {
     return juce::Font(juce::FontOptions(juce::Font::getDefaultMonospacedFontName(), height, style));
@@ -173,9 +174,11 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
         TrackControls(Impl& view, juce::String trackId) : p(view), id(std::move(trackId))
         {
             setInterceptsMouseClicks(false, true);
-            for (auto* button : { &mute, &solo, &arm, &devices }) addAndMakeVisible(button);
+            for (auto* button : { &mute, &solo, &arm, &devices, &rename }) addAndMakeVisible(button);
             mute.setTooltip("Mute this track"); solo.setTooltip("Solo this track"); devices.setTooltip("Show this track's devices");
             arm.setTooltip("Arm this track for recording. Choose an input in Devices / I/O first.");
+            rename.setTooltip(uiText("Rename track (F2). You can also double-click the track name.", "重命名轨道 (F2)，也可双击轨道名称。"));
+            rename.onClick = [this] { p.requestRename(id); };
             arm.onClick = [this] {
                 const auto current = p.engine.snapshot();
                 for (const auto& track : current.tracks) if (track.id == id) {
@@ -195,9 +198,9 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                 if (p.owner.onEditResult) p.owner.onEditResult(result); p.notifyState(); break;
             }
         }
-        void resized() override { const int y = getHeight() - 34; mute.setBounds(8, y, 28, 27); solo.setBounds(40, y, 28, 27); arm.setBounds(72, y, 28, 27); devices.setBounds(106, y, getWidth() - 114, 27); }
+        void resized() override { const int y = getHeight() - 34; mute.setBounds(8, y, 28, 27); solo.setBounds(40, y, 28, 27); arm.setBounds(72, y, 28, 27); devices.setBounds(106, y, getWidth() - 114, 27); rename.setBounds(getWidth() - 62, 3, 56, 24); }
         Impl& p; juce::String id;
-        juce::TextButton mute { "M" }, solo { "S" }, arm { "R" }, devices { "devices" };
+        juce::TextButton mute { "M" }, solo { "S" }, arm { "R" }, devices { "devices" }, rename { "rename" };
     };
     struct Canvas final : juce::Component, juce::TooltipClient {
         explicit Canvas(Impl& view) : p(view) { setWantsKeyboardFocus(true); setTitle("Audio arrangement tracks"); }
@@ -277,6 +280,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                 p.engine.selectTrack(p.explicitTrackSelection);
                 if (p.owner.onTrackFocus) p.owner.onTrackFocus(p.explicitTrackSelection);
                 p.notifyState();
+                if (e.mods.isPopupMenu()) p.showTrackMenu(p.explicitTrackSelection, this);
                 return;
             }
             else if (!e.mods.isCtrlDown() && !e.mods.isCommandDown()) p.selection.clear();
@@ -334,9 +338,11 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
         void mouseDoubleClick(const juce::MouseEvent& e) override
         {
             const int row = int(e.position.y) / p.rowHeight;
-            if (row >= 0 && row < int(p.state.tracks.size()))
+            if (row >= 0 && row < int(p.state.tracks.size())) {
+                if (e.position.x < p.labelWidth()) { p.requestRename(p.state.tracks[std::size_t(row)].id); return; }
                 if (const auto* clip = p.hitClip(std::size_t(row), e.position); clip && clip->kind == "midi" && p.owner.onOpenMidiClip)
                     p.owner.onOpenMidiClip(clip->id);
+            }
         }
         void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override
         {
@@ -350,6 +356,8 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
             const auto point = getMouseXYRelative().toFloat();
             const int row = static_cast<int>(point.y) / p.rowHeight;
             if (row >= 0 && row < static_cast<int>(p.state.tracks.size()))
+                if (point.x < p.labelWidth()) return uiText("Double-click the track name to rename. F2 or right-click also works.", "双击轨道名称可重命名，也可按 F2 或右键。" );
+            if (row >= 0 && row < static_cast<int>(p.state.tracks.size()))
                 if (const auto* clip = p.hitClip(static_cast<std::size_t>(row), point)) return clip->kind == "midi"
                     ? "Double-click: edit MIDI. Ctrl-click: multiple clips. Drag: move; edges: trim. Alt: free move." : clip->source.getFullPathName() + "\nDrag: move; edges: trim; upper handles: fades. Alt: free move.";
             return "Click: locate. Drag empty space: select clips. Shift-drag ruler: select time. Ctrl+L: loop selection.";
@@ -360,11 +368,60 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
         bool seeking = false;
     };
 
+    struct ChordLane final : juce::Component, juce::TooltipClient {
+        explicit ChordLane(Impl& view) : p(view)
+        {
+            setWantsKeyboardFocus(true);
+            setTitle(uiText("Chord track"));
+            addAndMakeVisible(source);
+            source.onChange = [this] {
+                const auto index = source.getSelectedItemIndex();
+                if (index >= 0 && index < p.chordAnalysisIds.size()) {
+                    p.chordAnalysisId = p.chordAnalysisIds[index]; p.selectedChordId.clear();
+                    p.rebuildChordDisplay(); repaint();
+                }
+            };
+        }
+        void paint(juce::Graphics& g) override { p.paintChords(g); }
+        void resized() override { source.setBounds(8, 25, p.labelWidth() - 16, 26); }
+        void mouseDown(const juce::MouseEvent& e) override
+        {
+            if (!isEnabled()) return;
+            if (isShowing()) grabKeyboardFocus();
+            p.cancelDrag();
+            if (const auto* chord = p.hitChord(e.position)) { p.selectedChordId = chord->id; repaint(); }
+        }
+        void mouseDoubleClick(const juce::MouseEvent& e) override
+        {
+            if (!isEnabled()) return;
+            if (const auto* chord = p.hitChord(e.position); chord && p.owner.onOpenChordRegion)
+                p.owner.onOpenChordRegion(chord->id);
+        }
+        void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override { p.wheel(e.position.x, e.mods, wheel); }
+        bool keyPressed(const juce::KeyPress& key) override
+        {
+            if ((key == juce::KeyPress::returnKey || key == juce::KeyPress::F2Key) && p.selectedChordId.isNotEmpty()) {
+                if (p.owner.onOpenChordRegion) p.owner.onOpenChordRegion(p.selectedChordId);
+                return true;
+            }
+            return p.owner.keyPressed(key);
+        }
+        juce::String getTooltip() override
+        {
+            if (const auto* chord = p.hitChord(getMouseXYRelative().toFloat()))
+                return p.displayChordLabel(chord->label) + "\n" + uiText("Double-click to edit chord.", "双击编辑和弦。" );
+            return uiText("Chords follow the project timeline. Double-click a chord to edit.", "和弦与工程时间线对齐，双击和弦可编辑。" );
+        }
+        Impl& p;
+        juce::ComboBox source;
+    };
+
     Impl(ArrangementView& component, EngineSession& session)
-        : owner(component), engine(session), canvas(*this), horizontal(false)
+        : owner(component), engine(session), canvas(*this), chordLane(*this), horizontal(false)
     {
         owner.addAndMakeVisible(viewport);
         owner.addAndMakeVisible(horizontal);
+        owner.addChildComponent(chordLane);
         viewport.setViewedComponent(&canvas, false);
         viewport.setScrollBarsShown(true, false);
         viewport.setScrollBarThickness(scrollSize);
@@ -384,10 +441,120 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
         horizontal.removeListener(this);
         viewport.setViewedComponent(nullptr, false);
     }
+    void requestRename(const juce::String& id)
+    {
+        if (id.isEmpty() || state.recording || state.recordingFinalizing) return;
+        engine.selectTrack(id); explicitTrackSelection = id; selection.clear(); notifyState();
+        if (owner.onRenameTrack) owner.onRenameTrack(id);
+    }
+    void showTrackMenu(const juce::String& id, juce::Component* target)
+    {
+        juce::PopupMenu menu;
+        menu.addItem(1, uiText("Rename track...", "重命名轨道...") + "\tF2", !state.recording && !state.recordingFinalizing);
+        menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(target).withMousePosition(),
+            [safe = juce::Component::SafePointer<ArrangementView>(&owner), id](int choice) {
+                if (safe && choice == 1) safe->impl->requestRename(id);
+            });
+    }
+    static juce::String displayChordLabel(const juce::String& value)
+    {
+        if (value == "N") return juce::String::fromUTF8("—");
+        auto root = value.upToFirstOccurrenceOf(":", false, false);
+        auto quality = value.fromFirstOccurrenceOf(":", false, false);
+        if (quality == "maj") return root;
+        if (quality == "min") return root + "m";
+        if (quality == "hdim7") return root + "m7b5";
+        return value.containsChar(':') ? root + quality.replace("min", "m") : value;
+    }
+    int chordHeight() const { return state.chordRegions && !state.chordRegions->empty() ? chordLaneHeight : 0; }
+    void rebuildChordDisplay()
+    {
+        chordDisplay.clear(); chordPrefixEnds.clear();
+        if (state.chordRegions) for (const auto& chord : *state.chordRegions)
+            if (chord.analysisId == chordAnalysisId) chordDisplay.push_back(&chord);
+        std::stable_sort(chordDisplay.begin(), chordDisplay.end(), [](const auto* a, const auto* b) { return a->startSeconds < b->startSeconds; });
+        double end = 0;
+        for (const auto* chord : chordDisplay) { end = std::max(end, chord->endSeconds); chordPrefixEnds.push_back(end); }
+    }
+    void updateChords(bool projectChanged)
+    {
+        const auto oldIds = chordAnalysisIds;
+        chordAnalysisIds.clear(); chordSourceNames.clear();
+        maximumChordEnd = 0.0;
+        if (state.chordRegions) for (const auto& chord : *state.chordRegions) {
+            maximumChordEnd = std::max(maximumChordEnd, chord.endSeconds);
+            if (!chordAnalysisIds.contains(chord.analysisId)) { chordAnalysisIds.add(chord.analysisId); chordSourceNames.add(chord.sourceName); }
+        }
+        if (projectChanged || !chordAnalysisIds.contains(chordAnalysisId) || chordAnalysisIds.size() > oldIds.size()) {
+            chordAnalysisId = chordAnalysisIds.isEmpty() ? juce::String() : chordAnalysisIds[chordAnalysisIds.size() - 1];
+            selectedChordId.clear();
+        }
+        if (selectedChordId.isNotEmpty() && state.chordRegions && std::none_of(state.chordRegions->begin(), state.chordRegions->end(),
+            [&](const auto& chord) { return chord.id == selectedChordId; })) selectedChordId.clear();
+        chordLane.source.clear(juce::dontSendNotification);
+        for (int i = 0; i < chordAnalysisIds.size(); ++i)
+            chordLane.source.addItem((chordSourceNames[i].isEmpty() ? uiText("Chords") : chordSourceNames[i])
+                + " / " + juce::String(i + 1), i + 1);
+        chordLane.source.setSelectedItemIndex(chordAnalysisIds.indexOf(chordAnalysisId), juce::dontSendNotification);
+        chordLane.source.setVisible(chordAnalysisIds.size() > 1);
+        rebuildChordDisplay();
+    }
+    juce::Rectangle<float> chordArea(const EngineSession::ChordRegionSnapshot& chord) const
+    {
+        const auto start = std::max(chord.startSeconds, viewStart);
+        const auto end = std::min(chord.endSeconds, viewStart + visibleDuration());
+        if (end <= start) return {};
+        return {timeX(start), 0.0f, std::max(0.0f, timeX(end) - timeX(start)), float(chordLaneHeight - 1)};
+    }
+    template<class Callback> void eachVisibleChord(Callback callback) const
+    {
+        // Prefix maxima also handle user-edited overlapping chord intervals.
+        // Zooming traverses visible intervals rather than every region each frame.
+        auto first = std::upper_bound(chordPrefixEnds.begin(), chordPrefixEnds.end(), viewStart);
+        for (auto index = std::size_t(first - chordPrefixEnds.begin()); index < chordDisplay.size(); ++index) {
+            const auto* chord = chordDisplay[index];
+            if (chord->startSeconds >= viewStart + visibleDuration()) break;
+            if (chord->endSeconds > viewStart) callback(*chord);
+        }
+    }
+    const EngineSession::ChordRegionSnapshot* hitChord(juce::Point<float> point) const
+    {
+        const EngineSession::ChordRegionSnapshot* found = nullptr;
+        eachVisibleChord([&](const auto& chord) { if (chordArea(chord).contains(point)) found = &chord; });
+        return found;
+    }
+    void paintChords(juce::Graphics& g)
+    {
+        g.fillAll(paper);
+        g.setColour(ink); g.setFont(mono(13.0f, juce::Font::bold));
+        g.drawText(uiText("Chords"), 10, 2, labelWidth() - 20, 24, juce::Justification::centredLeft);
+        if (chordAnalysisIds.size() == 1) {
+            g.setColour(secondary); g.setFont(mono(11.0f));
+            g.drawFittedText(chordSourceNames[0], 10, 26, labelWidth() - 20, 23, juce::Justification::centredLeft, 1);
+        }
+        g.setColour(rule); g.drawHorizontalLine(chordLaneHeight - 1, 0.0f, float(chordLane.getWidth()));
+        juce::Graphics::ScopedSaveState clipped(g); g.reduceClipRegion(labelWidth(), 0, plotWidth(), chordLaneHeight);
+        eachGrid([&](double, float x, int level) { drawGridLine(g, x, 0.0f, float(chordLaneHeight - 1), level); });
+        eachVisibleChord([&](const auto& chord) {
+            const auto area = chordArea(chord);
+            const bool selected = chord.id == selectedChordId;
+            g.setColour(selected ? ink : paper); g.fillRect(area);
+            g.setColour(selected ? paper : ink);
+            if (area.getWidth() >= 20.0f) {
+                g.setFont(mono(13.0f, juce::Font::bold));
+                g.drawFittedText(displayChordLabel(chord.label), area.toNearestInt().reduced(5, 3), juce::Justification::centredLeft, 1);
+            }
+            g.setColour(ink); g.drawRect(area, selected ? 1.8f : 0.7f);
+        });
+        const auto head = timeX(state.position);
+        if (head >= labelWidth() && head <= labelWidth() + plotWidth()) {
+            g.setColour(secondary); g.drawVerticalLine(juce::roundToInt(head), 0.0f, float(chordLaneHeight));
+        }
+    }
     double projectDuration() const
     {
         const auto bar = time::beatsPerBar(state.numerator, state.denominator) * 60.0 / state.bpm;
-        const auto music = std::max(state.duration, state.loopEnd);
+        const auto music = std::max({state.duration, state.loopEnd, maximumChordEnd});
         return std::min(172800.0, std::max({ 8.0 * bar, std::ceil(music / bar) * bar + 4.0 * bar, extendedTimelineEnd }));
     }
     double visibleDuration() const { return projectDuration() / zoom; }
@@ -524,10 +691,13 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
     }
     void layout()
     {
-        viewport.setBounds(0, rulerHeight, owner.getWidth(), juce::jmax(0, owner.getHeight() - rulerHeight - scrollSize - 4));
+        const auto trackTop = rulerHeight + chordHeight();
+        viewport.setBounds(0, trackTop, owner.getWidth(), juce::jmax(0, owner.getHeight() - trackTop - scrollSize - 4));
         canvas.setSize(juce::jmax(1, owner.getWidth() - scrollSize),
                        juce::jmax(viewport.getHeight(), static_cast<int>(state.tracks.size()) * rowHeight));
         for (std::size_t i = 0; i < headers.size(); ++i) headers[i]->setBounds(0, int(i) * rowHeight, labelWidth(), rowHeight);
+        chordLane.setVisible(chordHeight() != 0);
+        chordLane.setBounds(0, rulerHeight, canvas.getWidth(), chordHeight());
         horizontal.setBounds(labelWidth(), owner.getHeight() - scrollSize, plotWidth(), scrollSize);
         syncScroll();
     }
@@ -537,7 +707,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
         horizontal.setRangeLimits(0.0, projectDuration(), juce::dontSendNotification);
         horizontal.setCurrentRange(viewStart, visibleDuration(), juce::dontSendNotification);
         horizontal.setEnabled(zoom > 1.0);
-        canvas.repaint(); owner.repaint();
+        canvas.repaint(); chordLane.repaint(); owner.repaint();
     }
     void setZoom(double value, double anchorFraction)
     {
@@ -698,9 +868,9 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
         g.fillAll(paper);
         if (state.tracks.empty()) {
             g.setColour(ink); g.setFont(mono(20.0f));
-            g.drawFittedText("Start with a sound.", canvas.getLocalBounds().reduced(12).withTrimmedBottom(canvas.getHeight() / 2), juce::Justification::centredBottom, 2);
+            g.drawFittedText(uiText("Start with a sound.", "从一段声音开始。"), canvas.getLocalBounds().reduced(12).withTrimmedBottom(canvas.getHeight() / 2), juce::Justification::centredBottom, 2);
             g.setColour(secondary); g.setFont(mono(13.0f));
-            g.drawFittedText("Drop WAV or MP3 files here.\nEach track appears on this timeline.", 12, canvas.getHeight() / 2 + 14, canvas.getWidth() - 24, 50, juce::Justification::centredTop, 2);
+            g.drawFittedText(uiText("Drop WAV or MP3 files here.\nEach track appears on this timeline.", "拖入 WAV 或 MP3 文件。\n每个轨道都会显示在时间线上。"), 12, canvas.getHeight() / 2 + 14, canvas.getWidth() - 24, 50, juce::Justification::centredTop, 2);
             paintAttention(g);
             return;
         }
@@ -718,7 +888,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
             g.drawHorizontalLine(y + rowHeight - 1, 0.0f, static_cast<float>(canvas.getWidth()));
             if (selected) g.fillRect(0, y + 12, 2, rowHeight - 25);
             g.setColour(ink); g.setFont(mono(13.0f, selected ? juce::Font::bold : juce::Font::plain));
-            g.drawFittedText(track.name, 10, y + (rowHeight < 104 ? 2 : 10), labelWidth() - 20, rowHeight < 104 ? 26 : 34, juce::Justification::centredLeft, rowHeight < 104 ? 1 : 2);
+            g.drawFittedText(track.name, 10, y + (rowHeight < 104 ? 2 : 10), labelWidth() - (selected ? 76 : 20), rowHeight < 104 ? 26 : 34, juce::Justification::centredLeft, rowHeight < 104 ? 1 : 2);
             g.setColour(secondary); g.setFont(mono(11.0f));
             if (rowHeight >= 104) g.drawText(track.kind + " / " + juce::String(track.gainDb, 1) + " dB", 10, y + 39, labelWidth() - 18, 17, juce::Justification::centredLeft);
             const int meterY = y + (rowHeight < 104 ? 26 : 60);
@@ -905,6 +1075,12 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
     std::vector<double> dragEdges;
     juce::Result lastMoveResult = juce::Result::ok();
     Canvas canvas;
+    ChordLane chordLane;
+    juce::StringArray chordAnalysisIds, chordSourceNames;
+    juce::String chordAnalysisId, selectedChordId;
+    std::vector<const EngineSession::ChordRegionSnapshot*> chordDisplay;
+    std::vector<double> chordPrefixEnds;
+    double maximumChordEnd = 0.0;
     std::vector<std::unique_ptr<TrackControls>> headers;
     juce::Viewport viewport;
     juce::ScrollBar horizontal;
@@ -942,7 +1118,7 @@ void ArrangementView::update(const EngineSession::Snapshot& next)
     const bool projectChanged = next.projectId != p.state.projectId;
     const bool primaryClipChanged = next.selectedClipId != p.state.selectedClipId;
     const bool selectionChanged = next.selectedTrackId != p.state.selectedTrackId;
-    const bool contentChanged = projectChanged || next.revision != p.state.revision || next.tracks.size() != p.state.tracks.size();
+    const bool contentChanged = projectChanged || next.revision != p.state.revision || next.tracks.size() != p.state.tracks.size() || next.chordRegions != p.state.chordRegions;
     const bool lengthChanged = next.duration != p.state.duration;
     const auto previousHorizon = p.projectDuration();
     const auto previousVisible = p.visibleDuration();
@@ -958,6 +1134,7 @@ void ArrangementView::update(const EngineSession::Snapshot& next)
         }
     if (projectChanged || (p.drag.id.isNotEmpty() && next.selectedClipId != p.drag.id)) p.cancelDrag();
     p.state = next;
+    if (contentChanged) p.updateChords(projectChanged);
     if (projectChanged) p.extendedTimelineEnd = 0;
     if (next.position > p.projectDuration()) {
         const auto bar = time::beatsPerBar(next.numerator, next.denominator) * 60.0 / next.bpm;
@@ -974,6 +1151,10 @@ void ArrangementView::update(const EngineSession::Snapshot& next)
         p.headers[i]->solo.setToggleState(next.tracks[i].solo, juce::dontSendNotification);
         p.headers[i]->arm.setToggleState(next.tracks[i].armed, juce::dontSendNotification);
         p.headers[i]->arm.setEnabled(next.tracks[i].kind != "bus" && !next.recording && !next.recordingFinalizing);
+        p.headers[i]->rename.setVisible(next.tracks[i].id == next.selectedTrackId);
+        p.headers[i]->rename.setEnabled(!next.recording && !next.recordingFinalizing);
+        p.headers[i]->rename.setButtonText(uiText("rename"));
+        p.headers[i]->devices.setButtonText(uiText("devices"));
     }
     if (contentChanged) p.updateMidiOverviews();
     if (projectChanged) { p.selection.clear(); p.rangeSelection = {}; p.rulerDrag = 0; p.followSuspended = false; }
@@ -1003,7 +1184,7 @@ void ArrangementView::update(const EngineSession::Snapshot& next)
             break;
         }
     }
-    p.canvas.repaint(); repaint();
+    p.canvas.repaint(); p.chordLane.repaint(); repaint();
 }
 void ArrangementView::invalidateSources() { impl->forceSourceCheck = true; }
 void ArrangementView::setCompactRows(bool compact) { const int height = compact ? 64 : 104; if (impl->rowHeight != height) { impl->rowHeight = height; impl->layout(); } }
@@ -1066,8 +1247,8 @@ bool ArrangementView::waveformsReady() const
 juce::String ArrangementView::waveformStatus(const juce::String& id) const
 {
     const auto peaks = impl->findPeaks(id);
-    if (peaks == nullptr || peaks->status.load(std::memory_order_acquire) == PeakStatus::failed) return "Waveform unavailable";
-    return "Reading waveform...";
+    if (peaks == nullptr || peaks->status.load(std::memory_order_acquire) == PeakStatus::failed) return uiText("Waveform unavailable", "波形不可用");
+    return uiText("Reading waveform...", "正在读取波形...");
 }
 void ArrangementView::drawTrackWaveform(juce::Graphics& g, juce::Rectangle<int> area, const juce::String& id,
                                        double start, double end, float verticalZoom)
@@ -1174,6 +1355,9 @@ void ArrangementView::mouseWheelMove(const juce::MouseEvent& e, const juce::Mous
 bool ArrangementView::keyPressed(const juce::KeyPress& key)
 {
     if (key == juce::KeyPress::escapeKey && cancelClipDrag()) return true;
+    if (key == juce::KeyPress::F2Key && impl->state.selectedTrackId.isNotEmpty()) {
+        impl->requestRename(impl->state.selectedTrackId); return true;
+    }
     const auto mods = key.getModifiers();
     if ((mods.isCtrlDown() || mods.isCommandDown()) && key.getKeyCode() == 'L') {
         const auto result = loopSelection(); if (onEditResult) onEditResult(result); return true;
@@ -1260,6 +1444,73 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
         p.canvas.mouseDown(event(20.0f, static_cast<float>(lastRow * rowHeight + 30)));
     }
     report.setProperty("track_header_scope_and_clip_restore", true);
+    {
+        // These callbacks test the real rename entry points without opening a
+        // modal dialog or changing a user's track. The host owns the command.
+        const auto originalRename = onRenameTrack;
+        juce::String renamed; int renameCount = 0;
+        onRenameTrack = [&](const juce::String& id) { renamed = id; ++renameCount; };
+        p.canvas.mouseDoubleClick(event(20.0f, float(lastRow * rowHeight + 12)));
+        keyPressed(juce::KeyPress(juce::KeyPress::F2Key));
+        p.headers.back()->rename.onClick();
+        onRenameTrack = originalRename;
+        if (renameCount != 3 || renamed != initial.tracks.back().id || p.engine.snapshot().revision != headerRevision
+            || !p.headers.back()->rename.isVisible())
+            return juce::Result::fail("Track rename entries did not target the selected real track without mutating it.");
+        report.setProperty("track_rename_button_doubleclick_and_f2", true);
+    }
+    {
+        // Synthetic snapshot projection verifies layout/selection, not model
+        // recognition. Accepted chords/Undo/storage are covered by native E2E.
+        const auto actual = p.engine.snapshot();
+        auto fixture = actual;
+        auto chords = std::make_shared<std::vector<EngineSession::ChordRegionSnapshot>>();
+        chords->push_back({"ui-chord-1", "C:maj7", "ui-analysis-a", "Piano", 0.0, 2.0});
+        chords->push_back({"ui-chord-2", "A:min7", "ui-analysis-a", "Piano", 2.0, 4.0});
+        chords->push_back({"ui-chord-3", "D:7", "ui-analysis-a", "Piano", 4.0, 6.0});
+        fixture.chordRegions = chords;
+        update(fixture); fitToProject();
+        if (!p.chordLane.isVisible() || p.viewport.getY() != rulerHeight + chordLaneHeight
+            || p.chordLane.getWidth() != p.canvas.getWidth() || p.chordLane.source.isVisible())
+            return juce::Result::fail("Single chord track does not share the ruler width or preserve its pinned position.");
+        const auto area = p.chordArea(chords->front());
+        if (std::abs(area.getX() - p.timeX(0.0)) > .01f || std::abs(area.getRight() - p.timeX(2.0)) > .01f)
+            return juce::Result::fail("Chord region positions use a different time scale from audio/MIDI clips.");
+        const auto originalOpen = onOpenChordRegion;
+        juce::String opened;
+        onOpenChordRegion = [&](const juce::String& id) { opened = id; };
+        p.chordLane.mouseDown(event(area.getCentreX(), area.getCentreY()));
+        p.chordLane.mouseDoubleClick(event(area.getCentreX(), area.getCentreY()));
+        onOpenChordRegion = originalOpen;
+        if (opened != "ui-chord-1" || p.selectedChordId != opened || p.engine.snapshot().revision != actual.revision)
+            return juce::Result::fail("Chord selection/edit navigation mutated the engine or lost the chord identity.");
+        if (outputDirectory.isDirectory()) {
+            auto stream = outputDirectory.getChildFile("arrangement-chord-track-synthetic.png").createOutputStream();
+            if (!stream || !juce::PNGImageFormat().writeImageToStream(createComponentSnapshot(getLocalBounds()), *stream))
+                return juce::Result::fail("Could not save chord track visual evidence.");
+        }
+        // A new result becomes the selected lane; earlier accepted results stay
+        // accessible rather than silently painting over one another.
+        chords = std::make_shared<std::vector<EngineSession::ChordRegionSnapshot>>(*chords);
+        chords->push_back({"ui-chord-4", "F:maj", "ui-analysis-b", "Guitar", 0.0, 6.0});
+        fixture.chordRegions = chords; update(fixture);
+        if (!p.chordLane.source.isVisible() || p.chordAnalysisId != "ui-analysis-b" || p.chordDisplay.size() != 1)
+            return juce::Result::fail("Multiple chord results are not selectable as separate visual lanes.");
+        p.chordLane.source.setSelectedItemIndex(0, juce::sendNotificationSync);
+        if (p.chordAnalysisId != "ui-analysis-a" || p.chordDisplay.size() != 3)
+            return juce::Result::fail("The chord result selector did not restore earlier regions.");
+        chords = std::make_shared<std::vector<EngineSession::ChordRegionSnapshot>>();
+        for (int i = 0; i < 10000; ++i) chords->push_back({"ui-dense-" + juce::String(i), "C:maj", "ui-dense", "Dense fixture", i * .1, (i + 1) * .1});
+        fixture.chordRegions = chords; update(fixture); p.setZoom(1000.0, .5);
+        int visible = 0; p.eachVisibleChord([&](const auto&) { ++visible; });
+        if (visible > 24 || visible < 1) return juce::Result::fail("Deep zoom traverses more than the visible chord interval range.");
+        report.setProperty("chord_track_synthetic_projection_shared_scale", true);
+        report.setProperty("chord_track_multiple_result_selection", true);
+        report.setProperty("chord_track_10000_regions_visible_count", visible);
+        update(actual); fitToProject();
+        if (p.engine.snapshot().revision != actual.revision || p.chordLane.isVisible() != bool(actual.chordRegions && !actual.chordRegions->empty()))
+            return juce::Result::fail("Chord display navigation changed musical state or retained a stale lane.");
+    }
     const auto halfX = static_cast<float>(p.labelWidth() + p.plotWidth() * 0.5);
     // The track's former blank upper strip is now part of its full-height clip.
     // Seeking through occupied tracks is available from the ruler.

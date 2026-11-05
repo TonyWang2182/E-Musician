@@ -2,9 +2,13 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
-**最新候选 0.9.0：本地音频分析（2026-11-05）**。顶部 `analyze` 打开下栏：HTDemucs 四轨分离、Basic Pitch 有音高音频转 MIDI、Chroma/HMM 大小三和弦识别。真实模型在独立本地进程运行，先生成候选，明确导入后才修改工程；手动与 Agent 共用接口。支持取消、来源检查、一次 Undo/Redo、保存重开，Agent 固定能力清单同步更新。**识别质量、实际 ASIO 与鼠标听感仍需人工验收。** [本轮结果](docs/review/2026-11-05-audio-analysis/RESULTS.md) / [人工短测](docs/review/2026-11-05-audio-analysis/MANUAL-CHECK.md) / [模型来源与本机测量](docs/review/2026-11-05-audio-analysis/WORKER-RESULTS.md)。
+**0.9.1 分析工作区（2026-11-05）**：和弦结果在编曲区显示为和弦轨，分离和转录结果添加到普通音频/MIDI 轨。下栏显示波形、音符和和弦预览；Settings → Language 切换 English / 简体中文。轨道标题旁 rename、双击名称、F2、右键均可改名。分析新增可选四／六轨和品质档、乐器音域、七和弦等常用类型；具体算法和识别局限见 [Worker 记录](docs/review/2026-11-05-analysis-workspace/WORKER-NOTES.md)。
 
-本机新入口：`E:/MusicAgent&DAW/Start E-musician 0.9.0 Analysis.cmd`；程序在 `E:/emusician-analysis-build/bin/Release/E-musician.exe`。模型、隔离运行库和候选缓存位于 `E:/MusicAgent&DAW/analysis/`，不进入 Git。旧版 0.8.1 程序及入口保留，两个版本分开使用。
+新入口：`E:/MusicAgent&DAW/Start E-musician 0.9.1 Analysis.cmd`，确认窗口标题 0.9.1；[人工短测](docs/review/2026-11-05-analysis-workspace/MANUAL-CHECK.md)。本轮工作树同下，新分支 `feature/analysis-workspace-v091`；构建/测试证据见 [结果](docs/review/2026-11-05-analysis-workspace/RESULTS.md)。旧 0.8.1 程序与 0.9.0 发布归档保留，未自动合并 main。以下 0.9.0 为历史基线。
+
+**历史基线 0.9.0：本地音频分析（2026-11-05）**。顶部 `analyze` 打开下栏：HTDemucs 四轨分离、Basic Pitch 有音高音频转 MIDI、Chroma/HMM 大小三和弦识别。真实模型在独立本地进程运行，先生成候选，明确导入后才修改工程；手动与 Agent 共用接口。支持取消、来源检查、一次 Undo/Redo、保存重开，Agent 固定能力清单同步更新。**识别质量、实际 ASIO 与鼠标听感仍需人工验收。** [本轮结果](docs/review/2026-11-05-audio-analysis/RESULTS.md) / [人工短测](docs/review/2026-11-05-audio-analysis/MANUAL-CHECK.md) / [模型来源与本机测量](docs/review/2026-11-05-audio-analysis/WORKER-RESULTS.md)。
+
+原 `Start E-musician 0.9.0 Analysis.cmd` 与新入口指向同一个分析构建目录，现在会运行 0.9.1；0.9.0 的独立 EXE/源码保留在发布归档。模型、隔离运行库和候选缓存位于 `E:/MusicAgent&DAW/analysis/`，不进入 Git。旧版 0.8.1 程序及入口保留。
 
 **保留版本 0.8.1（2026-11-05）**：MIDI 音符与 clip 改为全行矩形；现有七种原生装置增加统一旋钮/图示，Sampler/Rack 增加 AR 和播放模式，EQ 每段可选六种形状，新声音参数支持 Agent。启动 `build/device-chain/bin/Release/E-musician.exe`，本机亦可双击 `E:/MusicAgent&DAW/Start E-musician 0.8.1.cmd`，检查标题版本。Release、CTest 10/10、Agent Python 245 和离线联测通过，实际桌面与设备听感待人工；[结果/截图](docs/review/2026-11-05-device-controls/RESULTS.md) / [人工短测](docs/review/2026-11-05-device-controls/MANUAL-CHECK.md)。新非默认装置状态使用版本 2，旧版会拒绝；旧程序备份保留。
 
@@ -18,17 +22,17 @@ Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、M
 
 保留0.6.1的1/16384网格、Ctrl+4吸附虚实线、三级小节标尺与深缩放，以及0.6.0剪贴板、循环跟随、节拍器、预备拍和资源/电平显示。旧录音、混合工程、性能与插件证据保持原版本范围，见[0.5交付档案](docs/verification/2026-10-27-v05/DELIVERY.md)。
 
-新工程默认 **120 BPM、4/4**。不提供和弦工具或乐句模板；MIDI 可通过用户安装的 Windows x64 VST2/VST3 乐器，或使用用户自行加载 WAV 的原生 Sampler／Drum Rack 发声。独立运行不需要 Ableton、模型服务或 API 密钥。
+新工程默认 **120 BPM、4/4**。提供音频和弦识别及标签编辑，不提供自动和弦伴奏或乐句模板；MIDI 可通过用户安装的 Windows x64 VST2/VST3 乐器，或加载 WAV 的原生 Sampler／Drum Rack 发声。独立运行和本地分析不需要 Ableton 或 API 密钥。
 
 既有Keyscape兼容、录音音符时间边界和保存修复继续保留。新功能沿用同一个工程、命令接口及Undo；模型请求在独立非实时进程中执行。不提供自动保存和恢复。
 
 ## 打开与开发
 
-本轮工作树为 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/audio-analysis`。用 VS Code 打开 [E-musician-Analysis.code-workspace](E-musician-Analysis.code-workspace)：Ctrl+Shift+B 构建 Release，运行 `Analysis: CTest with log` 测试，F5 调试 `0.9 Analysis`。这些任务通过 `scripts.dev.Recorder` 保留每次命令、时间、结果、源码指纹和日志。
+本轮工作树为 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/analysis-workspace-v091`。用 VS Code 打开 [E-musician-Analysis.code-workspace](E-musician-Analysis.code-workspace)：Ctrl+Shift+B 构建 Release，运行 `Analysis: CTest with log` 测试，F5 调试 `0.9.1 Analysis`。任务通过 `scripts.dev.Recorder` 保留命令、时间、结果、源码指纹和日志。
 
 本机使用目录联接 `E:/emusician-analysis-source` 作为 CMake 源目录，构建目录 `E:/emusician-analysis-build`，避免上游 MSBuild 对路径中 `&` 的处理问题。固定 JUCE 8.0.6 / Tracktion Engine 3.2.0，具体 commit 和配置以本轮构建记录为准。其他机器需按 [BUILDING](docs/BUILDING.md) 准备依赖并调整工作区路径；现有 `dev_agent.py` 的历史默认构建目录不是这次 0.9.0 的入口。
 
-每次运行前保存并关闭旧窗口，确认新标题 **0.9.0**。模型安装/探针和重复部署命令见 [Worker 说明](docs/review/2026-11-05-audio-analysis/WORKER-RESULTS.md)。项目约定见 [AGENTS.md](AGENTS.md)，当前上下文见 [CONTEXT](docs/CONTEXT.md)。
+每次运行前保存并关闭旧窗口，确认新标题 **0.9.1**。新增模型及复现实验见 [Worker 说明](docs/review/2026-11-05-analysis-workspace/WORKER-NOTES.md)。项目约定见 [AGENTS.md](AGENTS.md)，当前上下文见 [CONTEXT](docs/CONTEXT.md)。
 
 ## 基础操作
 

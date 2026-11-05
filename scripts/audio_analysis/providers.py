@@ -7,6 +7,23 @@ from pathlib import Path
 from .common import AnalysisError, sha256_file, validate_notes
 
 
+def separation_settings(parameters):
+    """Bounded inference profiles; quality uses real shift averaging, not EQ."""
+    return {"overlap": .5, "shifts": 2} if parameters["quality"] == "quality" else {"overlap": .25, "shifts": 0}
+
+
+def waveform_peaks(audio, bins=128):
+    """True all-channel absolute maxima; bounded UI envelope, unchanged PCM.
+
+    Process one view at a time to avoid a full-stem abs() allocation for long
+    files. Each bin represents the corresponding equal-duration source range.
+    """
+    import numpy as np
+    boundaries = np.linspace(0, len(audio), bins + 1, dtype=np.int64)
+    return [float(np.max(np.abs(audio[first:last]))) if last > first else 0.
+            for first, last in zip(boundaries, boundaries[1:])]
+
+
 def checked_model(entry, job):
     path = Path(entry.get("model_path", ""))
     if not path.is_file() or sha256_file(path, job) != entry.get("weight_sha256"):
@@ -18,12 +35,15 @@ def separate(job, audio, sample_rate, entry):
     import numpy as np
     import soundfile as sf
     import torch
+    import random
     from scipy.signal import resample_poly
     from demucs.hf import load_safetensors_model
     from demucs.apply import apply_model
 
     torch.set_num_threads(2)
     torch.set_num_interop_threads(1)
+    random.seed(0)
+    torch.manual_seed(0)
     device = "cuda" if entry.get("device") == "cuda" and torch.cuda.is_available() else "cpu"
     fallback = entry.get("device") == "cuda" and device == "cpu"
     if device == "cuda":
@@ -31,6 +51,11 @@ def separate(job, audio, sample_rate, entry):
     path = checked_model(entry, job)
     job.progress("loading_model", .15, f"Loading HTDemucs on {device.upper()}; local evaluation checkpoint.")
     model = load_safetensors_model(path).eval()
+    expected_sources = {"vocals", "drums", "bass", "other"}
+    if job.request["parameters"]["stems"] == 6:
+        expected_sources.update(("piano", "guitar"))
+    if set(model.sources) != expected_sources or len(model.sources) != len(expected_sources):
+        raise AnalysisError("model_integrity", "The registered separator does not match the requested stem count.")
     target = int(model.samplerate)
     if target != sample_rate:
         common = gcd(sample_rate, target)
@@ -44,13 +69,20 @@ def separate(job, audio, sample_rate, entry):
     mean = reference.mean()
     deviation = reference.std()
     segment = job.request["parameters"]["segment_seconds"]
+    settings = separation_settings(job.request["parameters"])
+    progress_fraction = 0.
 
     def progress(data):
+        nonlocal progress_fraction
         at = float(data.get("segment_offset", 0)) / target
         if data.get("state") == "end":
-            at += segment * .75
-        job.progress("separating", .2 + .65 * min(1., at / max(len(audio) / target, .001)),
-                     f"Separating vocals, drums, bass and other ({device.upper()}, two CPU threads).")
+            at += segment * (1. - settings["overlap"])
+        fraction = min(1., at / max(len(audio) / target, .001))
+        if settings["shifts"]:
+            fraction = (float(data.get("shift_idx", 0)) + fraction) / settings["shifts"]
+        progress_fraction = max(progress_fraction, fraction)
+        job.progress("separating", .2 + .65 * progress_fraction,
+                     f"Separating {len(model.sources)} stems ({device.upper()}, two CPU threads).")
 
     if float(deviation) <= 1e-8:
         outputs = torch.zeros((len(model.sources), 2, len(audio)), dtype=torch.float32)
@@ -58,7 +90,7 @@ def separate(job, audio, sample_rate, entry):
         mix = (mix - mean) / deviation
         try:
             with torch.inference_mode():
-                outputs = apply_model(model, mix[None], shifts=0, split=True, overlap=.25,
+                outputs = apply_model(model, mix[None], split=True, **settings,
                                       segment=segment, device=device, num_workers=0,
                                       progress=False, callback=progress)[0]
         except torch.cuda.OutOfMemoryError:
@@ -70,7 +102,7 @@ def separate(job, audio, sample_rate, entry):
             device, fallback = "cpu", True
             job.progress("cpu_fallback", .2, "GPU memory was insufficient; continuing on CPU (slower).")
             with torch.inference_mode():
-                outputs = apply_model(model, mix[None], shifts=0, split=True, overlap=.25,
+                outputs = apply_model(model, mix[None], split=True, **settings,
                                       segment=segment, device="cpu", num_workers=0,
                                       progress=False, callback=progress)[0]
         outputs = outputs * deviation + mean
@@ -83,18 +115,20 @@ def separate(job, audio, sample_rate, entry):
             raise AnalysisError("invalid_result", "Separation produced invalid or misaligned audio.")
         destination = job.directory / f"{name}.wav"
         sf.write(destination, data, target, subtype="FLOAT")
+        peaks = waveform_peaks(data)
         stems.append({"name": name, "path": destination.name, "sample_rate": target, "channels": 2,
                       "duration_seconds": len(data) / target, "frames": len(data),
-                      "sha256": sha256_file(destination, job), "peak": float(np.max(np.abs(data)))})
-    stems.sort(key=lambda stem: ("vocals", "drums", "bass", "other").index(stem["name"]))
+                      "sha256": sha256_file(destination, job), "peak": max(peaks), "waveform_peaks": peaks})
+    stems.sort(key=lambda stem: ("vocals", "drums", "bass", "piano", "guitar", "other").index(stem["name"]))
     return {"stems": stems, "runtime_metrics": {"device": device, "cpu_fallback": fallback,
             "gpu_name": torch.cuda.get_device_name() if device == "cuda" else "",
             "peak_cuda_allocated_bytes": torch.cuda.max_memory_allocated() if device == "cuda" else 0,
             "peak_cuda_reserved_bytes": torch.cuda.max_memory_reserved() if device == "cuda" else 0},
-            "limitations": ["Four stems only; other may contain several instruments.",
+            "limitations": ["Other may contain several instruments; lead/backing voices and guitar roles are not separated.",
+            *( ["Six-stem piano and guitar are experimental and may contain bleed or artifacts."] if len(stems) == 6 else []),
             "HTDemucs checkpoint is for local evaluation; redistribution rights are not cleared."],
-            "timing": {"output_sample_rate": target, "segment_seconds": segment, "overlap": .25,
-                       "shifts": 0, "global_normalization": "mean_std_restored", "independent_normalization": False,
+            "timing": {"output_sample_rate": target, "segment_seconds": segment, **settings,
+                       "random_seed": 0, "global_normalization": "mean_std_restored", "independent_normalization": False,
                        "quantized": False}}
 
 

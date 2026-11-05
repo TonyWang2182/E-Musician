@@ -1,4 +1,4 @@
-"""Real owned DAW + real local chord provider + deterministic language provider.
+"""Real owned DAW + local chord/optional six-stem models + deterministic LLM.
 
 This validates the shared analysis/import/edit pipeline, not musical accuracy or
 live ASIO performance. Never accesses user projects or a paid model API.
@@ -23,6 +23,8 @@ from agent_client import Client, ControlError
 from music_agent.bridge import DawBridge, BridgeError
 from music_agent.runtime import AgentRuntime
 from music_agent.config import DEFAULT_CONFIG
+from music_agent.analysis import authorize_start
+from music_agent.selection import freeze_scope
 from dev import configure_console_output
 from MusicAgentIntegration import protected
 
@@ -35,20 +37,24 @@ class Provider:
     def complete(self,messages,tools):self.calls+=1;return tool(self.name,self.args)
 
 class StartProvider(Provider):
-    def __init__(self,clip):super().__init__('start_audio_analysis',{"clip_id":clip,"kind":"chords"})
+    def __init__(self,clip,kind='chords',parameters=None):
+        super().__init__('start_audio_analysis',{"clip_id":clip,"kind":kind})
+        if parameters is not None:self.args['parameters']=parameters
     def complete(self,messages,tools):
         self.calls+=1
         if self.calls==1:return tool(self.name,self.args)
         reply=json.loads(next(m['content'] for m in reversed(messages) if m['role']=='tool'))
         assert reply['job']['status']=='ready'
-        return tool('propose_analysis_import',{'result_id':reply['candidate']['result_id'],'summary':'Import actual local chord candidates'})
+        return tool('propose_analysis_import',{'result_id':reply['candidate']['result_id'],'summary':'Import actual local analysis candidates'})
 
 class Audit:
     def write(self,*args,**kwargs):pass
 
 def main():
     configure_console_output()
-    ap=argparse.ArgumentParser();ap.add_argument('--exe',type=Path,required=True);ap.add_argument('--timeout',type=float,default=180);args=ap.parse_args()
+    ap=argparse.ArgumentParser();ap.add_argument('--exe',type=Path,required=True);ap.add_argument('--timeout',type=float,default=180)
+    ap.add_argument('--six-stems',action='store_true',help='Also exercise real HTDemucs six-stem inference through Agent confirmation/readback/Undo/Redo')
+    args=ap.parse_args()
     directory=ROOT/'build'/'agent-analysis-e2e'/uuid.uuid4().hex;directory.mkdir(parents=True)
     # Keep the test process independent of a concurrent MSBuild relink.
     frozen_exe=directory/'E-musician.exe';shutil.copy2(args.exe,frozen_exe)
@@ -57,7 +63,7 @@ def main():
     with wave.open(str(path),'wb') as out:
         out.setnchannels(1);out.setsampwidth(2);out.setframerate(rate)
         out.writeframes(b''.join(struct.pack('<h',round(32767*.13*sum(math.sin(2*math.pi*f*i/rate) for f in (261.625565,329.627557,391.995436)))) for i in range(rate*4)))
-    report={'passed':False,'mode':'owned-offline-DAW-real-local-chords','physical_audio':False,'external_llm':False,'music_accuracy_claim':False,'input_executable':str(args.exe),'exe_sha256':executable_hash,'checks':[]}
+    report={'passed':False,'mode':'owned-offline-DAW-real-local-chords-and-six-stems' if args.six_stems else 'owned-offline-DAW-real-local-chords','physical_audio':False,'external_llm':False,'music_accuracy_claim':False,'input_executable':str(args.exe),'exe_sha256':executable_hash,'checks':[]}
     checks=report['checks'];before=protected();client=None
     def wait(runtime):
         runtime.worker.join(args.timeout)
@@ -124,6 +130,54 @@ def main():
             runtime.cancel()
             groups=runtime.state()['capability_groups'];assert len(groups)==7 and next(g for g in groups if g['id']=='chords')['status']=='not_applicable'
             checks.append('Fixed seven-group UI capability state comes from actual host, adapter and local model readiness')
+            if args.six_stems:
+                assert caps.get('separation_six_stems') is True
+                assert any(p['kind']=='separate' and p['available'] for p in caps['providers'])
+                before_separation=bridge.snapshot();before_tracks={t['id'] for t in before_separation['tracks']}
+                source_before=next(c for t in before_separation['tracks'] for c in t['clips'] if c['id']==clip)
+                runtime.provider=StartProvider(clip,'separate',{'stems':6,'quality':'fast'})
+                runtime.plan_request('Separate the source into vocals, drums, bass, piano, guitar and other; prepare an import for confirmation',scope='project');wait(runtime)
+                assert runtime.phase=='ready' and runtime.provider.calls==2
+                candidate6=runtime.plan['analysis'];rid6=candidate6['result_id']
+                names={'vocals','drums','bass','piano','guitar','other'}
+                assert candidate6['kind']=='separate' and candidate6['total']==6 and candidate6['parameters']['stems']==6
+                assert {item['name'] for item in candidate6['items']}==names
+                assert bridge.snapshot()['revision']==before_separation['revision']
+                assert {t['id'] for t in bridge.snapshot()['tracks']}==before_tracks
+                assert not candidate6['applied'] and 'waveform_peaks' not in json.dumps(candidate6)
+                report['six_stems']={'result_id':rid6,'model':candidate6['model'],'parameters':candidate6['parameters'],'source_sha256':candidate6['source']['source_sha256']}
+                checks.append('Agent starts actual six-stem HTDemucs, polls locally and prepares a six-track review in two mocked LLM calls; no premature mutation')
+                runtime.apply(runtime.plan['id']);wait(runtime)
+                assert runtime.phase=='done' and runtime.undo_target
+                added=bridge.snapshot();assert added['revision']==before_separation['revision']+1
+                imported=[t for t in added['tracks'] if t['id'] not in before_tracks]
+                assert len(imported)==6 and {t['name'] for t in imported}=={'Separated / '+name for name in names}
+                assert all(len(t['clips'])==1 and t['clips'][0]['kind']=='audio' for t in imported)
+                role_ids={t['clips'][0]['analysis_role']:(t['id'],t['clips'][0]['id']) for t in imported}
+                assert set(role_ids)==names
+                assert all(abs(t['clips'][0]['start_seconds']-candidate6['source']['timeline_start'])<1e-6 for t in imported)
+                assert next(c for t in added['tracks'] for c in t['clips'] if c['id']==clip)==source_before
+                assert bridge.analysis_result(rid6)['applied'] is True
+                report['six_stems']['role_ids']=role_ids
+                checks.append('Explicit Agent confirmation imports exactly six named audio tracks; runtime readback verifies IDs, audio kinds, positions and instrument roles')
+                runtime.undo();wait(runtime)
+                assert {t['id'] for t in bridge.snapshot()['tracks']}==before_tracks
+                client.request({'command':'redo'})
+                restored=bridge.snapshot()
+                assert {t['id'] for t in restored['tracks']}==before_tracks|{pair[0] for pair in role_ids.values()}
+                assert {c['analysis_role']:(t['id'],c['id']) for t in restored['tracks'] if t['id'] not in before_tracks for c in t['clips']}==role_ids
+                checks.append('One Agent Undo removes all six imported tracks; one native Redo restores the same six track/clip IDs and roles')
+                project6=directory/'six-stems.emproj'
+                client.request({'command':'save_project','args':{'path':str(project6)}})
+                client.request({'command':'open_project','args':{'path':str(project6)}})
+                reopened=bridge.snapshot();scope=freeze_scope(reopened,'project')
+                assert {c['analysis_role']:(t['id'],c['id']) for t in reopened['tracks'] if t['id'] not in before_tracks for c in t['clips']}==role_ids
+                for role in ('piano','guitar'):
+                    request=authorize_start(reopened,scope,{'clip_id':role_ids[role][1],'kind':'transcribe','parameters':{'instrument':'auto'}})
+                    assert request['parameters']['instrument']=='auto'
+                request=authorize_start(reopened,scope,{'clip_id':role_ids['other'][1],'kind':'transcribe','parameters':{'instrument':'piano'}})
+                assert request['parameters']['instrument']=='piano'
+                checks.append('Six-stem project saves/reopens with roles intact; piano/guitar Auto and explicit other profile pass Agent authorization without another model run')
         report['passed']=True
     finally:
         if client:client.close()

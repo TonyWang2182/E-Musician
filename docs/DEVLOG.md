@@ -6436,3 +6436,342 @@ Implementation/evidence committed as c258d31daabf3acc9082af21ca0f80cd877e9abd on
 Correction to packaging audit: the earlier git diff --check covered tracked changes before staging and did not include new files. The full staged check found upstream SciPy LICENSE trailing spaces plus a harmless blank EOF in worker __init__.py. These are explicitly retained as formatting exceptions to preserve upstream text and the verified worker hash; excluding that verbatim license and blank-EOF rule, the full baseline-to-implementation check passes. Source code is unchanged since final tests. PACKAGING-CHECK now records both results, rather than hiding the first full-check failure.
 
 Final delivery documentation commit follows this payload commit; feature branch synchronization is performed separately. No main merge is authorized by this batch.
+
+### 2026-11-05T16:05:53+08:00 · agent-native-run · launched
+
+- Config: Release; exit code: None; elapsed: 0.209s.
+- Command: `E:\emusician-analysis-build\bin\Release\E-musician.exe --agent`
+- Context: Embedded Agent batch 2; physical audio acceptance remains manual
+- Source SHA-256: `0b1942e811c457ea55522f03dcbc9aa9620198833633df32a25a2d4a869885ee`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T080553.757274Z-d7a5bc92cf.json) · [Raw log](../build-logs/20261105T080553.757274Z-d7a5bc92cf.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261105T080553.757274Z-d7a5bc92cf.raw.log)
+
+### 2026-11-05T16:05:57+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.139s.
+- Command: `C:\Python314\python.exe E:\emusician-analysis-source\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `0b1942e811c457ea55522f03dcbc9aa9620198833633df32a25a2d4a869885ee`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T080557.726326Z-d5279c651e.json) · [Raw log](../build-logs/20261105T080557.726326Z-d5279c651e.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+
+## 2026-11-05 ? 0.9.1 analysis workspace iteration started
+
+Branch feature/analysis-workspace-v091 from f0d95b3; preserved existing 0.9.0 archive, old worktree, two uncommitted launch records and prior log entries. Scope/ownership/acceptance: docs/review/2026-11-05-analysis-workspace/PLAN.md. No build or acceptance for this iteration yet; no computer-use.
+
+### 2026-11-05T18:09:05+08:00 · analysis-setup · succeeded
+
+- Config: Python3.10 CPU; exit code: 0; elapsed: 48.840s.
+- Command: `E:\MusicAgent&DAW\analysis\runtimes\separation-cuda-py310\Scripts\python.exe scripts/audio_analysis/register.py --root E:\MusicAgent&DAW\analysis --kind separate --device cuda --stems 6`
+- Context: Explicit isolated model installation/probe; weights remain outside Git.
+- Source SHA-256: `fd90cb263893baad3787d2ca901a3014f487a1799e78c154922e106cf85249bc`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T100905.925688Z-5203fda088.json) · [Raw log](../build-logs/20261105T100905.925688Z-5203fda088.log)
+- [Exact process output](../build-logs/20261105T100905.925688Z-5203fda088.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T18:11:31+08:00 · analysis-workspace-worker-tests · succeeded
+
+- Config: Python3.10 isolated chords; exit code: 0; elapsed: 5.224s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe -m unittest tests.test_audio_analysis_workers -v`
+- Context: Interim worker numerical and protocol checks; other UI files remain under active parallel development.
+- Source SHA-256: `3a38ca942ca755d99c379849dd2e2b84b0d6cc442917c82c3632f7e774c8e563`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T101131.786651Z-2856286e19.json) · [Raw log](../build-logs/20261105T101131.786651Z-2856286e19.log)
+- [Exact process output](../build-logs/20261105T101131.786651Z-2856286e19.raw.log)
+
+### 2026-11-05T18:11:48+08:00 · analysis-workspace-real-workers · succeeded
+
+- Config: Python3.10 / RTX3050 CUDA offline; exit code: 0; elapsed: 48.942s.
+- Command: `python scripts/audio_analysis/probe.py --root E:/MusicAgent&DAW/analysis --kind all --stems 6 --quality quality --instrument piano`
+- Context: Actual six-stem quality-mode separator plus piano-range MIDI and extended chord workers on synthetic audio; not recognition-quality or ASIO evidence.
+- Source SHA-256: `3a38ca942ca755d99c379849dd2e2b84b0d6cc442917c82c3632f7e774c8e563`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T101148.569838Z-e3488965bb.json) · [Raw log](../build-logs/20261105T101148.569838Z-e3488965bb.log)
+- [Exact process output](../build-logs/20261105T101148.569838Z-e3488965bb.raw.log)
+
+### 2026-11-05T18:14:07+08:00 · analysis-workspace-worker-tests · succeeded
+
+- Config: Python3.10 isolated chords; exit code: 0; elapsed: 5.520s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe -m unittest tests.test_audio_analysis_workers -v`
+- Context: Worker protocol, extended chord time alignment, real waveform envelope and backward triad checks; worker source frozen for this command, parallel native UI development continues.
+- Source SHA-256: `eadd0e8905fede4109a37a20a0863f83e8f86796eabb5536fd299b8e499a2964`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T101407.916317Z-e7da5a2020.json) · [Raw log](../build-logs/20261105T101407.916317Z-e7da5a2020.log)
+- [Exact process output](../build-logs/20261105T101407.916317Z-e7da5a2020.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T18:14:28+08:00 · analysis-workspace-worker-final · succeeded
+
+- Config: Python3.10 / RTX3050 offline; exit code: 0; elapsed: 43.668s.
+- Command: `python scripts/audio_analysis/probe.py --root E:/MusicAgent&DAW/analysis --kind all --stems 6 --quality quality --instrument piano`
+- Context: Frozen worker sources: real six-stem quality inference, piano-profile MIDI, expanded chords and 128-bin waveform metadata; synthetic input, no audio device.
+- Source SHA-256: `c47b0dfefadcc3e066bd52e4c48f17b671707bea7476d7879710078478c87c9f`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T101428.477240Z-192f26fc2d.json) · [Raw log](../build-logs/20261105T101428.477240Z-192f26fc2d.log)
+- [Exact process output](../build-logs/20261105T101428.477240Z-192f26fc2d.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T18:15:12+08:00 · analysis-workspace-worker-final · succeeded
+
+- Config: Python3.10 / RTX3050 offline; exit code: 0; elapsed: 34.410s.
+- Command: `python scripts/audio_analysis/edge_probe.py --root E:/MusicAgent&DAW/analysis`
+- Context: Frozen worker sources: real six-stem quality inference, piano-profile MIDI, expanded chords and 128-bin waveform metadata; synthetic input, no audio device.
+- Source SHA-256: `968e9e3df9076bb3866862f4e26a5f41b01c96f892024562ea072dc7906eb49d`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T101512.680669Z-69457db2d0.json) · [Raw log](../build-logs/20261105T101512.680669Z-69457db2d0.log)
+- [Exact process output](../build-logs/20261105T101512.680669Z-69457db2d0.raw.log)
+
+### 2026-11-05T18:16:23+08:00 · analysis-workspace-public-workers · succeeded
+
+- Config: Python3.10 / RTX3050 offline; exit code: 0; elapsed: 41.271s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe scripts/audio_analysis/public_probe.py --root E:/MusicAgent&DAW/analysis --stems 6`
+- Context: Public attributed musical audio: new six-stem fast mode, real waveform envelopes, pitched MIDI and extended chord pipeline. No ground-truth quality or listening claim.
+- Source SHA-256: `dc474bf954ce9d4e8dcaa26d9bee8682c521056705d470ca35c909e736829035`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T101623.107525Z-0be22cc31b.json) · [Raw log](../build-logs/20261105T101623.107525Z-0be22cc31b.log)
+- [Exact process output](../build-logs/20261105T101623.107525Z-0be22cc31b.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T18:18:22+08:00 · analysis-ui-language · succeeded
+
+- Config: Web; exit code: 0; elapsed: 3.271s.
+- Command: `node --check scripts/music_agent/web/i18n.js`
+- Context: English/Chinese authored UI, draft preservation and responsive synthetic host fixtures; no real model or physical GUI
+- Source SHA-256: `53ff1a2553e40e8060c54340cee96d81a52628f93a71ec3c8fbd44df4fb9a489`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T101822.793427Z-e831826c63.json) · [Raw log](../build-logs/20261105T101822.793427Z-e831826c63.log)
+- [Exact process output](../build-logs/20261105T101822.793427Z-e831826c63.raw.log)
+
+### 2026-11-05T18:18:26+08:00 · analysis-ui-language · succeeded
+
+- Config: Web; exit code: 0; elapsed: 0.586s.
+- Command: `node --check scripts/music_agent/web/app.js`
+- Context: English/Chinese authored UI, draft preservation and responsive synthetic host fixtures; no real model or physical GUI
+- Source SHA-256: `53ff1a2553e40e8060c54340cee96d81a52628f93a71ec3c8fbd44df4fb9a489`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T101826.479400Z-f8d3961cbc.json) · [Raw log](../build-logs/20261105T101826.479400Z-f8d3961cbc.log)
+- [Exact process output](../build-logs/20261105T101826.479400Z-f8d3961cbc.raw.log)
+
+### 2026-11-05T18:18:27+08:00 · analysis-ui-language · succeeded
+
+- Config: Web; exit code: 0; elapsed: 14.899s.
+- Command: `C:\Python314\python.exe tests/AnalysisAgentWebSmoke.py`
+- Context: English/Chinese authored UI, draft preservation and responsive synthetic host fixtures; no real model or physical GUI
+- Source SHA-256: `53ff1a2553e40e8060c54340cee96d81a52628f93a71ec3c8fbd44df4fb9a489`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T101827.470901Z-5c9328d64f.json) · [Raw log](../build-logs/20261105T101827.470901Z-5c9328d64f.log)
+- [Exact process output](../build-logs/20261105T101827.470901Z-5c9328d64f.raw.log)
+
+### 2026-11-05T18:19:55+08:00 · analysis-workspace-worker-admission · succeeded
+
+- Config: Python3.10 isolated chords; exit code: 0; elapsed: 5.150s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe -m unittest tests.test_audio_analysis_workers -v`
+- Context: Permit mixed other stem only after explicit pitched profile selection; auto other and all drums remain rejected. Worker numerical/protocol regression; inference implementation unchanged.
+- Source SHA-256: `426e5cf34656504eac3fabeb768415f2e058a5723dc1f47f3b6c10406795b8c1`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T101955.562727Z-5ec8f41b86.json) · [Raw log](../build-logs/20261105T101955.562727Z-5ec8f41b86.log)
+- [Exact process output](../build-logs/20261105T101955.562727Z-5ec8f41b86.raw.log)
+
+### 2026-11-05T18:20:55+08:00 · analysis-ui-language · succeeded
+
+- Config: Web; exit code: 0; elapsed: 0.965s.
+- Command: `node --check scripts/music_agent/web/i18n.js`
+- Context: English/Chinese authored UI, draft preservation and responsive synthetic host fixtures; no real model or physical GUI
+- Source SHA-256: `f658bde696ca980d71596045a3b8d8c0ae30d7ad413a7cccd6ce11d25a3ff13f`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T102055.418464Z-767521f0bf.json) · [Raw log](../build-logs/20261105T102055.418464Z-767521f0bf.log)
+- [Exact process output](../build-logs/20261105T102055.418464Z-767521f0bf.raw.log)
+
+### 2026-11-05T18:20:56+08:00 · analysis-ui-language · succeeded
+
+- Config: Web; exit code: 0; elapsed: 0.586s.
+- Command: `node --check scripts/music_agent/web/app.js`
+- Context: English/Chinese authored UI, draft preservation and responsive synthetic host fixtures; no real model or physical GUI
+- Source SHA-256: `f658bde696ca980d71596045a3b8d8c0ae30d7ad413a7cccd6ce11d25a3ff13f`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T102056.789109Z-3fdd3a1e90.json) · [Raw log](../build-logs/20261105T102056.789109Z-3fdd3a1e90.log)
+- [Exact process output](../build-logs/20261105T102056.789109Z-3fdd3a1e90.raw.log)
+
+### 2026-11-05T18:20:57+08:00 · analysis-ui-language · succeeded
+
+- Config: Web; exit code: 0; elapsed: 16.704s.
+- Command: `C:\Python314\python.exe tests/AnalysisAgentWebSmoke.py`
+- Context: English/Chinese authored UI, draft preservation and responsive synthetic host fixtures; no real model or physical GUI
+- Source SHA-256: `f658bde696ca980d71596045a3b8d8c0ae30d7ad413a7cccd6ce11d25a3ff13f`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T102057.815442Z-96b76bf722.json) · [Raw log](../build-logs/20261105T102057.815442Z-96b76bf722.log)
+- [Exact process output](../build-logs/20261105T102057.815442Z-96b76bf722.raw.log)
+
+### 2026-11-05T18:25:41+08:00 · analysis-workspace-agent-contract · succeeded
+
+- Config: Python; exit code: 0; elapsed: 11.897s.
+- Command: `python -m unittest discover -s tests -p test_music_agent_analysis.py -v`
+- Context: Six-stem import and track budgets, explicit other instrument through result/import/cancel, extended chord edits and defensive option lists. No model/API calls.
+- Source SHA-256: `9668bb2e278c2e80ecdc4a9d22f6361387e5932393765b78232bff3f75f1ae47`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T102541.549783Z-35bfc90c09.json) · [Raw log](../build-logs/20261105T102541.549783Z-35bfc90c09.log)
+- [Exact process output](../build-logs/20261105T102541.549783Z-35bfc90c09.raw.log)
+
+### 2026-11-05T18:25:25+08:00 · analysis-workspace-configure · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 38.323s.
+- Command: `cmake -S E:/emusician-analysis-source -B E:/emusician-analysis-build`
+- Context: 0.9.1 analysis UI, language and model integration; no physical audio or quality claim
+- Source SHA-256: `af7df5311ab82f0066c6168611a4ff00bfb0e27ddb0c83d49da6fe7388c750af`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T102525.081358Z-249f1c4b4e.json) · [Raw log](../build-logs/20261105T102525.081358Z-249f1c4b4e.log)
+- [Exact process output](../build-logs/20261105T102525.081358Z-249f1c4b4e.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-05T18:28:08+08:00 · analysis-workspace-agent-contract-final · succeeded
+
+- Config: Python; exit code: 0; elapsed: 16.127s.
+- Command: `python -m unittest discover -s tests -p test_music_agent_analysis.py -v`
+- Context: Final Agent analysis contracts including explicit/auto profile-derived pitch bounds; source unchanged during scoped test. No model/API calls.
+- Source SHA-256: `7ff92464aa16a66717d1f66335b51c5c09647a419af896ead4a677df5d7954ca`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T102808.266541Z-2d62aaf86a.json) · [Raw log](../build-logs/20261105T102808.266541Z-2d62aaf86a.log)
+- [Exact process output](../build-logs/20261105T102808.266541Z-2d62aaf86a.raw.log)
+
+### 2026-11-05T18:26:23+08:00 · analysis-workspace-build · failed
+
+- Config: Release/Python; exit code: 1; elapsed: 228.971s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.9.1 analysis UI, language and model integration; no physical audio or quality claim
+- Source SHA-256: `9668bb2e278c2e80ecdc4a9d22f6361387e5932393765b78232bff3f75f1ae47`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T102623.979643Z-2598f6977d.json) · [Raw log](../build-logs/20261105T102623.979643Z-2598f6977d.log)
+- [Exact process output](../build-logs/20261105T102623.979643Z-2598f6977d.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T102623.979643Z-2598f6977d.log
+
+### 2026-11-05T18:33:45+08:00 · analysis-workspace-build · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 105.515s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.9.1 analysis UI, language and model integration; no physical audio or quality claim
+- Source SHA-256: `d34c002b82ec6030bf12f07f08e3583cae576aa7074220b55dfc3c6ba50a8176`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T103345.262562Z-6944bcd820.json) · [Raw log](../build-logs/20261105T103345.262562Z-6944bcd820.log)
+- [Exact process output](../build-logs/20261105T103345.262562Z-6944bcd820.raw.log)
+
+### 2026-11-05T18:35:52+08:00 · analysis-workspace-agent · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 101.509s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: 0.9.1 analysis UI, language and model integration; no physical audio or quality claim
+- Source SHA-256: `d34c002b82ec6030bf12f07f08e3583cae576aa7074220b55dfc3c6ba50a8176`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T103552.928430Z-197731e1f4.json) · [Raw log](../build-logs/20261105T103552.928430Z-197731e1f4.log)
+- [Exact process output](../build-logs/20261105T103552.928430Z-197731e1f4.raw.log)
+
+### 2026-11-05T18:35:52+08:00 · analysis-workspace-ctest · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 127.351s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: 0.9.1 analysis UI, language and model integration; no physical audio or quality claim
+- Source SHA-256: `d34c002b82ec6030bf12f07f08e3583cae576aa7074220b55dfc3c6ba50a8176`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T103552.924519Z-3c75c234ab.json) · [Raw log](../build-logs/20261105T103552.924519Z-3c75c234ab.log)
+- [Exact process output](../build-logs/20261105T103552.924519Z-3c75c234ab.raw.log)
+
+### 2026-11-05T18:38:39+08:00 · analysis-workspace-e2e · failed
+
+- Config: Release/Python; exit code: 1; elapsed: 51.578s.
+- Command: `C:\Python314\python.exe tests/AudioAnalysisEndToEnd.py --exe E:/emusician-analysis-build/bin/Release/E-musician.exe --six-stems`
+- Context: 0.9.1 analysis UI, language and model integration; no physical audio or quality claim
+- Source SHA-256: `d34c002b82ec6030bf12f07f08e3583cae576aa7074220b55dfc3c6ba50a8176`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T103839.257903Z-b55aae2cb1.json) · [Raw log](../build-logs/20261105T103839.257903Z-b55aae2cb1.log)
+- [Exact process output](../build-logs/20261105T103839.257903Z-b55aae2cb1.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T103839.257903Z-b55aae2cb1.log
+
+### 2026-11-05T18:40:52+08:00 · analysis-ui-language · succeeded
+
+- Config: Web; exit code: 0; elapsed: 0.930s.
+- Command: `node --check scripts/music_agent/web/i18n.js`
+- Context: English/Chinese authored UI, draft preservation and responsive synthetic host fixtures; no real model or physical GUI
+- Source SHA-256: `71e523e782dc1cba27263997bc84a6ca8f725a8dcb59d4e1c07fe90d45365d85`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T104052.694256Z-ffe76a891a.json) · [Raw log](../build-logs/20261105T104052.694256Z-ffe76a891a.log)
+- [Exact process output](../build-logs/20261105T104052.694256Z-ffe76a891a.raw.log)
+
+### 2026-11-05T18:40:54+08:00 · analysis-ui-language · succeeded
+
+- Config: Web; exit code: 0; elapsed: 0.637s.
+- Command: `node --check scripts/music_agent/web/app.js`
+- Context: English/Chinese authored UI, draft preservation and responsive synthetic host fixtures; no real model or physical GUI
+- Source SHA-256: `71e523e782dc1cba27263997bc84a6ca8f725a8dcb59d4e1c07fe90d45365d85`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T104054.082375Z-8ae65d0382.json) · [Raw log](../build-logs/20261105T104054.082375Z-8ae65d0382.log)
+- [Exact process output](../build-logs/20261105T104054.082375Z-8ae65d0382.raw.log)
+
+### 2026-11-05T18:40:55+08:00 · analysis-ui-language · succeeded
+
+- Config: Web; exit code: 0; elapsed: 16.241s.
+- Command: `C:\Python314\python.exe tests/AnalysisAgentWebSmoke.py`
+- Context: English/Chinese authored UI, draft preservation and responsive synthetic host fixtures; no real model or physical GUI
+- Source SHA-256: `71e523e782dc1cba27263997bc84a6ca8f725a8dcb59d4e1c07fe90d45365d85`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T104055.187269Z-86a76688f0.json) · [Raw log](../build-logs/20261105T104055.187269Z-86a76688f0.log)
+- [Exact process output](../build-logs/20261105T104055.187269Z-86a76688f0.raw.log)
+
+### 2026-11-05T18:41:59+08:00 · analysis-workspace-build · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 175.738s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.9.1 analysis UI, language and model integration; no physical audio or quality claim
+- Source SHA-256: `85a83842379a3c622b84598f96efe2e53bedb08a1c703171bb2a9e5dd24ef9e7`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T104159.651514Z-f59e181ba3.json) · [Raw log](../build-logs/20261105T104159.651514Z-f59e181ba3.log)
+- [Exact process output](../build-logs/20261105T104159.651514Z-f59e181ba3.raw.log)
+
+### 2026-11-05T18:46:45+08:00 · analysis-workspace-ctest · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 120.775s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: 0.9.1 analysis UI, language and model integration; no physical audio or quality claim
+- Source SHA-256: `85a83842379a3c622b84598f96efe2e53bedb08a1c703171bb2a9e5dd24ef9e7`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T104645.093782Z-ae1748427c.json) · [Raw log](../build-logs/20261105T104645.093782Z-ae1748427c.log)
+- [Exact process output](../build-logs/20261105T104645.093782Z-ae1748427c.raw.log)
+
+### 2026-11-05T18:49:17+08:00 · analysis-workspace-e2e · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 60.758s.
+- Command: `C:\Python314\python.exe tests/AudioAnalysisEndToEnd.py --exe E:/emusician-analysis-build/bin/Release/E-musician.exe --six-stems`
+- Context: 0.9.1 analysis UI, language and model integration; no physical audio or quality claim
+- Source SHA-256: `85a83842379a3c622b84598f96efe2e53bedb08a1c703171bb2a9e5dd24ef9e7`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T104917.549319Z-17a2eace8e.json) · [Raw log](../build-logs/20261105T104917.549319Z-17a2eace8e.log)
+- [Exact process output](../build-logs/20261105T104917.549319Z-17a2eace8e.raw.log)
+
+### 2026-11-05T18:53:22+08:00 · test-agent-analysis-readback · succeeded
+
+- Config: Python unit tests; no native process or model inference; exit code: 0; elapsed: 15.138s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_analysis.py -v`
+- Context: Fix confirmed six-stem import readback count and role integrity; regression tests plus integration CLI parse. Concurrent root native E2E, not a repository source freeze.
+- Source SHA-256: `f58b075d0a5bef535899599382ad368ac41cf2058d02a1c07f5e75e6e2ec7b5d`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T105322.093521Z-058c4d2a18.json) · [Raw log](../build-logs/20261105T105322.093521Z-058c4d2a18.log)
+- [Exact process output](../build-logs/20261105T105322.093521Z-058c4d2a18.raw.log)
+
+### 2026-11-05T18:53:37+08:00 · test-agent-analysis-readback · succeeded
+
+- Config: Python unit tests; no native process or model inference; exit code: 0; elapsed: 49.639s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_runtime.py -v`
+- Context: Fix confirmed six-stem import readback count and role integrity; regression tests plus integration CLI parse. Concurrent root native E2E, not a repository source freeze.
+- Source SHA-256: `f58b075d0a5bef535899599382ad368ac41cf2058d02a1c07f5e75e6e2ec7b5d`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T105337.678180Z-e169508d50.json) · [Raw log](../build-logs/20261105T105337.678180Z-e169508d50.log)
+- [Exact process output](../build-logs/20261105T105337.678180Z-e169508d50.raw.log)
+
+### 2026-11-05T18:54:27+08:00 · test-agent-analysis-readback · succeeded
+
+- Config: Python unit tests; no native process or model inference; exit code: 0; elapsed: 1.930s.
+- Command: `C:\Python314\python.exe tests/MusicAgentAnalysisIntegration.py --help`
+- Context: Fix confirmed six-stem import readback count and role integrity; regression tests plus integration CLI parse. Concurrent root native E2E, not a repository source freeze.
+- Source SHA-256: `f58b075d0a5bef535899599382ad368ac41cf2058d02a1c07f5e75e6e2ec7b5d`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T105427.750042Z-ba05eb3eab.json) · [Raw log](../build-logs/20261105T105427.750042Z-ba05eb3eab.log)
+- [Exact process output](../build-logs/20261105T105427.750042Z-ba05eb3eab.raw.log)
+
+### 2026-11-05T18:54:45+08:00 · analysis-workspace-agent-e2e · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 51.987s.
+- Command: `C:\Python314\python.exe tests/MusicAgentAnalysisIntegration.py --exe E:/emusician-analysis-build/bin/Release/E-musician.exe --six-stems`
+- Context: 0.9.1 analysis UI, language and model integration; no physical audio or quality claim
+- Source SHA-256: `f58b075d0a5bef535899599382ad368ac41cf2058d02a1c07f5e75e6e2ec7b5d`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T105445.111267Z-f2416f8e6f.json) · [Raw log](../build-logs/20261105T105445.111267Z-f2416f8e6f.log)
+- [Exact process output](../build-logs/20261105T105445.111267Z-f2416f8e6f.raw.log)
+
+### 2026-11-05T18:54:54+08:00 · analysis-workspace-agent · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 106.876s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: 0.9.1 analysis UI, language and model integration; no physical audio or quality claim
+- Source SHA-256: `f58b075d0a5bef535899599382ad368ac41cf2058d02a1c07f5e75e6e2ec7b5d`; Git HEAD: `f0d95b3254468f37da80a77fb79c5ba40cd3d90d`.
+- [Record](builds/20261105T105454.915941Z-3087c73fd3.json) · [Raw log](../build-logs/20261105T105454.915941Z-3087c73fd3.log)
+- [Exact process output](../build-logs/20261105T105454.915941Z-3087c73fd3.raw.log)
+
+### 2026-11-05 · 0.9.1 可视分析工作区最终自动验证与交付准备
+
+- 实现独立和弦轨/来源切换/编辑跳转、图形分析下栏、Options、小窗口布局、显式轨道改名及双击/F2/右键入口；Settings English/简体中文保留用户音乐与 Agent 草稿。真实四/六轨、Quality、转录音域和扩展和弦模板复用同一工程命令；没有新实时推理或读盘。
+- 原生最终构建 104159-f59e181ba3 成功，CTest 104645-ae1748427c 为 10/10；真实六轨/转录/扩展和弦原生整链 104917-17a2eace8e 为 9/9。Agent 最终 105454-3087c73fd3 为 275/275；真实最终 DAW + 本地和弦/六轨 + 模拟语言模型 105445-f2416f8e6f 为 12/12。受保护工程/设置 hash 未变。Worker 和网页各阶段证据见本轮 RESULTS。
+- 修复链保留：初次 JUCE F2/StringArray 编译失败；初次截图中文字面量被 ASCII 解码；真实六轨导入被旧 analysisRole 校验拒绝；Agent 计划和最终回读残留四轨假设。每次构建/测试原始失败与时间日志保留，未将失败覆盖为通过。上游 pwsh.exe 提示仍在原日志，MSBuild 实际退出 0。
+- 最终 EXE SHA256 a91c63949e1cc41cd7a6496f31db67477c3efd663fefee76a0947614135e04dc。原生构建/CTest/E2E 整仓指纹85a83842…；其后仅Agent runtime与两个测试文件改变，最终190输入f58b075d…，最终Agent验证全程冻结，其他已测原生/Worker/网页逐文件匹配。VERIFICATION.json保留完整映射。
+- 实际原生截图已检查英文/中文最小工作区、和弦、MIDI和空面板；预览为标明 synthetic 的夹具，真实模型另测。旧0.8.1独立EXE与0.8.1/0.9.0归档逐项hash复核通过。原先两条0805启动记录和日志保留。
+- 已创建0.9.1明确启动入口，工作区launch名称同步，计划/架构/ADR/API/上下文/人工短测更新。分支feature/analysis-workspace-v091，保持main不变；本地归档与Git同步在收尾进行。
+- 待用户人工确认实际鼠标/DPI、ASIO共存、短音乐听感及真实聊天模型意图理解。无付费API调用，无computer-use；常用和弦模板不是爵士训练模型，六轨分离不保证钢琴/吉他纯净，未接受候选不随工程恢复。

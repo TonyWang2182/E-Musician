@@ -1,4 +1,5 @@
 #include "NativeDevicePanel.h"
+#include "UiLanguage.h"
 #include "SampleWaveform.h"
 #include "DeviceControlStyle.h"
 #include <juce_cryptography/juce_cryptography.h>
@@ -84,10 +85,11 @@ struct NativeDevicePanel::Impl {
     Impl(NativeDevicePanel& component, EngineSession& engine, juce::String target, std::function<void(const juce::Result&)> callback)
         : owner(component), session(engine), trackId(std::move(target)), report(std::move(callback)), envelope(*this) {
         for (auto* c : std::initializer_list<juce::Component*>{ &title, &kind, &add, &sampleName, &choose, &clear, &preview, &stopPreview, &padGain, &padMute, &root, &start, &end, &apply, &attack, &release, &playbackMode, &status, &waveform, &envelope }) owner.addAndMakeVisible(c);
+        for (auto* button : { &add, &choose, &clear, &preview, &stopPreview, &padMute, &apply, &playbackMode }) uiButton(*button, button->getButtonText());
         title.setFont(mono(15)); sampleName.setFont(mono(13)); status.setFont(mono(12));
         status.setColour(juce::Label::textColourId, quiet);
         sampleName.setColour(juce::Label::textColourId, quiet);
-        kind.addItem("sampler", 1); kind.addItem("drum rack / 16 pads", 2); kind.setSelectedId(1, juce::dontSendNotification);
+        uiComboItem(kind, 1, "sampler"); uiComboItem(kind, 2, "drum rack / 16 pads"); kind.setSelectedId(1, juce::dontSendNotification);
         add.onClick = [this] { run("add_native_instrument", object({ {"track_id", trackId}, {"type", kind.getSelectedId() == 2 ? "drum_rack" : "sampler"} })); };
         for (int i = 0; i < int(pads.size()); ++i) {
             owner.addAndMakeVisible(pads[size_t(i)]);
@@ -271,8 +273,8 @@ struct NativeDevicePanel::Impl {
         padGain.setValue(p.hasProperty("gain_db") ? double(p["gain_db"]) : 0.0, juce::dontSendNotification);
         attack.setValue(p.hasProperty("attack_ms") ? double(p["attack_ms"]) : 3.0, juce::dontSendNotification);
         release.setValue(p.hasProperty("release_ms") ? double(p["release_ms"]) : 30.0, juce::dontSendNotification);
-        playbackMode.setButtonText(oneShot() ? "one-shot" : "gate"); envelope.repaint();
-        padMute.setButtonText(currentMuted() ? "unmute" : "mute");
+        uiButton(playbackMode, oneShot() ? "one-shot" : "gate"); envelope.repaint();
+        uiButton(padMute, currentMuted() ? "unmute" : "mute");
         root.setValue(data.hasProperty("root_note") ? int(data["root_note"]) : 60, juce::dontSendNotification);
         start.setValue(data.hasProperty("start") ? double(data["start"]) : 0.0, juce::dontSendNotification);
         end.setValue(data.hasProperty("end") ? double(data["end"]) : 1.0, juce::dontSendNotification);
@@ -488,13 +490,14 @@ void NativeDevicePanel::paint(juce::Graphics& g) {
     g.fillAll(paper); g.setColour(rule); g.drawHorizontalLine(30, 12, float(getWidth() - 12));
     g.setColour(quiet); g.setFont(mono(11));
     const auto label = [&](const juce::Slider& control, const char* name) {
-        if (control.isVisible()) g.drawText(name, control.getX(), control.getY() - 15, control.getWidth(), 14, juce::Justification::centred);
+        if (control.isVisible()) g.drawText(uiText(name), control.getX(), control.getY() - 15, control.getWidth(), 14, juce::Justification::centred);
     };
     label(impl->root, "root / MIDI"); label(impl->start, "start / 0..1"); label(impl->end, "end / 0..1");
     label(impl->padGain, "gain"); label(impl->attack, "attack"); label(impl->release, "release");
 }
 void NativeDevicePanel::resized() {
     if (!impl) return;
+    refreshUiButtons(*this);
     const int w = getWidth(), h = getHeight(), left = 12;
     const bool compactHeight = h < 250;
     impl->title.setBounds(left, 3, juce::jmax(80, w - 320), 25);

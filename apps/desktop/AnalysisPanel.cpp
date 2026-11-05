@@ -1,4 +1,5 @@
 #include "AnalysisPanel.h"
+#include "UiLanguage.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -18,6 +19,55 @@ bool succeeded(const juce::var& reply) {
 bool terminal(const juce::String& state) {
     return state == "ready" || state == "applied" || state == "failed" || state == "cancelled" || state == "stale";
 }
+juce::String modeName(const juce::String& kind) {
+    return kind == "separate" ? uiText("Separate", "音源分离") : kind == "transcribe" ? uiText("Audio to MIDI", "转 MIDI") : uiText("Chords", "和弦");
+}
+juce::String chordName(const juce::String& label) {
+    if(label == "N") return "-";
+    const auto root = label.upToFirstOccurrenceOf(":", false, false), quality = label.fromFirstOccurrenceOf(":", false, false);
+    return root + (quality == "maj" ? "" : quality == "min" ? "m" : quality == "min7" ? "m7" : quality == "hdim7" ? "m7b5" : quality);
+}
+struct AnalysisCanvas final : juce::Component {
+    std::function<void(juce::Graphics&,juce::Rectangle<int>)> draw;
+    std::function<void(juce::Point<float>)> select;
+    void paint(juce::Graphics& g) override { if(draw) draw(g,getLocalBounds()); }
+    void mouseDown(const juce::MouseEvent& e) override { if(select) select(e.position); }
+};
+class AnalysisOptions final : public juce::Component {
+public:
+    using Changed=std::function<void(const juce::String&,const juce::String&,double,double)>;
+    AnalysisOptions(const juce::String& begin,const juce::String& duration,double onset,double minimum,bool notes,Changed changed)
+        : notify(std::move(changed)) {
+        for(auto* c:std::initializer_list<juce::Component*>{&startLabel,&lengthLabel,&thresholdLabel,&minimumLabel,&from,&length,&threshold,&minimumNote,&done})addAndMakeVisible(c);
+        startLabel.setText(uiText("Start / s", "起点 / 秒"),juce::dontSendNotification);
+        lengthLabel.setText(uiText("Length / s", "长度 / 秒"),juce::dontSendNotification);
+        thresholdLabel.setText(uiText("Threshold", "阈值"),juce::dontSendNotification);minimumLabel.setText(uiText("Min note / ms", "最短音符 / ms"),juce::dontSendNotification);
+        for(auto* label:{&startLabel,&lengthLabel,&thresholdLabel,&minimumLabel}){label->setFont(mono(12));label->setColour(juce::Label::textColourId,ink);}
+        for(auto* field:{&from,&length}){field->setFont(mono(12));field->setInputRestrictions(16,"0123456789.");field->setSelectAllWhenFocused(true);
+            field->setColour(juce::TextEditor::backgroundColourId,paper);field->setColour(juce::TextEditor::textColourId,ink);field->setColour(juce::TextEditor::outlineColourId,rule);}
+        from.setText(begin,false);length.setText(duration,false);
+        threshold.setRange(.05,.95,.01);threshold.setValue(onset,juce::dontSendNotification);
+        minimumNote.setRange(20,1000,10);minimumNote.setValue(minimum,juce::dontSendNotification);
+        for(auto* slider:{&threshold,&minimumNote}){slider->setSliderStyle(juce::Slider::LinearHorizontal);slider->setTextBoxStyle(juce::Slider::TextBoxRight,false,50,24);slider->setScrollWheelEnabled(false);}
+        const auto update=[this]{if(notify)notify(from.getText(),length.getText(),threshold.getValue(),minimumNote.getValue());};
+        from.onTextChange=update;length.onTextChange=update;threshold.onValueChange=update;minimumNote.onValueChange=update;
+        done.setButtonText(uiText("Done", "完成"));done.onClick=[this]{if(auto* box=findParentComponentOfClass<juce::CallOutBox>())box->dismiss();};
+        thresholdLabel.setVisible(notes);threshold.setVisible(notes);minimumLabel.setVisible(notes);minimumNote.setVisible(notes);
+        setSize(310,notes?204:132);
+    }
+    void paint(juce::Graphics& g)override{g.fillAll(paper);}
+    void resized()override{
+        startLabel.setBounds(8,10,110,28);from.setBounds(120,10,180,28);
+        lengthLabel.setBounds(8,46,110,28);length.setBounds(120,46,180,28);
+        thresholdLabel.setBounds(8,82,110,28);threshold.setBounds(120,82,180,28);
+        minimumLabel.setBounds(8,118,110,28);minimumNote.setBounds(120,118,180,28);
+        done.setBounds(218,getHeight()-40,82,28);
+    }
+private:
+    Changed notify;
+    juce::Label startLabel,lengthLabel,thresholdLabel,minimumLabel;
+    juce::TextEditor from,length;juce::Slider threshold,minimumNote;juce::TextButton done;
+};
 }
 
 struct AnalysisPanel::Impl final : juce::ListBoxModel {
@@ -28,7 +78,29 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
                  &separate, &transcribe, &chords, &source, &from, &length, &start, &cancel, &availability,
                  &threshold, &minimumNote, &thresholdLabel, &minimumLabel, &jobs, &status, &progress,
                  &results, &emptyResults, &previous, &next, &page, &play, &stop, &accept, &guidance,
-                 &showSaved, &chordLabel, &chordStart, &chordEnd, &updateChord, &correctionHelp }) owner.addAndMakeVisible(control);
+                 &showSaved, &chordLabel, &chordStart, &chordEnd, &updateChord, &correctionHelp,
+                 &canvas, &stemCount, &quality, &instrument, &vocabulary, &options }) owner.addAndMakeVisible(control);
+        canvas.draw = [this](auto& g, auto bounds) { paintTimeline(g,bounds); };
+        canvas.select = [this](auto point) { for(int i=int(hitRegions.size())-1;i>=0;--i) if(hitRegions[size_t(i)].contains(point)) { results.selectRow(i); canvas.repaint(); return; } };
+        stemCount.addItem("4",4); stemCount.addItem("6",6); stemCount.setSelectedId(4,juce::dontSendNotification);
+        quality.addItem("Fast",1); quality.addItem("Quality",2); quality.setSelectedId(1,juce::dontSendNotification);
+        int instrumentId=1; for(const auto* label:{"Auto","Piano","Bass","Guitar","Vocals"}) instrument.addItem(label,instrumentId++);
+        instrument.setSelectedId(1,juce::dontSendNotification);
+        vocabulary.addItem("Common chords",1); vocabulary.addItem("Major / minor",2); vocabulary.setSelectedId(1,juce::dontSendNotification);
+        options.onClick=[this]{
+            auto content=std::make_unique<AnalysisOptions>(from.getText(),length.getText(),threshold.getValue(),minimumNote.getValue(),kind=="transcribe",
+                [safe=juce::Component::SafePointer<AnalysisPanel>(&owner),sourceId=clipId,project=projectId](const auto& begin,const auto& duration,double onset,double minimum){
+                    if(!safe||safe->impl->clipId!=sourceId||safe->impl->projectId!=project)return;
+                    auto& p=*safe->impl;p.from.setText(begin,false);p.length.setText(duration,false);
+                    p.threshold.setValue(onset,juce::dontSendNotification);p.minimumNote.setValue(minimum,juce::dontSendNotification);
+                });
+            auto* parent=owner.getTopLevelComponent();
+            juce::CallOutBox::launchAsynchronously(std::move(content),parent->getLocalArea(&options,options.getLocalBounds()),parent).setDismissalMouseClicksAreAlwaysConsumed(true);
+        };
+        stemCount.onChange=[this]{applyCapabilities();};
+        stemCount.setTooltip(uiText("Number of separated tracks", "分离轨道数量"));
+        quality.setTooltip(uiText("Quality takes longer; the original audio stays unchanged.", "高质量模式耗时更长，原音频保持不变。"));
+        instrument.setTooltip(uiText("Choose the instrument to limit the detected note range.", "选择乐器，限制识别音域。"));
         for (auto* button : { &separate, &transcribe, &chords }) button->getProperties().set("flat", true);
         separate.onClick = [this] { chooseMode("separate"); };
         transcribe.onClick = [this] { chooseMode("transcribe"); };
@@ -98,13 +170,16 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         accept.onClick = [this] { acceptResult(); };
         accept.setTooltip("Import the whole candidate with one Undo step. Original clips remain unchanged. Save as a new project to keep a 0.8.1 copy.");
         showSaved.onClick = [this] {
-            savedView = !savedView; pageOffset = 0; results.deselectAllRows(); fetchPage();
+            savedView = !savedView; savedAnalysisId.clear(); pageOffset = 0; results.deselectAllRows(); fetchPage();
         };
-        showSaved.setTooltip("Show saved chords for the selected audio clip, or all project chords when no audio clip is selected. Select a row to correct its label or timing.");
+        showSaved.setTooltip(uiText("Open the latest chord track. Double-click any chord in the arrangement to edit it.", "打开最新和弦轨；双击编曲区中的和弦可编辑。"));
         static const char* roots[] { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
         int option = 1;
         chordLabel.addItem("N", option++);
-        for (const auto* root : roots) { chordLabel.addItem(juce::String(root) + ":maj", option++); chordLabel.addItem(juce::String(root) + ":min", option++); }
+        for (const auto* root : roots) for(const auto* type:{"maj","min","7","maj7","min7","dim","aug","sus2","sus4","hdim7","dim7"}) {
+            const auto canonical=juce::String(root)+":"+type; chordValues.add(canonical); chordLabel.addItem(chordName(canonical),option++);
+        }
+        chordValues.insert(0,"N");
         chordLabel.setTextWhenNothingSelected("label"); chordLabel.setName("Chord label");
         chordStart.setName("Chord start, timeline seconds"); chordEnd.setName("Chord end, timeline seconds");
         chordStart.setTooltip("Start in absolute project timeline seconds."); chordEnd.setTooltip("End in absolute project timeline seconds.");
@@ -133,7 +208,7 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         separate.setToggleState(kind == "separate", juce::dontSendNotification);
         transcribe.setToggleState(kind == "transcribe", juce::dontSendNotification);
         chords.setToggleState(kind == "chords", juce::dontSendNotification);
-        if (savedView && kind != "chords") { savedView = false; pageOffset = 0; fetchPage(); }
+        if (savedView && kind != "chords") { savedView = false; savedAnalysisId.clear(); pageOffset = 0; fetchPage(); }
         applyCapabilities(); owner.resized(); owner.repaint();
     }
     void setRange(double begin, double duration) {
@@ -144,8 +219,9 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
     void refresh() {
         const auto snapshot = session.snapshot();
         if (snapshot.projectId != projectId) {
+            savedAnalysisId.clear();
             if (previewing) { request("stop_analysis_preview", object({})); previewing = false; previewJobId.clear(); }
-            projectId = snapshot.projectId; jobId.clear(); resultId.clear(); items.clear(); jobState.clear();
+            projectId = snapshot.projectId; jobId.clear(); displayJobId.clear(); resultId.clear(); items.clear(); jobState.clear();
             savedView = false; pageOffset = total = 0; results.updateContent(); error.clear();
             applied = presentInProject = resultStale = resultLoaded = false;
             resultCheckedRevision = std::numeric_limits<std::uint64_t>::max();
@@ -162,17 +238,17 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
             setRange(0.0, clipDuration);
             if (savedView) { pageOffset = 0; fetchPage(); }
         } else if (selected) { clipDuration = selected->duration; clipTimelineStart = selected->timelineStart; }
-        source.setText(clipId.isEmpty() ? "Select one audio clip" : selectedName + " / " + (selected ? selected->source.getFileName() : juce::String()), juce::dontSendNotification);
+        source.setText(clipId.isEmpty() ? uiText("Select one audio clip", "选择一个音频片段") : selectedName, juce::dontSendNotification);
         source.setTooltip(source.getText());
         recording = snapshot.recording || snapshot.recordingFinalizing;
         juce::StringArray nextIds, names;
-        for (const auto& job : snapshot.jobs) if (job.kind.startsWith("analysis.") && job.kind != "analysis.preview") {
-            nextIds.add(job.id); names.add(job.kind.fromFirstOccurrenceOf(".", false, false) + " / " + job.status + " / " + job.id.substring(0, 6));
+        for (const auto& job : snapshot.jobs) if (job.kind=="analysis.separate"||job.kind=="analysis.transcribe"||job.kind=="analysis.chords") {
+            nextIds.add(job.id); names.add(modeName(job.kind.fromFirstOccurrenceOf(".", false, false)) + " " + juce::String(nextIds.size()));
         }
         if (nextIds != jobIds || names != jobNames) {
             jobIds = nextIds; jobNames = names; jobs.clear(juce::dontSendNotification);
             for (int i = 0; i < jobIds.size(); ++i) jobs.addItem(jobNames[i], i + 1);
-            jobs.setSelectedId(jobIds.indexOf(jobId) + 1, juce::dontSendNotification);
+            jobs.setSelectedId(jobIds.indexOf(displayJobId) + 1, juce::dontSendNotification);
         }
         if (--capabilityCountdown <= 0) {
             const auto reply = request("get_analysis_capabilities", object({}));
@@ -180,8 +256,9 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
             capabilityCountdown = 12;
         }
         applyCapabilities();
-        if (jobId.isNotEmpty()) refreshJob();
-        else if (error.isEmpty()) status.setText("Choose a source, then run analysis.", juce::dontSendNotification);
+        if(savedView)status.setText(uiText("Chord track", "和弦轨"),juce::dontSendNotification);
+        else if (jobId.isNotEmpty()) refreshJob();
+        else if (error.isEmpty()) status.setText(uiText("Ready", "就绪"), juce::dontSendNotification);
         if (previewing && previewJobId.isNotEmpty()) {
             const auto reply = request("get_job", object({ {"job_id", previewJobId} }));
             if (!succeeded(reply)) { check(reply); previewing = false; previewJobId.clear(); }
@@ -191,7 +268,7 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
                 else if (preparationStatus.toString() == "failed" || preparationStatus.toString() == "cancelled") {
                     error = preparation["error"].toString(); status.setText(error.isEmpty() ? "Stem preview cancelled." : error, juce::dontSendNotification);
                     status.setTooltip(error); previewing = false; previewJobId.clear();
-                } else { status.setText(jobState + " / preparing stem preview", juce::dontSendNotification); }
+                } else { status.setText(uiText("Preparing preview…", "准备试听…"), juce::dontSendNotification); }
             }
         }
         if (previewing && previewJobId.isEmpty()) {
@@ -203,58 +280,110 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
                     error = preview["detail"].toString(); status.setText(error, juce::dontSendNotification); status.setTooltip(error);
                     previewing = false;
                 } else if (phase == "completed" || phase == "stopped") previewing = false;
-                else { status.setText(jobState + " / preview " + phase, juce::dontSendNotification); status.setTooltip(preview["detail"].toString()); }
+                else { status.setText(uiText("Listening", "试听中"), juce::dontSendNotification); status.setTooltip(preview["detail"].toString()); }
             } else { check(reply); previewing = false; }
         }
         if (savedView && savedRevision != revision && !chordStart.hasKeyboardFocus(true)
             && !chordEnd.hasKeyboardFocus(true) && !chordLabel.hasKeyboardFocus(true) && !chordLabel.isPopupActive()) fetchPage();
         updateControls();
     }
+    void applyLanguage() {
+        if(languageRevision==uiLanguageRevision())return;
+        languageRevision=uiLanguageRevision();
+        const int qualityId=quality.getSelectedId(),instrumentId=instrument.getSelectedId(),vocabularyId=vocabulary.getSelectedId();
+        separate.setButtonText(modeName("separate")); transcribe.setButtonText(modeName("transcribe")); chords.setButtonText(modeName("chords"));
+        start.setButtonText(uiText("Analyze", "分析"));cancel.setButtonText(uiText("Cancel", "取消"));
+        play.setButtonText(uiText("Listen", "试听"));stop.setButtonText(uiText("Stop", "停止"));
+        showSaved.setButtonText(uiText("Chord track", "和弦轨"));updateChord.setButtonText(uiText("Apply", "应用"));
+        thresholdLabel.setText(uiText("Threshold", "阈值"),juce::dontSendNotification);
+        minimumLabel.setText(uiText("Min / ms", "最短 / ms"),juce::dontSendNotification);
+        quality.changeItemText(1,uiText("Fast", "快速"));quality.changeItemText(2,uiText("Quality", "高质量"));
+        instrument.changeItemText(1,uiText("Auto", "自动"));instrument.changeItemText(2,uiText("Piano", "钢琴"));
+        instrument.changeItemText(3,uiText("Bass", "贝斯"));instrument.changeItemText(4,uiText("Guitar", "吉他"));instrument.changeItemText(5,uiText("Vocals", "人声"));
+        vocabulary.changeItemText(1,uiText("Common chords", "常用和弦"));vocabulary.changeItemText(2,uiText("Major / minor", "大 / 小三和弦"));
+        quality.setSelectedId(qualityId,juce::dontSendNotification);instrument.setSelectedId(instrumentId,juce::dontSendNotification);vocabulary.setSelectedId(vocabularyId,juce::dontSendNotification);
+        jobs.setTextWhenNothingSelected(uiText("Recent analyses", "最近分析"));
+        correctionHelp.setText(uiText("Chord    Start / s    End / s", "和弦    起点 / 秒    终点 / 秒"),juce::dontSendNotification);
+    }
     void applyCapabilities() {
-        available = false; juce::String modelDetail = "Analysis worker is not ready.";
-        if (const auto* providers = capabilities["providers"].getArray()) for (const auto& provider : *providers) {
-            if (provider["kind"].toString() != kind) continue;
-            available = bool(provider["available"]);
-            modelDetail = provider["model_id"].toString();
-            const auto reason = provider.getProperty("reason", provider["detail"]).toString();
-            if (reason.isNotEmpty()) modelDetail += (modelDetail.isEmpty() ? "" : "\n") + reason;
-            if (modelDetail.isEmpty()) modelDetail = available ? "Local model ready." : "Model not installed.";
-        }
-        availability.setText(modelDetail, juce::dontSendNotification); availability.setTooltip(modelDetail);
-        guidance.setText(kind == "separate" ? "4 stems: vocals / drums / bass / other. Original audio stays in place."
-            : kind == "transcribe" ? "Pitched notes only; no drums or pitch bends. Import, add an instrument, then edit in the piano roll."
-            : "Major / minor / N baseline. Scores are not probabilities. Import labels, then correct below.", juce::dontSendNotification);
-        guidance.setTooltip(guidance.getText());
+        applyLanguage(); available=false;
+        const auto providerList=capabilities.getProperty("providers",juce::Array<juce::var>());
+        if(const auto* list=providerList.getArray())for(const auto& provider:*list)
+            if(provider["kind"].toString()==kind)available=bool(provider["available"]);
+        if(kind=="separate"&&stemCount.getSelectedId()==6)available=bool(capabilities["separation_six_stems"]);
+        availability.setText(available ? juce::String() : uiText("Model unavailable", "模型未就绪"),juce::dontSendNotification);
+        guidance.setText({},juce::dontSendNotification);
         updateControls();
     }
     void updateControls() {
-        const bool busy = jobId.isNotEmpty() && !terminal(jobState);
-        start.setEnabled(available && clipId.isNotEmpty() && !busy && !recording);
-        cancel.setEnabled(busy && jobState != "applying");
-        const bool ready = resultLoaded && terminal(jobState) && resultId.isNotEmpty() && !savedView;
-        accept.setEnabled(ready && total > 0 && !recording && !applied && !resultStale);
-        accept.setButtonText(applied ? (presentInProject ? "imported" : "undone") : "import result");
-        accept.setTooltip(applied && !presentInProject ? "This import was undone. Use Redo to restore it; the same result cannot be imported twice."
-            : resultStale ? "The source clip or tempo changed. Run a new analysis before importing."
-            : "Import the whole candidate with one Undo step. Original clips remain unchanged. Save as a new project to keep a 0.8.1 copy.");
-        from.setEnabled(!busy); length.setEnabled(!busy);
-        threshold.setEnabled(!busy); minimumNote.setEnabled(!busy);
-        threshold.setVisible(kind == "transcribe"); minimumNote.setVisible(kind == "transcribe");
-        thresholdLabel.setVisible(kind == "transcribe"); minimumLabel.setVisible(kind == "transcribe");
-        const bool canPreview = bool(capabilities["preview_stems"]) && resultKind == "separate" && !savedView && resultId.isNotEmpty() && !resultStale;
-        play.setVisible(resultKind == "separate" && !savedView); stop.setVisible(resultKind == "separate" && !savedView);
-        play.setEnabled(canPreview && results.getSelectedRow() >= 0); stop.setEnabled(canPreview);
-        showSaved.setVisible(kind == "chords"); showSaved.setEnabled(true);
-        showSaved.setToggleState(savedView, juce::dontSendNotification);
-        for (juce::Component* c : std::initializer_list<juce::Component*> { &chordLabel, &chordStart, &chordEnd, &updateChord, &correctionHelp }) c->setVisible(savedView);
-        updateChord.setEnabled(savedView && selectedChordId.isNotEmpty() && !recording);
-        emptyResults.setText(savedView ? (clipId.isEmpty() ? "No saved chord regions in this project." : "No saved chord regions for this clip.") : jobState == "ready" ? "No events detected in this range."
-            : "Results appear here. Your project changes only after Import.", juce::dontSendNotification);
+        applyLanguage();
+        const bool busy=jobId.isNotEmpty()&&!terminal(jobState);
+        start.setEnabled(available&&clipId.isNotEmpty()&&!busy&&!recording);
+        cancel.setEnabled(busy&&jobState!="applying");cancel.setVisible(busy);
+        const bool ready=resultLoaded&&terminal(jobState)&&resultId.isNotEmpty()&&!savedView;
+        accept.setEnabled(ready&&total>0&&!recording&&!applied&&!resultStale);
+        accept.setButtonText(applied ? (presentInProject?uiText("Added", "已添加"):uiText("Undone", "已撤销"))
+            : resultKind=="transcribe"?uiText("Add MIDI track", "添加 MIDI 轨")
+            : resultKind=="chords"?uiText("Add chord track", "添加和弦轨"):uiText("Add tracks", "添加轨道"));
+        accept.setVisible(!savedView);
+        accept.setTooltip(resultStale?uiText("Source changed. Analyze again.", "来源已改变，请重新分析。")
+            :uiText("Add the result to the arrangement. Undo removes this import.", "将结果添加到编曲区；可一次撤销。"));
+        for(juce::Component* c:std::initializer_list<juce::Component*>{&from,&length,&threshold,&minimumNote,&stemCount,&quality,&instrument,&vocabulary})c->setEnabled(!busy);
+        const bool canPreview=bool(capabilities["preview_stems"])&&resultKind=="separate"&&!savedView&&!resultId.isEmpty()&&!resultStale;
+        play.setVisible(canPreview);stop.setVisible(canPreview);play.setEnabled(canPreview&&results.getSelectedRow()>=0);stop.setEnabled(canPreview&&previewing);
+        showSaved.setVisible(kind=="chords");showSaved.setToggleState(savedView,juce::dontSendNotification);
+        updateChord.setEnabled(savedView&&!selectedChordId.isEmpty()&&!recording);
+        emptyResults.setText(savedView?uiText("No chords yet", "暂无和弦")
+            :jobState=="ready"?uiText("No notes or chords found", "未检测到音符或和弦")
+            :busy?uiText("Analyzing…", "正在分析…"):uiText("Select audio, then Analyze", "选择音频，然后点击分析"),juce::dontSendNotification);
         emptyResults.setVisible(items.empty());
-        previous.setEnabled(pageOffset > 0); next.setEnabled(pageOffset + int(items.size()) < total);
-        page.setText(total > 0 ? juce::String(pageOffset + 1) + "-" + juce::String(pageOffset + int(items.size())) + " / " + juce::String(total) : "0 items", juce::dontSendNotification);
-        owner.resized();
+        if(items.empty())emptyResults.toFront(false);
+        previous.setEnabled(pageOffset>0);next.setEnabled(pageOffset+int(items.size())<total);
+        previous.setVisible(total>pageSize);next.setVisible(total>pageSize);
+        page.setText(total>pageSize?juce::String(pageOffset+1)+"-"+juce::String(pageOffset+int(items.size()))+" / "+juce::String(total)
+            :total>0?juce::String(total)+" "+(resultKind=="separate"?uiText("tracks", "轨道"):resultKind=="transcribe"?uiText("notes", "音符"):uiText("chords", "和弦")):juce::String(),juce::dontSendNotification);
+        options.setButtonText(uiText("Options", "选项"));options.setEnabled(!busy&&!recording);
+        results.setRowHeight(resultKind=="separate"?44:28);
+        results.setVisible(resultKind=="separate");canvas.setVisible(resultKind!="separate");
+        progress.setVisible(busy);guidance.setVisible(false);correctionHelp.setVisible(false);
+        owner.resized();canvas.repaint();
     }
+    juce::Rectangle<float> plotBounds(juce::Rectangle<int> bounds)const {
+        return bounds.toFloat().withTrimmedLeft(resultKind=="transcribe"?35.f:6.f).withTrimmedTop(22.f).withTrimmedBottom(4.f).withTrimmedRight(6.f);
+    }
+    void paintTimeline(juce::Graphics& g,juce::Rectangle<int> bounds) {
+        g.fillAll(paper);hitRegions.clear();
+        if(items.empty())return;
+        double first=std::numeric_limits<double>::max(),last=0;
+        int low=127,high=0;
+        for(const auto& item:items){const double a=double(item["start_seconds"]),b=resultKind=="transcribe"?a+double(item["duration_seconds"]):double(item["end_seconds"]);
+            first=juce::jmin(first,a);last=juce::jmax(last,b);if(resultKind=="transcribe"){low=juce::jmin(low,int(item["pitch"]));high=juce::jmax(high,int(item["pitch"]));}}
+        const auto plot=plotBounds(bounds);if(plot.getWidth()<1||plot.getHeight()<1)return;
+        last=juce::jmax(first+.001,last);const auto x=[&](double t){return plot.getX()+float((t-first)/(last-first))*plot.getWidth();};
+        g.setFont(mono(10));g.setColour(secondary);
+        for(int i=0;i<=4;++i){const double t=first+(last-first)*i/4.;const float px=x(t);
+            const int labelX=juce::jlimit(0,juce::jmax(0,bounds.getWidth()-64),int(px)-(i==4?58:i==0?0:30));
+            g.drawText(juce::String(t,2)+" s",labelX,0,64,18,juce::Justification::centredLeft);
+            g.setColour(rule.withAlpha(.6f));g.drawVerticalLine(int(px),plot.getY(),plot.getBottom());g.setColour(secondary);}
+        if(resultKind=="transcribe"){
+            low=juce::jmax(0,low-1);high=juce::jmin(127,juce::jmax(low+6,high+1));
+            const float row=plot.getHeight()/float(high-low+1);
+            for(int pitch=low;pitch<=high;++pitch){const float y=plot.getBottom()-(pitch-low+1)*row;
+                const int pc=pitch%12;const bool black=pc==1||pc==3||pc==6||pc==8||pc==10;
+                g.setColour(black?rule.withAlpha(.17f):paper);g.fillRect(plot.getX(),y,plot.getWidth(),row);
+                if(pitch%12==0){g.setColour(secondary);g.drawText(juce::MidiMessage::getMidiNoteName(pitch,true,true,4),0,int(y),32,juce::jmax(12,int(row)),juce::Justification::centredRight);}}
+            for(size_t i=0;i<items.size();++i){const auto& n=items[i];const double a=double(n["start_seconds"]);const float y=plot.getBottom()-(int(n["pitch"])-low+1)*row;
+                const juce::Rectangle<float> rect{x(a),y,juce::jmax(1.f,x(a+double(n["duration_seconds"]))-x(a)),row};hitRegions.push_back(rect);
+                g.setColour(int(i)==results.getSelectedRow()?ink:ink.withAlpha(.55f));g.fillRect(rect);}
+        }else{
+            for(size_t i=0;i<items.size();++i){const auto& c=items[i];const juce::Rectangle<float> rect{x(double(c["start_seconds"])),plot.getY()+4.f,juce::jmax(1.f,x(double(c["end_seconds"]))-x(double(c["start_seconds"]))),juce::jmax(1.f,plot.getHeight()-8.f)};
+                hitRegions.push_back(rect);const bool selected=int(i)==results.getSelectedRow();g.setColour(selected?ink:rule.withAlpha(.25f));g.fillRect(rect);
+                g.setColour(selected?paper:ink);g.drawRect(rect,1.f);
+                if(rect.getWidth()>22)g.drawFittedText(chordName(c["label"].toString()),rect.toNearestInt().reduced(5,2),juce::Justification::centred,1);}
+        }
+        g.setColour(rule);g.drawRect(plot,1.f);
+    }
+
     void startAnalysis() {
         if (!available || clipId.isEmpty()) return;
         const auto startText = from.getText().trim(), lengthText = length.getText().trim();
@@ -268,7 +397,10 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         }
         const double maximum = double(capabilities.getProperty("max_duration_seconds", 600.0));
         if (duration > maximum) { check(object({ {"status", "invalid"}, {"error", "Choose a range no longer than " + juce::String(maximum, 0) + " seconds."} })); return; }
-        auto parameters = kind == "transcribe" ? object({ {"onset_threshold", threshold.getValue()}, {"minimum_note_ms", minimumNote.getValue()} }) : object({});
+        static const char* instruments[]{"auto","piano","bass","guitar","vocals"};
+        auto parameters = kind=="separate"?object({{"stems",stemCount.getSelectedId()},{"quality",quality.getSelectedId()==2?"quality":"fast"}})
+            :kind=="transcribe"?object({{"onset_threshold",threshold.getValue()},{"minimum_note_ms",minimumNote.getValue()},{"instrument",instruments[juce::jlimit(0,4,instrument.getSelectedId()-1)]}})
+            :object({{"vocabulary",vocabulary.getSelectedId()==2?"triads":"extended"}});
         const auto reply = request("start_analysis", object({ {"clip_id", clipId}, {"kind", kind}, {"start_seconds", begin}, {"duration_seconds", duration}, {"parameters", parameters} }));
         if (!check(reply)) return;
         error.clear(); savedView = false; applied = presentInProject = resultStale = resultLoaded = false; resultId.clear(); items.clear(); total = pageOffset = 0;
@@ -276,7 +408,7 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
     }
     void selectJob(const juce::String& id) {
         if (previewing) { request("stop_analysis_preview", object({})); previewing = false; previewJobId.clear(); }
-        jobId = id; resultId.clear(); resultKind.clear(); jobState.clear(); resultVersion.clear(); error.clear();
+        jobId = id; displayJobId=id; resultId.clear(); resultKind.clear(); jobState.clear(); resultVersion.clear(); error.clear();
         savedView = false; applied = presentInProject = resultStale = resultLoaded = false;
         resultCheckedRevision = std::numeric_limits<std::uint64_t>::max(); items.clear(); total = pageOffset = 0; results.updateContent();
         results.deselectAllRows(); refreshJob();
@@ -290,12 +422,17 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         const auto phase = job["phase"].toString(), detail = job["detail"].toString();
         progressValue = juce::jlimit(0.0, 1.0, double(job["progress"]));
         const auto failure = job["error"].toString();
-        const auto message = failure.isNotEmpty() ? failure : jobState + (phase.isNotEmpty() && phase != jobState ? " / " + phase : "") + (detail.isNotEmpty() ? "  " + detail : "");
+        const auto message=failure.isNotEmpty()?uiText("Analysis failed. Try again.", "分析失败，请重试。")
+            :jobState=="ready"?uiText("Ready to add", "可添加到编曲")
+            :jobState=="applied"?uiText("Added to arrangement", "已添加到编曲")
+            :jobState=="cancelled"?uiText("Cancelled", "已取消")
+            :jobState=="applying"?uiText("Adding tracks…", "正在添加轨道…")
+            :uiText("Analyzing…", "正在分析…")+" "+juce::String(int(progressValue*100))+"%";
         const auto jobSource = job["source"];
         auto sourceName = jobSource.getProperty("source_name", jobSource["clip_name"]).toString();
         if (sourceName.isEmpty() && jobSource["clip_id"].toString().isNotEmpty()) sourceName = "clip " + jobSource["clip_id"].toString().substring(0, 8);
         status.setText(message, juce::dontSendNotification);
-        status.setTooltip(message + (sourceName.isEmpty() ? "" : "\nTask source: " + sourceName));
+        status.setTooltip(failure.isNotEmpty()?failure:sourceName);
         const auto nextResult = job["result_id"].toString();
         if (nextResult.isNotEmpty() && resultId != nextResult) { resultId = nextResult; pageOffset = 0; resultVersion.clear(); }
         const bool hasCandidate = jobState == "ready" || jobState == "applied" || (terminal(jobState) && (resultLoaded || int(job["summary"]["total"]) > 0));
@@ -308,13 +445,13 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         }
         if (jobState == "applied") {
             applied = true;
-            if (justApplied && presentInProject && resultKind == "chords" && !savedView) { savedView = true; pageOffset = 0; fetchPage(); }
+            if (justApplied && presentInProject && resultKind == "chords" && !savedView) { savedView = true; savedAnalysisId=resultId; pageOffset = 0; fetchPage(); }
         }
         if (applied && !presentInProject) {
-            status.setText("Import undone. Use Redo to restore this result.", juce::dontSendNotification);
+            status.setText(uiText("Undone — use Redo to restore", "已撤销，可重做恢复"), juce::dontSendNotification);
             status.setTooltip("This result was imported once and then undone. Redo restores it; duplicate import is disabled.");
         } else if (resultStale && !applied) {
-            status.setText("Source or tempo changed. Run a new analysis.", juce::dontSendNotification);
+            status.setText(uiText("Source changed. Analyze again.", "来源已改变，请重新分析。"), juce::dontSendNotification);
             status.setTooltip("This candidate no longer matches its source clip or project tempo. Import and audition are disabled.");
         }
         updateControls();
@@ -325,9 +462,10 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         if (resultStale && previewing) { request("stop_analysis_preview", object({})); previewing = false; previewJobId.clear(); }
     }
     void fetchPage() {
+        const auto keepSelection=selectedChordId;
         juce::var reply;
         if (savedView) {
-            reply = request("get_chord_regions", object({ {"clip_id", clipId}, {"offset", pageOffset}, {"limit", pageSize} }));
+            reply = request("get_chord_regions", object({ {"clip_id", savedAnalysisId.isEmpty()?clipId:juce::String()}, {"analysis_id",savedAnalysisId}, {"latest_only",savedAnalysisId.isEmpty()}, {"offset", pageOffset}, {"limit", pageSize} }));
         } else {
             if (resultId.isEmpty()) { items.clear(); total = 0; results.updateContent(); updateControls(); return; }
             reply = request("get_analysis_result", object({ {"result_id", resultId}, {"offset", pageOffset}, {"limit", pageSize} }));
@@ -341,7 +479,8 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         if (!savedView) applyResultState(data);
         else savedRevision = revision;
         selectedChordId.clear(); results.deselectAllRows(); results.updateContent(); results.repaint();
-        if (!items.empty()) results.selectRow(0);
+        int selected=0;if(savedView&&!keepSelection.isEmpty())for(int i=0;i<int(items.size());++i)if(items[size_t(i)]["id"].toString()==keepSelection){selected=i;break;}
+        if (!items.empty()) results.selectRow(selected);
         updateControls(); owner.repaint();
     }
     void acceptResult() {
@@ -360,7 +499,7 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
             check(object({ {"status", "conflict"}, {"error", "The project changed while editing this chord. Select its row again before applying."} }));
             savedRevision = std::numeric_limits<std::uint64_t>::max(); fetchPage(); return;
         }
-        const auto label = chordLabel.getText();
+        const auto label = chordValues[chordLabel.getSelectedId()-1];
         const double begin = chordStart.getText() == selectedChordStartText ? selectedChordStart : chordStart.getText().getDoubleValue();
         const double end = chordEnd.getText() == selectedChordEndText ? selectedChordEnd : chordEnd.getText().getDoubleValue();
         if (label.isEmpty() || !std::isfinite(begin) || !std::isfinite(end) || begin < 0.0 || end <= begin) {
@@ -370,40 +509,33 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         if (check(reply)) { savedRevision = std::numeric_limits<std::uint64_t>::max(); fetchPage(); if (report) report(juce::Result::ok()); }
     }
     int getNumRows() override { return int(items.size()); }
-    void paintListBoxItem(int row, juce::Graphics& g, int width, int height, bool selected) override {
-        if (row < 0 || row >= int(items.size())) return;
-        g.fillAll(selected ? ink : paper); g.setColour(selected ? paper : ink); g.setFont(mono(12));
-        const auto& item = items[size_t(row)]; juce::String text;
-        if (resultKind == "separate") {
-            text = item["name"].toString() + "  " + juce::String(double(item["duration_seconds"]), 2) + " s  "
-                + juce::String(double(item["sample_rate"]) / 1000.0, 1) + " kHz";
-        } else if (resultKind == "transcribe") {
-            const int pitch = int(item["pitch"]);
-            text = juce::MidiMessage::getMidiNoteName(pitch, true, true, 4) + " (" + juce::String(pitch) + ")  "
-                + juce::String(double(item["start_seconds"]), 3) + " s  len " + juce::String(double(item["duration_seconds"]), 3)
-                + "  vel " + juce::String(int(item["velocity"]));
-        } else {
-            text = item["label"].toString() + "  " + juce::String(double(item["start_seconds"]), 3) + " - "
-                + juce::String(double(item["end_seconds"]), 3) + " s";
-            if (bool(item["uncertain"])) text += "  uncertain";
-            else if (item.hasProperty("score")) text += (savedView ? "  original score " : "  score ") + juce::String(double(item["score"]), 2);
-        }
-        g.drawFittedText(text, 8, 0, width - 16, height, juce::Justification::centredLeft, 1, 1.0f);
+    void paintListBoxItem(int row,juce::Graphics& g,int width,int height,bool selected) override {
+        if(row<0||row>=int(items.size()))return;
+        g.fillAll(selected?rule.withAlpha(.25f):paper);g.setColour(ink);g.setFont(mono(12));
+        const auto& item=items[size_t(row)];const auto rawName=item["name"].toString();
+        g.drawFittedText(uiText(rawName),8,0,88,height,juce::Justification::centredLeft,1);
+        const auto* peaks=item["waveform_peaks"].getArray();
+        if(peaks&&!peaks->isEmpty()){
+            const float x0=104.f,span=juce::jmax(0.f,float(width)-x0-12.f),middle=height*.5f;
+            float maximum=.001f;for(const auto& v:*peaks)maximum=juce::jmax(maximum,float(v));
+            for(int i=0;i<peaks->size();++i){const float x=x0+span*float(i)/float(juce::jmax(1,peaks->size()-1));const float a=juce::jlimit(0.f,1.f,float(peaks->getReference(i))/maximum)*(height*.38f);g.drawVerticalLine(int(x),middle-a,middle+a);}
+        }else{g.setColour(secondary);g.drawText(juce::String(double(item["duration_seconds"]),1)+" s",104,0,width-112,height,juce::Justification::centredLeft);}
+        g.setColour(rule);g.drawHorizontalLine(height-1,0.f,float(width));
     }
+
     juce::String getTooltipForRow(int row) override {
-        if (row < 0 || row >= int(items.size()) || resultKind != "chords") return {};
-        const auto& item = items[size_t(row)];
-        return item["label"].toString() + " / " + juce::String(double(item["start_seconds"]), 6) + " - "
-            + juce::String(double(item["end_seconds"]), 6) + " seconds\nOriginal analysis score: "
-            + juce::String(double(item["score"]), 3) + ". Uncalibrated; not the probability that the label is correct."
-            + (savedView ? "\nEditing a label or boundary does not re-score the audio." : "");
+        if(row<0||row>=int(items.size()))return {};
+        return resultKind=="separate"?uiText("Select a track and Listen", "选择轨道后试听")
+            :uiText("Select a chord to edit", "选择和弦进行编辑");
     }
+
     void selectedRowsChanged(int row) override {
+        canvas.repaint();
         selectedChordId.clear();
         if (savedView && row >= 0 && row < int(items.size())) {
             const auto& value = items[size_t(row)]; selectedChordId = value["id"].toString();
             selectedChordRevision = revision;
-            chordLabel.setText(value["label"].toString(), juce::dontSendNotification);
+            chordLabel.setSelectedId(chordValues.indexOf(value["label"].toString())+1, juce::dontSendNotification);
             selectedChordStart = double(value["start_seconds"]); selectedChordEnd = double(value["end_seconds"]);
             selectedChordStartText = juce::String(selectedChordStart, 6); selectedChordEndText = juce::String(selectedChordEnd, 6);
             chordStart.setText(selectedChordStartText, false); chordEnd.setText(selectedChordEndText, false);
@@ -417,7 +549,11 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
     juce::Label source, availability, thresholdLabel, minimumLabel, status, guidance, page, correctionHelp, emptyResults;
     juce::TextEditor from, length, chordStart, chordEnd;
     juce::Slider threshold, minimumNote;
-    juce::ComboBox jobs, chordLabel;
+    juce::ComboBox jobs, chordLabel, stemCount, quality, instrument, vocabulary;
+    juce::TextButton options; AnalysisCanvas canvas;
+    juce::StringArray chordValues;std::vector<juce::Rectangle<float>> hitRegions;
+    juce::String savedAnalysisId,displayJobId;
+    std::uint64_t languageRevision=std::numeric_limits<std::uint64_t>::max();
     juce::TextButton start { "run analysis" }, cancel { "cancel" }, accept { "import result" }, previous { "<" }, next { ">" };
     juce::TextButton play { "play stem" }, stop { "stop" }, showSaved { "saved chords" }, updateChord { "apply" };
     juce::ListBox results; double progressValue = 0.0; juce::ProgressBar progress;
@@ -432,7 +568,7 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
     bool available = false, recording = false, savedView = false, applied = false, previewing = false;
     bool presentInProject = false, resultStale = false, resultLoaded = false;
     int pageOffset = 0, total = 0, capabilityCountdown = 0;
-    static constexpr int pageSize = 50;
+    static constexpr int pageSize = 100;
     juce::Rectangle<int> left, right;
 };
 
@@ -450,6 +586,7 @@ void AnalysisPanel::visibilityChanged() {
     }
 }
 void AnalysisPanel::timerCallback() { impl->refresh(); }
+void AnalysisPanel::refreshLanguage() { impl->applyLanguage(); impl->refresh(); repaint(); }
 void AnalysisPanel::setSelectedTimeRange(double startSeconds, double endSeconds) {
     impl->refresh();
     const auto begin = juce::jmax(0.0, startSeconds - impl->clipTimelineStart);
@@ -457,69 +594,62 @@ void AnalysisPanel::setSelectedTimeRange(double startSeconds, double endSeconds)
     if (end > begin && endSeconds > startSeconds) impl->setRange(begin, end - begin);
 }
 void AnalysisPanel::paint(juce::Graphics& g) {
-    const auto& p = *impl;
-    g.fillAll(paper); g.setColour(rule);
-    g.drawHorizontalLine(34, 0.0f, float(getWidth()));
-    g.drawVerticalLine(p.left.getRight() + 8, 43.0f, float(getHeight() - 7));
-    g.setColour(secondary); g.setFont(mono(11));
-    g.drawText("from / s", p.left.getX(), 76, 65, 24, juce::Justification::centredLeft);
-    g.drawText("length / s", p.left.getX(), 105, 78, 24, juce::Justification::centredLeft);
+    const auto& p=*impl;g.fillAll(paper);g.setColour(rule);g.drawHorizontalLine(34,0.f,float(getWidth()));
+    g.drawVerticalLine(p.left.getRight()+8,43.f,float(getHeight()-8));
+    g.setColour(secondary);g.setFont(mono(11));
 }
 void AnalysisPanel::resized() {
-    if (!impl) return;
-    auto& p = *impl;
-    const auto width = getWidth(), height = getHeight();
-    p.separate.setBounds(4, 2, 96, 28); p.transcribe.setBounds(104, 2, 132, 28); p.chords.setBounds(240, 2, 84, 28);
-    p.showSaved.setBounds(332, 2, 122, 28);
-    const auto leftWidth = juce::jlimit(190, 224, width / 3);
-    p.left = {8, 42, leftWidth, height - 50}; p.right = {leftWidth + 26, 42, juce::jmax(0, width - leftWidth - 34), height - 50};
-    p.source.setBounds(p.left.getX(), 42, p.left.getWidth(), 26);
-    p.from.setBounds(p.left.getX() + 82, 76, p.left.getWidth() - 82, 24);
-    p.length.setBounds(p.left.getX() + 82, 105, p.left.getWidth() - 82, 24);
-    const bool compact = height < 288;
-    p.thresholdLabel.setBounds(p.left.getX(), 135, 62, 24); p.threshold.setBounds(p.left.getX() + 62, 135, p.left.getWidth() - 62, 24);
-    p.minimumLabel.setBounds(p.left.getX(), 163, 62, 24); p.minimumNote.setBounds(p.left.getX() + 62, 163, p.left.getWidth() - 62, 24);
-    const auto availableY = p.kind == "transcribe" ? 193 : 140;
-    p.availability.setBounds(p.left.getX(), availableY, p.left.getWidth(), juce::jmax(0, height - availableY - 40));
-    p.availability.setVisible(p.kind != "transcribe" || !compact);
-    p.start.setBounds(p.left.getX(), height - 34, p.left.getWidth() - 72, 28); p.cancel.setBounds(p.start.getRight() + 4, height - 34, 68, 28);
-    p.jobs.setBounds(p.right.getX(), 42, p.right.getWidth(), 25);
-    p.status.setBounds(p.right.getX(), 70, p.right.getWidth(), 22); p.progress.setBounds(p.right.getX(), 95, p.right.getWidth(), 5);
-    p.guidance.setBounds(p.right.getX(), 104, p.right.getWidth(), compact ? 32 : 34);
-    const int correctionHeight = p.savedView ? 52 : 0;
-    const int listTop = compact ? 139 : 143, listBottom = height - 40 - correctionHeight;
-    p.results.setBounds(p.right.getX(), listTop, p.right.getWidth(), juce::jmax(26, listBottom - listTop));
-    p.emptyResults.setBounds(p.results.getBounds().reduced(12, 3));
-    p.correctionHelp.setBounds(p.right.getX(), listBottom + 2, p.right.getWidth(), 18);
-    const auto correctionY = listBottom + 22;
-    const int chordWidth = juce::jlimit(76, 104, p.right.getWidth() / 4);
-    p.chordLabel.setBounds(p.right.getX(), correctionY, chordWidth, 25);
-    const auto fieldWidth = juce::jmax(48, (p.right.getWidth() - chordWidth - 74) / 2);
-    p.chordStart.setBounds(p.chordLabel.getRight() + 4, correctionY, fieldWidth, 25);
-    p.chordEnd.setBounds(p.chordStart.getRight() + 4, correctionY, fieldWidth, 25);
-    p.updateChord.setBounds(p.right.getRight() - 62, correctionY, 62, 25);
-    p.previous.setBounds(p.right.getX(), height - 33, 26, 26); p.next.setBounds(p.right.getX() + 30, height - 33, 26, 26);
-    p.page.setBounds(p.right.getX() + 60, height - 33, juce::jmax(50, p.right.getWidth() - 200), 26);
-    p.accept.setBounds(p.right.getRight() - 126, height - 33, 126, 26);
-    const auto previewX = p.right.getRight() - 280;
-    p.play.setBounds(previewX, height - 33, 88, 26); p.stop.setBounds(previewX + 92, height - 33, 54, 26);
-    const bool previewFits = p.right.getWidth() >= 400;
-    if (p.resultKind == "separate" && !p.savedView) {
-        p.play.setVisible(previewFits); p.stop.setVisible(previewFits);
-        if (!previewFits) {
-            p.play.setVisible(true); p.stop.setVisible(true);
-            p.play.setBounds(p.right.getX(), 104, 92, 28); p.stop.setBounds(p.play.getRight() + 4, 104, 54, 28); p.guidance.setVisible(false);
-        } else p.guidance.setVisible(true);
-    } else p.guidance.setVisible(true);
+    if(!impl)return;auto& p=*impl;const int width=getWidth(),height=getHeight();
+    p.separate.setBounds(4,2,91,28);p.transcribe.setBounds(99,2,118,28);p.chords.setBounds(221,2,78,28);
+    p.showSaved.setBounds(305,2,112,28);
+    const int leftWidth=juce::jlimit(164,208,width/3);
+    p.left={8,42,leftWidth,height-50};p.right={leftWidth+25,42,juce::jmax(0,width-leftWidth-33),height-50};
+    p.source.setBounds(p.left.getX(),42,p.left.getWidth(),27);
+    const bool separation=p.kind=="separate",transcription=p.kind=="transcribe";
+    p.stemCount.setVisible(separation);p.quality.setVisible(separation);p.instrument.setVisible(transcription);p.vocabulary.setVisible(!separation&&!transcription);
+    p.stemCount.setBounds(p.left.getX(),76,52,26);p.quality.setBounds(p.left.getX()+58,76,p.left.getWidth()-58,26);
+    p.instrument.setBounds(p.left.getX(),76,p.left.getWidth(),26);p.vocabulary.setBounds(p.instrument.getBounds());
+    p.options.setBounds(p.left.getX(),108,82,25);p.availability.setBounds(p.left.getX()+84,109,p.left.getWidth()-84,24);
+    // Range and note options live in a compact popover at every dock size.
+    for(juce::Component* c:std::initializer_list<juce::Component*>{&p.from,&p.length,&p.threshold,&p.minimumNote,&p.thresholdLabel,&p.minimumLabel})c->setVisible(false);
+    p.start.setVisible(true);p.cancel.setVisible(p.jobId.isNotEmpty()&&!terminal(p.jobState));
+    p.start.setBounds(p.left.getX(),height-34,p.left.getWidth()-70,27);p.cancel.setBounds(p.start.getRight()+4,height-34,66,27);
+    p.jobs.setBounds(p.right.getX(),42,juce::jmax(90,p.right.getWidth()-138),25);p.status.setBounds(p.jobs.getRight()+5,42,p.right.getRight()-p.jobs.getRight()-5,25);
+    p.progress.setBounds(p.right.getX(),71,p.right.getWidth(),3);
+    const int correctionHeight=p.savedView?32:0;
+    const int top=82,bottom=height-42-correctionHeight;
+    p.results.setBounds(p.right.getX(),top,p.right.getWidth(),juce::jmax(26,bottom-top));p.canvas.setBounds(p.results.getBounds());
+    p.emptyResults.setBounds(p.results.getBounds().reduced(5));
+    for(juce::Component* c:std::initializer_list<juce::Component*>{&p.chordLabel,&p.chordStart,&p.chordEnd,&p.updateChord})c->setVisible(p.savedView);
+    const int chordWidth=juce::jlimit(66,90,p.right.getWidth()/4),fieldWidth=juce::jmax(42,(p.right.getWidth()-chordWidth-70)/2);
+    p.chordLabel.setBounds(p.right.getX(),bottom+3,chordWidth,25);p.chordStart.setBounds(p.chordLabel.getRight()+4,bottom+3,fieldWidth,25);
+    p.chordEnd.setBounds(p.chordStart.getRight()+4,bottom+3,fieldWidth,25);p.updateChord.setBounds(p.right.getRight()-58,bottom+3,58,25);
+    p.previous.setBounds(p.right.getX(),height-32,24,25);p.next.setBounds(p.right.getX()+28,height-32,24,25);
+    const int pageX=p.right.getX()+(p.total>p.pageSize?56:0);
+    p.page.setBounds(pageX,height-32,juce::jmax(30,p.right.getWidth()- (pageX-p.right.getX())-140),25);
+    p.accept.setBounds(p.right.getRight()-138,height-33,138,27);
+    p.play.setBounds(p.right.getX(),height-33,65,27);p.stop.setBounds(p.right.getX()+69,height-33,58,27);
+    if(p.resultKind=="separate")p.page.setVisible(false);else p.page.setVisible(true);
+}
+void AnalysisPanel::showChordRegion(const juce::String& chordId) {
+    auto& p=*impl;p.refresh();
+    const auto snapshot=p.session.snapshot();if(!snapshot.chordRegions)return;
+    const auto selected=std::find_if(snapshot.chordRegions->begin(),snapshot.chordRegions->end(),[&](const auto& c){return c.id==chordId;});
+    if(selected==snapshot.chordRegions->end())return;
+    p.chooseMode("chords");p.savedView=true;p.savedAnalysisId=selected->analysisId;p.resultKind="chords";
+    int index=0;for(const auto& c:*snapshot.chordRegions){if(c.id==chordId)break;if(c.analysisId==p.savedAnalysisId)++index;}
+    p.pageOffset=(index/p.pageSize)*p.pageSize;p.fetchPage();
+    for(int i=0;i<int(p.items.size());++i)if(p.items[size_t(i)]["id"].toString()==chordId){p.results.selectRow(i);break;}
+    p.updateControls();repaint();
 }
 
 juce::Result AnalysisPanel::runInteractionSmokeTest(juce::DynamicObject& report, const juce::File& directory) {
     auto& p = *impl; p.refresh();
     const auto before = p.session.snapshot();
     if (before.selectedClipId.isEmpty()) return juce::Result::fail("Analysis UI smoke requires a selected audio source.");
-    for (const auto size : { juce::Point<int>(930, 308), juce::Point<int>(600, 260) }) {
+    for (const auto size : { juce::Point<int>(930, 308), juce::Point<int>(600, 260), juce::Point<int>(540, 210) }) {
         setSize(size.x, size.y); p.chooseMode("transcribe");
-        if (p.start.getBounds().intersects(p.minimumNote.getBounds()) || p.right.getWidth() < 320)
+        if ((p.minimumNote.isVisible() && p.start.getBounds().intersects(p.minimumNote.getBounds())) || p.right.getWidth() < 300)
             return juce::Result::fail("Analysis controls overlap at the supported dock size.");
         auto output = directory.getChildFile("ui-analysis-" + juce::String(size.x) + "x" + juce::String(size.y) + ".png").createOutputStream();
         if (!output || !juce::PNGImageFormat().writeImageToStream(createComponentSnapshot(getLocalBounds()), *output))
@@ -535,15 +665,36 @@ juce::Result AnalysisPanel::runInteractionSmokeTest(juce::DynamicObject& report,
     p.resultStale = true; p.applied = false; p.updateControls();
     if (p.accept.isEnabled()) return juce::Result::fail("A stale candidate can still be imported from the UI.");
     p.resultStale = false; p.applied = true; p.presentInProject = false; p.updateControls();
-    if (p.accept.isEnabled() || p.accept.getButtonText() != "undone") return juce::Result::fail("Undone import is not distinguished from an active import.");
+    if (p.accept.isEnabled() || p.accept.getButtonText() != uiText("Undone", "已撤销")) return juce::Result::fail("Undone import is not distinguished from an active import.");
     p.presentInProject = true; p.updateControls();
-    if (p.accept.isEnabled() || p.accept.getButtonText() != "imported") return juce::Result::fail("Redo import projection is incorrect.");
+    if (p.accept.isEnabled() || p.accept.getButtonText() != uiText("Added", "已添加")) return juce::Result::fail("Redo import projection is incorrect.");
     p.resultId.clear(); p.resultLoaded = p.applied = p.presentInProject = false; p.total = 0; p.jobState.clear(); p.updateControls();
+    // These are explicitly synthetic view fixtures; real inference and import
+    // quality are separate process tests. No music is written by a screenshot.
+    const auto oldLanguage=uiLanguageCode();
+    struct RestoreLanguage{juce::String value;~RestoreLanguage(){setUiLanguage(value,false);}} restore{oldLanguage};
+    for(const auto* language:{"en","zh-CN"})for(const auto* visualKind:{"transcribe","chords"}){
+        setUiLanguage(language,false);setSize(600,260);p.chooseMode(visualKind);p.resultKind=visualKind;p.items.clear();
+        p.savedView=false;p.jobState="ready";p.resultLoaded=true;p.resultId="synthetic-view-only";
+        const bool notes=p.resultKind=="transcribe";
+        for(int i=0;i<(notes?32:8);++i)p.items.push_back(notes?object({{"pitch",60+i%12},{"start_seconds",i*.25},{"duration_seconds",.2},{"velocity",80},{"channel",1}})
+            :object({{"id","synthetic-"+juce::String(i)},{"label",i%2?"G:7":"C:maj7"},{"start_seconds",i*1.0},{"end_seconds",i+1.0},{"score",.6},{"uncertain",false}}));
+        p.total=int(p.items.size());p.results.updateContent();p.updateControls();
+        const auto capture=createComponentSnapshot(getLocalBounds());
+        auto output=directory.getChildFile("ui-analysis-"+p.resultKind+"-"+language+"-synthetic.png").createOutputStream();
+        if(!output||!juce::PNGImageFormat().writeImageToStream(capture,*output))return juce::Result::fail("Cannot capture analysis visual fixture.");
+        if(p.hitRegions.size()!=p.items.size())return juce::Result::fail("Analysis visual omitted paged notes/chords.");
+        for(const auto& bounds:p.hitRegions)if(!p.canvas.getLocalBounds().toFloat().expanded(1.f).contains(bounds))return juce::Result::fail("Analysis visual escaped its viewport.");
+        p.canvas.select(p.hitRegions.front().getCentre());
+        if(p.results.getSelectedRow()!=0)return juce::Result::fail("Analysis visual selection does not target the real page item.");
+    }
+    setUiLanguage(oldLanguage,false);p.items.clear();p.total=0;p.resultId.clear();p.resultLoaded=false;p.jobState.clear();p.updateControls();
     const auto after = p.session.snapshot();
     report.setProperty("analysis_ui_range_mapping", rangeApplied);
     report.setProperty("analysis_ui_read_only_navigation", before.revision == after.revision && before.projectId == after.projectId);
     report.setProperty("analysis_ui_empty_saved_chords", true);
     report.setProperty("analysis_ui_synthetic_stale_undo_redo_projection", true);
+    report.setProperty("analysis_ui_bilingual_piano_and_chord_visual_fixtures",true);
     if (!rangeApplied || before.revision != after.revision || before.projectId != after.projectId)
         return juce::Result::fail("Analysis navigation changed the project or mapped the range incorrectly.");
     return juce::Result::ok();

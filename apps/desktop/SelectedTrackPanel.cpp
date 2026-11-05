@@ -1,4 +1,5 @@
 #include "SelectedTrackPanel.h"
+#include "UiLanguage.h"
 #include <algorithm>
 #include <cmath>
 
@@ -35,7 +36,7 @@ struct SelectedTrackPanel::Impl {
             g.drawText("0 s", int(a.getX()), int(a.getBottom()) + 2, 60, 18, juce::Justification::centredLeft);
             g.drawText(juce::String(span(), 1) + " s", int(a.getRight()) - 75, int(a.getBottom()) + 2, 75, 18, juce::Justification::centredRight);
             const auto& values = points();
-            if (values.empty()) g.drawFittedText(p.currentTarget().isObject() ? "Double-click to add automation points" : "Choose an available parameter", a.toNearestInt(), juce::Justification::centred, 2);
+            if (values.empty()) g.drawFittedText(uiText(p.currentTarget().isObject() ? "Double-click to add automation points" : "Choose an available parameter"), a.toNearestInt(), juce::Justification::centred, 2);
             juce::Path path;
             if (!values.empty()) path.startNewSubPath(position(values.front()));
             for (size_t i = 1; i < values.size(); ++i) {
@@ -99,6 +100,7 @@ struct SelectedTrackPanel::Impl {
         for (auto* c : std::initializer_list<juce::Component*>{ &devices, &io, &automation, &plugin, &open, &bypass, &removePlugin, &up, &down, &browse, &nativeFx,
                 &input, &arm, &monitor, &output, &send, &sendTarget, &sendGain, &pre, &sendEnabled, &addSend, &removeSend,
                 &target, &laneEnabled, &deleteLane, &master, &curve, &hint }) owner.addAndMakeVisible(c);
+        for (auto* button : { &devices, &io, &automation, &open, &bypass, &removePlugin, &up, &down, &browse, &nativeFx, &arm, &pre, &sendEnabled, &addSend, &removeSend, &laneEnabled, &deleteLane, &master }) uiButton(*button, button->getButtonText());
         devices.onClick = [this] { page = 0; owner.resized(); owner.repaint(); };
         io.onClick = [this] { page = 1; refreshInputs(); owner.resized(); owner.repaint(); };
         automation.onClick = [this] { page = 2; refreshTargets(); owner.resized(); owner.repaint(); };
@@ -118,10 +120,10 @@ struct SelectedTrackPanel::Impl {
         up.onClick = [this] { movePlugin(-1); }; down.onClick = [this] { movePlugin(1); };
         browse.onClick = [this] { if (owner.onBrowsePlugins) owner.onBrowsePlugins(ownerId()); };
         nativeFx.onClick = [this] { if (owner.onOpenNativeEffect) owner.onOpenNativeEffect(ownerId(), {}); };
-        input.setTextWhenNothingSelected("Choose recording input");
+        input.setTextWhenNothingSelected(uiText("Choose recording input"));
         input.onChange = [this] { if (!updating) { const int i = input.getSelectedId() - 1; if (i >= 0 && i < int(inputs.size())) run("set_track_input", object({ {"track_id", ownerId()}, {"input_device_id", inputs[size_t(i)]["id"]} })); } };
         arm.onClick = [this] { if (const auto* t = track()) run("set_track_armed", object({ {"track_id", t->id}, {"armed", !t->armed} })); };
-        monitor.addItem("monitor off", 1); monitor.addItem("monitor auto", 2); monitor.addItem("monitor on", 3);
+        uiComboItem(monitor, 1, "monitor off"); uiComboItem(monitor, 2, "monitor auto"); uiComboItem(monitor, 3, "monitor on");
         monitor.setTooltip("Monitoring applies to this track only.");
         monitor.onChange = [this] { if (!updating) if (const auto* t = track()) run("set_input_monitor", object({ {"track_id", t->id}, {"mode", monitor.getSelectedId() == 3 ? "on" : monitor.getSelectedId() == 2 ? "auto" : "off"} })); };
         output.onChange = [this] { if (!updating && output.getSelectedId() > 0) run("set_track_output", object({ {"track_id", ownerId()}, {"target_track_id", destinations[output.getSelectedId() - 1]} })); };
@@ -161,7 +163,7 @@ struct SelectedTrackPanel::Impl {
     }
     void pluginCommand(const juce::String& command) { if (const auto* slot = currentPlugin()) run(command, object({ {"track_id", ownerId()}, {"plugin_id", slot->id} })); }
     void movePlugin(int direction) { if (const auto* slot = currentPlugin()) { const int index = plugin.getSelectedId() - 1 + direction; if (index >= 0 && index < int(plugins().size())) run("move_plugin", object({ {"track_id", ownerId()}, {"plugin_id", slot->id}, {"index", index} })); } }
-    void refreshPlugin() { const auto* slot = currentPlugin(); open.setEnabled(slot && !slot->missing); bypass.setEnabled(slot); removePlugin.setEnabled(slot); up.setEnabled(slot && plugin.getSelectedId() > 1); down.setEnabled(slot && plugin.getSelectedId() < int(plugins().size())); bypass.setButtonText(slot && !slot->enabled ? "enable" : "bypass"); }
+    void refreshPlugin() { const auto* slot = currentPlugin(); open.setEnabled(slot && !slot->missing); bypass.setEnabled(slot); removePlugin.setEnabled(slot); up.setEnabled(slot && plugin.getSelectedId() > 1); down.setEnabled(slot && plugin.getSelectedId() < int(plugins().size())); uiButton(bypass, slot && !slot->enabled ? "enable" : "bypass"); }
     void refreshInputs() {
         inputs.clear(); input.clear(juce::dontSendNotification); const auto result = query("get_recording_inputs");
         if (const auto* list = result["inputs"].getArray()) for (const auto& item : *list) {
@@ -182,7 +184,7 @@ struct SelectedTrackPanel::Impl {
     }
     void refreshLane() {
         const auto* lane = currentLane(); laneEnabled.setEnabled(lane != nullptr); deleteLane.setEnabled(lane != nullptr);
-        laneEnabled.setButtonText(lane && !lane->enabled ? "enable lane" : "bypass lane");
+        uiButton(laneEnabled, lane && !lane->enabled ? "enable lane" : "bypass lane");
         const auto t = currentTarget(); hint.setText(t.isObject() ? "Current: " + t["text"].toString() + " / double-click: add; drag: move; Alt-drag: curve; Delete: remove." : "Choose a track with an available automation parameter.", juce::dontSendNotification); curve.repaint();
     }
     void writeCurve(const std::vector<EngineSession::AutomationPointSnapshot>& values, std::uint64_t revision, bool enabled = true) {
@@ -196,7 +198,7 @@ struct SelectedTrackPanel::Impl {
     void refreshSend() {
         const auto* s = currentSend(); updating = true; sendGain.setValue(s ? s->gainDb : -12, juce::dontSendNotification); updating = false;
         for (auto* c : std::initializer_list<juce::Component*>{ &sendGain, &pre, &sendEnabled, &removeSend }) c->setEnabled(s != nullptr);
-        pre.setButtonText(s && s->preFader ? "pre-fader" : "post-fader"); sendEnabled.setButtonText(s && !s->enabled ? "enable send" : "bypass send");
+        uiButton(pre, s && s->preFader ? "pre-fader" : "post-fader"); uiButton(sendEnabled, s && !s->enabled ? "enable send" : "bypass send");
     }
     void rebuild() {
         updating = true;
@@ -211,7 +213,7 @@ struct SelectedTrackPanel::Impl {
         if (const auto* t = track()) {
             output.setSelectedId(destinations.indexOf(t->outputTargetId) + 1, juce::dontSendNotification);
             monitor.setSelectedId(t->monitorMode == "on" ? 3 : t->monitorMode == "auto" ? 2 : 1, juce::dontSendNotification);
-            arm.setButtonText(t->armed ? "armed" : "arm record"); arm.setToggleState(t->armed, juce::dontSendNotification);
+            uiButton(arm, t->armed ? "armed" : "arm record"); arm.setToggleState(t->armed, juce::dontSendNotification);
             for (size_t i = 0; i < t->sends.size(); ++i) { juce::String name = t->sends[i].targetTrackId; for (const auto& b : state.tracks) if (b.id == name) name = b.name; send.addItem(juce::String(int(i) + 1) + ". " + name, int(i) + 1); }
             send.setSelectedId(t->sends.empty() ? 0 : juce::jlimit(1, int(t->sends.size()), oldSend), juce::dontSendNotification);
         }
@@ -248,7 +250,7 @@ void SelectedTrackPanel::update(const EngineSession::Snapshot& state) {
     setEnabled(!state.recording && !state.recordingFinalizing);
 }
 void SelectedTrackPanel::resized() {
-    if (!impl) return; auto& p = *impl;
+    if (!impl) return; refreshUiButtons(*this); auto& p = *impl;
     p.devices.setBounds(8, 4, 94, 28); p.io.setBounds(108, 4, 118, 28); p.automation.setBounds(232, 4, 120, 28); p.master.setBounds(getWidth() - 88, 4, 80, 28);
     for (auto* c : std::initializer_list<juce::Component*>{ &p.plugin, &p.open, &p.bypass, &p.removePlugin, &p.up, &p.down, &p.browse, &p.nativeFx }) c->setVisible(p.page == 0);
     for (auto* c : std::initializer_list<juce::Component*>{ &p.input, &p.arm, &p.monitor, &p.output, &p.send, &p.sendTarget, &p.sendGain, &p.pre, &p.sendEnabled, &p.addSend, &p.removeSend }) c->setVisible(p.page == 1 && !p.masterView);
@@ -269,13 +271,13 @@ void SelectedTrackPanel::resized() {
 }
 void SelectedTrackPanel::paint(juce::Graphics& g) {
     auto& p = *impl; g.fillAll(paper); g.setColour(rule); g.drawHorizontalLine(35, 8, float(getWidth() - 8)); g.setColour(quiet); g.setFont(font(12));
-    if (p.page == 0) g.drawText(p.masterView ? "Master signal chain" : "Selected track signal chain", 12, 39, getWidth() - 24, 22, juce::Justification::centredLeft);
+    if (p.page == 0) g.drawText(uiText(p.masterView ? "Master signal chain" : "Selected track signal chain"), 12, 39, getWidth() - 24, 22, juce::Justification::centredLeft);
     if (p.page == 1) {
-        if (p.masterView) { g.drawFittedText("Choose a track to configure recording inputs, output and sends.", getLocalBounds().reduced(12).withTrimmedTop(40), juce::Justification::centred, 2); return; }
+        if (p.masterView) { g.drawFittedText(uiText("Choose a track to configure recording inputs, output and sends."), getLocalBounds().reduced(12).withTrimmedTop(40), juce::Justification::centred, 2); return; }
         const int split = juce::jmax(310, getWidth() / 2);
-        g.drawText("recording input", 12, 36, 240, 22, juce::Justification::centredLeft); g.drawText("send to bus", split, 36, 240, 22, juce::Justification::centredLeft);
-        g.drawText("track output", 12, 133, 240, 22, juce::Justification::centredLeft);
-        g.drawText("Monitoring applies to the shared input device.", 12, getHeight() - 24, getWidth() - 24, 22, juce::Justification::centredLeft);
+        g.drawText(uiText("recording input"), 12, 36, 240, 22, juce::Justification::centredLeft); g.drawText(uiText("send to bus"), split, 36, 240, 22, juce::Justification::centredLeft);
+        g.drawText(uiText("track output"), 12, 133, 240, 22, juce::Justification::centredLeft);
+        g.drawText(uiText("Monitoring applies to this track only."), 12, getHeight() - 24, getWidth() - 24, 22, juce::Justification::centredLeft);
     }
 }
 juce::Result SelectedTrackPanel::runInteractionSmokeTest(juce::DynamicObject& report) {
