@@ -1,5 +1,13 @@
 # E-musician 技术架构
 
+## 0.11.0 品牌工作区、颜色与效果手势（自动验证通过，人工待验）
+
+`UiDesign.h` 统一标签/数值、纸色面板与轨道色；`Branding.h` 使用编译内嵌的批准 Logo，启动动画只在正常窗口 UI 线程定时。`MainWorkspace.inc` 管理顶部 transport、搜索库、实际项目概览、可调整下栏与侧栏响应式布局；`WorkspaceBrowser` / `ProjectOverview` 只消费快照，概览图缓存到小尺寸图片，滚动时不重画全部 clip。
+
+`set_track_colour` 是 GUI 和 Agent 共同的编辑入口，严格 hex / 空串恢复，存入 Edit 的 emColour 及 StoredTrack.colour，旧工程缺省空。纯颜色批次更新元数据形成一次 Undo，不重建音频图或音符数组。Arrangement、PianoRoll、Agent 将其投影为身份色，选区状态独立。
+
+`EngineSessionEffectGestures.inc` 管理原生效果预览事务；begin/update 只改短期 DSP 预览，end 轻量提交权威参数和一次 Undo，cancel/冲突恢复已提交状态。可见效果面板读取有界 2048 点输出并在 UI 线程做 FFT，音频回调仅原子发布采样及平滑 DSP。详见 [ADR](decisions/2026-11-06-brand-colour-device-gestures.md) 与 [本轮计划](review/2026-11-06-workspace-brand/PLAN.md)。Sampler/Rack 换样、真实插件/ASIO 和听感验收不因界面升级而被推断通过。
+
 ## 0.10.0 节拍与固定比例 Warp（自动验证通过，人工待验）
 
 `AnalysisPanel / Agent → start_analysis(kind=beats) → Beat This! 独立进程 → 拍点与速度候选 → apply_beat_analysis → beginAudioWarp → 后台原件校验/Signalsmith 渲染 → revision 校验 → Edit 一次提交`。普通 Source 设置也进入 `set_audio_warp`，与分析应用共享后台任务、Undo 和资产流程。GUI 不另存音乐状态；Agent 使用候选 ID 和数值回读，不直接生成或执行 DSP。

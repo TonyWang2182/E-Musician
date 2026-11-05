@@ -43,6 +43,8 @@ private:
     struct Coeff { double b0=1,b1=0,b2=0,a1=0,a2=0; };
     struct Delay { double z1=0,z2=0; };
     std::array<Coeff,eqBandCount> coefficients {};
+    std::array<Coeff,eqBandCount> targets {}, increments {};
+    std::array<int,eqBandCount> remaining {};
     std::array<std::array<Delay,2>,eqBandCount> delays {};
     EqSettings last {};
     double lastRate=0;
@@ -59,6 +61,7 @@ private:
     double envelope = 0;
     float reductionDb = 0;
     double currentMix = 1;
+    double currentAttack=0,currentRelease=0,currentThreshold=1,currentPower=0,currentMakeup=1;
     bool mixInitialised = false;
 };
 // Storage is allocated once during construction, outside the audio callback.
@@ -72,6 +75,7 @@ private:
     std::vector<float> historyLeft, historyRight;
     std::size_t writeIndex = 0, validFrames = 0;
     double currentMix = 0;
+    double currentDelay=1,currentFeedback=0;
     bool mixInitialised = false;
 };
 } // namespace emusician::effects

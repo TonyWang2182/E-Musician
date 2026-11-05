@@ -52,7 +52,8 @@ void StereoReverb::process(float* left,float* right,int frames,double sampleRate
         || sampleRate > maximumSampleRate || !valid(settings)) return;
     if (right == left) right = nullptr;
     if (sampleRate != rate) configure(sampleRate);
-    if (!mixInitialised) { currentMix = settings.dryWet; mixInitialised = true; }
+    const bool first=!mixInitialised;
+    if(first){currentMix=settings.dryWet;currentDamping=settings.damping*.95f;mixInitialised=true;}
     const double target = settings.dryWet, mixStep = 1.0 / (sampleRate * .005);
     const float damping = settings.damping * .95f;
     std::array<std::array<float,4>,2> feedback{};
@@ -60,7 +61,10 @@ void StereoReverb::process(float* left,float* right,int frames,double sampleRate
         for (std::size_t i=0;i<4;++i)
             feedback[channel][i] = float(std::exp(-6.907755278982137 * double(lines[channel][i].length)
                                                  / (sampleRate * settings.decaySeconds)));
+    if(first)currentFeedback=feedback;
+    const float smooth=float(1-std::exp(-1.0/(sampleRate*.02)));
     for (int frame=0;frame<frames;++frame) {
+        currentDamping+=(damping-currentDamping)*smooth;
         const float dryL=finiteInput(left[frame]);
         const float dryR=right ? finiteInput(right[frame]) : dryL;
         const float safeL=bounded(dryL), safeR=bounded(dryR);
@@ -71,9 +75,10 @@ void StereoReverb::process(float* left,float* right,int frames,double sampleRate
             for (std::size_t i=0;i<4;++i) {
                 auto& line=lines[channel][i];
                 const auto delayed=line.read();
-                line.filtered=bounded((1-damping)*delayed+damping*line.filtered);
+                currentFeedback[channel][i]+=(feedback[channel][i]-currentFeedback[channel][i])*smooth;
+                line.filtered=bounded((1-currentDamping)*delayed+currentDamping*line.filtered);
                 if(std::abs(line.filtered)<1e-20f)line.filtered=0;
-                line.write(bounded(input[channel]+feedback[channel][i]*line.filtered));
+                line.write(bounded(input[channel]+currentFeedback[channel][i]*line.filtered));
                 combined+=delayed*.25f;
             }
             for (std::size_t i=4;i<6;++i) {

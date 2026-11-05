@@ -208,7 +208,10 @@ class AnalysisScopeTests(unittest.TestCase):
     def test_host_and_model_both_required_for_capability(self):
         caps = safe_capabilities({"providers": [{"kind": "separate", "available": True, "model_id": "test", "version": "mock"}]})
         groups = capability_groups(context(), {"commands": list(COMMANDS)}, caps)
-        self.assertEqual(len(groups), 9)
+        self.assertEqual(len(groups), 10)
+        self.assertFalse(next(g for g in groups if g["id"] == "track_colour")["enabled"])
+        colours = capability_groups(context(), {"commands": ["set_track_colour"]}, caps)
+        self.assertTrue(next(g for g in colours if g["id"] == "track_colour")["enabled"])
         self.assertTrue(next(g for g in groups if g["id"] == "separate")["enabled"])
         missing = capability_groups(context(), {"commands": []}, caps)
         self.assertFalse(next(g for g in missing if g["id"] == "separate")["enabled"])

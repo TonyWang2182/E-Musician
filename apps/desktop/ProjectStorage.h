@@ -84,6 +84,7 @@ struct StoredTrack {
     juce::String inputDeviceId, outputTargetId = "master";
     std::vector<StoredSend> sends;
     std::vector<StoredAutomationLane> automation;
+    juce::String colour; // Empty = automatic; otherwise canonical #RRGGBB.
 };
 
 // Accepted, editable chord labels; seconds are independent of the beat ruler.
@@ -156,6 +157,7 @@ struct IOOptions {
 
 // Pure DTO validation: no file reads, existence checks, or plugin instantiation.
 juce::Result validate(const StoredProject&);
+juce::Result canonicalTrackColour(const juce::var&, juce::String&);
 int requiredSchema(const StoredProject&);
 bool isSupportedChordLabel(const juce::String&);
 

@@ -24,7 +24,7 @@ private:
     struct Channel { double z1 = 0, z2 = 0; };
     Channel channels[2];
     double b0 = 1, b1 = 0, b2 = 0, a1 = 0, a2 = 0;
-    double sampleRate = 0, phase = 0, frequency = 1000, resonance = .7071, mix = 1, depth = 0;
+    double sampleRate = 0, phase = 0, frequency = 1000, resonance = .7071, mix = 1, depth = 0, lfoRate = 1;
     unsigned untilUpdate = 0;
     Mode currentMode = Mode::lowPass;
     bool initialised = false;

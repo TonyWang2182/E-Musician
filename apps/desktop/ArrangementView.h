@@ -12,6 +12,11 @@ public:
     void update(const EngineSession::Snapshot&);
     void invalidateSources();
     void fitToProject();
+    // Coordinates are local to this ArrangementView. Empty for rulers,
+    // scrollbars or blank space; no selection/transport mutation.
+    juce::String trackAtPosition(juce::Point<int>) const;
+    void revealPosition(double seconds); // Scroll only; preserves selection.
+    juce::Range<double> visibleTimeRange() const;
     void zoomIn();
     void zoomOut();
     double zoomFactor() const;

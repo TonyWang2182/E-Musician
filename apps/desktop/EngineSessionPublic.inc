@@ -3,6 +3,21 @@ EngineSession::EngineSession(bool enable):impl(std::make_unique<Impl>(enable&&!o
 EngineSession::~EngineSession()=default;
 bool EngineSession::isSupportedAudioFile(const juce::File& f){return f.hasFileExtension("wav;mp3");}
 
+bool EngineSession::nativeEffectSpectrum(const juce::String& projectId,const juce::String& trackId,
+                                        const juce::String& deviceId,std::array<float,2048>& samples,std::uint64_t& sequence)const
+{
+    requireControlThread();
+    if(projectId!=juce::String(impl->guard.projectId()))return false;
+    juce::ValueTree owner;
+    if(trackId=="master")owner=impl->metadata(*impl->edit);
+    else if(auto* binding=impl->find(trackId))owner=binding->track->state;
+    else return false;
+    const auto slot=owner.getChildWithName("EM_PLUGINS").getChildWithProperty("id",deviceId);
+    if(!slot.isValid()||slot["format"].toString()!="E-musician"||slot["role"].toString()!="effect"||!bool(slot["enabled"]))return false;
+    auto* effect=dynamic_cast<native_effects::Effect*>(impl->livePlugin(*impl->edit,deviceId));
+    return effect&&effect->readSpectrum(samples,sequence);
+}
+
 bool EngineSession::nativeCompressorMeter(const juce::String& projectId,const juce::String& trackId,
                                          const juce::String& deviceId,float& reductionDb,std::uint64_t& sequence)const{
     requireControlThread();
@@ -52,7 +67,7 @@ EngineSession::Snapshot EngineSession::snapshot()const
             s.chordRegions=std::move(chords);
         }
         for(const auto& t:state.tracks){
-            TrackSnapshot track;track.id=t.id;track.name=t.name;track.kind=t.kind;track.pan=t.pan;track.gainDb=t.gainDb;track.muted=t.muted;track.solo=t.solo;track.plugins=slots(t.plugins);
+            TrackSnapshot track;track.id=t.id;track.name=t.name;track.kind=t.kind;track.colour=t.colour;track.pan=t.pan;track.gainDb=t.gainDb;track.muted=t.muted;track.solo=t.solo;track.plugins=slots(t.plugins);
             track.inputDeviceId=t.inputDeviceId;track.outputTargetId=t.outputTargetId;track.automation=lanes(t.automation);
             for(const auto& send:t.sends)track.sends.push_back({send.id,send.targetTrackId,send.gainDb,send.preFader,send.enabled});
             for(const auto& c:t.clips){
@@ -117,6 +132,18 @@ juce::Result EngineSession::execute(const juce::String& command,const juce::var&
     if(command=="get_audio_warp"){juce::var data;auto r=impl->getAudioWarp(args,data);if(commandResult)*commandResult=std::move(data);return r;}
     requireControlThread();
     if(commandResult)*commandResult=juce::var();
+    if(isEffectGestureCommand(command)){
+        if(command!="cancel_native_effect_gesture"){
+            if(auto r=impl->preflight(expected);r.failed()){
+                if(impl->effectGesture&&impl->effectGesture->revision!=impl->guard.revision())impl->cancelEffectGesture();
+                return r;
+            }
+            if(impl->recordingBusy())return impl->fail("Finish recording before adjusting an effect.");
+        }
+        return impl->handleEffectGesture(command,args,commandResult);
+    }
+    const bool keepEffectPreview=command.startsWith("get_")||command=="play"||command=="pause"||command=="stop"||command=="seek"||command=="reset_meters";
+    if(impl->effectGesture&&!keepEffectPreview)impl->cancelEffectGesture();
     const bool analysisRead=command=="get_analysis_capabilities"||command=="get_analysis_job"||command=="get_analysis_result"||command=="get_chord_regions"||command=="get_analysis_preview_status"||command=="stop_analysis_preview";
     if(analysisRead||command=="cancel_analysis_job"||command=="start_analysis"||command=="accept_analysis_result"||command=="apply_beat_analysis"||command=="edit_chord_region"||command=="preview_analysis_stem"){
         if(!args.isObject())return impl->fail("Analysis arguments must be an object.");
@@ -217,7 +244,7 @@ juce::Result EngineSession::importFiles(const juce::Array<juce::File>& files,std
 {
     // Synchronous compatibility entry for controlled tests. Interactive import uses jobs.
     if(impl->recordingBusy())return impl->fail("Stop recording before importing audio.");
-    requireControlThread();if(auto r=impl->preflight(revision);r.failed())return r;
+    requireControlThread();if(auto r=impl->preflight(revision);r.failed())return r;impl->cancelEffectGesture();
     if(files.isEmpty())return impl->fail("Choose an audio file.");auto state=impl->capture();
     if(state.tracks.size()+size_t(files.size())>storage::maximumTracks)return impl->fail("Track limit exceeded.");
     for(const auto& file:files){AudioInfo info;if(auto r=inspectAudio(file,info);r.failed())return impl->fail(r.getErrorMessage());
@@ -232,7 +259,7 @@ juce::Result EngineSession::newProject(std::uint64_t expected)
 {
     if(impl->nativePending)return impl->fail("Wait for the native instrument edit before creating a project.");
     if(impl->recordingBusy())return impl->fail("Stop recording before creating a project.");
-    requireControlThread();if(auto r=impl->preflight(expected);r.failed())return r;
+    requireControlThread();if(auto r=impl->preflight(expected);r.failed())return r;impl->cancelEffectGesture();
     storage::StoredProject state;state.projectId=uid();std::unique_ptr<te::Edit> next;std::vector<Impl::Binding> bs;
     if(auto r=impl->build(state,next,bs);r.failed())return r;auto rev=impl->guard.revision()+1;
     impl->guard=commands::RevisionGuard(state.projectId.toStdString(),rev);impl->adopt(std::move(next),std::move(bs),{});impl->projectFile={};
@@ -243,7 +270,7 @@ juce::Result EngineSession::saveProject(const juce::File& file,std::uint64_t exp
     if(impl->nativePending)return impl->fail("Wait for the native instrument edit before saving.");
     // Test/legacy compatibility only. GUI and Agent use the asynchronous save_project job.
     if(impl->recordingBusy())return impl->fail("Stop recording before saving a project.");
-    requireControlThread();if(auto r=impl->preflight(expected);r.failed())return r;impl->finishGesture();auto state=impl->capture();
+    requireControlThread();if(auto r=impl->preflight(expected);r.failed())return r;impl->cancelEffectGesture();impl->finishGesture();auto state=impl->capture();
     if(auto r=impl->capturePluginStates(state);r.failed())return impl->fail(r.getErrorMessage());storage::StoredProject archived;
     storage::IOOptions options;if(auto r=impl->nativeAssetHashes(state,options.expectedAssetHashes);r.failed())return impl->fail(r.getErrorMessage());
     if(auto r=storage::save(file,state,archived,options);r.failed())return impl->fail(r.getErrorMessage());
@@ -253,7 +280,7 @@ juce::Result EngineSession::openProject(const juce::File& file,std::uint64_t exp
 {
     if(impl->nativePending)return impl->fail("Wait for the native instrument edit before opening a project.");
     if(impl->recordingBusy())return impl->fail("Stop recording before opening a project.");
-    requireControlThread();if(auto r=impl->preflight(expected);r.failed())return r;storage::StoredProject state;
+    requireControlThread();if(auto r=impl->preflight(expected);r.failed())return r;impl->cancelEffectGesture();storage::StoredProject state;
     if(auto r=storage::load(file,state);r.failed())return impl->fail(r.getErrorMessage());
     if(state.revision>=std::uint64_t(std::numeric_limits<juce::int64>::max())-1)return impl->fail("Project revision is too large.");
     std::unique_ptr<te::Edit> next;std::vector<Impl::Binding> bs;if(auto r=impl->build(state,next,bs);r.failed())return r;
@@ -270,7 +297,7 @@ juce::Result EngineSession::setTrackSolo(const juce::String& id,bool v,std::uint
 juce::Result EngineSession::removeTrack(const juce::String& id,std::uint64_t rev){return execute("remove_track",object({{"track_id",id}}),rev);}
 juce::Result EngineSession::undo(std::uint64_t rev){return execute("undo",object({}),rev);}
 juce::Result EngineSession::redo(std::uint64_t rev){return execute("redo",object({}),rev);}
-void EngineSession::beginEditGesture(){requireControlThread();impl->finishGesture();impl->edit->getUndoManager().beginNewTransaction("Adjust gain");impl->gesture=true;}
+void EngineSession::beginEditGesture(){requireControlThread();impl->cancelEffectGesture();impl->finishGesture();impl->edit->getUndoManager().beginNewTransaction("Adjust gain");impl->gesture=true;}
 void EngineSession::endEditGesture(){requireControlThread();impl->finishGesture();}
 void EngineSession::togglePlay(){
     ++impl->analysisPreviewGeneration;if(impl->analysisPreview)impl->analysisPreview->stop();
@@ -294,7 +321,8 @@ juce::var EngineSession::capabilities()const
     for(const auto* name:{"get_analysis_capabilities","start_analysis","get_analysis_job","cancel_analysis_job","get_analysis_result","accept_analysis_result","apply_beat_analysis","get_chord_regions","edit_chord_region","preview_analysis_stem","stop_analysis_preview","get_analysis_preview_status","get_audio_warp","set_audio_warp"})commands.add(name);
     for(const auto* name:{"get_capabilities","get_snapshot","get_project_state","get_jobs","get_job","get_events","get_clip_notes","create_track","rename_track","reorder_track","remove_track","set_track_gain","set_track_pan","set_track_muted","set_track_solo","set_master_gain","set_loop","set_loop_range","set_tempo","set_time_signature","move_clip","move_clips","trim_clip","split_clip","duplicate_clips","delete_clips","set_clip_fades","create_midi_clip","write_notes","batch","undo","redo","import_audio","import_midi","save_project","open_project","export_wav","export_midi","scan_plugins","cancel_job","add_plugin","remove_plugin","move_plugin","set_plugin_enabled","open_plugin","new_project","play","pause","stop","seek"})commands.add(name);
     for(const auto* command:{"get_recording_preferences","set_recording_preferences","reset_meters","get_clipboard_state","copy_clips","cut_clips","paste_clips"})commands.add(command);
-    commands.add("get_native_effect");commands.add("add_native_effect");commands.add("set_native_effect");
+    for(const auto* name:{"begin_native_effect_gesture","update_native_effect_gesture","end_native_effect_gesture","cancel_native_effect_gesture"})commands.add(name);
+    commands.add("set_track_colour");commands.add("get_native_effect");commands.add("add_native_effect");commands.add("set_native_effect");
     commands.add("get_track_clips");commands.add("get_plugin_catalog");commands.add("get_plugin_parameters");commands.add("set_plugin_parameter");commands.add("edit_notes");commands.add("get_save_diagnostics");
     for(const auto* command:{"get_recording_state","get_recording_inputs","get_audio_devices","configure_audio_device","set_track_input","set_track_armed","set_input_monitor","start_recording","stop_recording","set_track_output","add_send","update_send","remove_send","get_automation_targets","get_automation_points","set_automation_lane","remove_automation_lane","get_clip_controllers"})commands.add(command);
     // Non-audio-thread contract consumed by Agent and release tests. Effect
@@ -340,7 +368,7 @@ juce::var EngineSession::snapshotJson()const
     for(const auto& t:s.tracks){juce::Array<juce::var> clips;for(const auto& c:t.clips){
         if(clips.size()>=64||remainingClips<=0)break;clips.add(controlClipJson(c));--remainingClips;}
         juce::Array<juce::var> sends;for(const auto& send:t.sends)sends.add(object({{"id",send.id},{"target_track_id",send.targetTrackId},{"gain_db",send.gainDb},{"pre_fader",send.preFader},{"enabled",send.enabled}}));
-        tracks.add(object({{"id",t.id},{"name",t.name},{"kind",t.kind},{"gain_db",t.gainDb},{"pan",t.pan},{"muted",t.muted},{"solo",t.solo},{"clips",clips},{"clip_count",int(t.clips.size())},{"clips_truncated",clips.size()<int(t.clips.size())},{"plugins",plugins(t.plugins)},{"input_device_id",t.inputDeviceId},{"output_target_id",t.outputTargetId},{"armed",t.armed},{"monitor",t.monitorMode},{"peak_left_db",t.peakLeftDb},{"peak_right_db",t.peakRightDb},{"input_peak_db",t.inputPeakDb},{"overloaded",t.overloaded},{"sends",sends},{"automation",controlLanesJson(t.automation)}}));}
+        tracks.add(object({{"id",t.id},{"name",t.name},{"kind",t.kind},{"colour",t.colour},{"gain_db",t.gainDb},{"pan",t.pan},{"muted",t.muted},{"solo",t.solo},{"clips",clips},{"clip_count",int(t.clips.size())},{"clips_truncated",clips.size()<int(t.clips.size())},{"plugins",plugins(t.plugins)},{"input_device_id",t.inputDeviceId},{"output_target_id",t.outputTargetId},{"armed",t.armed},{"monitor",t.monitorMode},{"peak_left_db",t.peakLeftDb},{"peak_right_db",t.peakRightDb},{"input_peak_db",t.inputPeakDb},{"overloaded",t.overloaded},{"sends",sends},{"automation",controlLanesJson(t.automation)}}));}
     for(const auto& j:s.jobs)jobs.add(jobSnapshotJson(j));
     for(const auto& c:s.pluginCatalog){if(catalog.size()>=256)break;catalog.add(controlCatalogJson(c));}
     return object({{"project_id",s.projectId},{"revision",juce::int64(s.revision)},{"name",s.projectName},{"dirty",s.dirty},{"bpm",s.bpm},{"numerator",s.numerator},{"denominator",s.denominator},{"duration_seconds",s.duration},{"position_seconds",s.position},{"playing",s.playing},{"looping",s.looping},{"loop_start_seconds",s.loopStart},{"loop_end_seconds",s.loopEnd},{"master_gain_db",s.gainDb},{"selection_context",selectionContext()},{"selected_track_id",s.selectedTrackId},{"selected_clip_id",s.selectedClipId},{"can_undo",s.canUndo},{"can_redo",s.canRedo},{"tracks",tracks},{"jobs",jobs},{"analysis_jobs",impl->analysisJobs()},{"plugin_catalog",catalog},{"plugin_catalog_total",int(s.pluginCatalog.size())},{"plugin_catalog_truncated",catalog.size()<int(s.pluginCatalog.size())},{"master_plugins",plugins(s.masterPlugins)},{"master_automation",controlLanesJson(s.masterAutomation)},{"recording",s.recording},{"recording_finalizing",s.recordingFinalizing},{"recording_error",s.recordingError},{"recording_preferences",impl->recording.preferences()},{"counting_in",s.countingIn},{"count_in_beats_remaining",s.countInBeatsRemaining},{"memory_working_set_bytes",s.memoryWorkingSetBytes},{"memory_private_bytes",s.memoryPrivateBytes},{"master_peak_left_db",s.masterPeakLeftDb},{"master_peak_right_db",s.masterPeakRightDb},{"master_overloaded",s.masterOverloaded},{"cpu_usage",s.cpuUsage},{"xruns",s.xruns},{"sample_rate",s.sampleRate},{"buffer_size",s.bufferSize},{"event_sequence",juce::int64(impl->eventSequence)}});

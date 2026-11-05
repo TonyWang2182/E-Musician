@@ -1,5 +1,6 @@
 #include "EngineSession.h"
 #include "MainComponent.h"
+#include "Branding.h"
 #include "PluginHost.h"
 #include "ControlServer.h"
 #include <juce_gui_extra/juce_gui_extra.h>
@@ -15,7 +16,7 @@ public:
     {
         // CTest must execute its own process even when the interactive app is open.
         const auto args = juce::StringArray::fromTokens(getCommandLineParameters(), true);
-        return args.contains("--agent-sidebar-smoke") || args.contains("--smoke-test") || args.contains("--review-project") || args.contains("--control-stdio")
+        return args.contains("--workspace-smoke") || args.contains("--agent-sidebar-smoke") || args.contains("--smoke-test") || args.contains("--review-project") || args.contains("--control-stdio")
             || args.contains("--plugin-scan-worker") || args.contains("--render-worker") || args.contains("--performance-test")
             || args.contains("--control-output-probe-child") || args.contains("--plugin-notification-test") || args.contains("--production-test");
     }
@@ -32,7 +33,7 @@ public:
         const int reviewIndex = args.indexOf("--review-project");
         const bool smoke = smokeIndex >= 0;
         const bool review = reviewIndex >= 0;
-        if (args.contains("--agent-sidebar-smoke") || (smoke && args.contains("--offline")) || args.contains("--production-test") || args.contains("--control-output-probe"))
+        if (args.contains("--workspace-smoke") || args.contains("--agent-sidebar-smoke") || (smoke && args.contains("--offline")) || args.contains("--production-test") || args.contains("--control-output-probe"))
             EngineSession::setOfflineTestMode(true);
         reviewMode = review;
         try {
@@ -54,6 +55,17 @@ public:
                 setApplicationReturnValue(result.wasOk() ? 0 : 1); quit(); return;
             }
             session = std::make_unique<EngineSession>();
+            if(args.contains("--workspace-smoke")){
+                if(args.size()!=3||args[0]!="--workspace-smoke"||!juce::File::isAbsolutePath(args[1])||args[2]!="--offline"){setApplicationReturnValue(2);quit();return;}
+                const juce::File directory(args[1]);require(!directory.exists(),"Workspace smoke output must be fresh");require(directory.createDirectory().wasOk(),"Create workspace smoke output");
+                window=std::make_unique<Window>(*session,false);
+                after(100,directory,[this,directory]{
+                    auto report=std::make_unique<juce::DynamicObject>();const auto engine=session->runWorkspaceEngineSmokeTest(*report,directory.getChildFile("engine"));
+                    directory.getChildFile("workspace-engine-report.json").replaceWithText(juce::JSON::toString(juce::var(report.release())));require(engine.wasOk(),engine.getErrorMessage());
+                    const auto ui=static_cast<MainComponent*>(window->getContentComponent())->runWorkspaceUISmoke(directory);require(ui.wasOk(),ui.getErrorMessage());
+                    setApplicationReturnValue(0);quit();
+                });return;
+            }
             const int agentSmoke=args.indexOf("--agent-sidebar-smoke");
             if(agentSmoke>=0){
                 if(args.size()!=3||agentSmoke!=0||!juce::File::isAbsolutePath(args[1])||args[2]!="--offline"){setApplicationReturnValue(2);quit();return;}
@@ -88,7 +100,7 @@ public:
                 const auto result=session->runPerformanceProbe(directory,seconds);require(result.wasOk(),result.getErrorMessage());
                 waitForPerformance(directory,seconds+180);return;
             }
-            window = std::make_unique<Window>(*session, !smoke && !review);
+            window = std::make_unique<Window>(*session, !smoke && !review, !smoke && !review);
             if(args.contains("--agent"))static_cast<MainComponent*>(window->getContentComponent())->showAgent();
             if (smoke) {
                 if (smokeIndex + 1 >= args.size()) { setApplicationReturnValue(2); quit(); return; }
@@ -126,7 +138,7 @@ public:
             }
         } catch (const std::exception& e) {
             std::cerr << e.what() << std::endl;
-            if (!smoke && !review && !args.contains("--agent-sidebar-smoke") && !args.contains("--control-stdio") && !args.contains("--production-test"))
+            if (!smoke && !review && !args.contains("--workspace-smoke") && !args.contains("--agent-sidebar-smoke") && !args.contains("--control-stdio") && !args.contains("--production-test"))
                 juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Unable to start", e.what());
             setApplicationReturnValue(1);
             quit();
@@ -288,17 +300,24 @@ private:
     }
     class Window final : public juce::DocumentWindow {
     public:
-        Window(EngineSession& session, bool visible)
+        Window(EngineSession& session, bool visible, bool showStartup=false)
             : DocumentWindow("E-musician " EMUSICIAN_APPLICATION_VERSION " - Audio workspace", juce::Colours::white, allButtons)
         {
             setUsingNativeTitleBar(true);
+            setIcon(brand::logo());
             setContentOwned(new MainComponent(session), true);
             setResizable(true, false);
             setResizeLimits(1000, 650, 2400, 1600);
-            centreWithSize(1280, 800);
+            centreWithSize(1440, 900);
+            addChildComponent(startup);
+            if(getContentComponent())startup.setBounds(getContentComponent()->getBounds());
             setVisible(visible);
+            if(showStartup)startup.start();
         }
+        void resized() override {DocumentWindow::resized();if(getContentComponent())startup.setBounds(getContentComponent()->getBounds());}
         void closeButtonPressed() override { juce::JUCEApplication::getInstance()->systemRequestedQuit(); }
+    private:
+        brand::Startup startup {EMUSICIAN_APPLICATION_VERSION};
     };
     std::unique_ptr<EngineSession> session;
     std::unique_ptr<Window> window;

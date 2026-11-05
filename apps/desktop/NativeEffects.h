@@ -37,6 +37,12 @@ public:
     // when the device is bypassed, inactive or no audio callback is running.
     float gainReductionDb() const noexcept { return reductionDb.load(std::memory_order_relaxed); }
     std::uint64_t meterSequence() const noexcept { return meterBlocks.load(std::memory_order_acquire); }
+    // Control-thread transient tuning; persistent state remains owned by Edit.
+    void previewSettings(const Settings&) noexcept;
+    void restorePublishedSettings() { publish(); }
+    // Read-only display lease. Audio captures bounded output frames while a UI
+    // reader polls; copying/FFT/painting happen outside the audio callback.
+    bool readSpectrum(std::array<float,2048>&,std::uint64_t&) const noexcept;
 private:
     void valueTreePropertyChanged(juce::ValueTree&, const juce::Identifier&) override;
     void publish();
@@ -57,6 +63,11 @@ private:
     std::atomic<bool> filterHigh{false},filterLfoOn{false};
     std::atomic<float> reductionDb{0};
     std::atomic<std::uint64_t> meterBlocks{0};
+    mutable std::atomic<unsigned> spectrumLease{0};
+    std::array<float,2048> spectrumPending{};
+    std::array<std::atomic<float>,2048> spectrumFrame{};
+    std::atomic<std::uint64_t> spectrumVersion{0};
+    std::size_t spectrumPosition=0;
     effects::Equalizer equalizer;
     effects::Compressor compressor;
     autofilter::Filter autoFilter;

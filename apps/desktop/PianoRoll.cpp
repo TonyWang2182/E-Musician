@@ -1,5 +1,6 @@
 #include "PianoRoll.h"
 #include "UiLanguage.h"
+#include "UiDesign.h"
 #include "core/time/EditGrid.hpp"
 #include <algorithm>
 #include <array>
@@ -9,8 +10,8 @@
 
 namespace emusician {
 namespace {
-const juce::Colour ink { 0xff171817 }, rule { 0xffc6c9c3 }, paper { 0xfffefefd }, quiet { 0xff626560 };
-juce::Font mono(float size) { return juce::Font(juce::FontOptions(juce::Font::getDefaultMonospacedFontName(), size, juce::Font::plain)); }
+const auto ink = design::ink, rule = design::rule, paper = design::paper, quiet = design::secondary;
+juce::Font mono(float size) { return design::numberFont(size); }
 bool isTextInput(const juce::Component* focus)
 {
     for (; focus != nullptr; focus = focus->getParentComponent()) if (dynamic_cast<const juce::TextEditor*>(focus) != nullptr) return true;
@@ -44,10 +45,33 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     explicit Impl(PianoRoll& c) : owner(c), grid(*this), horizontal(false), vertical(true)
     {
         for (juce::Component* item : std::initializer_list<juce::Component*> {
-                &grid, &horizontal, &vertical, &snap, &snapEnabled, &draw, &copy, &cut, &paste, &erase, &duplicate, &quantize,
+                &grid, &horizontal, &vertical, &snap, &snapEnabled, &draw, &edit, &copy, &cut, &paste, &erase, &duplicate, &quantize,
                 &down, &up, &velocity, &zoomOut, &zoomIn, &fit, &drums, &drumPitch, &drumBar }) owner.addAndMakeVisible(item);
-        for (auto* button : { &draw, &snapEnabled, &copy, &cut, &paste, &erase, &duplicate, &quantize, &down, &up, &zoomOut, &zoomIn, &fit, &drums }) button->getProperties().set("flat", true);
-        for (auto* button : { &draw, &snapEnabled, &copy, &cut, &paste, &erase, &duplicate, &quantize, &down, &up, &zoomOut, &zoomIn, &fit, &drums }) uiButton(*button, button->getButtonText());
+        for (auto* button : { &draw, &edit, &snapEnabled, &copy, &cut, &paste, &erase, &duplicate, &quantize, &down, &up, &zoomOut, &zoomIn, &fit, &drums }) button->getProperties().set("flat", true);
+        for (auto* button : { &draw, &edit, &snapEnabled, &copy, &cut, &paste, &erase, &duplicate, &quantize, &down, &up, &zoomOut, &zoomIn, &fit, &drums }) uiButton(*button, button->getButtonText());
+        edit.setTooltip("Copy, cut, paste, delete and duplicate notes. Keyboard shortcuts remain available.");
+        edit.onClick = [this] {
+            juce::PopupMenu menu;
+            menu.addItem(1, uiText("copy") + "  Ctrl+C", copy.isEnabled());
+            menu.addItem(2, uiText("cut") + "  Ctrl+X", cut.isEnabled());
+            menu.addItem(3, uiText("paste") + "  Ctrl+V", paste.isEnabled());
+            menu.addSeparator();
+            menu.addItem(4, uiText("delete") + "  Delete", erase.isEnabled());
+            menu.addItem(5, uiText("duplicate") + "  Ctrl+D", duplicate.isEnabled());
+            menu.addSeparator();
+            menu.addItem(6, uiText("pitch -") + "  -1 st", down.isEnabled());
+            menu.addItem(7, uiText("pitch +") + "  +1 st", up.isEnabled());
+            menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(edit),
+                [safe = juce::Component::SafePointer<PianoRoll>(&owner)](int item) {
+                    if (!safe) return;
+                    auto& p = *safe->impl;
+                    const std::array<juce::TextButton*, 7> actions { &p.copy, &p.cut, &p.paste, &p.erase, &p.duplicate, &p.down, &p.up };
+                    if (item > 0 && item <= int(actions.size())) {
+                        auto* action = actions[std::size_t(item - 1)];
+                        if (action->isEnabled() && action->onClick) action->onClick();
+                    }
+                });
+        };
         snap.addItem("1/4", 2); snap.addItem("1/8", 3); snap.addItem("1/16", 4); snap.addItem("1/32", 5);
         snap.addItem("1/64", 6);
         for (int power = 7; power <= 14; ++power) snap.addItem("1/" + juce::String(1 << power), power + 2);
@@ -249,7 +273,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
         const bool usable = clipId.isNotEmpty(); const bool chosen = usable && !selected.empty();
         for (auto* b : { &copy, &cut, &erase, &duplicate, &quantize, &down, &up }) b->setEnabled(chosen);
         paste.setEnabled(usable && clipboardProject == projectId && !clipboard.empty()); draw.setEnabled(usable);
-        velocity.setEnabled(chosen); drums.setEnabled(usable);
+        velocity.setEnabled(chosen); drums.setEnabled(usable); edit.setEnabled(usable);
         if (chosen && !velocityGesture) for (const auto& n : notes) if (selected.count(n.id)) {
             updating = true; velocity.setValue(n.velocity, juce::dontSendNotification); updating = false; break;
         }
@@ -441,15 +465,18 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     void paintGrid(juce::Graphics& g)
     {
         g.fillAll(paper); const auto area = plot();
-        if (clipId.isEmpty()) { g.setColour(quiet); g.setFont(mono(15)); g.drawFittedText(uiText("Select a MIDI clip to edit notes."), grid.getLocalBounds(), juce::Justification::centred, 2); return; }
+        if (clipId.isEmpty()) { g.setColour(quiet); g.setFont(design::labelFont(14)); g.drawFittedText(uiText("Select a MIDI clip to edit notes."), grid.getLocalBounds(), juce::Justification::centred, 2); return; }
+        g.setColour(design::panel); g.fillRect(0, 0, grid.getWidth(), rulerHeight());
         const int rows = int(std::ceil(area.getHeight() / rowHeight));
         for (int r = 0; r < rows; ++r) {
             const int pitch = topPitch - r; if (pitch < 0) break;
             const auto yy = area.getY() + r * rowHeight;
-            if (isBlack(pitch)) { g.setColour(ink.withAlpha(0.035f)); g.fillRect(area.getX(), yy, area.getWidth(), rowHeight); }
+            if (isBlack(pitch)) { g.setColour(design::panel); g.fillRect(area.getX(), yy, area.getWidth(), rowHeight); }
             g.setColour(rule.withAlpha(pitch % 12 == 0 ? 1.0f : 0.45f)); g.drawHorizontalLine(juce::roundToInt(yy), 0, area.getRight());
             g.setColour(isBlack(pitch) ? ink : paper); g.fillRect(0.0f, yy + 1, 43.0f, rowHeight - 1);
-            g.setColour(isBlack(pitch) ? paper : ink); g.setFont(mono(12)); g.drawText(pitchName(pitch), 3, juce::roundToInt(yy), 38, int(rowHeight), juce::Justification::centredRight);
+            if (rowHeight >= 12.0f || pitch % 12 == 0) {
+                g.setColour(isBlack(pitch) ? paper : ink); g.setFont(mono(11)); g.drawText(pitchName(pitch), 3, juce::roundToInt(yy), 38, int(rowHeight), juce::Justification::centredRight);
+            }
         }
         lastPaintedTimeLines = 0;
         const auto timeLine = [&](float xx, float opacity) {
@@ -489,18 +516,19 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
             juce::Graphics::ScopedSaveState save(g); g.reduceClipRegion(area.toNearestInt());
             for (const auto& v : visible) {
                 const auto& n = notes[v.first]; const bool chosen = selected.count(n.id) != 0;
-                g.setColour(chosen ? ink : rule); g.fillRect(v.second);
-                g.setColour(ink); g.drawRect(v.second, chosen ? 1.5f : 0.8f);
-                if (v.second.getWidth() > 35) { g.setColour(chosen ? paper : ink); g.setFont(mono(10)); g.drawText(pitchName(n.pitch), v.second.toNearestInt().reduced(3, 0), juce::Justification::centredLeft); }
+                g.setColour(chosen ? ink : design::trackFill(trackColour)); g.fillRect(v.second);
+                g.setColour(chosen ? ink : design::trackColour(trackColour).darker(0.45f)); g.drawRect(v.second, chosen ? 1.5f : 0.8f);
+                if (v.second.getWidth() > 38 && rowHeight >= 12.0f) { g.setColour(chosen ? paper : ink); g.setFont(mono(11)); g.drawText(pitchName(n.pitch), v.second.toNearestInt().reduced(3, 0), juce::Justification::centredLeft); }
             }
             if (drag.mode == Drag::box && drag.changed) { g.setColour(ink.withAlpha(0.08f)); g.fillRect(drag.selectionBox); g.setColour(ink); g.drawRect(drag.selectionBox); }
         }
+        g.setColour(design::panel); g.fillRect(0.0f, area.getBottom(), float(grid.getWidth()), float(grid.getHeight()) - area.getBottom());
         g.setColour(rule); g.drawHorizontalLine(juce::roundToInt(area.getBottom()), 0, float(grid.getWidth()));
         const float velocityHeight = veryCompact() ? 10.0f : owner.getHeight() < 300 ? 18.0f : 35.0f;
-        g.setFont(mono(10)); g.setColour(quiet); g.drawText("vel", 2, int(area.getBottom()), 40, int(velocityHeight), juce::Justification::centred);
+        g.setFont(design::labelFont(11)); g.setColour(quiet); g.drawText(uiText("velocity"), 2, int(area.getBottom()), 44, int(velocityHeight), juce::Justification::centred);
         for (const auto& v : visible) {
             const auto& n = notes[v.first]; const float h = float(n.velocity) / 127.0f * velocityHeight;
-            g.setColour(selected.count(n.id) ? ink : quiet); g.fillRect(v.second.getX(), float(grid.getHeight()) - h - 3, 2.0f, h);
+            g.setColour(selected.count(n.id) ? ink : design::trackColour(trackColour).darker(0.3f)); g.fillRect(v.second.getX(), float(grid.getHeight()) - h - 3, 3.0f, h);
         }
         const auto head = x(playheadBeat - clipStart);
         if (head >= area.getX() && head <= area.getRight()) { g.setColour(ink.withAlpha(playing ? 1.0f : 0.45f)); g.drawVerticalLine(juce::roundToInt(head), 0, float(grid.getHeight())); }
@@ -518,7 +546,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     juce::ScrollBar horizontal, vertical;
     juce::ComboBox snap, drumPitch;
     juce::TextEditor drumBar;
-    juce::TextButton draw { "draw B" }, snapEnabled { "snap" }, copy { "copy" }, cut { "cut" }, paste { "paste" };
+    juce::TextButton draw { "draw [B]" }, edit { "edit" }, snapEnabled { "snap" }, copy { "copy" }, cut { "cut" }, paste { "paste" };
     juce::TextButton erase { "delete" }, duplicate { "duplicate" }, quantize { "quantize" }, down { "-1 st" }, up { "+1 st" };
     juce::TextButton zoomOut { "-" }, zoomIn { "+" }, fit { "fit" }, drums { "drum steps" };
     juce::Slider velocity;
@@ -535,7 +563,8 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     std::set<juce::String> reportedSelection;
     juce::String reportedClip;
     std::uint64_t selectionGeneration = 0;
-    juce::String projectId, clipId, name, clipboardProject, editError;
+    juce::String projectId, clipId, name, clipboardProject, editError, trackColour;
+    juce::Rectangle<int> velocityLabel;
     std::uint64_t revision = 0, gestureRevision = 0;
     double clipStart = 0, length = 4, bpm = 120, firstBeat = 0, pixelsPerBeat = 80, gridBeats = 0.25, playheadBeat = 0, barBeats = 4, beatUnit = 1, insertionBeat = 0;
     float rowHeight = 18;
@@ -557,6 +586,12 @@ void PianoRoll::setTimeSignature(int numerator, int denominator)
 {
     const double next = time::beatsPerBar(numerator, denominator), unit = 4.0 / juce::jmax(1, denominator);
     if (next != impl->barBeats || unit != impl->beatUnit) { impl->barBeats = next; impl->beatUnit = unit; impl->timeSignatureNumerator = numerator; impl->timeSignatureDenominator = denominator; impl->grid.repaint(); }
+}
+void PianoRoll::setTrackColour(const juce::String& colour)
+{
+    if (impl->trackColour == colour) return;
+    impl->trackColour = colour;
+    impl->grid.repaint();
 }
 void PianoRoll::setClip(const juce::String& projectId, const juce::String& clipId, const juce::String& name,
                        std::uint64_t revision, double startBeats, double lengthBeats, double bpm,
@@ -606,26 +641,37 @@ void PianoRoll::setPlayhead(double seconds, bool playing)
 void PianoRoll::resized()
 {
     refreshUiButtons(*this);
-    auto& p = *impl; auto top = getLocalBounds().reduced(12).removeFromTop(30);
-    // Allow for the host's 15 px monospaced labels and 8 px button insets.
-    // Keep transpose in the second row so labels fit even in the 726 px dock.
-    p.draw.setBounds(top.removeFromLeft(72)); p.snapEnabled.setBounds(top.removeFromLeft(60));
-    p.snap.setBounds(top.removeFromLeft(102)); top.removeFromLeft(8);
-    p.erase.setBounds(top.removeFromLeft(76)); p.duplicate.setBounds(top.removeFromLeft(104)); p.quantize.setBounds(top.removeFromLeft(96));
-    p.zoomOut.setBounds(top.removeFromLeft(32)); p.zoomIn.setBounds(top.removeFromLeft(32)); p.fit.setBounds(top.removeFromLeft(48));
+    auto& p = *impl;
+    const bool singleRow = getWidth() >= 840;
+    auto top = juce::Rectangle<int>(12, 8, juce::jmax(1, getWidth() - 24), 28);
+    // Routine commands share the Edit menu and existing shortcuts. The grid,
+    // drawing, quantize and zoom controls stay visible beside an open Agent.
+    for (auto* b : { &p.copy, &p.cut, &p.paste, &p.erase, &p.duplicate }) { b->setVisible(false); b->setBounds({}); }
+    p.draw.setBounds(top.removeFromLeft(64)); p.snapEnabled.setBounds(top.removeFromLeft(48));
+    p.snap.setBounds(top.removeFromLeft(90)); top.removeFromLeft(6);
+    p.edit.setBounds(top.removeFromLeft(52)); p.quantize.setBounds(top.removeFromLeft(76));
+    if (singleRow) {
+        p.down.setBounds(top.removeFromLeft(48)); p.up.setBounds(top.removeFromLeft(48)); top.removeFromLeft(8);
+        p.velocityLabel = top.removeFromLeft(50); p.velocity.setBounds(top.removeFromLeft(116)); top.removeFromLeft(8);
+        p.drums.setBounds(top.removeFromRight(90));
+    } else {
+        auto second = juce::Rectangle<int>(12, 40, juce::jmax(1, getWidth() - 24), 26);
+        p.velocityLabel = second.removeFromLeft(50); p.velocity.setBounds(second.removeFromLeft(134)); second.removeFromLeft(6);
+        p.down.setBounds(second.removeFromLeft(48)); p.up.setBounds(second.removeFromLeft(48));
+        p.drums.setBounds(second.removeFromRight(90));
+        top.removeFromLeft(8);
+    }
+    p.zoomOut.setBounds(top.removeFromLeft(24)); p.zoomIn.setBounds(top.removeFromLeft(24)); p.fit.setBounds(top.removeFromLeft(40));
     const bool drumMode = p.drums.getToggleState();
     const bool compact = getHeight() < 300;
     const bool stepOnly = compact && drumMode;
     p.grid.setVisible(!stepOnly); p.horizontal.setVisible(!stepOnly); p.vertical.setVisible(!stepOnly);
-    const auto gridTop = compact ? 76 : 82;
-    const auto gridHeight = p.veryCompact() ? juce::jmax(1, getHeight() - gridTop - 17)
-        : juce::jmax(62, getHeight() - (compact ? 110 : drumMode ? 190 : 134));
+    const auto gridTop = singleRow ? 42 : 72;
+    const auto bottomSpace = p.veryCompact() ? 17 : compact ? 34 : drumMode ? 108 : 50;
+    const auto gridHeight = juce::jmax(1, getHeight() - gridTop - bottomSpace);
     p.grid.setBounds(12, gridTop, getWidth() - 38, gridHeight);
     p.horizontal.setBounds(60, p.grid.getBottom() + 2, getWidth() - 86, 13);
     p.vertical.setBounds(p.grid.getRight() + 2, p.grid.getY() + p.rulerHeight(), 13, int(p.plot().getHeight()));
-    p.velocity.setBounds(82, 46, 205, 27); p.drums.setBounds(getWidth() - 138, 46, 122, 27);
-    p.copy.setBounds(292, 46, 56, 27); p.cut.setBounds(348, 46, 48, 27); p.paste.setBounds(396, 46, 60, 27);
-    p.down.setBounds(456, 46, 64, 27); p.up.setBounds(520, 46, 64, 27);
     p.drumPitch.setVisible(drumMode); p.drumBar.setVisible(drumMode);
     p.drumPitch.setBounds(12, getHeight() - 62, 150, 28); p.drumBar.setBounds(170, getHeight() - 62, 44, 28);
     const auto stepWidth = (getWidth() - 236) / 16;
@@ -634,8 +680,11 @@ void PianoRoll::resized()
 }
 void PianoRoll::paint(juce::Graphics& g)
 {
-    auto& p = *impl; g.fillAll(paper); g.setColour(quiet); g.setFont(mono(12));
-    g.drawText(uiText("velocity"), 12, 46, 70, 27, juce::Justification::centredLeft);
+    auto& p = *impl; g.fillAll(paper);
+    g.setColour(design::panel); g.fillRect(0, 0, getWidth(), p.grid.getY() - 4);
+    g.setColour(rule); g.drawHorizontalLine(p.grid.getY() - 4, 12.0f, float(getWidth() - 12));
+    g.setColour(quiet); g.setFont(design::labelFont(12));
+    g.drawText(uiText("velocity"), p.velocityLabel, juce::Justification::centredLeft);
     if (p.drums.getToggleState()) g.drawText(uiText("block"), 170, getHeight() - 80, 44, 18, juce::Justification::centredLeft);
     // The minimum main-window dock has only 156 px after its title bar. Tooltips
     // and the main status line retain help/errors; reserve its lower area for notes.
@@ -977,6 +1026,23 @@ juce::Result PianoRoll::runInteractionSmokeTest(juce::DynamicObject& report, con
             if (!writeImage(image, "piano-full-row-rectangles.png")) return fail("Could not write rectangular piano note evidence.");
             report.setProperty("midi_rectangle_unsnapped_duration_preserved", true);
             report.setProperty("midi_rectangle_full_row_pixels", true);
+            const auto unselected = r.noteRectangle(0);
+            const auto point = juce::Point<int>(int(unselected.getRight()) - 5, int(unselected.getCentreY()));
+            const auto previousPixel = image.getPixelAt(point.x, point.y);
+            const auto indexBuildsBeforeColour = r.indexBuilds;
+            rectangles.setTrackColour("#91A7C3");
+            juce::Image coloured(juce::Image::RGB, r.grid.getWidth(), r.grid.getHeight(), true);
+            { juce::Graphics graphics(coloured); r.paintGrid(graphics); }
+            if (coloured.getPixelAt(point.x, point.y) != design::trackFill("#91A7C3")
+                || coloured.getPixelAt(sampleX, firstRowPixel) != image.getPixelAt(sampleX, firstRowPixel)
+                || r.revision != 1 || r.indexBuilds != indexBuildsBeforeColour)
+                return fail("Track colour did not update the note projection without changing its dark selection or rebuilding the note index.");
+            if (!writeImage(coloured, "piano-track-colour.png")) return fail("Could not write track-colour piano evidence.");
+            rectangles.setTrackColour("");
+            { juce::Graphics graphics(coloured); r.paintGrid(graphics); }
+            if (coloured.getPixelAt(point.x, point.y) != previousPixel)
+                return fail("Resetting track colour did not restore the default note projection.");
+            report.setProperty("midi_track_colour_projection_and_reset", true);
         }
         q.snapEnabled.setToggleState(true, juce::dontSendNotification);
         for (const auto [scale, tier] : std::array<std::pair<double, int>, 3> { { { 12, 0 }, { 80, 1 }, { 400, 2 } } }) {
@@ -1046,10 +1112,27 @@ juce::Result PianoRoll::runInteractionSmokeTest(juce::DynamicObject& report, con
     p.drums.setToggleState(false, juce::dontSendNotification); setSize(726, 156); resized();
     if (!p.veryCompact() || !p.grid.isVisible() || p.plot().getHeight() < 24 || p.plot().getWidth() <= 0
         || p.fit.getRight() > getWidth() - 12 || p.velocity.getBottom() > p.grid.getY()
-        || p.paste.getRight() >= p.drums.getX() || p.grid.getBottom() >= p.horizontal.getY()
+        || p.up.getRight() >= p.drums.getX() || p.grid.getBottom() >= p.horizontal.getY()
         || p.horizontal.getBottom() > getHeight() || p.vertical.getBottom() > p.grid.getBottom())
         return fail("The 156-pixel minimum piano dock has overlapping controls or unusable note/scroll regions.");
     report.setProperty("midi_minimum_dock_geometry", true);
+    for (const auto width : { 540, 726, 1000 }) {
+        setSize(width, 224); resized();
+        const std::array<juce::Component*, 13> tools { &p.draw, &p.edit, &p.snapEnabled, &p.snap, &p.quantize, &p.down, &p.up,
+            &p.velocity, &p.zoomOut, &p.zoomIn, &p.fit, &p.drums, &p.grid };
+        for (std::size_t a = 0; a < tools.size(); ++a) {
+            if (!tools[a]->isVisible() || !getLocalBounds().contains(tools[a]->getBounds()))
+                return fail("A visible piano tool falls outside its narrow workspace.");
+            for (std::size_t b = a + 1; b < tools.size(); ++b)
+                if (tools[a]->getBounds().intersects(tools[b]->getBounds()))
+                    return fail("Piano tools overlap in the shared workspace.");
+        }
+        if (width >= 840 && (p.velocity.getY() != p.draw.getY() || p.drums.getY() != p.draw.getY()))
+            return fail("Wide piano toolbar did not fit into one row.");
+        if (p.copy.isVisible() || p.cut.isVisible() || p.paste.isVisible() || !p.edit.isEnabled())
+            return fail("Piano edit menu did not replace repeated toolbar actions.");
+    }
+    report.setProperty("midi_compact_toolbar_shared_workspace", true);
     setSize(1000, 580);
     setClip("ui-test", "ui-test-clip", "MIDI interaction", acceptedRevision, 0, 8, 120, accepted);
     p.drums.setToggleState(true, juce::dontSendNotification);

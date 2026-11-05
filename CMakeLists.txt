@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(EMusician VERSION 0.10.0 LANGUAGES C CXX)
+project(EMusician VERSION 0.11.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -104,13 +104,18 @@ if(EMUSICIAN_BUILD_DESKTOP)
     target_compile_definitions(emusician_native_instrument_tests PRIVATE JUCE_USE_CURL=0 JUCE_USE_MP3AUDIOFORMAT=1
         JUCE_PLUGINHOST_VST3=1 JUCE_PLUGINHOST_VST=1 JUCE_ASIO=1 TRACKTION_ENABLE_TIMESTRETCH_SOUNDTOUCH=0)
     target_link_libraries(emusician_native_instrument_tests PRIVATE tracktion::tracktion_engine tracktion::tracktion_graph
-        tracktion::tracktion_core juce::juce_audio_utils juce::juce_cryptography juce::juce_recommended_config_flags)
+        tracktion::tracktion_core juce::juce_audio_utils juce::juce_cryptography juce::juce_dsp juce::juce_recommended_config_flags)
     if(MSVC)
         target_compile_options(emusician_native_instrument_tests PRIVATE /utf-8 /bigobj)
     endif()
     add_test(NAME native_instrument.contracts COMMAND emusician_native_instrument_tests)
+    juce_add_binary_data(EMusicianBrand NAMESPACE emusician_brand HEADER_NAME BrandAssets.h
+        SOURCES assets/brand/yi-yue-shi-logo.png)
     juce_add_gui_app(EMusician PRODUCT_NAME "E-musician" COMPANY_NAME "E-musician"
-        BUNDLE_ID "local.emusician.desktop" NEEDS_WEBVIEW2 TRUE)
+        BUNDLE_ID "local.emusician.desktop" NEEDS_WEBVIEW2 TRUE
+        ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/assets/brand/yi-yue-shi-logo.png"
+        ICON_SMALL "${CMAKE_CURRENT_SOURCE_DIR}/assets/brand/yi-yue-shi-logo.png")
+    target_link_libraries(EMusician PRIVATE EMusicianBrand)
     if(WIN32)
         # JUCE 8.0.6 omits its Info.txt dependency for generated Windows resources.
         # Keep Explorer's file/product version current on incremental builds.
@@ -155,6 +160,10 @@ if(EMUSICIAN_BUILD_DESKTOP)
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/RunEngineSmoke.py"
         "$<TARGET_FILE:EMusician>" "${CMAKE_CURRENT_SOURCE_DIR}/build/smoke/$<CONFIG>")
     set_tests_properties(engine.integration_smoke PROPERTIES TIMEOUT 260 RUN_SERIAL TRUE)
+    add_test(NAME workspace.brand_colour COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/RunWorkspaceSmoke.py"
+        "$<TARGET_FILE:EMusician>" "${CMAKE_CURRENT_SOURCE_DIR}/build/workspace-smoke")
+    set_tests_properties(workspace.brand_colour PROPERTIES TIMEOUT 150 RUN_SERIAL TRUE)
     if(WIN32)
         add_test(NAME control.output_isolation COMMAND "${Python3_EXECUTABLE}"
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/ControlOutputSmoke.py"

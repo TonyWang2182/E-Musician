@@ -27,14 +27,15 @@ void Filter::process(float* left,float* right,int frames,double rate,const Setti
     if(!left||frames<=0||!std::isfinite(rate)||rate<1000||rate>384000||!valid(settings))return;
     if(right==left)right=nullptr;
     if(sampleRate!=rate){channels[0]={};channels[1]={};sampleRate=rate;untilUpdate=0;initialised=false;}
-    if(!initialised){frequency=settings.frequencyHz;resonance=settings.resonanceQ;mix=settings.dryWet;depth=settings.lfoEnabled?settings.lfoDepth:0;currentMode=settings.mode;initialised=true;}
+    if(!initialised){frequency=settings.frequencyHz;resonance=settings.resonanceQ;mix=settings.dryWet;depth=settings.lfoEnabled?settings.lfoDepth:0;lfoRate=settings.lfoHz;currentMode=settings.mode;initialised=true;}
     const double smooth=1-std::exp(-16.0/(rate*.01));
-    const double mixStep=1.0/(rate*.005),phaseStep=2*std::numbers::pi*double(settings.lfoHz)/rate;
+    const double mixStep=1.0/(rate*.005);
     constexpr auto maximum=double(std::numeric_limits<float>::max());
     for(int i=0;i<frames;++i){
         if(untilUpdate==0){
             frequency+=(double(settings.frequencyHz)-frequency)*smooth;
             resonance+=(double(settings.resonanceQ)-resonance)*smooth;
+            lfoRate+=(double(settings.lfoHz)-lfoRate)*smooth;
             depth+=((settings.lfoEnabled?double(settings.lfoDepth):0.0)-depth)*smooth;
             // Mode changes are explicit and coefficients update at most 16 samples later.
             currentMode=settings.mode;
@@ -52,7 +53,7 @@ void Filter::process(float* left,float* right,int frames,double rate,const Setti
             if(!std::isfinite(filtered)||!std::isfinite(state.z1)||!std::isfinite(state.z2)){state={};buffer[i]=0;}
             else buffer[i]=float(std::clamp(input*(1-mix)+filtered*mix,-maximum,maximum));
         }
-        phase+=phaseStep;if(phase>=2*std::numbers::pi)phase-=2*std::numbers::pi;
+        phase+=2*std::numbers::pi*lfoRate/rate;if(phase>=2*std::numbers::pi)phase-=2*std::numbers::pi;
     }
     for(auto& c:channels){if(std::abs(c.z1)<1e-20)c.z1=0;if(std::abs(c.z2)<1e-20)c.z2=0;}
 }

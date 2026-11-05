@@ -8,6 +8,9 @@
 #include "NativeDevicePanel.h"
 #include "NativeEffectsPanel.h"
 #include "DeviceChainStrip.h"
+#include "UiDesign.h"
+#include "Branding.h"
+#include "WorkspaceBrowser.h"
 #include "UiLanguage.h"
 #include "WorkflowPanels.h"
 #include "core/time/MusicalPosition.hpp"
@@ -101,31 +104,31 @@ public:
         setColour(juce::TooltipWindow::outlineColourId, rule);
         setColour(juce::ScrollBar::thumbColourId, rule);
     }
-    juce::Font getTextButtonFont(juce::TextButton&, int) override { return mono(15.0f); }
+    juce::Font getTextButtonFont(juce::TextButton&, int) override { return design::labelFont(13.0f); }
     juce::Font getLabelFont(juce::Label& label) override { return label.getFont(); }
-    juce::Font getComboBoxFont(juce::ComboBox&) override { return mono(14.0f); }
+    juce::Font getComboBoxFont(juce::ComboBox&) override { return design::labelFont(13.0f); }
     void drawButtonBackground(juce::Graphics& g, juce::Button& button, const juce::Colour&, bool over, bool down) override
     {
         const auto bounds = button.getLocalBounds().toFloat().reduced(1.5f);
         const bool flat = static_cast<bool>(button.getProperties()["flat"]);
         if (button.isEnabled() && (over || down || button.getToggleState())) {
-            g.setColour(button.getToggleState() ? ink : ink.withAlpha(down ? 0.12f : 0.055f));
-            g.fillRoundedRectangle(bounds, flat ? 2.0f : bounds.getHeight() * 0.5f);
+            g.setColour(button.getToggleState() ? ink : design::accent.withAlpha(down ? 0.7f : 0.4f));
+            g.fillRoundedRectangle(bounds, 3.0f);
         }
         if (! flat) {
-            g.setColour(button.isEnabled() ? ink : rule);
-            g.drawRoundedRectangle(bounds, bounds.getHeight() * 0.5f, 1.0f);
+            g.setColour(button.isEnabled() && over ? ink : rule);
+            g.drawRoundedRectangle(bounds, 3.0f, 1.0f);
         }
         if (button.hasKeyboardFocus(true)) {
-            g.setColour(ink);
-            g.drawRoundedRectangle(bounds.reduced(3.0f), flat ? 2.0f : bounds.getHeight() * 0.5f, 1.5f);
+            g.setColour(design::focus);
+            g.drawRoundedRectangle(bounds.reduced(2.0f), 3.0f, 1.5f);
         }
     }
     void drawButtonText(juce::Graphics& g, juce::TextButton& button, bool, bool) override
     {
         g.setColour(button.isEnabled() ? (button.getToggleState() ? paper : ink) : secondary);
-        g.setFont(mono(15.0f));
-        g.drawFittedText(button.getButtonText(), button.getLocalBounds().reduced(8, 2), juce::Justification::centred, 1);
+        g.setFont(design::labelFont(13.0f));
+        g.drawFittedText(button.getButtonText(), button.getLocalBounds().reduced(5, 2), juce::Justification::centred, 1);
     }
     void drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height, float position,
                           float, float, juce::Slider::SliderStyle, juce::Slider& slider) override
@@ -150,7 +153,8 @@ public:
         const bool active = getToggleState();
         const juce::Rectangle<float> disc(2.0f, cy - 16.0f, 32.0f, 32.0f);
         g.setColour(colour);
-        if (active || down) g.fillEllipse(disc); else g.drawEllipse(disc, over ? 1.7f : 1.0f);
+        if(getWidth()<60){if(active||down)g.fillRoundedRectangle(bounds.reduced(1),3);else {g.setColour(over?ink:rule);g.drawRoundedRectangle(bounds.reduced(1),3,1);}}
+        else if (active || down) g.fillEllipse(disc); else g.drawEllipse(disc, over ? 1.7f : 1.0f);
         g.setColour(active || down ? paper : colour);
         if (kind == play && active) {
             g.fillRect(juce::Rectangle<float>(13.0f, cy - 6.0f, 3.0f, 12.0f));
@@ -172,7 +176,7 @@ public:
             g.strokePath(arrow, juce::PathStrokeType(1.4f));
         }
         g.setColour(colour); g.setFont(mono(15.0f));
-        g.drawText(uiText(kind == play && active ? "pause" : getName()), 45, 0, getWidth() - 45, getHeight(), juce::Justification::centredLeft);
+        if(getWidth()>=60)g.drawText(uiText(kind == play && active ? "pause" : getName()), 45, 0, getWidth() - 45, getHeight(), juce::Justification::centredLeft);
         if (hasKeyboardFocus(true)) g.drawRoundedRectangle(bounds.reduced(0.5f), 3.0f, 1.0f);
     }
 private:
@@ -887,11 +891,24 @@ struct MainComponent::Impl : private juce::ListBoxModel {
             &arrangement, &zoomOut, &zoomIn, &fit, &clipStart, &setClipStart,
             &editMenu, &exportMenu, &plugins, &tempo, &gridMode, &clipProperties, &trackPan, &cancelJob,
             &closeEditor, &expandEditor, &details, &saveStatus, &trackPanel, &record, &rulerMode, &snap, &follow,
-            &metronome, &metronomeOptions, &countIn, &countInBars, &resources, &meterReset, &agentButton, &deviceChain, &analyze };
+            &metronome, &metronomeOptions, &countIn, &countInBars, &resources, &meterReset, &agentButton, &deviceChain, &analyze,
+            &browser, &libraryButton, &fileMenu, &divider, &overview };
         for (auto* child : children) {
             owner.addAndMakeVisible(child);
             child->addKeyListener(&owner);
         }
+        fileMenu.onClick = [&component] { component.showFileMenu(); };
+        libraryButton.onClick = [this] { libraryVisible = !libraryVisible; owner.resized(); owner.repaint(); };
+        browser.onActivate = [&component](const WorkspaceBrowser::Item& item) { component.activateLibrary(item.kind, item.id); };
+        overview.onReveal = [this](double seconds) { arrangement.revealPosition(seconds); owner.repaint(); };
+        divider.onDrag = [this](int delta, bool finished) {
+            if (dockDragStart < 0) dockDragStart = dockBounds.getHeight();
+            dockHeightUser = juce::jmax(180, dockDragStart - delta);
+            owner.resized(); owner.repaint();
+            if (finished) dockDragStart = -1;
+        };
+        fileMenu.setTooltip("New, open, save and export project");
+        libraryButton.setTooltip("Show or hide the sound and device library (Ctrl+F to search)");
         for (auto* label : { &filename, &status, &saveStatus }) {
             label->setFont(mono(15.0f));
             label->setColour(juce::Label::textColourId, ink);
@@ -1200,7 +1217,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     }
     void layoutDeviceButtons()
     {
-        int y = 470;
+        int y = inspector.getY() + 326;
         for (auto& button : deviceButtons) {
             button->setBounds(inspector.getX(), y, inspector.getWidth(), 28);
             button->setVisible(inspectorDisplayed && y + 28 <= footerY - 12);
@@ -1264,6 +1281,10 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     WaveformView waveform;
     SelectedTrackPanel trackPanel;
     DeviceChainStrip deviceChain;
+    WorkspaceBrowser browser;
+    DockDivider divider;
+    ProjectOverview overview;
+    juce::TextButton libraryButton { "Library" }, fileMenu { "File" };
     juce::TooltipWindow tooltips;
     juce::ListBox trackList;
     juce::TextButton settings { "settings" }, importButton { "add audio" }, transcribe { "transcribe" }, compose { "compose" };
@@ -1312,13 +1333,15 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     EngineSession::Snapshot state;
     juce::String error, trackGestureId, startEditId;
     std::uint64_t startEditRevision = 0;
-    juce::Rectangle<int> library, workspace, inspector, dockBounds;
+    juce::Rectangle<int> library, workspace, inspector, dockBounds, positionBounds, titleBounds;
     enum class Dock { closed, source, midi, track, native, effect, analysis };
     Dock dock = Dock::closed;
     bool pianoExpanded = false;
     bool compactAnalysisFooter = false;
     unsigned languageRevision = 0;
-    bool inspectorVisible = true;
+    bool inspectorVisible = false;
+    bool libraryVisible = true, libraryDisplayed = true;
+    int dockHeightUser = -1, dockDragStart = -1;
     int footerY = 0;
     bool updatingList = false, confirming = false, composeActive = true, startInputDirty = false, updatingStartInput = false;
 };
@@ -1513,155 +1536,8 @@ juce::Result MainComponent::runAgentSidebarSmokeTest(const juce::File& directory
     return failure.isEmpty()?juce::Result::ok():juce::Result::fail(failure);
 }
 
-void MainComponent::resized()
-{
-    auto& p = *impl;
-    constexpr int margin = 16;
-    p.compactAnalysisFooter = (p.dock == Impl::Dock::analysis || p.dock == Impl::Dock::source) && getHeight() < 720;
-    p.footerY = getHeight() - (p.compactAnalysisFooter ? 86 : 110);
-    if (p.dock != Impl::Dock::midi) p.pianoExpanded = false;
-    const bool expanded = p.dock == Impl::Dock::midi && p.pianoExpanded;
-    const bool showSidebar = p.agentVisible && !expanded;
-    const int sidebarWidth=showSidebar?juce::jlimit(340,520,getWidth()/3):0;
-    const int workspaceRight=getWidth()-margin-(showSidebar?sidebarWidth+8:0);
-    p.inspectorDisplayed=p.inspectorVisible&&!p.agentVisible&&!expanded&&p.dock!=Impl::Dock::native&&p.dock!=Impl::Dock::effect&&p.dock!=Impl::Dock::analysis&&p.dock!=Impl::Dock::source;
-    const int inspectorWidth = p.inspectorDisplayed ? 226 : 0;
-    if(p.agentSidebar){p.agentSidebar->setBounds(workspaceRight+8,110,sidebarWidth,p.footerY-122);p.agentSidebar->setPanelVisible(showSidebar);}
-    p.agentButton.setBounds(getWidth()-margin-208,75,80,30);
-    p.agentButton.setToggleState(p.agentVisible,juce::dontSendNotification);
-    p.inspector = { workspaceRight - inspectorWidth, 144, inspectorWidth, p.footerY - 156 };
-    const int workspaceTop = expanded ? 112 : 144;
-    p.workspace = { margin, workspaceTop, workspaceRight-margin - (p.inspectorDisplayed ? inspectorWidth + 16 : 0), p.footerY - workspaceTop - 12 };
-    p.library = {};
-    p.trackList.setVisible(false); p.compose.setVisible(false); p.transcribe.setVisible(false); p.filename.setVisible(false);
-    auto header = juce::Rectangle<int>(getWidth() - 590, 14, 574, 32);
-    for (auto* b : { &p.newButton, &p.openButton, &p.saveButton, &p.saveAsButton, &p.exportMenu, &p.settings }) {
-        const int w = b == &p.settings ? 140 : b == &p.saveAsButton ? 86 : b == &p.saveButton ? 94 : 76;
-        b->setBounds(header.removeFromLeft(w).reduced(2, 0));
-    }
-    p.saveStatus.setBounds(71, 45, juce::jmax(160, p.newButton.getX() - 80), 22);
-    int x = margin;
-    for (auto* b : { &p.importButton, &p.editMenu, &p.plugins, &p.separate, &p.analyze, &p.details }) {
-        b->setBounds(x, 75, b == &p.importButton ? 80 : 76, 30); x = b->getRight() + 4;
-    }
-    p.undoButton.setBounds(x + 8, 75, 60, 30); p.redoButton.setBounds(x + 72, 75, 60, 30);
-    p.rulerMode.setBounds(margin,113,102,28);p.snap.setBounds(126,113,66,28);
-    p.gridMode.setBounds(200,113,128,28);p.follow.setBounds(336,113,194,28);
-    for (juce::Component* c : std::initializer_list<juce::Component*>{ &p.rulerMode, &p.snap, &p.gridMode, &p.follow }) c->setVisible(!expanded);
-    p.zoomOut.setBounds(getWidth() - margin - 120, 75, 32, 30);
-    p.zoomIn.setBounds(getWidth() - margin - 84, 75, 32, 30);
-    p.fit.setBounds(getWidth() - margin - 48, 75, 48, 30);
-    const bool visualDevice = p.dock == Impl::Dock::native || p.dock == Impl::Dock::effect;
-    const bool chordLaneVisible = p.state.chordRegions && !p.state.chordRegions->empty();
-    const int minimumArrangement = 54 + (chordLaneVisible ? 56 : 0) + 64 + 16;
-    const int dockHeight = expanded ? p.workspace.getHeight() : p.dock == Impl::Dock::closed ? 0
-        : p.dock == Impl::Dock::analysis ? juce::jlimit(210, 330, p.workspace.getHeight() - minimumArrangement - 6)
-        : p.dock == Impl::Dock::source ? juce::jlimit(210, 360, p.workspace.getHeight() - minimumArrangement - 6)
-        : visualDevice ? juce::jlimit(248, 364, p.workspace.getHeight() - 204)
-        : p.dock == Impl::Dock::track ? juce::jlimit(278, 390, p.workspace.getHeight() - 204)
-        : juce::jlimit(180, 340, p.workspace.getHeight() - 204);
-    p.dockBounds = p.workspace.withTrimmedTop(p.workspace.getHeight() - dockHeight);
-    p.arrangement.setBounds(p.workspace.withTrimmedBottom(dockHeight > 0 ? dockHeight + 6 : 0));
-    p.arrangement.setCompactRows(dockHeight > 0 && p.arrangement.getHeight() < 258);
-    p.arrangement.setVisible(!expanded);
-    p.closeEditor.setVisible(dockHeight > 0);
-    const bool analysisDock = p.dock == Impl::Dock::analysis;
-    p.closeEditor.setButtonText(visualDevice ? "x" : analysisDock ? uiText("close", "关闭") : uiText("close editor"));
-    p.closeEditor.setTooltip(uiText("Close the lower editor panel", "关闭下方编辑面板"));
-    const int closeWidth = visualDevice ? 32 : analysisDock ? 88 : 112;
-    p.closeEditor.setBounds(p.dockBounds.getRight() - closeWidth - (analysisDock ? 4 : 0), p.dockBounds.getY() + ((visualDevice || analysisDock) ? 3 : 0), closeWidth, 26);
-    p.expandEditor.setVisible(p.dock == Impl::Dock::midi);
-    p.expandEditor.setButtonText(uiText(expanded ? "return to arrangement" : "expand"));
-    p.expandEditor.setBounds(p.dockBounds.getRight() - 278, p.dockBounds.getY(), 160, 26);
-    p.waveform.setVisible(p.dock == Impl::Dock::source);
-    p.waveform.setBounds(p.dockBounds.withTrimmedTop(28));
-    if (p.pianoRoll) { p.pianoRoll->setVisible(p.dock == Impl::Dock::midi); p.pianoRoll->setBounds(p.dockBounds.withTrimmedTop(24)); }
-    const bool chainVisible=p.dock==Impl::Dock::track || p.dock==Impl::Dock::native || p.dock==Impl::Dock::effect;
-    p.deviceChain.setVisible(chainVisible);
-    // Native panels already name the selected device. Share their top row with
-    // the close button instead of spending another 28 px on a duplicate title.
-    p.deviceChain.setBounds(visualDevice ? p.dockBounds.withTrimmedRight(36).removeFromTop(34)
-                                        : p.dockBounds.withTrimmedTop(28).removeFromTop(34));
-    const auto deviceBody=p.dockBounds.withTrimmedTop(visualDevice?36:chainVisible?62:28);
-    p.trackPanel.setVisible(p.dock == Impl::Dock::track); p.trackPanel.setBounds(deviceBody);
-    if(p.dockNative){p.dockNative->setVisible(p.dock==Impl::Dock::native);p.dockNative->setBounds(deviceBody);}
-    if(p.dockEffect){p.dockEffect->setVisible(p.dock==Impl::Dock::effect);p.dockEffect->setBounds(deviceBody);}
-    if(p.dockAnalysis){p.dockAnalysis->setVisible(analysisDock);p.dockAnalysis->setBounds(p.dockBounds);}
-    if (analysisDock) p.closeEditor.toFront(false);
-    p.separate.setToggleState(p.dock == Impl::Dock::source, juce::dontSendNotification);
-    p.analyze.setToggleState(p.dock == Impl::Dock::analysis, juce::dontSendNotification);
-    p.details.setToggleState(p.inspectorDisplayed, juce::dontSendNotification);
-    p.details.setEnabled(!p.agentVisible&&p.dock!=Impl::Dock::native&&p.dock!=Impl::Dock::effect&&p.dock!=Impl::Dock::analysis&&p.dock!=Impl::Dock::source);
-    const int ix = p.inspector.getX(), iw = p.inspector.getWidth();
-    p.clipStart.setBounds(ix + 54, 206, iw - 104, 28); p.setClipStart.setBounds(ix + iw - 46, 206, 46, 28);
-    p.clipProperties.setBounds(ix, 242, iw, 28);
-    p.trackGain.setBounds(ix, 298, iw, 30); p.trackPan.setBounds(ix, 356, iw, 30);
-    p.mute.setBounds(ix, 394, (iw - 6) / 2, 28); p.solo.setBounds(p.mute.getRight() + 6, 394, (iw - 6) / 2, 28);
-    p.remove.setVisible(false);
-    for (juce::Component* c : std::initializer_list<juce::Component*>{ &p.clipStart, &p.setClipStart, &p.clipProperties, &p.trackGain, &p.trackPan, &p.mute, &p.solo }) c->setVisible(p.inspectorDisplayed);
-    p.layoutDeviceButtons();
-    p.play.setBounds(margin, p.footerY + 8, 88, 38); p.stop.setBounds(108, p.footerY + 8, 88, 38); p.record.setBounds(200, p.footerY + 8, 80, 38); p.loop.setBounds(284, p.footerY + 8, 88, 38);
-    p.tempo.setBounds(498, p.footerY + 8, 102, 34);
-    p.gain.setBounds(getWidth() - margin - 260, p.footerY + 8, 260, 36);
-    p.meterReset.setBounds(p.gain.getX()-50,p.footerY+10,46,30);
-    p.metronome.setBounds(margin,p.footerY+50,80,30);p.metronomeOptions.setBounds(100,p.footerY+50,38,30);
-    p.countIn.setBounds(152,p.footerY+50,104,30);p.countInBars.setBounds(264,p.footerY+50,100,30);
-    p.resources.setBounds(380,p.footerY+50,getWidth()-396,30);
-    p.cancelJob.setBounds(getWidth() - margin - 116, p.footerY + (p.compactAnalysisFooter ? 54 : 85), 116, 22);
-    p.status.setBounds(p.compactAnalysisFooter ? 380 : margin, p.footerY + (p.compactAnalysisFooter ? 54 : 86),
-        getWidth() - (p.compactAnalysisFooter ? 380 + margin + 125 : margin * 2 + 125), 20);
-}
-
-void MainComponent::paint(juce::Graphics& g)
-{
-    const auto& p = *impl; const auto& s = p.state;
-    g.fillAll(paper);
-    g.setColour(ink); g.setFont(mono(30.0f, juce::Font::bold)); g.drawText("e~", 17, 14, 51, 40, juce::Justification::centredLeft);
-    g.setFont(mono(17.0f));
-    g.drawFittedText((s.projectName.isEmpty() ? juce::String("Untitled") : s.projectName) + (s.dirty ? " *" : ""), 71, 16,
-        juce::jmax(120, p.newButton.getX() - 80), 29, juce::Justification::centredLeft, 1);
-    g.setColour(rule); g.drawHorizontalLine(68, 16.0f, float(getWidth() - 16));
-    g.drawHorizontalLine(109, 16.0f, float(getWidth() - 16));
-    if (!p.pianoExpanded) {
-        g.drawHorizontalLine(142,16.0f,float(getWidth()-16));
-        g.setColour(secondary);g.setFont(mono(11));
-        const int hintX = p.follow.getRight() + 12;
-        const int hintRight = p.agentVisible && p.agentSidebar ? p.agentSidebar->getX() - 8 : getWidth() - 16;
-        const int hintWidth = hintRight - hintX;
-        if (hintWidth >= 420)
-            g.drawFittedText(uiText("drag empty: select clips   Shift-drag ruler: time   Ctrl+L: loop", "空白处拖动：框选   Shift 拖动标尺：选时间   Ctrl+L：循环"),hintX,115,hintWidth,24,juce::Justification::centredLeft,1);
-    }
-    if (p.inspectorDisplayed) {
-        const int ix = p.inspector.getX(), iw = p.inspector.getWidth();
-        g.drawVerticalLine(ix - 8, 144.0f, float(p.footerY - 12));
-        g.setColour(ink); g.setFont(mono(14.0f, juce::Font::bold));
-        g.drawFittedText(p.selectedTrack() ? p.selectedTrack()->name : uiText("Select a track", "选择轨道"), ix, 158, iw, 30, juce::Justification::centredLeft, 1);
-        g.setColour(secondary); g.setFont(mono(12.0f));
-        g.drawText(p.rulerMode.getSelectedId()==2?uiText("start/s", "起点/秒"):uiText("start"), ix, 206, 54, 28, juce::Justification::centredLeft);
-        g.drawText(uiText("track volume", "轨道音量"), ix, 276, iw, 22, juce::Justification::centredLeft);
-        g.drawText(uiText("pan / L - R", "声像 / 左 - 右"), ix, 334, iw, 22, juce::Justification::centredLeft);
-        g.drawText(uiText("devices"), ix, 439, iw, 24, juce::Justification::centredLeft);
-        if (const auto* track = p.selectedTrack()) {
-            if (track->plugins.empty()) g.drawFittedText(track->kind == "instrument" ? uiText("Add an instrument in Devices.", "在装置面板中添加乐器。") : uiText("No effects. Add in Devices.", "暂无效果器，可在装置面板添加。"), ix, 470, iw, 44, juce::Justification::topLeft, 2);
-        }
-    }
-    if (p.dock != Impl::Dock::closed) {
-        g.setColour(rule); g.drawHorizontalLine(p.dockBounds.getY(), float(p.dockBounds.getX()), float(p.dockBounds.getRight()));
-        g.setColour(secondary); g.setFont(mono(12));
-        if (p.dock != Impl::Dock::native && p.dock != Impl::Dock::effect && p.dock != Impl::Dock::analysis)
-        g.drawFittedText(p.dock == Impl::Dock::analysis ? "analyze / local audio" : p.dock == Impl::Dock::track ? "track / " + (p.selectedTrack() ? p.selectedTrack()->name : juce::String("Select a track")) : (p.dock == Impl::Dock::midi ? "MIDI / " : "source / ") + p.selectedClipName(), p.dockBounds.getX() + 5, p.dockBounds.getY() + 2,
-            p.dockBounds.getWidth() - (p.dock == Impl::Dock::midi ? 290 : 130), 24, juce::Justification::centredLeft, 1);
-    }
-    g.setColour(ink); g.drawHorizontalLine(p.footerY, 16.0f, float(getWidth() - 16));
-    g.setFont(mono(14)); g.drawText(p.rulerMode.getSelectedId()==2?clockText(s.position):positionText(s.position,s,true), 382, p.footerY + 8, 110, 23, juce::Justification::centredLeft);
-    g.setColour(secondary); g.setFont(mono(11)); g.drawText("/ " + clockText(s.duration), 382, p.footerY + 30, 110, 17, juce::Justification::centredLeft);
-    g.drawText(juce::String(s.numerator) + "/" + juce::String(s.denominator), 602, p.footerY + 13, 40, 24, juce::Justification::centred);
-    if (getWidth() >= 1200) g.drawFittedText(s.deviceAvailable ? s.deviceName : uiText("No audio device", "未连接音频设备"), 652, p.footerY + 13, getWidth() - 1030, 24, juce::Justification::centredLeft, 1);
-    for(int channel=0;channel<2;++channel){const auto db=channel?s.masterPeakRightDb:s.masterPeakLeftDb;
-        const float height=juce::jlimit(0.0f,1.0f,(db+60.0f)/60.0f)*28.0f;
-        const float x=float(p.gain.getX()-74+channel*10);g.setColour(rule);g.fillRect(x,float(p.footerY+12),6.0f,28.0f);
-        g.setColour(ink);g.fillRect(x,float(p.footerY+40)-height,6.0f,height);}
-}
+#include "MainWorkspace.inc"
+#include "../../tests/MainWorkspaceSmoke.inc"
 
 void MainComponent::refreshSnapshot()
 {
@@ -1695,6 +1571,8 @@ void MainComponent::refreshSnapshot()
     if (clipChanged) { p.startInputDirty = false; p.startEditId.clear(); }
     p.trackList.setVisible(false);
     p.arrangement.update(p.state);
+    p.browser.update(p.state);
+    p.overview.update(p.state,p.arrangement.visibleTimeRange());
     p.trackPanel.update(p.state);
     if(p.dock==Impl::Dock::track || p.dock==Impl::Dock::native || p.dock==Impl::Dock::effect) p.updateDeviceChain();
     p.waveform.update(p.state);
@@ -1740,6 +1618,7 @@ void MainComponent::refreshSnapshot()
     if (selected && !p.trackPan.isMouseButtonDown()) p.trackPan.setValue(selected->pan, juce::dontSendNotification);
     p.tempo.setButtonText(juce::String(p.state.bpm, std::fmod(p.state.bpm, 1.0) == 0 ? 0 : 1) + " BPM");
     if (p.pianoRoll) {
+        p.pianoRoll->setTrackColour(selected ? selected->colour : juce::String());
         p.pianoRoll->setTimeSignature(p.state.numerator, p.state.denominator);
         const auto* selectedMidi = p.selectedClip();
         if (selectedMidi && selectedMidi->kind == "midi") {
@@ -1811,8 +1690,8 @@ void MainComponent::refreshSnapshot()
         || p.state.recordingError.isNotEmpty() || taskText.isNotEmpty() || recordingBusy);
     p.status.setVisible(!p.compactAnalysisFooter || compactStatus);
     p.resources.setVisible(!compactStatus);
-    repaint(380, p.footerY + 8, 114, 40);
-    repaint(p.gain.getX()-78,p.footerY+8,25,36);
+    repaint(p.positionBounds);
+    repaint(getWidth()-260,p.footerY+3,22,28);
     if (repaintChrome) repaint();
     if (p.pendingSaveJob.isNotEmpty()) {
         for (const auto& job : p.state.jobs) if (job.id == p.pendingSaveJob && job.status != "queued" && job.status != "running") {
@@ -2531,6 +2410,7 @@ void MainComponent::showArrangementMenu(const juce::String& kind, const juce::St
     if (kind == "track" && track) {
         menu.addSectionHeader(track->name);
         if (editable) menu.addItem(1, uiText("Rename track...", "重命名轨道...") + "\tF2");
+        if (editable) menu.addItem(7, uiText("Track colour...", "轨道颜色..."));
         menu.addItem(2, uiText("Mute", "静音"), editable, track->muted);
         menu.addItem(3, uiText("Solo", "独奏"), editable, track->solo);
         if (track->kind != "bus") menu.addItem(4, uiText("Arm recording", "准备录音"), editable, track->armed);
@@ -2579,6 +2459,7 @@ void MainComponent::showArrangementMenu(const juce::String& kind, const juce::St
             if (action == 4) run("set_track_armed", arguments({ { "track_id", trackId }, { "armed", !armed } }));
             if (action == 5) { safe->session.selectTrack(trackId); p.dock = Impl::Dock::track; safe->resized(); safe->refreshSnapshot(); }
             if (action == 6) run("remove_track", arguments({ { "track_id", trackId } }));
+            if (action == 7) safe->chooseTrackColour(trackId);
             if (action == 11 || action == 12 || action == 14 || action == 16)
                 run(action == 11 ? "cut_clips" : action == 12 ? "copy_clips" : action == 14 ? "duplicate_clips" : "delete_clips", arguments({ { "clip_ids", idsValue(selected) } }));
             if (action == 13) run("paste_clips", arguments({ { "target_track_id", trackId }, { "start_seconds", at } }));
@@ -2610,6 +2491,7 @@ void MainComponent::showEditMenu()
     menu.addItem(13,uiText("Paste clips at playhead (Ctrl+V)", "在播放位置粘贴 (Ctrl+V)"),track!=nullptr);
     menu.addItem(14,uiText("Loop selection (Ctrl+L)", "循环选区 (Ctrl+L)"),clip!=nullptr||!impl->arrangement.selectedTimeRange().isEmpty());
     menu.addSeparator(); menu.addItem(6, uiText("Rename selected track... (F2)", "重命名选中轨道... (F2)"), track != nullptr);
+    menu.addItem(15,uiText("Track colour...", "轨道颜色..."),track!=nullptr);
     menu.addItem(7, uiText("Move track up", "轨道上移"), track != nullptr); menu.addItem(8, uiText("Move track down", "轨道下移"), track != nullptr);
     menu.addSeparator(); menu.addItem(9, uiText("Tempo, meter and loop range...", "速度、拍号与循环范围..."));
     menu.addSeparator(); menu.addItem(10, uiText("Remove selected track", "移除选中轨道"), track != nullptr);
@@ -2617,6 +2499,7 @@ void MainComponent::showEditMenu()
         if (!safe) return; auto& p = *safe->impl;
         if(id>=11&&id<=13){safe->clipClipboardAction(id==11?"copy_clips":id==12?"cut_clips":"paste_clips");return;}
         if(id==14){safe->showResult(p.arrangement.loopSelection());return;}
+        if(id==15){safe->chooseTrackColour(p.state.selectedTrackId);return;}
         if (id == 1) safe->execute("split_clip", arguments({ { "clip_id", p.state.selectedClipId }, { "at_seconds", p.state.position } }));
         if (id == 2 || id == 3) safe->execute(id == 2 ? "duplicate_clips" : "delete_clips", arguments({ { "clip_ids", idsValue(p.arrangement.selectedClipIds()) } }));
         if (id == 4) safe->showClipProperties(); if (id == 5) safe->showPianoRoll();
@@ -2636,7 +2519,7 @@ void MainComponent::showExportMenu()
     menu.addItem(3, uiText("Export project WAV at real-time speed...", "以实时速度导出 WAV..."), impl->state.duration > 0);
     menu.addSeparator(); menu.addItem(4, uiText("Export project MIDI...", "导出工程 MIDI..."));
     menu.addItem(5, uiText("Export selected MIDI clips...", "导出选中 MIDI 片段..."), impl->selectedClip() && impl->selectedClip()->kind == "midi");
-    menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&impl->exportMenu), [safe = juce::Component::SafePointer<MainComponent>(this)](int id) {
+    menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&impl->fileMenu), [safe = juce::Component::SafePointer<MainComponent>(this)](int id) {
         if (safe && id > 0) safe->chooseExport(id >= 4, id == 2 || id == 5, id == 3);
     });
 }
@@ -2740,6 +2623,7 @@ void MainComponent::showPianoRoll()
     if (clip->notes) for (const auto& n : *clip->notes) notes.push_back({ n.id, n.pitch, n.startBeats, n.lengthBeats, n.velocity, n.channel });
     impl->pianoRoll->setClip(impl->state.projectId, clip->id, impl->selectedClipName(), impl->state.revision, clip->startBeats, clip->lengthBeats, impl->state.bpm, notes);
     impl->pianoRoll->setTimeSignature(impl->state.numerator, impl->state.denominator);
+    impl->pianoRoll->setTrackColour(impl->selectedTrack()?impl->selectedTrack()->colour:juce::String());
 }
 void MainComponent::clipClipboardAction(const juce::String& command)
 {
@@ -3182,6 +3066,10 @@ bool MainComponent::keyPressed(const juce::KeyPress& key)
 {
     if(key.getModifiers().isCtrlDown()&&key.getModifiers().isShiftDown()&&(key.getKeyCode()=='A'||key.getKeyCode()=='a')){toggleAgent();return true;}
     if(impl->agentVisible&&impl->agentSidebar&&impl->agentSidebar->capturesKeyboard())return false;
+    if(key.getModifiers().isCtrlDown()&&!key.getModifiers().isAltDown()&&(key.getKeyCode()=='F'||key.getKeyCode()=='f')){
+        if(impl->agentVisible&&getWidth()<1450)toggleAgent();
+        impl->pianoExpanded=false;impl->libraryVisible=true;resized();impl->browser.focusSearch();return true;
+    }
     if ((key.getModifiers().isCommandDown() || key.getModifiers().isCtrlDown())
         && (key.getKeyCode() == 's' || key.getKeyCode() == 'S')) {
         saveProject(key.getModifiers().isShiftDown()); return true;

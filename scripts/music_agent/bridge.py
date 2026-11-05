@@ -38,7 +38,7 @@ def public_snapshot(raw):
     result["master_plugins"] = public_plugins(result.get("master_plugins",[]))
     for track in result.get("tracks", []):
         for key in list(track):
-            if key not in {"id", "name", "kind", "gain_db", "pan", "muted", "solo",
+            if key not in {"id", "name", "kind", "gain_db", "pan", "muted", "solo", "colour",
                            "clips", "clip_count", "clips_truncated", "plugins"}:
                 del track[key]
         track["plugins"] = public_plugins(track.get("plugins",[]))

@@ -1,6 +1,7 @@
 #pragma once
 #include <juce_audio_utils/juce_audio_utils.h>
 #include <cstdint>
+#include <array>
 #include <memory>
 #include <vector>
 
@@ -86,6 +87,7 @@ public:
         juce::String monitorMode = "off";
         std::vector<SendSnapshot> sends;
         std::vector<AutomationLaneSnapshot> automation;
+        juce::String colour; // Empty = automatic; otherwise canonical #RRGGBB.
     };
     struct ChordRegionSnapshot {
         juce::String id, label, analysisId, sourceName;
@@ -139,6 +141,8 @@ public:
     // Transient wet-path compressor meter; no project revision or Undo changes.
     bool nativeCompressorMeter(const juce::String& projectId, const juce::String& trackId,
                                const juce::String& deviceId, float& reductionDb, std::uint64_t& sequence) const;
+    bool nativeEffectSpectrum(const juce::String& projectId, const juce::String& trackId,
+                              const juce::String& deviceId, std::array<float, 2048>&, std::uint64_t& sequence) const;
     // GUI and local Agent requests share this dispatcher; all editing is serialized
     // on the message thread. Transport reads never change the project revision.
     juce::Result execute(const juce::String& command, const juce::var& args, std::uint64_t expectedRevision,
@@ -151,6 +155,7 @@ public:
     juce::var selectionContext() const;
     juce::Result runSelectionContextSmokeTest(juce::DynamicObject& report);
     juce::Result runBatchRefsSmokeTest(juce::DynamicObject& report);
+    juce::Result runWorkspaceEngineSmokeTest(juce::DynamicObject& report, const juce::File& outputDirectory);
     juce::var eventsSince(std::uint64_t sequence) const;
     bool hasActiveJobs() const;
     void cancelAllJobs();

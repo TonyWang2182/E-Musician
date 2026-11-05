@@ -42,7 +42,7 @@ def fixture(ready):
 HARNESS = r"""<script>
 window.__smokeErrors=[]; window.addEventListener('error',e=>window.__smokeErrors.push(e.message));
 let attempt=0; const checker=setInterval(()=>{
- const rows=[...document.querySelectorAll('.capability-row')]; if(rows.length!==9 && ++attempt<30)return;
+ const rows=[...document.querySelectorAll('.capability-row')]; if(rows.length!==10 && ++attempt<30)return;
  clearInterval(checker);
  const target=rows.find(r=>r.dataset.capability==='transcribe'); if(target)target.open=true;
  const btn=target?.querySelector('button'); if(btn&&!btn.disabled)btn.click();
@@ -64,7 +64,7 @@ let attempt=0; const checker=setInterval(()=>{
  window.emusicianSetLanguage(initialLanguage);
  const offline=rows.find(r=>r.dataset.capability==='separate')?.querySelector('button');
  const preview=document.getElementById('analysis-preview'); if(preview&&!preview.hidden)preview.open=true;
- const checks={rows:rows.length,disabledUnavailable:!!offline?.disabled,examplePopulates:document.getElementById('prompt').value.includes('MIDI'),
+ const checks={rows:rows.length,capabilitiesInitiallyCompact:!document.getElementById('capabilities').open,disabledUnavailable:!!offline?.disabled,examplePopulates:document.getElementById('prompt').value.includes('MIDI'),
  widthOK:document.documentElement.scrollWidth<=innerWidth,viewportWidth:innerWidth,errors:window.__smokeErrors,
  initialLanguage,englishLabel,chineseLabel,restoresEnglish,localePreservesDraft,localePreservesProject,literalValues,newAnalysisCopy,
  previewRows:preview&&!preview.hidden?document.querySelectorAll('#analysis-preview-items li').length:0};
@@ -109,7 +109,7 @@ def main():
             match=re.search(r'data-analysis-smoke="([^"]*)"',output)
             if not match: raise RuntimeError(f"No completed UI check in {label}")
             checks=json.loads(html.unescape(match.group(1)))
-            assert checks['rows']==9 and checks['disabledUnavailable'] and checks['examplePopulates'] and checks['widthOK'] and not checks['errors'],checks
+            assert checks['rows']==10 and checks['capabilitiesInitiallyCompact'] and checks['disabledUnavailable'] and checks['examplePopulates'] and checks['widthOK'] and not checks['errors'],checks
             assert checks['viewportWidth']==width,checks
             assert checks['initialLanguage']==language and all(checks[key] for key in ('englishLabel','chineseLabel','restoresEnglish','localePreservesDraft','localePreservesProject','literalValues','newAnalysisCopy')),checks
             assert checks['previewRows']==(20 if ready == "beats" else 2 if ready else 0),checks

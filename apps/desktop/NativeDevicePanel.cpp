@@ -23,11 +23,11 @@ struct NativeDevicePanel::Impl {
         bool previewDown = false;
         void paintButton(juce::Graphics& g, bool hover, bool down) override {
             const auto a = getLocalBounds().toFloat().reduced(0.5f);
-            g.setColour(getToggleState() ? ink : down ? rule : hover ? juce::Colour(0xffeeefeb) : paper); g.fillRect(a);
-            g.setColour(getToggleState() ? paper : isEnabled() ? ink : quiet); g.drawRect(a);
+            g.setColour(getToggleState() ? deviceui::accent : down ? rule : hover ? deviceui::surface : paper); g.fillRoundedRectangle(a.toFloat(),3);
+            g.setColour(isEnabled() ? ink : quiet); g.drawRoundedRectangle(a.toFloat().reduced(.5f),3,1);
             const auto label = getButtonText(); const auto split = label.indexOf("  ");
             const bool compact = getHeight() < 40;
-            g.setFont(mono(compact ? 10.0f : 11.0f)); g.drawText(label.substring(0, split), 6, 2, getWidth() - 12, compact ? 12 : 16, juce::Justification::topLeft);
+            g.setFont(deviceui::labelFont(compact ? 10.0f : 11.0f)); g.drawText(label.substring(0, split), 6, 2, getWidth() - 12, compact ? 12 : 16, juce::Justification::topLeft);
             g.drawText(label.substring(split + 2), 6, getHeight() - (compact ? 15 : 23), getWidth() - 30, compact ? 13 : 18, juce::Justification::centredLeft, true);
             if (!label.endsWith("empty")) { juce::Path play; const float x = float(getWidth() - 18), y = float(getHeight() - (compact ? 9 : 17)); play.addTriangle(x, y - 4, x, y + 4, x + 7, y); g.fillPath(play); }
             if (hasKeyboardFocus(true)) g.drawRect(getLocalBounds().reduced(3), 1);
@@ -84,9 +84,10 @@ struct NativeDevicePanel::Impl {
     };
     Impl(NativeDevicePanel& component, EngineSession& engine, juce::String target, std::function<void(const juce::Result&)> callback)
         : owner(component), session(engine), trackId(std::move(target)), report(std::move(callback)), envelope(*this) {
+        owner.setLookAndFeel(&controlLook);
         for (auto* c : std::initializer_list<juce::Component*>{ &title, &kind, &add, &sampleName, &choose, &clear, &preview, &stopPreview, &padGain, &padMute, &root, &start, &end, &apply, &attack, &release, &playbackMode, &status, &waveform, &envelope }) owner.addAndMakeVisible(c);
         for (auto* button : { &add, &choose, &clear, &preview, &stopPreview, &padMute, &apply, &playbackMode }) uiButton(*button, button->getButtonText());
-        title.setFont(mono(15)); sampleName.setFont(mono(13)); status.setFont(mono(12));
+        title.setFont(deviceui::labelFont(14,true)); sampleName.setFont(deviceui::labelFont(13)); status.setFont(deviceui::labelFont(11));
         status.setColour(juce::Label::textColourId, quiet);
         sampleName.setColour(juce::Label::textColourId, quiet);
         uiComboItem(kind, 1, "sampler"); uiComboItem(kind, 2, "drum rack / 16 pads"); kind.setSelectedId(1, juce::dontSendNotification);
@@ -337,7 +338,7 @@ NativeDevicePanel::NativeDevicePanel(EngineSession& s, juce::String trackId, std
     impl = std::make_unique<Impl>(*this, s, std::move(trackId), std::move(report));
     resized(); updatePollingInterval();
 }
-NativeDevicePanel::~NativeDevicePanel() { stopTimer(); if (impl) impl->stopAudition(); }
+NativeDevicePanel::~NativeDevicePanel() { setLookAndFeel(nullptr); stopTimer(); if (impl) impl->stopAudition(); }
 void NativeDevicePanel::updatePollingInterval() {
     if (!impl || !isVisible()) { stopTimer(); return; }
     // A parent can be hidden or minimised without sending this child a
@@ -488,7 +489,7 @@ juce::Result NativeDevicePanel::runInteractionSmokeTest(juce::DynamicObject& rep
 }
 void NativeDevicePanel::paint(juce::Graphics& g) {
     g.fillAll(paper); g.setColour(rule); g.drawHorizontalLine(30, 12, float(getWidth() - 12));
-    g.setColour(quiet); g.setFont(mono(11));
+    g.setColour(quiet); g.setFont(deviceui::labelFont(11));
     const auto label = [&](const juce::Slider& control, const char* name) {
         if (control.isVisible()) g.drawText(uiText(name), control.getX(), control.getY() - 15, control.getWidth(), 14, juce::Justification::centred);
     };

@@ -202,7 +202,7 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
             target.ensureNumberOfAudioTracks(te::getAudioTracks(target).size()+1);
             track=te::getAudioTracks(target).getLast();track->state.setProperty(emId,t.id,um);tracks[t.id]=track;
         }
-        track->state.setProperty(emKind,t.kind,um);track->setName(t.name);applyMix(target,*track->getVolumePlugin(),t.id,t.gainDb,t.pan,loading);
+        track->state.setProperty(emKind,t.kind,um);track->state.setProperty(emColour,t.colour,um);track->setName(t.name);applyMix(target,*track->getVolumePlugin(),t.id,t.gainDb,t.pan,loading);
         track->setMute(t.muted);track->setSolo(t.solo);
         if(auto r=syncPlugins(t.plugins,track->state,track->pluginList);r.failed())return r;
         for(const auto& c:t.clips){

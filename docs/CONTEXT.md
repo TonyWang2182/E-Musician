@@ -1,4 +1,14 @@
-# 当前候选：0.10.0 节拍、Warp 与日常操作（2026-11-05，自动验证通过、人工待验）
+# 当前候选：0.11.0 品牌工作区与轨道染色（2026-11-06，自动验证通过、人工待验）
+
+实际工作树仍为 `E:/MusicAgent&DAW/worktrees/audio-analysis`，本轮分支 `feature/workspace-brand-v0110`，基线 f1658895。用户批准树乐师 Logo 用于启动动画、Windows 图标和左上角，批准工作区设计图并要求轨道染色。范围及归属在 [PLAN](review/2026-11-06-workspace-brand/PLAN.md)。本轮不使用 computer-use、不调用付费模型，不覆盖旧 0.10.0 输出。
+
+已实现共享视觉元素、顶部 transport、左侧搜索/筛选资源库、真实 clip 概览、可调整下栏、颜色菜单和投影、Agent 颜色工具、精简卷帘及原生效果连续手势/平滑/大 EQ/频谱。最终 Release、CTest 11/11、Agent Python 300、真实离线宿主颜色闭环8项、实际 WebView/helper、双语三尺寸组件检查通过。原生颜色/手势139断言；源码221个输入 `c704e931…`、EXE `a69f82ec…` 已冻结匹配，首次编译失败与修复保留。[结果](review/2026-11-06-workspace-brand/RESULTS.md) / [精确证据](review/2026-11-06-workspace-brand/VERIFICATION.json)。
+
+启动 `E:/MusicAgent&DAW/Start E-musician 0.11.0 Workspace.cmd`，VS Code `E:/MusicAgent&DAW/E-musician-Workspace.code-workspace`；EXE 独立在 bin-0.11.0/Release。旧 0.10.0 SHA 复核保持不变。下一步仅按 [人工短测](review/2026-11-06-workspace-brand/MANUAL-CHECK.md) 确认鼠标/DPI、颜色保存和 ASIO 连续调参听感；代码同步与保留归档以 PUBLISH 记录为准，不自动合并 main。
+
+原有 DEVLOG 用户修改及两份启动记录保留。根 PRODUCT/DESIGN 已按批准方案更新，旧文件逐字归档。实时边界与取舍见 [ADR](decisions/2026-11-06-brand-colour-device-gestures.md)。ASIO/鼠标/DPI/听感均待人工确认。以下为历史候选，不是本轮验收。
+
+# 保留候选：0.10.0 节拍、Warp 与日常操作（2026-11-05，自动验证通过、人工待验）
 
 实际工作树 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/tempo-warp-workspace-v0100`，基线 be47b65。已实现视图跟随开关、真实 Beat This 候选与首拍修正、固定比例保音高 Source Warp、Agent 等价方案/回读、保存/设置重设计和情境右键。原件保留，后台准备后一次提交，schema 6；局部 Warp 和完整 Tempo Map 未实现。范围见 [PLAN](review/2026-11-05-tempo-warp/PLAN.md)，最终证据见 [RESULTS](review/2026-11-05-tempo-warp/RESULTS.md) / [VERIFICATION](review/2026-11-05-tempo-warp/VERIFICATION.json)。
 

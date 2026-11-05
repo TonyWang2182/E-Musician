@@ -41,7 +41,7 @@ bool valid(const CompressorSettings& s) noexcept {
 bool valid(const DelaySettings& s) noexcept {
     return between(s.delayMs,1,2000) && between(s.feedback,0,.95f) && between(s.dryWet,0,1);
 }
-void Equalizer::reset() noexcept { delays = {}; }
+void Equalizer::reset() noexcept { delays = {}; lastRate=0; remaining={}; }
 void Equalizer::update(double sr, const EqSettings& settings) noexcept {
     for (std::size_t i=0;i<eqBandCount;++i) {
         const auto& b=settings.bands[i]; auto& c=coefficients[i];
@@ -84,22 +84,27 @@ void Equalizer::process(float* left,float* right,int n,double sr,const EqSetting
         const auto& a=settings.bands[i];const auto& b=last.bands[i];
         changed=a.enabled!=b.enabled || a.frequency!=b.frequency || a.gainDb!=b.gainDb || a.q!=b.q || a.shape!=b.shape;
     }
-    if(changed) update(sr,settings);
+    if(changed) {
+        const auto previous=coefficients;const bool first=lastRate==0 || sr!=lastRate;update(sr,settings);targets=coefficients;
+        if(!first){
+            coefficients=previous;const int frames=std::max(1,int(sr*.01));
+            for(std::size_t i=0;i<eqBandCount;++i){const auto& a=coefficients[i];const auto& b=targets[i];
+                increments[i]={(b.b0-a.b0)/frames,(b.b1-a.b1)/frames,(b.b2-a.b2)/frames,(b.a1-a.a1)/frames,(b.a2-a.a2)/frames};remaining[i]=frames;}
+        }else remaining={};
+    }
     for(std::size_t band=0;band<eqBandCount;++band) {
-        if(!settings.bands[band].enabled || (settings.bands[band].gainDb==0 && gainShape(effectiveShape(settings.bands[band].shape,band)))) { delays[band]={}; continue; }
-        const auto c=coefficients[band];
-        for(int channel=0;channel<(right?2:1);++channel) {
-            auto* buffer=channel?right:left;auto& d=delays[band][std::size_t(channel)];
-            for(int i=0;i<n;++i) {
-                const auto x=double(buffer[i]); const auto y=c.b0*x+d.z1;
-                d.z1=c.b1*x-c.a1*y+d.z2; d.z2=c.b2*x-c.a2*y;
-                if(!std::isfinite(y) || std::abs(y)>double(std::numeric_limits<float>::max())){d={};buffer[i]=0;}
-                else buffer[i]=float(y);
+        auto& c=coefficients[band];auto& pending=remaining[band];const auto increment=increments[band];
+        if(!pending && c.b0==1 && c.b1==0 && c.b2==0 && c.a1==0 && c.a2==0){delays[band]={};continue;}
+        for(int i=0;i<n;++i){
+            if(pending>0){c.b0+=increment.b0;c.b1+=increment.b1;c.b2+=increment.b2;c.a1+=increment.a1;c.a2+=increment.a2;if(--pending==0)c=targets[band];}
+            for(int channel=0;channel<(right?2:1);++channel){
+                auto* buffer=channel?right:left;auto& d=delays[band][std::size_t(channel)];const auto x=double(buffer[i]);const auto y=c.b0*x+d.z1;
+                d.z1=c.b1*x-c.a1*y+d.z2;d.z2=c.b2*x-c.a2*y;
+                if(!std::isfinite(y)||std::abs(y)>double(std::numeric_limits<float>::max())){d={};buffer[i]=0;}else buffer[i]=float(y);
             }
-            // Avoid costly denormal tails without altering normal signals.
-            if(std::abs(d.z1)<1e-20)d.z1=0;
-            if(std::abs(d.z2)<1e-20)d.z2=0;
         }
+        for(auto& d:delays[band]){if(std::abs(d.z1)<1e-20)d.z1=0;if(std::abs(d.z2)<1e-20)d.z2=0;}
+
     }
 }
 double responseDb(double frequency,double sr,const EqSettings& settings) noexcept {
@@ -118,23 +123,26 @@ void Compressor::process(float* left,float* right,int n,double sr,const Compress
     const auto threshold=std::pow(10.0,double(s.thresholdDb)/20.0);
     const auto power=1.0-1.0/double(s.ratio);
     const auto makeup=std::pow(10.0,double(s.makeupDb)/20.0);
-    if(!mixInitialised){currentMix=s.dryWet;mixInitialised=true;}
+    if(!mixInitialised){currentMix=s.dryWet;currentAttack=attack;currentRelease=release;currentThreshold=threshold;currentPower=power;currentMakeup=makeup;mixInitialised=true;}
+    const double smooth=1-std::exp(-1.0/(sr*.01));
     const auto targetMix=double(s.dryWet);
     const auto mixStep=1.0/(sr*.005); // bounded five-millisecond transition
     for(int i=0;i<n;++i) {
         if(!std::isfinite(left[i]))left[i]=0;
         if(right&&!std::isfinite(right[i]))right[i]=0;
         const auto level=std::max(std::abs(double(left[i])),right?std::abs(double(right[i])):0.0);
-        const auto coeff=level>envelope?attack:release;
+        currentAttack+=(attack-currentAttack)*smooth;currentRelease+=(release-currentRelease)*smooth;
+        currentThreshold+=(threshold-currentThreshold)*smooth;currentPower+=(power-currentPower)*smooth;currentMakeup+=(makeup-currentMakeup)*smooth;
+        const auto coeff=level>envelope?currentAttack:currentRelease;
         envelope=coeff*envelope+(1-coeff)*level;
-        const auto wetGain=(envelope>threshold?std::pow(threshold/envelope,power):1.0)*makeup;
+        const auto wetGain=(envelope>currentThreshold?std::pow(currentThreshold/envelope,currentPower):1.0)*currentMakeup;
         currentMix+=std::clamp(targetMix-currentMix,-mixStep,mixStep);
         const auto gain=(1.0-currentMix)+currentMix*wetGain;
         const auto limit=double(std::numeric_limits<float>::max());
         left[i]=float(std::clamp(double(left[i])*gain,-limit,limit));
         if(right)right[i]=float(std::clamp(double(right[i])*gain,-limit,limit));
     }
-    const auto reduction=envelope>threshold?power*20.0*std::log10(envelope/threshold):0.0;
+    const auto reduction=envelope>currentThreshold?currentPower*20.0*std::log10(envelope/currentThreshold):0.0;
     reductionDb=float(std::clamp(reduction,0.0,120.0));
     if(envelope<1e-20)envelope=0;
 }
@@ -143,17 +151,22 @@ void StereoDelay::process(float* left,float* right,int n,double sr,const DelaySe
     if(!left||n<=0||!std::isfinite(sr)||sr<1000||sr>384000||!valid(s))return;
     if(right==left)right=nullptr;
     const auto delay=std::clamp<std::size_t>(std::size_t(std::llround(sr*double(s.delayMs)*.001)),1,maxFrames-1);
-    if(!mixInitialised){currentMix=s.dryWet;mixInitialised=true;}
+    if(!mixInitialised){currentMix=s.dryWet;currentDelay=double(delay);currentFeedback=s.feedback;mixInitialised=true;}
+    const double smooth=1-std::exp(-1.0/(sr*.02));
     const auto target=double(s.dryWet),step=1.0/(sr*.005);
     const auto limit=double(std::numeric_limits<float>::max());
     for(int i=0;i<n;++i){
         const auto inL=std::isfinite(left[i])?double(left[i]):0.0;
         const auto inR=right?(std::isfinite(right[i])?double(right[i]):0.0):inL;
-        const auto read=(writeIndex+maxFrames-delay)%maxFrames;
-        const double wetL=validFrames>=delay?historyLeft[read]:0.0;
-        const double wetR=validFrames>=delay?historyRight[read]:0.0;
-        historyLeft[writeIndex]=float(std::clamp(inL+wetL*s.feedback,-limit,limit));
-        historyRight[writeIndex]=float(std::clamp(inR+wetR*s.feedback,-limit,limit));
+        // Fractional moving tap avoids discontinuous index jumps. Time changes
+        // can create a tape-like pitch glide; this is not time-stretching.
+        currentDelay+=(double(delay)-currentDelay)*smooth;currentFeedback+=(double(s.feedback)-currentFeedback)*smooth;
+        const auto whole=std::clamp<std::size_t>(std::size_t(currentDelay),1,maxFrames-2);const double fraction=currentDelay-double(whole);
+        const auto read=(writeIndex+maxFrames-whole)%maxFrames,previous=(read+maxFrames-1)%maxFrames;
+        const auto sample=[&](const auto& history){return (validFrames>=whole?double(history[read]):0.0)*(1-fraction)+(validFrames>whole?double(history[previous]):0.0)*fraction;};
+        const double wetL=sample(historyLeft),wetR=sample(historyRight);
+        historyLeft[writeIndex]=float(std::clamp(inL+wetL*currentFeedback,-limit,limit));
+        historyRight[writeIndex]=float(std::clamp(inR+wetR*currentFeedback,-limit,limit));
         writeIndex=(writeIndex+1)%maxFrames;validFrames=std::min(validFrames+1,maxFrames);
         currentMix+=std::clamp(target-currentMix,-step,step);
         left[i]=float(std::clamp(inL*(1-currentMix)+wetL*currentMix,-limit,limit));

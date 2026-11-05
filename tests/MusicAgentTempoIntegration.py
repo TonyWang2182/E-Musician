@@ -151,7 +151,7 @@ def main():
             assert len(global_state['tracks'])==1 and global_warp[0]['warp_speed_ratio']==pre_global['warp_speed_ratio'] and not global_warp[0]['follow_tempo']
             runtime.undo();wait(runtime);assert bridge.snapshot()['bpm']==120 and bridge.snapshot()['numerator']==4
             checks.append('A second real analysis of warped audio supports explicit manual tempo/meter correction; project adoption retains source playback speed and undoes atomically')
-            assert len(runtime.state()['capability_groups'])==9
+            assert len(runtime.state()['capability_groups'])==10
         report['passed']=True
     finally:
         if client:client.close()

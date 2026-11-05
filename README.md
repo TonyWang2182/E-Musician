@@ -2,6 +2,8 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
+**0.11.0：易乐师品牌与工作区（自动验证通过，人工待验）**。树乐师 Logo 用于启动、Windows 图标和左上角；新的浅色工作区、搜索库、顶部播放控制、可调整装置下栏与连续调参。轨道右键 → Track colour 染色，颜色支持保存/Undo及 Agent。启动 `E:/MusicAgent&DAW/Start E-musician 0.11.0 Workspace.cmd`，旧0.10.0保留。Release、CTest11/11、Agent300、离线闭环与组件截图已验；真实设备/鼠标/听感按 [人工短测](docs/review/2026-11-06-workspace-brand/MANUAL-CHECK.md) 确认。[结果](docs/review/2026-11-06-workspace-brand/RESULTS.md) / [设计规范](DESIGN.md)。
+
 **0.10.0 节拍与 Warp（2026-11-05，自动验证通过，人工待验）**：可选播放头视图跟随；真实节拍分析、BPM/拍号/首拍修正；Source 固定比例保音高拉伸；Agent 等价方案与确认回读；新的 Save/Settings 和情境右键。保留原件及 0.9.1 程序，局部 Warp 点和变速 Tempo Map 尚未实现。入口 `E:/MusicAgent&DAW/Start E-musician 0.10.0 Tempo.cmd`。[结果](docs/review/2026-11-05-tempo-warp/RESULTS.md) / [人工短测](docs/review/2026-11-05-tempo-warp/MANUAL-CHECK.md)。
 
 **0.9.1 分析工作区（2026-11-05）**：和弦结果在编曲区显示为和弦轨，分离和转录结果添加到普通音频/MIDI 轨。下栏显示波形、音符和和弦预览；Settings → Language 切换 English / 简体中文。轨道标题旁 rename、双击名称、F2、右键均可改名。分析新增可选四／六轨和品质档、乐器音域、七和弦等常用类型；具体算法和识别局限见 [Worker 记录](docs/review/2026-11-05-analysis-workspace/WORKER-NOTES.md)。

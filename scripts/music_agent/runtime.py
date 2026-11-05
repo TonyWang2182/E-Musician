@@ -358,6 +358,10 @@ class AgentRuntime:
                 if len(calls) != 1:
                     raise ValueError("模型需先完成读取，再单独提交一个方案。未执行修改。")
                 payload = self._arguments(calls[0])
+                if any(isinstance(a, dict) and a.get("type") == "set_track_colour" for a in payload.get("actions", [])):
+                    commands = self.bridge.capabilities().get("commands", []) if hasattr(self.bridge, "capabilities") else []
+                    if "set_track_colour" not in commands:
+                        raise BridgeError("当前 DAW 尚不支持轨道颜色，请使用 0.11.0 或更新入口。")
                 if any(isinstance(a,dict) and a.get("type") in {"add_native_effect","set_native_effect","set_native_effect_parameter"} for a in payload.get("actions",[])):
                     if hasattr(self.bridge,"require_native_effect_catalog"):
                         self.bridge.require_native_effect_catalog()

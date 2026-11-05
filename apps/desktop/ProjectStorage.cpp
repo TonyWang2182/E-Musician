@@ -11,6 +11,16 @@
 #include <set>
 
 namespace emusician::storage {
+juce::Result canonicalTrackColour(const juce::var& value, juce::String& result)
+{
+    if (!value.isString()) return juce::Result::fail("Track colour must be a string.");
+    const auto text = value.toString();
+    if (text.isNotEmpty() && (text.length() != 7 || text[0] != '#'
+        || !text.substring(1).containsOnly("0123456789abcdefABCDEF")))
+        return juce::Result::fail("Track colour must be #RRGGBB or an empty string to reset.");
+    result = text.toUpperCase();
+    return juce::Result::ok();
+}
 #include "ProjectStorageWarp.inc"
 namespace {
 using juce::File;
@@ -300,6 +310,9 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
         if (!validIdentifier(track.id) || !trackIds.insert(track.id.toLowerCase()).second)
             return Result::fail("Track IDs must be valid and unique.");
         if (track.name.length() > 512) return Result::fail("Track names must be no longer than 512 characters.");
+        String colour;
+        if (canonicalTrackColour(track.colour, colour).failed() || colour != track.colour)
+            return Result::fail("Track colour must be canonical #RRGGBB or empty.");
         if (!validGain(track.gainDb)) return Result::fail("Track gain must be between -60 and +6 dB: " + track.name);
         if (!validPan(track.pan)) return Result::fail("Track pan must be between -1 and 1.");
         if (track.kind != "audio" && track.kind != "instrument" && track.kind != "bus") return Result::fail("Unsupported track kind.");
@@ -508,6 +521,9 @@ Result readTrackMetadata(const juce::DynamicObject& object, StoredTrack& stored)
         || !number(gain) || !validGain(static_cast<double>(gain)) || !muted.isBool() || !solo.isBool())
         return Result::fail("A track contains missing or invalid fields.");
     stored.id = id.toString(); stored.name = name.toString();
+    if (object.hasProperty("colour")) {
+        if (auto result = canonicalTrackColour(object.getProperty("colour"), stored.colour); result.failed()) return result;
+    }
     stored.gainDb = static_cast<float>(static_cast<double>(gain));
     stored.muted = static_cast<bool>(muted); stored.solo = static_cast<bool>(solo);
     return Result::ok();
@@ -959,6 +975,7 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
         if (cancelled(options)) return cancellation();
         auto object = std::make_unique<juce::DynamicObject>();
         object->setProperty("id", track.id); object->setProperty("name", track.name); object->setProperty("kind", track.kind);
+        object->setProperty("colour", track.colour);
         object->setProperty("gain_db", static_cast<double>(track.gainDb));
         object->setProperty("pan", static_cast<double>(track.pan));
         object->setProperty("muted", track.muted); object->setProperty("solo", track.solo);

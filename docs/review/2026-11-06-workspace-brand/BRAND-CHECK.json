@@ -1,0 +1,13 @@
+﻿{
+    "checked_at":  "2026-11-05T18:46:19.3018701Z",
+    "executable":  "E:/emusician-analysis-build/bin-0.11.0/Release/E-musician.exe",
+    "version":  "0.11.0",
+    "sha256":  "A69F82ECAF144A7021AA1313AD23DE681B407F39C93B99B06B1069D6B0503807",
+    "previous_0100_sha256":  "474FC0824600C4AEB99FF4B617B890220D9B9A20E9DAFDE0F9ED6ABE0BBFB5D6",
+    "logo_sha256":  "6B94245A35170EBBCAB97A1CEC0A5D5BDE08233F1C8BBE8F671F314FD34005A2",
+    "icon_extracted_from_executable":  "E:/MusicAgent\u0026DAW/worktrees/audio-analysis/build-logs/workspace-icon.png",
+    "cpu":  "13th Gen Intel(R) Core(TM) i7-13700H",
+    "logical_processors":  20,
+    "ram_bytes":  31923757056,
+    "physical_audio_tested":  false
+}

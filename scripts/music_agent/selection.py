@@ -13,7 +13,7 @@ class ScopeError(ValueError):
 
 
 NOTE_ACTIONS = {"transpose_notes", "quantize_notes", "set_note_velocity", "set_note_length", "move_notes", "delete_notes", "add_notes"}
-TRACK_ACTIONS = {"rename_track", "set_track_gain", "set_track_pan", "set_track_muted", "set_track_solo", "add_native_effect", "set_native_effect", "set_native_effect_parameter"}
+TRACK_ACTIONS = {"rename_track", "set_track_gain", "set_track_pan", "set_track_muted", "set_track_solo", "set_track_colour", "add_native_effect", "set_native_effect", "set_native_effect_parameter"}
 MODES = {"selection", "clip", "project"}
 
 

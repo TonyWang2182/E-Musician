@@ -82,6 +82,9 @@ void Effect::valueTreePropertyChanged(juce::ValueTree& tree,const juce::Identifi
 void Effect::publish(){
     storage::StoredPlugin p;p.format="E-musician";p.role="effect";p.identifier=state["emEffectType"].toString();
     const auto data=state["emEffectData"];if(const auto* bytes=data.getBinaryData())p.state=*bytes;Settings s;if(decode(p,s).failed())return;
+    previewSettings(s);
+}
+void Effect::previewSettings(const Settings& s) noexcept {
     settingsVersion.fetch_add(1);
     for(std::size_t i=0;i<effects::eqBandCount;++i){const auto& b=s.equalizer.bands[i];enabled[i].store(b.enabled);freq[i].store(b.frequency);gain[i].store(b.gainDb);q[i].store(b.q);shape[i].store(b.shape);}
     threshold.store(s.compressor.thresholdDb);ratio.store(s.compressor.ratio);attack.store(s.compressor.attackMs);release.store(s.compressor.releaseMs);makeup.store(s.compressor.makeupDb);dryWet.store(s.compressor.dryWet);
@@ -90,6 +93,14 @@ void Effect::publish(){
     filterFreq.store(s.filterSettings.frequencyHz);filterQ.store(s.filterSettings.resonanceQ);filterLfoHz.store(s.filterSettings.lfoHz);filterLfoDepth.store(s.filterSettings.lfoDepth);filterMix.store(s.filterSettings.dryWet);
     filterHigh.store(s.filterSettings.mode==autofilter::Mode::highPass);filterLfoOn.store(s.filterSettings.lfoEnabled);
     isEq.store(s.eq);isDelay.store(s.delay);isReverb.store(s.reverb);isFilter.store(s.autoFilter);settingsVersion.fetch_add(1);
+}
+bool Effect::readSpectrum(std::array<float,2048>& samples,std::uint64_t& sequence) const noexcept {
+    static_assert(std::atomic<float>::is_always_lock_free);
+    spectrumLease.store(48,std::memory_order_relaxed);
+    const auto before=spectrumVersion.load(std::memory_order_acquire);if(!before||(before&1))return false;
+    for(std::size_t i=0;i<samples.size();++i)samples[i]=spectrumFrame[i].load(std::memory_order_relaxed);
+    if(spectrumVersion.load(std::memory_order_acquire)!=before)return false;
+    sequence=before;return true;
 }
 void Effect::applyToBuffer(const tracktion::PluginRenderContext& c){
     if(!c.destBuffer||c.destBuffer->getNumChannels()<1||c.bufferNumSamples<=0)return;
@@ -112,6 +123,19 @@ void Effect::applyToBuffer(const tracktion::PluginRenderContext& c){
     else if(currentSettings.eq)equalizer.process(l,r,c.bufferNumSamples,rate.load(),currentSettings.equalizer);
     else {compressor.process(l,r,c.bufferNumSamples,rate.load(),currentSettings.compressor);
         reductionDb.store(compressor.lastReductionDb(),std::memory_order_relaxed);meterBlocks.fetch_add(1,std::memory_order_release);}
+    // At most one published 2048-sample frame per block; no FFT, allocation,
+    // lock or callback to the UI. Stops after the display polling lease expires.
+    const auto lease=spectrumLease.load(std::memory_order_relaxed);
+    if(lease>0){
+        spectrumLease.fetch_sub(1,std::memory_order_relaxed);
+        for(int i=0;i<c.bufferNumSamples;++i){const float value=r?(l[i]+r[i])*.5f:l[i];spectrumPending[spectrumPosition++]=std::isfinite(value)?value:0;
+            if(spectrumPosition==spectrumPending.size()){
+                spectrumVersion.fetch_add(1,std::memory_order_acq_rel);
+                for(std::size_t j=0;j<spectrumFrame.size();++j)spectrumFrame[j].store(spectrumPending[j],std::memory_order_relaxed);
+                spectrumVersion.fetch_add(1,std::memory_order_release);spectrumPosition=0;break;
+            }
+        }
+    }else spectrumPosition=0;
     rendering.clear(std::memory_order_release);
 }
 }

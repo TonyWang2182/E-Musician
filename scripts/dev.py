@@ -51,7 +51,7 @@ def source_fingerprint() -> dict:
     """Hash source inputs without hashing mutable documentation/build output."""
     candidates: set[Path] = set()
     errors: list[str] = []
-    for name in ("apps", "core", "tests", "scripts", "cmake"):
+    for name in ("apps", "core", "tests", "scripts", "cmake", "assets"):
         directory = ROOT / name
         if directory.is_dir():
             candidates.update(

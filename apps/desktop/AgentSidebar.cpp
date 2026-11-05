@@ -1,5 +1,6 @@
 #include "AgentSidebar.h"
 #include "UiLanguage.h"
+#include "UiDesign.h"
 #include <array>
 #include <atomic>
 #include <cstring>
@@ -248,7 +249,8 @@ struct AgentSidebar::Impl {
     explicit Impl(AgentSidebar& o, std::function<juce::var(const juce::var&)> d) : owner(o), dispatch(std::move(d)) {
         owner.addAndMakeVisible(status); owner.addAndMakeVisible(retry);
         status.setJustificationType(juce::Justification::centred);
-        status.setColour(juce::Label::textColourId, juce::Colour(0xff202020));
+        status.setColour(juce::Label::textColourId, design::secondary);
+        status.setFont(design::labelFont(13));
         retry.onClick = [this] { owner.restartWorker(); };
         uiButton(retry, "Retry assistant");
     }
@@ -348,7 +350,7 @@ void AgentSidebar::resized() {
     impl->retry.setBounds((getWidth() - 160) / 2, getHeight() / 2 + 62, 160, 30);
 }
 void AgentSidebar::paint(juce::Graphics& graphics) {
-    graphics.fillAll(juce::Colours::white); graphics.setColour(juce::Colour(0xffcccccc));
+    graphics.fillAll(design::paper); graphics.setColour(design::rule);
     graphics.drawVerticalLine(0, 0.0f, float(getHeight()));
 }
 }

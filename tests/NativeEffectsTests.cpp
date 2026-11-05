@@ -98,6 +98,22 @@ int main(){
     delay.reset();l.fill(0);r.fill(0);delay.process(l.data(),r.data(),int(l.size()),48000,ds);
     check(near(l[480],0),"delay reset discards the old tail without clearing the ring");
     ds.feedback=.96f;check(!valid(ds),"unstable delay feedback rejected");
+    {
+        // A new target must affect running audio gradually, not jump at the
+        // next block boundary or reset the filter/delay history.
+        Equalizer live;EqSettings tuning;l.fill(.1f);live.process(l.data(),nullptr,int(l.size()),48000,tuning);
+        tuning.bands[0].gainDb=12;l.fill(.1f);observe=true;live.process(l.data(),nullptr,int(l.size()),48000,tuning);observe=false;
+        check(l.front()<.105f && l.back()>.38f,"running EQ coefficients transition from old to new gain without resetting history");
+        Compressor liveComp;CompressorSettings makeup;makeup.ratio=1;l.fill(.2f);liveComp.process(l.data(),nullptr,int(l.size()),48000,makeup);
+        makeup.makeupDb=24;l.fill(.2f);observe=true;liveComp.process(l.data(),nullptr,int(l.size()),48000,makeup);observe=false;
+        check(l.front()<.21f && l.back()>3.1f,"running compressor makeup is smoothed instead of a block-boundary jump");
+        StereoDelay liveDelay;DelaySettings time;time.delayMs=10;time.dryWet=1;time.feedback=0;
+        for(std::size_t i=0;i<l.size();++i)l[i]=float(i)*.0001f;
+        liveDelay.process(l.data(),nullptr,int(l.size()),48000,time);time.delayMs=100;l[0]=.4096f;
+        observe=true;liveDelay.process(l.data(),nullptr,1,48000,time);observe=false;
+        check(l[0]>.35f&&l[0]<.37f,"delay-time changes interpolate the existing tap rather than jump into empty history");
+        check(allocations==0,"continuous parameter transitions remain allocation free");
+    }
     s.dryWet=1.01f;check(!valid(s),"out-of-range mix rejected");
     s.ratio=4;s.dryWet=1;eq=EqSettings{};l.fill(.1f);r.fill(.1f);observe=true;
     filter.process(l.data(),r.data(),int(l.size()),48000,eq);comp.process(l.data(),r.data(),int(l.size()),48000,s);

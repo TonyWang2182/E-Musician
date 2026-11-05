@@ -1,5 +1,17 @@
 # E-musician 开发计划
 
+## 0.11.0 品牌、工作区与轨道颜色（自动验证通过，人工待验）
+
+- [x] 用户批准资源归档，共享设计 token，独立 0.11.0 构建目录与工作分支；旧 0.10.0 保留。
+- [x] 轨道颜色命令/保存/Undo/只读投影与 Agent 工具实现，回归已编写。
+- [x] 启动品牌、Windows 图标、顶栏/Library/概览/可调下栏及精简卷帘实现。
+- [x] 原生效果手势事务、平滑、大 EQ/有界真实频谱与 A/B 实现。
+- [x] 最终 Release、CTest 11/11、Agent 300、真实离线宿主/Agent 8项、实际WebView及中英文尺寸截图复核。
+- [x] 221输入、产物 SHA、失败链与交付入口/人工检查文档归档。
+- [ ] 真实鼠标、DPI、ASIO/连续调参听感人工确认。
+
+范围与文件归属见 [PLAN](review/2026-11-06-workspace-brand/PLAN.md)，取舍见 [ADR](decisions/2026-11-06-brand-colour-device-gestures.md)，最终冻结与验收证据见 [RESULTS](review/2026-11-06-workspace-brand/RESULTS.md)。硬件/听感人工验证与代码自动验证分开。
+
 ## 0.10.0 跟随视图、节拍与 Warp（自动验证通过，人工待验）
 
 - [x] 跟随播放头开关、手动浏览暂停、持久化偏好与标尺右键入口，离屏行为检查通过。

@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <juce_dsp/juce_dsp.h>
 
 namespace emusician {
 namespace {
@@ -21,9 +22,10 @@ struct NativeEffectsPanel::Impl {
     Impl(NativeEffectsPanel& component, EngineSession& engine, juce::String track, juce::String device,
          std::function<void(const juce::Result&)> callback)
         : owner(component), session(engine), trackId(std::move(track)), deviceId(std::move(device)), report(std::move(callback)), graph(*this) {
-        for (auto* c : std::initializer_list<juce::Component*>{ &title, &status, &meter, &addEq, &addComp, &addDelay, &addReverb, &addFilter, &filterMode, &filterLfo, &graph, &bandOn, &shape, &bypass, &reset }) owner.addAndMakeVisible(c);
+        owner.setLookAndFeel(&controlLook);
+        for (auto* c : std::initializer_list<juce::Component*>{ &title, &status, &meter, &addEq, &addComp, &addDelay, &addReverb, &addFilter, &filterMode, &filterLfo, &graph, &bandOn, &shape, &bypass, &reset, &compareAButton, &compareBButton, &copyCompare }) owner.addAndMakeVisible(c);
         for (auto* button : { &addEq, &addComp, &addDelay, &addReverb, &addFilter, &filterMode, &filterLfo, &bandOn, &bypass, &reset }) uiButton(*button, button->getButtonText());
-        title.setFont(mono(15)); status.setFont(mono(11)); status.setColour(juce::Label::textColourId, quiet);
+        title.setFont(deviceui::labelFont(14,true)); status.setFont(deviceui::labelFont(11)); status.setColour(juce::Label::textColourId, quiet);
         meter.setFont(mono(11)); meter.setColour(juce::Label::textColourId, quiet); meter.setJustificationType(juce::Justification::centredRight);
         meter.setText("GR --", juce::dontSendNotification);
         meter.setTooltip("Measured gain reduction of the wet compressor signal, before makeup and dry/wet mix; unavailable when the device is not processing.");
@@ -69,18 +71,51 @@ struct NativeEffectsPanel::Impl {
         const std::array<double, 14> defaults {1000,0,.7071,-18,4,10,100,0,100,350,35,35,0,100};
         for (int i = 0; i < 14; ++i) {
             auto& slider = sliders[std::size_t(i)]; auto& label = names[std::size_t(i)]; owner.addAndMakeVisible(slider); owner.addAndMakeVisible(label);
-            uiLabel(label, labels[std::size_t(i)]); label.setFont(mono(11)); label.setColour(juce::Label::textColourId, quiet); label.setJustificationType(juce::Justification::centred);
+            uiLabel(label, labels[std::size_t(i)]); label.setFont(deviceui::labelFont(12)); label.setColour(juce::Label::textColourId, quiet); label.setJustificationType(juce::Justification::centred);
             slider.setRange(low[std::size_t(i)], high[std::size_t(i)], step[std::size_t(i)]);
             deviceui::configureKnob(slider, controlLook, defaults[std::size_t(i)], suffix[std::size_t(i)]);
             slider.setTitle(labels[std::size_t(i)]);
             if (i == 0) slider.setSkewFactorFromMidPoint(1000);
-            slider.onDragStart = [this] { dragging = true; gestureChanged = false; gestureRevision = revision; gestureProject = projectId; };
-            slider.onDragEnd = [this] { if (!dragging) return; dragging = false; if (gestureChanged) commit(state, gestureRevision, gestureProject); };
-            slider.onValueChange = [this, i] { if (updating || !valid) return; applySlider(i); gestureChanged = true; if (!dragging) commit(state, revision, projectId); };
+            slider.onDragStart = [this,i] { beginGesture(i); };
+            slider.onDragEnd = [this] { finishGesture(); ignoreUntilRelease=false; };
+            slider.onEscape=[this,i] { if(!dragging||activeKnob!=i)return false;cancelGesture();ignoreUntilRelease=true;return true; };
+            slider.onValueChange = [this, i] { if(updating||!valid||ignoreUntilRelease||gestureFailed)return;applySlider(i);gestureChanged=true;if(dragging)previewGesture();else commit(state,revision,projectId); };
         }
+        compareAButton.onClick=[this]{switchComparison(false);};compareBButton.onClick=[this]{switchComparison(true);};
+        copyCompare.onClick=[this]{if(!valid||dragging)return;if(comparisonB)compareA=state.clone();else compareB=state.clone();setError(uiText("Copied current settings to the other comparison slot.","已复制到另一比较槽。"));};
+        compareAButton.setTooltip("Recall A; changes this device only, with one Undo. Comparison slots last while this panel is open.");
+        compareBButton.setTooltip("Recall B; changes this device only, with one Undo. Comparison slots last while this panel is open.");
+        copyCompare.setTooltip("Copy current settings to the other comparison slot without changing audio.");
         update();
     }
-    ~Impl() { for (auto& slider : sliders) slider.setLookAndFeel(nullptr); }
+    ~Impl() {
+        if(gestureId.isNotEmpty())session.execute("cancel_native_effect_gesture",object({{"gesture_id",gestureId}}),session.snapshot().revision);
+        owner.setLookAndFeel(nullptr);for(auto& slider:sliders)slider.setLookAndFeel(nullptr);
+    }
+    void beginGesture(int knob=-1){
+        if(!valid||dragging)return;activeKnob=knob;dragging=true;gestureFailed=false;ignoreUntilRelease=false;gestureChanged=false;gestureRevision=revision;gestureProject=projectId;
+        juce::var result;const auto outcome=session.execute("begin_native_effect_gesture",object({{"track_id",trackId},{"device_id",deviceId}}),revision,&result);
+        if(outcome.failed()){gestureFailed=true;setError(outcome.getErrorMessage());return;}gestureId=result["gesture_id"].toString();
+    }
+    void previewGesture(){
+        if(!dragging||gestureFailed||gestureId.isEmpty())return;
+        const auto outcome=session.execute("update_native_effect_gesture",object({{"gesture_id",gestureId},{"state",state}}),gestureRevision);
+        if(outcome.failed()){gestureFailed=true;setError(outcome.getErrorMessage());}
+    }
+    void finishGesture(){
+        if(!dragging){gestureFailed=false;return;}dragging=false;
+        auto outcome=juce::Result::ok();
+        if(gestureId.isNotEmpty())outcome=session.execute(gestureFailed?"cancel_native_effect_gesture":"end_native_effect_gesture",object({{"gesture_id",gestureId}}),session.snapshot().revision);
+        gestureId.clear();gestureFailed=false;state=juce::var();revision=0;update();if(report)report(outcome);if(outcome.failed())setError(outcome.getErrorMessage());
+    }
+    void cancelGesture(){
+        if(gestureId.isNotEmpty())session.execute("cancel_native_effect_gesture",object({{"gesture_id",gestureId}}),session.snapshot().revision);
+        gestureId.clear();dragging=false;gestureFailed=false;graph.moving=false;state=juce::var();revision=0;update();setError(uiText("Parameter edit cancelled.","已取消参数调整。"));
+    }
+    void switchComparison(bool next){
+        if(!valid||dragging||comparisonB==next)return;if(comparisonB)compareB=state.clone();else compareA=state.clone();
+        const auto saved=(next?compareB:compareA).clone();if(!saved.isObject())return;const bool previous=comparisonB;comparisonB=next;if(!commit(saved,revision,projectId)){comparisonB=previous;refreshControls();}
+    }
     void add(const juce::String& type) {
         const auto s = session.snapshot();
         if (s.projectId != projectId || (trackId != "master" && s.selectedTrackId != trackId)) { setError("Project or track changed. Reopen the effect panel."); return; }
@@ -89,16 +124,17 @@ struct NativeEffectsPanel::Impl {
         deviceId = output["device_id"].toString(); revision = 0; update(); owner.resized();
     }
     void setError(const juce::String& text) {
-        const auto message = text.isEmpty() ? "Shift: fine   |   value: type   |   double-click knob: reset   |   release: apply" : text;
+        const auto message = text.isEmpty() ? uiText("Drag to hear · Shift: fine · Esc: cancel · Release: one Undo", "拖动试听 · Shift细调 · Esc取消 · 松手记一次撤销") : text;
         status.setText(message, juce::dontSendNotification); status.setTooltip(message);
     }
     void update() {
         if (languageRevision != uiLanguageRevision()) { languageRevision = uiLanguageRevision(); refreshUiButtons(owner); owner.repaint(); }
         const auto snapshot = session.snapshot(); if (sampleRate != snapshot.sampleRate) graph.invalidate(); sampleRate = snapshot.sampleRate;
         if (projectId.isEmpty()) projectId = snapshot.projectId;
-        if (snapshot.projectId != projectId || (trackId != "master" && snapshot.selectedTrackId != trackId)) { valid = false; setError("Project or track changed. Reopen this panel."); refreshControls(); return; }
+        if (snapshot.projectId != projectId || (trackId != "master" && snapshot.selectedTrackId != trackId)) { if(dragging)cancelGesture();valid = false; setError("Project or track changed. Reopen this panel."); refreshControls(); return; }
         const bool exists = trackId == "master" || std::any_of(snapshot.tracks.begin(), snapshot.tracks.end(), [&](const auto& t) { return t.id == trackId; });
         if (!exists) { valid = false; setError("Track no longer exists."); refreshControls(); return; }
+        targetName=trackId=="master"?juce::String("Master"):juce::String();for(const auto& track:snapshot.tracks)if(track.id==trackId)targetName=track.name;
         if (dragging) return;
         const auto updateEnabledSlot = [&](const auto& slots) { for (const auto& slot : slots) if (slot.id == deviceId) deviceEnabled = slot.enabled; };
         if (trackId == "master") updateEnabledSlot(snapshot.masterPlugins);
@@ -109,7 +145,10 @@ struct NativeEffectsPanel::Impl {
         if (snapshot.revision == revision && state.isObject()) { refreshEnabled(); return; }
         juce::var value; auto result = session.execute("get_native_effect", object({ {"track_id",trackId}, {"device_id",deviceId} }), snapshot.revision, &value);
         if (result.failed() || !value["state"].isObject()) { valid = false; state = juce::var(); setError(result.failed() ? result.getErrorMessage() : "Effect state unavailable."); }
-        else { state = value["state"]; revision = snapshot.revision; setError({}); }
+        else { state = value["state"]; revision = snapshot.revision; setError({});
+            if(compareDevice!=deviceId){spectrumAvailable=false;spectrumSequence=0;compareDevice=deviceId;compareA=state.clone();compareB=state.clone();comparisonB=false;}
+            else if(comparisonB)compareB=state.clone();else compareA=state.clone();
+        }
         refreshControls();
     }
     void applySlider(int index) {
@@ -124,29 +163,33 @@ struct NativeEffectsPanel::Impl {
             next.getDynamicObject()->setProperty(key,index==9?value:value/100.0); }
         state = std::move(next); graph.invalidate();
     }
-    void commit(const juce::var& next, std::uint64_t expected, const juce::String& project) {
+    bool commit(const juce::var& next, std::uint64_t expected, const juce::String& project) {
         const auto snapshot = session.snapshot();
         const auto result = project != snapshot.projectId || (trackId != "master" && trackId != snapshot.selectedTrackId) ? juce::Result::fail("Project or track changed; parameter edit cancelled.")
             : session.execute("set_native_effect", object({ {"track_id",trackId}, {"device_id",deviceId}, {"state",next} }), expected);
         if (report) report(result); state = juce::var(); revision = 0; update();
-        if (result.failed()) setError(result.getErrorMessage());
+        if (result.failed()) setError(result.getErrorMessage());return result.wasOk();
     }
     void refreshEnabled() {
         addEq.setEnabled(valid); addComp.setEnabled(valid); addDelay.setEnabled(valid); addReverb.setEnabled(valid); addFilter.setEnabled(valid); filterMode.setEnabled(valid);filterLfo.setEnabled(valid);bandOn.setEnabled(valid);
         for (auto& button : bands) button.setEnabled(valid && !dragging); for (auto& slider : sliders) slider.setEnabled(valid);
+        compareAButton.setEnabled(valid&&!dragging);compareBButton.setEnabled(valid&&!dragging);copyCompare.setEnabled(valid&&!dragging);
         bypass.setEnabled(valid && !dragging); reset.setEnabled(valid && !dragging); shape.setEnabled(valid && !dragging);
         if (const auto* list = state["bands"].getArray()) if (selectedBand < list->size()) sliders[1].setEnabled(valid && Graph::gainShape(list->getReference(selectedBand)));
     }
     void refreshControls() {
         updating = true; const auto type = state["type"].toString(); const bool eq = type == "eq8", comp = type == "compressor", delay = type == "delay", reverb = type == "reverb", filter = type == "auto_filter", empty = deviceId.isEmpty();
-        const auto prefix = trackId == "master" ? juce::String("Master / ") : juce::String();
+        const auto prefix=targetName.isEmpty()?juce::String():targetName+" / ";
         title.setText(prefix + (empty ? "Add a built-in effect" : eq ? "EQ Eight / " + juce::String(selectedBand + 1) : comp ? "Compressor" : delay ? "Stereo Delay" : reverb ? "Reverb" : filter ? "Auto Filter" : "Effect unavailable"), juce::dontSendNotification);
         addEq.setVisible(empty); addComp.setVisible(empty); addDelay.setVisible(empty); addReverb.setVisible(empty); addFilter.setVisible(empty); filterMode.setVisible(filter); filterLfo.setVisible(filter);
         graph.setVisible(eq || comp || delay || reverb || filter); bandOn.setVisible(eq); shape.setVisible(eq); meter.setVisible(comp); bypass.setVisible(!empty); reset.setVisible(!empty);
+        compareAButton.setVisible(!empty);compareBButton.setVisible(!empty);copyCompare.setVisible(!empty);
+        compareAButton.setToggleState(!comparisonB,juce::dontSendNotification);compareBButton.setToggleState(comparisonB,juce::dontSendNotification);
+        copyCompare.setButtonText(comparisonB?"B > A":"A > B");
         uiButton(reset, eq ? "reset band" : "reset");
         if(filter){uiButton(filterMode, state["mode"].toString()=="low_pass"?"low pass":"high pass");uiButton(filterLfo, bool(state["lfo_enabled"])?"LFO on":"LFO off");}
         graph.setTitle(comp ? "Compressor static input output curve" : delay ? "Delay echoes guide" : reverb ? "Reverb decay guide" : filter ? "Filter response" : "Equalizer response");
-        graph.setDescription("Parameter response preview, not a live spectrum. Drag labeled points; Escape cancels. Knobs and value boxes provide keyboard alternatives.");
+        graph.setDescription("Response curve and optional measured mono output spectrum. Drag a point to hear changes; Escape cancels. Knobs and value boxes provide keyboard alternatives.");
         for (int i = 0; i < 8; ++i) { bands[std::size_t(i)].setVisible(eq); bands[std::size_t(i)].setToggleState(i == selectedBand, juce::dontSendNotification); }
         for (int i = 0; i < 14; ++i) { names[std::size_t(i)].setVisible((i < 3 && eq) || (i >= 3 && i<9 && comp) || (i>=9 && i<12 && (delay || reverb)) || (i>=9&&filter)); sliders[std::size_t(i)].setVisible(names[std::size_t(i)].isVisible()); }
         if (eq) { if (auto* list = state["bands"].getArray()) if (selectedBand < list->size()) { const auto b = list->getReference(selectedBand);
@@ -178,32 +221,55 @@ struct NativeEffectsPanel::Impl {
         for (int i=0;i<14;++i) if (sliders[std::size_t(i)].isVisible()) sliders[std::size_t(i)].setTitle(names[std::size_t(i)].getText());
         updating = false; refreshEnabled(); graph.invalidate(); owner.resized(); owner.repaint();
     }
-    NativeEffectsPanel& owner; EngineSession& session; juce::String trackId, deviceId, projectId, gestureProject;
-    std::function<void(const juce::Result&)> report; juce::var state; std::uint64_t revision = 0, gestureRevision = 0; double sampleRate = 0;
-    bool valid = false, updating = false, dragging = false, gestureChanged = false, deviceEnabled = true; int selectedBand = 0;
+    void updateSpectrum(){
+        if(state["type"].toString()!="eq8"||!valid||!deviceEnabled){spectrumAvailable=false;return;}
+        std::array<float,2048> frame{};std::uint64_t sequence=0;
+        if(session.nativeEffectSpectrum(projectId,trackId,deviceId,frame,sequence)&&sequence!=spectrumSequence){
+            spectrumSequence=sequence;spectrumStale=0;fftData.fill(0);
+            for(std::size_t i=0;i<frame.size();++i)fftData[i]=frame[i]*float(.5-.5*std::cos(2*juce::MathConstants<double>::pi*double(i)/2047));
+            fft.performFrequencyOnlyForwardTransform(fftData.data());
+            const double rate=sampleRate>0?sampleRate:48000;
+            for(std::size_t i=0;i<spectrumDb.size();++i){
+                const double low=20*std::pow(std::min(20000.0,rate*.49)/20,double(i)/spectrumDb.size());
+                const double high=20*std::pow(std::min(20000.0,rate*.49)/20,double(i+1)/spectrumDb.size());
+                const int first=juce::jlimit(1,1023,int(std::floor(low*2048/rate))),last=juce::jlimit(first,1023,int(std::ceil(high*2048/rate)));
+                float peak=0;for(int bin=first;bin<=last;++bin)peak=juce::jmax(peak,fftData[std::size_t(bin)]);
+                spectrumDb[i]=juce::jlimit(-90.0f,0.0f,20*std::log10(juce::jmax(1e-8f,peak*float(2.0/1023.5))));
+            }
+            spectrumAvailable=true;
+        }else if(++spectrumStale>=10)spectrumAvailable=false;
+        graph.repaint();
+    }
+    juce::dsp::FFT fft{11};std::array<float,4096> fftData{};std::array<float,128> spectrumDb{};
+    std::uint64_t spectrumSequence=0;int spectrumStale=0,pollTick=0;bool spectrumAvailable=false;
+    NativeEffectsPanel& owner; EngineSession& session; juce::String trackId, deviceId, projectId, gestureProject,gestureId,targetName,compareDevice;
+    std::function<void(const juce::Result&)> report; juce::var state,compareA,compareB; std::uint64_t revision = 0, gestureRevision = 0; double sampleRate = 0;
+    bool comparisonB=false,gestureFailed=false,ignoreUntilRelease=false;
+    bool valid = false, updating = false, dragging = false, gestureChanged = false, deviceEnabled = true; int selectedBand = 0,activeKnob=-1;
     unsigned languageRevision = 0;
     juce::Label title, status, meter; juce::TextButton addEq {"add EQ Eight"}, addComp {"add Compressor"}, addDelay {"add Stereo Delay"}, addReverb {"add Reverb"}, addFilter {"add Auto Filter"}, filterMode {"low pass"}, filterLfo {"LFO off"}, bandOn {"band on"};
     std::uint64_t meterSequence = 0; int staleMeterPolls = 0;
     float reductionDb = 0; bool meterAvailable = false;
+    juce::TextButton compareAButton{"A"},compareBButton{"B"},copyCompare{"A > B"};
     juce::TextButton bypass {"on"}, reset {"reset"}; juce::ComboBox shape;
     deviceui::ControlLook controlLook;
-    std::array<juce::TextButton, 8> bands; std::array<juce::Slider, 14> sliders; std::array<juce::Label, 14> names; Graph graph;
+    std::array<juce::TextButton, 8> bands; std::array<deviceui::Knob, 14> sliders; std::array<juce::Label, 14> names; Graph graph;
 };
 
 NativeEffectsPanel::NativeEffectsPanel(EngineSession& session, juce::String track, juce::String device, std::function<void(const juce::Result&)> report)
     : impl(nullptr) { impl = std::make_unique<Impl>(*this, session, std::move(track), std::move(device), std::move(report)); resized(); }
 NativeEffectsPanel::~NativeEffectsPanel() { stopTimer(); }
-void NativeEffectsPanel::visibilityChanged() { if (!impl) return; if (isVisible()) { if (isShowing()) impl->update(); startTimer(isShowing() ? 250 : 1000); } else stopTimer(); }
+void NativeEffectsPanel::visibilityChanged() {if(!impl)return;if(!isShowing()&&impl->dragging)impl->cancelGesture();if(isVisible()){if(isShowing())impl->update();startTimer(isShowing()?50:1000);}else stopTimer();}
 void NativeEffectsPanel::timerCallback() {
     if (!isVisible()) { stopTimer(); return; }
-    if (!isShowing()) { startTimer(1000); return; }
-    if (getTimerInterval() != 250) startTimer(250);
-    impl->update();
+    if(!isShowing()){if(impl->dragging)impl->cancelGesture();startTimer(1000);return;}
+    if(getTimerInterval()!=50)startTimer(50);
+    if(++impl->pollTick%5==0)impl->update();impl->updateSpectrum();
     if (impl->state["type"].toString() != "compressor") return;
     float value=0;std::uint64_t sequence=0;
     if(impl->session.nativeCompressorMeter(impl->projectId,impl->trackId,impl->deviceId,value,sequence)){
         if(sequence!=impl->meterSequence){impl->meterSequence=sequence;impl->staleMeterPolls=0;}else ++impl->staleMeterPolls;
-        if(impl->staleMeterPolls<3){impl->meter.setText("GR -"+juce::String(value,1)+" dB",juce::dontSendNotification);impl->reductionDb=value;impl->meterAvailable=true;impl->graph.repaint();return;}
+        if(impl->staleMeterPolls<10){impl->meter.setText("GR -"+juce::String(value,1)+" dB",juce::dontSendNotification);impl->reductionDb=value;impl->meterAvailable=true;impl->graph.repaint();return;}
     }
     impl->meter.setText("GR --",juce::dontSendNotification);impl->meterAvailable=false;impl->graph.repaint();
 }
@@ -211,12 +277,24 @@ void NativeEffectsPanel::paint(juce::Graphics& g) { g.fillAll(paper); g.setColou
 void NativeEffectsPanel::resized() {
     if (!impl) return; auto& p = *impl; const int width = getWidth(), height = getHeight();
     const auto type = p.state["type"].toString(); const bool eq = type == "eq8", comp = type == "compressor", filter = type == "auto_filter";
-    p.title.setBounds(12, 4, juce::jmax(100,width - (comp ? 335 : 190)), 26);
-    p.reset.setBounds(width-102,4,90,26); p.bypass.setBounds(width-180,4,70,26); p.meter.setBounds(width-330,4,140,26);
+    int right=width-12;p.reset.setBounds(right-72,5,72,25);right-=78;p.bypass.setBounds(right-56,5,56,25);right-=62;
+    p.copyCompare.setBounds(right-46,5,46,25);right-=50;p.compareBButton.setBounds(right-27,5,27,25);right-=29;p.compareAButton.setBounds(right-27,5,27,25);right-=33;
+    if(comp){p.meter.setBounds(right-88,5,88,25);right-=94;}
+    p.title.setBounds(12,4,juce::jmax(80,right-18),26);
     p.status.setBounds(12, height - 23, juce::jmax(100,width - 24), 20);
     const std::array<juce::TextButton*,5> addButtons {&p.addEq,&p.addComp,&p.addDelay,&p.addReverb,&p.addFilter};
     const int addColumns = juce::jmax(1, (width - 24) / 164);
     for (int i=0;i<5;++i) addButtons[std::size_t(i)]->setBounds(12+(i%addColumns)*164,52+(i/addColumns)*40,154,32);
+    if(eq&&width>=720&&height>=240){
+        const int bottom=height-108;p.graph.setBounds(12,39,width-24,bottom-43);
+        for(int i=0;i<8;++i)p.bands[std::size_t(i)].setBounds(16+i*28,bottom+6,25,25);
+        p.shape.setBounds(16,bottom+40,134,27);p.bandOn.setBounds(156,bottom+40,82,27);
+        const int controlsX=juce::jmax(260,width-420),cell=(width-controlsX-12)/3;
+        for(int i=0;i<3;++i){p.names[std::size_t(i)].setBounds(controlsX+i*cell,bottom,cell,17);
+            p.sliders[std::size_t(i)].setBounds(controlsX+i*cell+4,bottom+17,cell-8,65);
+            p.sliders[std::size_t(i)].setTextBoxStyle(juce::Slider::TextBoxBelow,false,juce::jmin(100,cell-8),22);}
+        return;
+    }
     const int graphWidth = juce::jmax(220, (width-36)/2), x = 12 + graphWidth + 12, controlsWidth = width - x - 12;
     p.graph.setBounds(12,40,graphWidth,juce::jmax(80,height-(eq||filter?94:65)));
     const int bandWidth = juce::jmin(34,graphWidth/8);
@@ -269,6 +347,25 @@ juce::Result NativeEffectsPanel::runInteractionSmokeTest(juce::DynamicObject& re
     values = result["state"]["bands"].getArray();
     if (read.failed() || !values || std::abs(double(values->getReference(2)["gain_db"]) - 5.0) > 0.01)
         return juce::Result::fail("A stale EQ gesture overwrote the current project.");
+    {
+        const auto version=p.session.snapshot().revision;
+        p.sliders[1].onDragStart();p.sliders[1].setValue(6,juce::sendNotificationSync);p.sliders[1].setValue(8,juce::sendNotificationSync);
+        read=p.session.execute("get_native_effect",object({{"track_id",p.trackId},{"device_id",p.deviceId}}),version,&result);
+        if(read.failed()||p.session.snapshot().revision!=version||std::abs(double(result["state"]["bands"].getArray()->getReference(2)["gain_db"])-5)>.01)
+            return juce::Result::fail("Continuous knob preview leaked into committed state or revision.");
+        p.sliders[1].keyPressed(juce::KeyPress(juce::KeyPress::escapeKey));p.sliders[1].onDragEnd();
+        if(p.session.snapshot().revision!=version||std::abs(double(p.state["bands"].getArray()->getReference(2)["gain_db"])-5)>.01)
+            return juce::Result::fail("Knob Escape failed to restore committed state without an Undo step.");
+        p.sliders[1].onDragStart();p.sliders[1].setValue(7,juce::sendNotificationSync);p.sliders[1].setValue(9,juce::sendNotificationSync);p.sliders[1].onDragEnd();
+        if(p.session.snapshot().revision!=version+1)return juce::Result::fail("One knob gesture did not produce one revision.");
+        if(p.session.execute("undo",object({}),p.session.snapshot().revision).failed())return juce::Result::fail("Knob gesture Undo failed.");
+        p.revision=0;p.update();if(std::abs(double(p.state["bands"].getArray()->getReference(2)["gain_db"])-5)>.01)return juce::Result::fail("One Undo did not restore the full knob gesture.");
+        p.compareBButton.onClick();if(std::abs(double(p.state["bands"].getArray()->getReference(2)["gain_db"]))>.01)return juce::Result::fail("B did not recall the captured comparison.");
+        p.compareAButton.onClick();if(std::abs(double(p.state["bands"].getArray()->getReference(2)["gain_db"])-5)>.01)return juce::Result::fail("A did not restore the edited comparison.");
+        p.copyCompare.onClick();p.sliders[1].setValue(6,juce::sendNotificationSync);p.compareBButton.onClick();
+        if(std::abs(double(p.state["bands"].getArray()->getReference(2)["gain_db"])-5)>.01)return juce::Result::fail("Copy comparison did not preserve its independent captured values.");
+        p.compareAButton.onClick();p.sliders[1].setValue(5,juce::sendNotificationSync);
+    }
     setSize(1000, 250); if (!getLocalBounds().contains(p.graph.getBounds()) || !getLocalBounds().contains(p.bandOn.getBounds()))
         return juce::Result::fail("EQ controls overflow the compact dock.");
     auto saveImage = [&](const char* name) { juce::MemoryOutputStream bytes; const auto image = createComponentSnapshot(getLocalBounds(), true);
@@ -309,8 +406,10 @@ juce::Result NativeEffectsPanel::runInteractionSmokeTest(juce::DynamicObject& re
         return juce::Result::fail("EQ knobs, shape, or values overflow the 600 px dock.");
     setSize(600,212); if(!knobsFit() || p.sliders[0].getBottom()>=p.shape.getY() || !getLocalBounds().contains(p.bandOn.getBounds())
         || !saveImage(p.trackId=="master"?"ui-native-eq-master-minimum.png":"ui-native-eq-minimum.png"))return juce::Result::fail("EQ controls overlap or overflow the minimum dock.");
-    setSize(1000,250);
+    setSize(1000,330);
+    if(p.graph.getWidth()<950||p.sliders[0].getY()<p.graph.getBottom())return juce::Result::fail("Expanded EQ does not give the response graph full width with bottom controls.");
     if (!saveImage(p.trackId == "master" ? "ui-native-eq-master-dock.png" : "ui-native-eq-dock.png")) return juce::Result::fail("Could not capture the EQ panel.");
+    setSize(1000,250);
     p.deviceId.clear(); p.state = juce::var(); p.update(); p.addComp.onClick();
     if (p.deviceId.isEmpty() || p.state["type"].toString() != "compressor") return juce::Result::fail("UI could not add or read a compressor.");
     p.sliders[3].setValue(-12, juce::sendNotificationSync);
@@ -420,6 +519,7 @@ juce::Result NativeEffectsPanel::runInteractionSmokeTest(juce::DynamicObject& re
         return juce::Result::fail("Switching to reverb retained incorrect slider ranges or units.");
     report.setProperty(p.trackId == "master" ? "native_effect_master_ui_add_and_adjust" : "native_effect_ui_add_and_adjust", true);
     report.setProperty(p.trackId == "master" ? "native_effect_master_knobs_graphs_shape_bypass" : "native_effect_knobs_graphs_shape_bypass", true);
+    report.setProperty(p.trackId == "master" ? "native_effect_master_continuous_escape_ab" : "native_effect_continuous_escape_ab", true);
     return juce::Result::ok();
 }
 }

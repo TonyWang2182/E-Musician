@@ -44,10 +44,13 @@
     const row = element("li");
     if (typeof change !== "string") { row.textContent = t("此项缺少可读说明，请放弃并重新生成方案。"); return row; }
     // Highlight the action word without inferring which objects will be deleted.
-    const pattern = /删除|移除|\b(?:delete|remove)\b/gi;
+    const pattern = /删除|移除|\b(?:delete|remove)\b|#[0-9a-f]{6}\b|[+-]?(?:\d+\.?\d*|\.\d+)(?:\s*(?:BPM|dB|kHz|Hz|ms|beats?|%))?/gi;
     let offset = 0;
     for (const match of change.matchAll(pattern)) {
-      row.append(document.createTextNode(change.slice(offset, match.index)), element("strong", match[0], "change-action"));
+      const destructive = /^(?:删除|移除|delete|remove)$/i.test(match[0]);
+      const value = element(destructive ? "strong" : "span", match[0], destructive ? "change-action" : "change-value");
+      if (/^#[0-9a-f]{6}$/i.test(match[0])) { value.classList.add("colour-value"); value.style.setProperty("--track-colour", match[0]); }
+      row.append(document.createTextNode(change.slice(offset, match.index)), value);
       offset = match.index + match[0].length;
     }
     row.append(document.createTextNode(change.slice(offset)));
@@ -261,13 +264,14 @@
     const selectedClip = tracks.flatMap((track) => track.clips || []).find((clip) => clip.id === snapshot.selected_clip_id);
     text("selection-text", selectedClip ? `${selectedTrack?.name || t("片段")} / ${selectedClip.name || selectedClip.id}` : selectedTrack ? selectedTrack.name : t("未选择轨道或片段"));
     text("track-count", tracks.length);
-    const signature = JSON.stringify([tracks.map((track) => [track.id, track.name, track.kind, track.clip_count ?? track.clips?.length ?? 0]), snapshot.selected_track_id]);
+    const signature = JSON.stringify([tracks.map((track) => [track.id, track.name, track.kind, track.colour, track.clip_count ?? track.clips?.length ?? 0]), snapshot.selected_track_id]);
     if (signature !== trackSignature) {
       trackSignature = signature;
       const list = $("tracks"); list.replaceChildren();
       if (!tracks.length) list.append(element("li", t("工程还是空的。可以让助手新建轨道，也可在 DAW 中导入素材。"), "empty"));
       tracks.forEach((track) => {
         const row = element("li", null, track.id === snapshot.selected_track_id ? "selected" : "");
+        if (typeof track.colour === "string" && /^#[0-9a-f]{6}$/i.test(track.colour)) row.style.setProperty("--track-colour", track.colour);
         row.append(element("div", track.name || t("未命名轨道"), "track-name"));
         const kind = {instrument: "MIDI", audio: t("音频"), bus: t("总线")}[track.kind] || t("轨道");
         row.append(element("div", t`${kind} · ${track.clip_count ?? track.clips?.length ?? 0} 个片段`, "track-meta")); list.append(row);

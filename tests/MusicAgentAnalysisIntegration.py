@@ -128,7 +128,7 @@ def main():
             assert bridge.chord_page(bridge.snapshot(),clip)['total']==candidate['total']
             checks.append('Agent starts and locally polls real inference, then prepares review with exactly two mocked LLM requests; no automatic import')
             runtime.cancel()
-            groups=runtime.state()['capability_groups'];assert len(groups)==9 and next(g for g in groups if g['id']=='chords')['status']=='not_applicable'
+            groups=runtime.state()['capability_groups'];assert len(groups)==10 and next(g for g in groups if g['id']=='chords')['status']=='not_applicable'
             checks.append('Fixed UI capability state comes from actual host, adapter and local model readiness')
             if args.six_stems:
                 assert caps.get('separation_six_stems') is True

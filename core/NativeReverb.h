@@ -47,6 +47,8 @@ private:
     std::array<std::array<Line,6>,2> lines;
     double rate = 0;
     double currentMix = 0;
+    float currentDamping=0;
+    std::array<std::array<float,4>,2> currentFeedback{};
     bool mixInitialised = false;
     void configure(double sampleRate) noexcept;
 };

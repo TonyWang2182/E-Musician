@@ -1,5 +1,7 @@
 #include "ArrangementView.h"
 #include "UiLanguage.h"
+#include "UiDesign.h"
+#include "DeviceControlStyle.h"
 #include "core/time/EditGrid.hpp"
 #include "core/time/MusicalPosition.hpp"
 #include <algorithm>
@@ -11,7 +13,7 @@
 namespace emusician {
 namespace {
 const juce::Colour ink { 0xff171817 }, secondary { 0xff626560 }, rule { 0xffc6c9c3 }, paper { 0xfffefefd };
-constexpr int rulerHeight = 54, chordLaneHeight = 56, scrollSize = 12, rowHeight = 104;
+constexpr int rulerHeight = 54, chordLaneHeight = 56, scrollSize = 12, rowHeight = 88;
 juce::Font mono(float height, int style = juce::Font::plain)
 {
     return juce::Font(juce::FontOptions(juce::Font::getDefaultMonospacedFontName(), height, style));
@@ -189,7 +191,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
     struct TrackControls final : juce::Component {
         TrackControls(Impl& view, juce::String trackId) : p(view), id(std::move(trackId))
         {
-            setInterceptsMouseClicks(false, true);
+            setInterceptsMouseClicks(false, true);setLookAndFeel(&look);
             for (auto* button : { &mute, &solo, &arm, &devices, &rename }) {
                 addAndMakeVisible(button);
                 // JUCE Button treats any mouse button as a click by default.
@@ -219,7 +221,9 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                 if (p.owner.onEditResult) p.owner.onEditResult(result); p.notifyState(); break;
             }
         }
-        void resized() override { const int y = getHeight() - 34; mute.setBounds(8, y, 28, 27); solo.setBounds(40, y, 28, 27); arm.setBounds(72, y, 28, 27); devices.setBounds(106, y, getWidth() - 114, 27); rename.setBounds(getWidth() - 62, 3, 56, 24); }
+        ~TrackControls() override {setLookAndFeel(nullptr);}
+        void resized() override {const int y=getHeight()-30;mute.setBounds(8,y,24,24);solo.setBounds(36,y,24,24);arm.setBounds(64,y,24,24);devices.setBounds(92,y,getWidth()-100,24);rename.setBounds(getWidth()-54,3,48,23);}
+        deviceui::ControlLook look;
         Impl& p; juce::String id;
         HeaderButton mute { "M" }, solo { "S" }, arm { "R" }, devices { "devices" }, rename { "rename" };
     };
@@ -604,7 +608,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
         const auto minimumVisible = time::minimumEditGridBeats * 60.0 / state.bpm * plotWidth() / 16.0;
         return std::max(1.0, projectDuration() / minimumVisible);
     }
-    int labelWidth() const { return canvas.getWidth() >= 560 ? 192 : 160; }
+    int labelWidth() const { return rowHeight<=64 ? 160 : 170; }
     int plotWidth() const { return juce::jmax(1, canvas.getWidth() - labelWidth() - 7); }
     float timeX(double seconds) const
     {
@@ -906,9 +910,9 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
     {
         g.fillAll(paper);
         if (state.tracks.empty()) {
-            g.setColour(ink); g.setFont(mono(20.0f));
+            g.setColour(ink); g.setFont(design::labelFont(20.0f));
             g.drawFittedText(uiText("Start with a sound.", "从一段声音开始。"), canvas.getLocalBounds().reduced(12).withTrimmedBottom(canvas.getHeight() / 2), juce::Justification::centredBottom, 2);
-            g.setColour(secondary); g.setFont(mono(13.0f));
+            g.setColour(secondary); g.setFont(design::labelFont(13.0f));
             g.drawFittedText(uiText("Drop WAV or MP3 files here.\nEach track appears on this timeline.", "拖入 WAV 或 MP3 文件。\n每个轨道都会显示在时间线上。"), 12, canvas.getHeight() / 2 + 14, canvas.getWidth() - 24, 50, juce::Justification::centredTop, 2);
             paintAttention(g);
             return;
@@ -922,26 +926,29 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
             const int y = row * rowHeight;
             const bool selected = track.id == state.selectedTrackId;
             const bool silent = track.muted || (hasSolo && !track.solo);
-            if (selected) { g.setColour(ink.withAlpha(0.045f)); g.fillRect(0, y, canvas.getWidth(), rowHeight); }
-            g.setColour(selected ? ink : rule);
-            g.drawHorizontalLine(y + rowHeight - 1, 0.0f, static_cast<float>(canvas.getWidth()));
-            if (selected) g.fillRect(0, y + 12, 2, rowHeight - 25);
-            g.setColour(ink); g.setFont(mono(13.0f, selected ? juce::Font::bold : juce::Font::plain));
-            g.drawFittedText(track.name, 10, y + (rowHeight < 104 ? 2 : 10), labelWidth() - (selected ? 76 : 20), rowHeight < 104 ? 26 : 34, juce::Justification::centredLeft, rowHeight < 104 ? 1 : 2);
-            g.setColour(secondary); g.setFont(mono(11.0f));
-            if (rowHeight >= 104) g.drawText(track.kind + " / " + juce::String(track.gainDb, 1) + " dB", 10, y + 39, labelWidth() - 18, 17, juce::Justification::centredLeft);
-            const int meterY = y + (rowHeight < 104 ? 26 : 60);
+            if(selected){g.setColour(design::panel);g.fillRect(labelWidth(),y,canvas.getWidth()-labelWidth(),rowHeight);}
+            const auto identity=design::trackColour(track.colour);
+            g.setColour(design::trackFill(track.colour));g.fillRect(0,y,labelWidth(),rowHeight-1);
+            g.setColour(identity);g.fillRect(0,y,2,rowHeight-1);
+            g.setColour(rule);g.drawHorizontalLine(y+rowHeight-1,0,float(canvas.getWidth()));
+            if(selected){g.setColour(ink);g.drawRect(0,y,labelWidth(),rowHeight-1,1);}
+            g.setColour(ink);g.setFont(design::labelFont(13,selected));
+            g.drawFittedText(track.name,10,y+3,labelWidth()-(selected?68:20),24,juce::Justification::centredLeft,1);
+            g.setColour(secondary);g.setFont(mono(10.5f));
+            if(rowHeight>64){
+                const auto detail=track.overloaded?juce::String("CLIP"):track.armed&&track.inputDeviceId.isNotEmpty()
+                    ?"IN "+(track.inputPeakDb<=-99.0f?juce::String("--"):juce::String(track.inputPeakDb,1))+" dB"
+                    :track.kind+" / "+juce::String(track.gainDb,1)+" dB";
+                g.drawText(detail,10,y+27,labelWidth()-18,15,juce::Justification::centredLeft);
+            }
+            const int meterY=y+(rowHeight<=64?27:44);
             const int meterWidth = labelWidth() - 20;
             for (int channel = 0; channel < 2; ++channel) {
                 const float level = channel == 0 ? track.peakLeftDb : track.peakRightDb;
                 g.setColour(rule.withAlpha(0.7f)); g.fillRect(10, meterY + channel * 3, meterWidth, 2);
                 g.setColour(ink); g.fillRect(10, meterY + channel * 3, juce::roundToInt(meterWidth * juce::jlimit(0.0f, 1.0f, (level + 60.0f) / 60.0f)), 2);
             }
-            if (track.overloaded) { g.setColour(ink); g.setFont(mono(10.0f, juce::Font::bold)); g.drawText("CLIP", labelWidth() - 38, y + 1, 35, 15, juce::Justification::centredRight); }
-            if (rowHeight >= 104 && track.armed && track.inputDeviceId.isNotEmpty()) {
-                g.setFont(mono(10.0f)); g.setColour(secondary);
-                g.drawText("IN " + (track.inputPeakDb <= -99.0f ? juce::String("--") : juce::String(track.inputPeakDb, 1)) + " dB", 80, y + 39, labelWidth() - 90, 17, juce::Justification::centredRight);
-            }
+            if(track.overloaded&&rowHeight<=64){g.setColour(ink);g.fillRect(labelWidth()-8,meterY,3,5);}
             auto flags = track.format + "  " + juce::String(track.gainDb, 1) + " dB";
             if (track.muted) flags = "MUTED";
             else if (track.solo) flags = "SOLO";
@@ -955,8 +962,8 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                 const bool selectedClip = selection.contains(clip.id);
                 const auto start = displayedStart(clip);
                 const bool moving = drag.id == clip.id && drag.moved;
-                g.setColour(paper.withAlpha(selectedClip ? 0.95f : 0.8f));
-                g.fillRect(area);
+                g.setColour(silent?design::trackFill(track.colour).interpolatedWith(paper,.55f):design::trackFill(track.colour));g.fillRect(area);
+                g.setColour(paper.interpolatedWith(identity,silent?.18f:.42f));g.fillRect(area.withHeight(18));
                 g.setColour(ink.withAlpha(silent ? 0.3f : 0.8f));
                 const auto waveArea = area.toNearestInt().reduced(2).withTrimmedTop(16);
                 if (clip.kind == "midi") {
@@ -987,13 +994,13 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                     g.drawFittedText(owner.waveformStatus(clip.id), waveArea, juce::Justification::centred, 2);
                 }
                 if (area.getWidth() >= 70.0f) {
-                    g.setColour(ink); g.setFont(mono(10.5f));
+                    g.setColour(ink); g.setFont(design::labelFont(11.0f));
                     const auto clipName = track.name + (track.clips.size() > 1
                         ? " / clip " + juce::String(static_cast<int>(&clip - track.clips.data()) + 1) : juce::String());
-                    const auto caption = (moving ? "edit: " : "") + clipName
-                        + " @ " + (bars ? tickText(start) : juce::String(start, 3) + " s")
-                        + (moving ? "  len " + juce::String(drag.duration * state.bpm / 60.0, 3) + " beats" : "");
-                    g.drawFittedText(caption, area.toNearestInt().reduced(5, 1).withHeight(16), juce::Justification::centredLeft, 1);
+                    const auto timing=(bars?tickText(start):juce::String(start,3)+" s")+(moving?" / "+juce::String(drag.duration*state.bpm/60.0,2)+" beats":"");
+                    auto captionArea=area.toNearestInt().reduced(5,1).withHeight(16);
+                    if(area.getWidth()>260){auto numberArea=captionArea.removeFromRight(moving?160:100);g.setFont(mono(10.0f));g.drawText(timing,numberArea,juce::Justification::centredRight,true);captionArea.removeFromRight(8);}
+                    g.setFont(design::labelFont(11));g.drawFittedText((moving?"edit: ":"")+clipName,captionArea,juce::Justification::centredLeft,1);
                 }
                 g.setColour(selectedClip ? ink : (silent ? rule : secondary));
                 g.drawRect(area, selectedClip ? 1.8f : 0.7f);
@@ -1125,7 +1132,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
     juce::ScrollBar horizontal;
     double zoom = 1.0, viewStart = 0.0;
     double extendedTimelineEnd = 0.0;
-    int rowHeight = 104;
+    int rowHeight = 88;
     double gridBeats = 0.25;
     bool bars = false;
     int rulerMode = 1;
@@ -1226,8 +1233,22 @@ void ArrangementView::update(const EngineSession::Snapshot& next)
     p.canvas.repaint(); p.chordLane.repaint(); repaint();
 }
 void ArrangementView::invalidateSources() { impl->forceSourceCheck = true; }
-void ArrangementView::setCompactRows(bool compact) { const int height = compact ? 64 : 104; if (impl->rowHeight != height) { impl->rowHeight = height; impl->layout(); } }
+void ArrangementView::setCompactRows(bool compact) { const int height = compact ? 64 : 88; if (impl->rowHeight != height) { impl->rowHeight = height; impl->layout(); } }
 void ArrangementView::fitToProject() { impl->followSuspended = true; impl->zoom = 1.0; impl->viewStart = 0.0; impl->syncScroll(); }
+juce::String ArrangementView::trackAtPosition(juce::Point<int> point) const {
+    const auto& p=*impl;if(!getLocalBounds().contains(point)||!p.viewport.getBounds().contains(point))return {};
+    const auto local=p.canvas.getLocalPoint(this,point);
+    if(local.x<0||local.x>=p.canvas.getWidth()||local.y<0)return {};
+    // Exclude the viewport's vertical scrollbar; it is not an audio row target.
+    if(point.x>=p.viewport.getX()+p.viewport.getMaximumVisibleWidth())return {};
+    const auto row=std::size_t(local.y/p.rowHeight);return row<p.state.tracks.size()?p.state.tracks[row].id:juce::String();
+}
+void ArrangementView::revealPosition(double seconds){
+    if(!std::isfinite(seconds))return;auto& p=*impl;p.cancelDrag();p.followSuspended=true;
+    p.viewStart=juce::jlimit(0.0,p.projectDuration(),seconds)-p.visibleDuration()*.5;p.syncScroll();
+}
+juce::Range<double> ArrangementView::visibleTimeRange() const {return {impl->viewStart,impl->viewStart+impl->visibleDuration()};}
+
 void ArrangementView::zoomIn() { impl->setZoom(impl->zoom * 2.0, 0.5); }
 void ArrangementView::zoomOut() { impl->setZoom(impl->zoom * 0.5, 0.5); }
 double ArrangementView::zoomFactor() const { return impl->zoom; }
@@ -1465,6 +1486,45 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
     }
     setCompactRows(false);
     report.setProperty("clips_fill_standard_and_compact_track_lanes", true);
+    {
+        const auto selected=selectedClipIds();const auto before=p.engine.snapshot();
+        const auto scroll=p.viewport.getViewPosition();
+        p.viewport.setViewPosition(0,0);
+        const auto firstPoint=getLocalPoint(&p.canvas,juce::Point<int>(20,p.rowHeight/2));
+        if(trackAtPosition(firstPoint)!=p.state.tracks.front().id||trackAtPosition({20,12}).isNotEmpty()
+            ||trackAtPosition({getWidth()-1,p.viewport.getY()+8}).isNotEmpty())
+            return juce::Result::fail("Browser drop track hit-test includes the ruler/scrollbar or misses the first row.");
+        p.viewport.setViewPosition(0,int(p.state.tracks.size()-1)*p.rowHeight);
+        const auto point=juce::Point<int>(20,p.viewport.getY()+5);
+        const auto row=(p.viewport.getViewPositionY()+5)/p.rowHeight;
+        if(trackAtPosition(point)!=p.state.tracks[std::size_t(row)].id)return juce::Result::fail("Browser drop row did not account for vertical scrolling.");
+        p.viewport.setViewPosition(scroll);zoomIn();const auto target=initialHorizon*.7;revealPosition(target);
+        const auto visible=visibleTimeRange();const auto after=p.engine.snapshot();
+        if(!visible.contains(target)||selectedClipIds()!=selected||after.revision!=before.revision||after.position!=before.position
+            ||after.selectedTrackId!=before.selectedTrackId||after.selectedClipId!=before.selectedClipId)
+            return juce::Result::fail("Overview reveal changed selection/transport or failed to expose the requested time.");
+        fitToProject();
+        for(const auto& header:p.headers){
+            for(const auto* control:{&header->mute,&header->solo,&header->arm,&header->devices,&header->rename})
+                if(!header->getLocalBounds().contains(control->getBounds()))return juce::Result::fail("Compact track header control is outside its row.");
+            if(header->arm.getBounds().intersects(header->devices.getBounds())||header->rename.getBounds().intersects(header->mute.getBounds()))
+                return juce::Result::fail("Track header controls overlap.");
+        }
+        // Explicit synthetic colour projection, not a persistent edit.
+        auto fixture=p.state;fixture.tracks[0].colour="#7EA49D";fixture.tracks[1].colour="#91A7C3";update(fixture);
+        const auto image=p.canvas.createComponentSnapshot(p.canvas.getLocalBounds(),true);
+        if(!image.isValid()||image.getPixelAt(5,35)!=design::trackFill(fixture.tracks[0].colour)
+            ||image.getPixelAt(5,p.rowHeight+35)!=design::trackFill(fixture.tracks[1].colour))
+            return juce::Result::fail("Track identity colour is not projected into distinct light header fills.");
+        if(outputDirectory!=juce::File()){
+            juce::MemoryOutputStream data;if(!juce::PNGImageFormat().writeImageToStream(image,data)
+                ||!outputDirectory.getChildFile("arrangement-track-colours-synthetic.png").replaceWithData(data.getData(),data.getDataSize()))
+                return juce::Result::fail("Could not save the coloured arrangement fixture.");
+        }
+        update(before);p.viewport.setViewPosition(scroll);
+        report.setProperty("track_colour_projection_and_header_hit_regions",true);
+        report.setProperty("overview_reveal_and_scrolled_drop_target_preserve_music",true);
+    }
     const auto event = [&](float x, float y, bool dragging = false, int modifiers = 0) {
         const auto now = juce::Time::getCurrentTime();
         return juce::MouseEvent(juce::Desktop::getInstance().getMainMouseSource(), { x, y },

@@ -1,6 +1,9 @@
 "use strict";
 (() => {
   const en = {
+  "轨道颜色": "Track colour",
+  "把选中的轨道设为灰绿色 #BFD2CF，先列出修改。": "Set the selected track colour to muted teal #BFD2CF. Show the change first.",
+  "选择整条轨道，或明确使用整个工程范围；颜色修改不改变声音。": "Select a whole track or choose Whole project scope. Colour changes do not affect sound.",
   "上下文来自当前 DAW 工程。收起侧栏会保留输入内容，不会关闭工程。": "Uses the current DAW project. Closing the sidebar keeps your draft.",
   "准备就绪": "Ready",
   "正在生成方案": "Preparing a plan",

@@ -139,7 +139,7 @@ juce::String contentKey(const storage::StoredProject& s,const std::function<juce
     for(const auto& p:s.masterPlugins)plugin(p);
     lanes(s.masterAutomation);
     for(const auto& t:s.tracks){
-        o.writeString(t.id);o.writeString(t.name);o.writeString(t.kind);o.writeInt(int(std::round(t.gainDb*1000)));o.writeInt(int(std::round(t.pan*100000)));
+        o.writeString(t.id);o.writeString(t.name);o.writeString(t.kind);o.writeString(t.colour);o.writeInt(int(std::round(t.gainDb*1000)));o.writeInt(int(std::round(t.pan*100000)));
         o.writeBool(t.muted);o.writeBool(t.solo);for(const auto& p:t.plugins)plugin(p);
         o.writeString(t.inputDeviceId);o.writeString(t.outputTargetId);lanes(t.automation);
         for(const auto& send:t.sends){o.writeString(send.id);o.writeString(send.targetTrackId);o.writeFloat(send.gainDb);o.writeBool(send.preFader);o.writeBool(send.enabled);}
@@ -153,7 +153,7 @@ juce::String contentKey(const storage::StoredProject& s,const std::function<juce
 }
 struct AudioInfo{double duration=0,rate=0;int channels=0;juce::String format;juce::File playbackFile;};
 juce::Result inspectAudio(const juce::File& f,AudioInfo& info){audio::PreparedSource p;auto r=audio::prepareSource(f,p);if(r.wasOk())info={p.duration,p.sampleRate,p.channels,p.format,p.playbackFile};return r;}
-const juce::Identifier emId("emId"),emKind("emKind"),emAsset("emAsset"),emSource("emSource"),emChannel("emChannel");
+const juce::Identifier emId("emId"),emKind("emKind"),emColour("emColour"),emAsset("emAsset"),emSource("emSource"),emChannel("emChannel");
 juce::ValueTree slotTree(const storage::StoredPlugin& p)
 {
     juce::ValueTree v("EM_PLUGIN");
@@ -258,6 +258,17 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     SelectionNoteIdSet selectionNoteIndex;
     void refreshSelectionContext(const juce::var* proposed=nullptr);
     double duration=0;bool gesture=false,shuttingDown=false,pluginDirty=false;
+    struct EffectGesture {
+        juce::String id,projectId,trackId,deviceId;
+        std::uint64_t revision=0;
+        storage::StoredPlugin proposed;
+    };
+    std::optional<EffectGesture> effectGesture;
+    juce::Result effectTarget(const juce::String&,const juce::String&,juce::ValueTree&,native_effects::Effect*&);
+    juce::Result prepareEffectState(const juce::var&,storage::StoredPlugin&,juce::ValueTree&,native_effects::Effect*&);
+    juce::Result setNativeEffect(const juce::var&);
+    juce::Result handleEffectGesture(const juce::String&,const juce::var&,juce::var*);
+    void cancelEffectGesture();
     std::uint64_t cachedRevision=std::numeric_limits<std::uint64_t>::max(),eventSequence=0;Snapshot cached;
     std::vector<std::shared_ptr<Job>> jobs;juce::Array<juce::var> events;
     std::shared_ptr<bool> alive=std::make_shared<bool>(true);
@@ -404,7 +415,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         storage::StoredProject s;s.projectId=guard.projectId();s.revision=guard.revision();s.masterGainDb=stableGain(edit->getMasterVolumePlugin()->getVolumeDb());s.looping=edit->getTransport().looping.get();
         s.bpm=edit->tempoSequence.getTempo(0)->getBpm();auto* sig=edit->tempoSequence.getTimeSig(0);s.numerator=sig->numerator;s.denominator=sig->denominator;
         auto m=metadata(*edit);s.loopStart=double(m.getProperty("loopStart",0.0));s.loopEnd=double(m.getProperty("loopEnd",0.0));s.masterPlugins=captureSlots(m);
-        for(const auto& b:bindings){storage::StoredTrack t;t.id=b.id;t.name=b.track->getName();t.kind=b.track->state.getProperty(emKind,"audio").toString();t.gainDb=stableGain(b.track->getVolumePlugin()->getVolumeDb());t.pan=b.track->getVolumePlugin()->getPan();t.muted=b.track->isMuted(false);t.solo=b.track->isSolo(false);t.plugins=captureSlots(b.track->state);
+        for(const auto& b:bindings){storage::StoredTrack t;t.id=b.id;t.name=b.track->getName();t.kind=b.track->state.getProperty(emKind,"audio").toString();t.colour=b.track->state.getProperty(emColour,juce::String()).toString();t.gainDb=stableGain(b.track->getVolumePlugin()->getVolumeDb());t.pan=b.track->getVolumePlugin()->getPan();t.muted=b.track->isMuted(false);t.solo=b.track->isSolo(false);t.plugins=captureSlots(b.track->state);
             for(const auto& c:b.clips){storage::StoredClip a;a.id=c.id;a.assetId=c.assetId;a.analysisRole=c.clip->state["emAnalysisRole"].toString();auto pos=c.clip->getPosition();a.timelineStart=pos.time.getStart().inSeconds();a.sourceOffset=pos.offset.inSeconds();a.duration=pos.time.getLength().inSeconds();
                 if(auto* midi=dynamic_cast<te::MidiClip*>(c.clip.get())){a.kind="midi";a.startBeats=time::secondsToBeats(a.timelineStart,s.bpm);a.lengthBeats=time::secondsToBeats(a.duration,s.bpm);
                     if(includeNotes){const auto& notes=*noteView(c.id,*midi).notes;a.notes.reserve(notes.size());for(const auto& n:notes)a.notes.push_back({n.id,n.pitch,n.startBeats,n.lengthBeats,n.velocity,n.channel});}
@@ -449,11 +460,11 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     juce::Result fail(const juce::String& m){status=m;return juce::Result::fail(m);}
     juce::Result preflight(std::uint64_t expected){if(expected!=guard.revision())return fail("The project changed. Refresh and try again.");if(guard.revision()>=std::uint64_t(std::numeric_limits<juce::int64>::max())-1)return fail("Project revision limit reached.");return juce::Result::ok();}
     void publish(const juce::String& type,juce::var data={}){events.add(object({{"sequence",juce::int64(++eventSequence)},{"type",type},{"project_id",juce::String(guard.projectId())},{"revision",juce::int64(guard.revision())},{"data",data}}));if(events.size()>1024)events.removeRange(0,events.size()-1024);}
-    void advanceRevision(){guard=commands::RevisionGuard(guard.projectId(),guard.revision()+1);}
+    void advanceRevision(){cancelEffectGesture();guard=commands::RevisionGuard(guard.projectId(),guard.revision()+1);}
     void recordEdit(bool closeTransaction=true){advanceRevision();currentKey=calculateCurrentKey();cachedRevision=std::numeric_limits<std::uint64_t>::max();publish("project_changed");if(closeTransaction&&!gesture)edit->getUndoManager().beginNewTransaction();}
     Binding* find(const juce::String& id){auto i=std::find_if(bindings.begin(),bindings.end(),[&](const auto& t){return t.id==id;});return i==bindings.end()?nullptr:&*i;}
     ClipBinding* findClip(const juce::String& id,Binding** parent=nullptr){for(auto& t:bindings)for(auto& c:t.clips)if(c.id==id){if(parent)*parent=&t;return &c;}return nullptr;}
-    void choose(const juce::String& tid,const juce::String& cid={}){auto* t=find(tid);if(!t&&!bindings.empty())t=&bindings.front();selected=t?t->id:juce::String();selectedClip={};if(t&&!t->clips.empty()){auto i=std::find_if(t->clips.begin(),t->clips.end(),[&](const auto& c){return c.id==cid;});selectedClip=i==t->clips.end()?t->clips.front().id:i->id;}}
+    void choose(const juce::String& tid,const juce::String& cid={}){if(effectGesture&&tid!=selected)cancelEffectGesture();auto* t=find(tid);if(!t&&!bindings.empty())t=&bindings.front();selected=t?t->id:juce::String();selectedClip={};if(t&&!t->clips.empty()){auto i=std::find_if(t->clips.begin(),t->clips.end(),[&](const auto& c){return c.id==cid;});selectedClip=i==t->clips.end()?t->clips.front().id:i->id;}}
     void rebuild(te::Edit& target,std::vector<Binding>& out){
         out.clear();for(auto* t:te::getAudioTracks(target)){auto id=t->state[emId].toString();if(id.isEmpty())continue;Binding b{id,t,{}};
             for(auto* clip:t->getClips()){auto cid=clip->state[emId].toString();if(cid.isEmpty())continue;const auto source=clip->state[emSource].toString();AudioInfo info,original;
@@ -482,6 +493,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         if(auto r=prepare(s);r.failed())return r;candidate=te::createEmptyEdit(engine,{});if(!candidate)return fail("Could not create project.");candidate->getSceneList();auto r=applyTo(*candidate,s,next,true);if(r.wasOk()){te::TrackList::sortTracksByType(candidate->state,nullptr);candidate->getUndoManager().clearUndoHistory();}return r;
     }
     void adopt(std::unique_ptr<te::Edit> next,std::vector<Binding> bs,const juce::String& tid,const juce::String& cid={}){
+        cancelEffectGesture();
         ++analysisPreviewGeneration;if(analysisPreview)analysisPreview->stop();
         for(const auto& j:jobs)if(j->kind.startsWith("analysis."))j->cancel=true;
         if(nativeQueue&&nativeQueueProject.isNotEmpty())nativeQueue->cancelProject(nativeQueueProject);
@@ -513,6 +525,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
 #include "EngineSessionRecording.inc"
 #include "EngineSessionParameters.inc"
 #include "EngineSessionModel.inc"
+#include "EngineSessionEffectGestures.inc"
 #include "EngineSessionNative.inc"
 #include "EngineSessionCommands.inc"
 #include "EngineSessionJobs.inc"
@@ -523,6 +536,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
 #include "EngineSessionPublic.inc"
 #include "../../tests/EngineSessionWarpSmoke.inc"
 #include "../../tests/EngineSessionBatchRefsSmoke.inc"
+#include "../../tests/EngineSessionWorkspaceSmoke.inc"
 #include "../../tests/EngineSessionSmoke.inc"
 #include "../../tests/EngineSessionProjectSmoke.inc"
 #include "../../tests/EngineSessionClipSmoke.inc"

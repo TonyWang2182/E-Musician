@@ -1,9 +1,10 @@
 // Included inside NativeEffectsPanel::Impl. A bounded, message-thread preview
-// of committed/gesture-local parameters, never an audio analyser or DSP owner.
+// of parameters and a bounded output FFT snapshot; never owns live audio DSP.
 struct Graph final : juce::Component {
     explicit Graph(Impl& parent) : p(parent) { setWantsKeyboardFocus(true); }
     void invalidate() { dirty = true; repaint(); }
     void resized() override { dirty = true; }
+    void focusLost(FocusChangeType) override {if(moving){moving=false;p.cancelGesture();}}
     juce::Rectangle<float> plot() const { return getLocalBounds().toFloat().reduced(35, 26); }
     double rate() const { return p.sampleRate > 0 ? p.sampleRate : 48000.0; }
     double upper() const { return std::min(20000.0, rate() * .49); }
@@ -57,7 +58,13 @@ struct Graph final : juce::Component {
         if (hasKeyboardFocus(true)) { g.setColour(ink); g.drawRect(getLocalBounds().reduced(1)); }
     }
     void paintEq(juce::Graphics& g, juce::Rectangle<float> a) {
-        frequencyGrid(g, a, true); text(g, "EQ response / drag a band", int(a.getX()), 2, int(a.getWidth()));
+        frequencyGrid(g,a,true);
+        if(a.getWidth()>400)text(g,uiText("EQ response", "均衡曲线"),int(a.getX()),2,int(a.getWidth()*.4f));
+        text(g,p.spectrumAvailable?uiText("Mono output / 0 to -90 dBFS", "单声道输出 / 0至-90 dBFS"):uiText("Spectrum inactive", "频谱未活动"),int(a.getX()),2,int(a.getWidth()),juce::Justification::right);
+        if(p.spectrumAvailable){juce::Path spectrum;spectrum.startNewSubPath(a.getBottomLeft());
+            for(std::size_t i=0;i<p.spectrumDb.size();++i)spectrum.lineTo(a.getX()+float(i)*a.getWidth()/float(p.spectrumDb.size()-1),a.getBottom()-((p.spectrumDb[i]+90)/90)*a.getHeight());
+            spectrum.lineTo(a.getBottomRight());spectrum.closeSubPath();g.setColour(deviceui::accent.withAlpha(.55f));g.fillPath(spectrum);
+        }
         if (dirty) {
             effects::EqSettings settings;
             if (auto* bands = p.state["bands"].getArray()) for (int i = 0; i < 8 && i < bands->size(); ++i) {
@@ -217,7 +224,7 @@ struct Graph final : juce::Component {
         else if (type == "reverb") { choose(0, decayPoint(a)); frozenHorizon = reverbHorizon(); }
         else if (type == "auto_filter") choose(0, filterPoint(a));
         if (selectedHandle < 0) return;
-        p.dragging = true; p.gestureRevision = p.revision; p.gestureProject = p.projectId;
+        p.beginGesture();if(p.gestureFailed){p.finishGesture();return;}
         moving = true; changed = false; grabKeyboardFocus();
     }
     void mouseDrag(const juce::MouseEvent& event) override {
@@ -238,14 +245,13 @@ struct Graph final : juce::Component {
             else if (double(p.state["dry_wet"]) > .001) set(10, y / double(p.state["dry_wet"]) * 100);
         } else if (type == "reverb") set(9, x * frozenHorizon);
         else if (type == "auto_filter") { set(9, effectiveFilterFrequency(20 * std::pow(upper() / 20, x))); set(10, std::pow(10.0, (-60 + y * 84) / 20)); }
-        changed = true;
+        changed = true;p.gestureChanged=true;p.previewGesture();
     }
     void mouseUp(const juce::MouseEvent&) override {
-        if (!moving) return; moving = false; p.dragging = false;
-        if (changed) p.commit(p.state, p.gestureRevision, p.gestureProject); else invalidate();
+        if (!moving) return;moving=false;p.finishGesture();invalidate();
     }
     bool keyPressed(const juce::KeyPress& key) override {
-        if (key == juce::KeyPress::escapeKey && moving) { moving = false; p.dragging = false; p.state = juce::var(); p.revision = 0; p.update(); return true; }
+        if (key == juce::KeyPress::escapeKey && moving) { moving=false;p.cancelGesture();return true; }
         return false;
     }
     Impl& p; juce::Path curve; bool dirty = true, moving = false, changed = false;

@@ -331,6 +331,7 @@ def capability_groups(context, host, analysis):
     groups = []
     for key, label, needed, example in (
         ("project", "工程 / 选区", {"get_snapshot", "get_selection_context"}, "概括一下当前选择的内容。"),
+        ("track_colour", "轨道颜色", {"set_track_colour"}, "把选中的轨道设为灰绿色 #BFD2CF，先列出修改。"),
         ("midi", "MIDI 编辑", {"get_clip_notes", "edit_notes"}, "把选中的 MIDI 音符升高一个八度。"),
         ("clips", "片段编辑", {"move_clip", "duplicate_clips", "trim_clip"}, "将选中的片段复制到后面，先列出修改。"),
         ("devices", "原生装置", {"get_native_effect", "set_native_effect", "get_native_instrument"}, "查看当前轨道的原生装置，说明可调整的参数。")):
@@ -344,7 +345,7 @@ def capability_groups(context, host, analysis):
                 ok = False
         groups.append({"id": key, "label": label, "status": "available" if ok else "unavailable",
                        "status_label": "可用" if ok else "宿主未就绪", "enabled": ok, "example": example,
-                       "detail": "读取真实工程；修改先列出方案，确认后应用。"})
+                       "detail": "选择整条轨道，或明确使用整个工程范围；颜色修改不改变声音。" if key == "track_colour" else "读取真实工程；修改先列出方案，确认后应用。"})
     providers = {p["kind"]: p for p in analysis.get("providers", [])} if isinstance(analysis, dict) else {}
     for kind, label in KINDS.items():
         p = providers.get(kind, {})

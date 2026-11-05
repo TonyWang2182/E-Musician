@@ -140,6 +140,10 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
         if(added.name.isEmpty())added.name=added.kind=="audio"?"Audio":added.kind=="bus"?"Bus":"MIDI";s.tracks.push_back(std::move(added));
     }else if(cmd=="rename_track"){
         if(!t)return bad("Track no longer exists.");auto name=textArg(a,"name").trim();if(name.isEmpty()||name.length()>200)return bad("Track name must contain 1 to 200 characters.");t->name=name;
+    }else if(cmd=="set_track_colour"){
+        if(!a["track_id"].isString()||a.getDynamicObject()->getProperties().size()!=2)return bad("Track colour needs only track_id and colour.");
+        if(!t)return bad("Track no longer exists.");
+        if(auto result=storage::canonicalTrackColour(a["colour"],t->colour);result.failed())return result;
     }else if(cmd=="reorder_track"){
         if(!t)return bad("Track no longer exists.");double index=number(a,"index");if(!std::isfinite(index)||index!=std::floor(index)||index<0||index>=s.tracks.size())return bad("Invalid track order.");
         auto copy=*t;std::erase_if(s.tracks,[&](const auto& x){return x.id==copy.id;});s.tracks.insert(s.tracks.begin()+int(index),std::move(copy));
@@ -314,6 +318,7 @@ juce::Result EngineSession::Impl::perform(const juce::String& command,const juce
     }
     if(gesture&&command!="batch"&&command!="set_track_gain"&&command!="set_master_gain"&&command!="set_track_pan")finishGesture();
     if(command=="set_plugin_parameter")return setPluginParameter(args);
+    if(command=="set_native_effect")return setNativeEffect(args);
     if(command=="set_audio_warp")return beginAudioWarp(args,commandResult);
     if(command=="scan_plugins"||command=="cancel_job"||command=="import_audio"||command=="import_midi"||command=="save_project"||command=="open_project"||command=="export_wav"||command=="export_midi")return performJob(command,args);
     if(command=="open_plugin"){
@@ -348,21 +353,29 @@ juce::Result EngineSession::Impl::perform(const juce::String& command,const juce
         if(wasPlaying&&!edit->getTransport().isPlaying())edit->getTransport().play(false);
         return juce::Result::ok();
     }
-    const bool scalar=command=="set_track_gain"||command=="set_track_pan"||command=="set_track_muted"||command=="set_track_solo"
+    const auto* batchCommands=args["commands"].getArray();
+    const bool colourBatch=command=="batch"&&batchCommands&&!batchCommands->isEmpty()
+        &&std::all_of(batchCommands->begin(),batchCommands->end(),[](const auto& child){return child["command"].toString()=="set_track_colour";});
+    const bool scalar=colourBatch||command=="set_track_colour"||command=="set_track_gain"||command=="set_track_pan"||command=="set_track_muted"||command=="set_track_solo"
         ||command=="set_master_gain"||command=="set_loop"||command=="set_loop_range"||command=="set_time_signature"||command=="rename_track";
     if(scalar){
         // Validate the small metadata candidate through the same command rules.
         // None of these commands can change note validity or topology, so they
         // must not copy, rehash, validate, or reapply the project's MIDI notes.
         auto candidate=capture(false,false);auto selectedAfter=selectedClip;const auto before=contentKey(candidate);
-        if(auto r=mutate(candidate,command,args,selectedAfter);r.failed())return fail(r.getErrorMessage());
-        if(contentKey(candidate)==before)return juce::Result::ok();
+        juce::var metadataResult;
+        if(auto r=mutate(candidate,command,args,selectedAfter,&metadataResult);r.failed())return fail(r.getErrorMessage());
+        if(contentKey(candidate)==before){if(commandResult)*commandResult=metadataResult;return juce::Result::ok();}
+        if(colourBatch)finishGesture();
         remember(command.replaceCharacter('_',' '));auto* um=&edit->getUndoManager();
-        if(command.startsWith("set_track_")||command=="rename_track"){
+        if(colourBatch){
+            for(const auto& track:candidate.tracks)if(auto* binding=find(track.id))binding->track->state.setProperty(emColour,track.colour,um);
+        }else if(command.startsWith("set_track_")||command=="rename_track"){
             const auto id=textArg(args,"track_id");auto* b=find(id);auto* t=storedTrack(candidate,id);
             if(command=="set_track_gain"||command=="set_track_pan")applyMix(*edit,*b->track->getVolumePlugin(),id,t->gainDb,t->pan,false);
             else if(command=="set_track_muted")b->track->setMute(t->muted);
             else if(command=="set_track_solo")b->track->setSolo(t->solo);
+            else if(command=="set_track_colour")b->track->state.setProperty(emColour,t->colour,um);
             else b->track->setName(t->name);
         }else if(command=="set_master_gain")applyMix(*edit,*edit->getMasterVolumePlugin(),{},candidate.masterGainDb,edit->getMasterVolumePlugin()->getPan(),false);
         else if(command=="set_loop")um->perform(new LoopChange(*edit,edit->getTransport().looping.get(),candidate.looping));
@@ -372,7 +385,7 @@ juce::Result EngineSession::Impl::perform(const juce::String& command,const juce
             auto* sig=edit->tempoSequence.getTimeSig(0);sig->numerator=candidate.numerator;sig->denominator=candidate.denominator;
         }
         if(command=="set_loop"||command=="set_loop_range")refreshRange();
-        recordEdit();status=command.replaceCharacter('_',' ')+" completed.";return juce::Result::ok();
+        recordEdit(!colourBatch);status=command.replaceCharacter('_',' ')+" completed.";if(commandResult)*commandResult=metadataResult;return juce::Result::ok();
     }
     if(command=="edit_notes"||command=="write_notes"){
         Binding* owner=nullptr;auto* binding=findClip(textArg(args,"clip_id"),&owner);

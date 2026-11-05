@@ -7278,3 +7278,204 @@ print('PASS: unchanged baseline, 2 exact new cache files, both absent preference
 ## 2026-11-05 — 0.10.0 代码同步与本地保留
 
 实现提交89360380b0742ee0760fdf4a1183c7f96de0b7cd已推送feature/tempo-warp-workspace-v0100，远端精确回读一致；main仍为d4ed6c898af1303918e38b6325a915befabbb575，未合并。保留目录E:/MusicAgent&DAW/releases/0.10.0-20261105-tempo-warp包含EXE/PDB、源码文档ZIP、启动器及VS Code工作区；1317个归档条目中207个源码输入逐一匹配测试指纹，全部产物hash复核。精确记录见本轮PUBLISH.json。该保留包不是可移植安装器，模型与运行库仍为本机独立依赖。
+
+### 2026-11-06T01:57:45+08:00 · workspace-brand-configure · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 18.716s.
+- Command: `cmake -S E:/emusician-analysis-source -B E:\emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:\emusician-analysis-build\bin-0.11.0`
+- Context: 0.11.0 brand, track colours and workspace; hardware/audio quality not inferred
+- Source SHA-256: `1d1393d109290d92e2fd5f506c7eeb818c458e7d4ba6819a575235684a2b4fc4`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T175745.870986Z-72f3e0f756.json) · [Raw log](../build-logs/20261105T175745.870986Z-72f3e0f756.log)
+- [Exact process output](../build-logs/20261105T175745.870986Z-72f3e0f756.raw.log)
+
+### 2026-11-06T02:10:07+08:00 · workspace-brand-agent · failed
+
+- Config: Python; exit code: 2; elapsed: 0.765s.
+- Command: `preflight`
+- Context: 0.11.0 track colour scoped plan/readback/Undo and existing Agent regression; synthetic peers only, no provider calls
+- Source SHA-256: `498c73d823cc7beeb3907c6e0da46d92d4b42833edcf813f629faa887e07cff5`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T181007.844621Z-80679ab5e5.json) · [Raw log](../build-logs/20261105T181007.844621Z-80679ab5e5.log)
+- Error: Initial PowerShell native -c quoting stripped Python string quotes before Recorder/test execution; no tests ran. Switched to stdin source.
+
+### 2026-11-06T02:10:08+08:00 · workspace-brand-agent · succeeded
+
+- Config: Python; exit code: 0; elapsed: 52.187s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: 0.11.0 track colour scoped plan/readback/Undo and existing Agent regression; synthetic peers only, no provider calls
+- Source SHA-256: `498c73d823cc7beeb3907c6e0da46d92d4b42833edcf813f629faa887e07cff5`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T181008.881042Z-d0fc3cb3f9.json) · [Raw log](../build-logs/20261105T181008.881042Z-d0fc3cb3f9.log)
+- [Exact process output](../build-logs/20261105T181008.881042Z-d0fc3cb3f9.raw.log)
+
+### 2026-11-06T02:13:26+08:00 · workspace-brand-web · succeeded
+
+- Config: Synthetic Edge; exit code: 0; elapsed: 14.132s.
+- Command: `"C:/Program Files/nodejs/node.exe" tests/MusicAgentUI.cjs`
+- Context: 0.11.0 compact sidebar and colour review; local synthetic peer only, no user desktop or model calls
+- Source SHA-256: `498c73d823cc7beeb3907c6e0da46d92d4b42833edcf813f629faa887e07cff5`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T181326.029193Z-0a58470700.json) · [Raw log](../build-logs/20261105T181326.029193Z-0a58470700.log)
+- [Exact process output](../build-logs/20261105T181326.029193Z-0a58470700.raw.log)
+
+### 2026-11-06T02:15:45+08:00 · workspace-brand-colour-scope · succeeded
+
+- Config: Python; exit code: 0; elapsed: 3.578s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_track_colour.py -v`
+- Context: 0.11.0 explicit time-range selection rejection; synthetic bridge only
+- Source SHA-256: `5855d38899207c4e2c61029af25c47f3040310fc4ad67ad97c1c57bcd90e9e4a`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T181545.738812Z-5699b0af5b.json) · [Raw log](../build-logs/20261105T181545.738812Z-5699b0af5b.log)
+- [Exact process output](../build-logs/20261105T181545.738812Z-5699b0af5b.raw.log)
+
+### 2026-11-06T02:15:45+08:00 · workspace-brand-web · succeeded
+
+- Config: Synthetic Edge; exit code: 0; elapsed: 12.041s.
+- Command: `"C:/Program Files/nodejs/node.exe" tests/MusicAgentUI.cjs`
+- Context: 0.11.0 final colour preview fixture aligned to project scope; no user UI or model calls
+- Source SHA-256: `5855d38899207c4e2c61029af25c47f3040310fc4ad67ad97c1c57bcd90e9e4a`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T181545.733159Z-222dd347fa.json) · [Raw log](../build-logs/20261105T181545.733159Z-222dd347fa.log)
+- [Exact process output](../build-logs/20261105T181545.733159Z-222dd347fa.raw.log)
+
+### 2026-11-06T02:15:49+08:00 · workspace-brand-analysis-web · succeeded
+
+- Config: Synthetic Edge; exit code: 0; elapsed: 16.587s.
+- Command: `C:\Python314\python.exe tests/AnalysisAgentWebSmoke.py`
+- Context: 0.11.0 existing analysis previews and locale review; local synthetic peer, no inference
+- Source SHA-256: `5855d38899207c4e2c61029af25c47f3040310fc4ad67ad97c1c57bcd90e9e4a`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T181549.877332Z-da0be5658a.json) · [Raw log](../build-logs/20261105T181549.877332Z-da0be5658a.log)
+- [Exact process output](../build-logs/20261105T181549.877332Z-da0be5658a.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T02:19:20+08:00 · workspace-brand-build · failed
+
+- Config: Release/Python; exit code: 1; elapsed: 142.893s.
+- Command: `cmake --build E:\emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.11.0 brand, track colours and workspace; hardware/audio quality not inferred
+- Source SHA-256: `c91137dae1096689b60e64e811fb662314babfc5b24ce5234903c49b2dd640d1`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T181920.590710Z-68dd873f44.json) · [Raw log](../build-logs/20261105T181920.590710Z-68dd873f44.log)
+- [Exact process output](../build-logs/20261105T181920.590710Z-68dd873f44.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261105T181920.590710Z-68dd873f44.log
+
+### 2026-11-06T02:26:43+08:00 · workspace-brand-core · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 11.936s.
+- Command: `ctest --test-dir E:\emusician-analysis-build -C Release --output-on-failure -E engine.integration_smoke|workspace.brand_colour|control.output_isolation`
+- Context: 0.11.0 brand, track colours and workspace; hardware/audio quality not inferred
+- Source SHA-256: `c85cef5b763c24ef30890586f3b8d98aeae6e3e0b1e2e29dc87a0af11b60fc03`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T182643.428892Z-c5cf2a062f.json) · [Raw log](../build-logs/20261105T182643.428892Z-c5cf2a062f.log)
+- [Exact process output](../build-logs/20261105T182643.428892Z-c5cf2a062f.raw.log)
+
+### 2026-11-06T02:28:53+08:00 · workspace-brand-effects-benchmark · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 2.073s.
+- Command: `E:\emusician-analysis-build\Release\emusician_effects_benchmark.exe`
+- Context: 0.11.0 brand, track colours and workspace; hardware/audio quality not inferred
+- Source SHA-256: `9e5fbcb30a908a1830dbbddd028beb37a234400471b76bfe47d81bb04744a698`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T182853.063515Z-08de57bb8a.json) · [Raw log](../build-logs/20261105T182853.063515Z-08de57bb8a.log)
+- [Exact process output](../build-logs/20261105T182853.063515Z-08de57bb8a.raw.log)
+
+### 2026-11-06T02:30:03+08:00 · workspace-brand-build · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 309.692s.
+- Command: `cmake --build E:\emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.11.0 brand, track colours and workspace; hardware/audio quality not inferred
+- Source SHA-256: `5c03362d68cec7c7969df629d376336d7c8400d0b45d079d274c5c1bca1d471c`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T183003.099280Z-0f6f864552.json) · [Raw log](../build-logs/20261105T183003.099280Z-0f6f864552.log)
+- [Exact process output](../build-logs/20261105T183003.099280Z-0f6f864552.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T02:35:38+08:00 · workspace-brand-workspace · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 99.396s.
+- Command: `C:\Python314\python.exe tests/RunWorkspaceSmoke.py E:\emusician-analysis-build\bin-0.11.0\Release\E-musician.exe E:/emusician-analysis-build/workspace-smoke`
+- Context: 0.11.0 brand, track colours and workspace; hardware/audio quality not inferred
+- Source SHA-256: `31c6b0c38aec2f630ffb172865a5562675eaf7721572374f88f095911cc713f4`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T183538.756709Z-0a6dc4d10f.json) · [Raw log](../build-logs/20261105T183538.756709Z-0a6dc4d10f.log)
+- [Exact process output](../build-logs/20261105T183538.756709Z-0a6dc4d10f.raw.log)
+
+### 2026-11-06T02:39:36+08:00 · workspace-brand-build · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 40.033s.
+- Command: `cmake --build E:\emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.11.0 brand, track colours and workspace; hardware/audio quality not inferred
+- Source SHA-256: `588a6814ac8ad1e29276be8fb56d97283f4593351a7c4fc487c5c97c96235886`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T183936.508721Z-4b7ef6043b.json) · [Raw log](../build-logs/20261105T183936.508721Z-4b7ef6043b.log)
+- [Exact process output](../build-logs/20261105T183936.508721Z-4b7ef6043b.raw.log)
+
+### 2026-11-06T02:42:09+08:00 · workspace-brand-build · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 40.853s.
+- Command: `cmake --build E:\emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.11.0 brand, track colours and workspace; hardware/audio quality not inferred
+- Source SHA-256: `c704e931d08b7f364f2a49271bb021956216bcdfa1161021bba7a215a674ae63`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T184209.597427Z-cf39e18746.json) · [Raw log](../build-logs/20261105T184209.597427Z-cf39e18746.log)
+- [Exact process output](../build-logs/20261105T184209.597427Z-cf39e18746.raw.log)
+
+### 2026-11-06T02:42:43+08:00 · workspace-brand-agent · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 53.983s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: 0.11.0 brand, track colours and workspace; hardware/audio quality not inferred
+- Source SHA-256: `c704e931d08b7f364f2a49271bb021956216bcdfa1161021bba7a215a674ae63`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T184243.260742Z-668905d4db.json) · [Raw log](../build-logs/20261105T184243.260742Z-668905d4db.log)
+- [Exact process output](../build-logs/20261105T184243.260742Z-668905d4db.raw.log)
+
+### 2026-11-06T02:43:56+08:00 · workspace-brand-colour-e2e · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 14.812s.
+- Command: `C:\Python314\python.exe tests/MusicAgentColourIntegration.py --exe E:\emusician-analysis-build\bin-0.11.0\Release\E-musician.exe --timeout 60`
+- Context: 0.11.0 brand, track colours and workspace; hardware/audio quality not inferred
+- Source SHA-256: `c704e931d08b7f364f2a49271bb021956216bcdfa1161021bba7a215a674ae63`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T184356.887038Z-06ecc695d1.json) · [Raw log](../build-logs/20261105T184356.887038Z-06ecc695d1.log)
+- [Exact process output](../build-logs/20261105T184356.887038Z-06ecc695d1.raw.log)
+
+### 2026-11-06T02:46:17+08:00 · workspace-brand-icon · succeeded
+
+- Config: Release; exit code: 0; elapsed: 3.673s.
+- Command: `powershell.exe -NoProfile -File E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\check-brand-icon.ps1`
+- Context: Extract actual Windows executable icon and verify preserved old binary; no app GUI action
+- Source SHA-256: `c704e931d08b7f364f2a49271bb021956216bcdfa1161021bba7a215a674ae63`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T184617.593768Z-a4ffaf6ba5.json) · [Raw log](../build-logs/20261105T184617.593768Z-a4ffaf6ba5.log)
+- [Exact process output](../build-logs/20261105T184617.593768Z-a4ffaf6ba5.raw.log)
+
+### 2026-11-06T02:43:56+08:00 · workspace-brand-ctest · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 149.136s.
+- Command: `ctest --test-dir E:\emusician-analysis-build -C Release --output-on-failure`
+- Context: 0.11.0 brand, track colours and workspace; hardware/audio quality not inferred
+- Source SHA-256: `c704e931d08b7f364f2a49271bb021956216bcdfa1161021bba7a215a674ae63`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T184356.928954Z-4aeeb13cd5.json) · [Raw log](../build-logs/20261105T184356.928954Z-4aeeb13cd5.log)
+- [Exact process output](../build-logs/20261105T184356.928954Z-4aeeb13cd5.raw.log)
+
+### 2026-11-06T02:47:00+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.928s.
+- Command: `C:\Python314\python.exe E:\emusician-analysis-source\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `c704e931d08b7f364f2a49271bb021956216bcdfa1161021bba7a215a674ae63`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T184700.452024Z-d9bbeaf516.json) · [Raw log](../build-logs/20261105T184700.452024Z-d9bbeaf516.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-06T02:47:05+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 0.767s.
+- Command: `C:\Python314\python.exe E:\emusician-analysis-source\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `c704e931d08b7f364f2a49271bb021956216bcdfa1161021bba7a215a674ae63`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T184705.103311Z-d93eadd648.json) · [Raw log](../build-logs/20261105T184705.103311Z-d93eadd648.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-06T02:46:47+08:00 · workspace-brand-sidebar · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 20.260s.
+- Command: `C:\Python314\python.exe tests/RunWorkspaceSidebar.py E:\emusician-analysis-build\bin-0.11.0\Release\E-musician.exe E:/emusician-analysis-build/workspace-sidebar`
+- Context: 0.11.0 brand, track colours and workspace; hardware/audio quality not inferred
+- Source SHA-256: `c704e931d08b7f364f2a49271bb021956216bcdfa1161021bba7a215a674ae63`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T184647.252000Z-b00ffa2542.json) · [Raw log](../build-logs/20261105T184647.252000Z-b00ffa2542.log)
+- [Exact process output](../build-logs/20261105T184647.252000Z-b00ffa2542.raw.log)
+
+
+## 2026-11-06 — 0.11.0 品牌工作区、颜色与连续调参
+
+完成用户批准树乐师Logo的启动动画/Windows图标/左上角集成；按批准图实现浅色工作区、顶部transport、搜索资源库、真实工程概览、可调下栏与目标明确的装置链，精简卷帘和Agent呈现。轨道染色贯通GUI/Agent/保存/Undo和只读投影；纯颜色不重建音乐图。原生效果增加可取消的连续DSP预览、一次提交/Undo、平滑、输出频谱及面板A/B。
+
+最终Release记录20261105T184209.597427Z-cf39e18746；221输入SHA c704e931d08b7f364f2a49271bb021956216bcdfa1161021bba7a215a674ae63；EXE a69f82ecaf144a7021aa1313ad23de681b407f39c93b99b06b1069d6b0503807。CTest11/11、Agent300、真实离线DAW颜色闭环8项、实际WebView/helper、双语三尺寸组件检查通过；新引擎139断言。旧0.10.0 EXE SHA 474fc082…保持不变。第一次编译失败与所有修复/中间构建记录保留；并行只读审查修复了控件越界、无效拖放、未保存打开保护及目录刷新等问题。
+
+本轮没有computer-use、付费语言模型或物理声卡验收；CPU绘制与DSP离线微测不代表真实ASIO复杂工程性能。结果/设计/架构/人工步骤见docs/review/2026-11-06-workspace-brand。新增独立0.11启动器和VS Code工作区，旧入口保留，main不自动合并。用户原有DEVLOG启动条目与两份记录保持原样。

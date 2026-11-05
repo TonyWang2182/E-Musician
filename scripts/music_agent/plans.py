@@ -21,7 +21,7 @@ MAX_NOTES = 2000
 MAX_SECONDS = 172800
 EFFECT_NAMES = {"eq8":"EQ Eight", "compressor":"Compressor", "delay":"Stereo Delay", "reverb":"Reverb", "auto_filter":"Auto Filter"}
 EQ_SHAPES = ["bell", "low_shelf", "high_shelf", "high_pass", "low_pass", "notch"]
-TRACK_FIELDS = ("name", "kind", "gain_db", "pan", "muted", "solo")
+TRACK_FIELDS = ("name", "kind", "gain_db", "pan", "muted", "solo", "colour")
 CLIP_FIELDS = ("kind", "start_seconds", "duration_seconds", "start_beats", "length_beats", "note_count",
                "asset_id", "source_offset", "fade_in_seconds", "fade_out_seconds", "controller_count",
                "warp_enabled", "warp_follow_tempo", "warp_source_bpm", "warp_target_bpm", "warp_speed_ratio", "playback_source_offset")
@@ -94,6 +94,8 @@ _ACTIONS = [
     _shape("set_track_pan", {"track_id": _ID, "pan": {"type": "number", "minimum": -1, "maximum": 1}}),
     _shape("set_track_muted", {"track_id": _ID, "muted": {"type": "boolean"}}),
     _shape("set_track_solo", {"track_id": _ID, "solo": {"type": "boolean"}}),
+    _shape("set_track_colour", {"track_id": _ID, "colour": {"type": "string", "pattern": "^(|#[0-9A-Fa-f]{6})$",
+        "description": "Track colour as #RRGGBB, or an empty string to restore the default. Visual metadata only."}}),
     _shape("create_midi_clip", {"track_id": _ID, "start_beats": {"type": "number", "minimum": 0},
                                 "length_beats": {"type": "number", "exclusiveMinimum": 0}, "as": _ALIAS}, ("as",)),
     _shape("duplicate_clip", {"clip_id": _ID, "as": _ALIAS}, ("as",)),
@@ -129,6 +131,7 @@ PLAN_TOOL["function"]["description"] += " Stereo Delay uses effect_type='delay',
 PLAN_TOOL["function"]["description"] += " Reverb uses effect_type='reverb', parameters decay_seconds, damping (0 to 1), and dry_wet (0 to 1)."
 PLAN_TOOL["function"]["description"] += " Auto Filter uses effect_type='auto_filter'; mode is low_pass or high_pass, lfo_enabled is boolean, frequency_hz/resonance_q/lfo_hz/lfo_depth/dry_wet are numeric. Mode and lfo_enabled require absolute edits."
 PLAN_TOOL["function"]["description"] += " EQ shape is per-band: bell, low_shelf, high_shelf, high_pass, low_pass or notch (absolute only). High/low pass are 12 dB/octave; gain_db is inactive for pass and notch shapes. Sampler/Rack set_native_pad accepts gain_db, muted, attack_ms (0.1..2000), release_ms (1..5000), one_shot (boolean); supply at least one setting, omitted settings preserve the read current values. False one_shot is gate/release on note-off; true plays through note-off. No decay/sustain/loop/slicing controls."
+PLAN_TOOL["function"]["description"] += " set_track_colour changes visual track colour without changing sound. Use exact #RRGGBB (muted teal #BFD2CF) or empty string to reset. It requires explicit track selection or project scope, and can follow create_track using its @alias."
 
 def _default_effect(kind):
     if kind == "eq8":
@@ -569,19 +572,24 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
             touched_instruments.add(track["id"])
         elif kind.startswith("set_track_") or kind == "rename_track":
             field = {"rename_track": "name", "set_track_gain": "gain_db", "set_track_pan": "pan",
-                     "set_track_muted": "muted", "set_track_solo": "solo"}[kind]
+                     "set_track_muted": "muted", "set_track_solo": "solo", "set_track_colour": "colour"}[kind]
             value = args[field]
             if field == "name":
                 value = _text(value, "name")
+            elif field == "colour":
+                if not isinstance(value, str) or (value != "" and not re.fullmatch(r"#[0-9A-Fa-f]{6}", value)):
+                    raise PlanError("轨道颜色必须是 #RRGGBB 六位色值，或用空字符串恢复默认。")
+                value = value.upper()
             elif field in ("muted", "solo"):
                 if type(value) is not bool:
                     raise PlanError(f"{field} 必须是布尔值。")
             else:
                 value = _number(value, field, *({"gain_db": (-60, 6), "pan": (-1, 1)}[field]))
-            old = track[field]
+            old = track.get(field, "") if field == "colour" else track[field]
             track[field] = args[field] = value
             changed = not _same(old, value, field)
-            description = f"轨道「{track['name']}」{field}：{old} → {value}"
+            description = (f"轨道「{track['name']}」颜色：{old or '默认'} → {value or '默认'}（不改变声音）" if field == "colour"
+                           else f"轨道「{track['name']}」{field}：{old} → {value}")
         elif kind in {"create_midi_clip", "duplicate_clip"}:
             if sum(t.get("clip_count", len(t.get("clips", []))) for t in tracks.values()) >= 4096:
                 raise PlanError("工程最多支持 4096 个片段。")

@@ -17,9 +17,10 @@ const initial = {
   phase:'idle',busy:false,detail:'',
   snapshot:{project_id:'synthetic-project',revision:1,name:'合成界面测试 · Morning study',bpm:120,numerator:4,denominator:4,selected_track_id:'t1',selected_clip_id:'c1',
     selection_context:{available:true,selection_revision:3,active_track_id:'t1',active_clip_id:'c1',track_ids:['t1'],clip_ids:['c1'],note_clip_id:'c1',note_ids:['n1','n2'],time_range:{active:true,start_seconds:0,end_seconds:8},focus:'piano_roll'},
-    tracks:[{id:'t1',name:'钢琴',kind:'instrument',clips:[{id:'c1',name:'主旋律'}]},{id:'t2',name:'<img src=x onerror=alert(1)>',kind:'audio',clip_count:1}]},
+    tracks:[{id:'t1',name:'钢琴',colour:'#91A7C3',kind:'instrument',clips:[{id:'c1',name:'主旋律'}]},{id:'t2',name:'<img src=x onerror=alert(1)>',colour:'url(https://invalid.test)',kind:'audio',clip_count:1}]},
   plan:null,messages:[],provider:structuredClone(registry[0]),providers:structuredClone(registry),
-  usage:{calls:0,prompt_tokens:0,completion_tokens:0},can_undo:false,last_result:'',error:null,control:{connected:true}
+  usage:{calls:0,prompt_tokens:0,completion_tokens:0},can_undo:false,last_result:'',error:null,control:{connected:true},
+  capability_groups:[{id:'track_colour',label:'轨道颜色',status_label:'可用',enabled:true,example:'把选中的轨道设为灰绿色 #BFD2CF，先列出修改。',detail:'选择整条轨道，或明确使用整个工程范围；颜色修改不改变声音。'}]
 };
 let state = structuredClone(initial), rejectShutdown = false, lastPlan = null, lastSettings = null;
 const count = {get:0,plan:0,apply:0,undo:0,shutdown:0,settings:0,cancel:0,pause:0,resume:0};
@@ -92,9 +93,17 @@ async function capture(page,name,width,height) {
     assert.equal(await page.locator('#standalone-footer').isVisible(),false);
     assert.equal(await page.locator('#collapse').isVisible(),true);
     assert.match(await page.locator('#context-pills').innerText(),/2 个音符/);assert.match(await page.locator('#context-pills').innerText(),/0–8 秒/);
+    assert.equal(await page.locator('#capabilities').evaluate(e=>e.open),false);
+    assert.equal(await page.locator('#context-pills').evaluate(e=>e.getBoundingClientRect().height<=48),true);
+    assert.match(await page.locator('#tempo').evaluate(e=>getComputedStyle(e).fontFamily),/Consolas/);
+    assert.match(await page.locator('#prompt').evaluate(e=>getComputedStyle(e).fontFamily),/Segoe UI/);
+    assert.equal(await page.locator('.composer-dock').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(241, 242, 238)');
     await capture(page,'sidebar-idle-340',340,740);
+    await page.locator('#capabilities > summary').click();await page.locator('.capability-row > summary').click();await page.locator('.capability-row button').click();
+    assert.match(await page.locator('#prompt').inputValue(),/#BFD2CF/);assert.equal(count.plan,0);await refresh(page);assert.equal(await page.locator('#capabilities').evaluate(e=>e.open),true);await page.locator('#capabilities > summary').click();
     await page.locator('#project-details summary').click();
     assert.equal(await page.locator('.track-name').nth(1).textContent(),'<img src=x onerror=alert(1)>');assert.equal(await page.locator('.tracks img').count(),0);
+    assert.equal(await page.locator('.track-name').first().evaluate(e=>getComputedStyle(e,'::before').backgroundColor),'rgb(145, 167, 195)');assert.equal(await page.locator('#tracks li').nth(1).evaluate(e=>e.style.getPropertyValue('--track-colour')),'');
     await page.locator('#project-details summary').click();
     await page.reload();await waitReady(page);assert.equal(new URL(page.url()).search,'?embedded=1&lang=zh-CN');
     await page.locator('#prompt').fill('把所选两个音符升高一个八度');await page.locator('#submit').click();await page.locator('#apply').waitFor({state:'visible'});
@@ -109,6 +118,9 @@ async function capture(page,name,width,height) {
     await page.locator('#apply').click();await page.waitForFunction(()=>document.getElementById('tempo').textContent==='100 BPM');assert.equal(count.apply,1);
     await page.locator('#undo').click();await page.waitForFunction(()=>document.getElementById('tempo').textContent==='120 BPM');assert.equal(count.undo,1);
     const afterEdit=structuredClone(state), writesBefore=count.apply, cancelsBefore=count.cancel;
+    state.phase='ready';state.progress=null;state.plan={id:'colour-synthetic',scope:{mode:'project'},revision:state.snapshot.revision,summary:'调整钢琴轨颜色。',changes:['轨道「钢琴」颜色：#91A7C3 → #BFD2CF（不改变声音）']};state.last_result='';await refresh(page);
+    assert.deepEqual(await page.locator('#changes .colour-value').allTextContents(),['#91A7C3','#BFD2CF']);assert.equal(await page.locator('#changes .colour-value').last().evaluate(e=>getComputedStyle(e,'::before').backgroundColor),'rgb(191, 210, 207)');assert.equal(await page.locator('#apply').isDisabled(),false);assert.equal(count.apply,writesBefore);
+    await capture(page,'sidebar-colour-review-340',340,740);await page.evaluate(()=>window.emusicianSetLanguage('en'));await capture(page,'sidebar-colour-review-en-340',340,740);assert.equal(await page.locator('#apply').innerText(),'Apply changes');await page.evaluate(()=>window.emusicianSetLanguage('zh-CN'));
     state.phase='ready';state.plan={id:'notes-synthetic',scope:{mode:'project'},revision:state.snapshot.revision,summary:'在两个片段中新增明确音符。',changes:['测试钢琴 / 新片段：新增 2 个音符。','旋律轨 / 第二片段：新增 1 个音符。'],note_previews:[{label:'测试钢琴 / 新片段',notes:[{pitch:60,start_beats:0,length_beats:1,velocity:80,channel:1},{pitch:64,start_beats:1.125,length_beats:0.25,velocity:90,channel:2}]},{label:'<img src=x onerror=alert(1)>',notes:[{pitch:67,start_beats:2,length_beats:0.5,velocity:70,channel:16}]}]};state.last_result='';state.progress=null;
     await refresh(page);assert.equal(await page.locator('#note-preview-summary').innerText(),'新增音符明细（3）');assert.equal(await page.locator('#note-previews').evaluate(e=>e.open),false);assert.equal(await page.locator('.note-preview-row').count(),0);
     await page.locator('#note-preview-summary').click();await page.waitForFunction(()=>document.querySelectorAll('.note-preview-row').length===3);
