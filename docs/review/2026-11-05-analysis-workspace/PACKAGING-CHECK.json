@@ -1,0 +1,29 @@
+{
+  "created_at": "2026-11-05T11:04:05.185147+00:00",
+  "release_directory": "E:\\MusicAgent&DAW\\releases\\0.9.1-20261105-analysis-workspace",
+  "implementation_commit": "a6447ccc621b39c07909fb0589d65a3033afa5e1",
+  "archive_files": 1229,
+  "archive_verified_source_files": 190,
+  "artifacts": {
+    "E-musician.exe": {
+      "bytes": 21577216,
+      "sha256": "a91c63949e1cc41cd7a6496f31db67477c3efd663fefee76a0947614135e04dc"
+    },
+    "E-musician.pdb": {
+      "bytes": 168398848,
+      "sha256": "a1bcb65af40456e01d1aa3812323d3832196e98fe6cf666fb5463fa8e92ebad0"
+    },
+    "source-and-docs.zip": {
+      "bytes": 16466068,
+      "sha256": "0b5f159c778fa21d624d9ba346e04f8cbdfd4acdb4a86ccf64cb15b5bf03f51a"
+    },
+    "Start E-musician 0.9.1 Analysis.cmd": {
+      "bytes": 202,
+      "sha256": "477dc181792dd814f786ca7c6dd4c32abcbaf960a97bf538fc065121a985782d"
+    }
+  },
+  "git_cached_diff_check": "passed",
+  "added_lines_credential_pattern_scan": "no matches",
+  "archive_excludes": "models, runtimes, user projects, credentials, caches, dependencies and raw logs",
+  "note": "Preservation ZIP captures implementation commit; this record and final archive prose are documentation-only follow-up."
+}

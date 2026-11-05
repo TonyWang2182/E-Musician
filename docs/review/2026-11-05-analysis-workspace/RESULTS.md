@@ -53,3 +53,9 @@ EXE SHA-256：`a91c63949e1cc41cd7a6496f31db67477c3efd663fefee76a0947614135e04dc`
 本机 i7-13700H / 约 32GB / RTX 3050 Laptop 4GB / 驱动 555.99，离线 Worker 两条 CPU 线程，7 秒 44.1kHz 双声道合成输入，六轨 Quality 墙钟 28.58 秒，采样峰值 RSS 1.28GB、CUDA allocated 650MB / reserved 912MB。方法、版本和限制在 Worker 记录中。没有实际声卡缓冲和同时 ASIO 播放负载，不能推导实时稳定性或识别准确率。
 
 下一步按人工短测确认轨道可见、改名、语言、短音乐听感和真实设备播放共存。本轮没有付费 LLM 请求，没有操作用户电脑界面；聊天模型的实际意图理解尚未验证。旧工程、凭证和模型权重不进入 Git；新模型权重的再分发许可未确认，仅本机评测部署。
+
+## 版本管理与保留
+
+实现和自动证据提交：`a6447ccc621b39c07909fb0589d65a3033afa5e1`，分支 `feature/analysis-workspace-v091`。本地归档 `E:/MusicAgent&DAW/releases/0.9.1-20261105-analysis-workspace/` 含 EXE/PDB、启动入口、原始字节的源码/文档 ZIP 和 MANIFEST；1229 个归档条目中的 190 个构建输入已逐一对照最终 SHA。Git 行尾规范化不会代替本地原始字节快照。后续归档说明提交只改文档。
+
+归档不含模型、运行库、用户工程、凭证或原始日志，不是免安装跨机器发行包。旧 0.8.1 独立 EXE 和两版旧归档全部匹配既有清单；源码功能分支同步 GitHub，main 不改。打包核查见 [PACKAGING-CHECK](PACKAGING-CHECK.json)。

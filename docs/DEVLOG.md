@@ -6775,3 +6775,8 @@ Branch feature/analysis-workspace-v091 from f0d95b3; preserved existing 0.9.0 ar
 - 实际原生截图已检查英文/中文最小工作区、和弦、MIDI和空面板；预览为标明 synthetic 的夹具，真实模型另测。旧0.8.1独立EXE与0.8.1/0.9.0归档逐项hash复核通过。原先两条0805启动记录和日志保留。
 - 已创建0.9.1明确启动入口，工作区launch名称同步，计划/架构/ADR/API/上下文/人工短测更新。分支feature/analysis-workspace-v091，保持main不变；本地归档与Git同步在收尾进行。
 - 待用户人工确认实际鼠标/DPI、ASIO共存、短音乐听感及真实聊天模型意图理解。无付费API调用，无computer-use；常用和弦模板不是爵士训练模型，六轨分离不保证钢琴/吉他纯净，未接受候选不随工程恢复。
+
+### 2026-11-05 · 0.9.1 归档核查
+
+- 实现/测试/截图/日志已提交 a6447ccc621b39c07909fb0589d65a3033afa5e1（feature/analysis-workspace-v091）。本地归档 E:/MusicAgent&DAW/releases/0.9.1-20261105-analysis-workspace 包含最终 EXE/PDB/启动器及该提交的原始源码文档，1229条目中190个构建输入逐项核对冻结hash通过；完整产物SHA见PACKAGING-CHECK和归档MANIFEST。
+- Git staged diff --check通过，新增行凭证模式扫描无匹配；未提交依赖、模型、缓存、用户音频/工程或原始日志。代码运行入口、人工短测、状态上下文和旧版保留说明完整。随后只提交本条和归档说明，不改已验证源码或EXE；将两个提交同步功能分支，main保持不变。
