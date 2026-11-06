@@ -1,0 +1,8 @@
+{
+  "job_id": "cd31e019663a41f88856c23eaabd2754",
+  "files": {
+    "worker-error.json": "{\"error\":\"No module named 'scipy'\",\"error_type\":\"ModuleNotFoundError\",\"status\":\"failed\"}\n",
+    "attempt.json": "{\"before\":{\"gpu_free_bytes\":33669775360,\"host_available_bytes\":53819826176},\"elapsed_seconds\":2.8845520317554474,\"error\":\"RuntimeError: No module named 'scipy'\",\"exit_code\":1,\"finished_unix\":1793988897.4323146,\"inference_started\":true,\"job_id\":\"cd31e019663a41f88856c23eaabd2754\",\"last_resources\":{\"gpu_free_bytes\":30907826176,\"host_available_bytes\":53418881024},\"model_id\":\"muscriptor\",\"pid\":29761,\"started_unix\":1793988894.5477617,\"status\":\"failed\",\"timeout_seconds\":1800}\n",
+    "worker.log": "ModuleNotFoundError: No module named 'scipy'\n"
+  }
+}

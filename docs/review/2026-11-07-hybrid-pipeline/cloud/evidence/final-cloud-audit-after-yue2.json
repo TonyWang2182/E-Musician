@@ -1,0 +1,68 @@
+{
+  "passed": true,
+  "checked_at": "2026-11-06T18:30:19.037213+00:00",
+  "health": {
+    "protocol_version": 2,
+    "service": "emusician-compute",
+    "single_heavy_task": true,
+    "status": "ready"
+  },
+  "active_jobs": [],
+  "gpu_fields": [
+    "name",
+    "total_MiB",
+    "used_MiB",
+    "free_MiB",
+    "utilization_percent"
+  ],
+  "gpu": "NVIDIA GeForce RTX 5090, 32607, 0, 32110, 0",
+  "compute_processes": "",
+  "operations": "read-only health/queue/GPU; no hash rescan, inference or service/instance change",
+  "recorder_record": "docs/builds/20261106T183017.413164Z-2916902393.json",
+  "yue2_metadata_followup": {
+    "report_path": "E:\\MusicAgent&DAW\\cloud-inference\\experiments\\hybrid-final-20261107-v4-yue2\\report.json",
+    "report_sha256": "6ddb19dfcb183c98ace03189b96cf5464cf485cbe06cea342cd312440a683fee",
+    "passed": true,
+    "started_at": "2026-11-06T18:27:39.279+00:00",
+    "finished_at": "2026-11-06T18:28:49.628+00:00",
+    "result_id": "411f7181e62a4698ab4596005be882f0",
+    "candidate_completion": {
+      "truncated": true,
+      "stages": {
+        "abc": false,
+        "semantic": true
+      },
+      "reason": "token_budget",
+      "timing_is_exact": false
+    },
+    "candidate_truncated": true,
+    "phases": [
+      {
+        "phase": "open_owned_daw_and_import_input",
+        "passed": true,
+        "elapsed_seconds": 3.634385099983774
+      },
+      {
+        "phase": "real_gpu_inference_candidate_without_project_edit",
+        "passed": true,
+        "elapsed_seconds": 57.23063939998974
+      },
+      {
+        "phase": "accept_once_idempotency_and_single_undo_redo",
+        "passed": true,
+        "elapsed_seconds": 0.743250600004103
+      },
+      {
+        "phase": "save_close_disable_cloud_reopen_and_compare_full_music_state",
+        "passed": true,
+        "elapsed_seconds": 1.2033009000006132
+      },
+      {
+        "phase": "local_offline_render",
+        "passed": true,
+        "elapsed_seconds": 2.3060271000140347
+      }
+    ],
+    "scope": "Original v3 seven-model data-path acceptance remains; this v4 single-model run verifies corrected desktop truncation metadata. Cloud code unchanged; no listening/quality/physical-device claim."
+  }
+}

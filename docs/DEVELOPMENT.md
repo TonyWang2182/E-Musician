@@ -1,5 +1,17 @@
 # E-musician 开发计划
 
+## 0.13.0 架构 2–4（2026-11-07，自动验证通过，人工待验）
+
+- [x] 明确归属、基线与协议，建立独立功能分支；[计划](review/2026-11-07-hybrid-pipeline/PLAN.md)。
+- [x] 统一云端持久队列/上传/取消/幂等与七模型隔离适配；安全迁移旧ACE驻留服务，真实HTTP和重启检查通过。
+- [x] 本地/云端路由及真实结果下载校验；模型选择不静默替换，保留MIDI CC/多乐器/和弦原文/结构。
+- [x] 原生手动入口、Agent等价操作、综合候选与schema8存档；不自动改变工程BPM。
+- [x] Release、CTest11/11、Agent349、真实七模型到候选/接受/Undo/保存离线；YuE2截断状态修订复测通过。
+- [x] 独立0.13.0入口、E盘缓存/临时目录、VS Code工作区与[人工清单](review/2026-11-07-hybrid-pipeline/MANUAL-CHECK.md)。代码同步以本档案PUBLISH记录为准，不自动合并main。
+- [ ] 用户最终人工验收：物理ASIO/MIDI、鼠标/DPI、长段准确率和听感、本轮自然语言模型理解率。
+
+依据：[结果](review/2026-11-07-hybrid-pipeline/RESULTS.md) / [总核查](review/2026-11-07-hybrid-pipeline/VERIFICATION.json)。短段整链不等于模型精度或实时性能验收。
+
 ## MuScriptor medium 授权部署（2026-11-06）
 
 - [x] 用户read token官方固定权重权限核验；云端私有凭据与离线推理隔离，未代接受条款。

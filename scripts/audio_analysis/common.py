@@ -19,14 +19,14 @@ INSTRUMENT_RANGES = {"auto": (21, 108), "piano": (21, 108), "bass": (23, 72),
                      "guitar": (28, 96), "vocals": (36, 96)}
 OPTIONS = {"separate": {"quality": ("fast", "quality")},
            "transcribe": {"instrument": tuple(INSTRUMENT_RANGES)},
-           "chords": {"vocabulary": ("extended", "triads")}, "beats": {"meter": ("auto", "3/4", "4/4")}}
+           "chords": {"vocabulary": ("extended", "triads")}, "beats": {"meter": ("auto", "3/4", "4/4")}, "score": {}}
 PARAMETERS = {
     "separate": {"segment_seconds": (3., 4., 4.), "stems": (4., 6., 4.)},
     "transcribe": {"onset_threshold": (0., 1., .5), "frame_threshold": (0., 1., .3),
                    "minimum_note_ms": (10., 2000., 80.), "min_pitch": (21., 108., 21.),
                    "max_pitch": (21., 108., 108.)},
     "chords": {"sensitivity": (.2, .99, .55), "min_region_seconds": (.05, 2., .15)},
-    "beats": {},
+    "beats": {}, "score": {},
 }
 
 

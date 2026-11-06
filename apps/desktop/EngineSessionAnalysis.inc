@@ -12,6 +12,7 @@ juce::Result analysisJson(const juce::File& file,juce::var& value,juce::int64 ma
     return juce::JSON::parse(file.loadFileAsString(),value);
 }
 bool analysisNumber(const juce::var& value){return (value.isInt()||value.isInt64()||value.isDouble())&&std::isfinite(double(value));}
+#include "EngineSessionHybrid.inc"
 double analysisOption(const juce::var& args,const char* key,double fallback){return args.hasProperty(key)?number(args,key):fallback;}
 juce::String analysisItemsKey(const juce::String& kind){return kind=="separate"?"stems":kind=="transcribe"?"notes":kind=="beats"?"beat_events":"chord_regions";}
 juce::Result validateAnalysisResult(const juce::var& value,const juce::String& id,const juce::String& kind,double duration,int expectedStems=4)
@@ -20,8 +21,14 @@ juce::Result validateAnalysisResult(const juce::var& value,const juce::String& i
        ||!value["model"].isObject()||value["model"]["id"].toString().isEmpty()||value["model"]["id"].toString().length()>256
        ||!value["parameters"].isObject()||juce::JSON::toString(value["parameters"]).getNumBytesAsUTF8()>4096
        ||!analysisNumber(value["duration_seconds"])||std::abs(double(value["duration_seconds"])-duration)>.002)return juce::Result::fail("The analysis result does not match this request.");
-    const auto list=value.getProperty(analysisItemsKey(kind),{});if(!list.isArray())return juce::Result::fail("Analysis result items are missing.");
-    if(list.size()>(kind=="separate"?6:(kind=="chords"||kind=="beats")?10000:100000))return juce::Result::fail("Analysis result exceeds the project limit.");
+    if(kind=="transcribe"||kind=="score"){
+        if(!value["midi_tracks"].isArray()&&!value["notes"].isArray())return juce::Result::fail("Transcribed MIDI tracks are missing.");
+        if(auto r=validateCandidateMidi(value,duration);r.failed())return r;
+        if(kind=="transcribe")return juce::Result::ok();
+        if(auto r=storage::validateAnalysisAnnotations(candidateAnnotations(value),duration);r.failed())return r;
+    }
+    const auto list=value.getProperty(kind=="score"?juce::String("chord_regions"):analysisItemsKey(kind),{});if(!list.isArray())return juce::Result::fail("Analysis result items are missing.");
+    if(list.size()>(kind=="separate"?6:10000))return juce::Result::fail("Analysis result exceeds the project limit.");
     if(kind=="beats"){
         double previous=-1;
         for(const auto& beat:*list.getArray()){
@@ -56,12 +63,12 @@ juce::Result validateAnalysisResult(const juce::var& value,const juce::String& i
         if(kind=="transcribe"){
             if(!item["pitch"].isInt()||int(item["pitch"])<0||int(item["pitch"])>127||!item["velocity"].isInt()||int(item["velocity"])<1||int(item["velocity"])>127||int(item["channel"])!=1)
                 return juce::Result::fail("Invalid transcribed MIDI note.");
-        }else if(!item["label"].isString()||!storage::isSupportedChordLabel(item["label"].toString())||!analysisNumber(item["score"])||double(item["score"])<0||double(item["score"])>1||!item["uncertain"].isBool())return juce::Result::fail("Invalid chord candidate.");
+        }else if(!item["label"].isString()||!storage::isSupportedChordLabel(item["label"].toString())||(!item["score"].isVoid()&&(!analysisNumber(item["score"])||double(item["score"])<0||double(item["score"])>1))||!item["uncertain"].isBool())return juce::Result::fail("Invalid chord candidate.");
     }
     return juce::Result::ok();
 }
 juce::var chordJson(const storage::StoredChordRegion& c)
-{return object({{"id",c.id},{"label",c.label},{"analysis_id",c.analysisId},{"start_seconds",c.startSeconds},{"end_seconds",c.endSeconds},{"score",c.score},{"uncertain",c.uncertain}});}
+{return object({{"id",c.id},{"label",c.label},{"analysis_id",c.analysisId},{"start_seconds",c.startSeconds},{"end_seconds",c.endSeconds},{"score",c.score<0?juce::var():juce::var(c.score)},{"uncertain",c.uncertain}});}
 }
 
 juce::var EngineSession::Impl::analysisCapabilities()
@@ -71,12 +78,13 @@ juce::var EngineSession::Impl::analysisCapabilities()
     for(const auto* name:{"separate","transcribe","chords","beats"}){
         auto p=registry["providers"][name];const auto python=p["python_executable"].toString();
         const bool available=read.wasOk()&&bool(p["available"])&&juce::File::isAbsolutePath(python)&&juce::File(python).existsAsFile();
-        providers.add(object({{"kind",name},{"available",available},{"model_id",p["model_id"]},{"version",p["version"]},{"experimental",true},{"device",p["device"]},{"cpu_threads",2},
+        providers.add(object({{"kind",name},{"available",available},{"model_id",p["model_id"]},{"execution","local"},{"default",true},{"max_duration_seconds",600},{"version",p["version"]},{"experimental",true},{"device",p["device"]},{"cpu_threads",2},
             {"detail",available?p.getProperty("reason","Local analysis; review candidates before import."):juce::var("Model runtime is not installed or not ready. Run scripts/setup_analysis.py.")}}));
     }
     const auto six=registry["providers"]["separate_6s"];const auto sixPython=six["python_executable"].toString();
     const bool sixReady=read.wasOk()&&bool(six["available"])&&juce::File::isAbsolutePath(sixPython)&&juce::File(sixPython).existsAsFile();
-    return object({{"protocol_version",1},{"providers",providers},{"separation_six_stems",sixReady},{"separation_quality_modes",juce::var(juce::StringArray{"fast","quality"})},
+    for(const auto& p:cloudProviders(computeRegistry()))if(p["kind"].toString()!="generate")providers.add(p);
+    return object({{"protocol_version",2},{"providers",providers},{"execution_modes",juce::var(juce::StringArray{"auto","local","cloud"})},{"separation_six_stems",sixReady},{"separation_quality_modes",juce::var(juce::StringArray{"fast","quality"})},
         {"transcription_instruments",juce::var(juce::StringArray{"auto","piano","bass","guitar","vocals"})},{"chord_vocabularies",juce::var(juce::StringArray{"triads","extended"})},
         {"beat_meters",juce::var(juce::StringArray{"auto","3/4","4/4"})},{"beat_alignment_modes",juce::var(juce::StringArray{"audio_to_project","project_to_audio"})},
         {"max_duration_seconds",600},{"max_parallel_jobs",1},{"preview_stems",true},{"drum_transcription",false},{"cpu_threads",2},{"score_kind","uncalibrated_similarity"}});
@@ -105,7 +113,7 @@ juce::var EngineSession::Impl::analysisJobs()const
 juce::Result EngineSession::Impl::beginAnalysis(const juce::var& args,juce::var& out)
 {
     if(recordingBusy()||nativePending)return fail("Finish recording and pending device edits before analysis.");
-    const auto kind=textArg(args,"kind");if(kind!="separate"&&kind!="transcribe"&&kind!="chords"&&kind!="beats")return fail("Choose separation, MIDI, chords or beats.");
+    const auto kind=textArg(args,"kind");if(kind!="separate"&&kind!="transcribe"&&kind!="chords"&&kind!="beats"&&kind!="score")return fail("Choose separation, MIDI, chords, beats or score.");
     for(const auto& j:jobs)if(j->worker.joinable()&&(j->kind.startsWith("analysis.")||j->kind.startsWith("generation."))&&j->kind!="analysis.preview"&&j->kind!="generation.preview")return fail("One analysis is already running. Wait or cancel it first.");
     Binding* track=nullptr;auto* clip=findClip(textArg(args,"clip_id"),&track);
     if(!clip||!dynamic_cast<te::WaveAudioClip*>(clip->clip.get())||clip->info.playbackFile==juce::File())return fail("Select a prepared audio clip to analyze.");
@@ -118,7 +126,11 @@ juce::Result EngineSession::Impl::beginAnalysis(const juce::var& args,juce::var&
     const auto last=std::floor((p.offset.inSeconds()+start+length)*rate+1.0e-7);
     if(!std::isfinite(rate)||rate<=0||last<=first)return fail("The selected range must contain at least one full source sample.");
     start=juce::jmax(0.0,first/rate-p.offset.inSeconds());length=(last-first)/rate;
-    juce::var registry;if(auto r=analysisJson(analysisRoot().getChildFile("registry.json"),registry,128*1024);r.failed())return fail("Install the local analysis runtimes first.");
+    juce::var selected;if(auto r=selectAnalysisRoute(analysisCapabilities()["providers"],kind,args,selected);r.failed())return fail(r.getErrorMessage());
+    if(length>double(selected.getProperty("max_duration_seconds",600)))return fail("The selected range exceeds this model's duration limit.");
+    const bool cloud=selected["execution"].toString()=="cloud";
+    juce::var registry=cloud?computeRegistry():juce::var();
+    if(!cloud&&analysisJson(analysisRoot().getChildFile("registry.json"),registry,128*1024).failed())return fail("Install the local analysis runtimes first.");
     auto params=args.getProperty("parameters",object({}));if(!params.isObject()||juce::JSON::toString(params).getNumBytesAsUTF8()>4096)return fail("Invalid analysis parameters.");
     params=params.clone();
     if(kind=="separate"&&textArg(args,"preset")=="htdemucs_6s"){
@@ -127,21 +139,23 @@ juce::Result EngineSession::Impl::beginAnalysis(const juce::var& args,juce::var&
     }
     const int stemCount=int(params.getProperty("stems",4));
     if(kind=="separate"&&((params.hasProperty("stems")&&!params["stems"].isInt())||(stemCount!=4&&stemCount!=6)))return fail("Choose four or six separated tracks.");
-    auto provider=registry["providers"].getProperty(kind=="separate"&&stemCount==6?juce::String("separate_6s"):kind,{});const auto python=provider["python_executable"].toString();
+    if(cloud){if(kind=="separate"&&stemCount!=4)return fail("This cloud separation model produces four tracks.");
+        for(const auto& property:params.getDynamicObject()->getProperties())if(property.name.toString()!="stems"||kind!="separate")return fail("Cloud models use their fixed settings. Remove local-only analysis options.");}
+    auto provider=cloud?registry:registry["providers"].getProperty(kind=="separate"&&stemCount==6?juce::String("separate_6s"):kind,{});const auto python=provider["python_executable"].toString();
     if(!bool(provider["available"])||!juce::File::isAbsolutePath(python)||!juce::File(python).existsAsFile())return fail("This analysis runtime is not ready.");
     if(analyses.size()>=32){auto old=std::find_if(analyses.begin(),analyses.end(),[](const auto& a){return a.second->job&&!a.second->job->worker.joinable()&&(!a.second->acceptJob||!a.second->acceptJob->worker.joinable());});if(old==analyses.end())return fail("Analysis result history is full.");analyses.erase(old);}
-    auto a=std::make_shared<AnalysisEntry>();a->id=uid();a->kind=kind;a->original=a->boundOriginal=clip->source;a->sourceFile=clip->info.playbackFile;a->parameters=params.clone();
+    auto a=std::make_shared<AnalysisEntry>();a->id=uid();a->kind=kind;a->execution=cloud?"cloud":"local";a->modelId=selected["model_id"].toString();a->original=a->boundOriginal=clip->source;a->sourceFile=clip->info.playbackFile;a->parameters=params.clone();
     juce::var warpState;if(auto r=getAudioWarp(object({{"clip_ids",juce::var(juce::StringArray{clip->id})}}),warpState);r.failed())return r;
     const bool sourceWarped=bool(warpState["items"][0]["enabled"]);
     const auto expectedOriginalHash=clip->clip->state.getProperty("emAudioWarp",{})["source_sha256"].toString();
     a->directory=analysisRoot().getChildFile("cache/jobs").getChildFile(a->id);
     juce::String role=clip->clip->state["emAnalysisRole"].toString();if(role.isEmpty())role="pitched_or_unknown";
     const auto instrument=params["instrument"].toString();const bool explicitPitched=instrument=="piano"||instrument=="bass"||instrument=="guitar"||instrument=="vocals";
-    if(kind=="transcribe"&&(role=="drums"||(role=="other"&&!explicitPitched)))return fail("Choose a pitched instrument for mixed audio. Drum transcription is not supported.");
+    if(!cloud&&kind=="transcribe"&&(role=="drums"||(role=="other"&&!explicitPitched)))return fail("Choose a pitched instrument for mixed audio. Drum transcription is not supported.");
     a->source=object({{"project_id",juce::String(guard.projectId())},{"clip_id",clip->id},{"asset_id",clip->assetId},{"track_id",track->id},{"clip_timeline_start",p.time.getStart().inSeconds()},{"clip_source_offset",p.offset.inSeconds()},{"clip_duration",p.time.getLength().inSeconds()},
         {"bpm",edit->tempoSequence.getTempo(0)->getBpm()},{"range_start_seconds",start},{"duration_seconds",length},{"timeline_start",p.time.getStart().inSeconds()+start},{"sample_rate",clip->info.rate},{"input_role",role},{"warp_speed_ratio",warpState["items"][0]["warp_speed_ratio"]}});
-    const auto script=juce::File(EMUSICIAN_SOURCE_DIR).getChildFile("scripts/audio_analysis/run.py");const auto preset=textArg(args,"preset");
-    const auto resourcePolicy=analysis_worker::Policy::forKind(kind);
+    const auto script=juce::File(EMUSICIAN_SOURCE_DIR).getChildFile(cloud?"scripts/cloud/run_analysis.py":"scripts/audio_analysis/run.py");const auto preset=textArg(args,"preset");
+    const auto resourcePolicy=cloud?analysis_worker::Policy{analysis_worker::gib/2}:analysis_worker::Policy::forKind(kind);
     a->job=startJob("analysis."+kind,[this,a,script,python,preset,length,sourceWarped,expectedOriginalHash,resourcePolicy](const auto& j){
         const auto cancelled=[j]{return j->cancel.load();};JobFingerprint before,after;
         if(!a->directory.createDirectory()){jobStatus(j,"failed","Cannot create the analysis cache directory.");return;}
@@ -157,7 +171,7 @@ juce::Result EngineSession::Impl::beginAnalysis(const juce::var& args,juce::var&
         // External replacement must not analyze an old decode under a new hash.
         if(!sourceWarped&&a->original.hasFileExtension("mp3")&&a->sourceFile.getFileNameWithoutExtension()!=before.hash){jobStatus(j,"stale","The MP3 changed after import. Reimport it before analyzing.");return;}
         auto request=object({{"schema_version",1},{"job_id",a->id},{"kind",a->kind},{"preset",preset},{"source_path",a->sourceFile.getFullPathName()},
-            {"source_offset_seconds",double(a->source["clip_source_offset"])+double(a->source["range_start_seconds"])},{"duration_seconds",length},{"analysis_root",analysisRoot().getFullPathName()},{"source",a->source},{"parameters",a->parameters},{"resource_policy",resourcePolicy.json()}});
+            {"source_offset_seconds",double(a->source["clip_source_offset"])+double(a->source["range_start_seconds"])},{"duration_seconds",length},{"analysis_root",analysisRoot().getFullPathName()},{"compute_root",computeRoot().getFullPathName()},{"execution",a->execution},{"model_id",a->modelId},{"source",a->source},{"parameters",a->parameters},{"resource_policy",resourcePolicy.json()}});
         if(!a->directory.getChildFile("request.json").replaceWithText(juce::JSON::toString(request))){jobStatus(j,"failed","Cannot write the analysis request.");return;}
         const auto beforeLaunch=analysis_worker::resources();
         launchRecord.getDynamicObject()->setProperty("before_launch_available_commit_bytes",juce::int64(beforeLaunch.commit));
@@ -169,7 +183,7 @@ juce::Result EngineSession::Impl::beginAnalysis(const juce::var& args,juce::var&
         const auto began=juce::Time::getMillisecondCounterHiRes();bool terminated=false;analysis_worker::CriticalPressure pressure;
         while(process.isRunning()){
             if(cancelled()||juce::Time::getMillisecondCounterHiRes()-began>60.0*60.0*1000.0){
-                a->directory.getChildFile("cancel").replaceWithText("cancel");if(!process.wait(500))process.terminate();terminated=true;break;
+                a->directory.getChildFile("cancel").replaceWithText("cancel");if(!process.wait(a->execution=="cloud"?8000:500))process.terminate();terminated=true;break;
             }
             const auto memory=analysis_worker::resources();const auto now=juce::Time::getMillisecondCounterHiRes();
             if(pressure.shouldStop(memory,now)){
@@ -184,18 +198,22 @@ juce::Result EngineSession::Impl::beginAnalysis(const juce::var& args,juce::var&
         }
         const auto exitCode=process.exitCode();
         a->directory.getChildFile("worker-exit.json").replaceWithText(juce::JSON::toString(object({{"exit_code",juce::int64(exitCode)},{"exit_code_hex","0x"+juce::String::toHexString(exitCode).paddedLeft('0',8)},{"elapsed_seconds",(juce::Time::getMillisecondCounterHiRes()-began)/1000.0}})));
-        if(terminated||cancelled()){jobStatus(j,cancelled()?"cancelled":"failed",cancelled()?"":"Analysis exceeded its one-hour worker limit.");return;}
+        if(terminated||cancelled()){
+            if(a->execution=="cloud"){juce::var cancellation;analysisJson(a->directory.getChildFile("cancellation.json"),cancellation,32768);std::lock_guard lock(j->mutex);j->result=cancellation;}
+            jobStatus(j,cancelled()?"cancelled":"failed",cancelled()?"":"Analysis exceeded its one-hour worker limit.");return;}
         if(exitCode!=0){juce::var error;analysisJson(a->directory.getChildFile("error.json"),error,32768);jobStatus(j,"failed",error["message"].toString().isNotEmpty()?error["message"].toString().substring(0,1024):analysis_worker::exitFailure(exitCode));return;}
         juce::var result;const auto file=a->directory.getChildFile("result.json");
         if(auto r=analysisJson(file,result);r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}
         if(auto r=validateAnalysisResult(result,a->id,a->kind,length,int(a->parameters.getProperty("stems",4)));r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}
+        if(a->execution=="cloud"&&result["model"]["id"].toString()!=a->modelId){jobStatus(j,"failed","The cloud returned a different model than requested.");return;}
         if(auto r=fingerprint(a->original,after,cancelled);r.failed()||before.hash!=after.hash){jobStatus(j,cancelled()?"cancelled":"stale","Source audio changed during analysis.");return;}
         JobFingerprint resultFingerprint;if(auto r=fingerprint(file,resultFingerprint,cancelled);r.failed()){jobFailure(j,r);return;}
         // Publish on the control thread; workers never touch Edit/selection/maps.
-        std::lock_guard lock(j->mutex);j->commit=[this,a,j,result,before,resultFingerprint]{
+        const auto summary=candidateSummary(result);
+        std::lock_guard lock(j->mutex);j->commit=[this,a,j,result,before,resultFingerprint,summary]{
             if(j->cancel){jobStatus(j,"cancelled");return;}
             if(!analysisSourceMatches(*a)){jobStatus(j,"stale","The source clip, tempo or project changed. Run a new analysis.");return;}
-            a->originalHash=before.hash;a->resultHash=resultFingerprint.hash;a->result=result;
+            a->originalHash=before.hash;a->resultHash=resultFingerprint.hash;a->result=result;a->summary=summary;
             a->parameters=result["parameters"].clone();
             a->source.getDynamicObject()->setProperty("source_sha256",result["source"]["source_sha256"]);
             jobStatus(j,"ready",{},1);publish("analysis_ready",object({{"job_id",j->id},{"result_id",a->id},{"kind",a->kind}}));
@@ -212,7 +230,8 @@ juce::Result EngineSession::Impl::acceptAnalysis(const juce::var& args,juce::var
     if(a->applied){if(!metadata(*edit).getChildWithName("EM_ANALYSES").getChildWithProperty("id",a->id).isValid())return fail("This import was undone. Use Redo to restore it; it cannot be imported twice.");out=a->receipt;return juce::Result::ok();}
     if(a->acceptJob&&a->acceptJob->worker.joinable()){out=object({{"job_id",a->acceptJob->id},{"result_id",a->id}});return juce::Result::ok();}
     {std::lock_guard lock(a->job->mutex);if(a->job->status!="ready"||!a->result.isObject())return fail("Wait for a ready analysis result.");}
-    if(a->result.getProperty(analysisItemsKey(a->kind),{}).size()==0)return fail("The candidate is empty; there is nothing to import.");
+    const auto summary=a->summary.isObject()?a->summary:candidateSummary(a->result);
+    if(int(summary["track_count"])+int(summary["chord_count"])+int(summary["beat_count"])+int(summary["annotation_count"])==0)return fail("The candidate is empty; there is nothing to import.");
     if(recordingBusy()||nativePending)return fail("Finish recording and pending device edits before importing analysis.");
     auto candidate=std::make_shared<storage::StoredProject>(capture());const auto source=a->source;const auto result=a->result;const auto revision=guard.revision();const auto project=juce::String(guard.projectId());
     const auto boundOriginal=a->boundOriginal;
@@ -227,7 +246,8 @@ juce::Result EngineSession::Impl::acceptAnalysis(const juce::var& args,juce::var
         std::map<juce::String,AudioInfo> preparedOutputs;juce::Array<juce::var> trackIds,clipIds,chordIds;
         const double start=double(source["timeline_start"]),length=double(source["duration_seconds"]);
         storage::StoredAnalysis provenance{a->id,a->kind,result["model"]["id"].toString(),result["model"]["version"].toString(),source["clip_id"].toString(),source["asset_id"].toString(),a->originalHash,a->resultHash,juce::JSON::toString(a->parameters,true),start,length};
-        candidate->analyses.push_back(provenance);candidate->schemaVersion=storage::requiredSchema(*candidate);
+        auto annotations=candidateAnnotations(result);juce::Array<juce::var> midiMetadata;
+        candidate->analyses.push_back(provenance);
         if(a->kind=="separate"){
             for(const auto& stem:*result["stems"].getArray()){
                 const auto path=stem["path"].toString();if(juce::File::isAbsolutePath(path)||path.contains("..")||!path.endsWithIgnoreCase(".wav")){jobStatus(j,"failed","Invalid stem path.");return;}
@@ -243,18 +263,37 @@ juce::Result EngineSession::Impl::acceptAnalysis(const juce::var& args,juce::var
                 storage::StoredAsset asset{uid(),retained};storage::StoredTrack track;track.id=uid();track.name="Separated / "+stem["name"].toString();
                 storage::StoredClip clip{uid(),asset.id,start,0,info.duration};clip.analysisRole=stem["name"].toString();track.clips.push_back(clip);trackIds.add(track.id);clipIds.add(clip.id);candidate->assets.push_back(asset);candidate->tracks.push_back(std::move(track));
             }
-        }else if(a->kind=="transcribe"){
-            storage::StoredTrack track;track.id=uid();track.name="Transcribed MIDI";track.kind="instrument";
-            storage::StoredClip clip;clip.id=uid();clip.kind="midi";clip.timelineStart=start;clip.duration=length;clip.startBeats=time::secondsToBeats(start,candidate->bpm);clip.lengthBeats=time::secondsToBeats(length,candidate->bpm);
-            for(const auto& n:*result["notes"].getArray())clip.notes.push_back({uid(),int(n["pitch"]),time::secondsToBeats(double(n["start_seconds"]),candidate->bpm),time::secondsToBeats(double(n["duration_seconds"]),candidate->bpm),int(n["velocity"]),1});
-            track.clips.push_back(clip);trackIds.add(track.id);clipIds.add(clip.id);candidate->tracks.push_back(std::move(track));
-        }else for(const auto& c:*result["chord_regions"].getArray()){
-            storage::StoredChordRegion chord{uid(),c["label"].toString(),a->id,start+double(c["start_seconds"]),start+double(c["end_seconds"]),double(c["score"]),bool(c["uncertain"])};
+        }else if(a->kind=="transcribe"||a->kind=="score"){
+            const auto midi=candidateMidiTracks(result);
+            for(const auto& instrument:*midi.getArray()){
+                std::set<int> channels;for(const auto* key:{"notes","controllers"})for(const auto& event:*instrument[key].getArray())channels.insert(int(event.getProperty("channel",instrument.getProperty("channel",1))));
+                for(const auto channel:channels){
+                    storage::StoredTrack track;track.id=uid();track.name="MIDI / "+instrument.getProperty("name",instrument["instrument"]).toString();track.kind="instrument";
+                    if(channels.size()>1)track.name+=" / ch "+juce::String(channel);
+                    storage::StoredClip clip;clip.id=uid();clip.kind="midi";clip.timelineStart=start;clip.duration=length;clip.startBeats=time::secondsToBeats(start,candidate->bpm);clip.lengthBeats=time::secondsToBeats(length,candidate->bpm);
+                    // Tracktion clips use one output channel. Split channels rather
+                    // than silently merging their notes, pedals and programs.
+                    clip.midiChannel=channel;
+                    for(const auto& n:*instrument["notes"].getArray())if(int(n.getProperty("channel",instrument.getProperty("channel",1)))==channel)
+                        clip.notes.push_back({uid(),int(n["pitch"]),time::secondsToBeats(double(n["start_seconds"]),candidate->bpm),time::secondsToBeats(double(n["duration_seconds"]),candidate->bpm),int(n["velocity"]),channel});
+                    clip.controllers.push_back({uid(),0,te::MidiControllerEvent::programChangeType,int(instrument["program"])<<7,0});
+                    for(const auto& c:*instrument["controllers"].getArray())if(int(c.getProperty("channel",instrument.getProperty("channel",1)))==channel)
+                        clip.controllers.push_back({uid(),time::secondsToBeats(double(c["time_seconds"]),candidate->bpm),int(c["controller"]),int(c["value"])<<7,0});
+                    midiMetadata.add(object({{"track_id",track.id},{"clip_id",clip.id},{"source_track_id",instrument["id"]},{"instrument",instrument["instrument"]},{"program",instrument["program"]},{"channel",channel},{"is_drum",instrument["is_drum"]}}));
+                    track.clips.push_back(clip);trackIds.add(track.id);clipIds.add(clip.id);candidate->tracks.push_back(std::move(track));
+                }
+            }
+        }
+        if(a->kind=="chords"||a->kind=="score")for(const auto& c:*result["chord_regions"].getArray()){
+            storage::StoredChordRegion chord{uid(),c["label"].toString(),a->id,start+double(c["start_seconds"]),start+double(c["end_seconds"]),c["score"].isVoid()?-1:double(c["score"]),c["score"].isVoid()||bool(c["uncertain"])};
             chordIds.add(chord.id);candidate->chordRegions.push_back(std::move(chord));
         }
+        if(!midiMetadata.isEmpty())annotations.getDynamicObject()->setProperty("midi_tracks",midiMetadata);
+        if(annotations.getDynamicObject()->getProperties().size()>0)candidate->analyses.back().annotationsJson=juce::JSON::toString(annotations,true);
+        candidate->schemaVersion=storage::requiredSchema(*candidate);
         if(auto r=storage::validate(*candidate);r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}
         if(cancelled()){jobStatus(j,"cancelled");return;}
-        auto receipt=object({{"result_id",a->id},{"applied",true},{"track_ids",trackIds},{"clip_ids",clipIds},{"chord_ids",chordIds},{"revision",juce::int64(revision+1)}});
+        auto receipt=object({{"result_id",a->id},{"project_id",project},{"applied",true},{"track_ids",trackIds},{"clip_ids",clipIds},{"chord_ids",chordIds},{"summary",candidateSummary(result)},{"revision",juce::int64(revision+1)}});
         std::lock_guard lock(j->mutex);j->commit=[this,a,j,candidate,preparedOutputs,receipt,revision,project]{
             if(j->cancel){jobStatus(j,"cancelled");return;}
             if(guard.revision()!=revision||juce::String(guard.projectId())!=project||!analysisSourceMatches(*a)||recordingBusy()||nativePending){jobStatus(j,"stale","Project changed while validating the import. Review and import again.");return;}
@@ -356,14 +395,43 @@ juce::Result EngineSession::Impl::analysisCommand(const juce::String& command,co
         if(!job)return juce::Result::fail(status);out=object({{"job_id",job->id},{"status","loading"}});return juce::Result::ok();
     }
     if(command=="get_analysis_capabilities"){out=analysisCapabilities();return juce::Result::ok();}
+    if(command=="get_analysis_annotations"){
+        const auto component=args.getProperty("component","structure").toString();
+        if(component!="structure"&&component!="beats"&&component!="midi_tracks"&&component!="notes"&&component!="chords")return fail("Choose notes, chords, structure, beats or midi_tracks.");
+        const auto offset=analysisOption(args,"offset",0),limit=analysisOption(args,"limit",100);
+        if(!std::isfinite(offset)||!std::isfinite(limit)||offset<0||offset>100000||offset!=std::floor(offset)||limit<1||limit>100||limit!=std::floor(limit))return fail("Invalid annotation page.");
+        juce::Array<juce::var> page;int total=0;
+        for(const auto& a:metadata(*edit).getChildWithName("EM_ANALYSES")){
+            if(args["analysis_id"].toString().isNotEmpty()&&a["id"].toString()!=args["analysis_id"].toString())continue;
+            if(args["kind"].toString().isNotEmpty()&&a["kind"].toString()!=args["kind"].toString())continue;
+            if(component=="chords"){
+                for(const auto& c:metadata(*edit).getChildWithName("EM_CHORDS"))if(c["analysis_id"]==a["id"]){
+                    if(total>=int(offset)&&page.size()<int(limit))page.add(object({{"id",c["id"]},{"analysis_id",a["id"]},{"label",c["label"]},{"start_seconds",c["start_seconds"]},{"end_seconds",c["end_seconds"]},{"score",double(c["score"])<0?juce::var():c["score"]},{"uncertain",c["uncertain"]}}));++total;
+                }continue;
+            }
+            const auto data=juce::JSON::parse(a.getProperty("annotations_json","{}").toString());const auto list=data[component=="structure"?"structure_regions":component=="beats"?"beat_events":"midi_tracks"];
+            if(list.isArray())for(const auto& value:*list.getArray()){
+                if(component=="notes"){
+                    auto* bound=findClip(value["clip_id"].toString());auto* midi=bound?dynamic_cast<te::MidiClip*>(bound->clip.get()):nullptr;if(!midi)continue;
+                    const auto& notes=*noteView(bound->id,*midi).notes;const double bpm=edit->tempoSequence.getTempo(0)->getBpm(),at=midi->getPosition().time.getStart().inSeconds();
+                    for(const auto& n:notes){if(total>=int(offset)&&page.size()<int(limit))page.add(object({{"id",n.id},{"analysis_id",a["id"]},{"clip_id",bound->id},{"track_id",value["track_id"]},{"instrument",value["instrument"]},{"program",value["program"]},{"is_drum",value["is_drum"]},{"pitch",n.pitch},{"channel",n.channel},{"velocity",n.velocity},{"start_seconds",at+time::beatsToSeconds(n.startBeats,bpm)},{"duration_seconds",time::beatsToSeconds(n.lengthBeats,bpm)}}));++total;}continue;
+                }
+                if(total>=int(offset)&&page.size()<int(limit)){auto item=value.clone();auto* o=item.getDynamicObject();o->setProperty("analysis_id",a["id"]);
+                    for(const auto* key:{"start_seconds","end_seconds","time_seconds"})if(item.hasProperty(key))o->setProperty(key,double(item[key])+double(a["start_seconds"]));page.add(item);}
+                ++total;
+            }
+        }
+        out=object({{"component",component},{"items",page},{"total",total},{"offset",int(offset)},{"has_more",offset+page.size()<total}});return juce::Result::ok();
+    }
     if(command=="start_analysis")return beginAnalysis(args,out);
     if(command=="accept_analysis_result")return acceptAnalysis(args,out);
     if(command=="get_analysis_job"||command=="cancel_analysis_job"){
         for(const auto& [id,a]:analyses)for(const auto& j:{a->job,a->acceptJob})if(j&&j->id==textArg(args,"job_id")){
             if(a->source["project_id"].toString()!=juce::String(guard.projectId()))return fail("This task belongs to another project.");
             if(command=="cancel_analysis_job"){j->cancel=true;out=object({{"job_id",j->id},{"cancel_requested",true}});return juce::Result::ok();}
-            std::lock_guard lock(j->mutex);const auto& result=a->result;const int count=result.getProperty(analysisItemsKey(a->kind),{}).size();
-            out=object({{"job_id",j->id},{"id",j->id},{"kind",a->kind},{"status",a->applied?juce::String("applied"):j->status},{"progress",j->progress},{"phase",j->phase},{"detail",j->detail},{"error",j->error},{"result_id",a->id},{"source",a->source},{"parameters",a->parameters},{"receipt",a->receipt},{"summary",object({{"kind",a->kind},{"total",count}})}});return juce::Result::ok();
+            std::lock_guard lock(j->mutex);const auto summary=a->summary.isObject()?a->summary:candidateSummary(a->result);
+            out=object({{"job_id",j->id},{"id",j->id},{"kind",a->kind},{"execution",a->execution},{"model_id",a->modelId},{"status",a->applied?juce::String("applied"):j->status},{"progress",j->progress},{"phase",j->phase},{"detail",j->detail},{"error",j->error},{"result_id",a->id},{"source",a->source},{"parameters",a->parameters},{"receipt",a->receipt},{"summary",summary},
+                {"remote_status",j->result.getProperty("remote_status","unconfirmed")},{"remote_cancel_confirmed",j->result.getProperty("remote_cancel_confirmed",false)}});return juce::Result::ok();
         }return fail("Analysis task not found.");
     }
     if(command=="get_analysis_result"){
@@ -372,19 +440,32 @@ juce::Result EngineSession::Impl::analysisCommand(const juce::String& command,co
         if(!a.result.isObject())return fail("Analysis result is not ready.");
         const auto offset=analysisOption(args,"offset",0),limit=analysisOption(args,"limit",100);
         if(!std::isfinite(offset)||!std::isfinite(limit)||offset<0||offset>100000||offset!=std::floor(offset)||limit<1||limit>100||limit!=std::floor(limit))return fail("Analysis pages require offset >= 0 and limit 1 to 100.");
-        const auto& list=a.result.getProperty(analysisItemsKey(a.kind),{});juce::Array<juce::var> page;
-        for(int i=int(offset);i<std::min(list.size(),int(offset+limit));++i){auto item=list[i].clone();if(auto* o=item.getDynamicObject()){o->removeProperty("path");o->setProperty("index",i);}page.add(item);}
-        out=object({{"result_id",a.id},{"kind",a.kind},{"total",list.size()},{"offset",int(offset)},{"has_more",offset+page.size()<list.size()},{"items",page},{"source",a.source},{"model",a.result["model"]},{"parameters",a.parameters},{"tempo",a.result["tempo"]},{"waveform_peaks",a.result["waveform_peaks"]},{"score_kind",a.result.getProperty("score_kind","uncalibrated_similarity")},{"result_hash",a.resultHash},{"applied",a.applied},{"present_in_project",metadata(*edit).getChildWithName("EM_ANALYSES").getChildWithProperty("id",a.id).isValid()},{"receipt",a.receipt},{"stale",!analysisSourceMatches(a)},{"limitations",a.result["limitations"]}});return juce::Result::ok();
+        const auto component=args.getProperty("component",a.kind=="transcribe"||a.kind=="score"?"notes":a.kind=="separate"?"stems":a.kind).toString();
+        if(component!="notes"&&component!="chords"&&component!="beats"&&component!="structure"&&component!="stems")return fail("Choose notes, chords, beats, structure or stems.");
+        juce::Array<juce::var> page,tracks;int total=0;
+        const auto add=[&](juce::var item){if(total>=int(offset)&&page.size()<int(limit)){item=item.clone();if(auto* o=item.getDynamicObject()){o->removeProperty("path");o->setProperty("index",total);}page.add(item);}++total;};
+        const auto midi=candidateMidiTracks(a.result);
+        for(const auto& t:*midi.getArray()){
+            tracks.add(object({{"id",t["id"]},{"name",t["name"]},{"instrument",t["instrument"]},{"program",t["program"]},{"channel",t.getProperty("channel",1)},{"is_drum",t["is_drum"]},{"note_count",t["notes"].size()},{"controller_count",t["controllers"].size()}}));
+            if(component=="notes")for(const auto& n:*t["notes"].getArray()){
+                if(total>=int(offset)&&page.size()<int(limit)){auto item=n.clone();auto* o=item.getDynamicObject();for(const auto* key:{"instrument","program","is_drum"})o->setProperty(key,t[key]);o->setProperty("track_id",t["id"]);o->setProperty("channel",n.getProperty("channel",t.getProperty("channel",1)));add(item);}else ++total;
+            }
+        }
+        if(component!="notes"){
+            const auto key=component=="chords"?"chord_regions":component=="beats"?"beat_events":component=="structure"?"structure_regions":"stems";
+            const auto list=a.result[key];if(list.isArray())for(const auto& item:*list.getArray())add(item);
+        }
+        out=object({{"result_id",a.id},{"kind",a.kind},{"component",component},{"execution",a.execution},{"model_id",a.modelId},{"summary",a.summary.isObject()?a.summary:candidateSummary(a.result)},{"midi_tracks",tracks},{"total",total},{"offset",int(offset)},{"has_more",offset+page.size()<total},{"items",page},{"source",a.source},{"model",a.result["model"]},{"parameters",a.parameters},{"tempo",a.result["tempo"]},{"waveform_peaks",a.result["waveform_peaks"]},{"score_kind",a.result.getProperty("score_kind","uncalibrated_similarity")},{"result_hash",a.resultHash},{"applied",a.applied},{"present_in_project",metadata(*edit).getChildWithName("EM_ANALYSES").getChildWithProperty("id",a.id).isValid()},{"receipt",a.receipt},{"stale",!analysisSourceMatches(a)},{"limitations",a.result["limitations"]}});return juce::Result::ok();
     }
     if(command=="get_chord_regions"){
         const auto offset=analysisOption(args,"offset",0),limit=analysisOption(args,"limit",100);if(!std::isfinite(offset)||!std::isfinite(limit)||offset<0||offset>10000||offset!=std::floor(offset)||limit<1||limit>100||limit!=std::floor(limit))return fail("Invalid chord page.");
         auto meta=metadata(*edit);std::set<juce::String> selectedAnalyses;const auto clip=textArg(args,"clip_id"),analysis=textArg(args,"analysis_id");
-        for(const auto& a:meta.getChildWithName("EM_ANALYSES"))if(a["kind"].toString()=="chords"&&(clip.isEmpty()||a["source_clip_id"].toString()==clip)&&(analysis.isEmpty()||a["id"].toString()==analysis)){
+        for(const auto& a:meta.getChildWithName("EM_ANALYSES"))if((a["kind"].toString()=="chords"||a["kind"].toString()=="score")&&(clip.isEmpty()||a["source_clip_id"].toString()==clip)&&(analysis.isEmpty()||a["id"].toString()==analysis)){
             if(bool(args["latest_only"]))selectedAnalyses.clear();selectedAnalyses.insert(a["id"].toString());
         }
         juce::Array<juce::var> page;int total=0;
         for(const auto& c:meta.getChildWithName("EM_CHORDS"))if(selectedAnalyses.contains(c["analysis_id"].toString())){
-            if(total>=int(offset)&&page.size()<int(limit))page.add(object({{"id",c["id"]},{"label",c["label"]},{"analysis_id",c["analysis_id"]},{"start_seconds",c["start_seconds"]},{"end_seconds",c["end_seconds"]},{"score",c["score"]},{"uncertain",c["uncertain"]}}));++total;
+            if(total>=int(offset)&&page.size()<int(limit))page.add(object({{"id",c["id"]},{"label",c["label"]},{"analysis_id",c["analysis_id"]},{"start_seconds",c["start_seconds"]},{"end_seconds",c["end_seconds"]},{"score",double(c["score"])<0?juce::var():c["score"]},{"uncertain",c["uncertain"]}}));++total;
         }
         out=object({{"total",total},{"items",page},{"offset",int(offset)},{"has_more",offset+page.size()<total},{"score_kind","uncalibrated_similarity"}});return juce::Result::ok();
     }
@@ -396,7 +477,7 @@ juce::Result EngineSession::Impl::analysisCommand(const juce::String& command,co
         if(!storage::isSupportedChordLabel(label)||!std::isfinite(start)||!std::isfinite(end)||start<0||end<=start||end>storage::maximumTimelineSeconds)return fail("Invalid chord label or timeline range.");
         finishGesture();remember("Edit chord region");auto* undo=&edit->getUndoManager();
         region.setProperty("label",label,undo);region.setProperty("start_seconds",start,undo);region.setProperty("end_seconds",end,undo);
-        out=object({{"id",region["id"]},{"label",region["label"]},{"analysis_id",region["analysis_id"]},{"start_seconds",start},{"end_seconds",end},{"score",region["score"]},{"uncertain",region["uncertain"]}});
+        out=object({{"id",region["id"]},{"label",region["label"]},{"analysis_id",region["analysis_id"]},{"start_seconds",start},{"end_seconds",end},{"score",double(region["score"])<0?juce::var():region["score"]},{"uncertain",region["uncertain"]}});
         recordEdit();return juce::Result::ok();
     }
     return fail("Unsupported analysis command.");

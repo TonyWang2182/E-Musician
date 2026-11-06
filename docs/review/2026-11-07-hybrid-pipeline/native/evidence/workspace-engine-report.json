@@ -1,0 +1,18 @@
+{
+  "analysis_worker_windows_native_crash_and_tree_cancel": true,
+  "analysis_worker_process_fixture_checks": 34,
+  "hybrid_fixture": "synthetic multi-instrument score; native import/undo/redo/offline save, no model or network",
+  "hybrid_checks": 42,
+  "generation_checks": 37,
+  "generation_fixture": "synthetic PCM; no model, network or physical audio",
+  "checks": 141,
+  "status": "passed",
+  "offline": true,
+  "physical_audio": false,
+  "dsp_fixture": {
+    "sample_rate": 48000,
+    "block_size": 128,
+    "blocks_per_observation": 32,
+    "input": "synthetic constant 0.2 stereo"
+  }
+}

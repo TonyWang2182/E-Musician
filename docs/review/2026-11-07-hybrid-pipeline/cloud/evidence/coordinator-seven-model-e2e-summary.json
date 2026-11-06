@@ -1,0 +1,288 @@
+{
+  "passed": true,
+  "started_at": "2026-11-06T18:19:21.209+00:00",
+  "finished_at": "2026-11-06T18:23:26.676+00:00",
+  "exe_sha256": "d5579acbc8128ae9ffcd1c76cbf9ae68eb9d9ce897ab24fbb7e93e7f06de283f",
+  "mode": "real-native-public-command-real-cloud-model",
+  "real_music_model": true,
+  "real_llm": false,
+  "physical_audio": false,
+  "listening_quality_verified": false,
+  "mir_excerpt_seconds": 8.0,
+  "generation_requested_seconds": 12.0,
+  "report_path": "E:\\MusicAgent&DAW\\cloud-inference\\experiments\\hybrid-final-20261107-v3\\report.json",
+  "report_sha256": "df0beebb586a640bdc6631d6ec372d83b46a6c8f2dfd25b1ee05e9fafeafc630",
+  "models": [
+    {
+      "model_id": "scnet",
+      "passed": true,
+      "result_id": "a267d980b30448bbad87ec03ebb33c21",
+      "summary": {
+        "track_count": 4,
+        "note_count": 0,
+        "controller_count": 0,
+        "program_change_count": 0,
+        "chord_count": 0,
+        "beat_count": 0,
+        "annotation_count": 0
+      },
+      "phases": [
+        {
+          "phase": "open_owned_daw_and_import_input",
+          "passed": true,
+          "elapsed_seconds": 5.022773600008804
+        },
+        {
+          "phase": "real_gpu_inference_candidate_without_project_edit",
+          "passed": true,
+          "elapsed_seconds": 11.775258000008762
+        },
+        {
+          "phase": "accept_once_idempotency_and_single_undo_redo",
+          "passed": true,
+          "elapsed_seconds": 3.863475099991774
+        },
+        {
+          "phase": "save_close_disable_cloud_reopen_and_compare_full_music_state",
+          "passed": true,
+          "elapsed_seconds": 1.6666375000204425
+        },
+        {
+          "phase": "local_offline_render",
+          "passed": true,
+          "elapsed_seconds": 3.258065899979556
+        }
+      ]
+    },
+    {
+      "model_id": "transkun",
+      "passed": true,
+      "result_id": "8bdd354cc09242ca88bdd84a3470e458",
+      "summary": {
+        "track_count": 1,
+        "note_count": 62,
+        "controller_count": 14,
+        "program_change_count": 1,
+        "chord_count": 0,
+        "beat_count": 0,
+        "annotation_count": 0
+      },
+      "phases": [
+        {
+          "phase": "open_owned_daw_and_import_input",
+          "passed": true,
+          "elapsed_seconds": 2.0837012999982107
+        },
+        {
+          "phase": "real_gpu_inference_candidate_without_project_edit",
+          "passed": true,
+          "elapsed_seconds": 10.279874899977585
+        },
+        {
+          "phase": "accept_once_idempotency_and_single_undo_redo",
+          "passed": true,
+          "elapsed_seconds": 4.15540340001462
+        },
+        {
+          "phase": "save_close_disable_cloud_reopen_and_compare_full_music_state",
+          "passed": true,
+          "elapsed_seconds": 1.9275808999955188
+        },
+        {
+          "phase": "local_offline_render",
+          "passed": true,
+          "elapsed_seconds": 2.5489987000182737
+        }
+      ]
+    },
+    {
+      "model_id": "chordmini",
+      "passed": true,
+      "result_id": "b50c6dc1659c4a14b75ae746c1c339b2",
+      "summary": {
+        "track_count": 0,
+        "note_count": 0,
+        "controller_count": 0,
+        "program_change_count": 0,
+        "chord_count": 6,
+        "beat_count": 0,
+        "annotation_count": 0
+      },
+      "phases": [
+        {
+          "phase": "open_owned_daw_and_import_input",
+          "passed": true,
+          "elapsed_seconds": 0.9876014000037685
+        },
+        {
+          "phase": "real_gpu_inference_candidate_without_project_edit",
+          "passed": true,
+          "elapsed_seconds": 9.284179100010078
+        },
+        {
+          "phase": "accept_once_idempotency_and_single_undo_redo",
+          "passed": true,
+          "elapsed_seconds": 3.2226492000045255
+        },
+        {
+          "phase": "save_close_disable_cloud_reopen_and_compare_full_music_state",
+          "passed": true,
+          "elapsed_seconds": 1.9584663999849
+        },
+        {
+          "phase": "local_offline_render",
+          "passed": true,
+          "elapsed_seconds": 2.956295299984049
+        }
+      ]
+    },
+    {
+      "model_id": "muscriptor",
+      "passed": true,
+      "result_id": "c8d75794838d4b9888cc9b1bcfd4835f",
+      "summary": {
+        "track_count": 1,
+        "note_count": 61,
+        "controller_count": 0,
+        "program_change_count": 1,
+        "chord_count": 0,
+        "beat_count": 0,
+        "annotation_count": 0
+      },
+      "phases": [
+        {
+          "phase": "open_owned_daw_and_import_input",
+          "passed": true,
+          "elapsed_seconds": 1.0484241000085603
+        },
+        {
+          "phase": "real_gpu_inference_candidate_without_project_edit",
+          "passed": true,
+          "elapsed_seconds": 9.893789399997331
+        },
+        {
+          "phase": "accept_once_idempotency_and_single_undo_redo",
+          "passed": true,
+          "elapsed_seconds": 4.141413300007116
+        },
+        {
+          "phase": "save_close_disable_cloud_reopen_and_compare_full_music_state",
+          "passed": true,
+          "elapsed_seconds": 1.8405835999874398
+        },
+        {
+          "phase": "local_offline_render",
+          "passed": true,
+          "elapsed_seconds": 2.45176039999933
+        }
+      ]
+    },
+    {
+      "model_id": "sheetsage2",
+      "passed": true,
+      "result_id": "f7c00f0826364886ba83c3fb21ddbf78",
+      "summary": {
+        "track_count": 1,
+        "note_count": 16,
+        "controller_count": 0,
+        "program_change_count": 1,
+        "chord_count": 5,
+        "beat_count": 17,
+        "annotation_count": 2
+      },
+      "phases": [
+        {
+          "phase": "open_owned_daw_and_import_input",
+          "passed": true,
+          "elapsed_seconds": 0.9249003000149969
+        },
+        {
+          "phase": "real_gpu_inference_candidate_without_project_edit",
+          "passed": true,
+          "elapsed_seconds": 15.93540670000948
+        },
+        {
+          "phase": "accept_once_idempotency_and_single_undo_redo",
+          "passed": true,
+          "elapsed_seconds": 3.3050580999988597
+        },
+        {
+          "phase": "save_close_disable_cloud_reopen_and_compare_full_music_state",
+          "passed": true,
+          "elapsed_seconds": 1.9926091999805067
+        },
+        {
+          "phase": "local_offline_render",
+          "passed": true,
+          "elapsed_seconds": 2.4174584000138566
+        }
+      ]
+    },
+    {
+      "model_id": "ace-step-1.5-xl-turbo",
+      "passed": true,
+      "result_id": "c0a49b90c79b4635a4ca7f463de4fc62",
+      "summary": null,
+      "phases": [
+        {
+          "phase": "open_owned_daw_and_import_input",
+          "passed": true,
+          "elapsed_seconds": 0.5487373000069056
+        },
+        {
+          "phase": "real_gpu_inference_candidate_without_project_edit",
+          "passed": true,
+          "elapsed_seconds": 51.58926149999024
+        },
+        {
+          "phase": "accept_once_idempotency_and_single_undo_redo",
+          "passed": true,
+          "elapsed_seconds": 0.7512989999959245
+        },
+        {
+          "phase": "save_close_disable_cloud_reopen_and_compare_full_music_state",
+          "passed": true,
+          "elapsed_seconds": 1.2277671999763697
+        },
+        {
+          "phase": "local_offline_render",
+          "passed": true,
+          "elapsed_seconds": 2.3104835000121966
+        }
+      ]
+    },
+    {
+      "model_id": "yue2",
+      "passed": true,
+      "result_id": "c214da2ab0ab4d1486ac43b6b1f43fae",
+      "summary": null,
+      "phases": [
+        {
+          "phase": "open_owned_daw_and_import_input",
+          "passed": true,
+          "elapsed_seconds": 0.490562899998622
+        },
+        {
+          "phase": "real_gpu_inference_candidate_without_project_edit",
+          "passed": true,
+          "elapsed_seconds": 58.25340430001961
+        },
+        {
+          "phase": "accept_once_idempotency_and_single_undo_redo",
+          "passed": true,
+          "elapsed_seconds": 0.7552115000144113
+        },
+        {
+          "phase": "save_close_disable_cloud_reopen_and_compare_full_music_state",
+          "passed": true,
+          "elapsed_seconds": 1.5039440999971703
+        },
+        {
+          "phase": "local_offline_render",
+          "passed": true,
+          "elapsed_seconds": 2.0154113000025973
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "status": "passed",
+  "started_unix": 1793987268.949435,
+  "checks": [
+    "live-health-and-seven-capabilities",
+    "streamed-upload-hash-rejection-and-idempotent-content",
+    "request-idempotency-409-reconnect-queued-cancel-artifact-fence",
+    "controlled-restart-interrupted-recovery-terminal-and-asset-preservation",
+    "no-worker-or-gpu-inference-was-started"
+  ],
+  "job_ids": [
+    "servicecheck-20261106T174748Z-b9900fb5-cancel",
+    "servicecheck-20261106T174748Z-b9900fb5-restart"
+  ],
+  "gpu_inference_performed": false,
+  "script_sha256": "5693d5b10059c78a53bc6a8a9935a5f24c40230a85c66f2a850d5f1b0f6d4f98",
+  "service_pid_before": 28637,
+  "fixture": {
+    "sha256": "cf4716ba92d124407b28fb90b51338443d10998fd32f107e652f1cdd2f32c802",
+    "bytes": 4044,
+    "seconds": 0.25,
+    "kind": "synthetic-constant-low-amplitude"
+  },
+  "service_pid_after": 28832,
+  "active_after": [],
+  "elapsed_seconds": 0.7704180665314198,
+  "finished_unix": 1793987269.7199416,
+  "output": "/root/autodl-tmp/emusician/results/validation/compute-service/20261106T174748Z-b9900fb5"
+}

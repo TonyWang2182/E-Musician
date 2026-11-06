@@ -1,5 +1,17 @@
 # E-musician 技术架构
 
+## 0.13 统一计算管线（2026-11-07，七模型整链已验证，人工待验）
+
+`GUI / Agent → EngineSession 公共命令 → 冻结来源与修订 → 本地 Worker 或 SSH 后的 protocol 2 任务服务 → 校验本地候选 → 明确接受 → Edit / Undo / 本地资产`。实时音频回调不调用网络、模型、文件解析或任务轮询。新服务和宿主的完整验收记录以[本轮档案](review/2026-11-07-hybrid-pipeline/PLAN.md)为准；下文旧“尚不接入”是历史基线。
+
+云端服务在 `scripts/cloud/compute`，提供内容寻址 WAV、SQLite 幂等记录、单 GPU 调度及独立模型进程。模型部署目录与任务服务分离，固定版本文件在加载前验证；服务全生命周期持有旧 ACE service lock，防止两个调度器争用显存。取消、资源不足和服务退出只回收所拥有进程组。每任务释放的代价是冷启动加载时间；它不等于热模型缓存已实现。
+
+本地 `compute_client.py` 负责有界传输和任务身份，`run_analysis.py` 负责选区冻结、下载校验及分析候选转换，`run_compute_generation.py` 复用生成候选边界。单独的 `compute-registry.json` 保存配置与能力快照，旧本地分析 registry 保持；每次开始重新检查远端能力。云端分析只接受已适配模型的真实参数，不能把 Basic Pitch 的阈值控件套在 TransKun 上。
+
+MIDI 规范结果包含每乐器的 notes、controllers、program/channel；综合结果包含 chord_regions、beat_events、structure_regions。秒数相对上传片段，宿主按冻结的时间映射落轨，不根据猜测 BPM 自动量化。模型原始输出保持可追溯，候选裁边或默认力度必须注明。GUI 与 Agent 使用同一候选及轨数预算，最终保存仅依赖本地工程资产。取舍见[ADR](decisions/2026-11-07-unified-cloud-compute.md)，[真实验收](review/2026-11-07-hybrid-pipeline/RESULTS.md)。
+
+新云端分析实际保存为schema8，保留控制事件、分析标记和仪器元信息；生成使用schema7来源，`completion.truncated`统一为bool/null，YuE2原abc/semantic分项保留于stages。Saved score从权威工程派生当前音符/和弦，拍点/结构读取已接受注释。`EMUSICIAN_AUDIO_CACHE_ROOT`配置MP3解码缓存，新入口指向E盘；旧缓存不迁移。短暂Windows进度文件占用只重试原子发布；有界网络重连复用任务ID，但跨应用自动恢复未实现。
+
 ## 云端模型库层（2026-11-06，六模型短推理已验，尚不接入 DAW）
 
 `scripts/cloud/models/` 仅管理固定版本的上游源码、权重、独立环境与验证记录。云端 `manifests/model-library/<model>/deployment.json` 分别声明文件、环境、CPU 加载和 GPU 推理状态，汇总目录不自动激活任何 Provider。生成、分离、钢琴转录与综合谱面环境分开，目录与负责人见 [部署计划](review/2026-11-06-cloud-model-library/PLAN.md)。大型文件只留云端，本地仅纳管脚本和小型档案。

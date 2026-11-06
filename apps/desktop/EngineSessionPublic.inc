@@ -57,7 +57,7 @@ EngineSession::Snapshot EngineSession::snapshot()const
         s.masterAutomation=lanes(state.masterAutomation);
         if(!state.chordRegions.empty()){
             std::map<juce::String,juce::String> chordSources;
-            for(const auto& analysis:state.analyses)if(analysis.kind=="chords"){
+            for(const auto& analysis:state.analyses)if(analysis.kind=="chords"||analysis.kind=="score"){
                 juce::String name;
                 for(const auto& track:state.tracks)for(const auto& clip:track.clips)if(clip.id==analysis.sourceClipId)name=track.name;
                 chordSources.emplace(analysis.id,name);
@@ -149,7 +149,7 @@ juce::Result EngineSession::execute(const juce::String& command,const juce::var&
         if(!isGenerationRead(command)){if(auto r=impl->preflight(expected);r.failed())return r;}
         juce::var data;auto result=impl->generationCommand(command,args,data);if(commandResult)*commandResult=data;return result;
     }
-    const bool analysisRead=command=="get_analysis_capabilities"||command=="get_analysis_job"||command=="get_analysis_result"||command=="get_chord_regions"||command=="get_analysis_preview_status"||command=="stop_analysis_preview";
+    const bool analysisRead=command=="get_analysis_capabilities"||command=="get_analysis_job"||command=="get_analysis_result"||command=="get_analysis_annotations"||command=="get_chord_regions"||command=="get_analysis_preview_status"||command=="stop_analysis_preview";
     if(analysisRead||command=="cancel_analysis_job"||command=="start_analysis"||command=="accept_analysis_result"||command=="apply_beat_analysis"||command=="edit_chord_region"||command=="preview_analysis_stem"){
         if(!args.isObject())return impl->fail("Analysis arguments must be an object.");
         if(!analysisRead&&command!="cancel_analysis_job"){
@@ -324,7 +324,7 @@ juce::var EngineSession::capabilities()const
     juce::Array<juce::var> commands;
     commands.add("get_selection_context");
     for(const auto* name:{"get_generation_jobs","get_generation_capabilities","start_generation","get_generation_job","cancel_generation_job","get_generation_result","preview_generation_result","stop_generation_preview","accept_generation_result"})commands.add(name);
-    for(const auto* name:{"get_analysis_capabilities","start_analysis","get_analysis_job","cancel_analysis_job","get_analysis_result","accept_analysis_result","apply_beat_analysis","get_chord_regions","edit_chord_region","preview_analysis_stem","stop_analysis_preview","get_analysis_preview_status","get_audio_warp","set_audio_warp"})commands.add(name);
+    for(const auto* name:{"get_analysis_capabilities","start_analysis","get_analysis_job","cancel_analysis_job","get_analysis_result","get_analysis_annotations","accept_analysis_result","apply_beat_analysis","get_chord_regions","edit_chord_region","preview_analysis_stem","stop_analysis_preview","get_analysis_preview_status","get_audio_warp","set_audio_warp"})commands.add(name);
     for(const auto* name:{"get_capabilities","get_snapshot","get_project_state","get_jobs","get_job","get_events","get_clip_notes","create_track","rename_track","reorder_track","remove_track","set_track_gain","set_track_pan","set_track_muted","set_track_solo","set_master_gain","set_loop","set_loop_range","set_tempo","set_time_signature","move_clip","move_clips","trim_clip","split_clip","duplicate_clips","delete_clips","set_clip_fades","create_midi_clip","write_notes","batch","undo","redo","import_audio","import_midi","save_project","open_project","export_wav","export_midi","scan_plugins","cancel_job","add_plugin","remove_plugin","move_plugin","set_plugin_enabled","open_plugin","new_project","play","pause","stop","seek"})commands.add(name);
     for(const auto* command:{"get_recording_preferences","set_recording_preferences","reset_meters","get_clipboard_state","copy_clips","cut_clips","paste_clips"})commands.add(command);
     for(const auto* name:{"begin_native_effect_gesture","update_native_effect_gesture","end_native_effect_gesture","cancel_native_effect_gesture"})commands.add(name);
@@ -391,7 +391,7 @@ juce::var EngineSession::executeRequest(const juce::var& envelope)
     if(!args.isObject())return reply("invalid",{},"Request args must be an object.");
     if(command=="get_capabilities")return reply("completed",capabilities());
     if(command=="get_audio_warp"){juce::var data;auto r=impl->getAudioWarp(args,data);return reply(r.wasOk()?"completed":"failed",data,r.getErrorMessage());}
-    if(command=="get_analysis_capabilities"||command=="get_analysis_job"||command=="get_analysis_result"||command=="get_chord_regions"||command=="cancel_analysis_job"||command=="get_analysis_preview_status"||command=="stop_analysis_preview"){
+    if(command=="get_analysis_capabilities"||command=="get_analysis_job"||command=="get_analysis_result"||command=="get_analysis_annotations"||command=="get_chord_regions"||command=="cancel_analysis_job"||command=="get_analysis_preview_status"||command=="stop_analysis_preview"){
         juce::var data;const auto result=impl->analysisCommand(command,args,data);return reply(result.wasOk()?"completed":"failed",data,result.getErrorMessage());
     }
     if(isGenerationRead(command)){juce::var data;const auto result=impl->generationCommand(command,args,data);return reply(result.wasOk()?"completed":"failed",data,result.getErrorMessage());}

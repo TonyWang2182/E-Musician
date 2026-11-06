@@ -10951,3 +10951,784 @@ print('preflight failure preserved; frozen script SHA matches all three actual r
 - Fixed medium1,228,144,472bytes plus126byte config verified; CPU306,503,680finite parameters; one8s GPU probe produced61notes, raw MIDI valid. Full-song quality/velocity/tempo not established; DAW not connected.
 - 8guard+7receiver CPU checks and final receipt/source/credential-pattern audit passed. Original257DAW build inputs unchanged; catalog updated with164.74GBfree.
 - [Results](review/2026-11-06-muscriptor-authorized/RESULTS.md) / [Verification](review/2026-11-06-muscriptor-authorized/VERIFICATION.json).
+
+### 2026-11-07T01:29:38+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 0.883s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=15 emusician-autodl "date -u; nvidia-smi --query-gpu=name,memory.free --format=csv,noheader; df -B1 /root/autodl-tmp/emusician; curl -s --max-time 4 http://127.0.0.1:18081/health"`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `fbc3483e8599118f329c095ab83340d1624327586f8a8a76481d66ec22f4be71`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T172938.103163Z-5bf429345c.json) · [Raw log](../build-logs/20261106T172938.103163Z-5bf429345c.log)
+- [Exact process output](../build-logs/20261106T172938.103163Z-5bf429345c.raw.log)
+
+### 2026-11-07T01:29:06+08:00 · hybrid-agent-contracts-intermediate · failed
+
+- Config: Python 3.14; exit code: 1; elapsed: 62.712s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -q`
+- Context: Synthetic routing, scope, metadata and orchestration tests; concurrent tree edits mean this is intermediate evidence, no GPU or paid LLM
+- Source SHA-256: `da9895e8366206a1756c72192bf84d70e11209a9cc5579bb43e71f64ba61111b`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T172906.740614Z-8b8f81b21a.json) · [Raw log](../build-logs/20261106T172906.740614Z-8b8f81b21a.log)
+- [Exact process output](../build-logs/20261106T172906.740614Z-8b8f81b21a.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T172906.740614Z-8b8f81b21a.log
+
+### 2026-11-07T01:31:10+08:00 · hybrid-compute-transport-tests · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 5.321s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe -m unittest discover -s tests -p test_compute_transport.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `062115c7f35ca750365f6a104746da6ad7c2e4e0be09618e4e16c7319efca02c`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T173110.971786Z-1876f0ba4c.json) · [Raw log](../build-logs/20261106T173110.971786Z-1876f0ba4c.log)
+- [Exact process output](../build-logs/20261106T173110.971786Z-1876f0ba4c.raw.log)
+
+### 2026-11-07T01:31:16+08:00 · hybrid-compute-transport-tests · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 2.014s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_cloud_generation_transport.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `062115c7f35ca750365f6a104746da6ad7c2e4e0be09618e4e16c7319efca02c`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T173116.625825Z-b4fc3bb5a1.json) · [Raw log](../build-logs/20261106T173116.625825Z-b4fc3bb5a1.log)
+- [Exact process output](../build-logs/20261106T173116.625825Z-b4fc3bb5a1.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-07T01:31:33+08:00 · hybrid-agent-contracts-and-web-intermediate · succeeded
+
+- Config: Python 3.14 / headless Edge; exit code: 0; elapsed: 51.033s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -q`
+- Context: After adding score capability the legacy capability-count assertion was updated; synthetic tests only, concurrent tree edits are intermediate evidence
+- Source SHA-256: `cda7d9502056a3ff864afb0565abdfb5996d0337f6650117c7c3b5f56d42733c`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T173133.522944Z-b091135a21.json) · [Raw log](../build-logs/20261106T173133.522944Z-b091135a21.log)
+- [Exact process output](../build-logs/20261106T173133.522944Z-b091135a21.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-07T01:32:24+08:00 · hybrid-agent-contracts-and-web-intermediate · succeeded
+
+- Config: Python 3.14 / headless Edge; exit code: 0; elapsed: 12.140s.
+- Command: `C:\Python314\python.exe tests/HybridAgentWebSmoke.py`
+- Context: After adding score capability the legacy capability-count assertion was updated; synthetic tests only, concurrent tree edits are intermediate evidence
+- Source SHA-256: `a56c75f90ee4dc6a85e45aa2ac63792d42303d270643e7613789914f613420ae`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T173224.853305Z-63dfdcd7ff.json) · [Raw log](../build-logs/20261106T173224.853305Z-63dfdcd7ff.log)
+- [Exact process output](../build-logs/20261106T173224.853305Z-63dfdcd7ff.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-07T01:35:26+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 0.837s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=15 emusician-autodl "ls -l /root/autodl-tmp/emusician/tools/models/mir_upgrades/runtime.py /root/autodl-tmp/emusician/tools/ace_worker.py; cat /root/autodl-tmp/emusician/state/gateway.pid; ps -p 5862 -o pid,etime,cmd; readlink -f /root/autodl-tmp/emusician/envs/sheetsage2/bin/python"`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `90ce9d5ae3f4c6f0b15d438e218721e2502d4be8d634b7e0762c169353a492d4`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T173526.246727Z-20fd51974b.json) · [Raw log](../build-logs/20261106T173526.246727Z-20fd51974b.log)
+- [Exact process output](../build-logs/20261106T173526.246727Z-20fd51974b.raw.log)
+
+### 2026-11-07T01:37:12+08:00 · cloud-compute-tests · failed
+
+- Config: CPU-only; exit code: 1; elapsed: 5.374s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_cloud_compute.py -v`
+- Context: Unified cloud queue, immutable uploads, normalization and failure receipts; implementation is evolving and no GPU/service deployment is claimed.
+- Source SHA-256: `29073ccd444bc531478c69eefd84ba0bdac7a82f0ee95a3c78c17ed8aef93472`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T173712.582927Z-d050988fa0.json) · [Raw log](../build-logs/20261106T173712.582927Z-d050988fa0.log)
+- [Exact process output](../build-logs/20261106T173712.582927Z-d050988fa0.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T173712.582927Z-d050988fa0.log
+
+### 2026-11-07T01:37:42+08:00 · cloud-compute-tests · succeeded
+
+- Config: CPU-only; exit code: 0; elapsed: 3.861s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_cloud_compute.py -v`
+- Context: Corrected Windows-only test shim for Linux process-group cleanup; added natural-leader-exit descendant cleanup test. No model/GPU/service execution.
+- Source SHA-256: `a3ec42f0d38d353820c143bbfa5d213ed1a8b61596f68382f3a9d731dcd8a8fa`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T173742.682911Z-887b27eee9.json) · [Raw log](../build-logs/20261106T173742.682911Z-887b27eee9.log)
+- [Exact process output](../build-logs/20261106T173742.682911Z-887b27eee9.raw.log)
+
+### 2026-11-07T01:39:24+08:00 · cloud-compute-tests · succeeded
+
+- Config: CPU-only; exit code: 0; elapsed: 5.208s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_cloud_compute*.py -v`
+- Context: Final candidate cloud contract tests, integrity gates and download fence; Linux real-process tests are separately pending. Sources may change in parallel branches.
+- Source SHA-256: `9d1252b36c92e5832450d96976dcd7c0e70a56ee89c08f4e444f24e494b96059`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T173924.495324Z-6d5315e0e4.json) · [Raw log](../build-logs/20261106T173924.495324Z-6d5315e0e4.log)
+- [Exact process output](../build-logs/20261106T173924.495324Z-6d5315e0e4.raw.log)
+
+### 2026-11-07T01:40:03+08:00 · cloud-compute-candidate-check · succeeded
+
+- Config: CPU-only; exit code: 0; elapsed: 4.866s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_cloud_compute*.py -v`
+- Context: Recheck complete new compute package after optional empty-score artifacts are excluded; no deployment or inference.
+- Source SHA-256: `0d5644aaed800a04d47587c585a01f3b73aa5b9b9cab7cdbf36ed777246e59f6`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174003.486932Z-79e95431b0.json) · [Raw log](../build-logs/20261106T174003.486932Z-79e95431b0.log)
+- [Exact process output](../build-logs/20261106T174003.486932Z-79e95431b0.raw.log)
+
+### 2026-11-07T01:40:08+08:00 · cloud-compute-candidate-check · succeeded
+
+- Config: CPU-only; exit code: 0; elapsed: 0.430s.
+- Command: `git diff --check -- scripts/cloud/compute tests/test_cloud_compute.py tests/test_cloud_compute_linux.py docs/review/2026-11-07-hybrid-pipeline/cloud`
+- Context: Recheck complete new compute package after optional empty-score artifacts are excluded; no deployment or inference.
+- Source SHA-256: `0d5644aaed800a04d47587c585a01f3b73aa5b9b9cab7cdbf36ed777246e59f6`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174008.698192Z-0f89ac5466.json) · [Raw log](../build-logs/20261106T174008.698192Z-0f89ac5466.log)
+- [Exact process output](../build-logs/20261106T174008.698192Z-0f89ac5466.raw.log)
+
+### 2026-11-07T01:40:51+08:00 · hybrid-compute-transport-tests · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 1.577s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe -m unittest discover -s tests -p test_compute_transport.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `52e1192a860e14f2643fab266a50fb481907afd712002e6fc7941297927db6ee`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174051.024433Z-d091700e32.json) · [Raw log](../build-logs/20261106T174051.024433Z-d091700e32.log)
+- [Exact process output](../build-logs/20261106T174051.024433Z-d091700e32.raw.log)
+
+### 2026-11-07T01:40:52+08:00 · hybrid-compute-transport-tests · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 2.130s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_cloud_generation_transport.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `8a4003afecaaef6db1956b99486ae1b43733053e4d00d66352f4a7867a657e80`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174052.936029Z-4818f944dd.json) · [Raw log](../build-logs/20261106T174052.936029Z-4818f944dd.log)
+- [Exact process output](../build-logs/20261106T174052.936029Z-4818f944dd.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-07T01:40:54+08:00 · cloud-compute-validation-stage · succeeded
+
+- Config: CPU-only; exit code: 0; elapsed: 1.079s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/compute-validation/20261107-v1/compute /root/autodl-tmp/emusician/workspace/compute-validation/20261107-v1/tests"`
+- Context: Copy the candidate package and CPU tests into an isolated validation workspace only; no activation or GPU jobs.
+- Source SHA-256: `1cb16185ca4005739204dd1e7fb1bd480820cacfa4afc43a96a22b6ef8acc315`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174054.013867Z-c1fdf5b1d5.json) · [Raw log](../build-logs/20261106T174054.013867Z-c1fdf5b1d5.log)
+- [Exact process output](../build-logs/20261106T174054.013867Z-c1fdf5b1d5.raw.log)
+
+### 2026-11-07T01:40:55+08:00 · cloud-compute-validation-stage · succeeded
+
+- Config: CPU-only; exit code: 0; elapsed: 1.540s.
+- Command: `scp -q -r scripts/cloud/compute/. emusician-autodl:/root/autodl-tmp/emusician/workspace/compute-validation/20261107-v1/compute/`
+- Context: Copy the candidate package and CPU tests into an isolated validation workspace only; no activation or GPU jobs.
+- Source SHA-256: `1cb16185ca4005739204dd1e7fb1bd480820cacfa4afc43a96a22b6ef8acc315`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174055.449272Z-d789ebbbea.json) · [Raw log](../build-logs/20261106T174055.449272Z-d789ebbbea.log)
+- [Exact process output](../build-logs/20261106T174055.449272Z-d789ebbbea.raw.log)
+
+### 2026-11-07T01:40:57+08:00 · cloud-compute-validation-stage · succeeded
+
+- Config: CPU-only; exit code: 0; elapsed: 1.456s.
+- Command: `scp -q tests/test_cloud_compute.py tests/test_cloud_compute_linux.py emusician-autodl:/root/autodl-tmp/emusician/workspace/compute-validation/20261107-v1/tests/`
+- Context: Copy the candidate package and CPU tests into an isolated validation workspace only; no activation or GPU jobs.
+- Source SHA-256: `1cb16185ca4005739204dd1e7fb1bd480820cacfa4afc43a96a22b6ef8acc315`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174057.323129Z-a54cbae95e.json) · [Raw log](../build-logs/20261106T174057.323129Z-a54cbae95e.log)
+- [Exact process output](../build-logs/20261106T174057.323129Z-a54cbae95e.raw.log)
+
+### 2026-11-07T01:41:15+08:00 · cloud-compute-linux-cpu-tests · succeeded
+
+- Config: CPU-only; exit code: 0; elapsed: 8.452s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "cd /root/autodl-tmp/emusician/workspace/compute-validation/20261107-v1 && PYTHONPATH=. /root/miniconda3/bin/python -m unittest discover -s tests -p test_cloud_compute*.py -v"`
+- Context: Linux actual process-group and parent-death checks plus protocol tests in isolated validation directory; no GPU model/service execution.
+- Source SHA-256: `666d9c36f4403fc0b01479a6def869c730f918c7a3753a41e987f310f25461f3`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174115.486697Z-4b3b987986.json) · [Raw log](../build-logs/20261106T174115.486697Z-4b3b987986.log)
+- [Exact process output](../build-logs/20261106T174115.486697Z-4b3b987986.raw.log)
+
+### 2026-11-07T01:41:15+08:00 · cloud-compute-real-integrity-preflight · succeeded
+
+- Config: CPU-only; exit code: 0; elapsed: 31.587s.
+- Command: `ssh -o BatchMode=yes -o ServerAliveInterval=20 emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/compute-validation/20261107-v1/compute/preflight.py --root /root/autodl-tmp/emusician --runtime-sha 1ed93b588a631f2692cdcfd8bd59a6fd5c6a768fe38e6708e13e15bc66930c2f --output /root/autodl-tmp/emusician/workspace/compute-validation/20261107-v1/integrity.json"`
+- Context: Read and SHA-check existing pinned cloud model/code/config files only; never import Torch, allocate GPU, mutate installed environments or start services.
+- Source SHA-256: `666d9c36f4403fc0b01479a6def869c730f918c7a3753a41e987f310f25461f3`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174115.517382Z-fdc2be6017.json) · [Raw log](../build-logs/20261106T174115.517382Z-fdc2be6017.log)
+- [Exact process output](../build-logs/20261106T174115.517382Z-fdc2be6017.raw.log)
+
+### 2026-11-07T01:41:16+08:00 · hybrid-agent-contracts-pre-integration · succeeded
+
+- Config: Python; exit code: 0; elapsed: 50.902s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Agent contract hardening and native/GPU acceptance-script syntax. No LLM or GPU calls. Shared source tree still changing; final frozen integration belongs to root.
+- Source SHA-256: `666d9c36f4403fc0b01479a6def869c730f918c7a3753a41e987f310f25461f3`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174116.889288Z-f41ee78b3d.json) · [Raw log](../build-logs/20261106T174116.889288Z-f41ee78b3d.log)
+- [Exact process output](../build-logs/20261106T174116.889288Z-f41ee78b3d.raw.log)
+
+### 2026-11-07T01:42:08+08:00 · hybrid-agent-contracts-pre-integration · succeeded
+
+- Config: Python; exit code: 0; elapsed: 0.626s.
+- Command: `C:\Python314\python.exe -m py_compile tests/HybridComputeEndToEnd.py`
+- Context: Agent contract hardening and native/GPU acceptance-script syntax. No LLM or GPU calls. Shared source tree still changing; final frozen integration belongs to root.
+- Source SHA-256: `666d9c36f4403fc0b01479a6def869c730f918c7a3753a41e987f310f25461f3`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174208.087841Z-877b085a1b.json) · [Raw log](../build-logs/20261106T174208.087841Z-877b085a1b.log)
+- [Exact process output](../build-logs/20261106T174208.087841Z-877b085a1b.raw.log)
+
+### 2026-11-07T01:43:11+08:00 · cloud-compute-evidence · succeeded
+
+- Config: CPU-only; exit code: 0; elapsed: 0.918s.
+- Command: `scp -q emusician-autodl:/root/autodl-tmp/emusician/workspace/compute-validation/20261107-v1/integrity.json docs\review\2026-11-07-hybrid-pipeline\cloud\evidence\integrity.json`
+- Context: Retrieve only the small integrity receipt and freeze reviewed compute source hashes; no weights or audio transferred.
+- Source SHA-256: `ac1ae2524992edf57968e71ef7023c7041ed8060d68889f44dfe1b4152e27708`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174311.118118Z-b0b3fe8dba.json) · [Raw log](../build-logs/20261106T174311.118118Z-b0b3fe8dba.log)
+- [Exact process output](../build-logs/20261106T174311.118118Z-b0b3fe8dba.raw.log)
+
+### 2026-11-07T01:43:30+08:00 · compute-service-deployment · succeeded
+
+- Config: Linux/stdlib protocol2; exit code: 0; elapsed: 0.911s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=15 emusician-autodl "mkdir -p /root/autodl-tmp/emusician/deployments/compute/aedaa86c039f4be29770/compute"`
+- Context: Explicit idle-service migration; versioned scripts and hashes; no inference, no model/environment changes
+- Source SHA-256: `ac1ae2524992edf57968e71ef7023c7041ed8060d68889f44dfe1b4152e27708`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174330.631093Z-65ee50f5c3.json) · [Raw log](../build-logs/20261106T174330.631093Z-65ee50f5c3.log)
+- [Exact process output](../build-logs/20261106T174330.631093Z-65ee50f5c3.raw.log)
+
+### 2026-11-07T01:43:31+08:00 · compute-service-deployment · succeeded
+
+- Config: Linux/stdlib protocol2; exit code: 0; elapsed: 1.152s.
+- Command: `scp -q -o BatchMode=yes E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\__init__.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\adapters.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\catalog.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\normalize.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\preflight.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\protocol.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\server.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\start.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\store.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\supervisor.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\worker.py emusician-autodl:/root/autodl-tmp/emusician/deployments/compute/aedaa86c039f4be29770/compute/`
+- Context: Explicit idle-service migration; versioned scripts and hashes; no inference, no model/environment changes
+- Source SHA-256: `ac1ae2524992edf57968e71ef7023c7041ed8060d68889f44dfe1b4152e27708`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174331.850791Z-902aaf3a3f.json) · [Raw log](../build-logs/20261106T174331.850791Z-902aaf3a3f.log)
+- [Exact process output](../build-logs/20261106T174331.850791Z-902aaf3a3f.raw.log)
+
+### 2026-11-07T01:43:33+08:00 · compute-service-deployment · succeeded
+
+- Config: Linux/stdlib protocol2; exit code: 0; elapsed: 0.833s.
+- Command: `scp -q -o BatchMode=yes E:\MusicAgent&DAW\worktrees\audio-analysis\build\compute-deployment\aedaa86c039f4be29770\SHA256.json E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\install_compute.py emusician-autodl:/root/autodl-tmp/emusician/deployments/compute/aedaa86c039f4be29770/`
+- Context: Explicit idle-service migration; versioned scripts and hashes; no inference, no model/environment changes
+- Source SHA-256: `ac1ae2524992edf57968e71ef7023c7041ed8060d68889f44dfe1b4152e27708`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174333.553227Z-4e6edb7c31.json) · [Raw log](../build-logs/20261106T174333.553227Z-4e6edb7c31.log)
+- [Exact process output](../build-logs/20261106T174333.553227Z-4e6edb7c31.raw.log)
+
+### 2026-11-07T01:43:34+08:00 · compute-service-deployment · succeeded
+
+- Config: Linux/stdlib protocol2; exit code: 0; elapsed: 1.041s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=15 emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/deployments/compute/aedaa86c039f4be29770/install_compute.py --release /root/autodl-tmp/emusician/deployments/compute/aedaa86c039f4be29770"`
+- Context: Explicit idle-service migration; versioned scripts and hashes; no inference, no model/environment changes
+- Source SHA-256: `ac1ae2524992edf57968e71ef7023c7041ed8060d68889f44dfe1b4152e27708`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174334.752626Z-db50e46a32.json) · [Raw log](../build-logs/20261106T174334.752626Z-db50e46a32.log)
+- [Exact process output](../build-logs/20261106T174334.752626Z-db50e46a32.raw.log)
+
+### 2026-11-07T01:43:48+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 2.416s.
+- Command: `C:/Python314/python.exe scripts/cloud/register_compute.py --register`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `ac1ae2524992edf57968e71ef7023c7041ed8060d68889f44dfe1b4152e27708`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174348.802181Z-4c4f37441d.json) · [Raw log](../build-logs/20261106T174348.802181Z-4c4f37441d.log)
+- [Exact process output](../build-logs/20261106T174348.802181Z-4c4f37441d.raw.log)
+
+### 2026-11-07T01:44:40+08:00 · hybrid-acceptance-receipts-pre-integration · succeeded
+
+- Config: Python; exit code: 0; elapsed: 1.557s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_hybrid_compute_acceptance.py -v`
+- Context: Pure helper tests and syntax only for prepared real native/GPU acceptance runner. No process launch, LLM or GPU inference. Shared tree is still changing.
+- Source SHA-256: `934c0e889a80d12018fdbaae7944c15c9988731dc3fa56f7b48acb961a9c8c18`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174440.154898Z-f0c1af3ec2.json) · [Raw log](../build-logs/20261106T174440.154898Z-f0c1af3ec2.log)
+- [Exact process output](../build-logs/20261106T174440.154898Z-f0c1af3ec2.raw.log)
+
+### 2026-11-07T01:44:42+08:00 · hybrid-acceptance-receipts-pre-integration · succeeded
+
+- Config: Python; exit code: 0; elapsed: 0.523s.
+- Command: `C:\Python314\python.exe -m py_compile tests/HybridComputeEndToEnd.py`
+- Context: Pure helper tests and syntax only for prepared real native/GPU acceptance runner. No process launch, LLM or GPU inference. Shared tree is still changing.
+- Source SHA-256: `934c0e889a80d12018fdbaae7944c15c9988731dc3fa56f7b48acb961a9c8c18`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174442.045470Z-4ced9287a4.json) · [Raw log](../build-logs/20261106T174442.045470Z-4ced9287a4.log)
+- [Exact process output](../build-logs/20261106T174442.045470Z-4ced9287a4.raw.log)
+
+### 2026-11-07T01:47:04+08:00 · cloud-compute-live-fault-check · succeeded
+
+- Config: Linux stdlib / no GPU; exit code: 0; elapsed: 1.342s.
+- Command: `scp -q tests/CloudComputeServiceCheck.py emusician-autodl:/root/autodl-tmp/emusician/workspace/compute-validation/20261107-v1/CloudComputeServiceCheck.py`
+- Context: Coordinator granted idle-service restart window. Hold shared GPU lock throughout synthetic upload/queue/cancel/restart tests; restart only verified new compute service.
+- Source SHA-256: `0369882aa0714cddeaa044642c0f0814243f8a681eca651fdbe18a76b620d9f9`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174704.042017Z-0f8177d7ca.json) · [Raw log](../build-logs/20261106T174704.042017Z-0f8177d7ca.log)
+- [Exact process output](../build-logs/20261106T174704.042017Z-0f8177d7ca.raw.log)
+
+### 2026-11-07T01:47:06+08:00 · cloud-compute-live-fault-check · failed
+
+- Config: Linux stdlib / no GPU; exit code: 1; elapsed: 0.653s.
+- Command: `ssh -o BatchMode=yes -o ServerAliveInterval=20 emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/compute-validation/20261107-v1/CloudComputeServiceCheck.py --authorized-idle-restart-window"`
+- Context: Coordinator granted idle-service restart window. Hold shared GPU lock throughout synthetic upload/queue/cancel/restart tests; restart only verified new compute service.
+- Source SHA-256: `0369882aa0714cddeaa044642c0f0814243f8a681eca651fdbe18a76b620d9f9`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174706.038847Z-482ea6df20.json) · [Raw log](../build-logs/20261106T174706.038847Z-482ea6df20.log)
+- [Exact process output](../build-logs/20261106T174706.038847Z-482ea6df20.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T174706.038847Z-482ea6df20.log
+
+### 2026-11-07T01:47:46+08:00 · cloud-compute-live-fault-check · succeeded
+
+- Config: Linux stdlib / no GPU; exit code: 0; elapsed: 0.990s.
+- Command: `scp -q tests/CloudComputeServiceCheck.py emusician-autodl:/root/autodl-tmp/emusician/workspace/compute-validation/20261107-v1/CloudComputeServiceCheck-v2.py`
+- Context: Retry infrastructure admission only: bounded blocking GPU-lock acquisition avoids idle polling race. Earlier attempt created no jobs and did not restart service.
+- Source SHA-256: `09018e7f77222f5d0c7379c4d86608080ecfe9365c59d885f84f688baa9c7b91`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174746.721933Z-9698f1775c.json) · [Raw log](../build-logs/20261106T174746.721933Z-9698f1775c.log)
+- [Exact process output](../build-logs/20261106T174746.721933Z-9698f1775c.raw.log)
+
+### 2026-11-07T01:47:48+08:00 · cloud-compute-live-fault-check · succeeded
+
+- Config: Linux stdlib / no GPU; exit code: 0; elapsed: 1.413s.
+- Command: `ssh -o BatchMode=yes -o ServerAliveInterval=20 emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/compute-validation/20261107-v1/CloudComputeServiceCheck-v2.py --authorized-idle-restart-window"`
+- Context: Retry infrastructure admission only: bounded blocking GPU-lock acquisition avoids idle polling race. Earlier attempt created no jobs and did not restart service.
+- Source SHA-256: `09018e7f77222f5d0c7379c4d86608080ecfe9365c59d885f84f688baa9c7b91`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174748.060663Z-8aa899bb82.json) · [Raw log](../build-logs/20261106T174748.060663Z-8aa899bb82.log)
+- [Exact process output](../build-logs/20261106T174748.060663Z-8aa899bb82.raw.log)
+
+### 2026-11-07T01:48:47+08:00 · cloud-compute-live-fault-evidence · succeeded
+
+- Config: metadata-only; exit code: 0; elapsed: 0.890s.
+- Command: `scp -q emusician-autodl:/root/autodl-tmp/emusician/results/validation/compute-service/20261106T174706Z-39edcf73/receipt.json docs\review\2026-11-07-hybrid-pipeline\cloud\evidence\service-check-admission-failed.json`
+- Context: Collect the successful real service fault receipt and the preserved lock-admission failure; no model/audio data transferred.
+- Source SHA-256: `8bffd83cd35040a1b9efb754550108163e9a52da2cd41dc7f29fdfc189f8de78`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174847.251511Z-c3760ff063.json) · [Raw log](../build-logs/20261106T174847.251511Z-c3760ff063.log)
+- [Exact process output](../build-logs/20261106T174847.251511Z-c3760ff063.raw.log)
+
+### 2026-11-07T01:48:48+08:00 · cloud-compute-live-fault-evidence · succeeded
+
+- Config: metadata-only; exit code: 0; elapsed: 0.679s.
+- Command: `scp -q emusician-autodl:/root/autodl-tmp/emusician/results/validation/compute-service/20261106T174748Z-b9900fb5/receipt.json docs\review\2026-11-07-hybrid-pipeline\cloud\evidence\service-check-passed.json`
+- Context: Collect the successful real service fault receipt and the preserved lock-admission failure; no model/audio data transferred.
+- Source SHA-256: `8bffd83cd35040a1b9efb754550108163e9a52da2cd41dc7f29fdfc189f8de78`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T174848.504371Z-e7701118fb.json) · [Raw log](../build-logs/20261106T174848.504371Z-e7701118fb.log)
+- [Exact process output](../build-logs/20261106T174848.504371Z-e7701118fb.raw.log)
+
+### 2026-11-07T01:50:59+08:00 · hybrid-agent-native-contract-reconciliation · succeeded
+
+- Config: Python-Web; exit code: 0; elapsed: 51.679s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Fix real native CC vs program-change counts and YuE2 completion DTO after read-only integration review. Synthetic tests only, no GPU/LLM. Native build may be ongoing; records are module evidence.
+- Source SHA-256: `87ee48e8230fa143685a93f9af0d44795e6ba657f328f2315c7fcfa2838279f4`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T175059.239584Z-9bfbdc1741.json) · [Raw log](../build-logs/20261106T175059.239584Z-9bfbdc1741.log)
+- [Exact process output](../build-logs/20261106T175059.239584Z-9bfbdc1741.raw.log)
+
+### 2026-11-07T01:51:51+08:00 · hybrid-agent-native-contract-reconciliation · succeeded
+
+- Config: Python-Web; exit code: 0; elapsed: 10.363s.
+- Command: `C:\Python314\python.exe tests/HybridAgentWebSmoke.py`
+- Context: Fix real native CC vs program-change counts and YuE2 completion DTO after read-only integration review. Synthetic tests only, no GPU/LLM. Native build may be ongoing; records are module evidence.
+- Source SHA-256: `87ee48e8230fa143685a93f9af0d44795e6ba657f328f2315c7fcfa2838279f4`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T175151.234790Z-0dd1aa4be4.json) · [Raw log](../build-logs/20261106T175151.234790Z-0dd1aa4be4.log)
+- [Exact process output](../build-logs/20261106T175151.234790Z-0dd1aa4be4.raw.log)
+
+### 2026-11-07T01:52:02+08:00 · hybrid-agent-native-contract-reconciliation · succeeded
+
+- Config: Python-Web; exit code: 0; elapsed: 1.026s.
+- Command: `C:\Python314\python.exe -m py_compile tests/HybridComputeEndToEnd.py`
+- Context: Fix real native CC vs program-change counts and YuE2 completion DTO after read-only integration review. Synthetic tests only, no GPU/LLM. Native build may be ongoing; records are module evidence.
+- Source SHA-256: `87ee48e8230fa143685a93f9af0d44795e6ba657f328f2315c7fcfa2838279f4`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T175202.087035Z-827f7c6466.json) · [Raw log](../build-logs/20261106T175202.087035Z-827f7c6466.log)
+- [Exact process output](../build-logs/20261106T175202.087035Z-827f7c6466.raw.log)
+
+### 2026-11-07T01:51:33+08:00 · hybrid-compute-configure · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 31.744s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.13.0`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `87ee48e8230fa143685a93f9af0d44795e6ba657f328f2315c7fcfa2838279f4`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T175133.365392Z-7edfbb02d9.json) · [Raw log](../build-logs/20261106T175133.365392Z-7edfbb02d9.log)
+- [Exact process output](../build-logs/20261106T175133.365392Z-7edfbb02d9.raw.log)
+
+### 2026-11-07T01:52:46+08:00 · hybrid-compute-transport-tests · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 2.105s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe -m unittest discover -s tests -p test_compute_transport.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `230a9995ca768f7c108370692ad77c21ed49dacb3aa5bfef6326bdcdc7514a64`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T175246.753196Z-ec6d43c82d.json) · [Raw log](../build-logs/20261106T175246.753196Z-ec6d43c82d.log)
+- [Exact process output](../build-logs/20261106T175246.753196Z-ec6d43c82d.raw.log)
+
+### 2026-11-07T01:52:49+08:00 · hybrid-compute-transport-tests · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 1.634s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_cloud_generation_transport.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `230a9995ca768f7c108370692ad77c21ed49dacb3aa5bfef6326bdcdc7514a64`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T175249.217151Z-ed15205074.json) · [Raw log](../build-logs/20261106T175249.217151Z-ed15205074.log)
+- [Exact process output](../build-logs/20261106T175249.217151Z-ed15205074.raw.log)
+
+### 2026-11-07T01:54:56+08:00 · hybrid-compute-generation-contracts · succeeded
+
+- Config: Python; exit code: 0; elapsed: 1.878s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_compute_generation.py -v`
+- Context: New generation helper with fake transport but real PCM16 download/hash/inspection/publication. Non-default request compute_root dispatch and legacy compatibility. No SSH/GPU/LLM.
+- Source SHA-256: `539615066e1770e872a86de4137fbf20500e0c92f09c2aa260fb02ce19ab423a`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T175456.678496Z-f45d4bb2a4.json) · [Raw log](../build-logs/20261106T175456.678496Z-f45d4bb2a4.log)
+- [Exact process output](../build-logs/20261106T175456.678496Z-f45d4bb2a4.raw.log)
+
+### 2026-11-07T01:57:44+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 5.120s.
+- Command: `C:/Python314/python.exe -m unittest discover -s tests -p test_audio_analysis*.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `1404882b82b23942ddcb974d563747078854065c14435be745dc3b6b83a15464`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T175744.099249Z-e23bc48a4a.json) · [Raw log](../build-logs/20261106T175744.099249Z-e23bc48a4a.log)
+- [Exact process output](../build-logs/20261106T175744.099249Z-e23bc48a4a.raw.log)
+
+### 2026-11-07T01:56:57+08:00 · hybrid-compute-build · failed
+
+- Config: Release/0.13.0; exit code: 1; elapsed: 110.304s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `1404882b82b23942ddcb974d563747078854065c14435be745dc3b6b83a15464`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T175657.941709Z-7b6eae6250.json) · [Raw log](../build-logs/20261106T175657.941709Z-7b6eae6250.log)
+- [Exact process output](../build-logs/20261106T175657.941709Z-7b6eae6250.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T175657.941709Z-7b6eae6250.log
+
+### 2026-11-07T01:58:37+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 15.420s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe -m unittest discover -s tests -p test_audio_analysis*.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `1404882b82b23942ddcb974d563747078854065c14435be745dc3b6b83a15464`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T175837.680221Z-a57df51f90.json) · [Raw log](../build-logs/20261106T175837.680221Z-a57df51f90.log)
+- [Exact process output](../build-logs/20261106T175837.680221Z-a57df51f90.raw.log)
+
+### 2026-11-07T01:59:53+08:00 · hybrid-compute-build · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 158.922s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `945ebad23732ed1bdaa0b294313c63e2f077e8643d7c4883828416c72dadd689`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T175953.506610Z-c02860c838.json) · [Raw log](../build-logs/20261106T175953.506610Z-c02860c838.log)
+- [Exact process output](../build-logs/20261106T175953.506610Z-c02860c838.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-07T02:03:24+08:00 · hybrid-compute-build · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 24.958s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `cc48ceaef25b708445b2ddbd6069e9d4a832e6deaf10c861cbde1094104a7957`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T180324.083914Z-5843129d6c.json) · [Raw log](../build-logs/20261106T180324.083914Z-5843129d6c.log)
+- [Exact process output](../build-logs/20261106T180324.083914Z-5843129d6c.raw.log)
+
+### 2026-11-07T02:04:10+08:00 · hybrid-compute-test · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 131.052s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `cc48ceaef25b708445b2ddbd6069e9d4a832e6deaf10c861cbde1094104a7957`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T180410.063133Z-cf61c745f0.json) · [Raw log](../build-logs/20261106T180410.063133Z-cf61c745f0.log)
+- [Exact process output](../build-logs/20261106T180410.063133Z-cf61c745f0.raw.log)
+
+### 2026-11-07T02:06:48+08:00 · hybrid-compute-command · failed
+
+- Config: Release/0.13.0; exit code: 1; elapsed: 18.094s.
+- Command: `C:/Python314/python.exe tests/HybridComputeEndToEnd.py --exe E:/emusician-analysis-build/bin-0.13.0/Release/E-musician.exe --out E:/MusicAgent&DAW/cloud-inference/experiments/hybrid-final-20261107-v1`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `cc48ceaef25b708445b2ddbd6069e9d4a832e6deaf10c861cbde1094104a7957`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T180648.883850Z-4a6067afbe.json) · [Raw log](../build-logs/20261106T180648.883850Z-4a6067afbe.log)
+- [Exact process output](../build-logs/20261106T180648.883850Z-4a6067afbe.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T180648.883850Z-4a6067afbe.log
+
+### 2026-11-07T02:08:34+08:00 · hybrid-compute-transport-tests · failed
+
+- Config: Release/0.13.0; exit code: 1; elapsed: 3.090s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe -m unittest discover -s tests -p test_compute_transport.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `344a8df87e204009c6fc7049eff9f936b902b322b214751d8526b6eb7c71fcd8`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T180834.693840Z-cabbebc4d2.json) · [Raw log](../build-logs/20261106T180834.693840Z-cabbebc4d2.log)
+- [Exact process output](../build-logs/20261106T180834.693840Z-cabbebc4d2.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T180834.693840Z-cabbebc4d2.log
+
+### 2026-11-07T02:10:14+08:00 · hybrid-compute-transport-tests · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 2.298s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe -m unittest discover -s tests -p test_compute_transport.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `b2bf109699f79e10ee40b2953a338e1f1a3d22384515dcb331ae1bf32a50322a`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181014.796456Z-9b2e9b8fae.json) · [Raw log](../build-logs/20261106T181014.796456Z-9b2e9b8fae.log)
+- [Exact process output](../build-logs/20261106T181014.796456Z-9b2e9b8fae.raw.log)
+
+### 2026-11-07T02:10:17+08:00 · hybrid-compute-transport-tests · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 2.077s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_cloud_generation_transport.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `b2bf109699f79e10ee40b2953a338e1f1a3d22384515dcb331ae1bf32a50322a`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181017.506263Z-eaa4408199.json) · [Raw log](../build-logs/20261106T181017.506263Z-eaa4408199.log)
+- [Exact process output](../build-logs/20261106T181017.506263Z-eaa4408199.raw.log)
+
+### 2026-11-07T02:11:20+08:00 · hybrid-e2e-e-drive-isolation · succeeded
+
+- Config: Python; exit code: 0; elapsed: 0.739s.
+- Command: `C:\Python314\python.exe -m py_compile tests/HybridComputeEndToEnd.py`
+- Context: Only syntax/pure helper verification after redirecting E2E-owned TEMP/TMP and native audio cache to E drive. No native launch or GPU inference.
+- Source SHA-256: `a228e5630e3808ad203e1147741c4fbcaeac3248904170acacfab4a7c140dcd9`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181120.252941Z-872fba6da6.json) · [Raw log](../build-logs/20261106T181120.252941Z-872fba6da6.log)
+- [Exact process output](../build-logs/20261106T181120.252941Z-872fba6da6.raw.log)
+
+### 2026-11-07T02:11:21+08:00 · hybrid-e2e-e-drive-isolation · succeeded
+
+- Config: Python; exit code: 0; elapsed: 1.029s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_hybrid_compute_acceptance.py -v`
+- Context: Only syntax/pure helper verification after redirecting E2E-owned TEMP/TMP and native audio cache to E drive. No native launch or GPU inference.
+- Source SHA-256: `a228e5630e3808ad203e1147741c4fbcaeac3248904170acacfab4a7c140dcd9`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181121.292486Z-8aca5bf4a5.json) · [Raw log](../build-logs/20261106T181121.292486Z-8aca5bf4a5.log)
+- [Exact process output](../build-logs/20261106T181121.292486Z-8aca5bf4a5.raw.log)
+
+### 2026-11-07T02:12:33+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 1.618s.
+- Command: `C:/Python314/python.exe -m unittest discover -s tests -p test_compute_generation.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `a228e5630e3808ad203e1147741c4fbcaeac3248904170acacfab4a7c140dcd9`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181233.758958Z-64b0bafead.json) · [Raw log](../build-logs/20261106T181233.758958Z-64b0bafead.log)
+- [Exact process output](../build-logs/20261106T181233.758958Z-64b0bafead.raw.log)
+
+### 2026-11-07T02:11:55+08:00 · hybrid-compute-build · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 61.808s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `a228e5630e3808ad203e1147741c4fbcaeac3248904170acacfab4a7c140dcd9`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181155.738154Z-4a8b781c23.json) · [Raw log](../build-logs/20261106T181155.738154Z-4a8b781c23.log)
+- [Exact process output](../build-logs/20261106T181155.738154Z-4a8b781c23.raw.log)
+
+### 2026-11-07T02:13:27+08:00 · hybrid-compute-command · failed
+
+- Config: Release/0.13.0; exit code: 1; elapsed: 92.287s.
+- Command: `C:/Python314/python.exe tests/HybridComputeEndToEnd.py --exe E:/emusician-analysis-build/bin-0.13.0/Release/E-musician.exe --out E:/MusicAgent&DAW/cloud-inference/experiments/hybrid-final-20261107-v2`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `a228e5630e3808ad203e1147741c4fbcaeac3248904170acacfab4a7c140dcd9`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181327.719199Z-5405a67ef6.json) · [Raw log](../build-logs/20261106T181327.719199Z-5405a67ef6.log)
+- [Exact process output](../build-logs/20261106T181327.719199Z-5405a67ef6.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T181327.719199Z-5405a67ef6.log
+
+### 2026-11-07T02:13:27+08:00 · hybrid-compute-test · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 118.589s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `a228e5630e3808ad203e1147741c4fbcaeac3248904170acacfab4a7c140dcd9`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181327.714250Z-f588fd28c2.json) · [Raw log](../build-logs/20261106T181327.714250Z-f588fd28c2.log)
+- [Exact process output](../build-logs/20261106T181327.714250Z-f588fd28c2.raw.log)
+
+### 2026-11-07T02:16:26+08:00 · cloud-muscriptor-diagnose · succeeded
+
+- Config: read-only; exit code: 0; elapsed: 1.002s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=15 emusician-autodl "/root/miniconda3/bin/python -c 'from pathlib import Path
+import json
+p=Path('\"'\"'/root/autodl-tmp/emusician/jobs/compute/cd31e019663a41f88856c23eaabd2754'\"'\"')
+result={\"job_id\":p.name,\"files\":{}}
+for name in ('\"'\"'worker-error.json'\"'\"','\"'\"'attempt.json'\"'\"','\"'\"'worker.log'\"'\"','\"'\"'process.log'\"'\"'):
+ f=p/name
+ if f.is_file(): result['\"'\"'files'\"'\"'][name]=f.read_text(errors='\"'\"'replace'\"'\"')[-12000:]
+print(json.dumps(result))
+'"`
+- Context: Read only failed MuScriptor compute job error and attempt; no inference, deployment or environment modification.
+- Source SHA-256: `a228e5630e3808ad203e1147741c4fbcaeac3248904170acacfab4a7c140dcd9`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181626.541293Z-07e4b23ced.json) · [Raw log](../build-logs/20261106T181626.541293Z-07e4b23ced.log)
+- [Exact process output](../build-logs/20261106T181626.541293Z-07e4b23ced.raw.log)
+
+### 2026-11-07T02:17:11+08:00 · cloud-muscriptor-adapter-regression · failed
+
+- Config: CPU; exit code: 1; elapsed: 5.097s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_cloud_compute*.py -v`
+- Context: Fix unnecessary SciPy import for original-rate MuScriptor input; exercise no-SciPy path, actual conversion dispatch and nonfinite rejection, then compute suite. No cloud deployment/inference.
+- Source SHA-256: `f3b50c0925cd40f4e12fad7ee9fe8ea4b2c63ced811c23d630086f922db1c1fd`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181711.506379Z-c47a512223.json) · [Raw log](../build-logs/20261106T181711.506379Z-c47a512223.log)
+- [Exact process output](../build-logs/20261106T181711.506379Z-c47a512223.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T181711.506379Z-c47a512223.log
+
+### 2026-11-07T02:17:49+08:00 · cloud-muscriptor-adapter-regression · succeeded
+
+- Config: CPU-E-temp; exit code: 0; elapsed: 5.437s.
+- Command: `C:\Python314\python.exe -c "import tempfile,unittest; tempfile.tempdir='E:\\MusicAgent&DAW\\worktrees\\audio-analysis\\build-logs\\cloud-compute-test-temp'; suite=unittest.defaultTestLoader.discover('tests',pattern='test_cloud_compute*.py'); r=unittest.TextTestRunner(verbosity=2).run(suite); raise SystemExit(not r.wasSuccessful())"`
+- Context: Repeat full compute suite with temporary files on E rather than low-free-space C; no guard reduction.
+- Source SHA-256: `f3b50c0925cd40f4e12fad7ee9fe8ea4b2c63ced811c23d630086f922db1c1fd`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181749.784489Z-ffaa7d1b97.json) · [Raw log](../build-logs/20261106T181749.784489Z-ffaa7d1b97.log)
+- [Exact process output](../build-logs/20261106T181749.784489Z-ffaa7d1b97.raw.log)
+
+### 2026-11-07T02:17:55+08:00 · cloud-muscriptor-audio-load · succeeded
+
+- Config: existing-model-env-CPU; exit code: 0; elapsed: 1.079s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=15 emusician-autodl "/root/autodl-tmp/emusician/envs/muscriptor/bin/python -c 'import builtins,importlib.util,json,sys,hashlib
+from pathlib import Path
+sys.path.insert(0,'\"'\"'/root/autodl-tmp/emusician/tools'\"'\"')
+source='\"'\"'\"\"\"Production-sized, bounded inference using the pinned and previously tested APIs.\n\nImported only by isolated model workers. There is no network or CPU fallback.\n\"\"\"\nfrom __future__ import annotations\nimport dataclasses\nimport math\nfrom pathlib import Path\nimport shutil\nimport sys\nimport time\nfrom .normalize import add_artifact, empty_result, midi_tracks, score_events, set_tracks\nfrom .protocol import atomic_json\n\n\ndef read_audio(source, target=None):\n    import numpy as np\n    import soundfile as sf\n    audio, rate = sf.read(source, dtype=\'\"'\"'float32\'\"'\"', always_2d=True)\n    if not np.isfinite(audio).all():\n        raise ValueError(\'\"'\"'Input contains nonfinite audio\'\"'\"')\n    if target is not None and target != rate:\n        # MuScriptor consumes the original rate and performs its own conversion.\n        # Its pinned environment does not require SciPy; only the adapters that\n        # explicitly request a different rate need this optional dependency.\n        from scipy.signal import resample_poly\n        divisor = math.gcd(rate, target)\n        audio = resample_poly(audio, target // divisor, rate // divisor, axis=0).astype(np.float32)\n        rate = target\n    return audio, rate\n\n\ndef mir(root, request, source, output, manifest, duration, phase):\n    import numpy as np\n    import soundfile as sf\n    import torch\n    sys.path.insert(0, str(root / \'\"'\"'tools/models/mir_upgrades\'\"'\"'))\n    from runtime import load\n    model_id = request[\'\"'\"'model_id\'\"'\"']\n    phase(\'\"'\"'loading\'\"'\"')\n    model, extras, _ = load(model_id, \'\"'\"'cuda\'\"'\"')\n    result = empty_result(request, manifest, duration)\n    phase(\'\"'\"'running\'\"'\"')\n    with torch.inference_mode():\n        if model_id in (\'\"'\"'scnet\'\"'\"', \'\"'\"'transkun\'\"'\"'):\n            audio, rate = read_audio(source, int(extras[\'\"'\"'sample_rate\'\"'\"']))\n        if model_id == \'\"'\"'scnet\'\"'\"':\n            from utils.model_utils import demix\n            if audio.shape[1] == 1:\n                audio = np.repeat(audio, 2, axis=1)\n            config = extras[\'\"'\"'config\'\"'\"']; config.inference.batch_size = 1; config.training.use_amp = True\n            stems = demix(config, model, audio.T, torch.device(\'\"'\"'cuda\'\"'\"'), model_type=\'\"'\"'scnet\'\"'\"', pbar=False)\n            phase(\'\"'\"'postprocessing\'\"'\"')\n            if set(extras[\'\"'\"'sources\'\"'\"']) != {\'\"'\"'vocals\'\"'\"', \'\"'\"'drums\'\"'\"', \'\"'\"'bass\'\"'\"', \'\"'\"'other\'\"'\"'}:\n                raise ValueError(\'\"'\"'The configured SCNet weights do not have the expected four stems\'\"'\"')\n            for name in (\'\"'\"'vocals\'\"'\"', \'\"'\"'drums\'\"'\"', \'\"'\"'bass\'\"'\"', \'\"'\"'other\'\"'\"'):\n                samples = np.asarray(stems[name], dtype=np.float32).T\n                if samples.shape != audio.shape or not np.isfinite(samples).all():\n                    raise ValueError(\'\"'\"'Separated stem geometry is invalid\'\"'\"')\n                path = output / (name + \'\"'\"'.wav\'\"'\"'); sf.write(path, samples, rate, subtype=\'\"'\"'FLOAT\'\"'\"')\n                item = add_artifact(result, path, \'\"'\"'stem\'\"'\"')\n                result[\'\"'\"'stems\'\"'\"'].append({**item, \'\"'\"'path\'\"'\"': item[\'\"'\"'id\'\"'\"'], \'\"'\"'name\'\"'\"': name})\n            result[\'\"'\"'processing\'\"'\"'] = {\'\"'\"'upstream\'\"'\"': \'\"'\"'utils.model_utils.demix\'\"'\"', \'\"'\"'batch_size\'\"'\"': 1,\n                \'\"'\"'chunk_size\'\"'\"': config.audio.chunk_size, \'\"'\"'num_overlap\'\"'\"': config.inference.num_overlap,\n                \'\"'\"'amp\'\"'\"': True, \'\"'\"'output_clipping\'\"'\"': False, \'\"'\"'complete_input\'\"'\"': True}\n        elif model_id == \'\"'\"'transkun\'\"'\"':\n            from transkun.Data import writeMidi\n            events = model.transcribe(torch.from_numpy(audio).to(\'\"'\"'cuda\'\"'\"'), stepInSecond=None,\n                segmentSizeInSecond=None, discardSecondHalf=False, mergeIncompleteEvent=True)\n            phase(\'\"'\"'postprocessing\'\"'\"')\n            path = output / \'\"'\"'piano.mid\'\"'\"'; writeMidi(events).write(str(path))\n            tracks, edges = midi_tracks(path, duration); set_tracks(result, tracks)\n            result[\'\"'\"'selection_boundary_processing\'\"'\"'] = edges\n            add_artifact(result, path, \'\"'\"'native_midi\'\"'\"')\n            result[\'\"'\"'processing\'\"'\"'] = {\'\"'\"'upstream\'\"'\"': \'\"'\"'TransKun.transcribe\'\"'\"', \'\"'\"'segment_seconds\'\"'\"': model.segmentSizeInSecond,\n                \'\"'\"'hop_seconds\'\"'\"': model.segmentHopSizeInSecond, \'\"'\"'discardSecondHalf\'\"'\"': False,\n                \'\"'\"'mergeIncompleteEvent\'\"'\"': True, \'\"'\"'pedal_events_preserved\'\"'\"': True}\n        else:\n            from src.evaluation.utils.common import extract_song_features\n            from src.evaluation.utils.inference import predict_sliding_windows\n            config = extras[\'\"'\"'config\'\"'\"']\n            features, hop = extract_song_features(str(source), config)\n            if not np.isfinite(features).all():\n                raise ValueError(\'\"'\"'Nonfinite chord features\'\"'\"')\n            indices = predict_sliding_windows(model, features, extras[\'\"'\"'mean\'\"'\"'], extras[\'\"'\"'std\'\"'\"'],\n                int(config.model[\'\"'\"'seq_len\'\"'\"']), 1, \'\"'\"'BTC\'\"'\"', 170)\n            if len(indices) != len(features):\n                raise ValueError(\'\"'\"'Chord predictions omit input feature frames\'\"'\"')\n            segments = []\n            for index, label_id in enumerate(indices):\n                start, end = min(duration, index*hop), min(duration, (index+1)*hop)\n                label = extras[\'\"'\"'vocabulary\'\"'\"'][int(label_id)]\n                if end <= start:\n                    continue\n                if segments and segments[-1][\'\"'\"'label\'\"'\"'] == label:\n                    segments[-1][\'\"'\"'end_seconds\'\"'\"'] = end\n                else:\n                    segments.append({\'\"'\"'label\'\"'\"': label, \'\"'\"'raw_label\'\"'\"': label, \'\"'\"'start_seconds\'\"'\"': start,\n                                     \'\"'\"'end_seconds\'\"'\"': end, \'\"'\"'score\'\"'\"': None, \'\"'\"'uncertain\'\"'\"': True})\n            result[\'\"'\"'chord_regions\'\"'\"'] = segments\n            trailing = max(0, duration - (segments[-1][\'\"'\"'end_seconds\'\"'\"'] if segments else 0))\n            if trailing > hop + 1 / 8000:\n                raise ValueError(\'\"'\"'Chord features omit more than one trailing native hop\'\"'\"')\n            result[\'\"'\"'processing\'\"'\"'] = {\'\"'\"'batch_size\'\"'\"': 1, \'\"'\"'vocabulary_size\'\"'\"': 170, \'\"'\"'frame_duration_seconds\'\"'\"': hop,\n                \'\"'\"'trailing_uncovered_seconds\'\"'\"': trailing, \'\"'\"'smoothing\'\"'\"': False, \'\"'\"'confidence_calibrated\'\"'\"': False}\n            result[\'\"'\"'warnings\'\"'\"'].append(\'\"'\"'Fixed 170-label vocabulary; arbitrary jazz extensions and inversions are unsupported.\'\"'\"')\n            atomic_json(output / \'\"'\"'chords.json\'\"'\"', segments)\n            (output / \'\"'\"'chords.lab\'\"'\"').write_text(\'\"'\"'\'\"'\"'.join(f\'\"'\"'{s[\"start_seconds\"]:.6f}\\t{s[\"end_seconds\"]:.6f}\\t{s[\"label\"]}\\n\'\"'\"' for s in segments), encoding=\'\"'\"'utf-8\'\"'\"')\n            add_artifact(result, output / \'\"'\"'chords.json\'\"'\"', \'\"'\"'native_chords\'\"'\"')\n            add_artifact(result, output / \'\"'\"'chords.lab\'\"'\"', \'\"'\"'native_chords\'\"'\"')\n    return result\n\n\ndef muscriptor(root, request, source, output, manifest, duration, phase):\n    import numpy as np\n    import torch\n    from muscriptor import TranscriptionModel\n    from muscriptor.events import ProgressEvent\n    phase(\'\"'\"'loading\'\"'\"')\n    model = TranscriptionModel.load_model(weights_path=root / \'\"'\"'models/muscriptor/model.safetensors\'\"'\"',\n                                         device=\'\"'\"'cuda\'\"'\"', dtype=\'\"'\"'float32\'\"'\"')\n    audio, rate = read_audio(source)\n    waveform = torch.from_numpy(np.ascontiguousarray(audio.T))\n    phase(\'\"'\"'running\'\"'\"')\n    events = list(model.transcribe((waveform, rate), use_sampling=False, cfg_coef=1.0,\n        instruments=None, batch_size=1, no_eos_is_ok=False, beam_size=1, prelude_forcing=True))\n    progress = [event for event in events if isinstance(event, ProgressEvent)]\n    if not progress or progress[-1].completed != progress[-1].total:\n        raise ValueError(\'\"'\"'MuScriptor did not finish all audio chunks\'\"'\"')\n    phase(\'\"'\"'postprocessing\'\"'\"')\n    atomic_json(output / \'\"'\"'events.json\'\"'\"', [{\'\"'\"'type\'\"'\"': type(e).__name__, **dataclasses.asdict(e)} for e in events])\n    path = output / \'\"'\"'transcription.mid\'\"'\"'; path.write_bytes(model.events_to_midi_bytes(iter(events)))\n    result = empty_result(request, manifest, duration)\n    tracks, edges = midi_tracks(path, duration); set_tracks(result, tracks)\n    result[\'\"'\"'selection_boundary_processing\'\"'\"'] = edges\n    result[\'\"'\"'processing\'\"'\"'] = {\'\"'\"'use_sampling\'\"'\"': False, \'\"'\"'cfg_coef\'\"'\"': 1.0, \'\"'\"'instruments\'\"'\"': None, \'\"'\"'batch_size\'\"'\"': 1,\n        \'\"'\"'no_eos_is_ok\'\"'\"': False, \'\"'\"'beam_size\'\"'\"': 1, \'\"'\"'prelude_forcing\'\"'\"': True,\n        \'\"'\"'completed_chunks\'\"'\"': progress[-1].completed, \'\"'\"'actual_velocity_prediction\'\"'\"': False,\n        \'\"'\"'midi_tempo_is_export_default\'\"'\"': True}\n    result[\'\"'\"'warnings\'\"'\"'].append(\'\"'\"'MuScriptor MIDI velocity and tempo are export defaults, not measured performance or BPM.\'\"'\"')\n    add_artifact(result, path, \'\"'\"'native_midi\'\"'\"'); add_artifact(result, output / \'\"'\"'events.json\'\"'\"', \'\"'\"'native_events\'\"'\"')\n    return result\n\n\ndef sheetsage2(root, request, source, output, manifest, duration, phase):\n    from transformers import AutoModel\n    phase(\'\"'\"'loading\'\"'\"')\n    model = AutoModel.from_pretrained(str(root / \'\"'\"'models/sheetsage2\'\"'\"'), trust_remote_code=True,\n        local_files_only=True, base_model_path=str(root / \'\"'\"'models/mert2\'\"'\"')).eval().to(\'\"'\"'cuda\'\"'\"')\n    phase(\'\"'\"'running\'\"'\"')\n    native = output / \'\"'\"'native\'\"'\"'; last = [0.0]\n    def progress(event):\n        now = time.monotonic()\n        if now - last[0] > 2:\n            last[0] = now\n            phase(\'\"'\"'running\'\"'\"')\n    raw = model.transcribe(source, output_dir=native, dtype=\'\"'\"'bf16\'\"'\"', preset=\'\"'\"'default\'\"'\"', progress=progress)\n    if abs(raw[\'\"'\"'duration_seconds\'\"'\"'] - duration) > .15:\n        raise ValueError(\'\"'\"'SheetSage2 duration does not match the complete submitted audio\'\"'\"')\n    phase(\'\"'\"'postprocessing\'\"'\"')\n    result = empty_result(request, manifest, duration)\n    result.update(score_events(raw[\'\"'\"'events\'\"'\"'], duration))\n    # Melody MIDI contains actual model-predicted melody. Chord playback MIDI is\n    # derived from symbolic labels and is not relabelled as note transcription.\n    tracks, edges = midi_tracks(native / \'\"'\"'melody.mid\'\"'\"', duration); set_tracks(result, tracks)\n    result[\'\"'\"'selection_boundary_processing\'\"'\"'] = edges\n    for name, role in ((\'\"'\"'melody.mid\'\"'\"', \'\"'\"'native_midi\'\"'\"'), (\'\"'\"'events.json\'\"'\"', \'\"'\"'native_events\'\"'\"'),\n                       (\'\"'\"'score.abc\'\"'\"', \'\"'\"'score\'\"'\"'), (\'\"'\"'chord.lab\'\"'\"', \'\"'\"'native_chords\'\"'\"'),\n                       (\'\"'\"'structure.lab\'\"'\"', \'\"'\"'native_structure\'\"'\"'), (\'\"'\"'beat.lab\'\"'\"', \'\"'\"'native_beats\'\"'\"')):\n        path = native / name\n        if path.is_file() and path.stat().st_size:\n            shutil.copyfile(path, output / name); add_artifact(result, output / name, role)\n    result[\'\"'\"'processing\'\"'\"'] = {\'\"'\"'preset\'\"'\"': \'\"'\"'default\'\"'\"', \'\"'\"'dtype\'\"'\"': \'\"'\"'bf16\'\"'\"', \'\"'\"'window_seconds\'\"'\"': raw[\'\"'\"'window_seconds\'\"'\"'],\n        \'\"'\"'windows\'\"'\"': raw[\'\"'\"'windows\'\"'\"'], \'\"'\"'complete_input\'\"'\"': True, \'\"'\"'midi_velocity_is_export_default\'\"'\"': True,\n        \'\"'\"'token_limit_reached\'\"'\"': any(w[\'\"'\"'tokens\'\"'\"'] >= int(model.max_output_seq_len) for w in raw[\'\"'\"'windows\'\"'\"'])}\n    result[\'\"'\"'warnings\'\"'\"'] += [str(w)[:500] for w in raw.get(\'\"'\"'warnings\'\"'\"', [])[:20]]\n    if raw.get(\'\"'\"'abc_error\'\"'\"'):\n        result[\'\"'\"'warnings\'\"'\"'].append(\'\"'\"'ABC export unavailable: \'\"'\"' + str(raw[\'\"'\"'abc_error\'\"'\"'])[:300])\n    return result\n\n\ndef ace(root, request, output, manifest, phase):\n    sys.path.insert(0, str(root / \'\"'\"'tools\'\"'\"'))\n    from ace_worker import AceGenerator\n    generator = AceGenerator(root)\n    original = generator(request[\'\"'\"'parameters\'\"'\"'], output, phase, lambda: False)\n    artifact = original[\'\"'\"'artifacts\'\"'\"'][0]\n    result = empty_result(request, manifest, artifact[\'\"'\"'duration_seconds\'\"'\"'])\n    result[\'\"'\"'model\'\"'\"'].update(original[\'\"'\"'model\'\"'\"']); result[\'\"'\"'model\'\"'\"'][\'\"'\"'id\'\"'\"'] = request[\'\"'\"'model_id\'\"'\"']\n    result[\'\"'\"'conditioning\'\"'\"'] = original[\'\"'\"'conditioning\'\"'\"']; result[\'\"'\"'metrics\'\"'\"'].update(original[\'\"'\"'metrics\'\"'\"'])\n    add_artifact(result, output / \'\"'\"'audio.wav\'\"'\"', \'\"'\"'generated_audio\'\"'\"')\n    result[\'\"'\"'truncated\'\"'\"'] = None\n    return result\n\n\ndef yue2(root, request, output, manifest, phase):\n    import soundfile as sf\n    from yue2 import YuE2Pipeline\n    from yue2.pipeline import SongResult\n    from yue2.protocol import GenerationConfig, make_request\n    from yue2.storage import identity\n    parameters = request[\'\"'\"'parameters\'\"'\"']\n    maximum = int(math.ceil(parameters[\'\"'\"'duration_seconds\'\"'\"'] * 25))\n    minimum = max(32, int(maximum * .9))\n    config = GenerationConfig.from_dict({\'\"'\"'semantic\'\"'\"': {\'\"'\"'min_tokens\'\"'\"': minimum, \'\"'\"'max_tokens\'\"'\"': maximum}})\n    style = parameters[\'\"'\"'prompt\'\"'\"'] + \'\"'\"'\\nRequested tempo: \'\"'\"' + str(parameters[\'\"'\"'bpm\'\"'\"']) + \'\"'\"' BPM. Meter: \'\"'\"' + parameters[\'\"'\"'time_signature\'\"'\"'] + \'\"'\"'.\'\"'\"'\n    if parameters[\'\"'\"'instrumental\'\"'\"']:\n        style += \'\"'\"' Instrumental; no full sung vocal.\'\"'\"'\n    typed = make_request(id=request[\'\"'\"'request_id\'\"'\"'], style=style, lyrics=parameters[\'\"'\"'lyrics\'\"'\"'], cot=\'\"'\"'full\'\"'\"', seed=parameters[\'\"'\"'seed\'\"'\"'])\n    model = root / \'\"'\"'models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1\'\"'\"'\n    vae = root / \'\"'\"'models/yue2/YuE2-Vae/152733a19ad43aa67e367f9b5503ef8075bb5126\'\"'\"'\n    phase(\'\"'\"'loading\'\"'\"')\n    with YuE2Pipeline.from_pretrained(str(model), vae=str(vae), local_files_only=True, device=\'\"'\"'cuda\'\"'\"',\n            backend=\'\"'\"'torch-eager\'\"'\"', low_vram=True, memory_budget_gib=12, vae_core_frames=512,\n            generation_config=config, progress=False) as pipe:\n        effective = pipe.effective_config(typed)\n        job_identity = identity({\'\"'\"'request\'\"'\"': typed.to_dict(), \'\"'\"'config\'\"'\"': effective, \'\"'\"'weights\'\"'\"': pipe.weights})\n        phase(\'\"'\"'running\'\"'\"'); began = time.perf_counter()\n        plan = pipe.plan(request=typed); plan.save(output / \'\"'\"'plan\'\"'\"')\n        semantic = pipe.generate_semantic(plan)\n        latents = pipe.synthesize(semantic)\n        audio = pipe.decode(latents)\n        native = SongResult(audio, 48000, semantic, latents, effective, pipe.weights,\n            {\'\"'\"'e2e_seconds\'\"'\"': time.perf_counter()-began}, job_identity)\n        phase(\'\"'\"'postprocessing\'\"'\"')\n        native.save(output / \'\"'\"'native-audio.wav\'\"'\"')\n        samples, rate = sf.read(output / \'\"'\"'native-audio.wav\'\"'\"', dtype=\'\"'\"'float32\'\"'\"', always_2d=True)\n        # Upstream clamps its decoded audio; only encoding changes here. Keep the\n        # float original on the cloud and declare the portable PCM16 conversion.\n        sf.write(output / \'\"'\"'audio.wav\'\"'\"', samples, rate, subtype=\'\"'\"'PCM_16\'\"'\"')\n        result = empty_result(request, manifest, len(samples) / rate)\n        result[\'\"'\"'conditioning\'\"'\"'] = {\'\"'\"'requested_duration_seconds\'\"'\"': parameters[\'\"'\"'duration_seconds\'\"'\"'],\n            \'\"'\"'bpm\'\"'\"': parameters[\'\"'\"'bpm\'\"'\"'], \'\"'\"'time_signature\'\"'\"': parameters[\'\"'\"'time_signature\'\"'\"'],\n            \'\"'\"'timing_is_exact\'\"'\"': False, \'\"'\"'semantic_min_tokens\'\"'\"': minimum, \'\"'\"'semantic_max_tokens\'\"'\"': maximum,\n            \'\"'\"'style_conditioning\'\"'\"': style, \'\"'\"'post_crop\'\"'\"': False}\n        result[\'\"'\"'truncated\'\"'\"'] = native.truncated\n        result[\'\"'\"'processing\'\"'\"'] = {\'\"'\"'semantic_tokens\'\"'\"': len(semantic.tokens), \'\"'\"'abc_tokens\'\"'\"': len(plan.abc_ids),\n            \'\"'\"'effective_generation_config\'\"'\"': effective, \'\"'\"'memory_budget_gib\'\"'\"': 12,\n            \'\"'\"'output_conversion\'\"'\"': \'\"'\"'upstream FLOAT to PCM16; no duration crop\'\"'\"'}\n        result[\'\"'\"'warnings\'\"'\"'].append(\'\"'\"'Duration uses semantic token limits; natural stopping, song structure and tempo adherence require listening.\'\"'\"')\n        add_artifact(result, output / \'\"'\"'audio.wav\'\"'\"', \'\"'\"'generated_audio\'\"'\"')\n        if (output / \'\"'\"'plan/score.abc\'\"'\"').is_file():\n            shutil.copyfile(output / \'\"'\"'plan/score.abc\'\"'\"', output / \'\"'\"'score.abc\'\"'\"')\n            add_artifact(result, output / \'\"'\"'score.abc\'\"'\"', \'\"'\"'generated_score\'\"'\"')\n        return result\n'\"'\"'
+scope={'\"'\"'__name__'\"'\"':'\"'\"'compute.cpu_audio_fix_check'\"'\"','\"'\"'__package__'\"'\"':'\"'\"'compute'\"'\"'}
+exec(compile(source,'\"'\"'reviewed-adapters.py'\"'\"','\"'\"'exec'\"'\"'),scope)
+original=builtins.__import__
+attempted=[]
+def guarded(name,*args,**kwargs):
+ if name=='\"'\"'scipy'\"'\"' or name.startswith('\"'\"'scipy.'\"'\"'):
+  attempted.append(name)
+  raise ModuleNotFoundError('\"'\"'SciPy deliberately disabled for this CPU check'\"'\"')
+ return original(name,*args,**kwargs)
+builtins.__import__=guarded
+audio,rate=scope['\"'\"'read_audio'\"'\"'](Path('\"'\"'/root/autodl-tmp/emusician/assets/compute/c786944a33722655677ed2ee5a1b39d9f7527f4cf23129eac0d36cb63569c1b6.wav'\"'\"'))
+assert len(audio)==rate*8 and audio.shape[1]==2 and attempted==[]
+assert '\"'\"'torch'\"'\"' not in sys.modules
+print(json.dumps({'\"'\"'passed'\"'\"':True,'\"'\"'adapter_sha256'\"'\"':'\"'\"'90304d14bb1c30ddeb36c3264c9ae7bd2eb8049fbd15a157ecc7467ea80410a2'\"'\"','\"'\"'frames'\"'\"':len(audio),'\"'\"'sample_rate'\"'\"':rate,'\"'\"'channels'\"'\"':audio.shape[1],'\"'\"'scipy_present'\"'\"':importlib.util.find_spec('\"'\"'scipy'\"'\"') is not None,'\"'\"'scipy_import_attempts'\"'\"':attempted,'\"'\"'torch_imported'\"'\"':False,'\"'\"'gpu_inference'\"'\"':False,'\"'\"'live_release_modified'\"'\"':False}))
+'"`
+- Context: Execute reviewed adapter source in memory inside existing MuScriptor env; original 8s submitted WAV, SciPy import forbidden, no Torch/model/GPU import, no deployment or disk source change.
+- Source SHA-256: `f3b50c0925cd40f4e12fad7ee9fe8ea4b2c63ced811c23d630086f922db1c1fd`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181755.516471Z-dfe367ba66.json) · [Raw log](../build-logs/20261106T181755.516471Z-dfe367ba66.log)
+- [Exact process output](../build-logs/20261106T181755.516471Z-dfe367ba66.raw.log)
+
+### 2026-11-07T02:19:01+08:00 · compute-service-deployment · succeeded
+
+- Config: Linux/stdlib protocol2; exit code: 0; elapsed: 0.817s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=15 emusician-autodl "mkdir -p /root/autodl-tmp/emusician/deployments/compute/ed7d6a920487a651c988/compute"`
+- Context: Explicit idle-service migration; versioned scripts and hashes; no inference, no model/environment changes
+- Source SHA-256: `631ea275f3edb3bb1f363870dcd41bbf1fb3fe249c0db99e47be598751f5a776`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181901.339288Z-306cb58299.json) · [Raw log](../build-logs/20261106T181901.339288Z-306cb58299.log)
+- [Exact process output](../build-logs/20261106T181901.339288Z-306cb58299.raw.log)
+
+### 2026-11-07T02:19:02+08:00 · compute-service-deployment · succeeded
+
+- Config: Linux/stdlib protocol2; exit code: 0; elapsed: 1.221s.
+- Command: `scp -q -o BatchMode=yes E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\__init__.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\adapters.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\catalog.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\normalize.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\preflight.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\protocol.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\server.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\start.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\store.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\supervisor.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\compute\worker.py emusician-autodl:/root/autodl-tmp/emusician/deployments/compute/ed7d6a920487a651c988/compute/`
+- Context: Explicit idle-service migration; versioned scripts and hashes; no inference, no model/environment changes
+- Source SHA-256: `631ea275f3edb3bb1f363870dcd41bbf1fb3fe249c0db99e47be598751f5a776`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181902.493483Z-3d01dfd65e.json) · [Raw log](../build-logs/20261106T181902.493483Z-3d01dfd65e.log)
+- [Exact process output](../build-logs/20261106T181902.493483Z-3d01dfd65e.raw.log)
+
+### 2026-11-07T02:19:04+08:00 · compute-service-deployment · succeeded
+
+- Config: Linux/stdlib protocol2; exit code: 0; elapsed: 0.882s.
+- Command: `scp -q -o BatchMode=yes E:\MusicAgent&DAW\worktrees\audio-analysis\build\compute-deployment\ed7d6a920487a651c988\SHA256.json E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\install_compute.py emusician-autodl:/root/autodl-tmp/emusician/deployments/compute/ed7d6a920487a651c988/`
+- Context: Explicit idle-service migration; versioned scripts and hashes; no inference, no model/environment changes
+- Source SHA-256: `631ea275f3edb3bb1f363870dcd41bbf1fb3fe249c0db99e47be598751f5a776`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181904.204336Z-b1bea82f52.json) · [Raw log](../build-logs/20261106T181904.204336Z-b1bea82f52.log)
+- [Exact process output](../build-logs/20261106T181904.204336Z-b1bea82f52.raw.log)
+
+### 2026-11-07T02:19:05+08:00 · compute-service-deployment · succeeded
+
+- Config: Linux/stdlib protocol2; exit code: 0; elapsed: 1.243s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=15 emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/deployments/compute/ed7d6a920487a651c988/install_compute.py --release /root/autodl-tmp/emusician/deployments/compute/ed7d6a920487a651c988"`
+- Context: Explicit idle-service migration; versioned scripts and hashes; no inference, no model/environment changes
+- Source SHA-256: `631ea275f3edb3bb1f363870dcd41bbf1fb3fe249c0db99e47be598751f5a776`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181905.422498Z-e48ca78d64.json) · [Raw log](../build-logs/20261106T181905.422498Z-e48ca78d64.log)
+- [Exact process output](../build-logs/20261106T181905.422498Z-e48ca78d64.raw.log)
+
+### 2026-11-07T02:19:20+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 247.685s.
+- Command: `C:/Python314/python.exe tests/HybridComputeEndToEnd.py --exe E:/emusician-analysis-build/bin-0.13.0/Release/E-musician.exe --out E:/MusicAgent&DAW/cloud-inference/experiments/hybrid-final-20261107-v3`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `631ea275f3edb3bb1f363870dcd41bbf1fb3fe249c0db99e47be598751f5a776`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T181920.081847Z-0bf7c34997.json) · [Raw log](../build-logs/20261106T181920.081847Z-0bf7c34997.log)
+- [Exact process output](../build-logs/20261106T181920.081847Z-0bf7c34997.raw.log)
+
+### 2026-11-07T02:23:45+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 3.829s.
+- Command: `C:/Python314/python.exe scripts/verify_hybrid_release.py --build 20261106T181155.738154Z-4a8b781c23 --ctest 20261106T181327.714250Z-f588fd28c2 --e2e E:/MusicAgent&DAW/cloud-inference/experiments/hybrid-final-20261107-v3/report.json`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `631ea275f3edb3bb1f363870dcd41bbf1fb3fe249c0db99e47be598751f5a776`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T182345.994688Z-e9e4aa7d0b.json) · [Raw log](../build-logs/20261106T182345.994688Z-e9e4aa7d0b.log)
+- [Exact process output](../build-logs/20261106T182345.994688Z-e9e4aa7d0b.raw.log)
+
+### 2026-11-07T02:25:25+08:00 · cloud-compute-final-audit · succeeded
+
+- Config: read-only/Linux; exit code: 0; elapsed: 1.053s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=15 emusician-autodl "/root/miniconda3/bin/python -c 'from pathlib import Path
+import hashlib,json,sqlite3,subprocess,shutil,urllib.request,datetime
+root=Path('\"'\"'/root/autodl-tmp/emusician'\"'\"')
+expected={'\"'\"'files'\"'\"': {'\"'\"'compute/__init__.py'\"'\"': '\"'\"'1f84a53b9a286eb8df93a61367237b7612b90ee40d69f2fed8fb9cca4eb47ffd'\"'\"', '\"'\"'compute/adapters.py'\"'\"': '\"'\"'90304d14bb1c30ddeb36c3264c9ae7bd2eb8049fbd15a157ecc7467ea80410a2'\"'\"', '\"'\"'compute/catalog.py'\"'\"': '\"'\"'b3ac3668e2e1170441f1eb1637e6c61760947868fba5be44d68d666294696c50'\"'\"', '\"'\"'compute/normalize.py'\"'\"': '\"'\"'d2e4d34e25305db211b75f3ea3130d3df01a3c7d8d60693a52b4c13af8951a43'\"'\"', '\"'\"'compute/preflight.py'\"'\"': '\"'\"'c3bf06d655200c6d1071341ba57155d11fdee0222765e401f6ac99b2232b3f81'\"'\"', '\"'\"'compute/protocol.py'\"'\"': '\"'\"'37e12096c3f3d6267e96577d0331138eddece7c7f080e4059c19e7d82bd5345d'\"'\"', '\"'\"'compute/server.py'\"'\"': '\"'\"'69ec7b01992e2298053b8bed9b628b0640600e749a4a7c0c642905b6b93614a4'\"'\"', '\"'\"'compute/start.py'\"'\"': '\"'\"'a407b91ddab7240230afafdf6688ce150fe25beb77810626d9064e440960037c'\"'\"', '\"'\"'compute/store.py'\"'\"': '\"'\"'80fea92cb706658e6ad21b2ccaf495e3d344ea6d7e857b588f3fbe14ce70aef8'\"'\"', '\"'\"'compute/supervisor.py'\"'\"': '\"'\"'7146fbe763232e6dea22e3c508b5b89fbba5e44b75e9a099e2b38796bb7b5582'\"'\"', '\"'\"'compute/worker.py'\"'\"': '\"'\"'e85ca9d90acc528e07636a790f50c78fffd69d581f0c5ec586d8e085377b0cd6'\"'\"', '\"'\"'install_compute.py'\"'\"': '\"'\"'91eec0588b1baa0f842c779ff5168cc387a4ca178691f3dac514c5263cc585d8'\"'\"'}, '\"'\"'dependencies'\"'\"': {'\"'\"'tools/ace_worker.py'\"'\"': '\"'\"'501fc1a6faae09957e82b1ace8edf86a5c0eee5f8ae50ac9ddfbe2550eb3999d'\"'\"', '\"'\"'tools/models/mir_upgrades/runtime.py'\"'\"': '\"'\"'1ed93b588a631f2692cdcfd8bd59a6fd5c6a768fe38e6708e13e15bc66930c2f'\"'\"'}}
+release=(root/'\"'\"'tools/compute'\"'\"').resolve().parent
+assert release==root/'\"'\"'deployments/compute/ed7d6a920487a651c988'\"'\"'
+manifest=json.loads((release/'\"'\"'SHA256.json'\"'\"').read_text())
+assert manifest==expected
+def digest(path):
+ h=hashlib.sha256()
+ with path.open('\"'\"'rb'\"'\"') as stream:
+  for block in iter(lambda:stream.read(1048576),b'\"'\"''\"'\"'): h.update(block)
+ return h.hexdigest()
+files={relative:digest(release/relative) for relative in expected['\"'\"'files'\"'\"']}
+dependencies={relative:digest(root/relative) for relative in expected['\"'\"'dependencies'\"'\"']}
+assert files==expected['\"'\"'files'\"'\"'] and dependencies==expected['\"'\"'dependencies'\"'\"']
+assert (root/'\"'\"'tools/compute_start.py'\"'\"').resolve()==release/'\"'\"'compute/start.py'\"'\"'
+marker=json.loads((root/'\"'\"'state/compute-migration-complete.json'\"'\"').read_text())
+assert marker['\"'\"'release'\"'\"']==str(release)
+with urllib.request.build_opener(urllib.request.ProxyHandler({})).open('\"'\"'http://127.0.0.1:18082/health'\"'\"',timeout=5) as response:
+ health=json.loads(response.read(8192))
+assert health['\"'\"'service'\"'\"']=='\"'\"'emusician-compute'\"'\"' and health['\"'\"'protocol_version'\"'\"']==2 and health['\"'\"'status'\"'\"']=='\"'\"'ready'\"'\"'
+db=sqlite3.connect('\"'\"'file:'\"'\"'+str(root/'\"'\"'state/compute.sqlite3'\"'\"')+'\"'\"'?mode=ro'\"'\"',uri=True,timeout=3)
+try:
+ active=[dict(zip(('\"'\"'id'\"'\"','\"'\"'status'\"'\"','\"'\"'phase'\"'\"'),row)) for row in db.execute(\"select id,status,phase from jobs where status not in ('\"'\"'ready'\"'\"','\"'\"'failed'\"'\"','\"'\"'cancelled'\"'\"','\"'\"'interrupted'\"'\"')\")]
+ statuses=dict(db.execute('\"'\"'select status,count(*) from jobs group by status'\"'\"'))
+finally: db.close()
+assert active==[]
+pid=int((root/'\"'\"'state/compute.pid'\"'\"').read_text())
+cmd=(Path('\"'\"'/proc'\"'\"')/str(pid)/'\"'\"'cmdline'\"'\"').read_bytes().replace(b'\"'\"'\0'\"'\"',b'\"'\"' '\"'\"')
+assert b'\"'\"'/tools/compute/server.py'\"'\"' in cmd
+gpu=subprocess.run(['\"'\"'nvidia-smi'\"'\"','\"'\"'--query-gpu=name,memory.total,memory.used,memory.free,utilization.gpu'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'],check=True,capture_output=True,text=True,timeout=10).stdout.strip()
+processes=subprocess.run(['\"'\"'nvidia-smi'\"'\"','\"'\"'--query-compute-apps=pid,used_memory'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'],check=True,capture_output=True,text=True,timeout=10).stdout.strip()
+disk=shutil.disk_usage(root)
+print(json.dumps({'\"'\"'passed'\"'\"':True,'\"'\"'checked_at'\"'\"':datetime.datetime.now(datetime.timezone.utc).isoformat(),'\"'\"'release'\"'\"':str(release),'\"'\"'health'\"'\"':health,'\"'\"'active_jobs'\"'\"':active,'\"'\"'job_status_counts'\"'\"':statuses,'\"'\"'service_pid'\"'\"':pid,'\"'\"'process_identity_verified'\"'\"':True,'\"'\"'deployment_manifest_matches_local'\"'\"':True,'\"'\"'files_verified'\"'\"':files,'\"'\"'dependencies_verified'\"'\"':dependencies,'\"'\"'gpu_fields'\"'\"':['\"'\"'name'\"'\"','\"'\"'total_MiB'\"'\"','\"'\"'used_MiB'\"'\"','\"'\"'free_MiB'\"'\"','\"'\"'utilization_percent'\"'\"'],'\"'\"'gpu'\"'\"':gpu,'\"'\"'compute_processes'\"'\"':processes,'\"'\"'disk'\"'\"':{'\"'\"'total_bytes'\"'\"':disk.total,'\"'\"'used_bytes'\"'\"':disk.used,'\"'\"'free_bytes'\"'\"':disk.free},'\"'\"'operations'\"'\"':'\"'\"'read-only; no service/model/instance changes'\"'\"'}))
+'"`
+- Context: After seven-model v3 acceptance: health, readonly SQLite active queue, GPU/disk snapshot and active release source hashes vs exact local deployment manifest. No inference, restart or instance shutdown.
+- Source SHA-256: `631ea275f3edb3bb1f363870dcd41bbf1fb3fe249c0db99e47be598751f5a776`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T182525.349778Z-84292ed08c.json) · [Raw log](../build-logs/20261106T182525.349778Z-84292ed08c.log)
+- [Exact process output](../build-logs/20261106T182525.349778Z-84292ed08c.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-07T02:26:43+08:00 · hybrid-yue-real-shape-contract · succeeded
+
+- Config: Python; exit code: 0; elapsed: 3.096s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_compute_generation.py -v`
+- Context: Regression for actual YuE2 stage-dictionary truncation discovered in real v3 receipt. Canonical bool/null plus preserved stages; malformed input rejects publication. E2E asserts Agent projection and saved provenance. Mock transport and real PCM only, no GPU/LLM.
+- Source SHA-256: `1d2d6d1af490886906eca0f11a5dd70cdcf9339013206c5c0cf4ad4026f8ce39`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T182643.646322Z-809a94ef2a.json) · [Raw log](../build-logs/20261106T182643.646322Z-809a94ef2a.log)
+- [Exact process output](../build-logs/20261106T182643.646322Z-809a94ef2a.raw.log)
+
+### 2026-11-07T02:26:47+08:00 · hybrid-yue-real-shape-contract · succeeded
+
+- Config: Python; exit code: 0; elapsed: 0.541s.
+- Command: `C:\Python314\python.exe -m py_compile tests/HybridComputeEndToEnd.py`
+- Context: Regression for actual YuE2 stage-dictionary truncation discovered in real v3 receipt. Canonical bool/null plus preserved stages; malformed input rejects publication. E2E asserts Agent projection and saved provenance. Mock transport and real PCM only, no GPU/LLM.
+- Source SHA-256: `1d2d6d1af490886906eca0f11a5dd70cdcf9339013206c5c0cf4ad4026f8ce39`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T182647.045630Z-8b8bc26332.json) · [Raw log](../build-logs/20261106T182647.045630Z-8b8bc26332.log)
+- [Exact process output](../build-logs/20261106T182647.045630Z-8b8bc26332.raw.log)
+
+### 2026-11-07T02:27:37+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 72.886s.
+- Command: `C:/Python314/python.exe tests/HybridComputeEndToEnd.py --exe E:/emusician-analysis-build/bin-0.13.0/Release/E-musician.exe --models yue2 --out E:/MusicAgent&DAW/cloud-inference/experiments/hybrid-final-20261107-v4-yue2`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `90109dde805eabe95f85d07780ea0bd171c07ec80b14de93c8a99eece940b3f8`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T182737.873455Z-b33b832482.json) · [Raw log](../build-logs/20261106T182737.873455Z-b33b832482.log)
+- [Exact process output](../build-logs/20261106T182737.873455Z-b33b832482.raw.log)
+
+### 2026-11-07T02:30:07+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 1.505s.
+- Command: `C:/Python314/python.exe scripts/verify_hybrid_release.py --build 20261106T181155.738154Z-4a8b781c23 --ctest 20261106T181327.714250Z-f588fd28c2 --e2e E:/MusicAgent&DAW/cloud-inference/experiments/hybrid-final-20261107-v3/report.json E:/MusicAgent&DAW/cloud-inference/experiments/hybrid-final-20261107-v4-yue2/report.json`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `90109dde805eabe95f85d07780ea0bd171c07ec80b14de93c8a99eece940b3f8`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T183007.850857Z-cb271dcfb9.json) · [Raw log](../build-logs/20261106T183007.850857Z-cb271dcfb9.log)
+- [Exact process output](../build-logs/20261106T183007.850857Z-cb271dcfb9.raw.log)
+
+### 2026-11-07T02:30:17+08:00 · cloud-compute-final-after-yue2 · succeeded
+
+- Config: read-only/Linux; exit code: 0; elapsed: 1.295s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=15 emusician-autodl "/root/miniconda3/bin/python -c 'from pathlib import Path
+import datetime,json,sqlite3,subprocess,urllib.request
+root=Path('\"'\"'/root/autodl-tmp/emusician'\"'\"')
+with urllib.request.build_opener(urllib.request.ProxyHandler({})).open('\"'\"'http://127.0.0.1:18082/health'\"'\"',timeout=5) as response: health=json.loads(response.read(8192))
+assert health['\"'\"'service'\"'\"']=='\"'\"'emusician-compute'\"'\"' and health['\"'\"'protocol_version'\"'\"']==2 and health['\"'\"'status'\"'\"']=='\"'\"'ready'\"'\"'
+db=sqlite3.connect('\"'\"'file:'\"'\"'+str(root/'\"'\"'state/compute.sqlite3'\"'\"')+'\"'\"'?mode=ro'\"'\"',uri=True,timeout=3)
+try: active=[dict(zip(('\"'\"'id'\"'\"','\"'\"'status'\"'\"','\"'\"'phase'\"'\"'),row)) for row in db.execute(\"select id,status,phase from jobs where status not in ('\"'\"'ready'\"'\"','\"'\"'failed'\"'\"','\"'\"'cancelled'\"'\"','\"'\"'interrupted'\"'\"')\")]
+finally: db.close()
+assert active==[]
+gpu=subprocess.run(['\"'\"'nvidia-smi'\"'\"','\"'\"'--query-gpu=name,memory.total,memory.used,memory.free,utilization.gpu'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'],check=True,capture_output=True,text=True,timeout=10).stdout.strip()
+processes=subprocess.run(['\"'\"'nvidia-smi'\"'\"','\"'\"'--query-compute-apps=pid,used_memory'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'],check=True,capture_output=True,text=True,timeout=10).stdout.strip()
+print(json.dumps({'\"'\"'passed'\"'\"':True,'\"'\"'checked_at'\"'\"':datetime.datetime.now(datetime.timezone.utc).isoformat(),'\"'\"'health'\"'\"':health,'\"'\"'active_jobs'\"'\"':active,'\"'\"'gpu_fields'\"'\"':['\"'\"'name'\"'\"','\"'\"'total_MiB'\"'\"','\"'\"'used_MiB'\"'\"','\"'\"'free_MiB'\"'\"','\"'\"'utilization_percent'\"'\"'],'\"'\"'gpu'\"'\"':gpu,'\"'\"'compute_processes'\"'\"':processes,'\"'\"'operations'\"'\"':'\"'\"'read-only health/queue/GPU; no hash rescan, inference or service/instance change'\"'\"'}))
+'"`
+- Context: After v4 YuE2 canonical truncation metadata acceptance: read health/queue/GPU only. No repeat model/code hashing or inference.
+- Source SHA-256: `90109dde805eabe95f85d07780ea0bd171c07ec80b14de93c8a99eece940b3f8`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T183017.413164Z-2916902393.json) · [Raw log](../build-logs/20261106T183017.413164Z-2916902393.log)
+- [Exact process output](../build-logs/20261106T183017.413164Z-2916902393.raw.log)
+
+### 2026-11-07T02:33:04+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 5.433s.
+- Command: `C:/Python314/python.exe build/package-hybrid-final.py`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `90109dde805eabe95f85d07780ea0bd171c07ec80b14de93c8a99eece940b3f8`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T183304.987759Z-011f2a842f.json) · [Raw log](../build-logs/20261106T183304.987759Z-011f2a842f.log)
+- [Exact process output](../build-logs/20261106T183304.987759Z-011f2a842f.raw.log)
+
+## 2026-11-07 — 0.13.0 架构 2–4 最终候选
+
+- 完成统一云任务/单GPU隔离、Auto/Local/Cloud及模型契约、手动与Agent共同候选/接受、schema8踏板/通道/和弦/拍点/段落持久化。生成支持ACE/YuE2，截断归一化并保留分阶段回执。
+- 最终原生build 4a8b781c23；CTest f588fd28c2 11/11；Agent349、传输16+11、生成7、真实v3七模型及v4 YuE2加强元数据检查通过。最后核查cb271dcfb9确认356源码输入、EXE d5579acb…283f、工程/旧版本SHA与实际部署源码。模型短样本成功不代表音乐准确率或硬件听感通过。
+- 真实失败保留：编译动态key歧义、Windows进度文件共享占用、C盘测试磁盘保护、MuScriptor无用SciPy依赖、YuE2字典截断字段；修复均有针对性证据。测试临时与新入口PCM缓存放E盘，不清理用户C盘文件。
+- 云端release ed7d6a920487a651c988，七模型队列收尾为空、GPU0MiB；未关闭租用实例。未下载新模型权重到E。没有本轮真实LLM调用。
+- 交付入口：E:/MusicAgent&DAW/Start E-musician 0.13.0 Hybrid.cmd；VS Code为E-musician-Hybrid.code-workspace；保留包releases/0.13.0-20261107-hybrid，源码zip及EXE/PDB/入口逐项SHA与zip成员核对通过（011f2a842f）。此保留包不是独立安装器，依赖本机现有模型运行库和SSH配置。
+- 当前工作树仍E盘audio-analysis；功能分支feature/hybrid-pipeline-v0130，main不自动合并。代码同步状态以本轮PUBLISH.json为准。下一步按最终MANUAL-CHECK集中人工验收ASIO/键盘/鼠标/听感与自然语言意图；持续断网跨应用自动任务恢复和模型质量不冒称完成。
+
+### 2026-11-07T02:34:58+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 15.664s.
+- Command: `C:/Python314/python.exe build/audit-hybrid-staged.py`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `90109dde805eabe95f85d07780ea0bd171c07ec80b14de93c8a99eece940b3f8`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
+- [Record](builds/20261106T183458.862437Z-fdc56e6906.json) · [Raw log](../build-logs/20261106T183458.862437Z-fdc56e6906.log)
+- [Exact process output](../build-logs/20261106T183458.862437Z-fdc56e6906.raw.log)

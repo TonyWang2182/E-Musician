@@ -22,6 +22,7 @@ juce::Result canonicalTrackColour(const juce::var& value, juce::String& result)
     return juce::Result::ok();
 }
 #include "ProjectStorageWarp.inc"
+#include "ProjectStorageHybrid.inc"
 namespace {
 using juce::File;
 using juce::Result;
@@ -247,8 +248,8 @@ Result readJson(const File& file, juce::MemoryBlock& bytes, var& parsed)
 
 Result validateProject(const StoredProject& project, bool allowLegacy, bool verifySources)
 {
-    if (project.schemaVersion != 4 && project.schemaVersion != 5 && project.schemaVersion != 6 && project.schemaVersion != 7 && !(allowLegacy && project.schemaVersion >= 1 && project.schemaVersion <= 3))
-        return Result::fail("Saving requires a fully resolved schema 4 through 7 project.");
+    if (project.schemaVersion != 4 && project.schemaVersion != 5 && project.schemaVersion != 6 && project.schemaVersion != 7 && project.schemaVersion != 8 && !(allowLegacy && project.schemaVersion >= 1 && project.schemaVersion <= 3))
+        return Result::fail("Saving requires a fully resolved schema 4 through 8 project.");
     if (auto result=validateAnalysis(project);result.failed())return result;
     if (!validIdentifier(project.projectId)) return Result::fail("The project ID is missing or invalid.");
     if (project.revision > static_cast<std::uint64_t>(std::numeric_limits<juce::int64>::max()))
@@ -325,6 +326,7 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
             if (!validIdentifier(clip.id) || !clipIds.insert(clip.id.toLowerCase()).second)
                 return Result::fail("Clip IDs must be valid and unique across all tracks.");
             if(clip.analysisRole.isNotEmpty()&&(project.schemaVersion<5||clip.kind!="audio"||(clip.analysisRole!="vocals"&&clip.analysisRole!="drums"&&clip.analysisRole!="bass"&&clip.analysisRole!="other"&&clip.analysisRole!="piano"&&clip.analysisRole!="guitar")))return Result::fail("Invalid clip analysis role.");
+            if(clip.midiChannel<0||clip.midiChannel>16||(clip.midiChannel!=0&&(project.schemaVersion<8||clip.kind!="midi")))return Result::fail("Invalid explicit MIDI clip channel.");
             const auto& warp=clip.warp;
             if(warp.enabled){
                 if(project.schemaVersion<6||clip.kind!="audio"||warp.mode!="preserve_pitch"
@@ -367,7 +369,7 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
                 for (const auto& note : clip.notes) {
                     if (!validIdentifier(note.id) || !noteIds.insert(note.id.toLowerCase()).second)
                         return Result::fail("Note IDs must be valid and unique across the project.");
-                    if (note.channel != clip.notes.front().channel)
+                    if (note.channel != clip.notes.front().channel || (clip.midiChannel>0&&note.channel!=clip.midiChannel))
                         return Result::fail("All notes in one MIDI clip must use the same MIDI channel.");
                     if (note.pitch < 0 || note.pitch > 127 || note.velocity < 1 || note.velocity > 127
                         || note.channel < 1 || note.channel > 16 || !std::isfinite(note.startBeats)
@@ -882,7 +884,7 @@ Result validate(const StoredProject& project)
     return validateProject(project, false, false);
 }
 
-bool isSupportedChordLabel(const juce::String& label) { return validChordLabel(label); }
+bool isLegacyChordLabel(const juce::String& label) { return validChordLabel(label); }
 
 Result save(const File& target, const StoredProject& project, StoredProject& archived, const IOOptions& options)
 {
@@ -912,7 +914,7 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
             return Result::fail("Cannot safely inspect the existing project before replacement: " + result.getErrorMessage());
         const auto* object = previous.getDynamicObject();
         const auto schema = object != nullptr ? object->getProperty("schema") : var();
-        if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 7)
+        if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 8)
             return Result::fail("Cannot replace an existing project with an unsupported schema.");
         if (static_cast<int>(schema) < project.schemaVersion) legacySchema = static_cast<int>(schema);
     }
@@ -996,6 +998,7 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
             auto item = std::make_unique<juce::DynamicObject>();
             item->setProperty("id", clip.id); item->setProperty("kind", clip.kind);
             if(candidate.schemaVersion>=5)item->setProperty("analysis_role",clip.analysisRole);
+            if(candidate.schemaVersion>=8)item->setProperty("midi_channel",clip.midiChannel);
             if (clip.kind == "audio") {
                 if(candidate.schemaVersion>=6)item->setProperty("warp",audioWarpToVar(clip.warp));
                 item->setProperty("asset_id", clip.assetId); item->setProperty("source_offset", clip.sourceOffset);
@@ -1118,8 +1121,8 @@ Result load(const File& manifest, StoredProject& project, const IOOptions& optio
     const auto id = object->getProperty("project_id"), revision = object->getProperty("revision");
     const auto master = object->getProperty("master_gain_db"), looping = object->getProperty("looping");
     const auto tracks = object->getProperty("tracks");
-    if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 7)
-        return Result::fail("This project schema is not supported. Expected schema 1 through 7.");
+    if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 8)
+        return Result::fail("This project schema is not supported. Expected schema 1 through 8.");
     if (!id.isString() || !validIdentifier(id.toString()) || !integral(revision)
         || static_cast<juce::int64>(revision) < 0 || !number(master) || !validGain(static_cast<double>(master))
         || !looping.isBool() || !tracks.isArray())
@@ -1210,6 +1213,7 @@ Result load(const File& manifest, StoredProject& project, const IOOptions& optio
                     return Result::fail("A clip contains missing or invalid position fields.");
                 StoredClip value;
                 if(candidate.schemaVersion>=5){const auto role=clip->getProperty("analysis_role");if(!role.isString())return Result::fail("Missing clip analysis role.");value.analysisRole=role.toString();}
+                if(candidate.schemaVersion>=8){const auto channel=clip->getProperty("midi_channel");if(!int32Value(channel))return Result::fail("Missing MIDI clip channel.");value.midiChannel=int(channel);}
                 value.id = clipId.toString(); value.timelineStart = static_cast<double>(start); value.duration = static_cast<double>(duration);
                 if (candidate.schemaVersion >= 3) {
                     const auto kind = clip->getProperty("kind");

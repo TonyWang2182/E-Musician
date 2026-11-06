@@ -43,8 +43,20 @@ class NetworkError(GenerationError):
 def atomic_json(path, value):
     path = Path(path)
     tmp = path.with_name(path.name + ".tmp")
-    tmp.write_text(json.dumps(value, ensure_ascii=False, allow_nan=False, indent=2), encoding="utf-8")
-    os.replace(tmp, path)
+    with tmp.open("w", encoding="utf-8", newline="\n") as stream:
+        stream.write(json.dumps(value, ensure_ascii=False, allow_nan=False, indent=2))
+        stream.flush()
+        os.fsync(stream.fileno())
+    # Native Windows polling can briefly deny delete-sharing on the old file.
+    # Retry only this local publication; never restart or resubmit inference.
+    for attempt in range(11):
+        try:
+            os.replace(tmp, path)
+            return
+        except PermissionError:
+            if attempt == 10:
+                raise
+            time.sleep(.02)
 
 
 def read_json(path):
@@ -132,8 +144,9 @@ class Tunnel:
             local_port = listener.getsockname()[1]
         self.log = (self.directory / "ssh.log").open("ab")
         if self.registry.get("start_service", True):
+            starter = "compute_start.py" if self.registry.get("compute_protocol") == 2 else "gateway_start.py"
             bootstrap = [ssh, "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "ConnectTimeout=15", alias,
-                         "/root/miniconda3/bin/python /root/autodl-tmp/emusician/tools/gateway_start.py"]
+                         "/root/miniconda3/bin/python /root/autodl-tmp/emusician/tools/" + starter]
             self.process = subprocess.Popen(bootstrap, stdin=subprocess.DEVNULL, stdout=self.log, stderr=self.log,
                                             creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
             deadline = time.monotonic() + 35
@@ -159,7 +172,8 @@ class Tunnel:
                 raise GenerationError("Cloud SSH connection failed. Check the instance and SSH key.")
             try:
                 health = self.call("GET", "/health")
-                if health.get("service") != "emusician-generation" or health.get("protocol_version") != 1:
+                compute = self.registry.get("compute_protocol") == 2
+                if health.get("service") != ("emusician-compute" if compute else "emusician-generation") or health.get("protocol_version") != (2 if compute else 1):
                     raise GenerationError("The SSH endpoint is not a compatible generation service.")
                 return health
             except NetworkError:
@@ -273,6 +287,17 @@ def download(tunnel, job_id, result, directory, cancel):
 
 
 def run(request_path, registry=None, tunnel_factory=Tunnel):
+    # Existing explicit registry/tests retain the original protocol. New DAW
+    # requests use the separate compute configuration when it is installed.
+    if registry is None:
+        initial_request = read_json(Path(request_path))
+        compute_root = Path(initial_request.get("compute_root") or os.environ.get("EMUSICIAN_COMPUTE_ROOT", str(ROOT)))
+        if (compute_root / "compute-registry.json").is_file():
+            try:
+                from .run_compute_generation import run as compute_run
+            except ImportError:
+                from run_compute_generation import run as compute_run
+            return compute_run(request_path)
     request_path = Path(request_path).resolve()
     directory = request_path.parent
     request = read_json(request_path)

@@ -1,4 +1,12 @@
-# 当前工作：MuScriptor medium 授权部署（2026-11-06，文件/CPU加载/8秒GPU探针通过）
+# 当前候选：0.13.0 架构 2–4 统一计算与 DAW/Agent 接入（2026-11-07，自动验证通过、人工待验）
+
+用户要求完成后统一验收最终版。基线a6951f3，分支`feature/hybrid-pipeline-v0130`，实际工作树仍是E盘audio-analysis。统一云任务服务/单GPU调度、多模型数据契约和本地/云端路由、原生与Agent同步接入已完成。旧0.12.0/0.12.1 EXE SHA和用户工程保持；不自动合并main。源码/日志/边界见[结果](review/2026-11-07-hybrid-pipeline/RESULTS.md)，同步与归档以PUBLISH记录为准。
+
+最终Release EXE SHA d5579acb…283f，CTest11/11、Agent349、侧栏4、传输16+11、生成契约7、本地分析43通过/1跳过；实际七模型整链全部通过。五个MIR用原音频8秒，生成12秒；真实候选、一次接受/Undo/Redo、保存禁用云端后重开及离线渲染一致。v3全链后审查补出YuE2分阶段截断字典，helper归一化bool并保留stages；v4真实复测候选→Agent→存档一致，最终总核查cb271dcfb9比对356源码输入、构建/CTest、工程与旧EXE。原生双语窄屏截图已看；不声称真实LLM理解率、整曲准确率、多乐器真实质量、物理ASIO或听感通过。
+
+入口 `E:/MusicAgent&DAW/Start E-musician 0.13.0 Hybrid.cmd`，VS Code `E-musician-Hybrid.code-workspace`。新入口把MP3缓存和临时文件放E盘，旧C盘缓存未改。云端release `ed7d6a920487a651c988`、protocol2/18082，七模型已登记，收尾队列空/GPU0MiB，磁盘约164GB空闲；实例未关闭。新权重没有备份到E，实际任务结果作为本地候选/工程资产。下一步只需按[人工清单](review/2026-11-07-hybrid-pipeline/MANUAL-CHECK.md)集中验收；持续断网或应用重启后的自动任务恢复未实现，Auto不等于失败时静默换模型。新schema8工程需0.13打开，旧版本请用旧工程副本。
+
+# 保留基线：MuScriptor medium 授权部署（2026-11-06，文件/CPU加载/8秒GPU探针通过）
 
 用户提供HF只读令牌以继续原被授权阻断的部署。分支 `feature/muscriptor-authorized-20261106`、基线3f8d89f。官方固定权重访问已验证，私有云凭据0700/0600，不在本地/Git/日志中保存。云端HF接口连续503后改用官方HTTPS→本地1MiB RAM→SSH直接云盘中转，1,228,144,472字节权重与126字节medium配置SHA通过，E盘未保存权重。
 

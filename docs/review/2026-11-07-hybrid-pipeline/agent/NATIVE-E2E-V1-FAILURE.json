@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "evidence": "retained failed first native integration attempt, not a GPU/model-quality acceptance",
+  "original_report": "E:\\MusicAgent&DAW\\cloud-inference\\experiments\\hybrid-final-20261107-v1\\report.json",
+  "original_report_sha256": "381fec0e7d15bed2d6f1450b0c581c844e08a516f9b53e2d819839725e55db13",
+  "passed": false,
+  "started_at": "2026-11-06T18:06:50.362+00:00",
+  "finished_at": "2026-11-06T18:07:05.923+00:00",
+  "elapsed_seconds": 7.7006978999997955,
+  "exe_sha256": "a261a1858a7d67eb0905a7c0878049f8ed0ff1c59fc802e1c6a4a553b7d8ac29",
+  "protected_unchanged": true,
+  "frozen_exe_unchanged": true,
+  "error": "Model job did not complete: Cloud analysis failed (PermissionError); inspect its task log.",
+  "models": [
+    {
+      "model_id": "scnet",
+      "passed": false,
+      "phases": [
+        {
+          "phase": "open_owned_daw_and_import_input",
+          "started_at": "2026-11-06T18:06:58.224+00:00",
+          "passed": true,
+          "finished_at": "2026-11-06T18:07:03.397+00:00",
+          "elapsed_seconds": 5.1726559000089765
+        },
+        {
+          "phase": "real_gpu_inference_candidate_without_project_edit",
+          "started_at": "2026-11-06T18:07:03.399+00:00",
+          "passed": false,
+          "finished_at": "2026-11-06T18:07:05.285+00:00",
+          "elapsed_seconds": 1.8835215999861248
+        }
+      ],
+      "error": "Model job did not complete: Cloud analysis failed (PermissionError); inspect its task log.",
+      "transitions": [
+        {
+          "at": "2026-11-06T18:07:03.426+00:00",
+          "status": "running",
+          "phase": "queued"
+        },
+        {
+          "at": "2026-11-06T18:07:04.665+00:00",
+          "status": "running",
+          "phase": "preparing"
+        },
+        {
+          "at": "2026-11-06T18:07:05.282+00:00",
+          "status": "failed",
+          "phase": "failed"
+        }
+      ]
+    }
+  ],
+  "inference_reached": false,
+  "inference_basis": "Parent coordinator diagnosed failure during local input freeze/progress publication before cloud submission; observed job transitions stop at preparing/failed. No ready result exists.",
+  "parent_diagnosis": "Windows PermissionError/WinError 5 while replacing progress data; root added bounded atomic-write retries.",
+  "retry_changes": "Dedicated E-drive experiment audio-cache through EMUSICIAN_AUDIO_CACHE_ROOT plus process-local TEMP/TMP; retry requires the new native executable that supports this override. No retry or GPU task run by this agent.",
+  "script_checks": [
+    "docs/builds/20261106T181120.252941Z-872fba6da6.json",
+    "docs/builds/20261106T181121.292486Z-8aca5bf4a5.json"
+  ]
+}

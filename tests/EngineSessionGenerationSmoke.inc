@@ -57,6 +57,9 @@ juce::Result EngineSession::runGenerationEngineSmokeTest(juce::DynamicObject& re
         auto unsupported=saved;unsupported.schemaVersion=6;check(storage::validate(unsupported).failed(),"generation may not masquerade as schema6");
         okay(test.newProject(test.snapshot().revision),"switch project");check(run("accept_generation_result",args).failed(),"wrong project rejects old candidate");
         okay(test.openProject(project,test.snapshot().revision),"reopen generated project without inference");check(test.snapshot().tracks.size()==1&&test.impl->capture().generations.size()==1,"reopen retains track and provenance");
-        report.setProperty("generation_checks",checks);report.setProperty("generation_fixture","synthetic PCM; no model, network or physical audio");return juce::Result::ok();
+        const auto beforeHybrid=checks;
+#include "EngineSessionHybridSmoke.inc"
+        report.setProperty("hybrid_checks",checks-beforeHybrid);
+        report.setProperty("generation_checks",beforeHybrid);report.setProperty("generation_fixture","synthetic PCM; no model, network or physical audio");return juce::Result::ok();
     }catch(const std::exception& e){report.setProperty("generation_checks",checks);report.setProperty("generation_error",e.what());return juce::Result::fail(e.what());}
 }

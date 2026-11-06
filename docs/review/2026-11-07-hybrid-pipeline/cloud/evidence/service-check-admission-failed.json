@@ -1,0 +1,12 @@
+{
+  "status": "failed",
+  "started_unix": 1793987226.944052,
+  "checks": [],
+  "job_ids": [],
+  "gpu_inference_performed": false,
+  "script_sha256": "36e33c2728492ce2ea39f23bc67fbe7cc0fb8e47544378352a452aaa5d6b58ec",
+  "error": "BlockingIOError: [Errno 11] Resource temporarily unavailable",
+  "elapsed_seconds": 1.4659017324447632e-05,
+  "finished_unix": 1793987226.9441588,
+  "output": "/root/autodl-tmp/emusician/results/validation/compute-service/20261106T174706Z-39edcf73"
+}

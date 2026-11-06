@@ -252,7 +252,7 @@ template<class J> juce::Result writeJobMidi(const J& j,const juce::File& file,co
             const double rawTick=(c.startBeats+e.beats-origin)*ppqn;
             if(!std::isfinite(rawTick)||rawTick<0||rawTick>maximumTicks)return juce::Result::fail("A controller cannot be represented safely at 4096 PPQN.");
             const auto tick=std::min(std::llround(rawTick),static_cast<long long>(lastTick));
-            const int channel=c.notes.empty()?1:c.notes.front().channel;juce::MidiMessage message;
+            const int channel=c.midiChannel>0?c.midiChannel:c.notes.empty()?1:c.notes.front().channel;juce::MidiMessage message;
             if(e.type>=0&&e.type<=127)message=juce::MidiMessage::controllerEvent(channel,e.type,e.value>>7);
             else if(e.type==0x1001)message=juce::MidiMessage::programChange(channel,e.value>>7);
             else if(e.type==0x1004)message=juce::MidiMessage::aftertouchChange(channel,e.metadata,e.value>>7);

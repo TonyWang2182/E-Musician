@@ -71,6 +71,7 @@ struct StoredClip {
     std::vector<StoredControllerEvent> controllers;
     juce::String analysisRole;
     StoredAudioWarp warp;
+    int midiChannel = 0; // 0 preserves legacy note-derived channel; 1..16 is explicit.
 };
 
 struct StoredTrack {
@@ -97,6 +98,7 @@ struct StoredAnalysis {
     juce::String id, kind, modelId, modelVersion, sourceClipId, sourceAssetId;
     juce::String sourceSha256, resultSha256, parametersJson = "{}";
     double startSeconds = 0, durationSeconds = 0;
+    juce::String annotationsJson = "{}"; // Accepted beat/section and MIDI instrument metadata only.
 };
 struct StoredGeneration {
     juce::String id, assetId, clipId, modelId, modelRevision, audioSha256, resultSha256, parametersJson = "{}";
@@ -165,6 +167,8 @@ juce::Result validate(const StoredProject&);
 juce::Result canonicalTrackColour(const juce::var&, juce::String&);
 int requiredSchema(const StoredProject&);
 bool isSupportedChordLabel(const juce::String&);
+bool isLegacyChordLabel(const juce::String&);
+juce::Result validateAnalysisAnnotations(const juce::var&, double durationSeconds);
 
 // Reuses verified unchanged audio in this bundle, copies changed/new audio into
 // a fresh generation, then atomically replaces the schema 4 manifest.

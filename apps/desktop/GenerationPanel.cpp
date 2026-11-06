@@ -16,13 +16,15 @@ struct GenerationPanel::Impl {
     juce::Label title,promptLabel,lyricsLabel,durationLabel,seedLabel,context,status;
     juce::TextEditor prompt,lyrics,duration,seed;
     juce::TextButton run,cancel,preview,stop,add;
-    juce::ComboBox history;
+    juce::ComboBox history,model;
+    juce::StringArray modelIds;juce::Array<juce::var> providers;
     juce::String jobId,resultId,acceptId,projectId,lastState,actionError,previewJobId,previewState;
     std::uint64_t resultRevision=std::numeric_limits<std::uint64_t>::max();
     juce::var result;juce::StringArray historyIds;
     juce::Rectangle<int> waveBounds;bool configured=false,previewing=false;int capabilityCountdown=0;
     Impl(GenerationPanel& panel,EngineSession& engine):owner(panel),session(engine){
-        for(auto* c:std::initializer_list<juce::Component*>{&title,&promptLabel,&lyricsLabel,&durationLabel,&seedLabel,&context,&status,&prompt,&lyrics,&duration,&seed,&run,&cancel,&preview,&stop,&add,&history})owner.addAndMakeVisible(c);
+        for(auto* c:std::initializer_list<juce::Component*>{&title,&promptLabel,&lyricsLabel,&durationLabel,&seedLabel,&context,&status,&prompt,&lyrics,&duration,&seed,&run,&cancel,&preview,&stop,&add,&history,&model})owner.addAndMakeVisible(c);
+        model.setName("Generation model");model.onChange=[this]{actionError.clear();const int index=model.getSelectedId()-1;configured=index>=0&&index<providers.size()&&bool(providers[index]["available"]);};
         title.setFont(design::labelFont(15,true));context.setFont(design::numberFont(11));status.setFont(design::labelFont(12));
         prompt.setMultiLine(true,true);lyrics.setMultiLine(true,true);prompt.setReturnKeyStartsNewLine(true);lyrics.setReturnKeyStartsNewLine(true);prompt.setInputRestrictions(2000);lyrics.setInputRestrictions(4096);duration.setInputRestrictions(6,"0123456789.");seed.setInputRestrictions(10,"0123456789");
         for(auto* e:{&prompt,&lyrics,&duration,&seed}){e->setFont(design::labelFont(13));e->setColour(juce::TextEditor::backgroundColourId,design::paper);e->setColour(juce::TextEditor::textColourId,design::ink);e->setColour(juce::TextEditor::outlineColourId,design::rule);e->setColour(juce::TextEditor::focusedOutlineColourId,design::focus);}
@@ -52,6 +54,7 @@ struct GenerationPanel::Impl {
     void start(){
         if(previewing)stopPreview();
         auto args=generationObject({{"prompt",prompt.getText()},{"lyrics",lyrics.getText()},{"duration_seconds",duration.getText().getDoubleValue()}});
+        if(model.getSelectedId()>0)args.getDynamicObject()->setProperty("model_id",modelIds[model.getSelectedId()-1]);
         if(seed.getText().isNotEmpty())args.getDynamicObject()->setProperty("seed",juce::int64(seed.getText().getLargeIntValue()));
         auto reply=request("start_generation",args);const auto id=reply["job_id"].toString();if(id.isEmpty())return;
         jobId=id;resultId=reply["result_id"].toString();result=juce::var();acceptId={};lastState={};poll();
@@ -62,7 +65,14 @@ struct GenerationPanel::Impl {
     void refreshCapabilities(){
         if(capabilityCountdown--<=0){
             const auto capabilities=request("get_generation_capabilities",generationObject({}));
-            configured=capabilities.isObject()&&bool(capabilities["available"]);capabilityCountdown=20;
+            const auto previous=modelIds[model.getSelectedId()-1];providers.clear();modelIds.clear();model.clear(juce::dontSendNotification);
+            int selected=0;if(const auto* values=capabilities["providers"].getArray())for(const auto& value:*values){
+                providers.add(value);const auto id=value["model_id"].toString();modelIds.add(id);
+                model.addItem(id=="yue2"?"YuE2":id=="ace-step-1.5-xl-turbo"?"ACE-Step 1.5 XL":id,modelIds.size());
+                if(id==previous||previous.isEmpty()&&bool(value["default"]))selected=modelIds.size();
+            }
+            model.setSelectedId(selected>0?selected:modelIds.isEmpty()?0:1,juce::dontSendNotification);
+            const int index=model.getSelectedId()-1;configured=index>=0&&index<providers.size()&&bool(providers[index]["available"]);capabilityCountdown=20;
         }
     }
     void pollPreview(){
@@ -116,14 +126,14 @@ struct GenerationPanel::Impl {
         if(previewing&&(!ready||locked||snapshot.playing))stopPreview();
         pollPreview();
         run.setEnabled(configured&&!busy&&!importing&&!locked);cancel.setEnabled(busy);preview.setEnabled(ready&&!busy&&!importing&&!locked&&!snapshot.playing&&!previewing);stop.setEnabled(previewing);add.setEnabled(ready&&!bool(result["applied"])&&!importing&&!locked);
-        history.setEnabled(!importing);prompt.setEnabled(!busy);lyrics.setEnabled(!busy);duration.setEnabled(!busy);seed.setEnabled(!busy);
+        history.setEnabled(!importing);model.setEnabled(!busy&&!importing);prompt.setEnabled(!busy);lyrics.setEnabled(!busy);duration.setEnabled(!busy);seed.setEnabled(!busy);
         if(importTask["error"].toString().isNotEmpty())actionError=importTask["error"].toString();
         if(actionError.isNotEmpty())status.setText(actionError,juce::dontSendNotification);
         else if(task["error"].toString().isNotEmpty())status.setText(task["error"].toString(),juce::dontSendNotification);
         else if(importing)status.setText(uiText("Adding local audio…","正在加入本地音频…"),juce::dontSendNotification);
         else if(result.isObject()&&bool(result["stale"]))status.setText(uiText("Project tempo or meter changed. Generate a new take.","工程速度或拍号已改变，请重新生成。"),juce::dontSendNotification);
         else if(previewing)status.setText(previewState=="playing"?uiText("Listening","试听中"):uiText("Preparing preview…","准备试听…"),juce::dontSendNotification);
-        else if(result.isObject())status.setText(bool(result["applied"])?uiText("Added to arrangement","已加入编曲"):uiText("Ready · preview, then add a track","已就绪 · 试听后加入轨道"),juce::dontSendNotification);
+        else if(result.isObject())status.setText(juce::String(double(result["audio"]["duration_seconds"]),1)+" s · "+(bool(result["applied"])?uiText("Added to arrangement","已加入编曲"):bool(result["truncated"])?uiText("Token limit reached · ending may be cut","已达长度预算 · 结尾可能截断"):uiText("Ready · preview, then add","已就绪 · 试听后加入")),juce::dontSendNotification);
         else if(busy)status.setText(uiText("Generating… ","生成中… ")+task["phase"].toString(),juce::dontSendNotification);
         else if(state=="cancelled")status.setText(bool(task["remote_cancel_confirmed"])?uiText("Cancelled locally and on the server","本地和云端任务均已取消"):task["remote_status"].toString()=="cancelling"?uiText("Stopped locally · server cancellation pending","本地已停止 · 云端取消待完成"):uiText("Stopped locally · server cancellation unconfirmed","本地已停止 · 尚未确认云端取消"),juce::dontSendNotification);
         else status.setText(configured?uiText("Audio is added only when you choose Add track.","选择“加入轨道”后才会修改工程。"):uiText("Remote generation is not configured.","尚未配置远程生成。"),juce::dontSendNotification);
@@ -136,7 +146,7 @@ void GenerationPanel::visibilityChanged(){if(!isVisible())impl->stopPreview();el
 void GenerationPanel::refreshLanguage(){impl->language();impl->poll();}
 void GenerationPanel::timerCallback(){if(isShowing())impl->poll();}
 void GenerationPanel::resized(){
-    auto& p=*impl;auto area=getLocalBounds().reduced(12,8);auto header=area.removeFromTop(30);p.title.setBounds(header.removeFromLeft(155));header.removeFromRight(64);p.history.setBounds(header.removeFromRight(juce::jmin(220,header.getWidth())));
+    auto& p=*impl;auto area=getLocalBounds().reduced(12,8);auto header=area.removeFromTop(30);p.title.setBounds(header.removeFromLeft(130));p.model.setBounds(header.removeFromLeft(juce::jmin(178,header.getWidth()/2)));header.removeFromLeft(6);header.removeFromRight(64);p.history.setBounds(header);
     auto actions=area.removeFromBottom(32);p.run.setBounds(actions.removeFromLeft(90));actions.removeFromLeft(6);p.cancel.setBounds(actions.removeFromLeft(70));p.add.setBounds(actions.removeFromRight(104));actions.removeFromRight(6);p.stop.setBounds(actions.removeFromRight(66));actions.removeFromRight(6);p.preview.setBounds(actions.removeFromRight(82));
     area.removeFromBottom(7);auto left=area.removeFromLeft(area.getWidth()*54/100);area.removeFromLeft(16);
     auto options=left.removeFromBottom(28);p.durationLabel.setBounds(options.removeFromLeft(62));p.duration.setBounds(options.removeFromLeft(62));options.removeFromLeft(12);p.seedLabel.setBounds(options.removeFromLeft(48));p.seed.setBounds(options.removeFromLeft(juce::jmin(105,options.getWidth())));

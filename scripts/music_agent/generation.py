@@ -9,6 +9,7 @@ import math
 import re
 from .analysis import _tool, identifier, safe_text
 from .selection import ScopeError, assert_scope_unchanged
+from .compute import route_arguments, safe_route_fields
 
 COMMANDS = {"get_generation_capabilities", "start_generation", "get_generation_job",
             "get_generation_result", "cancel_generation_job", "preview_generation_result",
@@ -22,6 +23,8 @@ GENERATION_TOOLS = [
     _tool("start_generation", "用户明确要求生成音乐时直接调用，不要求用户补填BPM、拍号、播放头或未指定的时长。实际BPM/拍号由当前工程提供，见generation_defaults。默认20秒，短时间选区会适配；也可传duration_bars由本地按工程节拍计算。seconds与bars只能选一个，均省略即可使用默认。prompt保留用户已给的音乐内容；没给风格时可省略，使用中性纯音乐描述。未给歌词则纯音乐。默认冻结播放头或时间选区起点，无需源片段/已有轨道，不修改工程。只上传描述和可选歌词；本地等待，不重复启动。生成后直接propose_generation_import呈现试听/加入轨道确认，不再口头问一次BPM或是否继续。时长/BPM是条件，不保证精确整小节。", {
         "prompt": {"type": "string", "minLength": 1, "maxLength": 2000, "description": "音乐描述；保留用户已给的风格、乐器和情绪。完全未指定风格时可省略。"},
         "lyrics": {"type": "string", "maxLength": 4096},
+        "model_id": {"type": "string", "maxLength": 120, "description": "用户指定模型时从generation_capabilities.providers选取真实ID；否则省略采用宿主默认，不追问。"},
+        "execution": {"type": "string", "enum": ["auto", "cloud"], "description": "生成当前只提供云端计算。"},
         "duration_seconds": {"type": "number", "minimum": 10, "maximum": 120, "description": "明确给定的秒数；与duration_bars二选一。省略使用generation_defaults.duration_seconds。"},
         "duration_bars": {"type": "number", "minimum": .25, "maximum": 1024, "description": "明确给定的小节数；本地按当前工程BPM/拍号换算，不需要询问BPM。换算后须为10至120秒。"},
         "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647},
@@ -79,8 +82,19 @@ def _hash(value):
 def safe_capabilities(raw):
     if not isinstance(raw, dict):
         return {"available": False}
-    return {"available": raw.get("available") is True,
+    providers = []
+    for item in raw.get("providers", []) if isinstance(raw.get("providers"), list) else []:
+        if not isinstance(item, dict): continue
+        route = safe_route_fields(item)
+        if "model_id" not in route: continue
+        providers.append({"kind": "generate", **route, "execution": "cloud", "available": item.get("available") is True,
+                          "default": item.get("default") is True, "detail": safe_text(item.get("detail"), 400),
+                          "min_duration_seconds": number(item.get("min_duration_seconds", 10), .001, 120),
+                          "max_duration_seconds": number(item.get("max_duration_seconds", 120), 10, 600),
+                          "duration_exact": item.get("duration_exact") is True})
+    return {"available": raw.get("available") is True or any(p["available"] for p in providers),
             "experimental": True, "model_id": safe_text(raw.get("model_id"), 150),
+            "default_model_id": safe_text(raw.get("default_model_id", raw.get("model_id")), 120), "providers": providers,
             "min_duration_seconds": number(raw.get("min_duration_seconds", 10), 10, 120),
             "max_duration_seconds": number(raw.get("max_duration_seconds", 120), 10, 120),
             "max_parallel_jobs": 1, "detail": safe_text(raw.get("detail"), 400)}
@@ -90,6 +104,7 @@ def safe_job(raw):
     if not isinstance(raw, dict):
         raise ValueError("生成任务回执无效。")
     out = {k: deepcopy(raw[k]) for k in ("job_id", "result_id", "status", "progress", "applied", "operation", "kind") if k in raw}
+    out.update(safe_route_fields(raw))
     for key in ("phase", "error", "detail"):
         if key in raw: out[key] = safe_text(raw[key], 500)
     out["remote_status"] = raw.get("remote_status") if raw.get("remote_status") in {"cancelled", "cancelling", "unconfirmed"} else "unconfirmed"
@@ -142,12 +157,24 @@ def safe_result(raw):
     params = raw.get("parameters") or {}
     out["parameters"] = {k: deepcopy(v) for k, v in params.items()
                          if k in {"duration_seconds", "seed", "bpm", "meter_numerator", "meter_denominator"}}
+    out.update(safe_route_fields(raw))
+    if isinstance(raw.get("limitations"), list):
+        out["limitations"] = [safe_text(value, 300) for value in raw["limitations"][:8] if isinstance(value, str)]
+    if isinstance(raw.get("completion"), dict):
+        out["completion"] = {key: raw["completion"][key] is True for key in ("natural_end", "token_limit_reached", "duration_exact") if key in raw["completion"]}
+        completion = raw["completion"]
+        if "truncated" in completion and (completion["truncated"] is None or type(completion["truncated"]) is bool):
+            out["completion"]["truncated"] = completion["truncated"]
+        if isinstance(completion.get("reason"), str) and completion["reason"] in {"token_budget", "model_stop", "unknown"}:
+            out["completion"]["reason"] = completion["reason"]
+        if type(completion.get("timing_is_exact")) is bool:
+            out["completion"]["timing_is_exact"] = completion["timing_is_exact"]
     return out
 
 
 def authorize_start(context, frozen, args):
     assert_scope_unchanged(frozen, context)
-    if not isinstance(args, dict) or set(args)-{"prompt", "lyrics", "duration_seconds", "duration_bars", "seed", "timeline_start_seconds"}:
+    if not isinstance(args, dict) or set(args)-{"prompt", "lyrics", "duration_seconds", "duration_bars", "seed", "timeline_start_seconds", "model_id", "execution"}:
         raise ValueError("生成只接受音乐描述、歌词、时长、种子和起点。")
     defaults = generation_defaults(context, frozen)
     if not defaults["supported"]: raise ValueError(defaults["reason"])
@@ -169,6 +196,7 @@ def authorize_start(context, frozen, args):
     if frozen.get("mode") != "project" and not timed and "timeline_start_seconds" in args and abs(start-context.get("position_seconds", 0)) > 1e-8:
         raise ScopeError("当前选择范围的生成起点是发送时的播放头；自定义其他位置需使用整个工程。")
     request = {"prompt": prompt.strip(), "lyrics": lyrics, "duration_seconds": duration, "timeline_start_seconds": start}
+    request.update(route_arguments(args, generation=True))
     if "seed" in args:
         if type(args["seed"]) is not int or not 0 <= args["seed"] <= 2147483647:
             raise ValueError("随机种子必须是0至2147483647的整数。")

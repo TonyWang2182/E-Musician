@@ -1,0 +1,117 @@
+{
+  "release": "/root/autodl-tmp/emusician/deployments/compute/ed7d6a920487a651c988",
+  "files_verified": {
+    "compute/__init__.py": "1f84a53b9a286eb8df93a61367237b7612b90ee40d69f2fed8fb9cca4eb47ffd",
+    "compute/adapters.py": "90304d14bb1c30ddeb36c3264c9ae7bd2eb8049fbd15a157ecc7467ea80410a2",
+    "compute/catalog.py": "b3ac3668e2e1170441f1eb1637e6c61760947868fba5be44d68d666294696c50",
+    "compute/normalize.py": "d2e4d34e25305db211b75f3ea3130d3df01a3c7d8d60693a52b4c13af8951a43",
+    "compute/preflight.py": "c3bf06d655200c6d1071341ba57155d11fdee0222765e401f6ac99b2232b3f81",
+    "compute/protocol.py": "37e12096c3f3d6267e96577d0331138eddece7c7f080e4059c19e7d82bd5345d",
+    "compute/server.py": "69ec7b01992e2298053b8bed9b628b0640600e749a4a7c0c642905b6b93614a4",
+    "compute/start.py": "a407b91ddab7240230afafdf6688ce150fe25beb77810626d9064e440960037c",
+    "compute/store.py": "80fea92cb706658e6ad21b2ccaf495e3d344ea6d7e857b588f3fbe14ce70aef8",
+    "compute/supervisor.py": "7146fbe763232e6dea22e3c508b5b89fbba5e44b75e9a099e2b38796bb7b5582",
+    "compute/worker.py": "e85ca9d90acc528e07636a790f50c78fffd69d581f0c5ec586d8e085377b0cd6",
+    "install_compute.py": "91eec0588b1baa0f842c779ff5168cc387a4ca178691f3dac514c5263cc585d8"
+  },
+  "dependencies_verified": {
+    "tools/ace_worker.py": "501fc1a6faae09957e82b1ace8edf86a5c0eee5f8ae50ac9ddfbe2550eb3999d",
+    "tools/models/mir_upgrades/runtime.py": "1ed93b588a631f2692cdcfd8bd59a6fd5c6a768fe38e6708e13e15bc66930c2f"
+  },
+  "started_unix": 1793989146.406126,
+  "status": "ready",
+  "model_files_changed": false,
+  "stopped_owned_services": [
+    28832
+  ],
+  "previous_links": {
+    "compute": "/root/autodl-tmp/emusician/deployments/compute/aedaa86c039f4be29770/compute",
+    "compute_start.py": "/root/autodl-tmp/emusician/deployments/compute/aedaa86c039f4be29770/compute/start.py"
+  },
+  "capabilities": {
+    "execution": "cloud",
+    "protocol_version": 2,
+    "providers": [
+      {
+        "available": true,
+        "default": true,
+        "detail": "ACE-Step XL Turbo + 1.7B LM: musical conditioning is not exact timing verification.",
+        "execution": "cloud",
+        "kind": "generate",
+        "max_duration_seconds": 120,
+        "model_id": "ace-step-1.5-xl-turbo",
+        "parameters": "generation-conditioning",
+        "quality_verified": false
+      },
+      {
+        "available": true,
+        "default": false,
+        "detail": "YuE2: semantic token duration budget; natural stopping/truncation is reported.",
+        "execution": "cloud",
+        "kind": "generate",
+        "max_duration_seconds": 120,
+        "model_id": "yue2",
+        "parameters": "generation-conditioning",
+        "quality_verified": false
+      },
+      {
+        "available": true,
+        "default": true,
+        "detail": "SCNet XL IHF: vocals/drums/bass/other (four stems).",
+        "execution": "cloud",
+        "kind": "separate",
+        "max_duration_seconds": 600,
+        "model_id": "scnet",
+        "parameters": "fixed",
+        "quality_verified": false
+      },
+      {
+        "available": true,
+        "default": true,
+        "detail": "TransKun V2: expressive piano transcription including emitted pedal controls.",
+        "execution": "cloud",
+        "kind": "transcribe",
+        "max_duration_seconds": 600,
+        "model_id": "transkun",
+        "parameters": "fixed",
+        "quality_verified": false
+      },
+      {
+        "available": true,
+        "default": true,
+        "detail": "ChordMini BTC: fixed 170-label vocabulary; no arbitrary jazz extensions.",
+        "execution": "cloud",
+        "kind": "chords",
+        "max_duration_seconds": 600,
+        "model_id": "chordmini",
+        "parameters": "fixed",
+        "quality_verified": false
+      },
+      {
+        "available": true,
+        "default": false,
+        "detail": "MuScriptor medium: multiple instrument note tracks; exported velocity is a default, not predicted.",
+        "execution": "cloud",
+        "kind": "transcribe",
+        "max_duration_seconds": 600,
+        "model_id": "muscriptor",
+        "parameters": "fixed",
+        "quality_verified": false
+      },
+      {
+        "available": true,
+        "default": true,
+        "detail": "SheetSage2: symbolic score, notes and available structural annotations; inspect predictions.",
+        "execution": "cloud",
+        "kind": "score",
+        "max_duration_seconds": 600,
+        "model_id": "sheetsage2",
+        "parameters": "fixed",
+        "quality_verified": false
+      }
+    ],
+    "single_heavy_task": true
+  },
+  "inference_performed": false,
+  "finished_unix": 1793989146.9873724
+}

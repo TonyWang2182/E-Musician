@@ -144,11 +144,11 @@ juce::String contentKey(const storage::StoredProject& s,const std::function<juce
         o.writeBool(t.muted);o.writeBool(t.solo);for(const auto& p:t.plugins)plugin(p);
         o.writeString(t.inputDeviceId);o.writeString(t.outputTargetId);lanes(t.automation);
         for(const auto& send:t.sends){o.writeString(send.id);o.writeString(send.targetTrackId);o.writeFloat(send.gainDb);o.writeBool(send.preFader);o.writeBool(send.enabled);}
-        for(const auto& c:t.clips){o.writeString(c.id);o.writeString(c.kind);o.writeString(c.assetId);o.writeString(c.analysisRole);time(c.timelineStart);time(c.sourceOffset);time(c.duration);time(c.fadeIn);time(c.fadeOut);o.writeString(juce::JSON::toString(storage::audioWarpToVar(c.warp),true));
+        for(const auto& c:t.clips){o.writeString(c.id);o.writeString(c.kind);o.writeString(c.assetId);o.writeString(c.analysisRole);o.writeInt(c.midiChannel);time(c.timelineStart);time(c.sourceOffset);time(c.duration);time(c.fadeIn);time(c.fadeOut);o.writeString(juce::JSON::toString(storage::audioWarpToVar(c.warp),true));
             if(c.kind=="midi"){time(c.startBeats);time(c.lengthBeats);o.writeString(noteKey?noteKey(c.id):noteContentKey(c.notes));for(const auto& event:c.controllers){o.writeString(event.id);time(event.beats);o.writeInt(event.type);o.writeInt(event.value);o.writeInt(event.metadata);}}
         }
     }
-    for(const auto& a:s.analyses){o.writeString(a.id);o.writeString(a.kind);o.writeString(a.modelId);o.writeString(a.modelVersion);o.writeString(a.sourceClipId);o.writeString(a.sourceAssetId);o.writeString(a.sourceSha256);o.writeString(a.resultSha256);o.writeString(a.parametersJson);time(a.startSeconds);time(a.durationSeconds);}
+    for(const auto& a:s.analyses){o.writeString(a.id);o.writeString(a.kind);o.writeString(a.modelId);o.writeString(a.modelVersion);o.writeString(a.sourceClipId);o.writeString(a.sourceAssetId);o.writeString(a.sourceSha256);o.writeString(a.resultSha256);o.writeString(a.parametersJson);o.writeString(a.annotationsJson);time(a.startSeconds);time(a.durationSeconds);}
     for(const auto& g:s.generations){o.writeString(g.id);o.writeString(g.assetId);o.writeString(g.clipId);o.writeString(g.modelId);o.writeString(g.modelRevision);o.writeString(g.audioSha256);o.writeString(g.resultSha256);o.writeString(g.parametersJson);time(g.startSeconds);time(g.durationSeconds);}
     for(const auto& c:s.chordRegions){o.writeString(c.id);o.writeString(c.label);o.writeString(c.analysisId);time(c.startSeconds);time(c.endSeconds);time(c.score);o.writeBool(c.uncertain);}
     return sessionSha256(o.getData(),o.getDataSize());
@@ -186,16 +186,16 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         ~Job(){cancel=true;if(worker.joinable())worker.join();}
     };
     struct AnalysisEntry {
-        juce::String id, kind, originalHash, resultHash;
+        juce::String id, kind, originalHash, resultHash, execution="local", modelId;
         juce::File original, sourceFile, directory;
         juce::File boundOriginal; // Control-thread-only canonical path after a verified Save copy.
-        juce::var source, parameters, result, receipt;
+        juce::var source, parameters, result, receipt, summary;
         std::shared_ptr<Job> job;
         std::shared_ptr<Job> acceptJob;
         bool applied=false;
     };
     struct GenerationEntry {
-        juce::String id,resultHash;juce::File directory;juce::var source,parameters,result,receipt;
+        juce::String id,resultHash,modelId;juce::File directory;juce::var source,parameters,result,receipt;
         std::shared_ptr<Job> job,acceptJob;bool applied=false;
     };
     std::map<juce::String,std::shared_ptr<GenerationEntry>> generations;
@@ -430,7 +430,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         auto m=metadata(*edit);s.loopStart=double(m.getProperty("loopStart",0.0));s.loopEnd=double(m.getProperty("loopEnd",0.0));s.masterPlugins=captureSlots(m);
         for(const auto& b:bindings){storage::StoredTrack t;t.id=b.id;t.name=b.track->getName();t.kind=b.track->state.getProperty(emKind,"audio").toString();t.colour=b.track->state.getProperty(emColour,juce::String()).toString();t.gainDb=stableGain(b.track->getVolumePlugin()->getVolumeDb());t.pan=b.track->getVolumePlugin()->getPan();t.muted=b.track->isMuted(false);t.solo=b.track->isSolo(false);t.plugins=captureSlots(b.track->state);
             for(const auto& c:b.clips){storage::StoredClip a;a.id=c.id;a.assetId=c.assetId;a.analysisRole=c.clip->state["emAnalysisRole"].toString();auto pos=c.clip->getPosition();a.timelineStart=pos.time.getStart().inSeconds();a.sourceOffset=pos.offset.inSeconds();a.duration=pos.time.getLength().inSeconds();
-                if(auto* midi=dynamic_cast<te::MidiClip*>(c.clip.get())){a.kind="midi";a.startBeats=time::secondsToBeats(a.timelineStart,s.bpm);a.lengthBeats=time::secondsToBeats(a.duration,s.bpm);
+                if(auto* midi=dynamic_cast<te::MidiClip*>(c.clip.get())){a.kind="midi";a.midiChannel=int(c.clip->state.getProperty("emMidiChannel",0))>0?midi->getMidiChannel().getChannelNumber():0;a.startBeats=time::secondsToBeats(a.timelineStart,s.bpm);a.lengthBeats=time::secondsToBeats(a.duration,s.bpm);
                     if(includeNotes){const auto& notes=*noteView(c.id,*midi).notes;a.notes.reserve(notes.size());for(const auto& n:notes)a.notes.push_back({n.id,n.pitch,n.startBeats,n.lengthBeats,n.velocity,n.channel});}
                 }else if(auto* audio=dynamic_cast<te::WaveAudioClip*>(c.clip.get())){
                     const auto warp=c.clip->state.getProperty("emAudioWarp",{});
@@ -454,7 +454,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         for(const auto& asset:nativeAssets){const auto id=asset["id"].toString();
             if((nativeStateInvalid||nativeIds.contains(id))&&std::none_of(s.assets.begin(),s.assets.end(),[&](const auto& a){return a.id==id;}))
                 s.assets.push_back({id,juce::File(asset["source"].toString())});}
-        for(const auto& a:m.getChildWithName("EM_ANALYSES"))s.analyses.push_back({a["id"].toString(),a["kind"].toString(),a["model_id"].toString(),a["model_version"].toString(),a["source_clip_id"].toString(),a["source_asset_id"].toString(),a["source_sha256"].toString(),a["result_sha256"].toString(),a["parameters_json"].toString(),double(a["start_seconds"]),double(a["duration_seconds"])});
+        for(const auto& a:m.getChildWithName("EM_ANALYSES"))s.analyses.push_back({a["id"].toString(),a["kind"].toString(),a["model_id"].toString(),a["model_version"].toString(),a["source_clip_id"].toString(),a["source_asset_id"].toString(),a["source_sha256"].toString(),a["result_sha256"].toString(),a["parameters_json"].toString(),double(a["start_seconds"]),double(a["duration_seconds"]),a.getProperty("annotations_json","{}").toString()});
         for(const auto& c:m.getChildWithName("EM_CHORDS"))s.chordRegions.push_back({c["id"].toString(),c["label"].toString(),c["analysis_id"].toString(),double(c["start_seconds"]),double(c["end_seconds"]),double(c["score"]),bool(c["uncertain"])});
         for(const auto& g:m.getChildWithName("EM_GENERATIONS"))s.generations.push_back({g["id"].toString(),g["asset_id"].toString(),g["clip_id"].toString(),g["model_id"].toString(),g["model_revision"].toString(),g["audio_sha256"].toString(),g["result_sha256"].toString(),g["parameters_json"].toString(),double(g["start_seconds"]),double(g["duration_seconds"])});
         s.schemaVersion=storage::requiredSchema(s);

@@ -18,6 +18,9 @@ juce::Result audioWarpFromVar(const juce::var& v,StoredAudioWarp& w)
 }
 int requiredSchema(const StoredProject& p)
 {
+    for(const auto& a:p.analyses)if(a.kind=="score"||a.annotationsJson!="{}")return 8;
+    for(const auto& c:p.chordRegions)if(!isLegacyChordLabel(c.label)||c.score<0)return 8;
+    for(const auto& t:p.tracks)for(const auto& c:t.clips)if(c.midiChannel!=0)return 8;
     if(!p.generations.empty())return 7;
     for(const auto& t:p.tracks)for(const auto& c:t.clips)if(c.warp.enabled)return 6;
     for(const auto& a:p.analyses)if(a.kind=="beats")return 6;

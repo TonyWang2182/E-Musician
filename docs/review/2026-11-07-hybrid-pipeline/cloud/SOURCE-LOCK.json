@@ -1,0 +1,16 @@
+{
+  "scripts/cloud/compute/__init__.py": "1f84a53b9a286eb8df93a61367237b7612b90ee40d69f2fed8fb9cca4eb47ffd",
+  "scripts/cloud/compute/adapters.py": "bf5f5d28f98beaf5812e8f1cd8505760011ab16b0593b2ac95cb20e63a3de3d1",
+  "scripts/cloud/compute/catalog.py": "b3ac3668e2e1170441f1eb1637e6c61760947868fba5be44d68d666294696c50",
+  "scripts/cloud/compute/normalize.py": "d2e4d34e25305db211b75f3ea3130d3df01a3c7d8d60693a52b4c13af8951a43",
+  "scripts/cloud/compute/preflight.py": "c3bf06d655200c6d1071341ba57155d11fdee0222765e401f6ac99b2232b3f81",
+  "scripts/cloud/compute/protocol.py": "37e12096c3f3d6267e96577d0331138eddece7c7f080e4059c19e7d82bd5345d",
+  "scripts/cloud/compute/server.py": "69ec7b01992e2298053b8bed9b628b0640600e749a4a7c0c642905b6b93614a4",
+  "scripts/cloud/compute/start.py": "a407b91ddab7240230afafdf6688ce150fe25beb77810626d9064e440960037c",
+  "scripts/cloud/compute/store.py": "80fea92cb706658e6ad21b2ccaf495e3d344ea6d7e857b588f3fbe14ce70aef8",
+  "scripts/cloud/compute/supervisor.py": "7146fbe763232e6dea22e3c508b5b89fbba5e44b75e9a099e2b38796bb7b5582",
+  "scripts/cloud/compute/worker.py": "e85ca9d90acc528e07636a790f50c78fffd69d581f0c5ec586d8e085377b0cd6",
+  "tests/test_cloud_compute.py": "6f3733d4125347876e13650d44d536f6946fa4c94c6c9c3466b33efdfc6ac508",
+  "tests/test_cloud_compute_linux.py": "dca69f0ad1d816417f958a945654e2fb6c0be04bdf737ee0c35a66842cab5d92",
+  "tests/CloudComputeServiceCheck.py": "5693d5b10059c78a53bc6a8a9935a5f24c40230a85c66f2a850d5f1b0f6d4f98"
+}

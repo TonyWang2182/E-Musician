@@ -140,8 +140,9 @@ class DawBridge:
         from .generation import authorize_start
         from .analysis import identifier
         request = authorize_start(context, scope, args)
-        if self.generation_capabilities(refresh=True).get("available") is not True:
-            raise BridgeError("云端生成模型尚未就绪，请在 DAW 生成面板检查连接。")
+        from .compute import require_route
+        try: require_route(self.generation_capabilities(refresh=True), "generate", request)
+        except ValueError as exc: raise BridgeError(str(exc)) from exc
         envelope = {"command": "start_generation", "project_id": context["project_id"], "expected_revision": context["revision"], "args": request}
         if scope.get("mode") != "project": envelope["expected_selection_revision"] = scope["selection_revision"]
         reply = self._request(envelope, allow_accepted=True)
@@ -199,9 +200,9 @@ class DawBridge:
         from .analysis import authorize_start, identifier
         with self.lock:
             request = authorize_start(context, scope, args)
-            providers = self.analysis_capabilities().get("providers", [])
-            if not any(p["kind"] == request["kind"] and p["available"] for p in providers):
-                raise BridgeError("本地分析运行库或模型尚未就绪。请先在 DAW 分析面板检查。")
+            from .compute import require_route
+            try: require_route(self.analysis_capabilities(refresh=True), request["kind"], request)
+            except ValueError as exc: raise BridgeError(str(exc)) from exc
             envelope = {"command": "start_analysis", "project_id": context["project_id"],
                         "expected_revision": context["revision"], "args": request}
             if scope.get("mode") != "project":
@@ -217,12 +218,16 @@ class DawBridge:
             raise BridgeError("分析任务身份不匹配。")
         return value
 
-    def analysis_result(self, result_id, offset=0, limit=24):
+    def analysis_result(self, result_id, offset=0, limit=24, component=None):
         from .analysis import identifier, safe_result
         if type(offset) is not int or not 0 <= offset <= 100000 or type(limit) is not int or not 1 <= limit <= 100:
             raise ValueError("分析分页范围无效。")
-        value = safe_result(self._request({"command": "get_analysis_result", "args": {
-            "result_id": identifier(result_id), "offset": offset, "limit": limit}})["result"])
+        args = {"result_id": identifier(result_id), "offset": offset, "limit": limit}
+        if component is not None:
+            from .analysis import COMPONENTS
+            if not isinstance(component, str) or component not in COMPONENTS: raise ValueError("分析结果类型无效。")
+            args["component"] = component
+        value = safe_result(self._request({"command": "get_analysis_result", "args": args})["result"])
         if value["result_id"] != result_id or value.get("offset", offset) != offset or len(value["items"]) != min(limit, max(0, value["total"]-offset)):
             raise BridgeError("分析分页身份或数量不匹配。")
         return value
@@ -232,7 +237,7 @@ class DawBridge:
         # The generic job kind distinguishes an import even during the tiny
         # queued/running interval before its worker publishes "applying".
         raw = self._request({"command": "get_job", "args": {"job_id": identifier(job_id)}})["result"]
-        if not isinstance(raw, dict) or raw.get("kind") not in {"analysis.separate", "analysis.transcribe", "analysis.chords", "analysis.beats"} or raw.get("status") not in {"queued", "preparing", "running", "validating"}:
+        if not isinstance(raw, dict) or raw.get("kind") not in {"analysis.separate", "analysis.transcribe", "analysis.chords", "analysis.beats", "analysis.score"} or raw.get("status") not in {"queued", "preparing", "uploading", "loading", "running", "postprocessing", "downloading", "validating", "cancelling"}:
             raise BridgeError("任务已结束或是导入任务，没有发送取消。")
         return self._request({"command": "cancel_analysis_job", "args": {"job_id": identifier(job_id)}})
 
@@ -257,8 +262,8 @@ class DawBridge:
                 start, end = number(item.get("start_seconds"), 0, 172800), number(item.get("end_seconds"), 0, 172800)
                 if start >= end or type(item.get("uncertain")) is not bool: raise BridgeError("和弦对象时间无效。")
                 safe.append({"id": identifier(item.get("id")), "analysis_id": identifier(item.get("analysis_id")),
-                    "label": safe_text(item.get("label"), 30), "start_seconds": start, "end_seconds": end,
-                    "score": number(item.get("score"), 0, 1), "uncertain": item["uncertain"]})
+                    "label": safe_text(item.get("label"), 128), "start_seconds": start, "end_seconds": end,
+                    "score": None if item.get("score") is None else number(item["score"], 0, 1), "uncertain": item["uncertain"]})
             if len({i["id"] for i in safe}) != len(safe) or identity(self.snapshot()) != identity(context):
                 raise BridgeError("和弦读取不完整或工程已改变。")
             return {"items": safe, "total": total, "offset": offset, "score_kind": "uncalibrated_similarity"}
@@ -380,6 +385,46 @@ class DawBridge:
                 raise BridgeError("效果器类型或工程版本在读取期间变化。")
             context.setdefault("native_effects", {})[device_id] = state
             return copy.deepcopy(state)
+
+    def imported_controller_counts(self, context, clip_ids):
+        """Verify CC/program events locally without sending their arrays to LLM."""
+        from .analysis import identifier, number
+        if not isinstance(clip_ids, list) or len(clip_ids) > 64 or len(set(clip_ids)) != len(clip_ids):
+            raise BridgeError("导入 MIDI 片段列表无效。")
+        known = {c["id"] for t in context.get("tracks", []) for c in t.get("clips", []) if c.get("kind") == "midi"}
+        if not set(clip_ids) <= known:
+            raise BridgeError("导入 MIDI 控制事件目标不在真实回读中。")
+        counts = {"controller_count": 0, "program_change_count": 0, "other_count": 0}
+        with self.lock:
+            if identity(self.snapshot()) != identity(context):
+                raise BridgeError("核对 MIDI 控制事件前工程已变化。")
+            for clip_id in clip_ids:
+                identifier(clip_id)
+                total, offset, seen = None, 0, set()
+                while total is None or offset < total:
+                    raw = self._request({"command": "get_clip_controllers", "args": {"clip_id": clip_id, "offset": offset, "limit": 1000}})["result"]
+                    count, events = raw.get("total"), raw.get("events")
+                    if (type(count) is not int or not 0 <= count <= 100000 or (total is not None and count != total)
+                            or raw.get("offset") != offset or not isinstance(events, list) or len(events) != min(1000, count-offset)):
+                        raise BridgeError("导入 MIDI 控制事件分页不完整。")
+                    total = count
+                    for event in events:
+                        if not isinstance(event, dict): raise BridgeError("MIDI 控制事件无效。")
+                        eid = identifier(event.get("id"))
+                        if eid in seen: raise BridgeError("MIDI 控制事件身份重复。")
+                        seen.add(eid)
+                        kind, value = event.get("type"), event.get("value")
+                        number(event.get("beats"), 0, 1000000)
+                        if type(kind) is not int or type(value) is not int or not 0 <= value <= 16383:
+                            raise BridgeError("MIDI 控制事件类型或值无效。")
+                        field = "controller_count" if 0 <= kind <= 127 else "program_change_count" if kind == 4097 else "other_count"
+                        counts[field] += 1
+                    offset += len(events)
+                    if sum(counts.values()) > 100000:
+                        raise BridgeError("MIDI 控制事件超过工程预算。")
+            if identity(self.snapshot()) != identity(context):
+                raise BridgeError("核对 MIDI 控制事件期间工程已变化。")
+        return counts
 
     def read_native_instrument(self, context, track_id):
         from .plans import PlanError, _number

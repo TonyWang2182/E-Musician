@@ -128,7 +128,7 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
     };
     juce::ValueTree analysisTree("EM_ANALYSES"),chordTree("EM_CHORDS");
     for(const auto& a:s.analyses){juce::ValueTree v("ANALYSIS");
-        for(const auto& [k,x]:std::initializer_list<std::pair<juce::Identifier,juce::var>>{{"id",a.id},{"kind",a.kind},{"model_id",a.modelId},{"model_version",a.modelVersion},{"source_clip_id",a.sourceClipId},{"source_asset_id",a.sourceAssetId},{"source_sha256",a.sourceSha256},{"result_sha256",a.resultSha256},{"parameters_json",a.parametersJson},{"start_seconds",a.startSeconds},{"duration_seconds",a.durationSeconds}})v.setProperty(k,x,nullptr);
+        for(const auto& [k,x]:std::initializer_list<std::pair<juce::Identifier,juce::var>>{{"id",a.id},{"kind",a.kind},{"model_id",a.modelId},{"model_version",a.modelVersion},{"source_clip_id",a.sourceClipId},{"source_asset_id",a.sourceAssetId},{"source_sha256",a.sourceSha256},{"result_sha256",a.resultSha256},{"parameters_json",a.parametersJson},{"annotations_json",a.annotationsJson},{"start_seconds",a.startSeconds},{"duration_seconds",a.durationSeconds}})v.setProperty(k,x,nullptr);
         analysisTree.addChild(v,-1,nullptr);
     }
     for(const auto& c:s.chordRegions){juce::ValueTree v("CHORD");
@@ -228,7 +228,9 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
             clip->setPosition({range,te::TimeDuration::fromSeconds(c.sourceOffset/c.warp.speedRatio())});
             if(auto* midi=dynamic_cast<te::MidiClip*>(clip.get())){
                 midi->setSyncType(te::Clip::syncBarsBeats);midi->setUsesProxy(false);
-                if(!c.notes.empty())midi->setMidiChannel(te::MidiChannel(c.notes.front().channel));
+                clip->state.setProperty("emMidiChannel",c.midiChannel,um);
+                if(c.midiChannel>0)midi->setMidiChannel(te::MidiChannel(c.midiChannel));
+                else if(!c.notes.empty())midi->setMidiChannel(te::MidiChannel(c.notes.front().channel));
                 if(c.notes.size()>512&&midi->getSequence().getNumNotes()==0){replaceMidiNotes(*midi,c.notes,um);continue;}
                 auto& seq=midi->getSequence();std::map<juce::String,te::MidiNote*> existing;
                 for(auto* n:seq.getNotes())existing[n->state[emId].toString()]=n;

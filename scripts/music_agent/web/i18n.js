@@ -1,6 +1,18 @@
 "use strict";
 (() => {
   const en = {
+  "综合分析": "Music analysis",
+  "云端": "Cloud",
+  "本地": "Local",
+  "创建 {0} 条 MIDI 轨，包含 {1} 个音符。": "Create {0} MIDI tracks with {1} notes.",
+  "综合分析：{0} 条 MIDI 轨，{1} 个和弦。": "Music analysis: {0} MIDI tracks and {1} chords.",
+  "保留 {0} 个控制事件。": "Preserve {0} controller events.",
+  "节拍与结构保留为分析标记，工程速度不变。": "Keep beats and structure as analysis markers. Project tempo stays unchanged.",
+  "模型：{0} · {1}": "Model: {0} · {1}",
+  "已到生成预算上限；结尾可能被截断，请先试听。": "Generation reached its budget. The ending may be cut off; preview before adding.",
+  "按可用模型转录钢琴或多乐器，保留音符和模型提供的控制事件。": "Transcribe piano or multiple instruments, preserving notes and available controller events.",
+  "旋律、和弦、节拍和结构候选；确认后导入，不自动改速。": "Review melody, chords, beats and structure before adding. Tempo stays unchanged.",
+  "综合分析选中音频的旋律、和弦、节拍和结构，先预览，再确认加入工程。": "Analyze the selected audio's melody, chords, beats and structure. Preview before adding to the project.",
   "音乐生成": "Music generation",
   "正在准备试听…": "Preparing preview…",
   "正在试听": "Previewing",

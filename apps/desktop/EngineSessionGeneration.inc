@@ -39,10 +39,18 @@ juce::Result generationAudio(const juce::var& result,const juce::File& directory
 
 juce::var EngineSession::Impl::generationCapabilities()
 {
+    const auto compute=computeRegistry();const auto providers=cloudProviders(compute,"generate");
+    if(compute.isObject()){
+        bool available=false;for(const auto& p:providers)available=available||bool(p["available"]);
+        const auto model=compute["defaults"]["generate"].toString();
+        return object({{"available",available},{"model_id",model},{"default_model_id",model},{"providers",providers},{"experimental",true},{"min_duration_seconds",10},{"max_duration_seconds",120},{"max_parallel_jobs",1},
+            {"detail","Cloud models are checked when a task starts. Duration is a target; preview the actual result."}});
+    }
     juce::var registry;const auto r=analysisJson(generationRoot().getChildFile("registry.json"),registry,131072);
     const auto python=registry["python_executable"].toString();
     const bool installed=r.wasOk()&&bool(registry["available"])&&juce::File::isAbsolutePath(python)&&juce::File(python).existsAsFile();
-    return object({{"available",installed},{"model_id",registry["model_id"]},{"experimental",true},{"min_duration_seconds",10},{"max_duration_seconds",120},{"max_parallel_jobs",1},
+    juce::Array<juce::var> legacy;legacy.add(object({{"kind","generate"},{"model_id",registry["model_id"]},{"execution","cloud"},{"available",installed},{"default",true},{"max_duration_seconds",120}}));
+    return object({{"available",installed},{"model_id",registry["model_id"]},{"default_model_id",registry["model_id"]},{"providers",legacy},{"experimental",true},{"min_duration_seconds",10},{"max_duration_seconds",120},{"max_parallel_jobs",1},
         {"detail",installed?"Remote generation configured; connectivity is checked when a job starts.":"Remote generation is not configured."}});
 }
 bool EngineSession::Impl::generationSourceMatches(const GenerationEntry& g)const
@@ -69,12 +77,13 @@ juce::Result EngineSession::Impl::beginGeneration(const juce::var& args,juce::va
        ||!std::isfinite(seconds)||seconds<10||seconds>120||!std::isfinite(at)||at<0||at+150>storage::maximumTimelineSeconds)return fail("Enter a description and a duration from 10 to 120 seconds.");
     const auto seed=args.getProperty("seed",juce::Random::getSystemRandom().nextInt(std::numeric_limits<int>::max()));
     if((!seed.isInt()&&!seed.isInt64())||juce::int64(seed)<0||juce::int64(seed)>2147483647)return fail("Seed must be an integer from 0 to 2147483647.");
-    juce::var registry;if(auto r=analysisJson(generationRoot().getChildFile("registry.json"),registry,131072);r.failed())return fail("Remote generation is not configured.");
+    juce::var selected;if(auto r=selectAnalysisRoute(generationCapabilities()["providers"],"generate",args,selected);r.failed())return fail(r.getErrorMessage());
+    juce::var registry=computeRegistry();if(!registry.isObject()&&analysisJson(generationRoot().getChildFile("registry.json"),registry,131072).failed())return fail("Remote generation is not configured.");
     const auto python=registry["python_executable"].toString();
     if(!bool(registry["available"])||!juce::File::isAbsolutePath(python)||!juce::File(python).existsAsFile())return fail("Remote generation runtime is not ready.");
     while(generations.size()>=32){auto retired=std::find_if(generations.begin(),generations.end(),[](const auto& x){return x.second->job&&!x.second->job->worker.joinable()&&(!x.second->acceptJob||!x.second->acceptJob->worker.joinable());});
         if(retired==generations.end())return fail("Generation history is busy.");generations.erase(retired);}
-    auto g=std::make_shared<GenerationEntry>();g->id=uid();g->directory=generationRoot().getChildFile("jobs").getChildFile(g->id);
+    auto g=std::make_shared<GenerationEntry>();g->id=uid();g->modelId=selected["model_id"].toString();g->directory=generationRoot().getChildFile("jobs").getChildFile(g->id);
     const auto* signature=edit->tempoSequence.getTimeSig(0);const auto bpm=edit->tempoSequence.getTempo(0)->getBpm();
     g->source=object({{"project_id",juce::String(guard.projectId())},{"revision",juce::int64(guard.revision())},{"timeline_start",at},{"bpm",bpm},{"meter_numerator",int(signature->numerator)},{"meter_denominator",int(signature->denominator)}});
     g->parameters=object({{"prompt",prompt},{"lyrics",lyrics},{"duration_seconds",seconds},{"seed",seed},{"bpm",bpm},{"meter_numerator",int(signature->numerator)},{"meter_denominator",int(signature->denominator)}});
@@ -82,13 +91,13 @@ juce::Result EngineSession::Impl::beginGeneration(const juce::var& args,juce::va
     const auto root=generationRoot();
     g->job=startJob("generation.generate",[this,g,script,python,root](const auto& j){
         if(!g->directory.createDirectory()){jobStatus(j,"failed","Cannot create the local generation directory.");return;}
-        auto request=g->parameters.clone();auto* dto=request.getDynamicObject();dto->setProperty("schema_version",1);dto->setProperty("job_id",g->id);dto->setProperty("kind","generate");dto->setProperty("source",g->source);dto->setProperty("generation_root",root.getFullPathName());
+        auto request=g->parameters.clone();auto* dto=request.getDynamicObject();dto->setProperty("schema_version",1);dto->setProperty("job_id",g->id);dto->setProperty("kind","generate");dto->setProperty("source",g->source);dto->setProperty("generation_root",root.getFullPathName());dto->setProperty("compute_root",computeRoot().getFullPathName());dto->setProperty("model_id",g->modelId);
         if(!g->directory.getChildFile("request.json").replaceWithText(juce::JSON::toString(request))){jobStatus(j,"failed","Cannot write generation request.");return;}
-        juce::ChildProcess child;if(!child.start(juce::StringArray{python,script.getFullPathName(),"--request",g->directory.getChildFile("request.json").getFullPathName()},0)){jobStatus(j,"failed","Cannot launch the generation helper.");return;}
+        analysis_worker::Process child;if(auto r=child.start(juce::StringArray{python,script.getFullPathName(),"--request",g->directory.getChildFile("request.json").getFullPathName()},g->directory.getChildFile("process.log"));r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}
         const auto began=juce::Time::getMillisecondCounterHiRes();bool aborted=false;
         while(child.isRunning()){
             if(j->cancel||juce::Time::getMillisecondCounterHiRes()-began>60.0*60*1000){
-                g->directory.getChildFile("cancel").replaceWithText("cancel");if(!child.waitForProcessToFinish(8000))child.kill();aborted=true;break;}
+                g->directory.getChildFile("cancel").replaceWithText("cancel");if(!child.wait(8000))child.terminate();aborted=true;break;}
             juce::var progress;if(analysisJson(g->directory.getChildFile("progress.json"),progress,32768).wasOk()){
                 std::lock_guard lock(j->mutex);j->phase=progress["phase"].toString().substring(0,80);j->detail=progress["detail"].toString().substring(0,512);
                 if(analysisNumber(progress["progress"]))j->progress=juce::jlimit(0.0,1.0,double(progress["progress"]));
@@ -101,11 +110,12 @@ juce::Result EngineSession::Impl::beginGeneration(const juce::var& args,juce::va
                 j->detail=confirmed?"Local and remote tasks cancelled.":remote=="cancelling"?"Local task stopped; remote cancellation is pending.":"Local task stopped; remote cancellation is unconfirmed.";}
             jobStatus(j,j->cancel?"cancelled":"failed",j->cancel?"":"Generation exceeded its one-hour limit.");return;
         }
-        if(child.getExitCode()!=0){juce::var error;analysisJson(g->directory.getChildFile("error.json"),error,32768);jobStatus(j,"failed",error["message"].toString().isNotEmpty()?error["message"].toString().substring(0,1024):"Generation ended without a result.");return;}
+        if(child.exitCode()!=0){juce::var error;analysisJson(g->directory.getChildFile("error.json"),error,32768);jobStatus(j,"failed",error["message"].toString().isNotEmpty()?error["message"].toString().substring(0,1024):"Generation ended without a result.");return;}
         juce::var result;const auto file=g->directory.getChildFile("result.json");
         if(auto r=analysisJson(file,result,128*1024);r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}
         AudioInfo info;const auto cancel=[j]{return j->cancel.load();};
         if(auto r=generationAudio(result,g->directory,g->id,info,cancel);r.failed()){jobStatus(j,j->cancel?"cancelled":"failed",r.getErrorMessage());return;}
+        if(g->modelId.isNotEmpty()&&result["model"]["id"].toString()!=g->modelId){jobStatus(j,"failed","The server returned a different generation model.");return;}
         JobFingerprint hash;if(auto r=fingerprint(file,hash,cancel);r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}
         std::lock_guard lock(j->mutex);j->commit=[this,g,j,result,hash]{
             if(j->cancel){jobStatus(j,"cancelled");return;}g->result=result;g->resultHash=hash.hash;
@@ -136,7 +146,10 @@ juce::Result EngineSession::Impl::acceptGeneration(const juce::var& args,juce::v
         info.playbackFile=retained;storage::StoredAsset asset{uid(),retained};storage::StoredTrack track;track.id=uid();track.name="Generated / "+g->parameters["prompt"].toString().replaceCharacters("\r\n","  ").substring(0,60);
         const double at=double(g->source["timeline_start"]);storage::StoredClip clip{uid(),asset.id,at,0,info.duration};track.clips.push_back(clip);
         candidate->assets.push_back(asset);candidate->tracks.push_back(track);
-        candidate->generations.push_back({g->id,asset.id,clip.id,g->result["model"]["id"].toString(),g->result["model"].getProperty("revision",g->result["model"]["version"]).toString(),g->result["audio"]["sha256"].toString(),g->resultHash,juce::JSON::toString(g->parameters,true),at,info.duration});candidate->schemaVersion=storage::requiredSchema(*candidate);
+        auto provenance=g->parameters.clone();
+        for(const auto* key:{"truncated","conditioning","processing","warnings","limitations","completion"})if(g->result.hasProperty(key))provenance.getDynamicObject()->setProperty(key,g->result[key]);
+        provenance.getDynamicObject()->setProperty("actual_duration_seconds",info.duration);
+        candidate->generations.push_back({g->id,asset.id,clip.id,g->result["model"]["id"].toString(),g->result["model"].getProperty("revision",g->result["model"]["version"]).toString(),g->result["audio"]["sha256"].toString(),g->resultHash,juce::JSON::toString(provenance,true),at,info.duration});candidate->schemaVersion=storage::requiredSchema(*candidate);
         if(auto r=storage::validate(*candidate);r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}
         auto receipt=object({{"result_id",g->id},{"project_id",project},{"applied",true},{"track_ids",juce::var(juce::StringArray{track.id})},{"clip_ids",juce::var(juce::StringArray{clip.id})},{"revision",juce::int64(revision+1)}});
         std::lock_guard lock(j->mutex);j->commit=[this,g,j,candidate,revision,project,retained,info,receipt]{
@@ -161,13 +174,13 @@ juce::Result EngineSession::Impl::generationCommand(const juce::String& command,
     if(command=="get_generation_job"||command=="cancel_generation_job"){
         const auto id=textArg(args,"job_id");for(const auto& [resultId,g]:generations)for(const auto& j:{g->job,g->acceptJob})if(j&&j->id==id){
             if(command=="cancel_generation_job"){j->cancel=true;out=object({{"job_id",id},{"cancel_requested",true}});return juce::Result::ok();}
-            std::lock_guard lock(j->mutex);out=object({{"job_id",id},{"kind",j->kind},{"result_id",resultId},{"status",j->status},{"phase",j->phase},{"progress",j->progress},{"error",j->error},{"detail",j->detail},{"remote_status",j->result.getProperty("remote_status","unconfirmed")},{"remote_cancel_confirmed",j->result.getProperty("remote_cancel_confirmed",false)},{"source",g->source},{"applied",g->applied},{"receipt",g->receipt}});return juce::Result::ok();
+            std::lock_guard lock(j->mutex);out=object({{"job_id",id},{"kind",j->kind},{"execution","cloud"},{"model_id",g->modelId},{"result_id",resultId},{"status",j->status},{"phase",j->phase},{"progress",j->progress},{"error",j->error},{"detail",j->detail},{"remote_status",j->result.getProperty("remote_status","unconfirmed")},{"remote_cancel_confirmed",j->result.getProperty("remote_cancel_confirmed",false)},{"source",g->source},{"applied",g->applied},{"receipt",g->receipt}});return juce::Result::ok();
         }return fail("Generation job not found.");
     }
     auto found=generations.find(textArg(args,"result_id"));if(found==generations.end())return fail("Generation result is unavailable.");auto g=found->second;
     if(command=="get_generation_result"){
         if(!g->result.isObject())return fail("Generation result is not ready.");
-        out=object({{"result_id",g->id},{"kind","generate"},{"source",g->source},{"audio",g->result["audio"]},{"model",g->result["model"]},{"parameters",g->parameters},{"waveform_peaks",g->result["waveform_peaks"]},{"result_hash",g->resultHash},{"applied",g->applied},{"present_in_project",metadata(*edit).getChildWithName("EM_GENERATIONS").getChildWithProperty("id",g->id).isValid()},{"stale",!generationSourceMatches(*g)},{"receipt",g->receipt}});return juce::Result::ok();
+        out=object({{"result_id",g->id},{"kind","generate"},{"execution","cloud"},{"model_id",g->result["model"]["id"]},{"limitations",g->result["limitations"]},{"completion",g->result["completion"]},{"truncated",g->result["truncated"]},{"conditioning",g->result["conditioning"]},{"processing",g->result["processing"]},{"warnings",g->result["warnings"]},{"source",g->source},{"audio",g->result["audio"]},{"model",g->result["model"]},{"parameters",g->parameters},{"waveform_peaks",g->result["waveform_peaks"]},{"result_hash",g->resultHash},{"applied",g->applied},{"present_in_project",metadata(*edit).getChildWithName("EM_GENERATIONS").getChildWithProperty("id",g->id).isValid()},{"stale",!generationSourceMatches(*g)},{"receipt",g->receipt}});return juce::Result::ok();
     }
     if(command=="preview_generation_result"){
         if(recordingBusy()||edit->getTransport().isPlaying()||!g->result.isObject()||!generationSourceMatches(*g))return fail("Stop playback and choose a current generated candidate to preview.");

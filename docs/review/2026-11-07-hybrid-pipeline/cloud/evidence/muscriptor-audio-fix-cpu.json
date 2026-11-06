@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "adapter_sha256": "90304d14bb1c30ddeb36c3264c9ae7bd2eb8049fbd15a157ecc7467ea80410a2",
+  "frames": 352800,
+  "sample_rate": 44100,
+  "channels": 2,
+  "scipy_present": false,
+  "scipy_import_attempts": [],
+  "torch_imported": false,
+  "gpu_inference": false,
+  "live_release_modified": false
+}

@@ -73,12 +73,12 @@ class AnalysisScopeTests(unittest.TestCase):
         args={"region_id":"ch","clip_id":"c","label":"D:min","summary":"修正标签"}
         plan=compile_chord_edit(args,chord,ctx,freeze_scope(ctx))
         self.assertEqual(plan["commands"],[{"command":"edit_chord_region","args":{"id":"ch","label":"D:min"}}])
-        for change in ({"start_seconds":9}, {"end_seconds":14}, {"label":"C:maj9"}, {"label":"C:maj"}):
+        for change in ({"start_seconds":9}, {"end_seconds":14}, {"label":"C:maj\n"}, {"label":"C:maj"}):
             with self.subTest(change=change),self.assertRaises(ValueError): compile_chord_edit({**args,**change},chord,ctx,freeze_scope(ctx))
 
     def test_extended_chord_edits_use_canonical_supported_labels(self):
         ctx=context(); chord={"id":"ch", "analysis_id":"r", "label":"C:maj", "start_seconds":10, "end_seconds":12, "score":.8,"uncertain":False}
-        for label in ("C:maj7", "D:min7", "G:7", "B:hdim7", "F:sus4", "C:dim7"):
+        for label in ("C:maj7", "D:min7", "G:7", "B:hdim7", "F:sus4", "C:dim7", "C:maj9", "C:maj7/E", "unknown"):
             plan=compile_chord_edit({"region_id":"ch","clip_id":"c","label":label,"summary":"修正"},chord,ctx,freeze_scope(ctx))
             self.assertEqual(plan["commands"][0]["args"]["label"],label)
 
@@ -208,7 +208,7 @@ class AnalysisScopeTests(unittest.TestCase):
     def test_host_and_model_both_required_for_capability(self):
         caps = safe_capabilities({"providers": [{"kind": "separate", "available": True, "model_id": "test", "version": "mock"}]})
         groups = capability_groups(context(), {"commands": list(COMMANDS)}, caps)
-        self.assertEqual(len(groups), 10)
+        self.assertEqual(len(groups), 11)
         self.assertFalse(next(g for g in groups if g["id"] == "track_colour")["enabled"])
         colours = capability_groups(context(), {"commands": ["set_track_colour"]}, caps)
         self.assertTrue(next(g for g in colours if g["id"] == "track_colour")["enabled"])

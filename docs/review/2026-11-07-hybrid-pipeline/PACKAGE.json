@@ -1,0 +1,35 @@
+{
+  "packaged_utc": "2026-11-06T18:33:10.397803+00:00",
+  "release_directory": "E:\\MusicAgent&DAW\\releases\\0.13.0-20261107-hybrid",
+  "artifacts": [
+    {
+      "path": "E:\\MusicAgent&DAW\\releases\\0.13.0-20261107-hybrid\\E-musician-Hybrid.code-workspace",
+      "bytes": 1850,
+      "sha256": "011a976f50bfb4b8689673e4f91f7ecc85fb10490f41d87ff13c2103ad35e278"
+    },
+    {
+      "path": "E:\\MusicAgent&DAW\\releases\\0.13.0-20261107-hybrid\\E-musician.exe",
+      "bytes": 23029760,
+      "sha256": "d5579acbc8128ae9ffcd1c76cbf9ae68eb9d9ce897ab24fbb7e93e7f06de283f"
+    },
+    {
+      "path": "E:\\MusicAgent&DAW\\releases\\0.13.0-20261107-hybrid\\E-musician.pdb",
+      "bytes": 172797952,
+      "sha256": "a76f7c0f114c49100be90f8cb0aed1980669d883d3976fa3f4648a0f71a43021"
+    },
+    {
+      "path": "E:\\MusicAgent&DAW\\releases\\0.13.0-20261107-hybrid\\source-and-review.zip",
+      "bytes": 2355151,
+      "sha256": "617ef5462c45fa4709083793807b2f8aec75807be351ad34591d013c6d58f81e"
+    },
+    {
+      "path": "E:\\MusicAgent&DAW\\releases\\0.13.0-20261107-hybrid\\Start E-musician 0.13.0 Hybrid.cmd",
+      "bytes": 384,
+      "sha256": "2b04fa7f61709127c8aee2ff0477b49230f6f4c0c7717e6b4ba4692569dc7b6e"
+    }
+  ],
+  "source_inputs_verified": 356,
+  "contains_model_weights": false,
+  "portable_installer": false,
+  "runtime_note": "Existing pinned dependencies, local model environments and SSH compute configuration remain external. Launchers refer to this machine workspace."
+}

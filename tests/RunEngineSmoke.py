@@ -2,6 +2,7 @@
 from pathlib import Path
 import json
 import math
+import os
 import subprocess
 import sys
 import uuid
@@ -12,7 +13,10 @@ def main() -> int:
     directory = root / uuid.uuid4().hex[:12]
     directory.mkdir(parents=True, exist_ok=False)
     fixtures = Path(__file__).resolve().parent / "fixtures" / "audio"
-    result = subprocess.run([str(executable), "--smoke-test", str(directory), str(fixtures), "--offline"], timeout=240)
+    environment = dict(os.environ)
+    for name in ("EMUSICIAN_COMPUTE_ROOT", "EMUSICIAN_ANALYSIS_ROOT", "EMUSICIAN_GENERATION_ROOT"):
+        environment[name] = str((directory / "disabled-runtimes").resolve())
+    result = subprocess.run([str(executable), "--smoke-test", str(directory), str(fixtures), "--offline"], timeout=240, env=environment)
     if result.returncode:
         failure = directory / "failure.txt"
         if failure.exists():

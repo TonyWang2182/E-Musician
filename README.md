@@ -2,7 +2,9 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
-**当前云端工作：六个新增模型已通过短推理**。YuE2、SCNet、TransKun、ChordMini、SheetSage2和MuScriptor使用独立目录、环境与版本清单；MuScriptor medium已获读取权限，固定权重/配置、CPU加载与8秒真实GPU探针通过，见[本轮部署](docs/review/2026-11-06-muscriptor-authorized/RESULTS.md)。New Light/Keyboard的其他四项整曲测试见[原文件评测](docs/review/2026-11-06-real-audio/RESULTS.md)。本批不接入DAW，不把权重/音频/备份保存到E盘，脚本入口见[scripts/cloud/models](scripts/cloud/models/README.md)。下方0.12.1仍为桌面候选，模型安装不自动增加桌面功能。
+**当前候选 0.13.0：统一云端计算与七模型接入，自动验证通过、人工待验。** 分析支持 Auto/Local/Cloud 与模型选择；SCNet、TransKun、ChordMini、MuScriptor、SheetSage2 的结果可预览、确认入轨、撤销、保存与离线重开，保留踏板、乐器通道、原和弦标签、拍点和段落。生成可选 ACE／YuE2，明确提示长度预算截断。Agent 使用相同命令和候选。Release、CTest11/11、Agent349及七模型真实短段整链通过，物理声卡与听感仍需人工验收。[结果](docs/review/2026-11-07-hybrid-pipeline/RESULTS.md) / [最终人工清单](docs/review/2026-11-07-hybrid-pipeline/MANUAL-CHECK.md)。
+
+双击 `E:/MusicAgent&DAW/Start E-musician 0.13.0 Hybrid.cmd`，确认标题0.13.0。新缓存和临时文件在E盘，模型权重仍在云端；旧版本和工程保留。下方条目均为历史版本状态。
 
 **0.12.1 候选：生成默认值和分析故障保护（自动验证通过）**。Agent 自动沿用工程速度/拍号/播放头；本地分离增加提交内存准入、进程树隔离、可见错误，禁止 CUDA OOM 后同进程盲目切 CPU。Release、CTest11组、Agent334、Worker回归及一次真实GPT决策通过；真实短分离因资源不足未启动，原75秒六轨及ASIO仍待验。启动 `E:/MusicAgent&DAW/Start E-musician 0.12.1 Stability.cmd`；[结果](docs/review/2026-11-06-generation-stability/RESULTS.md) / [人工短测](docs/review/2026-11-06-generation-stability/MANUAL-CHECK.md)。云端MIR正在独立准备，当前尚不能自由切换本地/云端。
 
@@ -38,11 +40,11 @@ Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、M
 
 ## 打开与开发
 
-本轮工作树为 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `fix/generation-stability-v0121`。本机 VS Code 打开 `E:/MusicAgent&DAW/E-musician-Stability.code-workspace`：Ctrl+Shift+B 构建 Release，运行 CTest 任务，F5 调试0.12.1。命令行入口为 `python scripts/dev_generation.py build`、`test`、`python-tests`；`e2e` 会调用已租云端GPU，必须在模型登记就绪后运行。所有步骤通过 Recorder 保留命令、时间、退出码、源码指纹和日志。
+本轮工作树为 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/hybrid-pipeline-v0130`。本机 VS Code 打开 `E:/MusicAgent&DAW/E-musician-Hybrid.code-workspace`：Ctrl+Shift+B 配置/构建 Release，运行 CTest 任务，F5 调试0.13.0。命令行先执行 `python scripts/dev_compute.py configure`，再分别执行 `build`、`test`、`transport-tests`、`agent-tests`。`tests/HybridComputeEndToEnd.py` 会调用租用GPU，应通过 `dev_compute.py command` 记录并明确传入EXE。所有步骤保留命令、时间、退出码、源码指纹和日志。
 
 本机使用目录联接 `E:/emusician-analysis-source` 作为 CMake 源目录，构建目录 `E:/emusician-analysis-build`，避免上游 MSBuild 对路径中 `&` 的处理问题。固定 JUCE 8.0.6 / Tracktion Engine 3.2.0，具体 commit 和配置以本轮构建记录为准。其他机器需按 [BUILDING](docs/BUILDING.md) 准备依赖并调整工作区路径；现有 `dev_agent.py` 的历史默认构建目录不是这次 0.9.0 的入口。
 
-新候选独立输出到 `E:/emusician-analysis-build/bin-0.12.1/Release/E-musician.exe`，旧 `bin-0.12.0` 和发布归档保留。入口为 `E:/MusicAgent&DAW/Start E-musician 0.12.1 Stability.cmd`。每次运行前保存并关闭旧窗口，核对新标题 **0.12.1**，避免单实例逻辑返回旧窗口。云端生成通过SSH连接；本地MIR与既有DAW功能独立保留。项目约定见 [AGENTS.md](AGENTS.md)，真实验证状态以 [CONTEXT](docs/CONTEXT.md) 为准。
+新候选独立输出到 `E:/emusician-analysis-build/bin-0.13.0/Release/E-musician.exe`，旧0.12.x和发布归档保留。每次运行前保存并关闭旧窗口，核对新标题 **0.13.0**，避免单实例逻辑返回旧窗口。云端通过SSH连接；本地MIR与既有DAW功能独立保留。新schema8工程请用0.13.0打开。项目约定见 [AGENTS.md](AGENTS.md)，真实验证状态以 [CONTEXT](docs/CONTEXT.md) 为准。
 
 ## 基础操作
 

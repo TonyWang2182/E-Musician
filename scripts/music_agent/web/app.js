@@ -302,19 +302,32 @@
   function analysisChanges(candidate) {
     if (!candidate) return null;
     const total = Number(candidate.total), start = Number(candidate.source?.timeline_start || 0).toFixed(3);
+    const tracks = Number(candidate.summary?.track_count ?? (candidate.kind === "transcribe" ? 1 : 0));
+    const notes = Number(candidate.summary?.note_count ?? total);
     const title = candidate.kind === "separate" ? t`创建 ${total} 条音频轨。`
-      : candidate.kind === "transcribe" ? t`创建一条 MIDI 轨，包含 ${total} 个音符。`
-      : candidate.kind === "chords" ? t`在和弦轨上添加 ${total} 个和弦。` : null;
+      : candidate.kind === "transcribe" ? t`创建 ${tracks} 条 MIDI 轨，包含 ${notes} 个音符。`
+      : candidate.kind === "chords" ? t`在和弦轨上添加 ${total} 个和弦。`
+      : candidate.kind === "score" ? t`综合分析：${tracks} 条 MIDI 轨，${Number(candidate.summary?.chord_count || 0)} 个和弦。` : null;
     if (!title) return null;
     const rows = [title, t`起点 ${start} 秒，保留原音频。`];
-    if (candidate.kind === "transcribe") rows.push(t("选择乐器后即可播放。"));
+    if (candidate.kind === "transcribe" || candidate.kind === "score") {
+      if (candidate.summary?.controller_count) rows.push(t`保留 ${Number(candidate.summary.controller_count)} 个控制事件。`);
+      rows.push(t("选择乐器后即可播放。"));
+    }
+    if (candidate.kind === "score") rows.push(t("节拍与结构保留为分析标记，工程速度不变。"));
+    const model = candidate.model_id || candidate.model?.id;
+    if (model) rows.push(t`模型：${model} · ${candidate.execution === "cloud" ? t("云端") : t("本地")}`);
     return rows;
   }
   function generationChanges(candidate) {
     if (!candidate) return null;
     const start = Number(candidate.source?.timeline_start || 0).toFixed(3);
     const duration = Number(candidate.audio?.duration_seconds || 0).toFixed(2);
-    return [t("新建1条音频轨，加入生成音乐"), t`起点 ${start} 秒，实际时长 ${duration} 秒。`, t("现有音乐保留；加入后可一次撤销。")];
+    const rows = [t("新建1条音频轨，加入生成音乐"), t`起点 ${start} 秒，实际时长 ${duration} 秒。`, t("现有音乐保留；加入后可一次撤销。")];
+    if (candidate.completion?.token_limit_reached || candidate.completion?.truncated === true || candidate.completion?.reason === "token_budget") rows.push(t("已到生成预算上限；结尾可能被截断，请先试听。"));
+    const model = candidate.model_id || candidate.model?.id;
+    if (model) rows.push(t`模型：${model} · ${t("云端")}`);
+    return rows;
   }
   function warpChanges(plan, snapshot) {
     if (!["audio_warp", "beat_apply"].includes(plan.execution_kind)) return null;
@@ -410,7 +423,7 @@
     if (signature === analysisPreviewSignature) return;
     analysisPreviewSignature = signature;
     if (!candidate) return;
-    const names = {separate: t("分离候选"), transcribe: t("MIDI 候选"), chords: t("和弦候选"), beats: t("节拍候选")};
+    const names = {separate: t("分离候选"), transcribe: t("MIDI 候选"), chords: t("和弦候选"), beats: t("节拍候选"), score: t("综合分析")};
     text("analysis-preview-title", t`${names[candidate.kind] || t("分析候选")} · ${candidate.total} 项`);
     const source = candidate.source || {};
     if (candidate.kind === "beats") {
@@ -421,8 +434,8 @@
     const seconds = (value) => typeof value === "number" && Number.isFinite(value) ? `${value.toFixed(3)}s` : "—";
     const rows = (candidate.items || []).map((item) => {
       const label = candidate.kind === "separate" ? t`${item.name} · ${seconds(item.duration_seconds)} · ${item.channels} 声道`
-        : candidate.kind === "transcribe" ? t`MIDI ${item.pitch} · ${seconds(item.start_seconds)} 起 · 长 ${seconds(item.duration_seconds)} · 力度 ${item.velocity}`
-        : candidate.kind === "beats" ? `${item.is_downbeat ? t("强拍") : t("节拍")} · ${seconds(item.time_seconds)}`
+        : candidate.kind === "transcribe" || (candidate.kind === "score" && (!candidate.component || candidate.component === "notes")) ? t`MIDI ${item.pitch} · ${seconds(item.start_seconds)} 起 · 长 ${seconds(item.duration_seconds)} · 力度 ${item.velocity}`
+        : candidate.kind === "beats" || (candidate.kind === "score" && candidate.component === "beats") ? `${item.is_downbeat ? t("强拍") : t("节拍")} · ${seconds(item.time_seconds)}`
         : `${item.label} · ${seconds(item.start_seconds)}–${seconds(item.end_seconds)}${item.uncertain ? t(" · 待核对") : ""}`;
       return element("li", label);
     });

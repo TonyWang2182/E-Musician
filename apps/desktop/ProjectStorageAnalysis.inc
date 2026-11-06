@@ -6,7 +6,8 @@ juce::var serializeAnalyses(const StoredProject& p)
     for(const auto& a:p.analyses){auto* v=new juce::DynamicObject();
         v->setProperty("id",a.id);v->setProperty("kind",a.kind);v->setProperty("model_id",a.modelId);v->setProperty("model_version",a.modelVersion);
         v->setProperty("source_clip_id",a.sourceClipId);v->setProperty("source_asset_id",a.sourceAssetId);v->setProperty("source_sha256",a.sourceSha256);v->setProperty("result_sha256",a.resultSha256);
-        v->setProperty("parameters_json",a.parametersJson);v->setProperty("start_seconds",a.startSeconds);v->setProperty("duration_seconds",a.durationSeconds);items.add(v);
+        v->setProperty("parameters_json",a.parametersJson);v->setProperty("start_seconds",a.startSeconds);v->setProperty("duration_seconds",a.durationSeconds);
+        if(p.schemaVersion>=8)v->setProperty("annotations_json",a.annotationsJson);items.add(v);
     }return items;
 }
 juce::var serializeChords(const StoredProject& p)
@@ -41,14 +42,16 @@ Result validateAnalysis(const StoredProject& p)
     std::set<juce::String> ids,chords;
     for(const auto& a:p.analyses){
         if(!validIdentifier(a.id)||!ids.insert(a.id).second||!validIdentifier(a.sourceClipId)||!validIdentifier(a.sourceAssetId)
-           ||(a.kind!="separate"&&a.kind!="transcribe"&&a.kind!="chords"&&a.kind!="beats")||(a.kind=="beats"&&p.schemaVersion<6)||a.modelId.isEmpty()||a.modelId.length()>256||a.modelVersion.length()>128
+           ||(a.kind!="separate"&&a.kind!="transcribe"&&a.kind!="chords"&&a.kind!="beats"&&a.kind!="score")||(a.kind=="score"&&p.schemaVersion<8)||(a.kind=="beats"&&p.schemaVersion<6)||a.modelId.isEmpty()||a.modelId.length()>256||a.modelVersion.length()>128
            ||a.sourceSha256.length()!=64||!a.sourceSha256.containsOnly("0123456789abcdef")||a.resultSha256.length()!=64||!a.resultSha256.containsOnly("0123456789abcdef")
            ||a.parametersJson.getNumBytesAsUTF8()>4096||!juce::JSON::parse(a.parametersJson).isObject()
            ||!validTime(a.startSeconds)||!std::isfinite(a.durationSeconds)||a.durationSeconds<=0||!validTime(a.startSeconds+a.durationSeconds))return Result::fail("Invalid analysis provenance.");
+        if(a.annotationsJson.getNumBytesAsUTF8()>2*1024*1024||(a.annotationsJson!="{}"&&p.schemaVersion<8))return Result::fail("Invalid accepted analysis metadata size or schema.");
+        if(auto r=validateAnalysisAnnotations(juce::JSON::parse(a.annotationsJson),a.durationSeconds);r.failed())return r;
     }
     for(const auto& c:p.chordRegions){
-        if(!validIdentifier(c.id)||!chords.insert(c.id).second||!ids.contains(c.analysisId)||!validChordLabel(c.label)
-           ||!validTime(c.startSeconds)||!validTime(c.endSeconds)||c.endSeconds<=c.startSeconds||!std::isfinite(c.score)||c.score<0||c.score>1)return Result::fail("Invalid chord region.");
+        if(!validIdentifier(c.id)||!chords.insert(c.id).second||!ids.contains(c.analysisId)||!(p.schemaVersion>=8?isSupportedChordLabel(c.label):validChordLabel(c.label))
+           ||!validTime(c.startSeconds)||!validTime(c.endSeconds)||c.endSeconds<=c.startSeconds||!std::isfinite(c.score)||c.score<(p.schemaVersion>=8?-1:0)||c.score>1||(c.score<0&&!c.uncertain))return Result::fail("Invalid chord region.");
     }return Result::ok();
 }
 Result parseAnalysis(const var& object,StoredProject& p)
@@ -70,6 +73,7 @@ Result parseAnalysis(const var& object,StoredProject& p)
             if(!a[key].isString())return Result::fail("Invalid analysis string.");
         if(!number(a["start_seconds"])||!number(a["duration_seconds"]))return Result::fail("Invalid analysis time.");
         p.analyses.push_back({a["id"].toString(),a["kind"].toString(),a["model_id"].toString(),a["model_version"].toString(),a["source_clip_id"].toString(),a["source_asset_id"].toString(),a["source_sha256"].toString(),a["result_sha256"].toString(),a["parameters_json"].toString(),double(a["start_seconds"]),double(a["duration_seconds"])});
+        if(p.schemaVersion>=8){if(!a["annotations_json"].isString())return Result::fail("Missing accepted analysis metadata.");p.analyses.back().annotationsJson=a["annotations_json"].toString();}
     }
     for(const auto& a:*regions.getArray()){
         if(!a.isObject()||!a["id"].isString()||!a["label"].isString()||!a["analysis_id"].isString()||!number(a["start_seconds"])||!number(a["end_seconds"])||!number(a["score"])||!a["uncertain"].isBool())return Result::fail("Invalid chord object.");
