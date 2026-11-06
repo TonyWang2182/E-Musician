@@ -11732,3 +11732,4 @@ print(json.dumps({'\"'\"'passed'\"'\"':True,'\"'\"'checked_at'\"'\"':datetime.da
 - Source SHA-256: `90109dde805eabe95f85d07780ea0bd171c07ec80b14de93c8a99eece940b3f8`; Git HEAD: `a6951f3d6cad94f4f274ecbef2b28c5299904e58`.
 - [Record](builds/20261106T183458.862437Z-fdc56e6906.json) · [Raw log](../build-logs/20261106T183458.862437Z-fdc56e6906.log)
 - [Exact process output](../build-logs/20261106T183458.862437Z-fdc56e6906.raw.log)
+- 发布补记：实现提交 88f2f6f177a19ac5d68590b9d37f18ce77209b85 已推送并核对远端 feature/hybrid-pipeline-v0130；远端 main 观察值 d4ed6c898af1303918e38b6325a915befabbb575，本轮未写 main。PUBLISH.json 和 PACKAGE.json 保存同步/保留包证据。

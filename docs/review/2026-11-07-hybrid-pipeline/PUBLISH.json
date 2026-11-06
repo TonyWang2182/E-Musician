@@ -1,0 +1,14 @@
+{
+    "verified_utc":  "2026-11-06T18:36:54.0944396Z",
+    "branch":  "feature/hybrid-pipeline-v0130",
+    "implementation_commit":  "88f2f6f177a19ac5d68590b9d37f18ce77209b85",
+    "remote_implementation_verified":  "88f2f6f177a19ac5d68590b9d37f18ce77209b85",
+    "remote_main_observed":  "d4ed6c898af1303918e38b6325a915befabbb575",
+    "wrote_main":  false,
+    "base_commit":  "a6951f3",
+    "package_manifest":  "PACKAGE.json",
+    "verification":  "VERIFICATION.json",
+    "entry":  "E:/MusicAgent\u0026DAW/Start E-musician 0.13.0 Hybrid.cmd",
+    "workspace":  "E:/MusicAgent\u0026DAW/E-musician-Hybrid.code-workspace",
+    "status":  "Implementation and evidence pushed; manual acceptance pending"
+}
