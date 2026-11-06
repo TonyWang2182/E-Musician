@@ -1,0 +1,253 @@
+{
+  "id": "yue2",
+  "task": "music_generation",
+  "source_revision": "1116bea76032bee5668e5f097294d082fa0b84f0",
+  "model_revisions": {
+    "m-a-p/YuE2-3B": "8f24312f187763b9854adeec87e437e2b03bbff1",
+    "m-a-p/YuE2-Vae": "152733a19ad43aa67e367f9b5503ef8075bb5126"
+  },
+  "paths": {
+    "model": {
+      "mot": "/root/autodl-tmp/emusician/models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1",
+      "vae": "/root/autodl-tmp/emusician/models/yue2/YuE2-Vae/152733a19ad43aa67e367f9b5503ef8075bb5126"
+    },
+    "environment": "/root/autodl-tmp/emusician/envs/yue2",
+    "source": "/root/autodl-tmp/emusician/workspace/models/yue2/YuE-1116bea76032bee5668e5f097294d082fa0b84f0",
+    "cli": "/root/autodl-tmp/emusician/workspace/models/yue2/run.sh"
+  },
+  "checks": {
+    "files_verified": true,
+    "environment_verified": true,
+    "cpu_load_verified": true,
+    "gpu_inference_verified": true
+  },
+  "daw_connected": false,
+  "blockers": [
+    "Default24GiB/full-song/symbolic-plan GPU path has not been validated."
+  ],
+  "licenses": {
+    "code": "Apache-2.0",
+    "weights": "CC-BY-NC-4.0 plus upstream individual-creator/academic grant; see pinned MODEL_LICENSE"
+  },
+  "artifacts": [
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1/LICENSE",
+      "bytes": 20309,
+      "sha256": "060985741d20e70613b4c189c7de106cabd3fb2109fbbfb6d705c9d619417dd0",
+      "repository": "m-a-p/YuE2-3B",
+      "revision": "8f24312f187763b9854adeec87e437e2b03bbff1",
+      "upstream_sha256": null,
+      "upstream_git_blob": "5b4b50fd3e4d4cadbc54c49cab3552d0eb303d48"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1/README.md",
+      "bytes": 21898,
+      "sha256": "469ac88a01ef1be99a60ece8fdf1f3b81221e7c6943048782ed7487e06d159f0",
+      "repository": "m-a-p/YuE2-3B",
+      "revision": "8f24312f187763b9854adeec87e437e2b03bbff1",
+      "upstream_sha256": null,
+      "upstream_git_blob": "61c53c28dc6911a27899ab8ca5cf3b880e8f3846"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1/THIRD_PARTY_NOTICES.md",
+      "bytes": 793,
+      "sha256": "14d3fd9f6fee86b4260b69b0979735b99ffec8c6b4db254567047a4215cd9af3",
+      "repository": "m-a-p/YuE2-3B",
+      "revision": "8f24312f187763b9854adeec87e437e2b03bbff1",
+      "upstream_sha256": null,
+      "upstream_git_blob": "8178461b1f6ec6f9977cf0e03b93abd39f5ba1af"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1/config.json",
+      "bytes": 959,
+      "sha256": "ad3477bbef890bf98ae196c1e4b44779494a6231c4ab66f32708eabadf265329",
+      "repository": "m-a-p/YuE2-3B",
+      "revision": "8f24312f187763b9854adeec87e437e2b03bbff1",
+      "upstream_sha256": null,
+      "upstream_git_blob": "9584e50ba9d6e487690544e14dd7555edbe27973"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1/generation_config.json",
+      "bytes": 204,
+      "sha256": "ccc842772f029049fadf9b288393bcdd9f79271b361c0f1875ec1218e4ba5170",
+      "repository": "m-a-p/YuE2-3B",
+      "revision": "8f24312f187763b9854adeec87e437e2b03bbff1",
+      "upstream_sha256": null,
+      "upstream_git_blob": "041d89f512a1b79c13e1a3dee54b5a9bc7c26cad"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1/licenses/SnakeBeta-NVIDIA-MIT.txt",
+      "bytes": 1076,
+      "sha256": "da9858d516047d82096d01c112a61bd67f26d289039464d668a1d45f91738ecc",
+      "repository": "m-a-p/YuE2-3B",
+      "revision": "8f24312f187763b9854adeec87e437e2b03bbff1",
+      "upstream_sha256": null,
+      "upstream_git_blob": "e9663595cc28938f88d6299acd3ba791542e4c0c"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1/licenses/stable-audio-tools-MIT.txt",
+      "bytes": 1069,
+      "sha256": "a1fac33b7bcd791b74fb33aeb439f825e7277e239fc119fb7d2ab6f084a0c101",
+      "repository": "m-a-p/YuE2-3B",
+      "revision": "8f24312f187763b9854adeec87e437e2b03bbff1",
+      "upstream_sha256": null,
+      "upstream_git_blob": "f119f94cf2ec8269020dd0d8140a4c4b83cc65a1"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1/model.safetensors",
+      "bytes": 7261441640,
+      "sha256": "1d55c42c1a9875c34f5d736e15078449992b044e807ce2a138e6cf289a1e59e9",
+      "repository": "m-a-p/YuE2-3B",
+      "revision": "8f24312f187763b9854adeec87e437e2b03bbff1",
+      "upstream_sha256": "1d55c42c1a9875c34f5d736e15078449992b044e807ce2a138e6cf289a1e59e9",
+      "upstream_git_blob": "3314789dffff7318458e58ea9c615157ac59774a"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1/modeling_yue2.py",
+      "bytes": 32983,
+      "sha256": "62d2bd758c8fff1a0d64584a699343076fca9a7880db5d8e19263bc30ae79d7c",
+      "repository": "m-a-p/YuE2-3B",
+      "revision": "8f24312f187763b9854adeec87e437e2b03bbff1",
+      "upstream_sha256": null,
+      "upstream_git_blob": "9e2b9924b6e277cab5905771ac9afc068267ee8b"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1/qwen.tiktoken",
+      "bytes": 2561218,
+      "sha256": "b2b1b8dfb5cc5f024bafc373121c6aba3f66f9a5a0269e243470a1de16a33186",
+      "repository": "m-a-p/YuE2-3B",
+      "revision": "8f24312f187763b9854adeec87e437e2b03bbff1",
+      "upstream_sha256": null,
+      "upstream_git_blob": "9b9b0e0416d84d7c88333eb261c77e5fe2d7f7be"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1/weights_manifest.json",
+      "bytes": 179,
+      "sha256": "2296f82c29dcb11aeefde07e216403a32fc86c8f6da2ec15a70102abfd936a93",
+      "repository": "m-a-p/YuE2-3B",
+      "revision": "8f24312f187763b9854adeec87e437e2b03bbff1",
+      "upstream_sha256": null,
+      "upstream_git_blob": "5ac0adb948bf8d8987ce7a1401fc39d0842b709d"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1/yue2_generation_config.json",
+      "bytes": 466,
+      "sha256": "203830cebde6e3644eb291925362990d198e66c3b6006cd11f1aaa21904bcc61",
+      "repository": "m-a-p/YuE2-3B",
+      "revision": "8f24312f187763b9854adeec87e437e2b03bbff1",
+      "upstream_sha256": null,
+      "upstream_git_blob": "f8214009f5bb5425319e4519b12e4853ad72acf3"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-Vae/152733a19ad43aa67e367f9b5503ef8075bb5126/LICENSE",
+      "bytes": 20309,
+      "sha256": "060985741d20e70613b4c189c7de106cabd3fb2109fbbfb6d705c9d619417dd0",
+      "repository": "m-a-p/YuE2-Vae",
+      "revision": "152733a19ad43aa67e367f9b5503ef8075bb5126",
+      "upstream_sha256": null,
+      "upstream_git_blob": "5b4b50fd3e4d4cadbc54c49cab3552d0eb303d48"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-Vae/152733a19ad43aa67e367f9b5503ef8075bb5126/README.md",
+      "bytes": 10434,
+      "sha256": "7c4359464599b946cbcb979a6143c81ea8f047023638b18d709702b8f97d52b2",
+      "repository": "m-a-p/YuE2-Vae",
+      "revision": "152733a19ad43aa67e367f9b5503ef8075bb5126",
+      "upstream_sha256": null,
+      "upstream_git_blob": "acfc3c99d4af3bec4dad354f8ed6769d857ae044"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-Vae/152733a19ad43aa67e367f9b5503ef8075bb5126/THIRD_PARTY_NOTICES.md",
+      "bytes": 793,
+      "sha256": "14d3fd9f6fee86b4260b69b0979735b99ffec8c6b4db254567047a4215cd9af3",
+      "repository": "m-a-p/YuE2-Vae",
+      "revision": "152733a19ad43aa67e367f9b5503ef8075bb5126",
+      "upstream_sha256": null,
+      "upstream_git_blob": "8178461b1f6ec6f9977cf0e03b93abd39f5ba1af"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-Vae/152733a19ad43aa67e367f9b5503ef8075bb5126/config.json",
+      "bytes": 1378,
+      "sha256": "f0191bb9694009956de44e0c361a6f1334760be4c8f848e599bde242a54a0970",
+      "repository": "m-a-p/YuE2-Vae",
+      "revision": "152733a19ad43aa67e367f9b5503ef8075bb5126",
+      "upstream_sha256": null,
+      "upstream_git_blob": "f68832bef1b99f53dd70460f6b0d336971a664b8"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-Vae/152733a19ad43aa67e367f9b5503ef8075bb5126/licenses/SnakeBeta-NVIDIA-MIT.txt",
+      "bytes": 1076,
+      "sha256": "da9858d516047d82096d01c112a61bd67f26d289039464d668a1d45f91738ecc",
+      "repository": "m-a-p/YuE2-Vae",
+      "revision": "152733a19ad43aa67e367f9b5503ef8075bb5126",
+      "upstream_sha256": null,
+      "upstream_git_blob": "e9663595cc28938f88d6299acd3ba791542e4c0c"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-Vae/152733a19ad43aa67e367f9b5503ef8075bb5126/licenses/stable-audio-tools-MIT.txt",
+      "bytes": 1069,
+      "sha256": "a1fac33b7bcd791b74fb33aeb439f825e7277e239fc119fb7d2ab6f084a0c101",
+      "repository": "m-a-p/YuE2-Vae",
+      "revision": "152733a19ad43aa67e367f9b5503ef8075bb5126",
+      "upstream_sha256": null,
+      "upstream_git_blob": "f119f94cf2ec8269020dd0d8140a4c4b83cc65a1"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-Vae/152733a19ad43aa67e367f9b5503ef8075bb5126/model.safetensors",
+      "bytes": 530512720,
+      "sha256": "807ce9d5149fa27c5ad3e6582058469852e908f6c5acc8c8aa338e7ab7751346",
+      "repository": "m-a-p/YuE2-Vae",
+      "revision": "152733a19ad43aa67e367f9b5503ef8075bb5126",
+      "upstream_sha256": "807ce9d5149fa27c5ad3e6582058469852e908f6c5acc8c8aa338e7ab7751346",
+      "upstream_git_blob": "f02d9dc133e0c3013de3431295d587cb105d0512"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-Vae/152733a19ad43aa67e367f9b5503ef8075bb5126/modeling_vae.py",
+      "bytes": 25265,
+      "sha256": "b6578ff461e6be9fd079ca5ddf12893940f3b3338ff3435fceae89c466486f5a",
+      "repository": "m-a-p/YuE2-Vae",
+      "revision": "152733a19ad43aa67e367f9b5503ef8075bb5126",
+      "upstream_sha256": null,
+      "upstream_git_blob": "79014d26619982b3eaa9b9c987c31d6f931930b0"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/yue2/YuE2-Vae/152733a19ad43aa67e367f9b5503ef8075bb5126/weights_manifest.json",
+      "bytes": 178,
+      "sha256": "017d64a4d288217a43fcac3866a0e1d55f796fa891d4dfb6de0bd170ab750026",
+      "repository": "m-a-p/YuE2-Vae",
+      "revision": "152733a19ad43aa67e367f9b5503ef8075bb5126",
+      "upstream_sha256": null,
+      "upstream_git_blob": "c663bbfcc6238d5b35cd61bee56e6aab4c7e3876"
+    }
+  ],
+  "environment_lock_sha256": "c2c9429039031202f528a4d20ef7dc7cc0f0bcd76606add95068c6c19aa71990",
+  "source_lock_sha256": "858474000166fb7d2cfb98495e8f319818b1b42c0201fe5be8738d5390d823c2",
+  "runtime_policy": {
+    "backend": "torch-eager",
+    "torch": "2.10.0+cu128",
+    "vllm_installed": false,
+    "network_during_run": false,
+    "model_audio_backup_download_to_E": false
+  },
+  "cpu_report": "/root/autodl-tmp/emusician/manifests/model-library/yue2/cpu-check.json",
+  "gpu_probe": "/root/autodl-tmp/emusician/manifests/model-library/yue2/gpu-probe-20261106T102323Z.json",
+  "gpu_verified_scope": "official low_vram, budget8GiB, torch-eager, one short cot-off instrumental request",
+  "deployment_script_lock": {
+    "path": "/root/autodl-tmp/emusician/manifests/model-library/yue2/deployment-script-lock.json",
+    "sha256": "f82cc8eb9428ff6795aa2562da0b4578cbcced4f8d40deec18057248a7842266"
+  },
+  "probe_guard_audit": {
+    "executed_guard_sha256": "4e5e901d3bb1650e2bd4fd5a8f5ffc96617261a762e4caf3efc670af0abf5add",
+    "current_guard_sha256": "77328a5e126bfa526bccbb38aadda97f13535017193a29f682bb8dc92bd4e180",
+    "change": "After this one real probe, post-run telemetry failure handling was hardened and CPU-tested; future probe output moved to results/model-library/yue2/probe-<stamp>. Existing evidence was not moved. No repeat GPU run.",
+    "evidence": "Recorder 20261106T102322.038961Z-19a5b59536 (probe), 20261106T102525.748015Z-944a3aa48a (CPU guard tests)"
+  },
+  "gpu_limitations": [
+    "Only one token-capped 8GiB low_vram torch-eager instrumental request was tested.",
+    "Semantic generation hit 192-token cap; this is bounded audio rendering, not a completed song.",
+    "Default24GiB, full symbolic planning, long songs, vocals, batch/concurrent use and listening quality are unverified.",
+    "PCM16 peak reached1.0; the test establishes finite/nonzero audio only, not clipping-free or perceptual quality.",
+    "No DAW integration; generation requires an explicitly serialized GPU slot."
+  ],
+  "future_probe_output_root": "/root/autodl-tmp/emusician/results/model-library/yue2"
+}

@@ -1,3 +1,7 @@
+# 当前工作：云端模型库（2026-11-06，部署中）
+
+用户最新明确只部署所需云端模型，不下载权重/音频/备份到E盘，不接入DAW。新分支 `feature/cloud-model-library`，基线01936fa；三路分别部署YuE2、SCNet/TransKun/ChordMini、SheetSage2/MuScriptor，主代理维护汇总架构。脚本、版本锁与小日志纳入本地Git，大文件仅留云端；[本轮计划](review/2026-11-06-cloud-model-library/PLAN.md)。基础MIR阶段已完成文件/环境/CPU加载校验，云盘可用199.73GB，ACE未改；它们仍没有DAW云端路由。每个模型单独记录文件/环境/CPU/GPU状态，不混记可用。0.12.1修复分支已推送01936fa，main保持d4ed6c8。下面的修复结果和人工待验范围保留。
+
 # 当前候选：0.12.1 生成默认值与本地分离隔离（2026-11-06，自动验证通过、真实分离/人工待验）
 
 用户0.12.0人工测试报告反复追问BPM、生成音频分离时Python错误弹窗与DAW白屏。本地日志确认CUDA OOM及随后的CPU分配失败；75秒六轨异常的原生堆栈尚缺。本轮已实现工程默认生成参数、内存准入/少复制/禁止OOM隐式CPU重跑、Windows分析进程树隔离与可见失败。Release、CTest11/11、分析进程34项、Agent334、Worker44（43通过/1跳过，CPU Torch专项10项补覆盖）通过。一次真实GPT-5-mini决策直接发起生成并采用工程93BPM/3⁄4/播放头，未执行付费音乐生成。真实7秒本地分离因commit仅比硬门槛多6.83MiB而未启动，不能标为真实分离修复验收。见[结果](review/2026-11-06-generation-stability/RESULTS.md)/[人工短测](review/2026-11-06-generation-stability/MANUAL-CHECK.md)。

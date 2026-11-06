@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/yue2/cpu_check.py",
+      "bytes": 4794,
+      "sha256": "a09d4143d66610b681ce425328fe6be952baabe5152d1d3506a9ebdb54049d0e"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/yue2/finalize.py",
+      "bytes": 2390,
+      "sha256": "d7bd26b93da41e52034b955a1c5d8c5b2bb8bb8515bfb3a1db813eb7563dc762"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/yue2/gpu_smoke.py",
+      "bytes": 8154,
+      "sha256": "77328a5e126bfa526bccbb38aadda97f13535017193a29f682bb8dc92bd4e180"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/yue2/install.sh",
+      "bytes": 1654,
+      "sha256": "401ae30cb7b458d01624960b59cfdb8cd3f6fd0ca86ba064e009394c5227bd62"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/yue2/run.sh",
+      "bytes": 1236,
+      "sha256": "803aec4cd9bd2e9605f69456f047ce29b6fbe2df952f2f9d48127daade71dd2c"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/yue2/stage.py",
+      "bytes": 8075,
+      "sha256": "257449c9f6722a142ec8320954fef8df25a6258cc2b6835f96c6220fd4e0d8d1"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/yue2/test_gpu_smoke.py",
+      "bytes": 1740,
+      "sha256": "37eff64ae5696dbcac84c4a6e0a34d5c7339ab0503c6df60f41936445ff1170e"
+    }
+  ],
+  "generated_utc": "2026-11-06T10:28:53Z"
+}

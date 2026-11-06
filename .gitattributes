@@ -24,5 +24,7 @@ docs/builds/*.json -text whitespace=cr-at-eol,-blank-at-eof
 docs/verification/**/*.json -text whitespace=cr-at-eol,-blank-at-eof
 docs/verification/**/*.py.txt -text whitespace=cr-at-eol,-blank-at-eof
 docs/review/2026-11-06-cloud-generation/*.json -text whitespace=cr-at-eol,-blank-at-eof
+docs/review/2026-11-06-cloud-model-library/**/*.json -text whitespace=cr-at-eol,-blank-at-eof
+docs/review/2026-11-06-cloud-model-library/**/requirements.in text eol=lf
 # Preserve the exact third-party licence bytes included in source fingerprints.
 tests/fixtures/tool-licenses/* -text -whitespace

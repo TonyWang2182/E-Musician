@@ -1,0 +1,12 @@
+{
+  "kind": "cpu-model-load-only",
+  "parameter_count": 13613711,
+  "torch_version": "2.10.0+cu128",
+  "cuda_build": "12.8",
+  "cuda_initialized": false,
+  "forward_executed": false,
+  "elapsed_seconds": 1.0919434651732445,
+  "sample_rate": 44100,
+  "task_scope": "expressive piano transcription",
+  "pedal_output_verified": false
+}

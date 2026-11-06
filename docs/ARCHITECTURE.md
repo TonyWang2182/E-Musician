@@ -1,5 +1,11 @@
 # E-musician 技术架构
 
+## 云端模型库层（2026-11-06，部署中，尚不接入 DAW）
+
+`scripts/cloud/models/` 仅管理固定版本的上游源码、权重、独立环境与验证记录。云端 `manifests/model-library/<model>/deployment.json` 分别声明文件、环境、CPU 加载和 GPU 推理状态，汇总目录不自动激活任何 Provider。生成、分离、钢琴转录与综合谱面环境分开，目录与负责人见 [部署计划](review/2026-11-06-cloud-model-library/PLAN.md)。大型文件只留云端，本地仅纳管脚本和小型档案。
+
+这是模型运行层，位于未来任务适配器之下；本轮不改 GUI/Agent 命令、工程 schema、音频回调或现有 ACE 网关。已实现的联动仍是本地 MIR 与云端 ACE，统一多模型 GPU 调度与本地/云端切换尚未接入。不得从模型库安装状态推断 DAW 具备对应能力。
+
 ## 0.12.1 分析故障边界与生成默认值
 
 本地分析仍是 `GUI/Agent → 公共分析命令 → 文件工作线程 → 独立 Python Worker → 候选 → 明确接受`。Windows Worker 由私有 Job Object 拥有，在恢复运行前绑定，异常/取消仅回收自身进程树；启动及运行中的提交内存检查、Worker 音频缓冲预算与明确 OOM 终态共同防护。CUDA OOM 不再同进程隐式转 CPU。失败诊断保留在任务目录，UI 展示可滚动原因，不向工程提交伪结果。

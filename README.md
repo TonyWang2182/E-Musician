@@ -2,6 +2,8 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
+**当前云端工作：模型库部署**，分支 `feature/cloud-model-library`。YuE2、SCNet、TransKun、ChordMini、SheetSage2及MuScriptor访问检查使用独立目录、环境与版本清单；本批不接入DAW，不把权重/音频/备份下载到E盘。目录和验收层次见[部署计划](docs/review/2026-11-06-cloud-model-library/PLAN.md)，脚本入口见[scripts/cloud/models](scripts/cloud/models/README.md)。下方0.12.1仍为桌面候选，模型安装不自动增加桌面功能。
+
 **0.12.1 候选：生成默认值和分析故障保护（自动验证通过）**。Agent 自动沿用工程速度/拍号/播放头；本地分离增加提交内存准入、进程树隔离、可见错误，禁止 CUDA OOM 后同进程盲目切 CPU。Release、CTest11组、Agent334、Worker回归及一次真实GPT决策通过；真实短分离因资源不足未启动，原75秒六轨及ASIO仍待验。启动 `E:/MusicAgent&DAW/Start E-musician 0.12.1 Stability.cmd`；[结果](docs/review/2026-11-06-generation-stability/RESULTS.md) / [人工短测](docs/review/2026-11-06-generation-stability/MANUAL-CHECK.md)。云端MIR正在独立准备，当前尚不能自由切换本地/云端。
 
 **0.12.0 候选：云端音乐生成（真实整链及E盘完整备份校验通过）**。ACE文字/歌词生成、手动下栏和Agent共用候选接口；试听后明确加入新轨，保存时携带本地音频。真实5090推理、原生及GPT-5-mini/ACE闭环、保存重开/离线渲染已验，Agent325项回归通过。人工听感/ASIO仍待验。状态见 [当前上下文](docs/CONTEXT.md)，操作见 [人工短测](docs/review/2026-11-06-cloud-generation/MANUAL-CHECK.md)；旧0.11程序保留，YuE2和MIR升级属后续批次。

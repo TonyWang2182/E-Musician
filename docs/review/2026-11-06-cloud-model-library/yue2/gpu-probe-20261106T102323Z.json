@@ -1,0 +1,77 @@
+{
+  "id": "yue2",
+  "status": "passed",
+  "before": {
+    "active_ace_jobs": [],
+    "free_gpu_mib": 14774,
+    "ace_pid": "5862"
+  },
+  "started_utc": "20261106T102323Z",
+  "output": "/root/autodl-tmp/emusician/workspace/models/yue2/probes/20261106T102323Z",
+  "log": "/root/autodl-tmp/emusician/logs/model-library/yue2/gpu-20261106T102323Z.log",
+  "deadline_seconds": 180,
+  "preset": "official low_vram, budget8GiB, torch-eager, one short cot-off instrumental request",
+  "daw_connected": false,
+  "quality_evaluation": false,
+  "default_24gib_verified": false,
+  "exit_code": 0,
+  "result": {
+    "status": "passed",
+    "actual_generated_audio": true,
+    "duration_seconds": 7.6786666666666665,
+    "sample_rate": 48000,
+    "channels": 2,
+    "frames": 368576,
+    "rms": 0.1553415617272922,
+    "peak": 1.0,
+    "truncated": {
+      "abc": false,
+      "semantic": true
+    },
+    "torch": "2.10.0+cu128",
+    "cuda_runtime": "12.8",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "compute_capability": [
+      12,
+      0
+    ],
+    "peak_allocated_bytes": 4400219136,
+    "peak_reserved_bytes": 4420796416,
+    "worker_elapsed_seconds": 19.23113353177905,
+    "timing": {
+      "abc": {},
+      "semantic": {
+        "seconds": 5.287901382893324,
+        "prefill_seconds": 0.3362807296216488,
+        "ttft_seconds": 0.4948285222053528,
+        "output_tokens": 192,
+        "content_tokens": 192,
+        "output_tps": 36.309300438380234,
+        "prefix_tokens": 48,
+        "cfg_branches": 2,
+        "execution": "eager",
+        "attention": "sdpa"
+      },
+      "nar_seconds": 5.04362902790308,
+      "vae_seconds": 0.7199306637048721,
+      "load": {
+        "resolve_and_integrity_seconds": 5.6544100642204285,
+        "mot_load_seconds": 0.306419488042593
+      },
+      "e2e_seconds": 13.457231543958187
+    },
+    "audio": {
+      "path": "/root/autodl-tmp/emusician/workspace/models/yue2/probes/20261106T102323Z/audio.wav",
+      "bytes": 1474348,
+      "sha256": "a6de203bdcd664b329b51d5facd35e59b799b1f9b01f95d67a07213e3bd9e8b1"
+    },
+    "scope": "one short token-capped low_vram 8GiB coexistence probe; cot off; no listening/default24GiB/long-song claim"
+  },
+  "wall_seconds": 22.536907337605953,
+  "minimum_free_gpu_mib": 9960,
+  "after": {
+    "active_ace_jobs": [],
+    "free_gpu_mib": 14774,
+    "ace_pid": "5862"
+  }
+}

@@ -1,0 +1,322 @@
+{
+  "_id": "6aa1a5c9b2a011b7d548e447",
+  "id": "m-a-p/YuE2-3B",
+  "private": false,
+  "pipeline_tag": "text-to-audio",
+  "tags": [
+    "safetensors",
+    "yue2",
+    "arxiv:2610.05336",
+    "arxiv:2609.33757",
+    "music-generation",
+    "symbolic-planning",
+    "agentic-editing",
+    "custom_code",
+    "text-to-audio",
+    "zh",
+    "en",
+    "arxiv:2503.08638",
+    "license:cc-by-nc-4.0",
+    "region:us"
+  ],
+  "downloads": 23167,
+  "likes": 1238,
+  "modelId": "m-a-p/YuE2-3B",
+  "author": "m-a-p",
+  "sha": "8f24312f187763b9854adeec87e437e2b03bbff1",
+  "lastModified": "2026-10-06T07:30:41.000Z",
+  "gated": false,
+  "disabled": false,
+  "model-index": null,
+  "config": {
+    "architectures": [
+      "YuE2ForCausalLM"
+    ],
+    "auto_map": {
+      "AutoConfig": "modeling_yue2.YuE2Config",
+      "AutoModelForCausalLM": "modeling_yue2.YuE2ForCausalLM"
+    },
+    "model_type": "yue2"
+  },
+  "cardData": {
+    "license": "cc-by-nc-4.0",
+    "language": [
+      "zh",
+      "en"
+    ],
+    "pipeline_tag": "text-to-audio",
+    "tags": [
+      "arxiv:2610.05336",
+      "arxiv:2609.33757",
+      "music-generation",
+      "symbolic-planning",
+      "agentic-editing",
+      "custom_code"
+    ]
+  },
+  "siblings": [
+    {
+      "rfilename": ".gitattributes",
+      "blobId": "91fe29481f9dd9d34d37d0a89b67982e3572f255",
+      "size": 2134
+    },
+    {
+      "rfilename": "LICENSE",
+      "blobId": "5b4b50fd3e4d4cadbc54c49cab3552d0eb303d48",
+      "size": 20309
+    },
+    {
+      "rfilename": "README.md",
+      "blobId": "61c53c28dc6911a27899ab8ca5cf3b880e8f3846",
+      "size": 21898
+    },
+    {
+      "rfilename": "THIRD_PARTY_NOTICES.md",
+      "blobId": "8178461b1f6ec6f9977cf0e03b93abd39f5ba1af",
+      "size": 793
+    },
+    {
+      "rfilename": "assets/architecture.png",
+      "blobId": "f785f2454c4b13a9982c861204ddddb7f9d2972e",
+      "size": 407643,
+      "lfs": {
+        "sha256": "53345d556ec1762dc7071b76ab0d79518c8cdf52bbf48ad434c3c34926ff74a3",
+        "size": 407643,
+        "pointerSize": 131
+      }
+    },
+    {
+      "rfilename": "assets/audio/auld-lang-syne-jazz-funk-cover.mp3",
+      "blobId": "1daef06fb6b0d5fc67e8d249e0a63437b0c2fa75",
+      "size": 4559660,
+      "lfs": {
+        "sha256": "2920e32d6723181da2b26b766b11b34c78f162417229f7394a90a06d2db50141",
+        "size": 4559660,
+        "pointerSize": 132
+      }
+    },
+    {
+      "rfilename": "assets/audio/cyber-metal.mp3",
+      "blobId": "ad751f2d478373be533332572a3dd1d51bc0d9a1",
+      "size": 7215020,
+      "lfs": {
+        "sha256": "997171848c1fbabeece4885877dd4aa62374576042392e0583ba64b038c4af48",
+        "size": 7215020,
+        "pointerSize": 132
+      }
+    },
+    {
+      "rfilename": "assets/audio/examples.json",
+      "blobId": "9a6840246c61e0a0e4585bd0f5dc3be3df6e7cbf",
+      "size": 4432
+    },
+    {
+      "rfilename": "assets/audio/jingle-bells-heavy-metal-cover.mp3",
+      "blobId": "3d19fb390f76c9de3114e31250a549ef698e708f",
+      "size": 1657196,
+      "lfs": {
+        "sha256": "44d15f0e04949207f44bbaf07c392012fbae84a1e4d89f44e4b055a0c21fa845",
+        "size": 1657196,
+        "pointerSize": 132
+      }
+    },
+    {
+      "rfilename": "assets/audio/passion.mp3",
+      "blobId": "3ecc10cc7611d472edaf84b1b91316633ee9ca9f",
+      "size": 5633900,
+      "lfs": {
+        "sha256": "87fec41a160e430cfde543be76e1da81f7442ff3e0aca09455cf8fea9048cc63",
+        "size": 5633900,
+        "pointerSize": 132
+      }
+    },
+    {
+      "rfilename": "assets/audio/tonight-awake.mp3",
+      "blobId": "84bd36a9e76bdaa282c5775716537b26c3cec9f9",
+      "size": 4885100,
+      "lfs": {
+        "sha256": "54f642933f796e4244f0a308d3d0603c09b4d87f04e0bc42fbcbb9df0bffbcf9",
+        "size": 4885100,
+        "pointerSize": 132
+      }
+    },
+    {
+      "rfilename": "assets/audio/zuixuan-ballad-cover.mp3",
+      "blobId": "68895acfdd9f75f76d24efa93229f5410dbe3b43",
+      "size": 6838316,
+      "lfs": {
+        "sha256": "fbd0cc2131924fee15c8f5e7519c577f8cd53005302508cc9d959461d31b935f",
+        "size": 6838316,
+        "pointerSize": 132
+      }
+    },
+    {
+      "rfilename": "assets/figure1.pdf",
+      "blobId": "703764eec24c18fffcda0c2ddd687ff7d84bf4b1",
+      "size": 31395
+    },
+    {
+      "rfilename": "assets/figure1.png",
+      "blobId": "d2685ee9cac834322ab968a9011119e064bc6b05",
+      "size": 172053,
+      "lfs": {
+        "sha256": "0f7e859bfee94eb456a1c38650eb6474568721356349ef490ac4a7e8bc49c68f",
+        "size": 172053,
+        "pointerSize": 131
+      }
+    },
+    {
+      "rfilename": "assets/figure1.svg",
+      "blobId": "26391802f1e86bb47213946d8a595b25353215c6",
+      "size": 144767
+    },
+    {
+      "rfilename": "assets/logo.png",
+      "blobId": "544eb1bdb5d0548ab7a2fda5839c23d154415dd0",
+      "size": 14085
+    },
+    {
+      "rfilename": "config.json",
+      "blobId": "9584e50ba9d6e487690544e14dd7555edbe27973",
+      "size": 959
+    },
+    {
+      "rfilename": "examples/tonight-awake.json",
+      "blobId": "ce9fa69bd5272bcb1b5201348cb5c1702e7de7a5",
+      "size": 1734
+    },
+    {
+      "rfilename": "generation_config.json",
+      "blobId": "041d89f512a1b79c13e1a3dee54b5a9bc7c26cad",
+      "size": 204
+    },
+    {
+      "rfilename": "licenses/SnakeBeta-NVIDIA-MIT.txt",
+      "blobId": "e9663595cc28938f88d6299acd3ba791542e4c0c",
+      "size": 1076
+    },
+    {
+      "rfilename": "licenses/stable-audio-tools-MIT.txt",
+      "blobId": "f119f94cf2ec8269020dd0d8140a4c4b83cc65a1",
+      "size": 1069
+    },
+    {
+      "rfilename": "model.safetensors",
+      "blobId": "3314789dffff7318458e58ea9c615157ac59774a",
+      "size": 7261441640,
+      "lfs": {
+        "sha256": "1d55c42c1a9875c34f5d736e15078449992b044e807ce2a138e6cf289a1e59e9",
+        "size": 7261441640,
+        "pointerSize": 135
+      }
+    },
+    {
+      "rfilename": "modeling_yue2.py",
+      "blobId": "9e2b9924b6e277cab5905771ac9afc068267ee8b",
+      "size": 32983
+    },
+    {
+      "rfilename": "qwen.tiktoken",
+      "blobId": "9b9b0e0416d84d7c88333eb261c77e5fe2d7f7be",
+      "size": 2561218
+    },
+    {
+      "rfilename": "weights_manifest.json",
+      "blobId": "5ac0adb948bf8d8987ce7a1401fc39d0842b709d",
+      "size": 179
+    },
+    {
+      "rfilename": "yue2_generation_config.json",
+      "blobId": "f8214009f5bb5425319e4519b12e4853ad72acf3",
+      "size": 466
+    },
+    {
+      "rfilename": "yue2_infer-0.1.3-py3-none-any.whl",
+      "blobId": "b9cd10623d5caa0b402c91f40c7eeaaf79bbf67a",
+      "size": 60853
+    },
+    {
+      "rfilename": "yue2_infer-0.1.5-py3-none-any.whl",
+      "blobId": "8e2b7056612ca630c62b2365afe7a92fc2d94e1d",
+      "size": 66117
+    }
+  ],
+  "spaces": [
+    "mrfakename/yue2-3b",
+    "HTBris/zerogpu-sdxlTrainer",
+    "directedbykobyperez/YuE2-Create",
+    "x1205x62108/yue2-3b",
+    "hugging-apps/yue2-keygen-music-lora",
+    "launch-calcium/zerogpu-sdxlTrainer2-py311",
+    "Mothersuperior/yue2-hum-to-song",
+    "becausereasons/mltnt-reggae-yue2-demo",
+    "Mehdisabori66/yue2-3b",
+    "hugging-apps/yue2-two-steps-from-hell-demo",
+    "Reubencf/Score-Studio",
+    "hugging-apps/yue2-instrumental-cot-lora",
+    "ntc-ai/yue2-particle-sliders",
+    "levibrg/yue2-3b",
+    "shinichi-205/yue2-full-cover",
+    "adexinc/yue2-studio",
+    "Guilie/yue2-song-studio",
+    "hugging-apps/yue2-industrial-rock-lora-demo",
+    "Reubencf/Kiku-AI",
+    "FiditeNemini/yue2-3b",
+    "eustlb/text-to-audio-models-on-the-hub",
+    "becausereasons/yue2-qawwali-sufi-lora-demo",
+    "becausereasons/yue2-grvl-raspy-rock-soul",
+    "JayLL13/tune-studio",
+    "Rrrvo/yue2-3b",
+    "nanjoran/yue2-3b",
+    "Zuzuus/yue2-3b",
+    "Mirzoev/yue2-3b",
+    "OctagonInteractive/yue2-3b",
+    "stalesha/yue2-3b",
+    "mcuo/yue2-3b",
+    "EnderDK/yue2-3b",
+    "TNOT/yue2-3b",
+    "ohac/sandbox",
+    "akhaliq/yue2-3b",
+    "hdvd2309/yue2-3b",
+    "alibhji/yue2-3b",
+    "mrfakename/yue2-3b-mount-test",
+    "cabrouxel/yue2-3b",
+    "arfanc/yue2-3b",
+    "cabrouxel/yue2-3b-updated",
+    "RalphThings/yue2-studio",
+    "IgnitiveMinds/YuE2-Create",
+    "cabrouxel/YuE2-AG",
+    "ugsto/yue2-3b-song-studio",
+    "sakakuto/yue2-3b",
+    "LPDoctor/yue2-hum-to-song",
+    "Jamalbalya/auralyn-yue2",
+    "JCTN/yue2-hum-to-song",
+    "Reubencf/Kiku-YuE2",
+    "Reubencf/Kiku-Engine",
+    "tung776/yue2-3b",
+    "LoveOnTap/yue2-hum-to-song",
+    "batoon/hum",
+    "lucianoo6/yue2-3b",
+    "dwdaddsda/yue2-3b",
+    "Xiliourt/yue2-3b",
+    "Rocky28Man/yue2-full-cover",
+    "mrfakename/yue2-webgpu",
+    "djwugee/Kiku-Engine",
+    "hugging-apps/yue2-qtstrm-quiet-storm",
+    "WAVbot/yue2-3b",
+    "Mike0021/YuE2-Jam",
+    "JacobLinCool/urfm-vega-preview",
+    "MisterAO/yue2-flow",
+    "dcvizcayno/song-studio",
+    "launch-calcium/zerogpu-sdxlTrainer2",
+    "concedo/yue2-3b"
+  ],
+  "createdAt": "2026-09-09T18:30:33.000Z",
+  "safetensors": {
+    "parameters": {
+      "BF16": 3630684224
+    },
+    "total": 3630684224
+  },
+  "usedStorage": 7293868678
+}

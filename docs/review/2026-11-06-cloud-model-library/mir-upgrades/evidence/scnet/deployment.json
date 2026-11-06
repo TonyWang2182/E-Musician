@@ -1,0 +1,1178 @@
+{
+  "schema_version": 1,
+  "id": "scnet",
+  "task": "separate",
+  "source_revision": "a8a862231de29e6832a26c590e5c29f82f736f66",
+  "source_url": "https://github.com/ZFTurbo/Music-Source-Separation-Training",
+  "model_revisions": {
+    "revision": "v1.0.15",
+    "sha256": "ac25975f0f5704f3d1a3c3c251505b7a0f417a22eafe82773440ee4f7e14b74f"
+  },
+  "paths": {
+    "model": "/root/autodl-tmp/emusician/models/scnet/a8a862231de29e6832a26c590e5c29f82f736f66",
+    "environment": "/root/autodl-tmp/emusician/envs/scnet",
+    "source": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66"
+  },
+  "checks": {
+    "files_verified": true,
+    "environment_verified": true,
+    "cpu_load_verified": true,
+    "gpu_inference_verified": true
+  },
+  "daw_connected": false,
+  "blockers": [
+    "Independent quality/accuracy evaluation and long-audio load tests not performed",
+    "DAW integration not authorized in this phase"
+  ],
+  "artifacts": [
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/LICENSE",
+      "bytes": 1081,
+      "sha256": "3282dc057695ef5b9a64909a7092ca40b2c292c232580fc6ace6e5d665cc0207",
+      "git_blob": "9d7186e88bca9975edd65956cd499fa60bd04251",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/LICENSE"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/README.md",
+      "bytes": 6185,
+      "sha256": "ced0caa350a9224bb8f9d5cdc7c8632c09ccec8ae4c9443f53614cb5f0944bfd",
+      "git_blob": "283922a0d39e77ccc3ef21c7c37879ef095570ba",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/README.md"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/KimberleyJensen/config_vocals_mel_band_roformer_kj.yaml",
+      "bytes": 1721,
+      "sha256": "f63f38eb1e6e40a7db0dade714a5ae257555dd8748f4e774eae8679275a81926",
+      "git_blob": "f7f511025573acaa7a53f75c957b878c0aaa8205",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/KimberleyJensen/config_vocals_mel_band_roformer_kj.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_apollo.yaml",
+      "bytes": 561,
+      "sha256": "67a41e6c13c0d441467c06e696b04ba566a985d31d209a50c294e91ef6a0f09f",
+      "git_blob": "290547b44d0c5d62d3d3315e7c2e444728139f22",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_apollo.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_dnr_bandit_bsrnn_multi_mus64.yaml",
+      "bytes": 2024,
+      "sha256": "994b3c3802e225663aed578ba5e412eb68364a8272e1db556f06dd8428e1bf40",
+      "git_blob": "2392ca496e498e57a99d70f1f28f73fe3dd7c432",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_dnr_bandit_bsrnn_multi_mus64.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_dnr_bandit_v2_mus64.yaml",
+      "bytes": 1948,
+      "sha256": "b7062645d3fcd996b2f6da6119775100faf3c5c91f7d048fe8f6d1a1f1453232",
+      "git_blob": "db74fee27426b6e2204d459070603abcf846e3a6",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_dnr_bandit_v2_mus64.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_drumsep.yaml",
+      "bytes": 1555,
+      "sha256": "bc8db8a699d54c5c1a79961da626381c0a028b21b2ab3d0bad478ac751f11e47",
+      "git_blob": "687b5ff0639a476a57a6e24552964759c8ce1ff5",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_drumsep.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_htdemucs_6stems.yaml",
+      "bytes": 3071,
+      "sha256": "50922783af3dac02c2a31af675a36417f1be8a990b2ea34405886a8ede1bc99d",
+      "git_blob": "d06a489ec66794414dedd4c143f6e937b26ce666",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_htdemucs_6stems.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_bs_mamba2.yaml",
+      "bytes": 1597,
+      "sha256": "20e839713e1c9d79dfb555b586b34441c0315b25e1ca603291e95fa7e559c36c",
+      "git_blob": "89154451ca213849592ff4aa4a2d21e132b13cf2",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_bs_mamba2.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_bs_roformer.yaml",
+      "bytes": 2425,
+      "sha256": "7bf3415a5b01e4342b979aa84c994f48af2651ee03e37c2f766f546c7356f58b",
+      "git_blob": "ff17998d201e7f3d894cdc80671b9ac330023541",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_bs_roformer.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_bs_roformer_384_8_2_485100_sage.yaml",
+      "bytes": 4589,
+      "sha256": "2c3eb29fe5e7efc74ea746e49475326726272dcae104e8bfc1bc2eb364817b13",
+      "git_blob": "9824f0e8ff86660edbf7eb1b1089f1cc17af7235",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_bs_roformer_384_8_2_485100_sage.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_bs_roformer_with_lora.yaml",
+      "bytes": 4792,
+      "sha256": "cfaa0d72d80048d331fdd7eae486344428bfbdca9cf63ab35d3007d7966107f0",
+      "git_blob": "6c6dcdbcf7ca2a1c820d6649e3be056c270b8788",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_bs_roformer_with_lora.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_demucs3_mmi.yaml",
+      "bytes": 1554,
+      "sha256": "9e99474fec0eb074bc0b22f5ee1484b84e625b2ba70b0e3ae0f4ab1e9217c9a1",
+      "git_blob": "08c25c50f8f747d0e4af7acae68b1e47a01f3d0c",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_demucs3_mmi.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_htdemucs.yaml",
+      "bytes": 2670,
+      "sha256": "3c7198ee7bd023cdd5650439b951fa9631be05fbb6e9a1a047a0df2bc221073b",
+      "git_blob": "ba635367baca0b58a977fa4bb38a1cec99579ca9",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_htdemucs.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_mdx23c.yaml",
+      "bytes": 5436,
+      "sha256": "8c9a49438090a75bd70817b73ad923d075fb60968b5d910b731a71c9a68b25f6",
+      "git_blob": "73631f7293c8db94c55c7e1db9fdfc79c712d6e0",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_mdx23c.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_mdx23c_stht.yaml",
+      "bytes": 5436,
+      "sha256": "8c9a49438090a75bd70817b73ad923d075fb60968b5d910b731a71c9a68b25f6",
+      "git_blob": "73631f7293c8db94c55c7e1db9fdfc79c712d6e0",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_mdx23c_stht.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_mel_band_roformer.yaml",
+      "bytes": 1964,
+      "sha256": "501f038b6cd930af89b1e0ef0fc10d9f52c47eaf517e77c548d6a1448d64d599",
+      "git_blob": "4f5b9e05544f74b53a61dd8256b29d91704ca4fc",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_mel_band_roformer.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_mel_band_roformer_all_stems.yaml",
+      "bytes": 2849,
+      "sha256": "eb87da0d8037b6460615c0da1afcf9d2cef88126211e16a4591adb8e2bb4b8ad",
+      "git_blob": "9f7f323d40ca96c8359089d3258745078a6da2a9",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_mel_band_roformer_all_stems.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_mel_band_roformer_sage.yaml",
+      "bytes": 5947,
+      "sha256": "6cf7d379a7eee221fa37ab0337797b46443505a1c11ace9303e64c76fafc9865",
+      "git_blob": "0a36bb5f8c95d594822dcb70dbf03e5b0b9e8e97",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_mel_band_roformer_sage.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_scnet.yaml",
+      "bytes": 1656,
+      "sha256": "c3d6bde510a59a23c9ce2bdfc9dbcc0756804d9e20593c15f68eff8a257b751c",
+      "git_blob": "e7dcafdd8d023938f3f680c8e107a18dba6c892b",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_scnet.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_scnet_large.yaml",
+      "bytes": 1657,
+      "sha256": "f4185914b11cd452dbe2dabc92232b4b20e8d478e9b5d21f7f18c453459a9b34",
+      "git_blob": "939ba190c8bb18ea782326c5c90b1c26f460cd36",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_scnet_large.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_scnet_tran.yaml",
+      "bytes": 4103,
+      "sha256": "0169103e9bef341e45c30cdeffbf76b011332fc1e73b4ebd2d5fbec6c592ddd8",
+      "git_blob": "4d879d166629406935548b0ebd9f8788cc74bbd0",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_scnet_tran.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_segm_models.yaml",
+      "bytes": 2659,
+      "sha256": "460d84c69b7014e2a3ad67e61215af2fcc6b6e7fbf4c8b49411d4ba5b74d828b",
+      "git_blob": "cbec03910a628bd83c6f42f3984f5d9ba732a9fd",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_segm_models.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_torchseg.yaml",
+      "bytes": 2623,
+      "sha256": "fa1b4cb435bb80c244a7da30129c01d4f0e0bc6895887dbf9bd96326f7f1a374",
+      "git_blob": "8de81fccd55e4946d6180a1382603cad27e2a7c0",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_musdb18_torchseg.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_bandit_bsrnn_multi_mus64.yaml",
+      "bytes": 1805,
+      "sha256": "b4a492ff1d098053eefd2e5c0daa5f99062a5dc259b5a5498eb2a1e9c5134d80",
+      "git_blob": "432ae32c19e6136806a718ca882afc516f2aa1f4",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_bandit_bsrnn_multi_mus64.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_bs_mamba2.yaml",
+      "bytes": 1279,
+      "sha256": "2548953f2276da1e34bec5063f5ea78d7d6182f192695534bdac3379ddb9af16",
+      "git_blob": "967e01172c1f99306f61053238100f8e18d34963",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_bs_mamba2.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_bs_roformer.yaml",
+      "bytes": 2696,
+      "sha256": "c0d1e1b27121d92cde9ec522cc03e87a36df93437c12c090daf3b673070882c1",
+      "git_blob": "98fcb290f86ff37f81f7e45b98c2ed1c14c02c2d",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_bs_roformer.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_htdemucs.yaml",
+      "bytes": 2841,
+      "sha256": "d282649394fc2fe5e6f074fa8a28d561601bde6da2cb61aae4e0d3032220bd2b",
+      "git_blob": "796004a5cbd8a841963b5b41616ffd5cf8b247ea",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_htdemucs.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_mdx23c.yaml",
+      "bytes": 2716,
+      "sha256": "899308e20f67eb0451d0ccda380001a47b81bce8b0922fddc0c92c2cb37fd5f0",
+      "git_blob": "b241ad5da8e4e4cdeca43a3f09ec64961321ce13",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_mdx23c.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_mel_band_roformer.yaml",
+      "bytes": 2216,
+      "sha256": "694ef8fbf460c4ab4e1e081d376e839a897ec30963a578a4e636d71b8e9665b2",
+      "git_blob": "4fa4385aab64f0cb2c6a424bb6c63bd954f780e0",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_mel_band_roformer.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_scnet.yaml",
+      "bytes": 1608,
+      "sha256": "c6fff75e30152bc01307d811efb057d60fad0ffee732b298f90fff8fef83022f",
+      "git_blob": "1210f9654a6e09b0965937b31e9dcaeaaf2257a0",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_scnet.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_scnet_large.yaml",
+      "bytes": 1611,
+      "sha256": "b74f7f3c1a3af7eddae9ed43f76fee685aa1669612de2b6242cacbae00d5c80b",
+      "git_blob": "f34450eb84d2d2b072577504edbf2948efb94158",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_scnet_large.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_scnet_unofficial.yaml",
+      "bytes": 1504,
+      "sha256": "37977b819ba38ba12dddd67641061fb09c2cd83ee857ddaa05a3f8da6ab68862",
+      "git_blob": "2d3e604e4992e1f4090da91227c9ecc5e66e9117",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_scnet_unofficial.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_segm_models.yaml",
+      "bytes": 1775,
+      "sha256": "533be1fc03f3f740b83adde953b7919104fac219406962dc7e91842f31daf286",
+      "git_blob": "44711a0658a95289c8d3745a6d78114b937df1fa",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_segm_models.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_swin_upernet.yaml",
+      "bytes": 1286,
+      "sha256": "6307632eb7ded9d7c600b4ebb96697cbfd1633e290d9b9987ce0c4e5da9d28c7",
+      "git_blob": "28a837346ea70fa02a1df5245c5048a4676b63c7",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_swin_upernet.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_torchseg.yaml",
+      "bytes": 1617,
+      "sha256": "6fcd30157371d5855df0e85aaa834503c6f508f88f71639e5b3e582e4bd768b8",
+      "git_blob": "1ebbeae2770d68c4b2dbdcfd6125a5ca387e6d9b",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/config_vocals_torchseg.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/sage/config_musdb18_bs_roformer_384_8_2_485100_sage.yaml",
+      "bytes": 4589,
+      "sha256": "2c3eb29fe5e7efc74ea746e49475326726272dcae104e8bfc1bc2eb364817b13",
+      "git_blob": "9824f0e8ff86660edbf7eb1b1089f1cc17af7235",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/sage/config_musdb18_bs_roformer_384_8_2_485100_sage.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/sage/config_musdb18_mel_band_roformer_sage.yaml",
+      "bytes": 5947,
+      "sha256": "6cf7d379a7eee221fa37ab0337797b46443505a1c11ace9303e64c76fafc9865",
+      "git_blob": "0a36bb5f8c95d594822dcb70dbf03e5b0b9e8e97",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/sage/config_musdb18_mel_band_roformer_sage.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/viperx/model_bs_roformer_ep_317_sdr_12.9755.yaml",
+      "bytes": 1881,
+      "sha256": "42e5635ceab7287b83d9591c9880966f0b61cff26a0a40a29d236bacb32e5f2c",
+      "git_blob": "135a051897dee27285ac46ee350afe1e1ec02011",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/viperx/model_bs_roformer_ep_317_sdr_12.9755.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/viperx/model_bs_roformer_ep_937_sdr_10.5309.yaml",
+      "bytes": 2351,
+      "sha256": "c9ff80f71867e9b7df08722c3a08a564c68cffcfe1c2c32a004b8153456f8951",
+      "git_blob": "d5e9a0b670759dd378af60e09e0a5e3c650cbf7c",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/viperx/model_bs_roformer_ep_937_sdr_10.5309.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/configs/viperx/model_mel_band_roformer_ep_3005_sdr_11.4360.yaml",
+      "bytes": 1404,
+      "sha256": "4e0a24c9078b007caeea94efaad78ed4f29d4f44a80a6aefc4295bff09490314",
+      "git_blob": "7cb922c9c06076e382826decc017ca9d760b9623",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/configs/viperx/model_mel_band_roformer_ep_3005_sdr_11.4360.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/ensemble.py",
+      "bytes": 6008,
+      "sha256": "96511f17bf119df82042c9a97ad580f2df53f298fc0d3c6d6f576456ff419068",
+      "git_blob": "76fec7b7126d2d6f05ff5850bdbbb72c664bfd86",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/ensemble.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/gui/gui-wx.py",
+      "bytes": 28000,
+      "sha256": "987fef4a2e2b4b8da7cb066c3c5e54cbd08cd4398901714671e92ae33f69f349",
+      "git_blob": "f86757d38983539192e960b3fd5e88df8261cde2",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/gui/gui-wx.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/inference.py",
+      "bytes": 5596,
+      "sha256": "ce7b28a646945d8d0dae17e61809ff525486b788e942afd098db46c3f7cf7fc3",
+      "git_blob": "92f1674a48e7fb988c6256944b9b1a36a3fb4914",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/inference.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/__init__.py",
+      "bytes": 23508,
+      "sha256": "3711458192d388e7b8ac1f3a0ef260b70109b55810d130e32901e0b92f1a770c",
+      "git_blob": "a4d6d7953709c2f86a6b484e49c7715b58bbe86a",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/__init__.py",
+      "bytes": 103,
+      "sha256": "402546b3192371962c0b684d9db88918eb5657227e71e609b002b3a53fe0a1e4",
+      "git_blob": "1087fe2c4d7d3048295cdf73c0725a015bc0d129",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/_types.py",
+      "bytes": 373,
+      "sha256": "00710352a5111805744fb512079656fb920202c698f38824125778cb9fbcd853",
+      "git_blob": "9499f9a80b5dec7b5b0e7882849e4f7b2c801ccf",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/_types.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/augmentation.py",
+      "bytes": 3566,
+      "sha256": "e1a044fdac67897035120fa298328cf3b9b358047ddeb5c4175374bb909eecd6",
+      "git_blob": "238214bf17a69e71f48e8761e1ead05b17d0fa5a",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/augmentation.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/augmented.py",
+      "bytes": 1029,
+      "sha256": "debc7568fd579925c78c68a6ba219ded40008660ce6a6da42c40fb2f7d2adf88",
+      "git_blob": "84d19599a6579eb5afd304ef6da76a6cbca49045",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/augmented.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/base.py",
+      "bytes": 1917,
+      "sha256": "9129eb9053066bfc62d5edeba43f43f26dfc17be657c18ab6ff84fad7b8ea37c",
+      "git_blob": "a7b6c33a85b93c32209138e3d21bfc8e0f270cac",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/base.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/dnr/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/dnr/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/dnr/datamodule.py",
+      "bytes": 2069,
+      "sha256": "13865d973cd21d9582156f394ab4c2ff3d112bdf814a62e06201c3d817d373d7",
+      "git_blob": "dc5550608aabf460eb1781576112ed60185dd318",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/dnr/datamodule.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/dnr/dataset.py",
+      "bytes": 10917,
+      "sha256": "aef4f659e990c0fcbf21fcf15f131189c33b112eec9768b5c58fe887de113cd7",
+      "git_blob": "7b241cf0dd474eafbfc9db3ec2f4987d12596de4",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/dnr/dataset.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/dnr/preprocess.py",
+      "bytes": 1225,
+      "sha256": "1f4c4ca92baac97f4b7cc393d60f09971689592f19c2648c758b556afe3e8305",
+      "git_blob": "9d0b58690f3bae726b0655dbade6393c89bf8c9e",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/dnr/preprocess.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/musdb/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/musdb/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/musdb/datamodule.py",
+      "bytes": 2254,
+      "sha256": "92821410c48226573bc878bcc5e9668c65f57f247c26168d4563ba827d852847",
+      "git_blob": "a8984daebd535b25f0551d348c91dbd1702fb9da",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/musdb/datamodule.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/musdb/dataset.py",
+      "bytes": 8793,
+      "sha256": "747dc073577864079b8bae146a1608be17692cb739eb788ae7261deca130d051",
+      "git_blob": "53f5d9afdfe383600b5f89767c4ef1f4b54f4a47",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/musdb/dataset.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/musdb/preprocess.py",
+      "bytes": 7580,
+      "sha256": "b99f37d7277f744e1662e217902050925756c7737c49dbf33343051aa8150397",
+      "git_blob": "5d5892e5c3f4acef5bbb183a746d76475c461810",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/musdb/preprocess.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/musdb/validation.yaml",
+      "bytes": 474,
+      "sha256": "bb9d8fd2516142b55e52139b27272af06d9311c73ec43b3d2ce1721434cb5c55",
+      "git_blob": "2f8752478d285d1d13d5e842225af1de95cae57a",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/data/musdb/validation.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/loss/__init__.py",
+      "bytes": 164,
+      "sha256": "c3b09eb6f316d03d823e78d4496edfab9237d146a23ee50ca6a02bd96b8f18c5",
+      "git_blob": "0ab803aecde4f686e34d93f3f2d585e0a9867525",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/loss/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/loss/_complex.py",
+      "bytes": 866,
+      "sha256": "96dbf569d17b12e18415cdd72d59a23b5a1c665a381b53692f0d6ffad2862931",
+      "git_blob": "1d97e5d8bab3fdb095c2ba7c77faebef26e8f1ce",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/loss/_complex.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/loss/_multistem.py",
+      "bytes": 1320,
+      "sha256": "b66cf22211195492d96bf638ab4a45835c7d242c61cbcb82fba3a89cee1e575a",
+      "git_blob": "675e0ffbecf1f9f5efb0369bcb9d5c590efcfc31",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/loss/_multistem.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/loss/_timefreq.py",
+      "bytes": 3374,
+      "sha256": "cf7e0fb620772a5557c718cfa382c50a142b2bc8b72a269c3dc6e07c2e223c65",
+      "git_blob": "6ea9d5994ca645546b5ccb7e6eafaa3d2fbcf959",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/loss/_timefreq.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/loss/snr.py",
+      "bytes": 4920,
+      "sha256": "3a7e59d392c6eef9130f5431eb0e72649671c2b9684abd6e29dfa970d344eac7",
+      "git_blob": "2996dd57080db687599c1fd673d6807041a04b52",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/loss/snr.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/metrics/__init__.py",
+      "bytes": 266,
+      "sha256": "15365447085684e6b1beac11b5775b02a8a87d72515950efbd8ba44d6ae850b1",
+      "git_blob": "c638b4df585ad6c3c6490d9e67b7fc197f0d06f4",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/metrics/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/metrics/_squim.py",
+      "bytes": 14178,
+      "sha256": "77a09b0d4c086d620791bc4fe01053d3db425365a3b18e90bf7320cab6ed43d8",
+      "git_blob": "ec76b5fb5e27d0f6a6aaa5ececc5161482150bfc",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/metrics/_squim.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/metrics/snr.py",
+      "bytes": 4081,
+      "sha256": "43f36de1c2829877af49f28364d07736ea90b51f12469073ebc501cf135a4cb7",
+      "git_blob": "d2830b2cbecfa681c449d09e2d4c35a20fc98128",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/metrics/snr.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/__init__.py",
+      "bytes": 75,
+      "sha256": "7e39a945cff5c32171772a0ec268a1ba10e485152a9b8460abadbb19b4f64bc7",
+      "git_blob": "54ac48eb69d6f844ba5b73b213eae4cfab157cac",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/_spectral.py",
+      "bytes": 1768,
+      "sha256": "3c27075fb51f3bab55e9f6051b7e93e2a47e2d22680a713e278282658721b89c",
+      "git_blob": "564cd28600719579227a6085eed5e9d6ee521312",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/_spectral.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/bsrnn/__init__.py",
+      "bytes": 562,
+      "sha256": "6e4199eae13d21df769719a2de985c776cf0ab56a3a0cc5fc5c0156bb60ab781",
+      "git_blob": "c27826197fc8f4eb7a7036d8037966a58d8b38d4",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/bsrnn/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/bsrnn/bandsplit.py",
+      "bytes": 4406,
+      "sha256": "3218b8b08600569fbd9823feb907493909786c223449cb3396f15c5c3431ed91",
+      "git_blob": "63e6255857fb2d538634be317332afb2f93e145d",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/bsrnn/bandsplit.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/bsrnn/core.py",
+      "bytes": 24359,
+      "sha256": "12b0757caba7f1ab692d587354545bc24c051dd07e7172c5ed456ec3981e2fcf",
+      "git_blob": "7fd36259002a395e7b7864f605fcab5b4422e422",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/bsrnn/core.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/bsrnn/maskestim.py",
+      "bytes": 11224,
+      "sha256": "6b4df417bf5441fdfdfddde4f3ff66d250d5ae57f78bc4a26f63592c7e134cee",
+      "git_blob": "0b9289dfa702e02ff4d4f0dc76196fd39bb68e34",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/bsrnn/maskestim.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/bsrnn/tfmodel.py",
+      "bytes": 9801,
+      "sha256": "cb00d749a1e9e5fc5ab3f0f2c04efc4518818dfff12dda8339cf455bc39304aa",
+      "git_blob": "ba710798c5ab49936bd63c914f20da516cbc6af9",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/bsrnn/tfmodel.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/bsrnn/utils.py",
+      "bytes": 17322,
+      "sha256": "14dcd87349ec5bda34cda53c70b030b07eeae04032ab095b7605ba80198d6e11",
+      "git_blob": "bf8636e65fe9e7fdd13fa063760018df90a01cff",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/bsrnn/utils.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/bsrnn/wrapper.py",
+      "bytes": 31720,
+      "sha256": "b22fed75740d01617c3081992246ce535e73b9be9c081c41eac5416eac23c112",
+      "git_blob": "a31c087db33eb215effa3c3fc492999c5672c55e",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/model/bsrnn/wrapper.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/utils/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/utils/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/utils/audio.py",
+      "bytes": 13500,
+      "sha256": "f5b23c50bde89782fb41429d9f34c59cf72a598c70f6e9a54bfce11e9f1e4525",
+      "git_blob": "adae756bf2b02a994a42fcc007da1e1ff7bb6cfb",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/core/utils/audio.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/model_from_config.py",
+      "bytes": 703,
+      "sha256": "f9ed87f21f81658c41f68b6de19269902fd4b1c9e6c047f449c0aea1e2393b05",
+      "git_blob": "00ea586d7dfdbd6b89d6b7f2f400e6c8d04da5e4",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit/model_from_config.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit_v2/bandit.py",
+      "bytes": 11217,
+      "sha256": "94ed9bf8fc0a55a75d8788e952f8a76fc73d4bc7949ad25707bcc0d9e76c23c8",
+      "git_blob": "ac4e13f479891065cf1f7dae0720721128347979",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit_v2/bandit.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit_v2/bandsplit.py",
+      "bytes": 3860,
+      "sha256": "25ead97712d825bb57c65dd069e33ff5be9bccd9f791a0e22b472ddbcebda21b",
+      "git_blob": "a14ea52bfa318264d536c9f934d0e28db63e15dc",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit_v2/bandsplit.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit_v2/film.py",
+      "bytes": 511,
+      "sha256": "5492769e4dd8ad534e6a040922549aedc6f76d50456d0ce0574013142fc9a082",
+      "git_blob": "e30795332ea0e06865ea3d883767db17bb02353c",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit_v2/film.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit_v2/maskestim.py",
+      "bytes": 8529,
+      "sha256": "672ffc9a270e60d653f81a2edbac78895ee3b4bf6c278f3eea37939230cf6a04",
+      "git_blob": "65215d86a5e94dafdb71744aafadf7aaab93330d",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit_v2/maskestim.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit_v2/tfmodel.py",
+      "bytes": 4304,
+      "sha256": "0417897e3957ccb16fe107ecbc724ed9bfdb28e9d14d7df03c2c2337151d2724",
+      "git_blob": "21aef03d1f0e814c20db05fe7d14f8019f07713b",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit_v2/tfmodel.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit_v2/utils.py",
+      "bytes": 16359,
+      "sha256": "6aec7c2a1bcfc8f4e680dce2940eae75415d26ecebb6c9839a78c7dfa213218e",
+      "git_blob": "ad4eab5d8c5b5396ed717f5b9c365a6900eddd2f",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bandit_v2/utils.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bs_roformer/__init__.py",
+      "bytes": 119,
+      "sha256": "877feed3f602e3cdaeb572bed8939e2b5332fb9b193de2928a098ac175a91739",
+      "git_blob": "980e0afa5b7b4fd66168bce6905a94e7c91c380e",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bs_roformer/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bs_roformer/attend.py",
+      "bytes": 3681,
+      "sha256": "0459d799ade55541df2994b0becf7aec12214491360c5a06e346f6d615eaed15",
+      "git_blob": "d6dc4b3079cff5b3c8c90cea8df2301afd18918b",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bs_roformer/attend.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bs_roformer/attend_sage.py",
+      "bytes": 5799,
+      "sha256": "fc9fdfe3bd896edc2949b65d02196b2a683b55a886bc5a6b3794b24d453c1d02",
+      "git_blob": "f07b932a9f3e9b4b3ad0a2c595e43f45150dbd7b",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bs_roformer/attend_sage.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bs_roformer/bs_roformer.py",
+      "bytes": 19549,
+      "sha256": "d5e0256c670477e5c03dcb34ee12e55250d1a419f8fc81c7e5e4fde1839b589d",
+      "git_blob": "091797cf06c7698b9e723b684c1ea4eb7903c835",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bs_roformer/bs_roformer.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bs_roformer/bs_roformer_experimental.py",
+      "bytes": 21721,
+      "sha256": "737994b5f2c203e3142a7f9779b10eec00cfc069cbbe363da9498b4823d49028",
+      "git_blob": "a5c3544374d16c9429272f69b4621bc3878093cc",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bs_roformer/bs_roformer_experimental.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bs_roformer/mel_band_roformer.py",
+      "bytes": 21227,
+      "sha256": "e1dfe6661d7e8844cb566a2dbf18b740caeb05ba6c55d855c319b88157222b4e",
+      "git_blob": "be9e2ca55db973cfd78e780cc91ce1e4c8ba27a9",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bs_roformer/mel_band_roformer.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/bs_roformer/mel_band_roformer_experimental.py",
+      "bytes": 23562,
+      "sha256": "9aee3c4de1a225e9ead4586ab29e566a44567f583f661595765d6ab5be467132",
+      "git_blob": "5e9afeda0cd9db0a95cf3fed67034ddc4695d9f2",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/bs_roformer/mel_band_roformer_experimental.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/demucs4ht.py",
+      "bytes": 28434,
+      "sha256": "d0d20967cbab2b1eef93dbec2720c2753dfb7b9727f140f29c0d5900dc22f436",
+      "git_blob": "06c279c31a7ac7e12af4375a5715eb291ad5405c",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/demucs4ht.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/ex_bi_mamba2.py",
+      "bytes": 11636,
+      "sha256": "8254385e5dfb6de26ba5bcf06ceb2a8ae2cab9af175d1ee7b1291c79e7a0a197",
+      "git_blob": "6bcf797cce8b28e88c7aab9adfa2037070504763",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/ex_bi_mamba2.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/look2hear/models/__init__.py",
+      "bytes": 1261,
+      "sha256": "c78eaabe6c0bba559596118d61fbe96289fd8f279f056533a53f9bfc568d157e",
+      "git_blob": "b72fb1f70bbc43f10bd74583d582ddb45848e45e",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/look2hear/models/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/look2hear/models/apollo.py",
+      "bytes": 12510,
+      "sha256": "7c38949df88f8ce7f207b73fab510284ef4bbf5c4bdff72f9861fedc033d7e4e",
+      "git_blob": "5de9afd468e4635e581c0ff41dce7acc4eb249be",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/look2hear/models/apollo.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/look2hear/models/base_model.py",
+      "bytes": 2898,
+      "sha256": "35c23193853136c97c820a629f7e54a37339d88003ee2a32ea99822f623472be",
+      "git_blob": "e24b23192141634c0496be04899b6ecdb683b6c5",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/look2hear/models/base_model.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/mdx23c_tfc_tdf_v3.py",
+      "bytes": 7173,
+      "sha256": "e7a4be2b1065943a4623a743012fbfd37efa3c34a9737ff07bca2a483dfe9b8b",
+      "git_blob": "e6ec44ca5db2584a308329fa92afae692d0939ce",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/mdx23c_tfc_tdf_v3.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/mdx23c_tfc_tdf_v3_with_STHT.py",
+      "bytes": 10247,
+      "sha256": "eb485743f6963fed6c02084ee914e3d3d9beed097f2adb43522b8f359ec2fc36",
+      "git_blob": "2472fed312fa8c07dd33fa8510249bac941cb9d4",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/mdx23c_tfc_tdf_v3_with_STHT.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet/__init__.py",
+      "bytes": 25,
+      "sha256": "8ef8829a84f72fb500ee364c0394527cbbba7f86cd04f76052bea5824e5b9a12",
+      "git_blob": "5f6ecefede9345237623066dd21ebd8253af1c60",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet/scnet.py",
+      "bytes": 13750,
+      "sha256": "a024c6a6b3e5eda6da29f052076772c277183dc273f144b4feca1c565030e1ed",
+      "git_blob": "b27704dc922eb593dc76f3b9905aa8c0ea02507f",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet/scnet.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet/scnet_masked.py",
+      "bytes": 15358,
+      "sha256": "fb00eb2c7f55042cc98271a7237606b326abeb3b3dbe57bbe0ef4d1dba1f75e5",
+      "git_blob": "c4354e86235261d0459a51ee74384aedcaa7903c",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet/scnet_masked.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet/scnet_tran.py",
+      "bytes": 22126,
+      "sha256": "7dfd7a93f53d2179a93d987498e7f978606a7f12a625477b4a65be80e145f244",
+      "git_blob": "3f3bd05b3c1504ab807ff2103a81b4a5bf536700",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet/scnet_tran.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet/separation.py",
+      "bytes": 3742,
+      "sha256": "4fdda9982003b795c3b5d964f998ca0bc416d7c232b813706a6088b16a1a1639",
+      "git_blob": "d902dac4d947123d3ba1270dd065be0d8b4c5ed9",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet/separation.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet_unofficial/__init__.py",
+      "bytes": 47,
+      "sha256": "c6142406008009393178ab33a729eae0f5695e8352f72a9f772099b6ea80d161",
+      "git_blob": "6d034d38a2ace2e81bd28d63dd8f25feb918f33d",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet_unofficial/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet_unofficial/modules/__init__.py",
+      "bytes": 195,
+      "sha256": "c1d823249a23be7f4016aaef2236a35b8fb4e68155caff78a1e7825b29efad41",
+      "git_blob": "69617bb15044d9bbfd0211fcdfa0fa605b01c048",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet_unofficial/modules/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet_unofficial/modules/dualpath_rnn.py",
+      "bytes": 7083,
+      "sha256": "6cecfd6f163625431767364992fccbce5378fcea27d73d8617cccb5729ac10c6",
+      "git_blob": "2dfcdbcfc102a6fde5a2ff53a2a06f2d6caae196",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet_unofficial/modules/dualpath_rnn.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet_unofficial/modules/sd_encoder.py",
+      "bytes": 9455,
+      "sha256": "e78d682725a69b6e3969e30f274639cd397c270a2fbf260555462d2c0c0906d5",
+      "git_blob": "742577f480693671437dc50358a1a65d251b6e9b",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet_unofficial/modules/sd_encoder.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet_unofficial/modules/su_decoder.py",
+      "bytes": 7999,
+      "sha256": "adf87543dd8b2fd0ba8ecc15ea8326295803024a4903889ed004144214b29420",
+      "git_blob": "660c1fa6cbfd9b43bed73204a0bb6593524de272",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet_unofficial/modules/su_decoder.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet_unofficial/scnet.py",
+      "bytes": 7514,
+      "sha256": "f1ef0df2b766e23f16b93e2a4b52b2e646b07900892c687636eee0f852c39571",
+      "git_blob": "d076f85f1d5ce1345dc9a8c56b6a5aef09f2facc",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet_unofficial/scnet.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet_unofficial/utils.py",
+      "bytes": 3876,
+      "sha256": "330edd5f5575f362807755edfa9f35127d7b50096ca79da9e9a2e5b25bce692f",
+      "git_blob": "aae1afcd52e8088926ea984e52c9b62ca68be65c",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/scnet_unofficial/utils.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/segm_models.py",
+      "bytes": 7423,
+      "sha256": "595b06c8332c7867b4a26bd869623aae3e0cd6dbc941d2fd92349fd023b704f2",
+      "git_blob": "5e8f1814a30bd59d4cd94bb4a19edf8d409c24b5",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/segm_models.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/torchseg_models.py",
+      "bytes": 7401,
+      "sha256": "97d890061fbd86c6f3f022e2ac4f12c4ebcab2d341311aae9d8d7b0175de7cac",
+      "git_blob": "419abd3bc0b49424e9ba2f6f4f604d2e4f2938ea",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/torchseg_models.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/ts_bs_mamba2.py",
+      "bytes": 15685,
+      "sha256": "2e879821ee4593d324239103438662a15da5d544150620848463454d900ff471",
+      "git_blob": "a01a2a58c5418bfd846d6edb6900810392091189",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/ts_bs_mamba2.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/models/upernet_swin_transformers.py",
+      "bytes": 6845,
+      "sha256": "0b25d0189c747240ff677739503ba2ac28ba3b59cf8f2ee7f99590c14fe3195d",
+      "git_blob": "ddf61cc3785877c7e65d82bf81435a1a3fff0f1b",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/models/upernet_swin_transformers.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/requirements.txt",
+      "bytes": 569,
+      "sha256": "4677846ab95e3620f296132a97be322a32358ef38e1bb6d344335b4492b38533",
+      "git_blob": "0ac8bab0698992a73255274e581576b8120f131f",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/requirements.txt"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/scripts/moises_to_musdb.py",
+      "bytes": 11892,
+      "sha256": "b7cbbd9ca497926d252c10e0e374cae31c95615bc101100bbb6efc3a04901743",
+      "git_blob": "90f38b435971cea01bc2e0b9eb22a4d178a57894",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/scripts/moises_to_musdb.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/scripts/redact_config.py",
+      "bytes": 3906,
+      "sha256": "80fe18173ef36987ba2077b8b790837cdd86feb3eb51194eb615e515fc170e7c",
+      "git_blob": "5886af8a333f528e2a8d76348876b8a040794fda",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/scripts/redact_config.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/scripts/stream.py",
+      "bytes": 13632,
+      "sha256": "9c30da5061ae234c06a9517c1001026f846f2ef00b63147c656c6611265954cf",
+      "git_blob": "c6e51f89395a0dc766f417ace01d6a96a5e6b87e",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/scripts/stream.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/scripts/trim.py",
+      "bytes": 3416,
+      "sha256": "16f3e1af413f17ec62ad471d9bb508a10ed005a51f52662794f1b02891ebf044",
+      "git_blob": "e8b4ede396e5c7fc663e205b5d28b43135ae23e1",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/scripts/trim.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/scripts/valid_to_inference.py",
+      "bytes": 2822,
+      "sha256": "a3d5a7f53cba438b9f4b5c89e14c02c64d3332c6f99c600ce4868a5ff68f742d",
+      "git_blob": "935fc9d9b0286942da26449287f4f27daa610f14",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/scripts/valid_to_inference.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/tests/admin_test.py",
+      "bytes": 6764,
+      "sha256": "1fe0a6133f48b85b1e9dae0a297a0c74ba585043cc35e99b030b95cc9b55ca00",
+      "git_blob": "bb782bd877f50064b3a34e183c7bc90998ddf4d5",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/tests/admin_test.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/tests/test.py",
+      "bytes": 8986,
+      "sha256": "588806c780bd49ac0c38eafc8b55b20936e113729685b9570ffe55278a44a3a0",
+      "git_blob": "d05e128674f0850d82a2583527493f77c9d435d4",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/tests/test.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/train.py",
+      "bytes": 8695,
+      "sha256": "380ce396e758bc535600b92f5faf421b5a16dd7e305c35e410fb58414db21e79",
+      "git_blob": "17a0a185f3f5bda521a7f78d7fb36d0afb14617b",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/train.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/train_accelerate.py",
+      "bytes": 14915,
+      "sha256": "3903edd27fcf34fd31db7ec0e7a0cf3907a17f39171c9686fb65da51525c15cf",
+      "git_blob": "d192fd684dacac95a917d76e861eb094cd4aeb6f",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/train_accelerate.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/train_ddp.py",
+      "bytes": 8994,
+      "sha256": "830cc5f26992bf73428554c48dca4df6969537976446b6edece5758131b67426",
+      "git_blob": "13ef042f3c0e4b4e3d8d2c61d33ea7de17bb3eb2",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/train_ddp.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/utils/audio_utils.py",
+      "bytes": 4278,
+      "sha256": "6e8d714be567dddfe419c466d9ba51bb7fd23b18e260529c37128a756fcfb7e3",
+      "git_blob": "aaec59ac98059f5f80e0d017eb79ef80c5597a23",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/utils/audio_utils.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/utils/dataset.py",
+      "bytes": 29876,
+      "sha256": "bd260832e6a3a16898f6fbc29780b268d223b19b2316e1190c317c901fbde3c4",
+      "git_blob": "4fe9a593e56c4a35fcc4428410b1048b6ab06032",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/utils/dataset.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/utils/losses.py",
+      "bytes": 6783,
+      "sha256": "255eb57c71282f3efc8e3e8ad4f3ce0f56f72be90dedc2a8756e2e814ac68b00",
+      "git_blob": "de697387f0d95cad684eda60a38d10e310679b42",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/utils/losses.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/utils/metrics.py",
+      "bytes": 15697,
+      "sha256": "b8586e3a1f3e9e5e733fd8a4ae53380b328d62e126e2ffc3bbfe4e013d9b32dd",
+      "git_blob": "245e8f225bff2cc4472a76f43fbda9ec2a6f78da",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/utils/metrics.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/utils/model_utils.py",
+      "bytes": 21268,
+      "sha256": "f7fcbc2dcc3d98cefbe59544b116dbe1360b830079a249cc1b6fb2f5efc36abb",
+      "git_blob": "0d11355bbcf4aaa26140bba01a1dabdeac2531d6",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/utils/model_utils.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/utils/settings.py",
+      "bytes": 23934,
+      "sha256": "3344934c3f013a8a542527fe7091da4f8e5bc6676cc03e19f5c634847ac95bcc",
+      "git_blob": "04789748164ea08d16ab94f6bd464b21c4123d03",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/utils/settings.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/valid.py",
+      "bytes": 20957,
+      "sha256": "d97adee0e0f9274a38883cdba2dfc173e58292c564932746d2755a3c2c242e1e",
+      "git_blob": "4574c3a4b575623c696246f0e892ac977bd7dd0d",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/valid.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66/valid_ddp.py",
+      "bytes": 16275,
+      "sha256": "93d3f4fb25c7861c30874018ef35e04b00fa083ba477054857500c279615be02",
+      "git_blob": "734bad984309bbb76b877fd51da619b8df142d50",
+      "url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/a8a862231de29e6832a26c590e5c29f82f736f66/valid_ddp.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/scnet/a8a862231de29e6832a26c590e5c29f82f736f66/config_musdb18_scnet_xl_more_wide_v5.yaml",
+      "bytes": 5906,
+      "sha256": "54ddcb8aeeae85c8d0e148741e7d87b0fbd38bd21cffa5d59ba124fe1e672f40",
+      "git_blob": "fa406bb8b04f807cd90c65ee1b1ec3d695047107",
+      "url": "https://github.com/ZFTurbo/Music-Source-Separation-Training/releases/download/v1.0.15/config_musdb18_scnet_xl_more_wide_v5.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/scnet/a8a862231de29e6832a26c590e5c29f82f736f66/model_scnet_ep_36_sdr_10.0891.ckpt",
+      "bytes": 214063778,
+      "sha256": "ac25975f0f5704f3d1a3c3c251505b7a0f417a22eafe82773440ee4f7e14b74f",
+      "git_blob": "f18e89fae8610ff5c55675cd00ba38f6b13b29bd",
+      "url": "https://github.com/ZFTurbo/Music-Source-Separation-Training/releases/download/v1.0.15/model_scnet_ep_36_sdr_10.0891.ckpt"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/manifests/model-library/scnet/environment-freeze.txt",
+      "bytes": 3892,
+      "sha256": "14b575fb2e04425a1968733988b0a973996bfc12a07babe2dbb22a6a257dbd24"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/manifests/model-library/scnet/requirements.lock.txt",
+      "bytes": 48347,
+      "sha256": "8eeabff66f9bceb99f4297a5132e41f0cb49de6948d0aa30a2cd39f1b51dc830"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/audit.py",
+      "bytes": 4686,
+      "sha256": "7894257f861ceaab9688831a8527ec5f1a85394d11d7f17085438dc79acdbf68"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/freeze.py",
+      "bytes": 1554,
+      "sha256": "28ff8a5b41d159a45dd1d60b90fc229aea6e23e83991420756b1c50321ba2502"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/guarded_probe.py",
+      "bytes": 6559,
+      "sha256": "3f9dc71500a1f4a56dbaf5f588dc394fddde8e8470cc7ce80aad4bdb1e0130af"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/infer.py",
+      "bytes": 7360,
+      "sha256": "110c869156d157780d2b3b295be1f417571294744d5aa5bc0f8bf9f27557578a"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/install.sh",
+      "bytes": 1712,
+      "sha256": "4ab2e5bccc14db9ac92f258d46049f3ba23738126adbad7a2b3d489a62cb8292"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/requirements.py",
+      "bytes": 1521,
+      "sha256": "99d381db755ccfccc6f75072df3c22330c02ad23f6e42ea045b02e9202cfe67b"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/runtime.py",
+      "bytes": 5417,
+      "sha256": "1ed93b588a631f2692cdcfd8bd59a6fd5c6a768fe38e6708e13e15bc66930c2f"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/stage.py",
+      "bytes": 7253,
+      "sha256": "9a10a9df87fa391897ee2f67b7ede1e9399b541db21a8ebb3ac1384abe4ff4ec"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/stage.sh",
+      "bytes": 547,
+      "sha256": "3fa81beb59305e3c2a6cc59b798c21b57824217edea102bcd1479990917fbed1"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/test_guard.py",
+      "bytes": 2193,
+      "sha256": "7ee7929fa8642c20f7a3aa9ccc2160fa4f68ee27eab94c2ccd97b7e5dc026f89"
+    }
+  ],
+  "scope": "private cloud evaluation; no local weight/audio copy",
+  "cpu_check": {
+    "kind": "cpu-model-load-only",
+    "parameter_count": 53466800,
+    "torch_version": "2.10.0+cu128",
+    "cuda_build": "12.8",
+    "cuda_initialized": false,
+    "forward_executed": false,
+    "elapsed_seconds": 0.4687161445617676,
+    "sources": [
+      "drums",
+      "bass",
+      "other",
+      "vocals"
+    ],
+    "sample_rate": 44100
+  },
+  "dependency_notes": [
+    "Torch/Torchaudio 2.10.0+cu128 pinned for RTX5090; independent environment",
+    "Only inference dependencies installed for SCNet; universal training/GUI CLI stack omitted",
+    "Source files unmodified; narrow loader requires strict checkpoint/state matching"
+  ],
+  "gpu_probe": "/root/autodl-tmp/emusician/manifests/model-library/scnet/gpu-probe-20261106T101716Z.json",
+  "probe_result": {
+    "id": "scnet",
+    "device": "cuda",
+    "input": "/root/autodl-tmp/emusician/results/model-library/fixtures/ace-piano-trio-first8s.wav",
+    "input_sha256": "fc7793b3002302127c0e77df74cb396ebc9a88c92bd0ed9e6c78d0f7921960ea",
+    "input_duration_seconds": 8.0,
+    "sample_rate": 48000,
+    "source_revision": "a8a862231de29e6832a26c590e5c29f82f736f66",
+    "model_revisions": {
+      "revision": "v1.0.15",
+      "sha256": "ac25975f0f5704f3d1a3c3c251505b7a0f417a22eafe82773440ee4f7e14b74f"
+    },
+    "model_load_seconds": 0.654901534318924,
+    "outputs": [
+      {
+        "path": "/root/autodl-tmp/emusician/results/model-library/scnet/probe-20261106T101716Z/drums.wav",
+        "frames": 352800,
+        "sample_rate": 44100,
+        "channels": 2,
+        "rms": 0.06659470765441491,
+        "bytes": 2822488,
+        "sha256": "87af1f05018c278d9ecf4f7fcdb7fa4b96d921dc9e6f53e6bf7d107374f2be63"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/model-library/scnet/probe-20261106T101716Z/bass.wav",
+        "frames": 352800,
+        "sample_rate": 44100,
+        "channels": 2,
+        "rms": 0.13798767306119203,
+        "bytes": 2822488,
+        "sha256": "f1b7e085e30a14abae66042637e2562d6c48c4f2eabc1ab8e8abdd3eb6b6cd72"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/model-library/scnet/probe-20261106T101716Z/other.wav",
+        "frames": 352800,
+        "sample_rate": 44100,
+        "channels": 2,
+        "rms": 0.14020204777796327,
+        "bytes": 2822488,
+        "sha256": "59d8420a6308f3a0ec91c9bf0ce183c847dad2c127e0ac88eb8b46a4d22b27cd"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/model-library/scnet/probe-20261106T101716Z/vocals.wav",
+        "frames": 352800,
+        "sample_rate": 44100,
+        "channels": 2,
+        "rms": 0.0006780532944353587,
+        "bytes": 2822488,
+        "sha256": "93145299085d27c3dda9c0d975aa7062e77d6ff6082e6832ccdc421e0ab4b8d3"
+      }
+    ],
+    "daw_connected": false,
+    "processing": {
+      "upstream_function": "utils.model_utils.demix",
+      "batch_size": 1,
+      "num_overlap": 4,
+      "chunk_size": 485100,
+      "amp": true
+    },
+    "gpu_name": "NVIDIA GeForce RTX 5090",
+    "peak_cuda_allocated_bytes": 1440811520,
+    "peak_cuda_reserved_bytes": 2688548864,
+    "inference_seconds": 2.123183771967888,
+    "total_seconds": 2.778086543083191
+  },
+  "output_validation": [
+    {
+      "path": "/root/autodl-tmp/emusician/results/model-library/scnet/probe-20261106T101716Z/drums.wav",
+      "duration_seconds": 8.0,
+      "finite": true,
+      "nonzero": true,
+      "channels": 2
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/results/model-library/scnet/probe-20261106T101716Z/bass.wav",
+      "duration_seconds": 8.0,
+      "finite": true,
+      "nonzero": true,
+      "channels": 2
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/results/model-library/scnet/probe-20261106T101716Z/other.wav",
+      "duration_seconds": 8.0,
+      "finite": true,
+      "nonzero": true,
+      "channels": 2
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/results/model-library/scnet/probe-20261106T101716Z/vocals.wav",
+      "duration_seconds": 8.0,
+      "finite": true,
+      "nonzero": true,
+      "channels": 2
+    }
+  ],
+  "source_modifications": [],
+  "cli": {
+    "python": "/root/autodl-tmp/emusician/envs/scnet/bin/python",
+    "script": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/infer.py",
+    "arguments": "scnet --input <cloud audio> --output <new cloud results directory> --device cuda",
+    "constraint": "Only one root-authorized GPU workload; bounded CLI input <=120s, tested only8s"
+  },
+  "support_limits": "Four stems only: drums, bass, other, vocals; not lead/backing vocals or separate guitars/keyboards.",
+  "guard_change_after_gpu_probes": {
+    "gpu_tested_sha256": "6b68695bcd54d73dd7b3d0915ad99d536a9d933a6214ba23a43eaca60ee7d709",
+    "final_sha256": "3f9dc71500a1f4a56dbaf5f588dc394fddde8e8470cc7ce80aad4bdb1e0130af",
+    "change": "Exceptional monitor/cleanup now TERM-then-KILL and durable terminal receipt; final diagnostic errors separate",
+    "cpu_fault_tests": {
+      "passed": 3,
+      "gpu_access": false,
+      "record": "docs/builds/20261106T102503.755071Z-fc91eeea5d.json"
+    },
+    "gpu_probes_repeated_after_guard_change": false
+  }
+}

@@ -1,0 +1,666 @@
+{
+  "repository": "https://github.com/multimodal-art-projection/YuE",
+  "revision": "1116bea76032bee5668e5f097294d082fa0b84f0",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 226,
+      "sha256": "54d2bd024ef6f2dbab9c9322c91ee5227e23dcdecda7206a0cfdf31614feaee5"
+    },
+    {
+      "path": ".github/workflows/tests.yml",
+      "bytes": 1169,
+      "sha256": "0764b4c2780a0af9e7efae41cf8763bc517d79dde72924ffdd37153bdefa0998"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 205,
+      "sha256": "4d5633a384795f24c8bb4aa9aab4520855c286998c143fdf9f89677cd61a148c"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "MANIFEST.in",
+      "bytes": 431,
+      "sha256": "da84994c9e46fd0bbaf52bf1f5c0320b23bf700640d535b26e1d8e552f7f1ff1"
+    },
+    {
+      "path": "MODEL_LICENSE",
+      "bytes": 23876,
+      "sha256": "c7a0e99360555513ff56815b5dbbc8f0b27a3ad762ceaeeab6838baea9743b3a"
+    },
+    {
+      "path": "README.md",
+      "bytes": 23687,
+      "sha256": "73481ddf41229acc1b58f5a8b07de8fe548ba135aa7fdb323e85ba0574e8f3cb"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "bytes": 867,
+      "sha256": "c552c22ea11e421d4e6b85cfb03a346f33fd18ec00f894a7e6ccc3ae82fb8564"
+    },
+    {
+      "path": "assets/architecture.png",
+      "bytes": 407593,
+      "sha256": "1926e7b5943d90c5b26426fdc5b3ff64b8552cce10fb5a7df60a077941d143b1"
+    },
+    {
+      "path": "assets/discord.svg",
+      "bytes": 1564,
+      "sha256": "49d90f3c5c5ae3c7e66560aa3713dd1e587130c8ed43aa04aea955961636df8e"
+    },
+    {
+      "path": "assets/frontier-teaser.pdf",
+      "bytes": 31395,
+      "sha256": "58d5f5ce6195e63561bc3fc051e233845581056cf2cebfbdee05bba7cd935cd6"
+    },
+    {
+      "path": "assets/frontier-teaser.png",
+      "bytes": 172053,
+      "sha256": "0f7e859bfee94eb456a1c38650eb6474568721356349ef490ac4a7e8bc49c68f"
+    },
+    {
+      "path": "assets/frontier-teaser.svg",
+      "bytes": 144767,
+      "sha256": "bf4f12a2e8178e42461046a6b6294ca52303b55d487b3d07db91bc2e3585d036"
+    },
+    {
+      "path": "assets/institutions-mobile.svg",
+      "bytes": 173770,
+      "sha256": "d9d14b1f8de53bd808414b06e2b21b4c040eab787ae436af7a15eaaa4b98d862"
+    },
+    {
+      "path": "assets/institutions.svg",
+      "bytes": 173769,
+      "sha256": "32fea44f6570955714a009966330dde28ad852c39236323b963d551e4c69c479"
+    },
+    {
+      "path": "assets/logo.png",
+      "bytes": 14085,
+      "sha256": "d57837783827061e6e4c6c817468c3e904cce06015a51a95fbd46add27f7af48"
+    },
+    {
+      "path": "docs/benchmark-results.csv",
+      "bytes": 3298,
+      "sha256": "579ffb6b9b069f6d3cdd32a76788998ec633a12426a0ebb7c9f83e6fb0d5b1fc"
+    },
+    {
+      "path": "docs/benchmark-results.json",
+      "bytes": 9885,
+      "sha256": "e6d5ffb2bed50ec59ea784cfe5be80a79c9b0d4f6275b6ed28513cb7fdf656cf"
+    },
+    {
+      "path": "docs/benchmarks.md",
+      "bytes": 14721,
+      "sha256": "065e12522f58b49c7e737793271f1da8fa59567e3e7f32b3400225dd7a6bd42b"
+    },
+    {
+      "path": "docs/cover-results.csv",
+      "bytes": 1045,
+      "sha256": "d425a7d9a71ce77cc70bf6314c68131dc7f6ff0df651955fb1a4173936b3f1e6"
+    },
+    {
+      "path": "docs/cover-results.json",
+      "bytes": 4606,
+      "sha256": "3b4d33665bc6ef0c9b974480d46d9af6a3b12446c0d347edd73b9cdb8ca380e6"
+    },
+    {
+      "path": "docs/covers.md",
+      "bytes": 3663,
+      "sha256": "2f6ecfd551f5f674404b657fad749abc5142c2c83970786b268e1cfdad92922b"
+    },
+    {
+      "path": "docs/editing-results.csv",
+      "bytes": 2466,
+      "sha256": "d19b4ce442e6c122b90528097719b0c118a10d05a1d7f4791a10f56a2791786d"
+    },
+    {
+      "path": "docs/editing-results.json",
+      "bytes": 9621,
+      "sha256": "214d094c5c5d56f6ab87d0a73c8fde19d4046edb9432e06cefacbfb1ce3b0dbc"
+    },
+    {
+      "path": "docs/editing.md",
+      "bytes": 3736,
+      "sha256": "370e7e556b3ba3787df90de5fb2e5e3b17a18957575d2dc766073251a310840b"
+    },
+    {
+      "path": "docs/frontier-composites.json",
+      "bytes": 16554,
+      "sha256": "faee507e246ab6ce0e0c06ea1b1ddc790193c0538aaa3be7ee1d33f8f9e7f086"
+    },
+    {
+      "path": "docs/generation.md",
+      "bytes": 7392,
+      "sha256": "c23d74fbac55efa5bcf3b83d805cd75ce9487209a00c614333c60c90184f8bc4"
+    },
+    {
+      "path": "docs/hardware.md",
+      "bytes": 8493,
+      "sha256": "815c7fb509eece3bd2d4c4ce7c03e17e3536efbbfa86d0a268040c62ff46e03a"
+    },
+    {
+      "path": "docs/sheetsage2_technical_report.pdf",
+      "bytes": 2237678,
+      "sha256": "135f38391cc0b084f55ae08f2dbc8e4dea61fbe50dc8635921b92be29dab6661"
+    },
+    {
+      "path": "docs/source-notes.md",
+      "bytes": 1968,
+      "sha256": "6f66318d9b6228f38b16db39ca4c0bbf3b63110f9c2efb7f769db947a40a3165"
+    },
+    {
+      "path": "docs/technical_report.pdf",
+      "bytes": 2627074,
+      "sha256": "90ea3ff24eac9bf984eead11c1b5d08d700531a8b4dc29cf626a0c298d2cab54"
+    },
+    {
+      "path": "examples/README.md",
+      "bytes": 2526,
+      "sha256": "908a3645288f480939b3ab042dffea191c159f545f7a73424561f55984bfbd71"
+    },
+    {
+      "path": "examples/generate.py",
+      "bytes": 1747,
+      "sha256": "b0040569374eef0ec923abf1a9e89e7c0b2ca6a584ec6d4c3c3d57656983c8ce"
+    },
+    {
+      "path": "examples/instrumental_clip.py",
+      "bytes": 2347,
+      "sha256": "cbeb2166e5971912c3429e3745cb5be3eb90e452bc7aec05580a4d4765f43065"
+    },
+    {
+      "path": "examples/melody.abc",
+      "bytes": 314,
+      "sha256": "07c3218a4dacbbc26c1c3142d7e7155a8381dbe87cf4288f613d934be640084d"
+    },
+    {
+      "path": "examples/score-jazz.abc",
+      "bytes": 362,
+      "sha256": "ff717e64cf2945504499faf117735bdf147df67293a2abee2df8c37609d86fc5"
+    },
+    {
+      "path": "examples/score.abc",
+      "bytes": 339,
+      "sha256": "17fbe8419e813c1593be7c295466523afc1b3c4f50d5ea078b5d769ec216e431"
+    },
+    {
+      "path": "examples/song.json",
+      "bytes": 498,
+      "sha256": "6b590fc427a8262e2c07d4097ae213384d70d9ac9d62357bb0d26485eb19fc50"
+    },
+    {
+      "path": "licenses/SnakeBeta-NVIDIA-MIT.txt",
+      "bytes": 1076,
+      "sha256": "e2f86126a8a56dfd0882e9112e282c7599a34d2c4479f6f5c461b8c2121a579f"
+    },
+    {
+      "path": "licenses/stable-audio-tools-MIT.txt",
+      "bytes": 1069,
+      "sha256": "a1fac33b7bcd791b74fb33aeb439f825e7277e239fc119fb7d2ab6f084a0c101"
+    },
+    {
+      "path": "pyproject.toml",
+      "bytes": 1777,
+      "sha256": "b59f69a656fdfbbd441b00bd2a1991d1403e8587528baafe86079489447667ae"
+    },
+    {
+      "path": "skills/yue2-music/LICENSE",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "skills/yue2-music/SKILL.md",
+      "bytes": 9585,
+      "sha256": "49909582781c3c144dd2b71f0830ce45901d6a03d645a0b6dff0a35669440152"
+    },
+    {
+      "path": "skills/yue2-music/agents/openai.yaml",
+      "bytes": 325,
+      "sha256": "f8f436aaf83adeb31b6cceef0884ba34e5c71ea020a17cdfde36b1515ece5445"
+    },
+    {
+      "path": "skills/yue2-music/assets/edit-brief.md",
+      "bytes": 1563,
+      "sha256": "dd113d95276e302c410275228a946dfaa5d4d3afd0d32eee0d647965f188355a"
+    },
+    {
+      "path": "skills/yue2-music/assets/prompt.json",
+      "bytes": 498,
+      "sha256": "6b590fc427a8262e2c07d4097ae213384d70d9ac9d62357bb0d26485eb19fc50"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/LICENSE",
+      "bytes": 1080,
+      "sha256": "689d887cb61b76599b8bded2066dbd4cd728d5345533925585ee1270ae7315d1"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/PRIVACY.md",
+      "bytes": 2381,
+      "sha256": "2761e081e7176d4cc0de3eb7e5fd3e9becce52a5c9e357ec81f3ff8b92120e60"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/README.md",
+      "bytes": 2889,
+      "sha256": "fc8a77b705768f41f6fe359e4d3e597501362bff8ceea644f193bc5f1f8319e6"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/SKILL.md",
+      "bytes": 4291,
+      "sha256": "bb4cae9cfbff4355c7b5b8c377a2156c2c36350fd674caea5c9af9e636ecc0c2"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/agents/openai.yaml",
+      "bytes": 312,
+      "sha256": "e88118d8ff5bfc52ef0344e088bd48621dfcc9b3734e7c7b88043fe663a75720"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/assets/cover-release.json",
+      "bytes": 603,
+      "sha256": "d5b31d144ae25a148802c7b44eab1612d3609bdb944c71a7a96915cc5df6c5a5"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/assets/example-ins.abc",
+      "bytes": 305,
+      "sha256": "4447b55037f5daab52426bdd20e9d08fdb5629ca115354880eca76078333b722"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/assets/example-original.abc",
+      "bytes": 314,
+      "sha256": "b16b482baf2da75a0d960569156e520638f2391908fbee514bd180babc5e79f4"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/assets/example-repairs.json",
+      "bytes": 772,
+      "sha256": "b435760cd01ae168f62ca290b8e06ce3da91a1e75c3d5cc49806b0b25c0c7a75"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/assets/example-style.txt",
+      "bytes": 269,
+      "sha256": "02cdfdd19f67ae20ba2e669a7c60ec1e557df6accc019213c9772835adfbf2a0"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/assets/release.json",
+      "bytes": 2151,
+      "sha256": "4e9a9bcd2541790da2541126b6549c9ebd6ba4d42980da9e325980b883f79172"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/assets/validation.json",
+      "bytes": 8698,
+      "sha256": "f8a9927f20ed13e6fd4527415652b865872e6e42e883449f434740051bfeac03"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/bundle-manifest.json",
+      "bytes": 3768,
+      "sha256": "77b5817cfd109fd22e3003002edce9b0206bd1ce8fb00fbbb796fdd121ccf93a"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/references/abc-repair.md",
+      "bytes": 5123,
+      "sha256": "e68f4c05278955e1c00fdcc83f3715b82b942dc194231fca700db5da35e87b18"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/references/cover.md",
+      "bytes": 2783,
+      "sha256": "39e8590ff9cc51cfed974fd811afe41445ff4c8dae7e23df3b3a953ec5fbb819"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/references/event-schema.md",
+      "bytes": 1780,
+      "sha256": "0e518bfaf730d0a83c9c9c2aaeada6ab4dc8b442e7c55e7f89317b391408addc"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/references/setup.md",
+      "bytes": 5128,
+      "sha256": "fb967349ceb890b773edc46f6a8b90fbf812714ed76b82ba7a498b50b95f53b8"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/requirements-inference.txt",
+      "bytes": 192,
+      "sha256": "2f24e5cc62394398504336fabf16b4ae7639376a3fc43c8d32eecc908ded9895"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/scripts/abc_tools.py",
+      "bytes": 15750,
+      "sha256": "2c14660882d6ac4014fd802acc9b4af346567c81a3107eddd2aaf98da342386b"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/scripts/common.py",
+      "bytes": 951,
+      "sha256": "2929619bd37a176c87c37fdcde9864613d4d5172ca2d89d724aa450a4d7053be"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/scripts/compile_score.py",
+      "bytes": 10540,
+      "sha256": "c4eec7f68e3f09b93b45d568a8af640b3f10bb47d31ef6d3b6ce4ae23ac1dea3"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/scripts/instrumental.py",
+      "bytes": 27768,
+      "sha256": "1c0dc29334e21f1735c11397cd361b147a339c8710cedd4d1fb5455ca40d71e0"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/scripts/instrumentalize.py",
+      "bytes": 5980,
+      "sha256": "a769111656f418cf4298841dc4a7f6be1a50bfae1e66b1bccfaca3eacf948681"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/scripts/setup_runtime.py",
+      "bytes": 5991,
+      "sha256": "39a57ace45510890d877ffda87e9361809290ff3c21229f2414eb5435ea78e6b"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/scripts/test_tools.py",
+      "bytes": 27776,
+      "sha256": "d33ffc5e501fa92c647f35f7ad37aa5af5cfb977d1c42167af3b448a163fe0c6"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/scripts/transcribe_cover.py",
+      "bytes": 6300,
+      "sha256": "ea4bb23c684e1a83a38934c78e2d2385b32daf6bc6668cfb3a81730f4e391704"
+    },
+    {
+      "path": "skills/yue2-music/instrumental/scripts/verify_bundle.py",
+      "bytes": 2338,
+      "sha256": "9c1d93bd276b946fbd422a1c64f0a6aeb8cbf934cf2ca228018749d075ec8f20"
+    },
+    {
+      "path": "skills/yue2-music/references/abc-editing.md",
+      "bytes": 12858,
+      "sha256": "398e239ab21d6a05bbf943bf9f71aaa81886d735b877e52548b04f5543f14c43"
+    },
+    {
+      "path": "skills/yue2-music/references/editing-workflows.md",
+      "bytes": 9514,
+      "sha256": "6d1ed38facc21e9670d16891561885c2e360e8df3ebc382a147a6a6467a3b398"
+    },
+    {
+      "path": "skills/yue2-music/references/generation-and-covers.md",
+      "bytes": 12533,
+      "sha256": "f8bc42ce439747bf6022ac410b45edf6f915fc669030048b76c576d40e644a22"
+    },
+    {
+      "path": "skills/yue2-music/references/listening-and-evaluation.md",
+      "bytes": 8143,
+      "sha256": "ea41431718aef6e3fc3aa94d84bde3e883bac8c3022cab9922907037ece1ee73"
+    },
+    {
+      "path": "skills/yue2-music/references/models-and-setup.md",
+      "bytes": 17287,
+      "sha256": "9b2b94bbf64adc1397b40597e4db52e9e68d92b6faef05438b5e8d61570b59b1"
+    },
+    {
+      "path": "skills/yue2-music/scripts/abc_tools.py",
+      "bytes": 15750,
+      "sha256": "2c14660882d6ac4014fd802acc9b4af346567c81a3107eddd2aaf98da342386b"
+    },
+    {
+      "path": "skills/yue2-music/scripts/common.py",
+      "bytes": 951,
+      "sha256": "2929619bd37a176c87c37fdcde9864613d4d5172ca2d89d724aa450a4d7053be"
+    },
+    {
+      "path": "skills/yue2-music/scripts/listen.py",
+      "bytes": 14820,
+      "sha256": "012b138004e0427e2d7496a5e88e473bcb408642afdef2afa047e97262ebe46f"
+    },
+    {
+      "path": "skills/yue2-music/scripts/run_yue2.py",
+      "bytes": 10401,
+      "sha256": "d931c1afc9dbb3f5762dfdaff9c826516e1e09de931a26aea5562f3a0cdef508"
+    },
+    {
+      "path": "skills/yue2-music/scripts/transcribe.py",
+      "bytes": 6126,
+      "sha256": "ed4fca91976d74eb7624bc74ece43557aac926af8b4669fbc0fb62e03429726a"
+    },
+    {
+      "path": "src/yue2/__init__.py",
+      "bytes": 562,
+      "sha256": "e35b3471f497934fe5dbe4aa615fc571b82e075b973fef3eebbe994368148ea8"
+    },
+    {
+      "path": "src/yue2/cli.py",
+      "bytes": 18735,
+      "sha256": "1909652d590ae964474cee96b9fc26452704a4b1c46746785306e74e2e821fe0"
+    },
+    {
+      "path": "src/yue2/cuda_graph.py",
+      "bytes": 15495,
+      "sha256": "fe9bd0a688ece8efd5a0174f43d90f09c2321b105f82e508a03b4cac2918d2fa"
+    },
+    {
+      "path": "src/yue2/devices.py",
+      "bytes": 1489,
+      "sha256": "a03ec1274c2e2326e437e69a061defe9c1ec1158bdb4e83a2ac6ca784e9162cd"
+    },
+    {
+      "path": "src/yue2/fast.py",
+      "bytes": 21219,
+      "sha256": "0760f6f9bd841969332d27d552b6a3aa26b35b27323ad5dea761b6eaa5de10dd"
+    },
+    {
+      "path": "src/yue2/modeling_vae.py",
+      "bytes": 26300,
+      "sha256": "119d4720189399ed31730a07df858c27bc4c4129c12ae08c207e643aa8b3ddca"
+    },
+    {
+      "path": "src/yue2/modeling_yue2.py",
+      "bytes": 35980,
+      "sha256": "163dc19293f7454c4c616377ea74e68f62dc5d02281175e148d59337adcb9be9"
+    },
+    {
+      "path": "src/yue2/nar.py",
+      "bytes": 14086,
+      "sha256": "62f151d1b2f1014aa2e795983b92deefe94c30971cf2dc27eb81c7e56cc57e15"
+    },
+    {
+      "path": "src/yue2/pipeline.py",
+      "bytes": 24625,
+      "sha256": "23c0ae20d522576ffd16073a9cb905ba6b5c1e079e75eab2c12ef2a2b5d0b967"
+    },
+    {
+      "path": "src/yue2/placement.py",
+      "bytes": 1070,
+      "sha256": "fdda8e2c40714d5eaf5827c1a46860f8e86db92efc3eb8558026ce93ec8697e2"
+    },
+    {
+      "path": "src/yue2/progress.py",
+      "bytes": 12497,
+      "sha256": "8de1fa588607dd0525aee37b652f44b17350689ad9e6ddcba8aaa8aaccf61b24"
+    },
+    {
+      "path": "src/yue2/protocol.py",
+      "bytes": 7255,
+      "sha256": "ac60cbdf05de608bd02dac69c85f45cb64edc8c973143a0b736936aa0dddf21a"
+    },
+    {
+      "path": "src/yue2/quantization.py",
+      "bytes": 5361,
+      "sha256": "91e54fcd38a638727ebc05e240d2997097c541eec0cc18693fe429f702f38e78"
+    },
+    {
+      "path": "src/yue2/sampling.py",
+      "bytes": 9263,
+      "sha256": "469a1161c4898238ea292b12cbbff2fe7e7aa637f6da0b49b9097adfca0d542b"
+    },
+    {
+      "path": "src/yue2/storage.py",
+      "bytes": 7954,
+      "sha256": "76fe54c5b22664fa01085efc36c1d38c0ba638a72135f7fd96af527f7140a827"
+    },
+    {
+      "path": "src/yue2/tokenization_yue2.py",
+      "bytes": 2005,
+      "sha256": "4f4de357d597671981cbc77bd650dd082d7fce6f7c19f867a6ef80cab5aa7f0e"
+    },
+    {
+      "path": "tests/test_attention_portability.py",
+      "bytes": 7118,
+      "sha256": "f6c7f2c05dd05e920d9fd814aad6f5f87cca4859e60f0306734fc180e4d6391e"
+    },
+    {
+      "path": "tests/test_cli_batch.py",
+      "bytes": 2219,
+      "sha256": "320c245870ce7ba153d6636a4b61b8c30698f2b288464b0e6cdde4ef8055a1e4"
+    },
+    {
+      "path": "tests/test_cli_decode.py",
+      "bytes": 5500,
+      "sha256": "1a64985ed692d5332bac5af09ccb2fc013ddc8dae760f3a5bb26f2e484bdb77b"
+    },
+    {
+      "path": "tests/test_cli_export.py",
+      "bytes": 3464,
+      "sha256": "af242b04a0c6edf8b85d1fed5bceaaf937c07ed7b1263fe6773e7c947b6d6681"
+    },
+    {
+      "path": "tests/test_cli_inspect.py",
+      "bytes": 2745,
+      "sha256": "ac42820dcef99fe093b8297f5074b4e3a78b176c06d4728d2ef04e3fe91b2fb8"
+    },
+    {
+      "path": "tests/test_cli_public.py",
+      "bytes": 6587,
+      "sha256": "be0d774332891a8a0e6e6f508c72fe716949e03026025ebab73b8f4d832cb5b0"
+    },
+    {
+      "path": "tests/test_cuda_graph.py",
+      "bytes": 7364,
+      "sha256": "788778c753fc50985b5548156e93eaeaaab8f23183a5df3e850850f66c2b55e3"
+    },
+    {
+      "path": "tests/test_devices.py",
+      "bytes": 1521,
+      "sha256": "5ac95204b469354f7840ae3289cff4c03378e8aaa6e04c89a50c0cfe69b388a3"
+    },
+    {
+      "path": "tests/test_example_generate.py",
+      "bytes": 2812,
+      "sha256": "347e7f79e389747c4883fe35733c28130e6614fed37cfbf18e86b6a6463fc0b2"
+    },
+    {
+      "path": "tests/test_fast.py",
+      "bytes": 13051,
+      "sha256": "d4d68105a59bb47e3de51ec692c3d5419e10bfe31932877f4efd4749df658bae"
+    },
+    {
+      "path": "tests/test_instrumental_delivery.py",
+      "bytes": 6692,
+      "sha256": "6dee0b8045699ec4c88b34112cd78ca8904a46c970f433423f4c7b4f973db818"
+    },
+    {
+      "path": "tests/test_model.py",
+      "bytes": 10045,
+      "sha256": "ab75f412478cbcc1776396f914735bfe09be38c559d28ecb04f98866b98b0eb8"
+    },
+    {
+      "path": "tests/test_nar.py",
+      "bytes": 15090,
+      "sha256": "56e7d751117bedb03bdd9c743a60caf31ea6d656f076e5d2f08c7a792d835d28"
+    },
+    {
+      "path": "tests/test_offline_workflow.py",
+      "bytes": 9750,
+      "sha256": "76c93672c6e9a23762e4eaea3c2b41766eb026857dad31e7a2a43c60333bb01f"
+    },
+    {
+      "path": "tests/test_pipeline.py",
+      "bytes": 2242,
+      "sha256": "a0a3a5d81a6a2b5a87ef516a1cbad7e9f9740f93056694fd73d478cd88f6efdb"
+    },
+    {
+      "path": "tests/test_placement.py",
+      "bytes": 4193,
+      "sha256": "ccd13eacf40f0f902b9ffa60d5505a3965b372f379dd0431d5a1fb81ce2879f1"
+    },
+    {
+      "path": "tests/test_preflight.py",
+      "bytes": 4379,
+      "sha256": "de156edefa335edaf93b52a5a867f41d37d3cca7090499f95aca8c44bb79d862"
+    },
+    {
+      "path": "tests/test_progress.py",
+      "bytes": 10822,
+      "sha256": "3aa950530cd8b694769413f2ff0b412debd6512912ca124587cca9e8ed1cb3bc"
+    },
+    {
+      "path": "tests/test_progress_integration.py",
+      "bytes": 13862,
+      "sha256": "e7a4dd1ab7cd84d6b4185259c24eb233517d1c1664effd51ce9031f4c5e63216"
+    },
+    {
+      "path": "tests/test_protocol.py",
+      "bytes": 5590,
+      "sha256": "826c743b3938211aa4e40c30843f3553d141ac16931b4e6b2beccf8b0e846822"
+    },
+    {
+      "path": "tests/test_public_export.py",
+      "bytes": 5441,
+      "sha256": "0392fc6e649fbba415561683dadae590c046465ccf98788409a2b1d0a4b70107"
+    },
+    {
+      "path": "tests/test_sampling.py",
+      "bytes": 6885,
+      "sha256": "738027076d4030257923dd2dda913837803e9145444662744dad51be7ef0d1cc"
+    },
+    {
+      "path": "tests/test_skill_abc_tools.py",
+      "bytes": 7113,
+      "sha256": "803a0723733e104a8233e77702b7395ba988399ea2a354dbbafb1fd42496160f"
+    },
+    {
+      "path": "tests/test_skill_listen.py",
+      "bytes": 6383,
+      "sha256": "afcbc7ab2a25dc9aebc99ba416cb929aa3d37d73f5c4e7e0ed137e8592d65777"
+    },
+    {
+      "path": "tests/test_skill_release.py",
+      "bytes": 6070,
+      "sha256": "821565e4197817a23ee841cadaa5a0a130c57542aa43f199bd4d8fdf3f63c308"
+    },
+    {
+      "path": "tests/test_skill_requests.py",
+      "bytes": 3516,
+      "sha256": "71cfb6960912c7ef5edd879ef8577dc1800fc7303bd3377a99277d19daa31e94"
+    },
+    {
+      "path": "tests/test_skill_transcribe_melody_only.py",
+      "bytes": 8394,
+      "sha256": "e7d88a632478128e1c801bf6d3fa5c88e88c5bbb25d819c3cdcbb7004c1a5d07"
+    },
+    {
+      "path": "tests/test_song_result.py",
+      "bytes": 4233,
+      "sha256": "81243a84541fbe31b3d905667b26da904d187dc04d536e111072c8fc84b3208b"
+    },
+    {
+      "path": "tests/test_storage.py",
+      "bytes": 4306,
+      "sha256": "d7459941ba2b20be8275e610c8e32fbbb049cfa72823321a635bea1038f11401"
+    },
+    {
+      "path": "tests/test_text_encoding.py",
+      "bytes": 2823,
+      "sha256": "1b6b3e28cd37612520f28dad1d2f15c6e7208965dadf1e30857acea3e233bb49"
+    },
+    {
+      "path": "tests/test_tokenizer.py",
+      "bytes": 1595,
+      "sha256": "ae62368c4c04896a6624a0cdf30f2f6aa564064d14433bfa80d4707766e065c2"
+    },
+    {
+      "path": "tests/test_vae.py",
+      "bytes": 12788,
+      "sha256": "36910c1b9e39826c19d5762e94e857d391ca30fae9c2d324d8b35c422b4fc407"
+    },
+    {
+      "path": "tools/build_release.py",
+      "bytes": 3961,
+      "sha256": "94e62d49a1bfb4228a6921659aa0481824a6a364a2dccb8bbec75e303f4208a0"
+    }
+  ]
+}

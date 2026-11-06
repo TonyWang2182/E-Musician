@@ -1,0 +1,12 @@
+usage: yue2 [-h] {doctor,generate,batch,export,inspect,decode,validate} ...
+
+YuE2: style + lyrics → symbolic plan → song
+
+positional arguments:
+  {doctor,generate,batch,export,inspect,decode,validate}
+    inspect             Verify saved artifacts without loading models
+    decode              Decode standalone latents with only the VAE
+    validate            Check request JSON or batch JSONL without models
+
+options:
+  -h, --help            show this help message and exit

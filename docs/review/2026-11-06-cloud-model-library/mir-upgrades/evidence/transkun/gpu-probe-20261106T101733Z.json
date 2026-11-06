@@ -1,0 +1,62 @@
+{
+  "id": "transkun",
+  "started_utc": "20261106T101733Z",
+  "before": {
+    "active_ace_jobs": [],
+    "free_gpu_mib": 14774
+  },
+  "input": "/root/autodl-tmp/emusician/results/model-library/fixtures/ace-piano-trio-first8s.wav",
+  "input_sha256": "fc7793b3002302127c0e77df74cb396ebc9a88c92bd0ed9e6c78d0f7921960ea",
+  "input_origin": "/root/autodl-tmp/emusician/jobs/generation/gateway-20261106T075755Z-120s/audio.wav",
+  "input_duration_seconds": 8,
+  "status": "passed",
+  "log": "/root/autodl-tmp/emusician/logs/model-library/transkun-20261106T101733Z-gpu.log",
+  "output": "/root/autodl-tmp/emusician/results/model-library/transkun/probe-20261106T101733Z",
+  "quality_evaluation": false,
+  "daw_connected": false,
+  "exit_code": 0,
+  "wall_seconds": 6.196359761059284,
+  "minimum_free_gpu_mib": 13150,
+  "after": {
+    "active_ace_jobs": [],
+    "free_gpu_mib": 14774
+  },
+  "result": {
+    "id": "transkun",
+    "device": "cuda",
+    "input": "/root/autodl-tmp/emusician/results/model-library/fixtures/ace-piano-trio-first8s.wav",
+    "input_sha256": "fc7793b3002302127c0e77df74cb396ebc9a88c92bd0ed9e6c78d0f7921960ea",
+    "input_duration_seconds": 8.0,
+    "sample_rate": 48000,
+    "source_revision": "c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6",
+    "model_revisions": {
+      "revision": "c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6",
+      "sha256": "50a80010effc2a59ffcd068a95cd2b29bd7f23a27a3515bc3ccd209c89a3d44c"
+    },
+    "model_load_seconds": 0.3749771900475025,
+    "outputs": [
+      {
+        "path": "/root/autodl-tmp/emusician/results/model-library/transkun/probe-20261106T101733Z/piano.mid",
+        "notes": 40,
+        "control_changes": 8,
+        "control_numbers": [
+          64,
+          67
+        ],
+        "bytes": 375,
+        "sha256": "acc62a0927f7611e27c5ae243f2790d4e59cbe8d6fdf7f74800213321b535dff"
+      }
+    ],
+    "daw_connected": false,
+    "processing": {
+      "upstream_function": "TransKun.transcribe + Data.writeMidi",
+      "segment_seconds": 16,
+      "pedal_events_dropped": false
+    },
+    "gpu_name": "NVIDIA GeForce RTX 5090",
+    "peak_cuda_allocated_bytes": 888915456,
+    "peak_cuda_reserved_bytes": 1059061760,
+    "inference_seconds": 3.4272161833941936,
+    "total_seconds": 3.8021940886974335
+  }
+}

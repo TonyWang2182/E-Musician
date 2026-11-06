@@ -1,0 +1,16 @@
+{
+  "kind": "cpu-model-load-only",
+  "parameter_count": 53466800,
+  "torch_version": "2.10.0+cu128",
+  "cuda_build": "12.8",
+  "cuda_initialized": false,
+  "forward_executed": false,
+  "elapsed_seconds": 0.4687161445617676,
+  "sources": [
+    "drums",
+    "bass",
+    "other",
+    "vocals"
+  ],
+  "sample_rate": 44100
+}

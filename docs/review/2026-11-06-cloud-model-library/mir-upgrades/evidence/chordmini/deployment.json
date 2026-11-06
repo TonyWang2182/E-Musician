@@ -1,0 +1,714 @@
+{
+  "schema_version": 1,
+  "id": "chordmini",
+  "task": "chords",
+  "source_revision": "aa6e3a8d7b017f082fd2aaff9329d5c26af49c03",
+  "source_url": "https://github.com/ptnghia-j/ChordMini",
+  "model_revisions": {
+    "revision": "aa6e3a8d7b017f082fd2aaff9329d5c26af49c03",
+    "sha256": "e0a12ca6d881f81e01dfb459b4836ec7dac8d8f87b0170a412b5807256b3a1fc"
+  },
+  "paths": {
+    "model": "/root/autodl-tmp/emusician/models/chordmini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03",
+    "environment": "/root/autodl-tmp/emusician/envs/chordmini",
+    "source": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03"
+  },
+  "checks": {
+    "files_verified": true,
+    "environment_verified": true,
+    "cpu_load_verified": true,
+    "gpu_inference_verified": true
+  },
+  "daw_connected": false,
+  "blockers": [
+    "Independent quality/accuracy evaluation and long-audio load tests not performed",
+    "DAW integration not authorized in this phase"
+  ],
+  "artifacts": [
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/LICENSE",
+      "bytes": 1079,
+      "sha256": "685a58dfd4258f5f5e00652d93694456865381c0312d80a3b20e7d0b71bcb3ef",
+      "git_blob": "27ca6d111e10f16751907237190f9ce0611a77ab",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/LICENSE"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/README.md",
+      "bytes": 14096,
+      "sha256": "81bac02b2d31eba7c9f92340b8af121286c075adf8f8b12d158d7b69d7680747",
+      "git_blob": "85f8d0520e202fb8fa2479c6de13b3fcce490b5d",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/README.md"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/config/ChordMini.yaml",
+      "bytes": 2283,
+      "sha256": "79fe67e764e6e8ddb1dc7bf88efecff0363d8ab25c4ad25e0b4ed429a9ad2535",
+      "git_blob": "836f7fb21692feae1114395d963d246bb6cfddcf",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/config/ChordMini.yaml"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/requirements.txt",
+      "bytes": 191,
+      "sha256": "c679fd4149c30321bc99d32497dc3b7276220b8ad990df205db9f45789502a8b",
+      "git_blob": "46f53f275d7b97ad5a00acad2c96434d136f8632",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/requirements.txt"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/data/AudioChordDataset.py",
+      "bytes": 11140,
+      "sha256": "02ef44be43ad51e57bf987f82020e0fb7d5f0ab1d4ab7b91a409e1f3be9b96d9",
+      "git_blob": "27f15c33d9a234efdfdfdc7cd5d5afebf34ea9cf",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/data/AudioChordDataset.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/data/SynthDataset.py",
+      "bytes": 13987,
+      "sha256": "2b98c2a245e8ee5aa45d7fe8384129795b9a47d754a111b12d4a2d2a8268ed7a",
+      "git_blob": "98c3bbadc195b3f8bc1a35b74f704bce403f3c0f",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/data/SynthDataset.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/data/UnlabeledAudioDataset.py",
+      "bytes": 6838,
+      "sha256": "1075e18f32d72ca8d953e1f48af598601f761b29ef98835d10c0857f58db57cd",
+      "git_blob": "1228fccee8da15912c48e9b510e07318093a2df4",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/data/UnlabeledAudioDataset.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/data/__init__.py",
+      "bytes": 208,
+      "sha256": "5a0ecb2b97b958788dc9ccd5c899289ef3a18b61f57a38c99aa4003a88247c97",
+      "git_blob": "5c75d900371dba2423687d45391be012f2db240b",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/data/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/data/utils/__init__.py",
+      "bytes": 251,
+      "sha256": "1334131e3d1c1515c37edabd4bc618cb1d8c0c2c9885f77d196a7fdda9b26ffb",
+      "git_blob": "8d1c0be8cd4442422df9e1bd2b79e6d233d9698a",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/data/utils/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/data/utils/common.py",
+      "bytes": 3100,
+      "sha256": "735372a7600407143be5c4dac563357d107efac6c8cd8aff59a9a77b06acc67f",
+      "git_blob": "a61f98353914172d2fc97a589b22de5db90c4622",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/data/utils/common.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/evaluation/test.py",
+      "bytes": 9813,
+      "sha256": "fedd13b2a818ca351187e0646827a3e8bf6c29ae8e05b747f72fa3f3d7e2ce1a",
+      "git_blob": "4dd8051a11ba9122c67916ac42f5231c092a1d9b",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/evaluation/test.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/evaluation/test_labeled_audio.py",
+      "bytes": 20895,
+      "sha256": "67a6d0ec894128a5cbbdc6ce6ac628e7908138a0c723969f9138ee3da4cfd47f",
+      "git_blob": "5bcf07c7ddc8615b05628f7d30d9a1656e0cf63f",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/evaluation/test_labeled_audio.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/evaluation/utils/__init__.py",
+      "bytes": 79,
+      "sha256": "fd6964d41b2da77cd25be4ca591562a6e4a67897fc50951c4ca18fc97a71814b",
+      "git_blob": "6550e1706a2d4d65545f8dc8169b1b13d855a0aa",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/evaluation/utils/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/evaluation/utils/common.py",
+      "bytes": 11041,
+      "sha256": "1822d8c4eefb1287e8f68562b3be3dfd545231300b50e0b4b3c9e9d0a5a1a2e4",
+      "git_blob": "0ecad9c9f09e970aede946ec8e3367c526afa2e5",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/evaluation/utils/common.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/evaluation/utils/inference.py",
+      "bytes": 5717,
+      "sha256": "d076b833dbbd8e86afd96a6d47b1199783e9499070706b515d9b6ad160b51144",
+      "git_blob": "5dac4e5020caf6e490438c2f77ad50284d801969",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/evaluation/utils/inference.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/evaluation/utils/quality_analysis.py",
+      "bytes": 13586,
+      "sha256": "192c2dc03c79b93b500343e2e9a6cd9b929061aa663b7d65ee44b4ee25ebbc3a",
+      "git_blob": "a6d2943d6a71427a0284c8dc474954b8653d4e65",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/evaluation/utils/quality_analysis.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/__init__.py",
+      "bytes": 232,
+      "sha256": "ff116c20a36b9f2d46b75b9ab6d5cbc67a01271b35c81ce5a00999ab3612650c",
+      "git_blob": "0c80a90664dd124911cf6c6fa9826cd18115447c",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/btc_model.py",
+      "bytes": 7604,
+      "sha256": "734d5618966f394b541ff5907d8fbfb12eb58159f0049700ac1094d1d1cc2d78",
+      "git_blob": "e45477f9a8dc55a81474fc2381735fac365b628c",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/btc_model.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/chord_net.py",
+      "bytes": 4392,
+      "sha256": "7c05a97c523c542154a6a39de461180f39e3623accf2f2e71c325a8a30ff8d59",
+      "git_blob": "b6ba47b59284707b4a0bed9293b89d512c421f9e",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/chord_net.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/common/__init__.py",
+      "bytes": 213,
+      "sha256": "0f298ee18469f754dd98da1d2b394a70633040e5a34d3e42bd96cc7af37dd544",
+      "git_blob": "bd70d8e19b523de0f7860fb916a1e52ea0cf1572",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/common/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/common/base_transformer.py",
+      "bytes": 7989,
+      "sha256": "10f1c15db0e9572c9d47e2746a0b2f99dfee663be69c73683f3ce8ea881402ad",
+      "git_blob": "72cf44669a0ad013dbb07e3095b39d9be2833d58",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/common/base_transformer.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/common/checkpoint_loading.py",
+      "bytes": 4241,
+      "sha256": "efa815d8a4de0ab22dc7e7d9a8d3e29d4c6fdf87d5abaf06b20ba8a35506294e",
+      "git_blob": "b8b9126fbdff39029f18bd958394006e9f1329e0",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/common/checkpoint_loading.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/common/config.py",
+      "bytes": 3543,
+      "sha256": "d14dfb6330f1c1a0cc159bd6c0ed5b2de4b77f04137d08088e0d25b793b3db4e",
+      "git_blob": "3a278e0b54c1fa68f42c3fad11da23f7468ac7f2",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/common/config.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/common/temporal_smoothing.py",
+      "bytes": 1489,
+      "sha256": "9706db254b809109ff88de2561dc1a6c1c01bacdaa5a9c013f5848029b8c253f",
+      "git_blob": "fc5c598d56e0fcb08245ff2b04e670f4cd51e8f8",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/common/temporal_smoothing.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/common/transformer_modules.py",
+      "bytes": 5945,
+      "sha256": "1aa87e18e4463a2f3b8b0e0ffcac49f68dea54c8e64304a1e690605d01a66ada",
+      "git_blob": "f2dc6724d032111260e7de9364eeca262b878665",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/models/common/transformer_modules.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/__init__.py",
+      "bytes": 124,
+      "sha256": "cdca75d9a6e167a6bcefed145f7684c89493a5d01f2386f85c6b6162613e6f8e",
+      "git_blob": "112f56d4526b56d25263ab69d8e9163af5137871",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/continual_learning_trainer.py",
+      "bytes": 12461,
+      "sha256": "550fe77eefde84b8412b14b2cf2b5976cb936348005acd8356bfd012d7e1da2c",
+      "git_blob": "39930ea0966948e586d555b27bf1d2c76ba05ba0",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/continual_learning_trainer.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/pseudo_labeling_trainer.py",
+      "bytes": 17841,
+      "sha256": "991c6134647885558d8d3b2e6424a84ff8546020fc246a503407bfc832aa8dd8",
+      "git_blob": "b6c36df44bd2f952934aca58d45d60b6855809a3",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/pseudo_labeling_trainer.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/utils/__init__.py",
+      "bytes": 139,
+      "sha256": "8393a5b7427de7052806a5f006afa3f6e08f619664e6d5e648bf974c212577a5",
+      "git_blob": "2b566c0aaff6f7004a14de14feee3b1c08e9b848",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/utils/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/utils/checkpointing.py",
+      "bytes": 4210,
+      "sha256": "52db9fe7202e377dec911d4401c49e4021d0e943d8023a4385fabbd92c3e971b",
+      "git_blob": "80eb558533b3ccc681590317e1706d654610f691",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/utils/checkpointing.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/utils/chordnet_eval.py",
+      "bytes": 3930,
+      "sha256": "73ff5154f9feb16e2477044fe3d3908f68f1269a0e9b72de42838e90abdc5887",
+      "git_blob": "615e0b5f4c96030df0a42f3927d1741baedc0903",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/utils/chordnet_eval.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/utils/losses.py",
+      "bytes": 2746,
+      "sha256": "4a81a1ef880af7b01cdcb0d093bd3dcf4f06e7c16cee09e5a2068158e0348ad0",
+      "git_blob": "f5c85f74f9a723598eb9dc6f90a9d43b065e1350",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/utils/losses.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/utils/lr_schedulers.py",
+      "bytes": 7640,
+      "sha256": "c34c9c5d930850d84f3cfe2e84881eaba25ad213dcecc764adc82ded11c18236",
+      "git_blob": "e9fe5d175e0b514c92372684f5fdbf14dd850777",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/utils/lr_schedulers.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/utils/trainer_common.py",
+      "bytes": 3301,
+      "sha256": "b825907e51b6d89eb2a3f06891a239fdfa739ccc34139de1b754860799f91dd5",
+      "git_blob": "148a8dc2c85ef1ebe32d400f918f94a98c212572",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training/utils/trainer_common.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training_scripts/train_continual_learning.py",
+      "bytes": 7353,
+      "sha256": "719c8f076c083ca60fce4df4805be759567b85a2a92b86b64b51dba78babad26",
+      "git_blob": "7cf698c2cb79ab21df5c2c70ec4f11bce40fefae",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training_scripts/train_continual_learning.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training_scripts/train_from_scratch.py",
+      "bytes": 13339,
+      "sha256": "1d78a88e4a0ff0fcd93de74001e86d0b677c863674517e79c9afb92a5e63285c",
+      "git_blob": "b33da213ee6477e8594ec2c7f9cb87d876050983",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training_scripts/train_from_scratch.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training_scripts/train_pseudo_labeling.py",
+      "bytes": 11680,
+      "sha256": "1348e0fe4dbc0a3a73a8d570aa16b8dc309c342d902b5d75ae428f9b554a0e61",
+      "git_blob": "fbd3ab3bf021309bd194658cbe55ec72f110887c",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training_scripts/train_pseudo_labeling.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training_scripts/utils/__init__.py",
+      "bytes": 679,
+      "sha256": "42ce0b662cbbc7ba82945164683caab5146a3df119978e090777247a3898f19c",
+      "git_blob": "1c5ddc8e0c6aa47e17bff6c24b5cdf8f44525b10",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training_scripts/utils/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training_scripts/utils/labeled_training.py",
+      "bytes": 3939,
+      "sha256": "ff591a5932f0a80eaede10f390437d27d0bfd31d580307dcfa68855d6f8888d2",
+      "git_blob": "8a5a2e6c84d08c751c5f982d937d965646fdab51",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/training_scripts/utils/labeled_training.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/__init__.py",
+      "bytes": 1634,
+      "sha256": "c99e946f2e60d95ce9eac127a1671690b7c4f0e20089d502f051ddb2e7da6c7b",
+      "git_blob": "92ca33b73c2fda82639fee98525b19f19534fa54",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/audio_io.py",
+      "bytes": 578,
+      "sha256": "0662cd31a3057650c04e3cef3c6cd9563236a92e68924d7084e8f08d9cad09a7",
+      "git_blob": "1ee10d2c97f06c7d08c0a1b03a588bb94da7ac98",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/audio_io.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/checkpoint_utils.py",
+      "bytes": 3056,
+      "sha256": "3aafd9ec8c598780598f8b28e7aab07ea976a9e914cd05c398b1ab516fce15b5",
+      "git_blob": "a7268fc617290eb0451613ed55db3561e812b125",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/checkpoint_utils.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/chords.py",
+      "bytes": 15918,
+      "sha256": "579c578259d0fde1cfa257ef31fe7719b994257ec67c88c0d4ab86d4de6f8e21",
+      "git_blob": "2be90228df37d9be1a7175ea2606a631a3cc6f80",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/chords.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/cli.py",
+      "bytes": 655,
+      "sha256": "59783144d56ed59f7cf66237aa3357f5fc044f25e34c31fef89964f83f98b1c1",
+      "git_blob": "7d59483397fee83caf108e3dee91df4019d20386",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/cli.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/config_utils.py",
+      "bytes": 468,
+      "sha256": "692880ba2bb1743852603a6e8090dcec6d8d9026d8393948aa72911aa4edca78",
+      "git_blob": "b9dbb2daa1ed253c0d93fb1777e6efbf3b6c4740",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/config_utils.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/dataloader.py",
+      "bytes": 711,
+      "sha256": "ad518bce82237319f900a3ecc044e770a4f80b3bc93d58e77fd870e11400838f",
+      "git_blob": "eeafd9f86cfc428f0cb96e59871a14380dcbad35",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/dataloader.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/device.py",
+      "bytes": 570,
+      "sha256": "635c99da4d1f7f1b78ba3af631ac4799382671b6a95ecd6db5444a53a84e9cbd",
+      "git_blob": "7e6c60b0811d76411483fda3d42afb5c77f215fb",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/device.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/gradient_utils.py",
+      "bytes": 961,
+      "sha256": "a79a408de887c3493bcf441c3b5752831b8dc2c232a4cdd7a69bf9a4b5441122",
+      "git_blob": "b2e4ef953a6d87a2772fbb9aa611df3b8bd67f60",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/gradient_utils.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/hparams.py",
+      "bytes": 895,
+      "sha256": "1aff9ac72c9f0e04f2eee31de6cf40db987669d1dc017d8288c087ab0e1e1158",
+      "git_blob": "c0c3fd04d4727f0254557e89e8e52941310e211a",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/hparams.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/logger.py",
+      "bytes": 998,
+      "sha256": "0e9ce81ae4cb983486dad8ef342d1ebfb5ac188735ea8874a0ab717c98fd102d",
+      "git_blob": "498400605014185d632079de10418b1b7c4ef846",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/logger.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/paths.py",
+      "bytes": 2035,
+      "sha256": "b36976ba86edadfd336168846c5c329fd4ea5d931672e0d6601c6dde90767349",
+      "git_blob": "f844bac56813dec37cc3b48a0bd49b10e0720f94",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/paths.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/random_utils.py",
+      "bytes": 391,
+      "sha256": "bfdecff2384bf677f555ab3ee48931610401fc9ad9e7a6366035a76685c0367d",
+      "git_blob": "a2e439f4eeab8b851abbaa20b177950ab59faabf",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/utils/random_utils.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/chordmini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/btc_model_best.pth",
+      "bytes": 35942692,
+      "sha256": "e0a12ca6d881f81e01dfb459b4836ec7dac8d8f87b0170a412b5807256b3a1fc",
+      "git_blob": "a691af56aec01fcd52d3bd46992f96bb9874ee59",
+      "url": "https://raw.githubusercontent.com/ptnghia-j/ChordMini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/checkpoints/btc_model_best.pth"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/manifests/model-library/chordmini/environment-freeze.txt",
+      "bytes": 4381,
+      "sha256": "62ac99945a9845410f5aca142bcd6415d3386056b12cb90ac87c7304187b952d"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/manifests/model-library/chordmini/requirements.lock.txt",
+      "bytes": 122770,
+      "sha256": "00a156540fe21750dd1cfd2765efd5c52f9730da7eb8361274a155fbe60298a2"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/audit.py",
+      "bytes": 4686,
+      "sha256": "7894257f861ceaab9688831a8527ec5f1a85394d11d7f17085438dc79acdbf68"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/freeze.py",
+      "bytes": 1554,
+      "sha256": "28ff8a5b41d159a45dd1d60b90fc229aea6e23e83991420756b1c50321ba2502"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/guarded_probe.py",
+      "bytes": 6559,
+      "sha256": "3f9dc71500a1f4a56dbaf5f588dc394fddde8e8470cc7ce80aad4bdb1e0130af"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/infer.py",
+      "bytes": 7360,
+      "sha256": "110c869156d157780d2b3b295be1f417571294744d5aa5bc0f8bf9f27557578a"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/install.sh",
+      "bytes": 1712,
+      "sha256": "4ab2e5bccc14db9ac92f258d46049f3ba23738126adbad7a2b3d489a62cb8292"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/requirements.py",
+      "bytes": 1521,
+      "sha256": "99d381db755ccfccc6f75072df3c22330c02ad23f6e42ea045b02e9202cfe67b"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/runtime.py",
+      "bytes": 5417,
+      "sha256": "1ed93b588a631f2692cdcfd8bd59a6fd5c6a768fe38e6708e13e15bc66930c2f"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/stage.py",
+      "bytes": 7253,
+      "sha256": "9a10a9df87fa391897ee2f67b7ede1e9399b541db21a8ebb3ac1384abe4ff4ec"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/stage.sh",
+      "bytes": 547,
+      "sha256": "3fa81beb59305e3c2a6cc59b798c21b57824217edea102bcd1479990917fbed1"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/test_guard.py",
+      "bytes": 2193,
+      "sha256": "7ee7929fa8642c20f7a3aa9ccc2160fa4f68ee27eab94c2ccd97b7e5dc026f89"
+    }
+  ],
+  "scope": "private cloud evaluation; no local weight/audio copy",
+  "cpu_check": {
+    "kind": "cpu-model-load-only",
+    "parameter_count": 3036842,
+    "torch_version": "2.10.0+cu128",
+    "cuda_build": "12.8",
+    "cuda_initialized": false,
+    "forward_executed": false,
+    "elapsed_seconds": 0.13015246018767357,
+    "vocabulary_size": 170,
+    "vocabulary": [
+      "C:min",
+      "C",
+      "C:dim",
+      "C:aug",
+      "C:min6",
+      "C:maj6",
+      "C:min7",
+      "C:minmaj7",
+      "C:maj7",
+      "C:7",
+      "C:dim7",
+      "C:hdim7",
+      "C:sus2",
+      "C:sus4",
+      "C#:min",
+      "C#",
+      "C#:dim",
+      "C#:aug",
+      "C#:min6",
+      "C#:maj6",
+      "C#:min7",
+      "C#:minmaj7",
+      "C#:maj7",
+      "C#:7",
+      "C#:dim7",
+      "C#:hdim7",
+      "C#:sus2",
+      "C#:sus4",
+      "D:min",
+      "D",
+      "D:dim",
+      "D:aug",
+      "D:min6",
+      "D:maj6",
+      "D:min7",
+      "D:minmaj7",
+      "D:maj7",
+      "D:7",
+      "D:dim7",
+      "D:hdim7",
+      "D:sus2",
+      "D:sus4",
+      "D#:min",
+      "D#",
+      "D#:dim",
+      "D#:aug",
+      "D#:min6",
+      "D#:maj6",
+      "D#:min7",
+      "D#:minmaj7",
+      "D#:maj7",
+      "D#:7",
+      "D#:dim7",
+      "D#:hdim7",
+      "D#:sus2",
+      "D#:sus4",
+      "E:min",
+      "E",
+      "E:dim",
+      "E:aug",
+      "E:min6",
+      "E:maj6",
+      "E:min7",
+      "E:minmaj7",
+      "E:maj7",
+      "E:7",
+      "E:dim7",
+      "E:hdim7",
+      "E:sus2",
+      "E:sus4",
+      "F:min",
+      "F",
+      "F:dim",
+      "F:aug",
+      "F:min6",
+      "F:maj6",
+      "F:min7",
+      "F:minmaj7",
+      "F:maj7",
+      "F:7",
+      "F:dim7",
+      "F:hdim7",
+      "F:sus2",
+      "F:sus4",
+      "F#:min",
+      "F#",
+      "F#:dim",
+      "F#:aug",
+      "F#:min6",
+      "F#:maj6",
+      "F#:min7",
+      "F#:minmaj7",
+      "F#:maj7",
+      "F#:7",
+      "F#:dim7",
+      "F#:hdim7",
+      "F#:sus2",
+      "F#:sus4",
+      "G:min",
+      "G",
+      "G:dim",
+      "G:aug",
+      "G:min6",
+      "G:maj6",
+      "G:min7",
+      "G:minmaj7",
+      "G:maj7",
+      "G:7",
+      "G:dim7",
+      "G:hdim7",
+      "G:sus2",
+      "G:sus4",
+      "G#:min",
+      "G#",
+      "G#:dim",
+      "G#:aug",
+      "G#:min6",
+      "G#:maj6",
+      "G#:min7",
+      "G#:minmaj7",
+      "G#:maj7",
+      "G#:7",
+      "G#:dim7",
+      "G#:hdim7",
+      "G#:sus2",
+      "G#:sus4",
+      "A:min",
+      "A",
+      "A:dim",
+      "A:aug",
+      "A:min6",
+      "A:maj6",
+      "A:min7",
+      "A:minmaj7",
+      "A:maj7",
+      "A:7",
+      "A:dim7",
+      "A:hdim7",
+      "A:sus2",
+      "A:sus4",
+      "A#:min",
+      "A#",
+      "A#:dim",
+      "A#:aug",
+      "A#:min6",
+      "A#:maj6",
+      "A#:min7",
+      "A#:minmaj7",
+      "A#:maj7",
+      "A#:7",
+      "A#:dim7",
+      "A#:hdim7",
+      "A#:sus2",
+      "A#:sus4",
+      "B:min",
+      "B",
+      "B:dim",
+      "B:aug",
+      "B:min6",
+      "B:maj6",
+      "B:min7",
+      "B:minmaj7",
+      "B:maj7",
+      "B:7",
+      "B:dim7",
+      "B:hdim7",
+      "B:sus2",
+      "B:sus4",
+      "X",
+      "N"
+    ],
+    "task_scope": "fixed 170-label chord vocabulary; no arbitrary 9/11/13/slash-chord guarantee"
+  },
+  "dependency_notes": [
+    "Torch/Torchaudio 2.10.0+cu128 pinned for RTX5090; independent environment",
+    "Only inference dependencies installed for SCNet; universal training/GUI CLI stack omitted",
+    "Source files unmodified; narrow loader requires strict checkpoint/state matching"
+  ],
+  "gpu_probe": "/root/autodl-tmp/emusician/manifests/model-library/chordmini/gpu-probe-20261106T101740Z.json",
+  "probe_result": {
+    "id": "chordmini",
+    "device": "cuda",
+    "input": "/root/autodl-tmp/emusician/results/model-library/fixtures/ace-piano-trio-first8s.wav",
+    "input_sha256": "fc7793b3002302127c0e77df74cb396ebc9a88c92bd0ed9e6c78d0f7921960ea",
+    "input_duration_seconds": 8.0,
+    "sample_rate": 48000,
+    "source_revision": "aa6e3a8d7b017f082fd2aaff9329d5c26af49c03",
+    "model_revisions": {
+      "revision": "aa6e3a8d7b017f082fd2aaff9329d5c26af49c03",
+      "sha256": "e0a12ca6d881f81e01dfb459b4836ec7dac8d8f87b0170a412b5807256b3a1fc"
+    },
+    "model_load_seconds": 0.30439917370676994,
+    "outputs": [
+      {
+        "path": "/root/autodl-tmp/emusician/results/model-library/chordmini/probe-20261106T101740Z/chords.lab",
+        "segments": 9,
+        "frame_duration_seconds": 0.09287981859410431,
+        "vocabulary_size": 170,
+        "bytes": 218,
+        "sha256": "1d58ce317fb6a24ffa99dfea084aa40701aeed1e6c5f6261a61b41d99e41f979"
+      }
+    ],
+    "daw_connected": false,
+    "processing": {
+      "upstream_function": "extract_song_features + predict_sliding_windows",
+      "batch_size": 1,
+      "vote_aggregation": "hard",
+      "smoothing": false
+    },
+    "gpu_name": "NVIDIA GeForce RTX 5090",
+    "peak_cuda_allocated_bytes": 25576960,
+    "peak_cuda_reserved_bytes": 39845888,
+    "inference_seconds": 9.873013012111187,
+    "total_seconds": 10.17741309478879
+  },
+  "output_validation": [
+    {
+      "path": "/root/autodl-tmp/emusician/results/model-library/chordmini/probe-20261106T101740Z/chords.lab",
+      "segments": 9,
+      "start_seconds": 0.0,
+      "end_seconds": 8.0,
+      "contiguous": true
+    }
+  ],
+  "source_modifications": [],
+  "cli": {
+    "python": "/root/autodl-tmp/emusician/envs/chordmini/bin/python",
+    "script": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/infer.py",
+    "arguments": "chordmini --input <cloud audio> --output <new cloud results directory> --device cuda",
+    "constraint": "Only one root-authorized GPU workload; bounded CLI input <=120s, tested only8s"
+  },
+  "support_limits": "170 labels: 12 roots x14 chord qualities plus X/N. No explicit 9th/11th/13th or slash-bass classes; no jazz-accuracy claim.",
+  "guard_change_after_gpu_probes": {
+    "gpu_tested_sha256": "6b68695bcd54d73dd7b3d0915ad99d536a9d933a6214ba23a43eaca60ee7d709",
+    "final_sha256": "3f9dc71500a1f4a56dbaf5f588dc394fddde8e8470cc7ce80aad4bdb1e0130af",
+    "change": "Exceptional monitor/cleanup now TERM-then-KILL and durable terminal receipt; final diagnostic errors separate",
+    "cpu_fault_tests": {
+      "passed": 3,
+      "gpu_access": false,
+      "record": "docs/builds/20261106T102503.755071Z-fc91eeea5d.json"
+    },
+    "gpu_probes_repeated_after_guard_change": false
+  }
+}

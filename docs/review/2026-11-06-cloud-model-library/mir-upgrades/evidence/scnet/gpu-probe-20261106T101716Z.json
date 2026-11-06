@@ -1,0 +1,89 @@
+{
+  "id": "scnet",
+  "started_utc": "20261106T101716Z",
+  "before": {
+    "active_ace_jobs": [],
+    "free_gpu_mib": 14774
+  },
+  "input": "/root/autodl-tmp/emusician/results/model-library/fixtures/ace-piano-trio-first8s.wav",
+  "input_sha256": "fc7793b3002302127c0e77df74cb396ebc9a88c92bd0ed9e6c78d0f7921960ea",
+  "input_origin": "/root/autodl-tmp/emusician/jobs/generation/gateway-20261106T075755Z-120s/audio.wav",
+  "input_duration_seconds": 8,
+  "status": "passed",
+  "log": "/root/autodl-tmp/emusician/logs/model-library/scnet-20261106T101716Z-gpu.log",
+  "output": "/root/autodl-tmp/emusician/results/model-library/scnet/probe-20261106T101716Z",
+  "quality_evaluation": false,
+  "daw_connected": false,
+  "exit_code": 0,
+  "wall_seconds": 5.46168015152216,
+  "minimum_free_gpu_mib": 11596,
+  "after": {
+    "active_ace_jobs": [],
+    "free_gpu_mib": 14774
+  },
+  "result": {
+    "id": "scnet",
+    "device": "cuda",
+    "input": "/root/autodl-tmp/emusician/results/model-library/fixtures/ace-piano-trio-first8s.wav",
+    "input_sha256": "fc7793b3002302127c0e77df74cb396ebc9a88c92bd0ed9e6c78d0f7921960ea",
+    "input_duration_seconds": 8.0,
+    "sample_rate": 48000,
+    "source_revision": "a8a862231de29e6832a26c590e5c29f82f736f66",
+    "model_revisions": {
+      "revision": "v1.0.15",
+      "sha256": "ac25975f0f5704f3d1a3c3c251505b7a0f417a22eafe82773440ee4f7e14b74f"
+    },
+    "model_load_seconds": 0.654901534318924,
+    "outputs": [
+      {
+        "path": "/root/autodl-tmp/emusician/results/model-library/scnet/probe-20261106T101716Z/drums.wav",
+        "frames": 352800,
+        "sample_rate": 44100,
+        "channels": 2,
+        "rms": 0.06659470765441491,
+        "bytes": 2822488,
+        "sha256": "87af1f05018c278d9ecf4f7fcdb7fa4b96d921dc9e6f53e6bf7d107374f2be63"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/model-library/scnet/probe-20261106T101716Z/bass.wav",
+        "frames": 352800,
+        "sample_rate": 44100,
+        "channels": 2,
+        "rms": 0.13798767306119203,
+        "bytes": 2822488,
+        "sha256": "f1b7e085e30a14abae66042637e2562d6c48c4f2eabc1ab8e8abdd3eb6b6cd72"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/model-library/scnet/probe-20261106T101716Z/other.wav",
+        "frames": 352800,
+        "sample_rate": 44100,
+        "channels": 2,
+        "rms": 0.14020204777796327,
+        "bytes": 2822488,
+        "sha256": "59d8420a6308f3a0ec91c9bf0ce183c847dad2c127e0ac88eb8b46a4d22b27cd"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/model-library/scnet/probe-20261106T101716Z/vocals.wav",
+        "frames": 352800,
+        "sample_rate": 44100,
+        "channels": 2,
+        "rms": 0.0006780532944353587,
+        "bytes": 2822488,
+        "sha256": "93145299085d27c3dda9c0d975aa7062e77d6ff6082e6832ccdc421e0ab4b8d3"
+      }
+    ],
+    "daw_connected": false,
+    "processing": {
+      "upstream_function": "utils.model_utils.demix",
+      "batch_size": 1,
+      "num_overlap": 4,
+      "chunk_size": 485100,
+      "amp": true
+    },
+    "gpu_name": "NVIDIA GeForce RTX 5090",
+    "peak_cuda_allocated_bytes": 1440811520,
+    "peak_cuda_reserved_bytes": 2688548864,
+    "inference_seconds": 2.123183771967888,
+    "total_seconds": 2.778086543083191
+  }
+}

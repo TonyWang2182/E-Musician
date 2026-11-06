@@ -1,0 +1,354 @@
+{
+  "schema_version": 1,
+  "id": "transkun",
+  "task": "piano_transcription",
+  "source_revision": "c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6",
+  "source_url": "https://github.com/Yujia-Yan/Transkun",
+  "model_revisions": {
+    "revision": "c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6",
+    "sha256": "50a80010effc2a59ffcd068a95cd2b29bd7f23a27a3515bc3ccd209c89a3d44c"
+  },
+  "paths": {
+    "model": "/root/autodl-tmp/emusician/models/transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6",
+    "environment": "/root/autodl-tmp/emusician/envs/transkun",
+    "source": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6"
+  },
+  "checks": {
+    "files_verified": true,
+    "environment_verified": true,
+    "cpu_load_verified": true,
+    "gpu_inference_verified": true
+  },
+  "daw_connected": false,
+  "blockers": [
+    "Independent quality/accuracy evaluation and long-audio load tests not performed",
+    "DAW integration not authorized in this phase"
+  ],
+  "artifacts": [
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/LICENSE",
+      "bytes": 1066,
+      "sha256": "7662b6b4acfb7090612b946c1f427d8c7b591cda7d7a16139aed4eb66d20b066",
+      "git_blob": "c9b219d221b3b97cb706fb839c5c98bab6dc37fa",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/LICENSE"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/README.md",
+      "bytes": 14268,
+      "sha256": "814f9dbf073058f754e3ddd4b1230eaa3951d2748de04aa81bf21a0659143f66",
+      "git_blob": "853d62f905d9fcf34589d1f7aad80cad29a6f20b",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/README.md"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/requirements.txt",
+      "bytes": 127,
+      "sha256": "fbc06363948b420deaab65ed06c05784ab2b74d22bb89ef882bf79d01b110196",
+      "git_blob": "39d9e0989d68a673d9c2c01ee082cbd0cb67dacb",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/requirements.txt"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/setup.py",
+      "bytes": 1208,
+      "sha256": "ea7d1858e1eb607eb9d99b19581be65c884a7baf7647fbe701bed0f57c198bbb",
+      "git_blob": "44e3cda068c0c9951653638a88468a926d71482a",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/setup.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/CRF/NeuralSemiCRFInterval.py",
+      "bytes": 16638,
+      "sha256": "deedcd96d54dcda0ad7530f99ece006c38385b47b3d7585694f36c1e077b0b63",
+      "git_blob": "3925ffec5e49dadd01e3d5564268dee3dd54b414",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/CRF/NeuralSemiCRFInterval.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/CRF/__init__.py",
+      "bytes": 57,
+      "sha256": "5f6c080079be73a235dd44c2ac889d82b72471cd0ebb7630210e92a8e30cd38d",
+      "git_blob": "4ad3e21074a5ff85b2509e24506b5413414c863b",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/CRF/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/Data.py",
+      "bytes": 32759,
+      "sha256": "ecf8cbcf5fff1f7c09e18b232265ce6348fed91201b3436adfe0a480ba606931",
+      "git_blob": "d20db39911ab54cbf4b01a75c4e26c98942be8aa",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/Data.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/Evaluation.py",
+      "bytes": 10043,
+      "sha256": "1ea60493ebb9012e51191d9d216295ffe40cfeb08961f19319f40993ae83b55c",
+      "git_blob": "47ed432cf3e32fff9c7985f0c59acd4278e068af",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/Evaluation.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/LayersTransformer.py",
+      "bytes": 26100,
+      "sha256": "e58aaf7d4f35211180223a02221a223bc004ba47b240e7d0d78a282e73453648",
+      "git_blob": "4528d2c3d91586850b262822bca25b767a6f941b",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/LayersTransformer.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/Layers_ablation.py",
+      "bytes": 6809,
+      "sha256": "11e3c0746944a6aa3a0033623ed77776ef1ab84e23bf5c2f21381377ceeb23d9",
+      "git_blob": "2b09ea7fe762f7eb5c42c222029f277b41420c73",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/Layers_ablation.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/ModelTransformer.py",
+      "bytes": 27691,
+      "sha256": "58470f5764fabde0636a13fda7c42a95129db4d2203c2ea8f818e52b9375cfa8",
+      "git_blob": "532e8cb290ae91ec0aedf146a8e1599610ce61dd",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/ModelTransformer.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/Model_ablation.py",
+      "bytes": 24438,
+      "sha256": "9a63632708374fbbfadcc2ddd3773e91ace2f0b3b7a54cc27c1f77e4b88dbb97",
+      "git_blob": "17e32314a1f15aaa288e237c8b58216de986eab1",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/Model_ablation.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/SyncBN.py",
+      "bytes": 5673,
+      "sha256": "cee23ac1ff26a9af2c8f9d8650eccaef124de7239f345397372a00eae2e702e1",
+      "git_blob": "b5936a219f8068c49ffd6bdea631ed75eac6d354",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/SyncBN.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/TrainUtil.py",
+      "bytes": 9458,
+      "sha256": "339508507801c54ab4beea9f7f9d61270045d561e23c83742848f855323fa9cc",
+      "git_blob": "d05880425712af7045e7b13ee047ef86f78b0236",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/TrainUtil.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/Util.py",
+      "bytes": 4447,
+      "sha256": "e681ebc8a53dd94bffa430962b7619acff0dd2022d486f70ab313952382f0434",
+      "git_blob": "6d26e1160d46822dcb64621dec53f149afc39ce6",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/Util.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/computeMetrics.py",
+      "bytes": 6658,
+      "sha256": "98352091b0890cfd8862e9d9fabeda7df664b373c00c0f8dd2a35ac7829c8e69",
+      "git_blob": "e381075ff1724146d7a0aa04681a1664a2f59614",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/computeMetrics.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/createDatasetMaestro.py",
+      "bytes": 1596,
+      "sha256": "f0fe67e46241e7a658bab85383969b1184b1c086ee2f47c0380bea3fb4b8986e",
+      "git_blob": "136487bd101618a28a828acc5f47a5c306842aee",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/createDatasetMaestro.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/crfMinimalExample.py",
+      "bytes": 811,
+      "sha256": "9aad26acc91f7267b4a5e2523a995bc828e7284df18ed205fa2c4558deffb427",
+      "git_blob": "8b8334ad58ca31f2a4484d3721023537b891aba0",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/crfMinimalExample.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/plotDeviation.py",
+      "bytes": 2699,
+      "sha256": "3a5530303a45676d5aaa5b78984a13c055237f7888583611e5f7f76288091a11",
+      "git_blob": "2dd522d1c2c6ce4ddb8eef23029c137b042278c0",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/plotDeviation.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/pretrained/2.0.conf",
+      "bytes": 782,
+      "sha256": "d3d989214eb148230ee5df476d994dcde6af595904d3f968f1221d2e3bea5ac6",
+      "git_blob": "a55c47b5c7be42e4e2f2b9382fbc0ced6cf6c6b1",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/pretrained/2.0.conf"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/pretrained/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/pretrained/__init__.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/train.py",
+      "bytes": 15591,
+      "sha256": "e4f6e537806340d0e0a9b346d18ca316cbfd7328858c3e9a82b5c1d42e8d361a",
+      "git_blob": "9121b929183ea7c70e8114735d0d34e697d8a361",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/train.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/transcribe.py",
+      "bytes": 2974,
+      "sha256": "d2f2ccddb64ff52cf3eb0e4e99ab0324ac7850a064941d44db794b9c6c1baa89",
+      "git_blob": "1ff45ba127ff7a9cb04d856ba6f4d745e3f9451c",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/transcribe.py"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/2.0.pt",
+      "bytes": 56408978,
+      "sha256": "50a80010effc2a59ffcd068a95cd2b29bd7f23a27a3515bc3ccd209c89a3d44c",
+      "git_blob": "42183f2e0ce08017b74675a2ccf9f2e88732dfc9",
+      "url": "https://raw.githubusercontent.com/Yujia-Yan/Transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6/transkun/pretrained/2.0.pt"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/manifests/model-library/transkun/environment-freeze.txt",
+      "bytes": 4383,
+      "sha256": "4c7e90a473c40a15f6a92dd7bce70fdf7e280948d21404a0d34cbfc67b0c9063"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/manifests/model-library/transkun/requirements.lock.txt",
+      "bytes": 94875,
+      "sha256": "7d95bb3396fe5e54243c190ae174a9d4df0581a26f5907f154a9cd0c58348392"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/audit.py",
+      "bytes": 4686,
+      "sha256": "7894257f861ceaab9688831a8527ec5f1a85394d11d7f17085438dc79acdbf68"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/freeze.py",
+      "bytes": 1554,
+      "sha256": "28ff8a5b41d159a45dd1d60b90fc229aea6e23e83991420756b1c50321ba2502"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/guarded_probe.py",
+      "bytes": 6559,
+      "sha256": "3f9dc71500a1f4a56dbaf5f588dc394fddde8e8470cc7ce80aad4bdb1e0130af"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/infer.py",
+      "bytes": 7360,
+      "sha256": "110c869156d157780d2b3b295be1f417571294744d5aa5bc0f8bf9f27557578a"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/install.sh",
+      "bytes": 1712,
+      "sha256": "4ab2e5bccc14db9ac92f258d46049f3ba23738126adbad7a2b3d489a62cb8292"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/requirements.py",
+      "bytes": 1521,
+      "sha256": "99d381db755ccfccc6f75072df3c22330c02ad23f6e42ea045b02e9202cfe67b"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/runtime.py",
+      "bytes": 5417,
+      "sha256": "1ed93b588a631f2692cdcfd8bd59a6fd5c6a768fe38e6708e13e15bc66930c2f"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/stage.py",
+      "bytes": 7253,
+      "sha256": "9a10a9df87fa391897ee2f67b7ede1e9399b541db21a8ebb3ac1384abe4ff4ec"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/stage.sh",
+      "bytes": 547,
+      "sha256": "3fa81beb59305e3c2a6cc59b798c21b57824217edea102bcd1479990917fbed1"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/test_guard.py",
+      "bytes": 2193,
+      "sha256": "7ee7929fa8642c20f7a3aa9ccc2160fa4f68ee27eab94c2ccd97b7e5dc026f89"
+    }
+  ],
+  "scope": "private cloud evaluation; no local weight/audio copy",
+  "cpu_check": {
+    "kind": "cpu-model-load-only",
+    "parameter_count": 13613711,
+    "torch_version": "2.10.0+cu128",
+    "cuda_build": "12.8",
+    "cuda_initialized": false,
+    "forward_executed": false,
+    "elapsed_seconds": 1.0919434651732445,
+    "sample_rate": 44100,
+    "task_scope": "expressive piano transcription",
+    "pedal_output_verified": false
+  },
+  "dependency_notes": [
+    "Torch/Torchaudio 2.10.0+cu128 pinned for RTX5090; independent environment",
+    "Only inference dependencies installed for SCNet; universal training/GUI CLI stack omitted",
+    "Source files unmodified; narrow loader requires strict checkpoint/state matching"
+  ],
+  "gpu_probe": "/root/autodl-tmp/emusician/manifests/model-library/transkun/gpu-probe-20261106T101733Z.json",
+  "probe_result": {
+    "id": "transkun",
+    "device": "cuda",
+    "input": "/root/autodl-tmp/emusician/results/model-library/fixtures/ace-piano-trio-first8s.wav",
+    "input_sha256": "fc7793b3002302127c0e77df74cb396ebc9a88c92bd0ed9e6c78d0f7921960ea",
+    "input_duration_seconds": 8.0,
+    "sample_rate": 48000,
+    "source_revision": "c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6",
+    "model_revisions": {
+      "revision": "c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6",
+      "sha256": "50a80010effc2a59ffcd068a95cd2b29bd7f23a27a3515bc3ccd209c89a3d44c"
+    },
+    "model_load_seconds": 0.3749771900475025,
+    "outputs": [
+      {
+        "path": "/root/autodl-tmp/emusician/results/model-library/transkun/probe-20261106T101733Z/piano.mid",
+        "notes": 40,
+        "control_changes": 8,
+        "control_numbers": [
+          64,
+          67
+        ],
+        "bytes": 375,
+        "sha256": "acc62a0927f7611e27c5ae243f2790d4e59cbe8d6fdf7f74800213321b535dff"
+      }
+    ],
+    "daw_connected": false,
+    "processing": {
+      "upstream_function": "TransKun.transcribe + Data.writeMidi",
+      "segment_seconds": 16,
+      "pedal_events_dropped": false
+    },
+    "gpu_name": "NVIDIA GeForce RTX 5090",
+    "peak_cuda_allocated_bytes": 888915456,
+    "peak_cuda_reserved_bytes": 1059061760,
+    "inference_seconds": 3.4272161833941936,
+    "total_seconds": 3.8021940886974335
+  },
+  "output_validation": [
+    {
+      "path": "/root/autodl-tmp/emusician/results/model-library/transkun/probe-20261106T101733Z/piano.mid",
+      "notes": 40,
+      "control_changes": 8,
+      "first_note_seconds": 0.14947916666666666,
+      "last_note_end_seconds": 7.999479166666666,
+      "last_control_seconds": 8.0,
+      "control_numbers": [
+        64,
+        67
+      ]
+    }
+  ],
+  "source_modifications": [],
+  "cli": {
+    "python": "/root/autodl-tmp/emusician/envs/transkun/bin/python",
+    "script": "/root/autodl-tmp/emusician/tools/models/mir_upgrades/infer.py",
+    "arguments": "transkun --input <cloud audio> --output <new cloud results directory> --device cuda",
+    "constraint": "Only one root-authorized GPU workload; bounded CLI input <=120s, tested only8s"
+  },
+  "support_limits": "Piano-specific; this real inference emitted CC64 and CC67 and the MIDI writer preserved them. No ground truth or pedal-accuracy evaluation.",
+  "guard_change_after_gpu_probes": {
+    "gpu_tested_sha256": "6b68695bcd54d73dd7b3d0915ad99d536a9d933a6214ba23a43eaca60ee7d709",
+    "final_sha256": "3f9dc71500a1f4a56dbaf5f588dc394fddde8e8470cc7ce80aad4bdb1e0130af",
+    "change": "Exceptional monitor/cleanup now TERM-then-KILL and durable terminal receipt; final diagnostic errors separate",
+    "cpu_fault_tests": {
+      "passed": 3,
+      "gpu_access": false,
+      "record": "docs/builds/20261106T102503.755071Z-fc91eeea5d.json"
+    },
+    "gpu_probes_repeated_after_guard_change": false
+  }
+}

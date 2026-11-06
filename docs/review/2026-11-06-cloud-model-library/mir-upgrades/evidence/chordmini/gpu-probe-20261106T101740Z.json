@@ -1,0 +1,60 @@
+{
+  "id": "chordmini",
+  "started_utc": "20261106T101740Z",
+  "before": {
+    "active_ace_jobs": [],
+    "free_gpu_mib": 14774
+  },
+  "input": "/root/autodl-tmp/emusician/results/model-library/fixtures/ace-piano-trio-first8s.wav",
+  "input_sha256": "fc7793b3002302127c0e77df74cb396ebc9a88c92bd0ed9e6c78d0f7921960ea",
+  "input_origin": "/root/autodl-tmp/emusician/jobs/generation/gateway-20261106T075755Z-120s/audio.wav",
+  "input_duration_seconds": 8,
+  "status": "passed",
+  "log": "/root/autodl-tmp/emusician/logs/model-library/chordmini-20261106T101740Z-gpu.log",
+  "output": "/root/autodl-tmp/emusician/results/model-library/chordmini/probe-20261106T101740Z",
+  "quality_evaluation": false,
+  "daw_connected": false,
+  "exit_code": 0,
+  "wall_seconds": 12.26766524836421,
+  "minimum_free_gpu_mib": 14130,
+  "after": {
+    "active_ace_jobs": [],
+    "free_gpu_mib": 14774
+  },
+  "result": {
+    "id": "chordmini",
+    "device": "cuda",
+    "input": "/root/autodl-tmp/emusician/results/model-library/fixtures/ace-piano-trio-first8s.wav",
+    "input_sha256": "fc7793b3002302127c0e77df74cb396ebc9a88c92bd0ed9e6c78d0f7921960ea",
+    "input_duration_seconds": 8.0,
+    "sample_rate": 48000,
+    "source_revision": "aa6e3a8d7b017f082fd2aaff9329d5c26af49c03",
+    "model_revisions": {
+      "revision": "aa6e3a8d7b017f082fd2aaff9329d5c26af49c03",
+      "sha256": "e0a12ca6d881f81e01dfb459b4836ec7dac8d8f87b0170a412b5807256b3a1fc"
+    },
+    "model_load_seconds": 0.30439917370676994,
+    "outputs": [
+      {
+        "path": "/root/autodl-tmp/emusician/results/model-library/chordmini/probe-20261106T101740Z/chords.lab",
+        "segments": 9,
+        "frame_duration_seconds": 0.09287981859410431,
+        "vocabulary_size": 170,
+        "bytes": 218,
+        "sha256": "1d58ce317fb6a24ffa99dfea084aa40701aeed1e6c5f6261a61b41d99e41f979"
+      }
+    ],
+    "daw_connected": false,
+    "processing": {
+      "upstream_function": "extract_song_features + predict_sliding_windows",
+      "batch_size": 1,
+      "vote_aggregation": "hard",
+      "smoothing": false
+    },
+    "gpu_name": "NVIDIA GeForce RTX 5090",
+    "peak_cuda_allocated_bytes": 25576960,
+    "peak_cuda_reserved_bytes": 39845888,
+    "inference_seconds": 9.873013012111187,
+    "total_seconds": 10.17741309478879
+  }
+}
