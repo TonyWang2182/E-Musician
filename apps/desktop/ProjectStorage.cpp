@@ -247,8 +247,8 @@ Result readJson(const File& file, juce::MemoryBlock& bytes, var& parsed)
 
 Result validateProject(const StoredProject& project, bool allowLegacy, bool verifySources)
 {
-    if (project.schemaVersion != 4 && project.schemaVersion != 5 && project.schemaVersion != 6 && !(allowLegacy && project.schemaVersion >= 1 && project.schemaVersion <= 3))
-        return Result::fail("Saving requires a fully resolved schema 4, 5 or 6 project.");
+    if (project.schemaVersion != 4 && project.schemaVersion != 5 && project.schemaVersion != 6 && project.schemaVersion != 7 && !(allowLegacy && project.schemaVersion >= 1 && project.schemaVersion <= 3))
+        return Result::fail("Saving requires a fully resolved schema 4 through 7 project.");
     if (auto result=validateAnalysis(project);result.failed())return result;
     if (!validIdentifier(project.projectId)) return Result::fail("The project ID is missing or invalid.");
     if (project.revision > static_cast<std::uint64_t>(std::numeric_limits<juce::int64>::max()))
@@ -912,7 +912,7 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
             return Result::fail("Cannot safely inspect the existing project before replacement: " + result.getErrorMessage());
         const auto* object = previous.getDynamicObject();
         const auto schema = object != nullptr ? object->getProperty("schema") : var();
-        if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 6)
+        if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 7)
             return Result::fail("Cannot replace an existing project with an unsupported schema.");
         if (static_cast<int>(schema) < project.schemaVersion) legacySchema = static_cast<int>(schema);
     }
@@ -1036,6 +1036,12 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
     juce::Array<var> masterPlugins;
     if (auto result = serializePlugins(candidate.masterPlugins, root, cleanup, transfer, masterPlugins); result.failed()) return result;
     auto object = std::make_unique<juce::DynamicObject>();
+    if(candidate.schemaVersion>=7){juce::Array<var> records;
+        for(const auto& g:candidate.generations){auto* record=new juce::DynamicObject();
+            for(const auto& [key,value]:std::initializer_list<std::pair<juce::Identifier,juce::var>>{{"id",g.id},{"asset_id",g.assetId},{"clip_id",g.clipId},{"model_id",g.modelId},{"model_revision",g.modelRevision},{"audio_sha256",g.audioSha256},{"result_sha256",g.resultSha256},{"parameters_json",g.parametersJson},{"start_seconds",g.startSeconds},{"duration_seconds",g.durationSeconds}})record->setProperty(key,value);
+            records.add(record);
+        }object->setProperty("generations",records);
+    }
     object->setProperty("schema", candidate.schemaVersion);
     if(candidate.schemaVersion>=5){object->setProperty("analyses",serializeAnalyses(candidate));object->setProperty("chord_regions",serializeChords(candidate));}
     object->setProperty("project_id", candidate.projectId);
@@ -1112,8 +1118,8 @@ Result load(const File& manifest, StoredProject& project, const IOOptions& optio
     const auto id = object->getProperty("project_id"), revision = object->getProperty("revision");
     const auto master = object->getProperty("master_gain_db"), looping = object->getProperty("looping");
     const auto tracks = object->getProperty("tracks");
-    if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 6)
-        return Result::fail("This project schema is not supported. Expected schema 1 through 6.");
+    if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 7)
+        return Result::fail("This project schema is not supported. Expected schema 1 through 7.");
     if (!id.isString() || !validIdentifier(id.toString()) || !integral(revision)
         || static_cast<juce::int64>(revision) < 0 || !number(master) || !validGain(static_cast<double>(master))
         || !looping.isBool() || !tracks.isArray())

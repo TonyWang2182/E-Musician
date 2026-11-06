@@ -45,6 +45,8 @@ def public_snapshot(raw):
     result["clip_notes"] = {}
     from .analysis import safe_job
     result["analysis_jobs"] = [safe_job(j) for j in raw.get("analysis_jobs", [])[-12:] if isinstance(j, dict)]
+    from .generation import safe_job as safe_generation_job
+    result["generation_jobs"] = [safe_generation_job(j) for j in raw.get("generation_jobs", [])[-12:] if isinstance(j, dict)]
     result["context_limits"] = "Clip preview: max 64/track, 256 total. Notes read on demand, max 2000/clip."
     return result
 
@@ -55,6 +57,8 @@ class DawBridge:
         self._capabilities = None
         self._analysis_capabilities = {"providers": [], "available": False}
         self._analysis_checked = 0.0
+        self._generation_capabilities = {"available": False}
+        self._generation_checked = 0.0
         self.embedded = bool(embedded or getattr(client, "embedded", False))
         if self.embedded and client is None:
             raise ValueError("Embedded mode requires a host-owned transport.")
@@ -121,6 +125,75 @@ class DawBridge:
                 self._analysis_capabilities = safe_capabilities(raw)
                 self._analysis_checked = time.monotonic()
             return copy.deepcopy(self._analysis_capabilities)
+
+    def generation_capabilities(self, refresh=False):
+        from .generation import COMMANDS, safe_capabilities
+        with self.lock:
+            if not COMMANDS <= set(self.capabilities().get("commands", [])):
+                return {"available": False}
+            if refresh or time.monotonic() - self._generation_checked > 5:
+                self._generation_capabilities = safe_capabilities(self._request({"command": "get_generation_capabilities"})["result"])
+                self._generation_checked = time.monotonic()
+            return copy.deepcopy(self._generation_capabilities)
+
+    def start_generation(self, context, scope, args):
+        from .generation import authorize_start
+        from .analysis import identifier
+        request = authorize_start(context, scope, args)
+        if self.generation_capabilities(refresh=True).get("available") is not True:
+            raise BridgeError("云端生成模型尚未就绪，请在 DAW 生成面板检查连接。")
+        envelope = {"command": "start_generation", "project_id": context["project_id"], "expected_revision": context["revision"], "args": request}
+        if scope.get("mode") != "project": envelope["expected_selection_revision"] = scope["selection_revision"]
+        reply = self._request(envelope, allow_accepted=True)
+        return {"job_id": identifier((reply.get("result") or {}).get("job_id"))}
+
+    def generation_job(self, job_id):
+        from .generation import safe_job
+        from .analysis import identifier
+        value = safe_job(self._request({"command": "get_generation_job", "args": {"job_id": identifier(job_id)}})["result"])
+        if value.get("job_id") != job_id:
+            raise BridgeError("生成任务身份不匹配。")
+        return value
+
+    def generation_result(self, result_id):
+        from .generation import safe_result
+        from .analysis import identifier
+        value = safe_result(self._request({"command": "get_generation_result", "args": {"result_id": identifier(result_id)}})["result"])
+        if value["result_id"] != result_id: raise BridgeError("生成候选身份不匹配。")
+        return value
+
+    def cancel_generation(self, job_id):
+        from .analysis import identifier
+        raw = self._request({"command": "get_job", "args": {"job_id": identifier(job_id)}})["result"]
+        if not isinstance(raw, dict) or raw.get("kind") != "generation.generate" or raw.get("status") in {"completed", "ready", "failed", "cancelled", "stale", "applied"}:
+            raise BridgeError("该任务已经结束或是导入任务，没有发送取消。")
+        return self._request({"command": "cancel_generation_job", "args": {"job_id": job_id}})
+
+    def preview_generation(self, result_id=None):
+        from .analysis import identifier
+        if result_id is None:
+            return self._request({"command": "stop_generation_preview"})
+        context = self.snapshot()
+        return self._request({"command": "preview_generation_result", "project_id": context["project_id"], "expected_revision": context["revision"],
+                              "args": {"result_id": identifier(result_id)}}, allow_accepted=True)
+
+    def generation_preview_status(self, job_id):
+        from .analysis import identifier, safe_text
+        job_id = identifier(job_id)
+        job = self._request({"command": "get_job", "args": {"job_id": job_id}})["result"]
+        if not isinstance(job, dict) or job.get("id") != job_id or job.get("kind") != "generation.preview":
+            raise BridgeError("生成试听任务身份不匹配。")
+        state = job.get("status")
+        if state in {"queued", "running"}: return {"status": "preparing", "job_id": job_id}
+        if state in {"failed", "cancelled", "conflict"}:
+            detail = safe_text(job.get("error"), 400)
+            status = "unavailable" if "No audio output is active" in detail else "stopped" if state == "cancelled" else "failed"
+            return {"status": status, "detail": detail, "job_id": job_id}
+        if state != "completed": raise BridgeError("生成试听状态未知。")
+        stream = self._request({"command": "get_analysis_preview_status"})["result"]
+        if not isinstance(stream, dict) or stream.get("status") not in {"loading", "playing", "completed", "stopped", "failed", "unavailable"}:
+            raise BridgeError("生成试听流状态无效。")
+        return {"status": stream["status"], "detail": safe_text(stream.get("detail"), 400), "job_id": job_id}
 
     def start_analysis(self, context, scope, args):
         from .analysis import authorize_start, identifier
@@ -352,6 +425,20 @@ class DawBridge:
             return value
 
     def apply(self, plan):
+        if plan.get("execution_kind") == "generation_import":
+            from .generation import compile_import
+            candidate = self.generation_result(plan["generation"]["result_id"])
+            if candidate.get("result_hash") != plan["generation"].get("result_hash"):
+                raise BridgeError("生成候选在预览后发生变化，没有提交旧方案。")
+            compile_import(candidate, self.snapshot(), plan["scope"], plan["summary"])
+            envelope = {"request_id": plan["id"], "command": "accept_generation_result",
+                        "project_id": plan["project_id"], "expected_revision": plan["revision"],
+                        "args": {"result_id": candidate["result_id"], "result_hash": candidate["result_hash"]}}
+            if plan["scope"].get("mode") != "project": envelope["expected_selection_revision"] = plan["scope"]["selection_revision"]
+            reply = self._request(envelope, allow_accepted=True)
+            if reply.get("status") != "accepted" or not isinstance((reply.get("result") or {}).get("job_id"), str):
+                raise BridgeError("生成导入回执异常，结果未知；请检查 DAW，不要重复提交。")
+            return reply
         if plan.get("execution_kind") in {"audio_warp","beat_apply"}:
             from .tempo import compile_warp, compile_beats
             current=self.snapshot();args=plan["commands"][0]["args"]
@@ -468,6 +555,20 @@ class DawBridge:
                 raise NativeJobFailed("分析候选未导入：" + str(job.get("error") or job["status"])[:300])
             time.sleep(0.1)
         raise BridgeError("分析导入已受理，但等待超时；结果未知，请检查 DAW，不要重复提交。")
+
+    def wait_generation_import(self, job_id, timeout=180.0):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            job = self.generation_job(job_id)
+            if job.get("status") == "applied":
+                receipt = job.get("receipt")
+                if not isinstance(receipt, dict) or receipt.get("applied") is not True:
+                    raise BridgeError("生成导入完成回执无效；请检查 DAW，不要重复提交。")
+                return receipt
+            if job.get("status") in {"failed", "stale", "cancelled", "conflict"}:
+                raise NativeJobFailed("生成音频未导入：" + str(job.get("error") or job["status"])[:300])
+            time.sleep(.1)
+        raise BridgeError("生成导入已受理，但等待超时；结果未知，请检查 DAW，不要重复提交。")
 
     def undo(self, project_id, revision, request_id):
         return self._request({"request_id": request_id, "project_id": project_id,

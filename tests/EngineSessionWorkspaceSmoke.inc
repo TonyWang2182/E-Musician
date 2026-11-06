@@ -8,6 +8,7 @@ juce::Result EngineSession::runWorkspaceEngineSmokeTest(juce::DynamicObject& rep
     const auto child=[](const char* command,juce::var args){return object({{"command",command},{"args",args}});};
     try{
         okay(outputDirectory.createDirectory(),"fixture output directory");
+        okay(runGenerationEngineSmokeTest(report,outputDirectory.getChildFile("generation")),"generation contracts");
         okay(run("create_track",object({{"kind","instrument"},{"name","Colour fixture"}})),"create fixture track");
         const auto id=test.snapshot().tracks.front().id;
         okay(run("create_midi_clip",object({{"track_id",id},{"start_beats",0.0},{"length_beats",4.0}})),"create fixture clip");

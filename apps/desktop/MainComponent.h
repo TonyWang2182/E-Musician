@@ -56,6 +56,7 @@ private:
     juce::Result setInterfaceLanguage(const juce::String&, bool persist = true);
     void refreshInterfaceLanguage();
     void renameTrack(const juce::String& trackId);
+    void showGenerationDock();
     void showAnalysisDock(const juce::String& chordId = {});
     void showEditMenu();
     void showAddMenu();

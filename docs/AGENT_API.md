@@ -1,5 +1,26 @@
 # 本地 Agent 控制接口 v1
 
+## 0.12 云端音乐生成（验收见本轮记录）
+
+生成独立于分析，不要求已有源音频。手动面板和Agent调用相同宿主命令，普通编辑保护与一次Undo不变。`get_generation_capabilities` 的 available 表示本机已登记，不代表云端此刻在线；连接在启动任务时验证。
+
+| 宿主命令 | 参数与行为 |
+|---|---|
+| get_generation_capabilities | 已登记模型、10–120秒目标范围、单重任务 |
+| get_generation_jobs | 当前会话工程的轻量任务清单 |
+| start_generation | prompt必填、duration_seconds必填；lyrics、seed、timeline_start_seconds可选；固定工程BPM/拍号和起点；返回原生job_id与候选result_id，两者不同 |
+| get_generation_job | job_id；区分queued/running/ready/failed/stale/cancelled等；接受任务也可查询 |
+| cancel_generation_job | job_id；停止本地任务并尝试取消云端；remote_status与remote_cancel_confirmed说明云端是否真的结束 |
+| get_generation_result | result_id；实际音频元数据、来源、模型、result_hash、waveform_peaks、applied/present_in_project/stale |
+| preview_generation_result / stop_generation_preview | 候选试听/停止，不修改工程；试听不能等于Agent听感判断 |
+| accept_generation_result | result_id、result_hash；再次校验文件/来源/版本，后台准备独立本地资产，控制线程一次新增轨道；返回接受job_id，完成后回读receipt |
+
+Agent工具为 start_generation、get_generation_result、cancel_generation、preview_generation、propose_generation_import。音乐描述只交给固定模型接口，模型不能指定SSH命令、文件路径或网络端点；工具返回清洗后的元数据。候选导入仍须审核卡确认。无选中对象也允许生成，现有编辑动作仍要求合法作用范围。时间选区存在时生成范围受限；实际输出越界时不能静默扩大选区。
+
+开始生成不增加工程revision；接受新增一条音频轨后增加一次revision。重复接受不产生第二份音乐；Undo后用Redo恢复。schema7保存独立生成来源与本地资产，不引用远程URL作为播放源。目标BPM/时长不保证精确拍点，不能擅自拉伸。云端任务与本地请求文件保留，但此版DAW重启不重建未接受候选的界面历史。
+
+原始部署与测试证据见 [批次计划](review/2026-11-06-cloud-generation/PLAN.md)，人工步骤见 [MANUAL-CHECK](review/2026-11-06-cloud-generation/MANUAL-CHECK.md)。
+
 ## 0.10.0 节拍与 Warp 增量（自动验证通过，人工待验）
 
 `start_analysis(kind="beats", preset="beat_this", parameters={"meter":"auto"|"3/4"|"4/4"})` 沿用片段内 start_seconds/duration_seconds（最多 600 秒）。候选 beat_events 采用分析区间相对秒，tempo 含 bpm、first_beat_seconds、first_downbeat_seconds、meter_numerator/denominator、meter_supported、tempo_candidates、variable_tempo；未知值为 null 或 numerator=0，不能当成已识别。波形峰值只给 UI，不放入语言模型上下文。

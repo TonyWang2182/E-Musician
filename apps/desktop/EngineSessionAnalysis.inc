@@ -106,7 +106,7 @@ juce::Result EngineSession::Impl::beginAnalysis(const juce::var& args,juce::var&
 {
     if(recordingBusy()||nativePending)return fail("Finish recording and pending device edits before analysis.");
     const auto kind=textArg(args,"kind");if(kind!="separate"&&kind!="transcribe"&&kind!="chords"&&kind!="beats")return fail("Choose separation, MIDI, chords or beats.");
-    for(const auto& j:jobs)if(j->worker.joinable()&&j->kind.startsWith("analysis.")&&j->kind!="analysis.preview")return fail("One analysis is already running. Wait or cancel it first.");
+    for(const auto& j:jobs)if(j->worker.joinable()&&(j->kind.startsWith("analysis.")||j->kind.startsWith("generation."))&&j->kind!="analysis.preview"&&j->kind!="generation.preview")return fail("One analysis is already running. Wait or cancel it first.");
     Binding* track=nullptr;auto* clip=findClip(textArg(args,"clip_id"),&track);
     if(!clip||!dynamic_cast<te::WaveAudioClip*>(clip->clip.get())||clip->info.playbackFile==juce::File())return fail("Select a prepared audio clip to analyze.");
     const auto p=clip->clip->getPosition();double start=analysisOption(args,"start_seconds",0),length=analysisOption(args,"duration_seconds",p.time.getLength().inSeconds()-start);

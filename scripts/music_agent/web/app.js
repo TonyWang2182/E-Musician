@@ -182,13 +182,14 @@
       if (hasRange) add(t`选区 ${Number(range.start_seconds.toFixed(3))}–${Number(range.end_seconds.toFixed(3))} 秒`);
       const hasSelection = trackIds.length || focusedTrack || clipIds.length || notes.length || hasRange;
       if (!pills.length) add(t("尚未选择对象"));
-      text("scope-hint", hasSelection ? t("只针对当前选择；发送后改变选区，需要重新生成。") : t("先在 DAW 选择对象，或明确切换到整个工程。"));
+      text("scope-hint", hasSelection ? t("只针对当前选择；发送后改变选区，需要重新生成。") : t("选择对象后编辑；也可以直接描述要生成的音乐。"));
     }
     $("context-pills").replaceChildren(...pills);
   }
   function armPoll() {
     clearTimeout(timer);
-    if (!stopped && token && nativeVisible) timer = setTimeout(refresh, busyPhases.has(state?.phase) ? 1000 : 2500);
+    const previewActive = ["preparing", "loading", "playing"].includes(state?.generation_preview?.status);
+    if (!stopped && token && nativeVisible) timer = setTimeout(refresh, busyPhases.has(state?.phase) || previewActive ? 1000 : 2500);
   }
   async function request(path, body) {
     const controller = new AbortController();
@@ -222,8 +223,14 @@
       : state?.pause_requested ? t("当前步骤结束后暂停，不会继续下一步。")
       : working ? phase === "applying" ? t("正在应用整份方案并核对结果。")
       : phase === "cancelled" ? t("正在结束当前请求，完成后可以继续。") : t("正在读取工程并生成方案，尚未修改工程。") : "";
-    text("busy-detail", typeof progress.label === "string" && progress.label.trim() ? progress.label
-      : typeof state?.detail === "string" && state.detail ? state.detail : fallback);
+    let detail = typeof progress.label === "string" && progress.label.trim() ? t(progress.label)
+      : typeof state?.detail === "string" && state.detail ? t(state.detail) : fallback;
+    if (stage === "generating") {
+      const job = state?.generation_jobs?.at(-1), generationPhase = job?.phase || job?.status;
+      const labels = {connecting: "正在连接生成服务", reconnecting: "正在重连原生成任务", queued: "生成任务正在排队", loading: "正在加载生成模型", running: "正在生成音频", downloading: "正在下载并校验音频", ready: "音频已下载，可以试听"};
+      detail = `${t(labels[generationPhase] || "正在生成音频")} · ${t("尚未加入工程")}`;
+    }
+    text("busy-detail", detail);
     $("commit-hint").hidden = phase !== "applying";
     $("task-progress").hidden = !working && !["ready", "error", "cancelled", "done", "paused"].includes(phase);
     $("task-progress").dataset.busy = String(working);
@@ -235,6 +242,8 @@
     $("submit").disabled = working || inFlight || !connected || !state?.provider?.configured || !$("prompt").value.trim();
     $("prompt").disabled = working;
     $("apply").disabled = working || inFlight || !connected || state?.phase !== "ready" || !state?.plan?.id || !readablePlan(state.plan);
+    $("generation-play").disabled = working || inFlight || !connected || ["preparing", "loading"].includes(state?.generation_preview?.status) || state?.phase !== "ready" || state?.plan?.execution_kind !== "generation_import";
+    $("generation-stop").disabled = inFlight || !connected;
     $("discard").disabled = working || inFlight || !online;
     $("undo").disabled = working || inFlight || !connected || !state?.can_undo;
     $("refresh").disabled = inFlight;
@@ -301,6 +310,12 @@
     if (candidate.kind === "transcribe") rows.push(t("选择乐器后即可播放。"));
     return rows;
   }
+  function generationChanges(candidate) {
+    if (!candidate) return null;
+    const start = Number(candidate.source?.timeline_start || 0).toFixed(3);
+    const duration = Number(candidate.audio?.duration_seconds || 0).toFixed(2);
+    return [t("新建1条音频轨，加入生成音乐"), t`起点 ${start} 秒，实际时长 ${duration} 秒。`, t("现有音乐保留；加入后可一次撤销。")];
+  }
   function warpChanges(plan, snapshot) {
     if (!["audio_warp", "beat_apply"].includes(plan.execution_kind)) return null;
     const rows = [t("后台处理后一次提交，可一次撤销。")];
@@ -334,7 +349,7 @@
       text("plan-revision", revision == null ? "" : t`基于修订 ${revision}`);
       const scope = (frozenScope && typeof frozenScope === "object" ? frozenScope.mode : frozenScope) || submittedScope;
       text("plan-scope", scope === "project" ? t("本次范围：整个工程") : scope === "selection" ? t("本次范围：发送时的选择") : scope === "clip" ? t("本次范围：整个片段") : t("范围以提交时的选择为准"));
-      const importedChanges = warpChanges(plan, state.snapshot || {}) || (plan.execution_kind === "analysis_import" ? analysisChanges(plan.analysis) : null);
+      const importedChanges = warpChanges(plan, state.snapshot || {}) || (plan.execution_kind === "analysis_import" ? analysisChanges(plan.analysis) : plan.execution_kind === "generation_import" ? generationChanges(plan.generation) : null);
       const steps = importedChanges ? [{label: t("核对来源、候选和工程版本")}, {label: importedChanges[0]}] : Array.isArray(plan.steps) ? plan.steps : [];
       const hasSteps = steps.length > 0 && steps.every((step) => typeof step?.label === "string" && step.label.trim());
       $("plan-sequence").hidden = !hasSteps;
@@ -347,7 +362,14 @@
     }
     renderNotePreviews(visible ? plan : null);
     renderAnalysisPreview(visible ? plan?.analysis : null);
-    $("result").hidden = !state.last_result; text("result-text", state.last_result || "");
+    const generated = visible && plan?.execution_kind === "generation_import" && plan.generation;
+    $("generation-preview").hidden = !generated;
+    if (generated) text("generation-preview-info", `${Number(generated.audio?.duration_seconds || 0).toFixed(2)} s · ${Number(generated.audio?.sample_rate || 0)/1000} kHz · ${t("生成候选")}`);
+    const audition = state.generation_preview || {}, previewLabels = {preparing: "正在准备试听…", loading: "正在准备试听…", playing: "正在试听", stopped: "试听已停止", completed: "试听已结束", failed: "试听失败", unavailable: "试听不可用"};
+    text("generation-preview-status", audition.status ? `${t(previewLabels[audition.status] || "试听状态未知")}${["failed", "unavailable"].includes(audition.status) && audition.detail ? ` · ${t(audition.detail)}` : ""}` : "");
+    $("generation-play").disabled = !generated || state.busy || !connected || mutating;
+    $("generation-stop").disabled = !connected || mutating;
+    $("result").hidden = !state.last_result; text("result-text", t(state.last_result || ""));
     const usage = state.usage || {}, format = (value) => Number(value || 0).toLocaleString(window.emusicianI18n.locale);
     text("usage", t`${format(usage.calls)} 次请求 · 输入 ${format(usage.prompt_tokens)} / 输出 ${format(usage.completion_tokens)} tokens`);
     renderProviders();
@@ -450,6 +472,8 @@
   }
   $("settings-toggle").addEventListener("click", () => toggleSettings($("settings").hidden));
   $("scope").addEventListener("change", scopeContext);
+  $("generation-play").addEventListener("click", () => { if (state?.plan?.id) mutate("/api/generation/preview", {plan_id: state.plan.id}); });
+  $("generation-stop").addEventListener("click", () => mutate("/api/generation/preview", {stop: true}));
   $("settings-form").addEventListener("input", () => { settingsDirty = true; });
   $("provider").addEventListener("change", () => {
     settingsDirty = true; $("api-key").value = ""; text("settings-feedback", "");

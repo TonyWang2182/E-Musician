@@ -98,6 +98,10 @@ struct StoredAnalysis {
     juce::String sourceSha256, resultSha256, parametersJson = "{}";
     double startSeconds = 0, durationSeconds = 0;
 };
+struct StoredGeneration {
+    juce::String id, assetId, clipId, modelId, modelRevision, audioSha256, resultSha256, parametersJson = "{}";
+    double startSeconds = 0, durationSeconds = 0;
+};
 
 struct StoredProject {
     juce::String projectId;
@@ -116,6 +120,7 @@ struct StoredProject {
     std::vector<StoredAutomationLane> masterAutomation;
     std::vector<StoredChordRegion> chordRegions;
     std::vector<StoredAnalysis> analyses;
+    std::vector<StoredGeneration> generations;
 };
 
 inline constexpr std::size_t maximumTracks = 64;

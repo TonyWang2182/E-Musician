@@ -1,3 +1,21 @@
+# 当前进行：0.12 云端音乐生成（2026-11-06，真实整链通过，完整备份中）
+
+实际工作树 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/cloud-generation-v0120`，基线0219f9ad。本批ACE文字/歌词生成已接通手动下栏与Agent：独立候选、试听状态、确认后一次导入、schema7来源和本地资产。旧0.11 EXE哈希保持。0.12 EXE SHA `017ced8e…`，253个源码输入 SHA `ebdfea33…`；完整CTest11/11后针对UI修正复测工作区及engine integration通过，最终Agent325/325、传输11、网关9和三份网页夹具通过，真实原生与真实GPT-5-mini/ACE整链均通过。
+
+云端5090/32GB、Torch2.10+cu128，32个模型文件25.25GB已完整校验，12秒纯音乐/人声和120秒上界均真实推理通过。E盘根 `E:/MusicAgent&DAW/cloud-inference`，登记available=true；模型在现有实例，单队列/驻留服务走SSH loopback18081。原生候选不改工程，确认导入/Undo/Redo/保存重开/云端禁用后的离线渲染已验；真实GPT-5-mini两次调用完成同等流程。正在执行完整E盘备份（记录080514…97ce676029），之后校验归档/发布保留并做[人工短测](review/2026-11-06-cloud-generation/MANUAL-CHECK.md)。证据见[VERIFICATION](review/2026-11-06-cloud-generation/VERIFICATION.json)、[云端结果](review/2026-11-06-cloud-generation/CLOUD-RESULTS.md)、[Agent结果](review/2026-11-06-cloud-generation/AGENT-RESULTS.md)。没有人工听感、ASIO共存或跨实例恢复结论；YuE2/MIR升级尚未实施。
+
+# AutoDL 远程开发已接通（2026-11-06，仅 H0 部分基础设施）
+
+用户已租 RTX5090 实例并授权 VS Code SSH 与 E 盘数据保存。本轮已实际通过独立密钥 BatchMode 登录、VS Code Remote-SSH resolver/转发/exec server、云端归档下载至 E 盘及整包/内部 SHA-256。入口 `E:/MusicAgent&DAW/cloud-inference/Connect AutoDL Music.cmd`，任务结束后运行同目录 `Save Cloud Data.cmd`，本地备份在 backups；远程根 `/root/autodl-tmp/emusician`。VS Code 远程编辑不会自动落到本地，需明确备份。既有主机/设置保持，密码未写入配置，完整原始连接日志仅本地保留。
+
+实际 GPU RTX5090 32607MiB、驱动580.76.05、数据盘250GB。详情与首次权限/PATH/连接超时修正见 [接入结果](review/2026-11-06-autodl-ssh/RESULTS.md) / [证据](review/2026-11-06-autodl-ssh/VERIFICATION.json)。备份脚本源在 scripts/cloud。本轮无模型安装/推理、应用构建或 DAW 远程 Provider；下方方案仍待实施。下一步锁5090兼容环境，固定短样本与模型版本，继续 H0/H1，不把 SSH 接通当模型就绪。
+
+# 新增规划：本地 DAW＋AutoDL 分析/生成（2026-11-06，模型未部署）
+
+用户希望本地创作、租卡评测模型并接入 DAW，先要求完整方案和可复用保存方法。本轮仅查阅现有代码和官方资料，已形成 [模型/架构/分批计划](review/2026-11-06-hybrid-ai/PLAN.md) 与 [AutoDL 保存恢复手册](review/2026-11-06-hybrid-ai/AUTODL-RUNBOOK.md)，经过两路只读审查。不改变以下 0.11.0 可用候选或本地模型注册；没有租卡、安装、推理、付费 API 或构建。当前文件中的云端目录、服务接口和设置均是拟新增。
+
+建议先单卡 24–32GB、单重任务队列，以现有 HTDemucs 打通远程闭环，再分批评测 ACE、TransKun、ChordMini/SCNet，后续 MuScriptor/SheetSage2/YuE2。结果必须下载进本地工程资产；普通 AutoDL 镜像不包含数据盘，另做模型/结果备份和新实例恢复演练。下一实施步是 H0/H1；精确权重版本、许可、云端性能与真实 DAW 共存均待评测。既有用户 DEVLOG 与启动记录保留。
+
 # 当前候选：0.11.0 品牌工作区与轨道染色（2026-11-06，自动验证通过、人工待验）
 
 实际工作树仍为 `E:/MusicAgent&DAW/worktrees/audio-analysis`，本轮分支 `feature/workspace-brand-v0110`，基线 f1658895。用户批准树乐师 Logo 用于启动动画、Windows 图标和左上角，批准工作区设计图并要求轨道染色。范围及归属在 [PLAN](review/2026-11-06-workspace-brand/PLAN.md)。本轮不使用 computer-use、不调用付费模型，不覆盖旧 0.10.0 输出。

@@ -7279,6 +7279,25 @@ print('PASS: unchanged baseline, 2 exact new cache files, both absent preference
 
 实现提交89360380b0742ee0760fdf4a1183c7f96de0b7cd已推送feature/tempo-warp-workspace-v0100，远端精确回读一致；main仍为d4ed6c898af1303918e38b6325a915befabbb575，未合并。保留目录E:/MusicAgent&DAW/releases/0.10.0-20261105-tempo-warp包含EXE/PDB、源码文档ZIP、启动器及VS Code工作区；1317个归档条目中207个源码输入逐一匹配测试指纹，全部产物hash复核。精确记录见本轮PUBLISH.json。该保留包不是可移植安装器，模型与运行库仍为本机独立依赖。
 
+### 2026-11-05T20:49:20+08:00 · agent-native-run · launched
+
+- Config: Release; exit code: None; elapsed: 0.225s.
+- Command: `E:\emusician-analysis-build\bin-0.10.0\Release\E-musician.exe --agent`
+- Context: Embedded Agent batch 2; physical audio acceptance remains manual
+- Source SHA-256: `47f058946b48a3020181aecee86b1e4ea7193247b5505751a67c147ed71df08e`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T124920.632170Z-8f3f943580.json) · [Raw log](../build-logs/20261105T124920.632170Z-8f3f943580.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261105T124920.632170Z-8f3f943580.raw.log)
+
+### 2026-11-05T20:49:26+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.166s.
+- Command: `C:\Python314\python.exe E:\emusician-analysis-source\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `47f058946b48a3020181aecee86b1e4ea7193247b5505751a67c147ed71df08e`; Git HEAD: `f1658895a2743b2dddce08654f0d9e21329b64ab`.
+- [Record](builds/20261105T124926.811799Z-23063f0e85.json) · [Raw log](../build-logs/20261105T124926.811799Z-23063f0e85.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
 ### 2026-11-06T01:57:45+08:00 · workspace-brand-configure · succeeded
 
 - Config: Release/Python; exit code: 0; elapsed: 18.716s.
@@ -7480,6 +7499,439 @@ print('PASS: unchanged baseline, 2 exact new cache files, both absent preference
 
 本轮没有computer-use、付费语言模型或物理声卡验收；CPU绘制与DSP离线微测不代表真实ASIO复杂工程性能。结果/设计/架构/人工步骤见docs/review/2026-11-06-workspace-brand。新增独立0.11启动器和VS Code工作区，旧入口保留，main不自动合并。用户原有DEVLOG启动条目与两份记录保持原样。
 
+
 ## 2026-11-06 — 0.11.0 代码同步与本地保留
 
 实现提交 1fb0bbaa48f98989bf18394e6ea08a22651ba0eb 已推送 feature/workspace-brand-v0110，远端回读一致；main 保持 d4ed6c898af1303918e38b6325a915befabbb575。本地 releases/0.11.0-20261106-workspace-brand 保留 EXE/PDB、源码文档ZIP、启动器和VS Code工作区；221输入逐一匹配最终测试指纹。归档不是独立安装器，模型和Worker运行库仍为本机依赖；见本轮 PUBLISH.json。用户既有两个启动记录及 DEVLOG 条目未改、未纳入本轮提交。
+
+### 2026-11-06T09:31:06+08:00 · agent-native-run · launched
+
+- Config: Release; exit code: None; elapsed: 0.337s.
+- Command: `E:\emusician-analysis-build\bin-0.11.0\Release\E-musician.exe --agent`
+- Context: Embedded Agent batch 2; physical audio acceptance remains manual
+- Source SHA-256: `c704e931d08b7f364f2a49271bb021956216bcdfa1161021bba7a215a674ae63`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T013106.903509Z-c1fc2ef8af.json) · [Raw log](../build-logs/20261106T013106.903509Z-c1fc2ef8af.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261106T013106.903509Z-c1fc2ef8af.raw.log)
+
+### 2026-11-06T09:31:14+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.487s.
+- Command: `C:\Python314\python.exe E:\emusician-analysis-source\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `c704e931d08b7f364f2a49271bb021956216bcdfa1161021bba7a215a674ae63`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T013114.749886Z-cb9e443f7f.json) · [Raw log](../build-logs/20261106T013114.749886Z-cb9e443f7f.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-06T09:35:00+08:00 · agent-native-run · launched
+
+- Config: Release; exit code: None; elapsed: 0.230s.
+- Command: `E:\emusician-analysis-build\bin-0.11.0\Release\E-musician.exe --agent`
+- Context: Embedded Agent batch 2; physical audio acceptance remains manual
+- Source SHA-256: `c704e931d08b7f364f2a49271bb021956216bcdfa1161021bba7a215a674ae63`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T013500.457644Z-cba3bb91e1.json) · [Raw log](../build-logs/20261106T013500.457644Z-cba3bb91e1.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261106T013500.457644Z-cba3bb91e1.raw.log)
+
+### 2026-11-06T09:35:04+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.229s.
+- Command: `C:\Python314\python.exe E:\emusician-analysis-source\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `c704e931d08b7f364f2a49271bb021956216bcdfa1161021bba7a215a674ae63`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T013504.354445Z-da1d0631a6.json) · [Raw log](../build-logs/20261106T013504.354445Z-da1d0631a6.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+## 2026-11-06 · 本地 DAW＋AutoDL MIR/生成规划（仅文档）
+
+- 用户要求租卡评测并接入本地 DAW 的完整方案，以及模型/环境/结果保存复用方法。核对现有分析进程、候选接受与实时线程边界，检索 AutoDL 和候选模型官方资料。
+- 新增 docs/review/2026-11-06-hybrid-ai/PLAN.md、AUTODL-RUNBOOK.md、REVIEW.md；更新 CONTEXT、DEVELOPMENT 与 ARCHITECTURE 的明确“未实现”规划入口。
+- 两路只读审查：模型/任务架构与 AutoDL 保存恢复；修正未知和弦与 N 的区别、钢琴六轨能力检查、分析上下文 padding、各模型独立兼容环境，以及备份模板失败即停/拒绝复用旧目录。
+- 检查：3份文档相对链接存在、围栏成对；2个 PowerShell 模板仅 AST 语法解析通过；git diff --check 通过。没有运行模板、应用测试、构建、模型安装/推理、租卡或付费 API。
+- 当前可用候选仍为0.11.0，本地模型、程序、工程、已有未提交启动记录不变；DEVLOG只追加。未提交/推送。云端容量、时延、准确率及恢复能力均待实际评测，下一实施步 H0/H1。
+
+
+## 2026-11-06 ? VS Code AutoDL SSH ? E ????????/?????
+
+- ??????????? VS Code SSH?????????? E ???? emusician-autodl ?????????????? E:/MusicAgent&DAW/cloud-inference ???????? SSH ????? VS Code ????????????/????????
+- ???? BatchMode ?????RTX5090 32607MiB/??580.76.05/250GB????VS Code1.144.1 Remote-SSH0.128.0 resolver/????/exec server?server ??????????????????
+- ?? scripts/cloud ????? E ?????????3??????????????? E ??????????? SHA-256 ???????????????????? Save Cloud Data.cmd?????/????????????????
+- ??????E?????SID??SSH???????????/??ACL??????Set-Acl??SeSecurityPrivilege?????????ACL??????python3??PATH???miniconda????????VS??22??????OpenSSH???90?????????????find???????????????????????????????
+- Python/PowerShell????/?????workspace JSON?git diff --check?????????????/?????LLM???????????/????????????????????
+- ?? docs/review/2026-11-06-autodl-ssh/RESULTS.md ? VERIFICATION.json?CONTEXT/DEVELOPMENT????H0?SSH/???????????????????????
+
+### 2026-11-06T15:15:37+08:00 · cloud-generation-python-tests · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 8.655s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_cloud_generation*.py -v`
+- Context: 0.12 cloud generation; no physical audio acceptance inferred
+- Source SHA-256: `4c4164e04cb5ce792e66eefece369b6882bf917efa153acdcc4d11eed15e3a88`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T071537.892022Z-daf3a8a1cb.json) · [Raw log](../build-logs/20261106T071537.892022Z-daf3a8a1cb.log)
+- [Exact process output](../build-logs/20261106T071537.892022Z-daf3a8a1cb.raw.log)
+
+### 2026-11-06T15:15:46+08:00 · cloud-generation-python-tests · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 61.172s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: 0.12 cloud generation; no physical audio acceptance inferred
+- Source SHA-256: `4c4164e04cb5ce792e66eefece369b6882bf917efa153acdcc4d11eed15e3a88`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T071546.783235Z-98380d8cfd.json) · [Raw log](../build-logs/20261106T071546.783235Z-98380d8cfd.log)
+- [Exact process output](../build-logs/20261106T071546.783235Z-98380d8cfd.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T15:18:41+08:00 · cloud-generation-agent-contracts · succeeded
+
+- Config: Release; exit code: 0; elapsed: 5.537s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_generation.py -v`
+- Context: Synthetic host/model contracts; no inference or audio-device acceptance
+- Source SHA-256: `6af2fc84b3b812e9a28ec282a04187c98b63c0872545c6edb1f809b6a4396d60`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T071841.968713Z-4fc80f1d30.json) · [Raw log](../build-logs/20261106T071841.968713Z-4fc80f1d30.log)
+- [Exact process output](../build-logs/20261106T071841.968713Z-4fc80f1d30.raw.log)
+
+### 2026-11-06T15:18:55+08:00 · cloud-generation-agent-regression · succeeded
+
+- Config: Release; exit code: 0; elapsed: 52.299s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_*.py -v`
+- Context: Agent unit/in-memory regression, no paid model and no hardware audio
+- Source SHA-256: `4f58f385ea25855643f434bca3c666270ef8c0eeca087b50f10b874604bee7e3`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T071855.258943Z-f9695300ca.json) · [Raw log](../build-logs/20261106T071855.258943Z-f9695300ca.log)
+- [Exact process output](../build-logs/20261106T071855.258943Z-f9695300ca.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+
+## 2026-11-06?0.12 ?????????????
+
+??????????????????/Agent???? feature/cloud-generation-v0120???0219f9ad?????0.11???SSH????????????????5090/32607MiB/??580.76.05/250GB????????????????? docs/review/2026-11-06-cloud-generation/PLAN.md???ACE?????/???Agent????????????????????8????Agent300??????????/??????????????????????????????cu128????????????????ASIO????????
+
+### 2026-11-06T15:21:33+08:00 · cloud-generation-agent-ui · succeeded
+
+- Config: Release; exit code: 0; elapsed: 11.552s.
+- Command: `C:\Python314\python.exe tests/GenerationAgentWebSmoke.py`
+- Context: Real sidebar rendering with synthetic candidate and mocked preview endpoint; owned headless Edge
+- Source SHA-256: `ec4a183c5cf9bcddd4c6e151d6d3b082196ea73d3e401950a57bb915cabf3696`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T072133.679256Z-180e457f87.json) · [Raw log](../build-logs/20261106T072133.679256Z-180e457f87.log)
+- [Exact process output](../build-logs/20261106T072133.679256Z-180e457f87.raw.log)
+
+### 2026-11-06T15:22:21+08:00 · cloud-generation-configure · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 32.720s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.12.0`
+- Context: 0.12 cloud generation; no physical audio acceptance inferred
+- Source SHA-256: `9c75f089f0ed4e7834de198857f3cd817e13ebc6d96414960556f36a68d53c63`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T072221.642824Z-017ac4938c.json) · [Raw log](../build-logs/20261106T072221.642824Z-017ac4938c.log)
+- [Exact process output](../build-logs/20261106T072221.642824Z-017ac4938c.raw.log)
+
+### 2026-11-06T15:24:36+08:00 · cloud-generation-agent-contracts-final · succeeded
+
+- Config: Release; exit code: 0; elapsed: 5.974s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_generation.py -v`
+- Context: Final bounded format and metadata audit tests; no live model or device
+- Source SHA-256: `7030211bd7fe9d4068ff78ae7b0d4072c402b362fb31d115188567d7183122ab`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T072436.831270Z-da5a780a2a.json) · [Raw log](../build-logs/20261106T072436.831270Z-da5a780a2a.log)
+- [Exact process output](../build-logs/20261106T072436.831270Z-da5a780a2a.raw.log)
+
+### 2026-11-06T15:24:43+08:00 · cloud-generation-agent-contracts-final · succeeded
+
+- Config: Release; exit code: 0; elapsed: 28.054s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_runtime.py -v`
+- Context: Final bounded format and metadata audit tests; no live model or device
+- Source SHA-256: `7030211bd7fe9d4068ff78ae7b0d4072c402b362fb31d115188567d7183122ab`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T072443.292098Z-d44c12a972.json) · [Raw log](../build-logs/20261106T072443.292098Z-d44c12a972.log)
+- [Exact process output](../build-logs/20261106T072443.292098Z-d44c12a972.raw.log)
+
+### 2026-11-06T15:22:54+08:00 · cloud-generation-build · failed
+
+- Config: Release/Python; exit code: 1; elapsed: 189.856s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.12 cloud generation; no physical audio acceptance inferred
+- Source SHA-256: `9c75f089f0ed4e7834de198857f3cd817e13ebc6d96414960556f36a68d53c63`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T072254.905531Z-e3bb9f7129.json) · [Raw log](../build-logs/20261106T072254.905531Z-e3bb9f7129.log)
+- [Exact process output](../build-logs/20261106T072254.905531Z-e3bb9f7129.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T072254.905531Z-e3bb9f7129.log
+
+### 2026-11-06T15:26:30+08:00 · cloud-generation-transport-tests · succeeded
+
+- Config: Python; exit code: 0; elapsed: 1.509s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_cloud_generation_transport.py -v`
+- Context: 9 deterministic transport checks; real model pending
+- Source SHA-256: `5c8925ca78ba07aff328110f7bcf1a1dc558a7539083c7286f934871691c3c3f`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T072630.178741Z-29e56c4ac3.json) · [Raw log](../build-logs/20261106T072630.178741Z-29e56c4ac3.log)
+- [Exact process output](../build-logs/20261106T072630.178741Z-29e56c4ac3.raw.log)
+
+
+## 2026-11-06：0.12 云端生成接入启动记录更正
+
+此前追加 DEVLOG 的中文经 Windows PowerShell 管道传入 Python 时被替换为问号；该历史条目按 append-only 约定保留，本条更正其内容。后续追加中文从 UTF-8 文件读取，不通过默认编码的命令管道传递。
+
+用户授权按计划配置生成模型并接通手动/Agent。新分支 `feature/cloud-generation-v0120`，基线 `0219f9ad`，保留既有0.11程序、SSH规划记录及用户启动记录。云端核验 RTX5090、32607MiB、驱动580.76.05、250GB数据盘。批次计划及归属见 `docs/review/2026-11-06-cloud-generation/PLAN.md`。
+
+首轮传输8项和既有Agent300项通过，属于模拟协议/既有回归；新增Agent后318项及三份侧栏网页夹具通过。首次原生构建失败于 `GenerationPanel` 的空 `juce::var` 赋值歧义和不存在的 `StringArray::getLast`；失败记录 `20261106T072254.905531Z-e3bb9f7129` 保留，修正后重建。此时真实云端推理、最终应用验收和ASIO听感尚未完成。
+
+### 2026-11-06T15:28:52+08:00 · test-agent-generation-cancellation · succeeded
+
+- Config: Release; exit code: 0; elapsed: 9.056s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_generation.py -v`
+- Context: Agent remote cancellation acknowledgements and complete generation regression; deterministic fixtures only
+- Source SHA-256: `c9eb55628600bf979abf39086a6ac7351871b3e4af19fc2ecb7f1f9973925307`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T072852.126796Z-3197014547.json) · [Raw log](../build-logs/20261106T072852.126796Z-3197014547.log)
+- [Exact process output](../build-logs/20261106T072852.126796Z-3197014547.raw.log)
+
+### 2026-11-06T15:28:03+08:00 · cloud-generation-build · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 128.129s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.12 cloud generation; no physical audio acceptance inferred
+- Source SHA-256: `166d566261071bfe1a612f269c2270891caf5a6e43a7cf53eb4e90bcb29546c3`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T072803.450901Z-64543bdc37.json) · [Raw log](../build-logs/20261106T072803.450901Z-64543bdc37.log)
+- [Exact process output](../build-logs/20261106T072803.450901Z-64543bdc37.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T15:30:12+08:00 · cloud-generation-test · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 142.966s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: 0.12 cloud generation; no physical audio acceptance inferred
+- Source SHA-256: `4c8677d8876b713d14ababc81adaabadeec69892c29c5b1e090d0f953b414ec3`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T073012.350343Z-a859c95328.json) · [Raw log](../build-logs/20261106T073012.350343Z-a859c95328.log)
+- [Exact process output](../build-logs/20261106T073012.350343Z-a859c95328.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T15:33:05+08:00 · test-agent-generation-final · succeeded
+
+- Config: Release; exit code: 0; elapsed: 75.602s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: Generation Agent final Python regression and bilingual sidebar actual headless UI fixtures; no paid model calls
+- Source SHA-256: `cd37c919da002678754c85a2a03d4a34d148448b503e7cf293ec2fd98ebae0e8`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T073305.725362Z-f9560ed200.json) · [Raw log](../build-logs/20261106T073305.725362Z-f9560ed200.log)
+- [Exact process output](../build-logs/20261106T073305.725362Z-f9560ed200.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T15:34:21+08:00 · test-agent-generation-final · succeeded
+
+- Config: Release; exit code: 0; elapsed: 10.707s.
+- Command: `C:\Python314\python.exe tests/GenerationAgentWebSmoke.py`
+- Context: Generation Agent final Python regression and bilingual sidebar actual headless UI fixtures; no paid model calls
+- Source SHA-256: `318c4bf49705e81222991af14655c7fc8e8c16071803e6e0181563814bcc04bf`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T073421.621622Z-08e86a3c46.json) · [Raw log](../build-logs/20261106T073421.621622Z-08e86a3c46.log)
+- [Exact process output](../build-logs/20261106T073421.621622Z-08e86a3c46.raw.log)
+
+### 2026-11-06T15:35:55+08:00 · cloud-generation-build · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 30.167s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.12 cloud generation; no physical audio acceptance inferred
+- Source SHA-256: `c3f034eb144d32eeb08011449b9cb502de37f7ef13d0f0e7b76da77b70bc6822`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T073555.543268Z-2a04fbf8d3.json) · [Raw log](../build-logs/20261106T073555.543268Z-2a04fbf8d3.log)
+- [Exact process output](../build-logs/20261106T073555.543268Z-2a04fbf8d3.raw.log)
+
+### 2026-11-06T15:36:26+08:00 · cloud-generation-ui-retest · succeeded
+
+- Config: Release; exit code: 0; elapsed: 14.856s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release -R workspace.brand_colour --output-on-failure`
+- Context: Default duration ink fix; relevant native workspace capture and engine contracts
+- Source SHA-256: `c3f034eb144d32eeb08011449b9cb502de37f7ef13d0f0e7b76da77b70bc6822`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T073626.494252Z-6d80e0a97e.json) · [Raw log](../build-logs/20261106T073626.494252Z-6d80e0a97e.log)
+- [Exact process output](../build-logs/20261106T073626.494252Z-6d80e0a97e.raw.log)
+
+### 2026-11-06T15:36:45+08:00 · cloud-generation-ssh-probe · succeeded
+
+- Config: Python/SSH; exit code: 0; elapsed: 2.720s.
+- Command: `C:\Python314\python.exe scripts/cloud/register_generation.py`
+- Context: Live service health and capabilities only; no inference
+- Source SHA-256: `c3f034eb144d32eeb08011449b9cb502de37f7ef13d0f0e7b76da77b70bc6822`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T073645.284480Z-81c7dbad8b.json) · [Raw log](../build-logs/20261106T073645.284480Z-81c7dbad8b.log)
+- [Exact process output](../build-logs/20261106T073645.284480Z-81c7dbad8b.raw.log)
+
+### 2026-11-06T15:48:57+08:00 · cloud-generation-unicode-contract · succeeded
+
+- Config: Python; exit code: 0; elapsed: 1.066s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_cloud_generation_transport.py -v`
+- Context: Unicode provenance and shared audio-rate contract; earlier python -c wrapper failed before tests due PowerShell argument quoting
+- Source SHA-256: `23679dd608512752f30e2d434537d2c36adf20cc5c10c90a004190a7b84ce060`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T074857.366711Z-74b60706c9.json) · [Raw log](../build-logs/20261106T074857.366711Z-74b60706c9.log)
+- [Exact process output](../build-logs/20261106T074857.366711Z-74b60706c9.raw.log)
+
+### 2026-11-06T15:48:38+08:00 · cloud-generation-build · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 24.434s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.12 cloud generation; no physical audio acceptance inferred
+- Source SHA-256: `23679dd608512752f30e2d434537d2c36adf20cc5c10c90a004190a7b84ce060`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T074838.991769Z-7579521bbc.json) · [Raw log](../build-logs/20261106T074838.991769Z-7579521bbc.log)
+- [Exact process output](../build-logs/20261106T074838.991769Z-7579521bbc.raw.log)
+
+### 2026-11-06T15:49:46+08:00 · cloud-generation-ui-errors · succeeded
+
+- Config: Release; exit code: 0; elapsed: 20.059s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release -R workspace.brand_colour --output-on-failure`
+- Context: Preview async error, stale source, registry refresh and workspace layout; physical audio remains manual
+- Source SHA-256: `23679dd608512752f30e2d434537d2c36adf20cc5c10c90a004190a7b84ce060`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T074946.088446Z-8ebf87af06.json) · [Raw log](../build-logs/20261106T074946.088446Z-8ebf87af06.log)
+- [Exact process output](../build-logs/20261106T074946.088446Z-8ebf87af06.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T15:52:03+08:00 · test-agent-preview-feedback · succeeded
+
+- Config: Release; exit code: 0; elapsed: 7.233s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_generation.py -v`
+- Context: Generation preview asynchronous preparation, stream/device/disconnection status, race against stop, native sample-rate contract and bilingual UI error feedback
+- Source SHA-256: `1cdc210fe5104b25146084dda1c7191f6cc0781320c708a6b1a6bd9bd3fe74b9`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T075203.406242Z-5fc1080954.json) · [Raw log](../build-logs/20261106T075203.406242Z-5fc1080954.log)
+- [Exact process output](../build-logs/20261106T075203.406242Z-5fc1080954.raw.log)
+
+### 2026-11-06T15:52:10+08:00 · test-agent-preview-feedback · failed
+
+- Config: Release; exit code: 1; elapsed: 5.437s.
+- Command: `C:\Python314\python.exe tests/GenerationAgentWebSmoke.py`
+- Context: Generation preview asynchronous preparation, stream/device/disconnection status, race against stop, native sample-rate contract and bilingual UI error feedback
+- Source SHA-256: `1cdc210fe5104b25146084dda1c7191f6cc0781320c708a6b1a6bd9bd3fe74b9`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T075210.973150Z-e8e7652805.json) · [Raw log](../build-logs/20261106T075210.973150Z-e8e7652805.log)
+- [Exact process output](../build-logs/20261106T075210.973150Z-e8e7652805.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T075210.973150Z-e8e7652805.log
+
+### 2026-11-06T15:53:09+08:00 · test-agent-preview-ui-retest · succeeded
+
+- Config: Release; exit code: 0; elapsed: 13.294s.
+- Command: `C:\Python314\python.exe tests/GenerationAgentWebSmoke.py`
+- Context: Retest preview failure feedback using actual asynchronous sidebar polling; first failure showed fixture observed before scheduled poll
+- Source SHA-256: `6526a1c86cc72fcf98aad728b9682d1bf33fac2f69e660750d414eec829d9db1`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T075309.682606Z-23b53d7f8e.json) · [Raw log](../build-logs/20261106T075309.682606Z-23b53d7f8e.log)
+- [Exact process output](../build-logs/20261106T075309.682606Z-23b53d7f8e.raw.log)
+
+
+# 0.12 跨层审查记录
+
+2026-11-06，整链验证进行中。原生、Agent、云端分别由独立代理实现并交叉阅读；主代理统一构建与结果核验。此文件记录问题和处理，不代替真实推理或设备验收。
+
+| 发现 | 处理与证据 |
+|---|---|
+| 首次 C++ 构建的 `juce::var` 空赋值歧义、无效 StringArray API | 明确构造空 var、按索引访问；失败构建 `20261106T072254.905531Z-e3bb9f7129` 保留，后续构建通过。 |
+| 秒数编辑框默认20不可见 | 先设置编辑器颜色再写入默认文字；实际组件图复核，不依赖仅几何断言。 |
+| 试听只报告请求已受理，后台解码或无设备失败不可见 | 原生下栏追踪准备任务及共享试听状态，保留错误并在隐藏/过期时停止。Agent 同步处理，由所属代理报告单独测试。 |
+| 改BPM后接受按钮禁用，但仍显示Ready | 原生下栏明确显示工程/速度变化，不误称可接受。 |
+| 界面打开后配置就绪，生成按钮不刷新 | 面板重开及低频可见轮询刷新配置。 |
+| 中文歌词在结果来源校验时被误拒绝 | 原检查按 ASCII 转义长度计算；改为 UTF-8 实际字节上限32768，与原生契约一致。最大2000字提示+4096字歌词及超界回归已测。 |
+| helper、原生、Agent音频采样率范围不一致 | 统一16–96kHz、PCM16单/双声道，ACE真实输出格式另验。 |
+| 本地写盘失败被当成网络错误重复尝试 | 独立NetworkError类型；磁盘错误直接失败，下载仅验证完整后发布。 |
+| 运行中取消可能被说成云端已停止 | 返回远端取消确认状态；未确认时保留本地收据，不把关闭连接等同取消计算。 |
+| 活跃SQLite/WAL不能直接归档 | 云端备份先检查任务终态，再用SQLite online backup生成一致快照；恢复说明区分镜像与数据盘。 |
+
+原生修正构建：`20261106T074838.991769Z-7579521bbc` 通过。工作区重测 `20261106T074946.088446Z-8ebf87af06` 通过；主代理查看 `build/workspace-smoke/7f055a26b4da/ui-generation-workspace-1000x650-en.png`，文字/布局正常。该夹具使用合成工程且没有音频设备，不代表真实试听。
+
+传输11项：`20261106T074857.366711Z-74b60706c9` 通过。此前一次PowerShell直接传`python -c`因引号被剥离而在测试前语法失败，改为ASCII here-string；没有运行测试，不计为通过。
+
+需要继续核验：真实ACE推理、云端结果到原生/Agent的整链、E盘完整备份校验。实际鼠标/中文输入法/DPI/ASIO共存和音乐听感保留人工验收；生成目标BPM/时长不保证精确对齐，候选列表尚不跨宿主重启恢复。
+
+
+### 2026-11-06T15:54:04+08:00 · cloud-generation-preview-smoke · succeeded
+
+- Config: Release; exit code: 0; elapsed: 104.689s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release -R engine.integration_smoke --output-on-failure`
+- Context: Run component interaction checks after preview/stale/config refresh fix; workspace-only smoke does not invoke this fixture
+- Source SHA-256: `6526a1c86cc72fcf98aad728b9682d1bf33fac2f69e660750d414eec829d9db1`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T075404.513872Z-639d5a4b99.json) · [Raw log](../build-logs/20261106T075404.513872Z-639d5a4b99.log)
+- [Exact process output](../build-logs/20261106T075404.513872Z-639d5a4b99.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T15:55:53+08:00 · test-agent-generation-final-regression · succeeded
+
+- Config: Release; exit code: 0; elapsed: 62.308s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: Final full Agent regression after async preview feedback and16-96k sample-rate contract; Agent source held unchanged; no paid models
+- Source SHA-256: `9af7d44739553be7cffe2458648c43aca455114ffcb596626fcffa3a90f6cd84`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T075553.928270Z-4561a6821a.json) · [Raw log](../build-logs/20261106T075553.928270Z-4561a6821a.log)
+- [Exact process output](../build-logs/20261106T075553.928270Z-4561a6821a.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T15:57:46+08:00 · cloud-backup-verifier-test · succeeded
+
+- Config: Python; exit code: 0; elapsed: 1.638s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_cloud_backup_verification.py -v`
+- Context: Synthetic streaming archive boundaries; no extraction, network or model
+- Source SHA-256: `962c8786b5f562f1e3a502ff554a32acbc514584ea2524460139389cbcd03fb2`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T075746.851879Z-7dda7d0f5f.json) · [Raw log](../build-logs/20261106T075746.851879Z-7dda7d0f5f.log)
+- [Exact process output](../build-logs/20261106T075746.851879Z-7dda7d0f5f.raw.log)
+
+### 2026-11-06T15:58:00+08:00 · cloud-backup-verifier-existing · succeeded
+
+- Config: Python; exit code: 0; elapsed: 0.618s.
+- Command: `C:\Python314\python.exe scripts/cloud/verify_backup.py --archive E:\MusicAgent&DAW\cloud-inference\backups\20261106T065856Z-fe1204e4\emusician-20261106T065856Z-e4accfdd.tar.gz --receipt E:\MusicAgent&DAW\cloud-inference\backups\20261106T065856Z-fe1204e4\receipt.json --report build/cloud-backup-verification/existing-20261106T065856Z.json`
+- Context: Read-only verification of real 20261106T065856Z backup; receipt hash and all three members in one archive read
+- Source SHA-256: `962c8786b5f562f1e3a502ff554a32acbc514584ea2524460139389cbcd03fb2`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T075800.309681Z-cbe545bd0d.json) · [Raw log](../build-logs/20261106T075800.309681Z-cbe545bd0d.log)
+- [Exact process output](../build-logs/20261106T075800.309681Z-cbe545bd0d.raw.log)
+
+### 2026-11-06T15:58:22+08:00 · cloud-generation-register · succeeded
+
+- Config: Python/SSH; exit code: 0; elapsed: 2.589s.
+- Command: `C:\Python314\python.exe scripts/cloud/register_generation.py --register`
+- Context: Actual cloud cold/warm generation passed before registration
+- Source SHA-256: `962c8786b5f562f1e3a502ff554a32acbc514584ea2524460139389cbcd03fb2`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T075822.297088Z-c1e64ea511.json) · [Raw log](../build-logs/20261106T075822.297088Z-c1e64ea511.log)
+- [Exact process output](../build-logs/20261106T075822.297088Z-c1e64ea511.raw.log)
+
+### 2026-11-06T15:59:06+08:00 · test-agent-real-cloud-generation · failed
+
+- Config: Release; exit code: 1; elapsed: 3.309s.
+- Command: `C:\Python314\python.exe tests/MusicAgentGenerationIntegration.py --exe E:/emusician-analysis-build/bin-0.12.0/Release/E-musician.exe --duration 12`
+- Context: Actual native0.12 + SSH + ACE12sec; deterministic language provider; isolated offline audio device; explicit import/Undo/save/reopen
+- Source SHA-256: `962c8786b5f562f1e3a502ff554a32acbc514584ea2524460139389cbcd03fb2`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T075906.404327Z-db365dc65f.json) · [Raw log](../build-logs/20261106T075906.404327Z-db365dc65f.log)
+- [Exact process output](../build-logs/20261106T075906.404327Z-db365dc65f.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T075906.404327Z-db365dc65f.log
+
+### 2026-11-06T15:58:42+08:00 · cloud-generation-e2e · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 30.312s.
+- Command: `C:\Python314\python.exe E:\MusicAgent&DAW\worktrees\audio-analysis\tests\CloudGenerationEndToEnd.py --exe E:/emusician-analysis-build/bin-0.12.0/Release/E-musician.exe`
+- Context: 0.12 cloud generation; no physical audio acceptance inferred
+- Source SHA-256: `962c8786b5f562f1e3a502ff554a32acbc514584ea2524460139389cbcd03fb2`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T075842.254509Z-f05148e413.json) · [Raw log](../build-logs/20261106T075842.254509Z-f05148e413.log)
+- [Exact process output](../build-logs/20261106T075842.254509Z-f05148e413.raw.log)
+
+### 2026-11-06T16:00:46+08:00 · test-agent-real-cloud-generation-retest · failed
+
+- Config: Release; exit code: 1; elapsed: 32.264s.
+- Command: `C:\Python314\python.exe tests/MusicAgentGenerationIntegration.py --exe E:/emusician-analysis-build/bin-0.12.0/Release/E-musician.exe --duration 12`
+- Context: Actual native0.12 + SSH + ACE12sec; deterministic language provider; independent stable-user-data guard excludes concurrent disposable render jobs
+- Source SHA-256: `e9021ef5428faa398dc1e89087e2b21d95f994c1689ed76f599d994b5ebde46e`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T080046.736426Z-6492f4fd33.json) · [Raw log](../build-logs/20261106T080046.736426Z-6492f4fd33.log)
+- [Exact process output](../build-logs/20261106T080046.736426Z-6492f4fd33.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T080046.736426Z-6492f4fd33.log
+
+### 2026-11-06T16:02:14+08:00 · test-agent-real-preview-envelope · succeeded
+
+- Config: Release; exit code: 0; elapsed: 6.699s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_generation.py -v`
+- Context: Fix actual native preview admission: supply project/revision envelope; preserve prior failed real run then rerun focused contracts and12sec deterministic actual pipeline
+- Source SHA-256: `ebdfea33db3961af998df283ab6599d56e5736315039901561ff63def288c789`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T080214.705009Z-33bf1e6b2e.json) · [Raw log](../build-logs/20261106T080214.705009Z-33bf1e6b2e.log)
+- [Exact process output](../build-logs/20261106T080214.705009Z-33bf1e6b2e.raw.log)
+
+### 2026-11-06T16:02:21+08:00 · test-agent-real-preview-envelope · succeeded
+
+- Config: Release; exit code: 0; elapsed: 31.147s.
+- Command: `C:\Python314\python.exe tests/MusicAgentGenerationIntegration.py --exe E:/emusician-analysis-build/bin-0.12.0/Release/E-musician.exe --duration 12`
+- Context: Fix actual native preview admission: supply project/revision envelope; preserve prior failed real run then rerun focused contracts and12sec deterministic actual pipeline
+- Source SHA-256: `ebdfea33db3961af998df283ab6599d56e5736315039901561ff63def288c789`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T080221.669747Z-1e3d01724b.json) · [Raw log](../build-logs/20261106T080221.669747Z-1e3d01724b.log)
+- [Exact process output](../build-logs/20261106T080221.669747Z-1e3d01724b.raw.log)
+
+### 2026-11-06T16:03:09+08:00 · test-agent-live-cloud-generation · succeeded
+
+- Config: Release; exit code: 0; elapsed: 60.030s.
+- Command: `C:\Python314\python.exe tests/MusicAgentGenerationIntegration.py --exe E:/emusician-analysis-build/bin-0.12.0/Release/E-musician.exe --duration 12 --live`
+- Context: One explicitly authorized semantic probe using existing configured language provider; maximum4 language calls and one12sec ACE request; no settings or key changes; isolated offline native host
+- Source SHA-256: `ebdfea33db3961af998df283ab6599d56e5736315039901561ff63def288c789`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T080309.327868Z-495121e1d1.json) · [Raw log](../build-logs/20261106T080309.327868Z-495121e1d1.log)
+- [Exact process output](../build-logs/20261106T080309.327868Z-495121e1d1.raw.log)
+
+### 2026-11-06T16:04:13+08:00 · test-agent-final-native-envelope-regression · succeeded
+
+- Config: Release; exit code: 0; elapsed: 60.111s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: Full Agent regression after real native preview envelope bug fix; source frozen; no paid APIs in this command
+- Source SHA-256: `ebdfea33db3961af998df283ab6599d56e5736315039901561ff63def288c789`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T080413.231293Z-8f2678c9da.json) · [Raw log](../build-logs/20261106T080413.231293Z-8f2678c9da.log)
+- [Exact process output](../build-logs/20261106T080413.231293Z-8f2678c9da.raw.log)

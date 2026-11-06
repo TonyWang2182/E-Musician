@@ -148,6 +148,7 @@ juce::String contentKey(const storage::StoredProject& s,const std::function<juce
         }
     }
     for(const auto& a:s.analyses){o.writeString(a.id);o.writeString(a.kind);o.writeString(a.modelId);o.writeString(a.modelVersion);o.writeString(a.sourceClipId);o.writeString(a.sourceAssetId);o.writeString(a.sourceSha256);o.writeString(a.resultSha256);o.writeString(a.parametersJson);time(a.startSeconds);time(a.durationSeconds);}
+    for(const auto& g:s.generations){o.writeString(g.id);o.writeString(g.assetId);o.writeString(g.clipId);o.writeString(g.modelId);o.writeString(g.modelRevision);o.writeString(g.audioSha256);o.writeString(g.resultSha256);o.writeString(g.parametersJson);time(g.startSeconds);time(g.durationSeconds);}
     for(const auto& c:s.chordRegions){o.writeString(c.id);o.writeString(c.label);o.writeString(c.analysisId);time(c.startSeconds);time(c.endSeconds);time(c.score);o.writeBool(c.uncertain);}
     return sessionSha256(o.getData(),o.getDataSize());
 }
@@ -192,6 +193,17 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         std::shared_ptr<Job> acceptJob;
         bool applied=false;
     };
+    struct GenerationEntry {
+        juce::String id,resultHash;juce::File directory;juce::var source,parameters,result,receipt;
+        std::shared_ptr<Job> job,acceptJob;bool applied=false;
+    };
+    std::map<juce::String,std::shared_ptr<GenerationEntry>> generations;
+    juce::var generationCapabilities();
+    juce::var generationJobs()const;
+    bool generationSourceMatches(const GenerationEntry&)const;
+    juce::Result generationCommand(const juce::String&,const juce::var&,juce::var&);
+    juce::Result beginGeneration(const juce::var&,juce::var&);
+    juce::Result acceptGeneration(const juce::var&,juce::var&);
     std::map<juce::String,std::shared_ptr<AnalysisEntry>> analyses;
     std::unique_ptr<AnalysisPreview> analysisPreview;
     std::uint64_t analysisPreviewGeneration=0;
@@ -443,6 +455,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
                 s.assets.push_back({id,juce::File(asset["source"].toString())});}
         for(const auto& a:m.getChildWithName("EM_ANALYSES"))s.analyses.push_back({a["id"].toString(),a["kind"].toString(),a["model_id"].toString(),a["model_version"].toString(),a["source_clip_id"].toString(),a["source_asset_id"].toString(),a["source_sha256"].toString(),a["result_sha256"].toString(),a["parameters_json"].toString(),double(a["start_seconds"]),double(a["duration_seconds"])});
         for(const auto& c:m.getChildWithName("EM_CHORDS"))s.chordRegions.push_back({c["id"].toString(),c["label"].toString(),c["analysis_id"].toString(),double(c["start_seconds"]),double(c["end_seconds"]),double(c["score"]),bool(c["uncertain"])});
+        for(const auto& g:m.getChildWithName("EM_GENERATIONS"))s.generations.push_back({g["id"].toString(),g["asset_id"].toString(),g["clip_id"].toString(),g["model_id"].toString(),g["model_revision"].toString(),g["audio_sha256"].toString(),g["result_sha256"].toString(),g["parameters_json"].toString(),double(g["start_seconds"]),double(g["duration_seconds"])});
         s.schemaVersion=storage::requiredSchema(s);
         production::captureGraph(*edit,s,includeControllers);return s;
     }
@@ -495,7 +508,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     void adopt(std::unique_ptr<te::Edit> next,std::vector<Binding> bs,const juce::String& tid,const juce::String& cid={}){
         cancelEffectGesture();
         ++analysisPreviewGeneration;if(analysisPreview)analysisPreview->stop();
-        for(const auto& j:jobs)if(j->kind.startsWith("analysis."))j->cancel=true;
+        for(const auto& j:jobs)if(j->kind.startsWith("analysis.")||j->kind.startsWith("generation."))j->cancel=true;
         if(nativeQueue&&nativeQueueProject.isNotEmpty())nativeQueue->cancelProject(nativeQueueProject);
         nativeQueueProject.clear();nativeRuntime.clear();nativeTrackErrors.clear();nativePending.reset();nativeLastScan=std::numeric_limits<std::uint64_t>::max();
         plugins::PluginHost::closeAllEditors(*edit);edit->getTransport().stop(false,false);trackMeters.clear();inputMeters.clear();masterMeter.bind(nullptr);recording.detach();pluginHost.detachEdit(*edit);edit->state.removeListener(this);noteViews.clear();transactionControl.reset();bindings.clear();edit=std::move(next);clipClipboard={};lastPastedClipIds.clear();bindings=std::move(bs);transactionControl=std::make_unique<te::Edit::UndoTransactionInhibitor>(*edit);edit->state.addListener(this);recording.attach(*edit,recordingDirectory());
@@ -504,7 +517,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     void timerCallback() override;
     void reapFinishedJobs(bool applyCommits);
     bool hasBlockingFileTask()const{
-        for(const auto& job:jobs)if(job->worker.joinable()&&(!job->kind.startsWith("analysis.")||job->kind=="analysis.accept"))return true;
+        for(const auto& job:jobs)if(job->worker.joinable()&&((!job->kind.startsWith("analysis.")&&!job->kind.startsWith("generation."))||job->kind=="analysis.accept"||job->kind=="generation.accept"))return true;
         return false;
     }
     std::shared_ptr<Job> startJob(const juce::String&,std::function<void(const std::shared_ptr<Job>&)>);
@@ -531,11 +544,13 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
 #include "EngineSessionJobs.inc"
 #include "EngineSessionWarp.inc"
 #include "EngineSessionAnalysis.inc"
+#include "EngineSessionGeneration.inc"
 #include "EngineSessionTelemetry.inc"
 #include "EngineSessionSelection.inc"
 #include "EngineSessionPublic.inc"
 #include "../../tests/EngineSessionWarpSmoke.inc"
 #include "../../tests/EngineSessionBatchRefsSmoke.inc"
+#include "../../tests/EngineSessionGenerationSmoke.inc"
 #include "../../tests/EngineSessionWorkspaceSmoke.inc"
 #include "../../tests/EngineSessionSmoke.inc"
 #include "../../tests/EngineSessionProjectSmoke.inc"

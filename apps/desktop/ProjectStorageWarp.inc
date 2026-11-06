@@ -18,6 +18,7 @@ juce::Result audioWarpFromVar(const juce::var& v,StoredAudioWarp& w)
 }
 int requiredSchema(const StoredProject& p)
 {
+    if(!p.generations.empty())return 7;
     for(const auto& t:p.tracks)for(const auto& c:t.clips)if(c.warp.enabled)return 6;
     for(const auto& a:p.analyses)if(a.kind=="beats")return 6;
     return p.analyses.empty()&&p.chordRegions.empty()?4:5;

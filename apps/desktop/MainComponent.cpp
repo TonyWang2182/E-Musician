@@ -3,6 +3,7 @@
 #include "PianoRoll.h"
 #include "AgentSidebar.h"
 #include "AnalysisPanel.h"
+#include "GenerationPanel.h"
 #include "AnalysisPreview.h"
 #include "SelectedTrackPanel.h"
 #include "NativeDevicePanel.h"
@@ -1315,6 +1316,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     std::unique_ptr<NativeDevicePanel> dockNative;
     std::unique_ptr<NativeEffectsPanel> dockEffect;
     std::unique_ptr<AnalysisPanel> dockAnalysis;
+    std::unique_ptr<GenerationPanel> dockGeneration;
     juce::String nativeTrackId, nativeProjectId;
     juce::String effectTrackId, effectProjectId;
     juce::String chainTrackId, chainSelectedId;
@@ -1334,7 +1336,7 @@ struct MainComponent::Impl : private juce::ListBoxModel {
     juce::String error, trackGestureId, startEditId;
     std::uint64_t startEditRevision = 0;
     juce::Rectangle<int> library, workspace, inspector, dockBounds, positionBounds, titleBounds;
-    enum class Dock { closed, source, midi, track, native, effect, analysis };
+    enum class Dock { closed, source, midi, track, native, effect, analysis, generation };
     Dock dock = Dock::closed;
     bool pianoExpanded = false;
     bool compactAnalysisFooter = false;
@@ -2025,6 +2027,7 @@ juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDire
         if (result.wasOk() && !captureComponent(editor, "ui-piano-fixture-1000x580.png")) result = juce::Result::fail("Could not capture the MIDI interaction fixture.");
         editor.setSize(820, 440);
         if (result.wasOk() && !captureComponent(editor, "ui-piano-fixture-820x440.png")) result = juce::Result::fail("Could not capture the narrow MIDI interaction fixture.");
+        if(result.wasOk()){GenerationPanel generationFixture(session);generationFixture.setLookAndFeel(&p.look);result=generationFixture.runInteractionSmokeTest(outputDirectory);generationFixture.setLookAndFeel(nullptr);}
         PluginPanel browser(session, {}); browser.setLookAndFeel(&p.look);
         if (result.wasOk() && !captureComponent(browser, "ui-plugins-900x580.png")) result = juce::Result::fail("Could not capture the installed-plugin browser.");
         browser.setSize(780, 420);
@@ -2331,6 +2334,11 @@ void MainComponent::execute(const juce::String& command, const juce::var& args)
 {
     showResult(session.execute(command, args, impl->state.revision));
 }
+void MainComponent::showGenerationDock()
+{
+    auto& p=*impl;if(!p.dockGeneration){p.dockGeneration=std::make_unique<GenerationPanel>(session);addAndMakeVisible(*p.dockGeneration);}
+    p.pianoExpanded=false;p.dock=Impl::Dock::generation;resized();refreshSnapshot();repaint();
+}
 void MainComponent::showAnalysisDock(const juce::String& chordId)
 {
     auto& p = *impl;
@@ -2372,12 +2380,15 @@ void MainComponent::showAddMenu()
     menu.addItem(1, uiText("Import audio... (WAV / MP3)", "导入音频... (WAV / MP3)")); menu.addItem(2, uiText("Import MIDI...", "导入 MIDI...")); menu.addSeparator();
     menu.addItem(3, uiText("New audio track", "新建音频轨道")); menu.addItem(4, uiText("New MIDI / instrument track", "新建 MIDI／乐器轨道"));
     menu.addItem(6, uiText("New bus / group track", "新建总线／编组轨道"));
+    menu.addSeparator();
+    menu.addItem(7, uiText("Generate music…", "生成音乐…"));
     const auto* track = impl->selectedTrack();
     menu.addItem(5, uiText("New 4-bar MIDI clip at playhead", "在播放位置新建 4 小节 MIDI 片段"), track && track->kind == "instrument");
     menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&impl->importButton), [safe = juce::Component::SafePointer<MainComponent>(this)](int id) {
         if (!safe) return;
         if (id == 1) safe->chooseSource();
         if (id == 2) safe->chooseMidi();
+        if (id == 7) safe->showGenerationDock();
         if (id == 3 || id == 4) safe->execute("create_track", arguments({ { "kind", id == 4 ? "instrument" : "audio" }, { "name", id == 4 ? "MIDI track" : "Audio track" } }));
         if (id == 6) safe->execute("create_track", arguments({ { "kind", "bus" }, { "name", "Bus" } }));
         if (id == 5) {
@@ -3014,6 +3025,7 @@ void MainComponent::refreshInterfaceLanguage()
     if (p.saveDialog) { p.saveDialog->setName(uiText("Save project", "保存工程")); if (auto* panel = dynamic_cast<ProjectSavePanel*>(p.saveDialog->getContentComponent())) panel->refreshLanguage(uiText(p.state.dirty ? "Unsaved changes" : "Saved")); }
     if (p.agentSidebar) p.agentSidebar->refreshLanguage();
     if (p.dockAnalysis) p.dockAnalysis->refreshLanguage();
+    if (p.dockGeneration) p.dockGeneration->refreshLanguage();
     repaint();
 }
 juce::Result MainComponent::setInterfaceLanguage(const juce::String& code, bool persist)

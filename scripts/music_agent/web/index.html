@@ -58,7 +58,7 @@
         <div id="transcript" class="conversation-scroll" tabindex="0" aria-label="Conversation and plan" data-i18n-aria-label="对话与修改方案">
           <div id="notice" class="notice" role="alert" hidden></div>
           <section id="conversation" class="conversation" aria-label="Conversation" data-i18n-aria-label="对话记录">
-            <div id="conversation-empty" class="welcome"><h2 data-i18n="从一个小调整开始">What would you like to change?</h2><p data-i18n="选好轨道、片段或音符，告诉我你想怎样调整。修改会先列成方案，等你确认。">Select tracks, clips or notes and describe the change. Review the plan before applying it.</p><p class="privacy-note" data-i18n="发送工程结构与必要的音符数据。音频分析在本机运行，不上传音频文件。">Uses project structure and relevant notes. Audio analysis runs locally.</p></div>
+            <div id="conversation-empty" class="welcome"><h2 data-i18n="从一个小调整开始">What would you like to change?</h2><p data-i18n="选好轨道、片段或音符，告诉我你想怎样调整。修改会先列成方案，等你确认。">Select tracks, clips or notes and describe the change. Review the plan before applying it.</p><p class="privacy-note" data-i18n="发送工程结构与必要音符；分析在本机，生成描述和歌词发送至配置的云端。">Uses project structure and relevant notes. Analysis is local; generation sends your prompt and lyrics to the configured cloud.</p></div>
             <details id="capabilities" class="capabilities"><summary data-i18n="助手能做什么">What the assistant can do</summary><div id="capability-list"><p class="muted" data-i18n="正在核对宿主与本机模型…">Checking available tools…</p></div></details>
             <div id="messages"></div>
           </section>
@@ -71,6 +71,7 @@
             <div class="section-heading"><h2 id="plan-heading" data-i18n="待应用的修改">Review changes</h2><span id="plan-revision" class="muted"></span></div>
             <p id="plan-summary"></p>
             <details id="analysis-preview" class="analysis-preview" hidden><summary id="analysis-preview-title" data-i18n="分析候选">Analysis result</summary><p id="analysis-preview-info" class="muted"></p><ol id="analysis-preview-items"></ol><p id="analysis-preview-limit" class="muted"></p></details>
+            <div id="generation-preview" class="analysis-preview" hidden><h3 data-i18n="生成音频">Generated audio</h3><p id="generation-preview-info" class="muted"></p><div class="actions"><button id="generation-play" type="button" data-i18n="试听">Preview</button><button id="generation-stop" type="button" data-i18n="停止试听">Stop preview</button></div><p id="generation-preview-status" class="muted" role="status" aria-live="polite"></p><p class="muted" data-i18n="已下载到本地。确认后加入新轨道，现有音乐保留。">Downloaded locally. Apply to add a new track and keep existing music.</p></div>
             <div id="plan-sequence" class="plan-sequence" hidden><h3 data-i18n="执行顺序">Steps</h3><ol id="plan-steps"></ol></div>
             <h3 class="changes-heading" data-i18n="具体修改">Changes</h3><ol id="changes"></ol>
             <details id="note-previews" class="note-previews" hidden>

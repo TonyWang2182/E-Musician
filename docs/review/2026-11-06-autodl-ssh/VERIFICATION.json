@@ -1,0 +1,22 @@
+{
+  "checked_utc": "2026-11-06T07:01:15.646222+00:00",
+  "ssh_alias": "emusician-autodl",
+  "key_authentication_passed": true,
+  "local_data_root": "E:\\MusicAgent&DAW\\cloud-inference",
+  "remote_data_root": "/root/autodl-tmp/emusician",
+  "backup_archive": "E:\\MusicAgent&DAW\\cloud-inference\\backups\\20261106T065856Z-fe1204e4\\emusician-20261106T065856Z-e4accfdd.tar.gz",
+  "archive_sha256": "250f33c90e06d7a8c632a1fc0e37807119eba87c6121be53105bc29f4da3b344",
+  "archive_size": 2518,
+  "all_archive_member_checksums_passed": true,
+  "archived_files": 3,
+  "vscode_remote_connection": "verified: resolver, forwarding server and exec server established",
+  "model_inference_tested": false,
+  "gpu": "NVIDIA GeForce RTX 5090, 32607 MiB, 580.76.05",
+  "disk": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/md0        250G   40K  250G   1% /root/autodl-tmp",
+  "vscode_remote_log": "C:\\Users\\28712\\AppData\\Roaming\\Code\\logs\\20261104T223337\\window4\\exthost\\output_logging_20261106T150020\\1-Remote - SSH.log",
+  "backup_source_sha256": {
+    "backup_data.py": "20dfa00b926622f397fb2aad8ef0e098164f9b0a1fa315773484517c098a0a33",
+    "Save-CloudData.ps1": "5cd43e8d7329281690d417f72d1e398c767bc19f2a8129387ee0a2693e3bcefc"
+  },
+  "authentication_password_in_configuration": false
+}

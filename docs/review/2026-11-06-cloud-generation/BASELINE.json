@@ -1,0 +1,14 @@
+{
+  "captured_at": "2026-11-06T07:20:43.819253+00:00",
+  "branch": "feature/cloud-generation-v0120",
+  "base_commit": "0219f9adb26b258b7275112abc02f1e4d881458f",
+  "preserved_exe": "E:\\emusician-analysis-build\\bin-0.11.0\\Release\\E-musician.exe",
+  "preserved_exe_sha256": "a69f82ecaf144a7021aa1313ad23de681b407f39c93b99b06b1069d6b0503807",
+  "prior_dirty_docs": [
+    "docs/ARCHITECTURE.md",
+    "docs/CONTEXT.md",
+    "docs/DEVELOPMENT.md",
+    "docs/DEVLOG.md"
+  ],
+  "model_deployed": false
+}

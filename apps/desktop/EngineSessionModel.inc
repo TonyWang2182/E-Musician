@@ -147,6 +147,12 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
     if(auto r=preparePlugins(s.masterPlugins,meta);r.failed())return fail(r.getErrorMessage());
     for(const auto& t:s.tracks)if(auto r=preparePlugins(t.plugins,tracks.contains(t.id)?tracks[t.id]->state:juce::ValueTree());r.failed())return fail(r.getErrorMessage());
 
+    juce::ValueTree generationTree("EM_GENERATIONS");
+    for(const auto& g:s.generations){juce::ValueTree v("GENERATION");
+        for(const auto& [key,value]:std::initializer_list<std::pair<juce::Identifier,juce::var>>{{"id",g.id},{"asset_id",g.assetId},{"clip_id",g.clipId},{"model_id",g.modelId},{"model_revision",g.modelRevision},{"audio_sha256",g.audioSha256},{"result_sha256",g.resultSha256},{"parameters_json",g.parametersJson},{"start_seconds",g.startSeconds},{"duration_seconds",g.durationSeconds}})v.setProperty(key,value,nullptr);
+        generationTree.addChild(v,-1,nullptr);
+    }
+    syncMetadata("EM_GENERATIONS",generationTree);
     syncMetadata("EM_ANALYSES",analysisTree);syncMetadata("EM_CHORDS",chordTree);
     auto nativeAssets=meta.getChildWithName("EM_NATIVE_ASSETS");
     if(!nativeAssets.isValid()&&!nativeIds.empty())nativeAssets=meta.getOrCreateChildWithName("EM_NATIVE_ASSETS",um);

@@ -1,0 +1,71 @@
+{
+  "passed": true,
+  "mode": "real-native-and-cloud-generation",
+  "language_provider": "deterministic-fixture-no-LLM-call",
+  "physical_audio": false,
+  "quality_claim": false,
+  "exe_sha256": "017ced8ef2309da0bc2d4228466369cab4b35b5b41e6df55ad270cd9601b3641",
+  "checks": [
+    "Actual native generation commands and configured runtime are available on an empty project",
+    "An actual generated/downloaded candidate reaches review within four language calls without mutating the empty project",
+    "Preview preparation and stream/device status are read back; Stop preserves project revision. Physical playback is not tested",
+    "Explicit Agent confirmation imports one audio track once and verifies local candidate identity, start and duration",
+    "One Agent Undo removes the generated track; native Redo restores it",
+    "Actual save/reopen preserves the generated audio track and duration",
+    "A fresh native process with no generation registry reopens the saved local audio project"
+  ],
+  "language_model": "deterministic-integration-fixture",
+  "request_to_review_seconds": 6.472406699991552,
+  "candidate": {
+    "result_id": "173dbce4e4d041d6abf7dc77bb4eded0",
+    "kind": "generate",
+    "result_hash": "c46fd81e5408f405362cc44c2e6a25254bd7b588d372de7044f130a59cd74c77",
+    "applied": false,
+    "present_in_project": false,
+    "stale": false,
+    "source": {
+      "project_id": "5907c4fec0a04133aedf92836b3f0623",
+      "revision": 0,
+      "timeline_start": 0.0,
+      "bpm": 120.0,
+      "meter_numerator": 4,
+      "meter_denominator": 4
+    },
+    "audio": {
+      "sha256": "086f3b720eb46322903cf70aae8ebc8d670e8dc9d0e158d29e5964134a205286",
+      "duration_seconds": 12.0,
+      "sample_rate": 48000.0,
+      "channels": 2.0
+    },
+    "model": {
+      "id": "ace-step-1.5-xl-turbo",
+      "revision": "4228da3a418e1f1a04d9799e8040b62860d26b7a8c4e80ce374a17e5418cc4bf"
+    },
+    "parameters": {
+      "duration_seconds": 12.0,
+      "seed": 7021,
+      "bpm": 120.0,
+      "meter_numerator": 4,
+      "meter_denominator": 4
+    }
+  },
+  "preview_status": {
+    "status": "unavailable",
+    "job_id": "480102f13535439fa590655069800a85",
+    "result_id": "173dbce4e4d041d6abf7dc77bb4eded0",
+    "project_id": "5907c4fec0a04133aedf92836b3f0623",
+    "detail": "No audio output is active. Open audio settings before previewing a stem."
+  },
+  "saved_project": "E:\\MusicAgent&DAW\\worktrees\\audio-analysis\\build\\agent-generation-e2e\\68239afec86049fe83e57e8f589aac55\\generated.emproj",
+  "language_usage": {
+    "calls": 2,
+    "prompt_tokens": 0,
+    "completion_tokens": 0
+  },
+  "protected_file_changes": {
+    "unchanged": true,
+    "changed_or_removed": [],
+    "unexpected_additions": [],
+    "exclusions": "Transient render-jobs, cache, Temporary and own append-only audit logs"
+  }
+}

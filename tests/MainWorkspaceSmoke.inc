@@ -125,6 +125,16 @@ juce::Result MainComponent::runWorkspaceUISmoke(const juce::File& directory)
             p.expandEditor.onClick();
             require(!p.pianoExpanded && p.arrangement.isVisible() && p.pianoRoll->selectedNoteCount() == 8, "return preserves piano selection " + juce::String(language));
         }
+        for(const auto language:{"en","zh-CN"}){
+            view.setInterfaceLanguage(language,false);p.inspectorVisible=false;p.agentVisible=false;p.libraryVisible=true;p.dockHeightUser=284;
+            view.showGenerationDock();
+            for(const auto size:{juce::Point<int>(1000,650),juce::Point<int>(1280,800)}){
+                view.setSize(size.x,size.y);view.resized();view.refreshSnapshot();
+                require(p.dockGeneration&&p.dockGeneration->isVisible()&&p.dockGeneration->getHeight()>=284,"generation dock remains usable");
+                require(!p.arrangement.getBounds().intersects(p.dockBounds),"generation dock keeps arrangement visible");
+                capture(view,"ui-generation-workspace-"+juce::String(size.x)+"x"+juce::String(size.y)+"-"+language+".png");
+            }
+        }
         require(fixture.snapshot().revision == stableRevision, "all presentation checks preserve project revision");
     } catch (const std::exception& error) {
         failure = juce::String::fromUTF8(error.what());

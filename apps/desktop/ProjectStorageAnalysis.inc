@@ -26,6 +26,16 @@ bool validChordLabel(const juce::String& label)
 }
 Result validateAnalysis(const StoredProject& p)
 {
+    if(!p.generations.empty()&&p.schemaVersion<7)return Result::fail("Generated audio requires project schema 7.");
+    if(p.generations.size()>maximumAnalyses)return Result::fail("Generation metadata limit exceeded.");
+    std::set<juce::String> generationIds;
+    for(const auto& g:p.generations){
+        if(!validIdentifier(g.id)||!generationIds.insert(g.id).second||!validIdentifier(g.assetId)||!validIdentifier(g.clipId)
+           ||g.modelId.isEmpty()||g.modelId.length()>256||g.modelRevision.length()>128
+           ||g.audioSha256.length()!=64||!g.audioSha256.containsOnly("0123456789abcdef")||g.resultSha256.length()!=64||!g.resultSha256.containsOnly("0123456789abcdef")
+           ||g.parametersJson.getNumBytesAsUTF8()>32768||!juce::JSON::parse(g.parametersJson).isObject()
+           ||!validTime(g.startSeconds)||!std::isfinite(g.durationSeconds)||g.durationSeconds<=0||!validTime(g.startSeconds+g.durationSeconds))return Result::fail("Invalid generation provenance.");
+    }
     if((!p.analyses.empty()||!p.chordRegions.empty())&&p.schemaVersion<5)return Result::fail("Analysis data requires project schema 5 or later.");
     if(p.analyses.size()>maximumAnalyses||p.chordRegions.size()>maximumChordRegions)return Result::fail("Analysis metadata limit exceeded.");
     std::set<juce::String> ids,chords;
@@ -43,6 +53,15 @@ Result validateAnalysis(const StoredProject& p)
 }
 Result parseAnalysis(const var& object,StoredProject& p)
 {
+    if(p.schemaVersion>=7){
+        const auto records=object["generations"];if(!records.isArray()||records.size()>int(maximumAnalyses))return Result::fail("Invalid generation records.");
+        for(const auto& g:*records.getArray()){
+            if(!g.isObject())return Result::fail("Invalid generation record.");
+            for(const auto* key:{"id","asset_id","clip_id","model_id","model_revision","audio_sha256","result_sha256","parameters_json"})if(!g[key].isString())return Result::fail("Invalid generation string.");
+            if(!number(g["start_seconds"])||!number(g["duration_seconds"]))return Result::fail("Invalid generation time.");
+            p.generations.push_back({g["id"].toString(),g["asset_id"].toString(),g["clip_id"].toString(),g["model_id"].toString(),g["model_revision"].toString(),g["audio_sha256"].toString(),g["result_sha256"].toString(),g["parameters_json"].toString(),double(g["start_seconds"]),double(g["duration_seconds"])});
+        }
+    }
     auto records=object["analyses"],regions=object["chord_regions"];
     if(!records.isArray()||!regions.isArray()||records.size()>int(maximumAnalyses)||regions.size()>int(maximumChordRegions))return Result::fail("Invalid analysis arrays.");
     for(const auto& a:*records.getArray()){

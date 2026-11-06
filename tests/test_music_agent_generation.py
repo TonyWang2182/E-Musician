@@ -1,0 +1,264 @@
+"""Generation contract and orchestration tests with explicit fake host/model.
+
+No GPU, music inference, audio-device operation or paid LLM requests occur here.
+"""
+from copy import deepcopy
+from pathlib import Path
+import sys
+import tempfile
+import threading
+import unittest
+from unittest.mock import Mock, patch
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]/"scripts"))
+from music_agent import generation as g
+from music_agent.bridge import DawBridge, BridgeError
+from music_agent.runtime import AgentRuntime, SYSTEM
+from music_agent.selection import ScopeError, freeze_scope
+from music_agent.audit import Audit
+from music_agent.config import DEFAULT_CONFIG
+from test_music_agent_runtime import FakeProvider, FakeBridge, tool
+from test_music_agent_selection import context as selected_context
+
+
+def context():
+    ctx = selected_context()
+    ctx.update(tracks=[], clip_notes={}, position_seconds=5, can_undo=False, numerator=4, denominator=4)
+    ctx["selection_context"].update(active_track_id="", active_clip_id="", track_ids=[], clip_ids=[], note_clip_id="", note_ids=[], note_count=0, focus="none")
+    return ctx
+
+
+def candidate():
+    return {"result_id": "gen-r", "kind": "generate", "result_hash": "a"*64, "applied": False, "present_in_project": False, "stale": False,
+            "source": {"project_id": "p", "revision": 4, "timeline_start": 5., "bpm": 120., "meter_numerator": 4, "meter_denominator": 4},
+            "audio": {"path": "audio.wav", "sha256": "b"*64, "duration_seconds": 16., "sample_rate": 48000, "channels": 2},
+            "parameters": {"duration_seconds": 16, "seed": 42}, "model": {"id": "synthetic-no-inference", "version": "fixture"}}
+
+
+class ContractTests(unittest.TestCase):
+    def test_empty_project_generates_at_frozen_playhead_without_source(self):
+        ctx = context(); scope = freeze_scope(ctx)
+        request = g.authorize_start(ctx, scope, {"prompt": "Warm piano", "duration_seconds": 16})
+        self.assertEqual(request["timeline_start_seconds"], 5)
+        self.assertEqual(request["lyrics"], "")
+        self.assertNotIn("clip_id", request)
+
+    def test_time_selection_determines_start_and_bounds(self):
+        ctx = context(); ctx["selection_context"]["time_range"] = {"active": True, "start_seconds": 10, "end_seconds": 30}
+        self.assertEqual(g.authorize_start(ctx, freeze_scope(ctx), {"prompt": "Piano", "duration_seconds": 16})["timeline_start_seconds"], 10)
+        with self.assertRaises(ScopeError): g.authorize_start(ctx, freeze_scope(ctx), {"prompt": "Piano", "duration_seconds": 30})
+
+    def test_explicit_other_location_requires_project_scope(self):
+        ctx = context(); args = {"prompt": "Piano", "duration_seconds": 16, "timeline_start_seconds": 30}
+        with self.assertRaises(ScopeError): g.authorize_start(ctx, freeze_scope(ctx), args)
+        self.assertEqual(g.authorize_start(ctx, freeze_scope(ctx, "project"), args)["timeline_start_seconds"], 30)
+
+    def test_invalid_numbers_seeds_limits_and_paths_rejected(self):
+        ctx = context(); args = {"prompt": "Piano", "duration_seconds": 16}
+        for update in ({"duration_seconds": True}, {"duration_seconds": float("nan")}, {"duration_seconds": 9}, {"duration_seconds": 121}, {"seed": -1}, {"seed": 1.5}, {"prompt": " "}, {"lyrics": "x"*4097}, {"path": "E:/private.wav"}, {"endpoint": "http://attacker"}):
+            with self.subTest(update=str(update)[:80]), self.assertRaises(ValueError): g.authorize_start(ctx, freeze_scope(ctx), {**args, **update})
+
+    def test_import_only_ids_and_hash_preserves_content_identity(self):
+        ctx = context(); plan = g.compile_import(candidate(), ctx, freeze_scope(ctx), "Add music")
+        self.assertEqual(plan["execution_kind"], "generation_import")
+        self.assertEqual(plan["commands"], [{"command": "accept_generation_result", "args": {"result_id": "gen-r", "result_hash": "a"*64}}])
+        self.assertNotIn("path", plan["generation"]["audio"])
+
+    def test_stale_wrong_project_tempo_meter_and_applied_refused(self):
+        ctx = context()
+        for field, value in (("project_id", "other"), ("bpm", 90), ("meter_numerator", 3), ("meter_denominator", 8)):
+            c = candidate(); c["source"][field] = value
+            with self.subTest(field=field), self.assertRaises(ScopeError): g.compile_import(c, ctx, freeze_scope(ctx), "add")
+        for update in ({"applied": True}, {"stale": True}, {"result_hash": "bad"}):
+            with self.subTest(update=update), self.assertRaises(ValueError): g.compile_import({**candidate(), **update}, ctx, freeze_scope(ctx), "add")
+
+    def test_unrelated_edits_allow_fresh_plan_but_frozen_plan_cannot_apply(self):
+        ctx = context(); frozen = freeze_scope(ctx); ctx["revision"] += 1; ctx["selection_context"]["project_revision"] += 1
+        with self.assertRaises(ScopeError): g.compile_import(candidate(), ctx, frozen, "old")
+        self.assertEqual(g.compile_import(candidate(), ctx, freeze_scope(ctx), "fresh")["revision"], 5)
+
+    def test_format_identity_track_budget_and_missing_timing_refused(self):
+        for field, value in (("channels", 3), ("channels", 1.5), ("sample_rate", 5000), ("sha256", "bad"), ("duration_seconds", 0)):
+            c = candidate(); c["audio"][field] = value
+            with self.subTest(field=field), self.assertRaises(ValueError): g.safe_result(c)
+        ctx = context(); ctx["tracks"] = [{}]*64
+        with self.assertRaises(ValueError): g.compile_import(candidate(), ctx, freeze_scope(ctx), "add")
+
+    def test_sensitive_runtime_fields_never_enter_context(self):
+        c = candidate(); c["audio"]["path"] = "E:/private/generated.wav"; c["model"]["python"] = "/root/private/python"
+        c["parameters"]["endpoint"] = "http://secret"; c["source"]["api_key"] = "key"
+        safe = g.safe_result(c)
+        self.assertNotIn("private", str(safe)); self.assertNotIn("endpoint", str(safe)); self.assertNotIn("api_key", str(safe))
+
+    def test_capabilities_require_host_and_runtime(self):
+        self.assertFalse(g.capability_group({}, {"available": True})["enabled"])
+        self.assertFalse(g.capability_group({"commands": list(g.COMMANDS)}, {"available": False})["enabled"])
+        self.assertTrue(g.capability_group({"commands": list(g.COMMANDS)}, {"available": True})["enabled"])
+        self.assertIn("start_generation", SYSTEM)
+        self.assertNotIn("不能直接听到音频、生成音频", SYSTEM)
+
+    def test_bridge_refuses_import_cancel_and_mismatched_result(self):
+        bridge = object.__new__(DawBridge)
+        bridge._request = Mock(return_value={"result": {"kind": "generation.accept", "status": "running"}})
+        with self.assertRaises(BridgeError): bridge.cancel_generation("job")
+        self.assertEqual(bridge._request.call_count, 1)
+        bridge._request = Mock(return_value={"result": candidate()})
+        with self.assertRaises(BridgeError): bridge.generation_result("different")
+
+    def test_bridge_envelope_is_revision_selection_and_hash_guarded(self):
+        bridge = object.__new__(DawBridge); ctx = context(); scope = freeze_scope(ctx)
+        bridge.generation_capabilities = Mock(return_value={"available": True})
+        bridge._request = Mock(return_value={"status": "accepted", "result": {"job_id": "job"}})
+        bridge.start_generation(ctx, scope, {"prompt": "Piano", "duration_seconds": 16})
+        envelope = bridge._request.call_args.args[0]
+        self.assertEqual((envelope["project_id"], envelope["expected_revision"], envelope["expected_selection_revision"]), ("p", 4, 8))
+        bridge.snapshot = Mock(return_value=ctx); bridge.generation_result = Mock(return_value=g.safe_result(candidate()))
+        plan = g.compile_import(candidate(), ctx, scope, "add"); plan["id"] = "plan"
+        bridge.apply(plan)
+        self.assertEqual(bridge._request.call_args.args[0]["args"], {"result_id": "gen-r", "result_hash": "a"*64})
+
+    def test_preview_checks_async_preparation_then_stream_and_errors(self):
+        bridge = object.__new__(DawBridge)
+        job = {"id": "preview-j", "kind": "generation.preview", "status": "running"}
+        bridge._request = Mock(return_value={"result": job})
+        self.assertEqual(bridge.generation_preview_status("preview-j")["status"], "preparing")
+        self.assertEqual(bridge._request.call_count, 1)
+        job["status"] = "completed"
+        for state in ("loading", "playing", "completed", "failed", "unavailable"):
+            bridge._request = Mock(side_effect=[{"result": job}, {"result": {"status": state, "detail": "Synthetic status"}}])
+            self.assertEqual(bridge.generation_preview_status("preview-j")["status"], state)
+            self.assertEqual(bridge._request.call_args.args[0]["command"], "get_analysis_preview_status")
+        bridge._request = Mock(return_value={"result": {**job, "status": "failed", "error": "No audio output is active. Open audio settings before previewing a stem."}})
+        self.assertEqual(bridge.generation_preview_status("preview-j")["status"], "unavailable")
+        self.assertEqual(bridge._request.call_count, 1)
+        bridge._request = Mock(return_value={"result": {**job, "kind": "analysis.preview"}})
+        with self.assertRaises(BridgeError): bridge.generation_preview_status("preview-j")
+
+    def test_preview_start_uses_native_revision_envelope_but_stop_is_read(self):
+        bridge = object.__new__(DawBridge); bridge.snapshot = Mock(return_value=context())
+        bridge._request = Mock(return_value={"status": "accepted", "result": {"job_id": "preview-j"}})
+        bridge.preview_generation("gen-r")
+        request = bridge._request.call_args.args[0]
+        self.assertEqual((request["project_id"], request["expected_revision"]), ("p", 4))
+        self.assertEqual(request["args"], {"result_id": "gen-r"})
+        bridge.preview_generation()
+        self.assertEqual(bridge._request.call_args.args[0], {"command": "stop_generation_preview"})
+        self.assertEqual(bridge.snapshot.call_count, 1)
+
+    def test_sample_rate_matches_native_generation_contract(self):
+        for rate in (8000, 12000, 96001, 192000):
+            c = candidate(); c["audio"]["sample_rate"] = rate
+            with self.subTest(rate=rate), self.assertRaises(ValueError): g.safe_result(c)
+        for rate in (16000, 48000, 96000):
+            c = candidate(); c["audio"]["sample_rate"] = rate
+            self.assertEqual(g.safe_result(c)["audio"]["sample_rate"], rate)
+
+
+class GenerationBridge(FakeBridge):
+    def __init__(self, running=False):
+        super().__init__(); self.data = context(); self.candidate = g.safe_result(candidate()); self.running = running
+        self.started = threading.Event(); self.cancelled = False; self.preview_status = "loading"
+    def capabilities(self): return {"commands": list(g.COMMANDS)}
+    def generation_capabilities(self): return {"available": True}
+    def start_generation(self, ctx, scope, args):
+        g.authorize_start(ctx, scope, args); self.calls.append(("start", deepcopy(args))); self.started.set(); return {"job_id": "gen-j"}
+    def generation_job(self, jid):
+        return {"job_id": jid, "result_id": "gen-r", "status": "cancelled" if self.cancelled else "running" if self.running else "ready", "source": deepcopy(self.candidate["source"])}
+    def generation_result(self, rid): return deepcopy(self.candidate)
+    def cancel_generation(self, jid): self.calls.append(("cancel", jid)); self.cancelled = True
+    def preview_generation(self, rid=None): self.calls.append(("preview", rid)); return {"result": {"job_id": "preview-j"}}
+    def generation_preview_status(self, jid): return {"job_id": jid, "status": self.preview_status, "detail": "Synthetic output detail"}
+    def apply(self, plan):
+        self.calls.append(("apply", deepcopy(plan))); self.last_before = deepcopy(self.data); self.last_notes = deepcopy(self.notes)
+        return {"status": "accepted", "result": {"job_id": "import-j"}}
+    def wait_generation_import(self, jid):
+        self.candidate["applied"] = True
+        self.data["tracks"].append({"id": "generated-track", "kind": "audio", "clips": [{"id": "generated-clip", "kind": "audio", "start_seconds": 5., "duration_seconds": 16.}]})
+        self.data.update(revision=5, can_undo=True)
+        self.data["selection_context"]["project_revision"] = 5
+        return {"project_id": "p", "revision": 5, "applied": True, "result_id": "gen-r", "track_ids": ["generated-track"], "clip_ids": ["generated-clip"]}
+
+
+class RuntimeTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(); self.runtimes = []
+        self.patches = [patch("music_agent.runtime.load_config", return_value=deepcopy(DEFAULT_CONFIG)), patch("music_agent.runtime.has_key", return_value=False), patch("music_agent.providers.has_key", return_value=False)]
+        for p in self.patches: p.start()
+    def tearDown(self):
+        for r in self.runtimes:
+            r.cancel_event.set()
+            if r.worker: r.worker.join(3)
+        for p in self.patches: p.stop()
+        self.temp.cleanup()
+    def make(self, *responses, running=False):
+        r = AgentRuntime(GenerationBridge(running), FakeProvider(responses), Audit(Path(self.temp.name)/"audit.jsonl"))
+        self.runtimes.append(r); return r
+    def finish(self, r):
+        r.worker.join(3); self.assertFalse(r.worker.is_alive()); return r.state(False)
+    def ready(self):
+        r = self.make(tool("start_generation", {"prompt": "Warm piano", "duration_seconds": 16}), tool("propose_generation_import", {"result_id": "gen-r", "summary": "Add generated piano"}))
+        r.plan_request("Generate piano", "selection"); s = self.finish(r)
+        self.assertEqual(s["phase"], "ready", s); return r, s
+    def test_generate_review_preview_apply_verify_and_one_undo(self):
+        r, s = self.ready(); self.assertEqual(r.bridge.data["tracks"], []); self.assertEqual(len(r.provider.requests), 2)
+        pid = s["plan"]["id"]; r.preview_generation_plan(pid); r.preview_generation_plan(stop=True)
+        self.assertEqual(r.bridge.calls[-2:], [("preview", "gen-r"), ("preview", None)])
+        r.apply(pid); s = self.finish(r); self.assertEqual(s["phase"], "done", s); self.assertTrue(s["can_undo"])
+        with self.assertRaises(ValueError): r.apply(pid)
+        r.undo(); self.finish(r); self.assertEqual(r.bridge.data["tracks"], [])
+    def test_preview_state_poll_reports_device_failure_without_losing_review(self):
+        r, s = self.ready(); r.preview_generation_plan(s["plan"]["id"])
+        self.assertEqual(r.state(False)["generation_preview"]["status"], "preparing")
+        self.assertEqual(r.state()["generation_preview"]["status"], "loading")
+        r.bridge.preview_status = "unavailable"; state = r.state()
+        self.assertEqual(state["generation_preview"]["status"], "unavailable")
+        self.assertEqual(state["phase"], "ready"); self.assertEqual(state["plan"]["id"], s["plan"]["id"])
+        self.assertFalse(r.bridge.data["tracks"])
+    def test_preview_disconnect_never_retains_a_playing_claim(self):
+        r, s = self.ready(); r.preview_generation_plan(s["plan"]["id"])
+        r.bridge.preview_status = "playing"; self.assertEqual(r.state()["generation_preview"]["status"], "playing")
+        r.bridge.connected = False
+        self.assertEqual(r.state()["generation_preview"]["status"], "unavailable")
+    def test_preview_refresh_after_stop_does_not_restore_old_playback(self):
+        r, s = self.ready(); r.preview_generation_plan(s["plan"]["id"])
+        def racing_status(_):
+            r.preview_generation_plan(stop=True)
+            return {"status": "playing"}
+        r.bridge.generation_preview_status = racing_status
+        self.assertEqual(r.state()["generation_preview"]["status"], "stopped")
+    def test_cancel_generation_does_not_make_more_model_calls(self):
+        r = self.make(tool("start_generation", {"prompt": "Warm piano", "duration_seconds": 16}), running=True)
+        r.plan_request("Generate piano", "selection"); self.assertTrue(r.bridge.started.wait(2)); r.cancel()
+        s = self.finish(r); self.assertEqual(s["phase"], "cancelled", s); self.assertTrue(r.bridge.cancelled)
+        self.assertEqual(len(r.provider.requests), 1); self.assertFalse(any(c[0] == "apply" for c in r.bridge.calls))
+        self.assertIn("无法确认云端", s["last_result"])
+    def test_local_cancellation_never_claims_cloud_stopped_without_ack(self):
+        for remote in (None, "unconfirmed", "cancelling"):
+            raw = {"status": "cancelled", "remote_status": remote, "remote_cancel_confirmed": True}
+            status = g.cancellation_status(g.safe_job(raw))
+            self.assertTrue(status["local_cancelled"]); self.assertFalse(status["cancel_completed"])
+        job = g.safe_job({"status": "cancelled", "remote_status": "cancelled", "remote_cancel_confirmed": True})
+        self.assertTrue(g.cancellation_status(job)["cancel_completed"])
+        self.assertIn("本地和云端", g.cancellation_label(job))
+    def test_repeated_identical_generation_reuses_job_not_compute(self):
+        args = {"prompt": "Warm piano", "duration_seconds": 16}
+        r = self.make(tool("start_generation", args), tool("start_generation", args), tool("propose_generation_import", {"result_id": "gen-r", "summary": "Add"}))
+        r.plan_request("Generate", "selection"); s = self.finish(r); self.assertEqual(s["phase"], "ready", s)
+        self.assertEqual(sum(c[0] == "start" for c in r.bridge.calls), 1)
+    def test_changed_generation_request_in_same_task_refused(self):
+        r = self.make(tool("start_generation", {"prompt": "Piano", "duration_seconds": 16}), tool("start_generation", {"prompt": "Drums", "duration_seconds": 16}))
+        r.plan_request("Generate", "selection"); s = self.finish(r); self.assertEqual(s["phase"], "error")
+        self.assertEqual(sum(c[0] == "start" for c in r.bridge.calls), 1)
+    def test_changed_revision_after_review_does_not_commit_or_preview(self):
+        r, s = self.ready(); r.bridge.data["revision"] += 1
+        with self.assertRaises(ScopeError): r.preview_generation_plan(s["plan"]["id"])
+        r.apply(s["plan"]["id"]); s = self.finish(r); self.assertEqual(s["phase"], "error")
+        self.assertFalse(any(c[0] == "apply" for c in r.bridge.calls))
+    def test_generation_readback_detects_wrong_clip(self):
+        r, s = self.ready(); plan = deepcopy(r.plan); receipt = r.bridge.wait_generation_import("i")
+        after = r.bridge.snapshot(); self.assertEqual(r._verify_generation_import(plan, receipt, after), [])
+        after["tracks"][0]["clips"][0]["duration_seconds"] = 2
+        self.assertTrue(r._verify_generation_import(plan, receipt, after))
+
+
+if __name__ == "__main__": unittest.main()

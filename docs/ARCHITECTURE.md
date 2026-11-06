@@ -1,5 +1,21 @@
 # E-musician 技术架构
 
+## 0.12 生成管线（真实云端/原生/Agent整链已验证）
+
+`GenerationPanel / Agent → EngineSession generation命令 → 后台Python helper → 受管SSH隧道 → loopback网关/SQLite/单GPU队列 → ACE → PCM16+SHA清单 → E盘候选 → 试听/明确接受 → 本地工程资产/一次Undo`。生成不假造源clip，不复用需要源音频的分析元数据；聊天模型只组织工具调用，音乐模型独立生成音频。所有网络、模型和文件校验都在后台，音频回调不参与。
+
+网关用request_id和规范参数维持幂等，重连查询原任务。模型延迟加载并热复用；取消在安全检查点执行，原生任务终止与远端确认分开记录。服务器重启标记未完成任务interrupted，模型运行栈与本地DAW独立。当前只配置ACE文字/歌词生成，未提供远程音频上传或MIR替换。
+
+本地先校验大小、SHA和实际音频格式，再发布不可变候选。接受时重新核验结果及工程版本，并复制到E盘session assets，控制线程一次提交新轨道和`EM_GENERATIONS`来源记录。含生成来源使用schema7；普通旧工程保留所需版本。保存包含本地音频，重开/导出不需要云服务；未接受候选文件保留，但此版不恢复其跨DAW会话UI列表。
+
+实现/API与准确验收范围见 [ADR](decisions/2026-11-06-cloud-generation.md)、[计划](review/2026-11-06-cloud-generation/PLAN.md) 和 [云端契约](review/2026-11-06-cloud-generation/CLOUD-API.md)。下面的完整混合计算方案仍有未实施项，不能从生成管线推断远程MIR或YuE2已就绪。
+
+## 后续扩展：本地＋远程计算边界（2026-11-06，ACE以外待做）
+
+计划将分析/生成 Provider 放在统一后台任务适配层：GUI/Agent 共用命令 → 冻结来源/时基 → 本地或 SSH 隧道后的远程任务服务 → 下载校验候选 → 明确接受 → 现有 Edit/Undo/工程资产。云端单 GPU 重任务队列与分模型环境独立于实时回调；结果成为本地资产后不依赖服务器在线。远程任务历史用于重连查询，不是工程自动保存。
+
+完整方案仍是后续设计；上方ACE分支已经实现，远程MIR、其他生成模型及跨实例恢复仍未验收。模型选择、输出契约、故障状态、缓存与部署验收集中于 [完整计划](review/2026-11-06-hybrid-ai/PLAN.md)；下方为既有版本。
+
 ## 0.11.0 品牌工作区、颜色与效果手势（自动验证通过，人工待验）
 
 `UiDesign.h` 统一标签/数值、纸色面板与轨道色；`Branding.h` 使用编译内嵌的批准 Logo，启动动画只在正常窗口 UI 线程定时。`MainWorkspace.inc` 管理顶部 transport、搜索库、实际项目概览、可调整下栏与侧栏响应式布局；`WorkspaceBrowser` / `ProjectOverview` 只消费快照，概览图缓存到小尺寸图片，滚动时不重画全部 clip。

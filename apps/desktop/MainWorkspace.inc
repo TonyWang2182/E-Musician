@@ -17,7 +17,7 @@ void MainComponent::resized()
     p.browser.setVisible(p.libraryDisplayed);p.browser.setBounds(p.library);
     p.libraryButton.setToggleState(p.libraryDisplayed,juce::dontSendNotification);
     p.libraryButton.setEnabled(!expanded&&(!sidebar||getWidth()>=1450));
-    p.inspectorDisplayed=p.inspectorVisible&&!sidebar&&!expanded&&p.dock!=Impl::Dock::track&&p.dock!=Impl::Dock::native&&p.dock!=Impl::Dock::effect&&p.dock!=Impl::Dock::analysis&&p.dock!=Impl::Dock::source;
+    p.inspectorDisplayed=p.inspectorVisible&&!sidebar&&!expanded&&p.dock!=Impl::Dock::track&&p.dock!=Impl::Dock::native&&p.dock!=Impl::Dock::effect&&p.dock!=Impl::Dock::analysis&&p.dock!=Impl::Dock::generation&&p.dock!=Impl::Dock::source;
     const int inspectorWidth=p.inspectorDisplayed?210:0;
     p.inspector={right-inspectorWidth,88,inspectorWidth,p.footerY-100};
     const int left=margin+(p.libraryDisplayed?libraryWidth+8:0);
@@ -44,6 +44,7 @@ void MainComponent::resized()
     p.zoomOut.setBounds(getWidth()-116,50,30,28);p.zoomIn.setBounds(getWidth()-82,50,30,28);p.fit.setBounds(getWidth()-48,50,40,28);
     for(juce::Component* c:std::initializer_list<juce::Component*>{&p.rulerMode,&p.snap,&p.gridMode,&p.follow})c->setVisible(!expanded);
     const bool visual=p.dock==Impl::Dock::native||p.dock==Impl::Dock::effect;
+    const bool generation=p.dock==Impl::Dock::generation;
     const bool analysis=p.dock==Impl::Dock::analysis;
     const bool chain=p.dock==Impl::Dock::track||visual;
     const int overviewHeight=expanded?0:18;
@@ -52,7 +53,7 @@ void MainComponent::resized()
     // Keep workspace as the whole usable area; tests and Agent use its width.
     p.workspace={left,88,right-left-(p.inspectorDisplayed?inspectorWidth+8:0),p.footerY-100};
     const int minArrangement=198;
-    const int minimumDock=chain?248:analysis?210:p.dock==Impl::Dock::source?203:180;
+    const int minimumDock=generation?284:chain?248:analysis?210:p.dock==Impl::Dock::source?203:180;
     const int preferred=(p.dock==Impl::Dock::midi||chain)?280:300;
     const int height=p.dock==Impl::Dock::closed?0:expanded?body.getHeight():juce::jlimit(minimumDock,juce::jmax(minimumDock,body.getHeight()-minArrangement-6),p.dockHeightUser>0?p.dockHeightUser:preferred);
     p.dockBounds=body.withTrimmedTop(body.getHeight()-height);
@@ -72,9 +73,10 @@ void MainComponent::resized()
     if(p.dockNative){p.dockNative->setVisible(p.dock==Impl::Dock::native);p.dockNative->setBounds(deviceBody);}
     if(p.dockEffect){p.dockEffect->setVisible(p.dock==Impl::Dock::effect);p.dockEffect->setBounds(deviceBody);}
     if(p.dockAnalysis){p.dockAnalysis->setVisible(analysis);p.dockAnalysis->setBounds(p.dockBounds);}
-    if(analysis)p.closeEditor.toFront(false);
+    if(p.dockGeneration){p.dockGeneration->setVisible(generation);p.dockGeneration->setBounds(p.dockBounds);}
+    if(analysis||generation)p.closeEditor.toFront(false);
     p.separate.setToggleState(p.dock==Impl::Dock::source,juce::dontSendNotification);p.analyze.setToggleState(analysis,juce::dontSendNotification);
-    p.details.setToggleState(p.inspectorDisplayed,juce::dontSendNotification);p.details.setEnabled(!sidebar&&!visual&&!analysis&&p.dock!=Impl::Dock::source&&p.dock!=Impl::Dock::track);
+    p.details.setToggleState(p.inspectorDisplayed,juce::dontSendNotification);p.details.setEnabled(!sidebar&&!visual&&!analysis&&!generation&&p.dock!=Impl::Dock::source&&p.dock!=Impl::Dock::track);
     const int ix=p.inspector.getX(),iy=p.inspector.getY(),iw=p.inspector.getWidth();
     p.clipStart.setBounds(ix+48,iy+62,iw-94,28);p.setClipStart.setBounds(ix+iw-42,iy+62,42,28);
     p.clipProperties.setBounds(ix,iy+98,iw,28);p.trackGain.setBounds(ix,iy+154,iw,30);p.trackPan.setBounds(ix,iy+212,iw,30);

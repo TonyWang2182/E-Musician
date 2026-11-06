@@ -149,6 +149,10 @@ class Handler(BaseHTTPRequestHandler):
                 result = runtime.plan_request(value["prompt"], value.get("scope","selection"))
             elif path == "/api/apply" and set(value) == {"plan_id"}:
                 result = runtime.apply(value["plan_id"])
+            elif path == "/api/generation/preview" and set(value) == {"plan_id"}:
+                result = runtime.preview_generation_plan(value["plan_id"])
+            elif path == "/api/generation/preview" and value == {"stop": True}:
+                result = runtime.preview_generation_plan(stop=True)
             elif path == "/api/pause" and not value:
                 result = runtime.pause()
             elif path == "/api/resume" and not value:

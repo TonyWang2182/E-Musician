@@ -31,6 +31,7 @@ READ_COMMANDS = {
     "get_recording_state", "get_recording_inputs", "get_audio_devices",
     "get_automation_targets", "get_automation_points", "get_clip_controllers", "get_save_diagnostics", "get_native_instrument",
     "get_analysis_capabilities", "get_analysis_job", "get_analysis_result", "get_chord_regions", "get_analysis_preview_status",
+    "get_generation_capabilities", "get_generation_jobs", "get_generation_job", "get_generation_result",
 }
 TERMINAL_JOBS = {"completed", "ready", "applied", "failed", "cancelled", "canceled", "conflict", "stale"}
 

@@ -155,6 +155,7 @@ public:
     juce::var selectionContext() const;
     juce::Result runSelectionContextSmokeTest(juce::DynamicObject& report);
     juce::Result runBatchRefsSmokeTest(juce::DynamicObject& report);
+    juce::Result runGenerationEngineSmokeTest(juce::DynamicObject& report, const juce::File& outputDirectory);
     juce::Result runWorkspaceEngineSmokeTest(juce::DynamicObject& report, const juce::File& outputDirectory);
     juce::var eventsSince(std::uint64_t sequence) const;
     bool hasActiveJobs() const;
