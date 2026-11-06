@@ -1,0 +1,95 @@
+{
+  "status": "passed",
+  "started_utc": "20261106T122253Z",
+  "script_sha256": "86d4f24aad6ed822c78e3ab7ced9f89d5044f03a4cdbea46a2193e9b56fec485",
+  "prompt_file_sha256": "5f080976c665d1917c3b9a56d41dcb39f6741237f3a45b57abd9230383834c52",
+  "deadline_seconds": 1200,
+  "static_request": "/root/autodl-tmp/emusician/workspace/evaluations/jungle_20261106/yue2-static.json",
+  "daw_connected": false,
+  "attempts": 1,
+  "inference_started": true,
+  "before": {
+    "active_ace_jobs": [],
+    "free_gpu_mib": 14774,
+    "ace_pid": "5862"
+  },
+  "output": "/root/autodl-tmp/emusician/results/evaluations/jungle_20261106/yue2-20261106T122253Z",
+  "log": "/root/autodl-tmp/emusician/results/evaluations/jungle_20261106/yue2-20261106T122253Z/worker.log",
+  "exit_code": 0,
+  "result": {
+    "status": "passed",
+    "actual_generated_audio": true,
+    "duration_seconds": 119.99866666666667,
+    "sample_rate": 48000,
+    "channels": 2,
+    "frames": 5759936,
+    "rms": 0.1514749461917634,
+    "peak": 1.0,
+    "at_rail_fraction": 5.2951977244191605e-06,
+    "truncated": {
+      "abc": false,
+      "semantic": true
+    },
+    "semantic_tokens": 3000,
+    "abc_tokens": 3259,
+    "timing": {
+      "abc": {
+        "seconds": 44.22335682809353,
+        "prefill_seconds": 0.3025396540760994,
+        "ttft_seconds": 0.5310867689549923,
+        "output_tokens": 3260,
+        "content_tokens": 3259,
+        "output_tps": 73.71670162155212,
+        "prefix_tokens": 329,
+        "cfg_branches": 1,
+        "execution": "eager",
+        "attention": "sdpa"
+      },
+      "semantic": {
+        "seconds": 40.14966904744506,
+        "prefill_seconds": 0.09440977871417999,
+        "ttft_seconds": 0.09533760324120522,
+        "output_tokens": 3000,
+        "content_tokens": 3000,
+        "output_tps": 74.72041666034372,
+        "prefix_tokens": 3590,
+        "cfg_branches": 1,
+        "execution": "eager",
+        "attention": "sdpa"
+      },
+      "nar_seconds": 11.185427162796259,
+      "vae_seconds": 1.4044780619442463,
+      "load": {
+        "resolve_and_integrity_seconds": 5.806826967746019,
+        "mot_load_seconds": 0.30262405052781105
+      },
+      "e2e_seconds": 99.38985383883119
+    },
+    "worker_wall_seconds": 105.77398990094662,
+    "torch": "2.10.0+cu128",
+    "cuda_runtime": "12.8",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "peak_allocated_bytes": 5463789568,
+    "peak_reserved_bytes": 5649727488,
+    "audio": {
+      "path": "/root/autodl-tmp/emusician/results/evaluations/jungle_20261106/yue2-20261106T122253Z/audio.wav",
+      "bytes": 46079576,
+      "sha256": "eb6ed94cabb06043407fa392e83d38b988f023fc7d63caa3f5b179b4ff6ce989",
+      "subtype": "FLOAT"
+    },
+    "native_artifacts": "/root/autodl-tmp/emusician/results/evaluations/jungle_20261106/yue2-20261106T122253Z/native",
+    "request_identity": "18d8814ea5cbcb7dd93fa39d04385ba01aa3d50941c13cdfae260514d8c234d4",
+    "effective_prompt_sha256": "d52750d660e226231a13f846b1ac8ceecbcfb11dc446c13456b0d853333e9678",
+    "prompt_file_sha256": "5f080976c665d1917c3b9a56d41dcb39f6741237f3a45b57abd9230383834c52",
+    "output_postprocessing": "None; upstream pipeline clamps to[-1,1]; saved FLOAT WAV.",
+    "quality_and_structure_adherence": "Not established by signal validation; requires listening."
+  },
+  "wall_seconds": 107.94826765358448,
+  "minimum_free_gpu_mib": 8788,
+  "after": {
+    "active_ace_jobs": [],
+    "free_gpu_mib": 14774,
+    "ace_pid": "5862"
+  },
+  "after_healthcheck_verified": true
+}

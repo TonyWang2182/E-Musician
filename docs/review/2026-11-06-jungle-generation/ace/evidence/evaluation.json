@@ -1,0 +1,67 @@
+{
+  "id": "jungle-ace-20261106T121829Z-1a3810e6d6",
+  "status": "passed",
+  "started_utc": "20261106T121829Z",
+  "attempts_requested": 1,
+  "audio_copied_to_e": false,
+  "daw_connected": false,
+  "quality_evaluation": false,
+  "evaluation_script_sha256": "e0eba0a93c837bed5ccae740203833ec79fa82c4d83a81a580d051f1858e7ec9",
+  "prompt_file_sha256": "5f080976c665d1917c3b9a56d41dcb39f6741237f3a45b57abd9230383834c52",
+  "prompt_sha256": "d52750d660e226231a13f846b1ac8ceecbcfb11dc446c13456b0d853333e9678",
+  "prompt_characters": 1304,
+  "before": {
+    "active_ace_jobs": [],
+    "gpu_csv_name_total_used_free_mib_util_percent": "NVIDIA GeForce RTX 5090, 32607, 17337, 14774, 0"
+  },
+  "submission_http_code": 202,
+  "owned_job_final_state": "ready",
+  "owned_job_terminal": true,
+  "audio_path": "/root/autodl-tmp/emusician/jobs/generation/jungle-ace-20261106T121829Z-1a3810e6d6/audio.wav",
+  "actual_audio": {
+    "frames": 5760000,
+    "sample_rate": 48000,
+    "channels": 2,
+    "sample_width_bytes": 2,
+    "duration_seconds": 120.0
+  },
+  "audio_sha256": "0b01f1e6a15af055ce7483bba5f4cd2f647e39d1e34059684100ae6cfa9986f4",
+  "audio_bytes": 23040044,
+  "model": {
+    "id": "ace-step-1.5-xl-turbo",
+    "source_commit": "ca1e85fe9430179831e6bc6be790c332190a3866",
+    "weights_revision": "4228da3a418e1f1a04d9799e8040b62860d26b7a8c4e80ce374a17e5418cc4bf",
+    "weights_manifest": "ace-model-lock.json",
+    "source": "https://github.com/ace-step/ACE-Step-1.5",
+    "weights_source": "https://modelscope.cn/models/ACE-Step/acestep-v15-xl-turbo",
+    "revision": "4228da3a418e1f1a04d9799e8040b62860d26b7a8c4e80ce374a17e5418cc4bf",
+    "language_model": "acestep-5Hz-lm-1.7B",
+    "backend": "pytorch",
+    "dtype": "bfloat16",
+    "steps": 8
+  },
+  "metrics": {
+    "cold_load": false,
+    "load_seconds": 0.0007163286209106445,
+    "inference_seconds": 13.630906347185373,
+    "total_seconds": 13.859321650117636,
+    "gpu_peak_allocated_bytes": 16511014400,
+    "gpu_peak_reserved_bytes": 17565745152,
+    "peak": 0.8912509083747864,
+    "rms": 0.14532303536311822,
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "torch": "2.10.0+cu128",
+    "cuda": "12.8"
+  },
+  "conditioning": {
+    "bpm": 170,
+    "time_signature": "4/4",
+    "duration_seconds": 120,
+    "timing_is_exact": false
+  },
+  "wall_seconds": 14.759540159255266,
+  "after": {
+    "active_ace_jobs": [],
+    "gpu_csv_name_total_used_free_mib_util_percent": "NVIDIA GeForce RTX 5090, 32607, 17337, 14774, 0"
+  }
+}

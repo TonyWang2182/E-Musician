@@ -1,0 +1,229 @@
+{
+  "checked_utc": "2026-11-06T12:30:00.647724+00:00",
+  "same_original_prompt": true,
+  "effective_prompt_sha256": "d52750d660e226231a13f846b1ac8ceecbcfb11dc446c13456b0d853333e9678",
+  "seed": 170611,
+  "real_generation_attempts": {
+    "ace": 1,
+    "yue2": 1
+  },
+  "executed_scripts_match_final_source": true,
+  "analysis_matches_generated_audio_hashes": true,
+  "daw_build_source_files_unchanged": 257,
+  "small_metadata_only": true,
+  "listening_performed": false,
+  "bpm170_verified": false,
+  "yue2_semantic_capped": true,
+  "scripts_sha256": {
+    "scripts/cloud/evaluations/jungle_20261106/ace_once.py": "e0eba0a93c837bed5ccae740203833ec79fa82c4d83a81a580d051f1858e7ec9",
+    "scripts/cloud/evaluations/jungle_20261106/analyze.py": "064c8f87227785195b24618bbdf18a871134ac1d5768ce5155a2730b15b4195b",
+    "scripts/cloud/evaluations/jungle_20261106/analyze_beats.py": "f86fd35d548651af08f80acf22dee3bc091a53fbb989f11f5a536f58507423fd",
+    "scripts/cloud/evaluations/jungle_20261106/analyze_checks.py": "e93e100c92e905fdf74f2384a4a772b2bbcf30e111f9898d7a5b12403df063be",
+    "scripts/cloud/evaluations/jungle_20261106/analyze_index.py": "c9973faf5bd0d10f70481b911dff69f3b1dce42b6b9a68e640edc088907c3ad4",
+    "scripts/cloud/evaluations/jungle_20261106/yue2_eval.py": "86d4f24aad6ed822c78e3ab7ced9f89d5044f03a4cdbea46a2193e9b56fec485",
+    "scripts/cloud/evaluations/jungle_20261106/yue2_record.py": "6ccbd00e2087a394acd03437979394281458ecf1126e1706c63bc6a3b6d36102",
+    "scripts/cloud/evaluations/jungle_20261106/yue2_test.py": "1d959281780c5fdc6d954020717ceb199de254ef3a09f7f0fcfc9a3e1af44642"
+  },
+  "command_records": [
+    {
+      "record": "20261106T121629.045181Z-14cfda61f7.json",
+      "action": "jungle-yue2-inspect",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T121630.372104Z-a2b7ebbde4.json",
+      "action": "jungle-yue2-inspect",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T121631.454093Z-69de9dc7b3.json",
+      "action": "jungle-yue2-inspect",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T121656.561363Z-ae2edfbeee.json",
+      "action": "jungle-yue2-inspect-runtime",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T121657.769787Z-bf743e753d.json",
+      "action": "jungle-yue2-inspect-runtime",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T121658.845056Z-6d2a850678.json",
+      "action": "jungle-yue2-inspect-runtime",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T121745.349422Z-bbced69230.json",
+      "action": "jungle-yue2-inspect-codec",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T121746.759719Z-ec4c220c6b.json",
+      "action": "jungle-yue2-inspect-codec",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T121818.105110Z-1974e34b28.json",
+      "action": "jungle-ace-stage",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T121819.224005Z-96f516418a.json",
+      "action": "jungle-ace-stage",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T121828.283919Z-ebaab29915.json",
+      "action": "jungle-ace-single-generation",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T121958.675297Z-78bb056d99.json",
+      "action": "jungle-ace-small-evidence",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122014.694527Z-7ef7e13bf3.json",
+      "action": "jungle-yue2-upload",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122015.845288Z-00e581926f.json",
+      "action": "jungle-yue2-upload",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122055.327099Z-2642b093cc.json",
+      "action": "jungle-yue2-check",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122211.881232Z-2fee5c03bd.json",
+      "action": "jungle-yue2-fault-tests",
+      "status": "failed"
+    },
+    {
+      "record": "20261106T122221.113957Z-811d97124a.json",
+      "action": "jungle-yue2-fault-tests",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122226.795402Z-d8fbc968d0.json",
+      "action": "jungle-yue2-upload",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122227.896259Z-3793bace75.json",
+      "action": "jungle-yue2-upload",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122234.249777Z-462fe89796.json",
+      "action": "jungle-yue2-check",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122252.048283Z-1a49fb6983.json",
+      "action": "jungle-yue2-run",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122258.423122Z-c44ba19fa3.json",
+      "action": "jungle-analysis-prepare",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122259.679259Z-217223ad3c.json",
+      "action": "jungle-analysis-prepare",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122300.950594Z-8166a31516.json",
+      "action": "jungle-analysis-prepare",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122302.221417Z-551efcb8fb.json",
+      "action": "jungle-analysis-prepare",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122304.078941Z-cc505a746b.json",
+      "action": "jungle-analysis-synthetic-checks",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122317.212125Z-6d58b4d008.json",
+      "action": "jungle-ace-objective-audio-review",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122325.746872Z-8d9f8f8f27.json",
+      "action": "jungle-yue2-collect",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122426.147415Z-40e3874ba1.json",
+      "action": "jungle-yue2-collect",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122459.076660Z-e866b5dce1.json",
+      "action": "jungle-listening-index-stage",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122527.322039Z-f91f2a9de3.json",
+      "action": "jungle-yue2-objective-audio-review",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122540.188343Z-2ed4b4a0c8.json",
+      "action": "jungle-yue2-collect",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122610.582241Z-6dd9646b20.json",
+      "action": "jungle-listening-index-render",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122611.990049Z-d7b8eba727.json",
+      "action": "jungle-listening-index-render",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122702.577301Z-6639f877a8.json",
+      "action": "jungle-listening-link-verification",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122704.462119Z-249e1d3755.json",
+      "action": "jungle-analysis-small-evidence-copy",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122705.938707Z-9602fcd3c6.json",
+      "action": "jungle-analysis-small-evidence-copy",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122707.221017Z-8ea72437e0.json",
+      "action": "jungle-analysis-small-evidence-copy",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122708.538613Z-4c13585b57.json",
+      "action": "jungle-analysis-small-evidence-copy",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T122949.732010Z-81859d29ae.json",
+      "action": "jungle-final-evidence-review",
+      "status": "failed"
+    }
+  ]
+}

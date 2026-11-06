@@ -9524,3 +9524,499 @@ print('terminal command receipts',len(records))
 - 详细证据：docs/review/2026-11-06-cloud-model-library/RESULTS.md、CATALOG.json、VERIFICATION.json。更新CONTEXT、DEVELOPMENT、ARCHITECTURE和独立ADR；暂不合并main。
 - 提交前核对补充：首次git diff --check指出原样CLI help的尾随空格；保留原始帮助输出并用.gitattributes明确其为逐字证据。scores/artifacts.json显式保留原始换行，定向重新暂存后全部部署脚本的Git字节与VERIFICATION记录SHA相同；没有修改已验证推理源码。
 - 同步记录：实现0639d5332d84c3558354ee0642b6a31df1461a62已推送并核对GitHub的feature/cloud-model-library；main仍d4ed6c8。PUBLISH.json记录本轮仅小型代码/证据同步，没有E盘新模型备份或DAW接入。随后仅文档提交收录同步回执。
+
+### 2026-11-06T20:16:29+08:00 · jungle-yue2-inspect · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 0.978s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "cat /root/autodl-tmp/emusician/workspace/models/yue2/YuE-1116bea76032bee5668e5f097294d082fa0b84f0/docs/generation.md"`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `c4ad57fb4293f4ce400be1bfd37ff6fb8a40b31aec6236ee875c85b25dfe46b5`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T121629.045181Z-14cfda61f7.json) · [Raw log](../build-logs/20261106T121629.045181Z-14cfda61f7.log)
+- [Exact process output](../build-logs/20261106T121629.045181Z-14cfda61f7.raw.log)
+
+### 2026-11-06T20:16:30+08:00 · jungle-yue2-inspect · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 0.679s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "cat /root/autodl-tmp/emusician/workspace/models/yue2/YuE-1116bea76032bee5668e5f097294d082fa0b84f0/examples/instrumental_clip.py"`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `c4ad57fb4293f4ce400be1bfd37ff6fb8a40b31aec6236ee875c85b25dfe46b5`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T121630.372104Z-a2b7ebbde4.json) · [Raw log](../build-logs/20261106T121630.372104Z-a2b7ebbde4.log)
+- [Exact process output](../build-logs/20261106T121630.372104Z-a2b7ebbde4.raw.log)
+
+### 2026-11-06T20:16:31+08:00 · jungle-yue2-inspect · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 0.910s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "cat /root/autodl-tmp/emusician/workspace/models/yue2/YuE-1116bea76032bee5668e5f097294d082fa0b84f0/src/yue2/protocol.py"`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `c4ad57fb4293f4ce400be1bfd37ff6fb8a40b31aec6236ee875c85b25dfe46b5`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T121631.454093Z-69de9dc7b3.json) · [Raw log](../build-logs/20261106T121631.454093Z-69de9dc7b3.log)
+- [Exact process output](../build-logs/20261106T121631.454093Z-69de9dc7b3.raw.log)
+
+### 2026-11-06T20:16:56+08:00 · jungle-yue2-inspect-runtime · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 0.922s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "cat /root/autodl-tmp/emusician/workspace/models/yue2/YuE-1116bea76032bee5668e5f097294d082fa0b84f0/src/yue2/pipeline.py"`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `62db0fc931325568c928667de3f6a0a2b0a763f698118c8449594ff45fb4eb83`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T121656.561363Z-ae2edfbeee.json) · [Raw log](../build-logs/20261106T121656.561363Z-ae2edfbeee.log)
+- [Exact process output](../build-logs/20261106T121656.561363Z-ae2edfbeee.raw.log)
+
+### 2026-11-06T20:16:57+08:00 · jungle-yue2-inspect-runtime · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 0.763s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "cat /root/autodl-tmp/emusician/workspace/models/yue2/YuE-1116bea76032bee5668e5f097294d082fa0b84f0/docs/hardware.md"`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `62db0fc931325568c928667de3f6a0a2b0a763f698118c8449594ff45fb4eb83`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T121657.769787Z-bf743e753d.json) · [Raw log](../build-logs/20261106T121657.769787Z-bf743e753d.log)
+- [Exact process output](../build-logs/20261106T121657.769787Z-bf743e753d.raw.log)
+
+### 2026-11-06T20:16:58+08:00 · jungle-yue2-inspect-runtime · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 0.748s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "cat /root/autodl-tmp/emusician/workspace/models/yue2/YuE-1116bea76032bee5668e5f097294d082fa0b84f0/skills/yue2-music/instrumental/README.md"`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `62db0fc931325568c928667de3f6a0a2b0a763f698118c8449594ff45fb4eb83`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T121658.845056Z-6d2a850678.json) · [Raw log](../build-logs/20261106T121658.845056Z-6d2a850678.log)
+- [Exact process output](../build-logs/20261106T121658.845056Z-6d2a850678.raw.log)
+
+## 2026-11-06 用户 Jungle 提示词 ACE/YuE2 对照启动
+
+- 用户授权同一完整170BPM UK jungle提示词进行真实生成并报告。本轮只执行云端评测，不改变DAW，不下载模型/音频E。
+- 新分支eval/jungle-ace-yue2-20261106，基线bfb7853。prompt原文和计划保存在docs/review/2026-11-06-jungle-generation/；三路分别负责ACE、YuE2与CPU后分析，根管理共享GPU时段和汇总。
+- ACE先目标120秒、170BPM、4/4、seed170611、instrumental=true、歌词空；YuE2核对固定源码后用真实可支持的预算参数，不把token上限声称为精确120秒。不截断或改写prompt，不重复抽取最好结果。
+- 新任务所有实际执行通过Recorder保留命令、日志和终态；结果区分音频可解析、自动节拍估计与尚未进行的人工听感。
+
+### 2026-11-06T20:17:45+08:00 · jungle-yue2-inspect-codec · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.068s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "cat /root/autodl-tmp/emusician/workspace/models/yue2/YuE-1116bea76032bee5668e5f097294d082fa0b84f0/src/yue2/nar.py"`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `39be0bdbaf2fbb66346ab73b1726eaaa89e75f26b90e587a0f926a4ca3a792dd`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T121745.349422Z-bbced69230.json) · [Raw log](../build-logs/20261106T121745.349422Z-bbced69230.log)
+- [Exact process output](../build-logs/20261106T121745.349422Z-bbced69230.raw.log)
+
+### 2026-11-06T20:17:46+08:00 · jungle-yue2-inspect-codec · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 0.889s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "cat /root/autodl-tmp/emusician/workspace/models/yue2/YuE-1116bea76032bee5668e5f097294d082fa0b84f0/src/yue2/modeling_vae.py"`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `39be0bdbaf2fbb66346ab73b1726eaaa89e75f26b90e587a0f926a4ca3a792dd`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T121746.759719Z-ec4c220c6b.json) · [Raw log](../build-logs/20261106T121746.759719Z-ec4c220c6b.log)
+- [Exact process output](../build-logs/20261106T121746.759719Z-ec4c220c6b.raw.log)
+
+### 2026-11-06T20:18:18+08:00 · jungle-ace-stage · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.875s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/evaluations/jungle-20261106"`
+- Context: One full 1304-character prompt; small scripts/text only; no service/environment changes
+- Source SHA-256: `c95516a2f1ba07eb6e179ddc481e8aba76ba791e5e33673cbb5183ba317d6819`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T121818.105110Z-1974e34b28.json) · [Raw log](../build-logs/20261106T121818.105110Z-1974e34b28.log)
+- [Exact process output](../build-logs/20261106T121818.105110Z-1974e34b28.raw.log)
+
+### 2026-11-06T20:18:19+08:00 · jungle-ace-stage · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.134s.
+- Command: `scp -o BatchMode=yes scripts\cloud\evaluations\jungle_20261106\ace_once.py docs/review/2026-11-06-jungle-generation/prompt.txt emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/jungle-20261106/`
+- Context: One full 1304-character prompt; small scripts/text only; no service/environment changes
+- Source SHA-256: `c95516a2f1ba07eb6e179ddc481e8aba76ba791e5e33673cbb5183ba317d6819`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T121819.224005Z-96f516418a.json) · [Raw log](../build-logs/20261106T121819.224005Z-96f516418a.log)
+- [Exact process output](../build-logs/20261106T121819.224005Z-96f516418a.raw.log)
+
+### 2026-11-06T20:18:28+08:00 · jungle-ace-single-generation · succeeded
+
+- Config: Release; exit code: 0; elapsed: 15.772s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/evaluations/jungle-20261106/ace_once.py --approved-slot --prompt /root/autodl-tmp/emusician/workspace/evaluations/jungle-20261106/prompt.txt"`
+- Context: Single unchanged user prompt; 120s 170BPM 4/4 seed170611 instrumental; shared GPU lock; cloud output only
+- Source SHA-256: `c95516a2f1ba07eb6e179ddc481e8aba76ba791e5e33673cbb5183ba317d6819`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T121828.283919Z-ebaab29915.json) · [Raw log](../build-logs/20261106T121828.283919Z-ebaab29915.log)
+- [Exact process output](../build-logs/20261106T121828.283919Z-ebaab29915.raw.log)
+
+### 2026-11-06T20:19:58+08:00 · jungle-ace-small-evidence · succeeded
+
+- Config: Release; exit code: 0; elapsed: 3.367s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/jungle-20261106/jungle-ace-20261106T121829Z-1a3810e6d6/request.json emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/jungle-20261106/jungle-ace-20261106T121829Z-1a3810e6d6/capabilities.json emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/jungle-20261106/jungle-ace-20261106T121829Z-1a3810e6d6/receipt.json emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/jungle-20261106/jungle-ace-20261106T121829Z-1a3810e6d6/evaluation.json docs\review\2026-11-06-jungle-generation\ace\evidence`
+- Context: Copy only request/capability/receipt/evaluation JSON; no audio or model download
+- Source SHA-256: `c95516a2f1ba07eb6e179ddc481e8aba76ba791e5e33673cbb5183ba317d6819`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T121958.675297Z-78bb056d99.json) · [Raw log](../build-logs/20261106T121958.675297Z-78bb056d99.log)
+- [Exact process output](../build-logs/20261106T121958.675297Z-78bb056d99.raw.log)
+
+### 2026-11-06T20:20:14+08:00 · jungle-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 0.858s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/evaluations/jungle_20261106"`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `c4b17d3a7bb0ad03a206bd44b06c77ea80bf0e6c63fceb54621b398d7b9d348d`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122014.694527Z-7ef7e13bf3.json) · [Raw log](../build-logs/20261106T122014.694527Z-7ef7e13bf3.log)
+- [Exact process output](../build-logs/20261106T122014.694527Z-7ef7e13bf3.raw.log)
+
+### 2026-11-06T20:20:15+08:00 · jungle-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.226s.
+- Command: `scp E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\evaluations\jungle_20261106\yue2_eval.py E:\MusicAgent&DAW\worktrees\audio-analysis\docs\review\2026-11-06-jungle-generation\prompt.txt emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/jungle_20261106/`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `c4b17d3a7bb0ad03a206bd44b06c77ea80bf0e6c63fceb54621b398d7b9d348d`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122015.845288Z-00e581926f.json) · [Raw log](../build-logs/20261106T122015.845288Z-00e581926f.log)
+- [Exact process output](../build-logs/20261106T122015.845288Z-00e581926f.raw.log)
+
+### 2026-11-06T20:20:55+08:00 · jungle-yue2-check · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 2.466s.
+- Command: `ssh -o BatchMode=yes -o ServerAliveInterval=20 emusician-autodl "/root/autodl-tmp/emusician/envs/yue2/bin/python /root/autodl-tmp/emusician/workspace/evaluations/jungle_20261106/yue2_eval.py --static-check"`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `c4b17d3a7bb0ad03a206bd44b06c77ea80bf0e6c63fceb54621b398d7b9d348d`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122055.327099Z-2642b093cc.json) · [Raw log](../build-logs/20261106T122055.327099Z-2642b093cc.log)
+- [Exact process output](../build-logs/20261106T122055.327099Z-2642b093cc.raw.log)
+
+### 2026-11-06T20:22:11+08:00 · jungle-yue2-fault-tests · failed
+
+- Config: local/win32/Python3.14; exit code: 1; elapsed: 1.345s.
+- Command: `C:\Python314\python.exe -m unittest discover -s E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\evaluations\jungle_20261106 -p yue2_test.py -v`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `5081b5f913ee7f62f2c809d419916b4268c6fe3f1a0e908dbf3b7dc32aad815e`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122211.881232Z-2fee5c03bd.json) · [Raw log](../build-logs/20261106T122211.881232Z-2fee5c03bd.log)
+- [Exact process output](../build-logs/20261106T122211.881232Z-2fee5c03bd.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T122211.881232Z-2fee5c03bd.log
+
+### 2026-11-06T20:22:21+08:00 · jungle-yue2-fault-tests · succeeded
+
+- Config: local/win32/Python3.14; exit code: 0; elapsed: 1.054s.
+- Command: `C:\Python314\python.exe -m unittest discover -s E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\evaluations\jungle_20261106 -p yue2_test.py -v`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `1ebe51f69e5bd1a491369ed4c87501d260431d1627112150ca691a59cee7cd94`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122221.113957Z-811d97124a.json) · [Raw log](../build-logs/20261106T122221.113957Z-811d97124a.log)
+- [Exact process output](../build-logs/20261106T122221.113957Z-811d97124a.raw.log)
+
+### 2026-11-06T20:22:26+08:00 · jungle-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 0.842s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/evaluations/jungle_20261106"`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `1ebe51f69e5bd1a491369ed4c87501d260431d1627112150ca691a59cee7cd94`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122226.795402Z-d8fbc968d0.json) · [Raw log](../build-logs/20261106T122226.795402Z-d8fbc968d0.log)
+- [Exact process output](../build-logs/20261106T122226.795402Z-d8fbc968d0.raw.log)
+
+### 2026-11-06T20:22:27+08:00 · jungle-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.330s.
+- Command: `scp E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\evaluations\jungle_20261106\yue2_eval.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\evaluations\jungle_20261106\yue2_test.py E:\MusicAgent&DAW\worktrees\audio-analysis\docs\review\2026-11-06-jungle-generation\prompt.txt emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/jungle_20261106/`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `1ebe51f69e5bd1a491369ed4c87501d260431d1627112150ca691a59cee7cd94`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122227.896259Z-3793bace75.json) · [Raw log](../build-logs/20261106T122227.896259Z-3793bace75.log)
+- [Exact process output](../build-logs/20261106T122227.896259Z-3793bace75.raw.log)
+
+### 2026-11-06T20:22:34+08:00 · jungle-yue2-check · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 2.497s.
+- Command: `ssh -o BatchMode=yes -o ServerAliveInterval=20 emusician-autodl "/root/autodl-tmp/emusician/envs/yue2/bin/python /root/autodl-tmp/emusician/workspace/evaluations/jungle_20261106/yue2_eval.py --static-check"`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `1ebe51f69e5bd1a491369ed4c87501d260431d1627112150ca691a59cee7cd94`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122234.249777Z-462fe89796.json) · [Raw log](../build-logs/20261106T122234.249777Z-462fe89796.log)
+- [Exact process output](../build-logs/20261106T122234.249777Z-462fe89796.raw.log)
+
+### 2026-11-06T20:22:58+08:00 · jungle-analysis-prepare · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.985s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/tools/evaluations/jungle_20261106 /root/autodl-tmp/emusician/logs/evaluations/jungle_20261106"`
+- Context: Stage CPU-only objective audio analyzer and bounded BeatThis worker; no inference yet
+- Source SHA-256: `9dadd55ccfe2be507eb4d5e774b51d297db3c1071a1dd03e08b410b5a3368943`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122258.423122Z-c44ba19fa3.json) · [Raw log](../build-logs/20261106T122258.423122Z-c44ba19fa3.log)
+- [Exact process output](../build-logs/20261106T122258.423122Z-c44ba19fa3.raw.log)
+
+### 2026-11-06T20:22:59+08:00 · jungle-analysis-prepare · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.021s.
+- Command: `scp -o BatchMode=yes scripts/cloud/evaluations/jungle_20261106/analyze.py emusician-autodl:/root/autodl-tmp/emusician/tools/evaluations/jungle_20261106/analyze.py`
+- Context: Stage CPU-only objective audio analyzer and bounded BeatThis worker; no inference yet
+- Source SHA-256: `9dadd55ccfe2be507eb4d5e774b51d297db3c1071a1dd03e08b410b5a3368943`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122259.679259Z-217223ad3c.json) · [Raw log](../build-logs/20261106T122259.679259Z-217223ad3c.log)
+- [Exact process output](../build-logs/20261106T122259.679259Z-217223ad3c.raw.log)
+
+### 2026-11-06T20:23:00+08:00 · jungle-analysis-prepare · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.012s.
+- Command: `scp -o BatchMode=yes scripts/cloud/evaluations/jungle_20261106/analyze_beats.py emusician-autodl:/root/autodl-tmp/emusician/tools/evaluations/jungle_20261106/analyze_beats.py`
+- Context: Stage CPU-only objective audio analyzer and bounded BeatThis worker; no inference yet
+- Source SHA-256: `9dadd55ccfe2be507eb4d5e774b51d297db3c1071a1dd03e08b410b5a3368943`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122300.950594Z-8166a31516.json) · [Raw log](../build-logs/20261106T122300.950594Z-8166a31516.log)
+- [Exact process output](../build-logs/20261106T122300.950594Z-8166a31516.raw.log)
+
+### 2026-11-06T20:23:02+08:00 · jungle-analysis-prepare · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.932s.
+- Command: `scp -o BatchMode=yes scripts/cloud/evaluations/jungle_20261106/analyze_checks.py emusician-autodl:/root/autodl-tmp/emusician/tools/evaluations/jungle_20261106/analyze_checks.py`
+- Context: Stage CPU-only objective audio analyzer and bounded BeatThis worker; no inference yet
+- Source SHA-256: `9dadd55ccfe2be507eb4d5e774b51d297db3c1071a1dd03e08b410b5a3368943`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122302.221417Z-551efcb8fb.json) · [Raw log](../build-logs/20261106T122302.221417Z-551efcb8fb.log)
+- [Exact process output](../build-logs/20261106T122302.221417Z-551efcb8fb.raw.log)
+
+### 2026-11-06T20:23:04+08:00 · jungle-analysis-synthetic-checks · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.073s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 /root/autodl-tmp/emusician/envs/mir-torch/bin/python /root/autodl-tmp/emusician/tools/evaluations/jungle_20261106/analyze_checks.py 2>&1 | tee /root/autodl-tmp/emusician/logs/evaluations/jungle_20261106/analysis-synthetic.log; exit ${PIPESTATUS[0]}'"`
+- Context: Three small synthetic CPU tests of RMS silence rail correlation and nonfinite handling; no model call
+- Source SHA-256: `9dadd55ccfe2be507eb4d5e774b51d297db3c1071a1dd03e08b410b5a3368943`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122304.078941Z-cc505a746b.json) · [Raw log](../build-logs/20261106T122304.078941Z-cc505a746b.log)
+- [Exact process output](../build-logs/20261106T122304.078941Z-cc505a746b.raw.log)
+
+### 2026-11-06T20:23:17+08:00 · jungle-ace-objective-audio-review · succeeded
+
+- Config: Release; exit code: 0; elapsed: 8.542s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2 /root/autodl-tmp/emusician/envs/mir-torch/bin/python /root/autodl-tmp/emusician/tools/evaluations/jungle_20261106/analyze.py --input /root/autodl-tmp/emusician/jobs/generation/jungle-ace-20261106T121829Z-1a3810e6d6/audio.wav --label ACE --expected-sha256 0b01f1e6a15af055ce7483bba5f4cd2f647e39d1e34059684100ae6cfa9986f4 --beats 2>&1 | tee /root/autodl-tmp/emusician/logs/evaluations/jungle_20261106/ace-analysis.log; exit ${PIPESTATUS[0]}'"`
+- Context: Actual ACE120s audio statistics and bounded BeatThis CPU estimate; two threads, no CUDA, no listening claim
+- Source SHA-256: `9dadd55ccfe2be507eb4d5e774b51d297db3c1071a1dd03e08b410b5a3368943`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122317.212125Z-6d58b4d008.json) · [Raw log](../build-logs/20261106T122317.212125Z-6d58b4d008.log)
+- [Exact process output](../build-logs/20261106T122317.212125Z-6d58b4d008.raw.log)
+
+### 2026-11-06T20:23:25+08:00 · jungle-yue2-collect · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.575s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/jungle_20261106/yue2-*.json E:\MusicAgent&DAW\worktrees\audio-analysis\docs\review\2026-11-06-jungle-generation\yue2`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `9dadd55ccfe2be507eb4d5e774b51d297db3c1071a1dd03e08b410b5a3368943`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122325.746872Z-8d9f8f8f27.json) · [Raw log](../build-logs/20261106T122325.746872Z-8d9f8f8f27.log)
+- [Exact process output](../build-logs/20261106T122325.746872Z-8d9f8f8f27.raw.log)
+
+### 2026-11-06T20:24:26+08:00 · jungle-yue2-collect · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 2.117s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/jungle_20261106/yue2-*.json E:\MusicAgent&DAW\worktrees\audio-analysis\docs\review\2026-11-06-jungle-generation\yue2`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `9dadd55ccfe2be507eb4d5e774b51d297db3c1071a1dd03e08b410b5a3368943`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122426.147415Z-40e3874ba1.json) · [Raw log](../build-logs/20261106T122426.147415Z-40e3874ba1.log)
+- [Exact process output](../build-logs/20261106T122426.147415Z-40e3874ba1.raw.log)
+
+### 2026-11-06T20:22:52+08:00 · jungle-yue2-run · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 109.030s.
+- Command: `ssh -o BatchMode=yes -o ServerAliveInterval=20 emusician-autodl "/root/autodl-tmp/emusician/envs/yue2/bin/python /root/autodl-tmp/emusician/workspace/evaluations/jungle_20261106/yue2_eval.py --approved-gpu-slot"`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `1ebe51f69e5bd1a491369ed4c87501d260431d1627112150ca691a59cee7cd94`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122252.048283Z-1a49fb6983.json) · [Raw log](../build-logs/20261106T122252.048283Z-1a49fb6983.log)
+- [Exact process output](../build-logs/20261106T122252.048283Z-1a49fb6983.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T20:24:59+08:00 · jungle-listening-index-stage · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.190s.
+- Command: `scp -o BatchMode=yes scripts/cloud/evaluations/jungle_20261106/analyze_index.py emusician-autodl:/root/autodl-tmp/emusician/tools/evaluations/jungle_20261106/analyze_index.py`
+- Context: Stage cloud-only native audio listening index builder; no server or audio copies
+- Source SHA-256: `e6c5bac1ddc986f431210f41b9a5dd3293f5ba5412ffa77536c1788cf8e120a1`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122459.076660Z-e866b5dce1.json) · [Raw log](../build-logs/20261106T122459.076660Z-e866b5dce1.log)
+- [Exact process output](../build-logs/20261106T122459.076660Z-e866b5dce1.raw.log)
+
+### 2026-11-06T20:25:27+08:00 · jungle-yue2-objective-audio-review · succeeded
+
+- Config: Release; exit code: 0; elapsed: 8.267s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2 /root/autodl-tmp/emusician/envs/mir-torch/bin/python /root/autodl-tmp/emusician/tools/evaluations/jungle_20261106/analyze.py --input /root/autodl-tmp/emusician/results/evaluations/jungle_20261106/yue2-20261106T122253Z/audio.wav --label YuE2 --expected-sha256 eb6ed94cabb06043407fa392e83d38b988f023fc7d63caa3f5b179b4ff6ce989 --beats 2>&1 | tee /root/autodl-tmp/emusician/logs/evaluations/jungle_20261106/yue2-analysis.log; exit ${PIPESTATUS[0]}'"`
+- Context: Actual YuE2 FLOAT output statistics and bounded BeatThis CPU estimate; preserve original audio and truncation caveat
+- Source SHA-256: `e6c5bac1ddc986f431210f41b9a5dd3293f5ba5412ffa77536c1788cf8e120a1`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122527.322039Z-f91f2a9de3.json) · [Raw log](../build-logs/20261106T122527.322039Z-f91f2a9de3.log)
+- [Exact process output](../build-logs/20261106T122527.322039Z-f91f2a9de3.raw.log)
+
+### 2026-11-06T20:25:40+08:00 · jungle-yue2-collect · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.797s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/jungle_20261106/yue2-*.json E:\MusicAgent&DAW\worktrees\audio-analysis\docs\review\2026-11-06-jungle-generation\yue2`
+- Context: Original prompt evaluation; no DAW changes or model/audio downloads to E; GPU only for separately authorized run action.
+- Source SHA-256: `e6c5bac1ddc986f431210f41b9a5dd3293f5ba5412ffa77536c1788cf8e120a1`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122540.188343Z-2ed4b4a0c8.json) · [Raw log](../build-logs/20261106T122540.188343Z-2ed4b4a0c8.log)
+- [Exact process output](../build-logs/20261106T122540.188343Z-2ed4b4a0c8.raw.log)
+
+### 2026-11-06T20:26:10+08:00 · jungle-listening-index-render · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.150s.
+- Command: `scp -o BatchMode=yes scripts/cloud/evaluations/jungle_20261106/analyze_index.py emusician-autodl:/root/autodl-tmp/emusician/tools/evaluations/jungle_20261106/analyze_index.py`
+- Context: Build authenticated Jupyter cloud-only audio links and cautious two-model summary; original audio unchanged
+- Source SHA-256: `4221a990fe0915a6406e7354cbd8cba9dfade29079870ae4e27530d39120a6f8`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122610.582241Z-6dd9646b20.json) · [Raw log](../build-logs/20261106T122610.582241Z-6dd9646b20.log)
+- [Exact process output](../build-logs/20261106T122610.582241Z-6dd9646b20.raw.log)
+
+### 2026-11-06T20:26:11+08:00 · jungle-listening-index-render · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.796s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 /root/autodl-tmp/emusician/envs/mir-torch/bin/python /root/autodl-tmp/emusician/tools/evaluations/jungle_20261106/analyze_index.py 2>&1 | tee /root/autodl-tmp/emusician/logs/evaluations/jungle_20261106/listening-index.log; exit ${PIPESTATUS[0]}'"`
+- Context: Build authenticated Jupyter cloud-only audio links and cautious two-model summary; original audio unchanged
+- Source SHA-256: `4221a990fe0915a6406e7354cbd8cba9dfade29079870ae4e27530d39120a6f8`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122611.990049Z-d7b8eba727.json) · [Raw log](../build-logs/20261106T122611.990049Z-d7b8eba727.log)
+- [Exact process output](../build-logs/20261106T122611.990049Z-d7b8eba727.raw.log)
+
+### 2026-11-06T20:27:02+08:00 · jungle-listening-link-verification · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.041s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'CUDA_VISIBLE_DEVICES= /root/miniconda3/bin/python - <<'\"'\"'PY'\"'\"'
+from html.parser import HTMLParser
+from pathlib import Path
+from urllib.parse import unquote,urlparse
+import hashlib,json
+root=Path('\"'\"'/root/autodl-tmp/emusician'\"'\"')
+base=root/'\"'\"'results/evaluations/jungle_20261106/analysis'\"'\"'
+class Links(HTMLParser):
+ def __init__(self):super().__init__();self.links=[];self.audio=[]
+ def handle_starttag(self,tag,attrs):
+  d=dict(attrs)
+  if tag=='\"'\"'a'\"'\"' and '\"'\"'href'\"'\"' in d:self.links.append(d['\"'\"'href'\"'\"'])
+  if tag=='\"'\"'audio'\"'\"':self.audio.append(d['\"'\"'src'\"'\"'])
+checks=[]
+for path in [base/'\"'\"'index.html'\"'\"',base/'\"'\"'ace/report.html'\"'\"',base/'\"'\"'yue2/report.html'\"'\"']:
+ text=path.read_text();p=Links();p.feed(text)
+ assert '\"'\"'base64'\"'\"' not in '\"'\"''\"'\"'.join(p.audio)
+ for link in p.links+p.audio:
+  u=urlparse(link);assert not u.scheme and not u.netloc
+  resolved=(path.parent/unquote(u.path)).resolve();assert resolved.is_relative_to(root) and resolved.is_file()
+ checks.append({'\"'\"'html'\"'\"':str(path),'\"'\"'audio_controls'\"'\"':len(p.audio),'\"'\"'verified_links'\"'\"':len(p.links)+len(p.audio)})
+summary=json.load(open(base/'\"'\"'summary.json'\"'\"'))
+for row in summary['\"'\"'reports'\"'\"']:
+ p=Path(row['\"'\"'report_path'\"'\"']);assert hashlib.sha256(p.read_bytes()).hexdigest()==row['\"'\"'report_sha256'\"'\"']
+ d=json.loads(p.read_text());assert d['\"'\"'beat_estimate'\"'\"']['\"'\"'cuda_initialized'\"'\"'] is False
+ audio=Path(d['\"'\"'source'\"'\"']['\"'\"'path'\"'\"']);assert hashlib.sha256(audio.read_bytes()).hexdigest()==d['\"'\"'source'\"'\"']['\"'\"'sha256'\"'\"']==d['\"'\"'beat_estimate'\"'\"']['\"'\"'input_sha256'\"'\"']
+ assert d['\"'\"'listened'\"'\"'] is False and d['\"'\"'structure_evaluated'\"'\"'] is False
+report={'\"'\"'passed'\"'\"':True,'\"'\"'html_checks'\"'\"':checks,'\"'\"'audio_sha_unchanged'\"'\"':True,'\"'\"'cuda_initialized'\"'\"':False,'\"'\"'listened'\"'\"':False,'\"'\"'audio_copied_to_E'\"'\"':False}
+(base/'\"'\"'verification.json'\"'\"').write_text(json.dumps(report,indent=2)+'\"'\"'\n'\"'\"');print(json.dumps(report))
+PY'"`
+- Context: Validate local HTML audio/report links, finite JSON and unchanged audio SHA; no audio transfer or listening
+- Source SHA-256: `4221a990fe0915a6406e7354cbd8cba9dfade29079870ae4e27530d39120a6f8`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122702.577301Z-6639f877a8.json) · [Raw log](../build-logs/20261106T122702.577301Z-6639f877a8.log)
+- [Exact process output](../build-logs/20261106T122702.577301Z-6639f877a8.raw.log)
+
+### 2026-11-06T20:27:04+08:00 · jungle-analysis-small-evidence-copy · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.245s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/jungle_20261106/analysis/ace/report.json docs\review\2026-11-06-jungle-generation\analysis\evidence\ace.json`
+- Context: Copy only small measurement JSON and verification metadata; no HTML audio or weights copied
+- Source SHA-256: `4221a990fe0915a6406e7354cbd8cba9dfade29079870ae4e27530d39120a6f8`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122704.462119Z-249e1d3755.json) · [Raw log](../build-logs/20261106T122704.462119Z-249e1d3755.log)
+- [Exact process output](../build-logs/20261106T122704.462119Z-249e1d3755.raw.log)
+
+### 2026-11-06T20:27:05+08:00 · jungle-analysis-small-evidence-copy · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.021s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/jungle_20261106/analysis/yue2/report.json docs\review\2026-11-06-jungle-generation\analysis\evidence\yue2.json`
+- Context: Copy only small measurement JSON and verification metadata; no HTML audio or weights copied
+- Source SHA-256: `4221a990fe0915a6406e7354cbd8cba9dfade29079870ae4e27530d39120a6f8`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122705.938707Z-9602fcd3c6.json) · [Raw log](../build-logs/20261106T122705.938707Z-9602fcd3c6.log)
+- [Exact process output](../build-logs/20261106T122705.938707Z-9602fcd3c6.raw.log)
+
+### 2026-11-06T20:27:07+08:00 · jungle-analysis-small-evidence-copy · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.083s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/jungle_20261106/analysis/summary.json docs\review\2026-11-06-jungle-generation\analysis\evidence\summary.json`
+- Context: Copy only small measurement JSON and verification metadata; no HTML audio or weights copied
+- Source SHA-256: `4221a990fe0915a6406e7354cbd8cba9dfade29079870ae4e27530d39120a6f8`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122707.221017Z-8ea72437e0.json) · [Raw log](../build-logs/20261106T122707.221017Z-8ea72437e0.log)
+- [Exact process output](../build-logs/20261106T122707.221017Z-8ea72437e0.raw.log)
+
+### 2026-11-06T20:27:08+08:00 · jungle-analysis-small-evidence-copy · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.001s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/jungle_20261106/analysis/verification.json docs\review\2026-11-06-jungle-generation\analysis\evidence\verification.json`
+- Context: Copy only small measurement JSON and verification metadata; no HTML audio or weights copied
+- Source SHA-256: `4221a990fe0915a6406e7354cbd8cba9dfade29079870ae4e27530d39120a6f8`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122708.538613Z-4c13585b57.json) · [Raw log](../build-logs/20261106T122708.538613Z-4c13585b57.log)
+- [Exact process output](../build-logs/20261106T122708.538613Z-4c13585b57.raw.log)
+
+### 2026-11-06T20:29:49+08:00 · jungle-final-evidence-review · failed
+
+- Config: Release; exit code: 1; elapsed: 0.657s.
+- Command: `C:\Python314\python.exe -c "
+from pathlib import Path
+import json,hashlib,ast,re,datetime
+root=Path.cwd(); base=Path('docs/review/2026-11-06-jungle-generation'); scripts=Path('scripts/cloud/evaluations/jungle_20261106')
+hashfile=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+prompt=(base/'prompt.txt').read_text(encoding='utf8').rstrip('\r\n')
+ace=json.loads((base/'ace/evidence/request.json').read_text())
+yue=json.loads((base/'yue2/yue2-static.json').read_text())
+assert ace['prompt']==yue['request']['style']==prompt
+assert ace['seed']==yue['request']['seed']==170611
+assert ace['lyrics']==yue['request']['lyrics']==''
+a=json.loads((base/'ace/evidence/evaluation.json').read_text())
+y=json.loads((base/'yue2/yue2-attempt.json').read_text())
+assert a['status']==y['status']=='passed'
+assert hashfile(scripts/'ace_once.py')==a['evaluation_script_sha256']
+assert hashfile(scripts/'yue2_eval.py')==y['script_sha256']==yue['script_sha256']
+for model,sha in [('ace',a['audio_sha256']),('yue2',y['result']['audio']['sha256'])]:
+ r=json.loads((base/f'analysis/evidence/{model}.json').read_text())
+ assert r['source']['sha256']==sha
+ assert r['overall']['all_samples_finite']
+ assert r['beat_estimate']['cuda_initialized'] is False
+ assert r['beat_estimate']['stability']=='variable_intervals'
+assert y['result']['truncated']=={'abc':False,'semantic':True}
+prior=json.loads(Path('docs/builds/20261106T093624.026444Z-cf0feb7592.json').read_text())['source_fingerprint']['files']
+assert all(Path(p).is_file() and hashfile(Path(p))==h for p,h in prior.items())
+for p in scripts.glob('*.py'): ast.parse(p.read_text(encoding='utf8'),filename=str(p))
+for p in base.rglob('*.json'):json.loads(p.read_text(encoding='utf8'))
+files=[p for folder in (base,scripts) for p in folder.rglob('*') if p.is_file() and '__pycache__' not in p.parts]
+for p in files:
+ assert p.stat().st_size<4*1024**2
+ assert p.suffix not in ('.wav','.mp3','.flac','.npy','.pt','.safetensors','.zip')
+ assert not re.search(r'sk-(?:proj-)?[A-Za-z0-9_-]{24,}|-----BEGIN (?:RSA |OPENSSH |EC )?PRIVATE KEY-----',p.read_text(encoding='utf8'))
+records=[]
+for p in sorted(Path('docs/builds').glob('20261106T12*.json')):
+ if p.name<'20261106T121400':continue
+ r=json.loads(p.read_text())
+ if r['status'] not in ('running','preflight'):records.append({'record':p.name,'action':r['action'],'status':r['status']})
+report={'checked_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'same_original_prompt':True,'effective_prompt_sha256':hashlib.sha256(prompt.encode()).hexdigest(),'seed':170611,'real_generation_attempts':{'ace':1,'yue2':1},'executed_scripts_match_final_source':True,'analysis_matches_generated_audio_hashes':True,'daw_build_source_files_unchanged':len(prior),'small_metadata_only':True,'listening_performed':False,'bpm170_verified':False,'yue2_semantic_capped':True,'scripts_sha256':{p.as_posix():hashfile(p) for p in scripts.glob('*.py')},'command_records':records}
+(base/'VERIFICATION.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf8')
+print('Verified original prompts/seeds, executed scripts, two audio hashes, finite outputs, CPU-only tempo, 257 unchanged DAW inputs and metadata-only local artifacts.')
+"`
+- Context: Cross-check both genuine runs and CPU analyses; no model rerun or audio transfer
+- Source SHA-256: `4221a990fe0915a6406e7354cbd8cba9dfade29079870ae4e27530d39120a6f8`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122949.732010Z-81859d29ae.json) · [Raw log](../build-logs/20261106T122949.732010Z-81859d29ae.log)
+- [Exact process output](../build-logs/20261106T122949.732010Z-81859d29ae.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T122949.732010Z-81859d29ae.log
+
+### 2026-11-06T20:29:58+08:00 · jungle-final-evidence-review · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.733s.
+- Command: `C:\Python314\python.exe -c "
+from pathlib import Path
+import json,hashlib,ast,re,datetime
+root=Path.cwd(); base=Path('docs/review/2026-11-06-jungle-generation'); scripts=Path('scripts/cloud/evaluations/jungle_20261106')
+hashfile=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+prompt=(base/'prompt.txt').read_text(encoding='utf8').rstrip('\r\n')
+ace=json.loads((base/'ace/evidence/request.json').read_text(encoding='utf8'))
+yue=json.loads((base/'yue2/yue2-static.json').read_text(encoding='utf8'))
+assert ace['prompt']==yue['request']['style']==prompt
+assert ace['seed']==yue['request']['seed']==170611
+assert ace['lyrics']==yue['request']['lyrics']==''
+a=json.loads((base/'ace/evidence/evaluation.json').read_text(encoding='utf8'))
+y=json.loads((base/'yue2/yue2-attempt.json').read_text(encoding='utf8'))
+assert a['status']==y['status']=='passed'
+assert hashfile(scripts/'ace_once.py')==a['evaluation_script_sha256']
+assert hashfile(scripts/'yue2_eval.py')==y['script_sha256']==yue['script_sha256']
+for model,sha in [('ace',a['audio_sha256']),('yue2',y['result']['audio']['sha256'])]:
+ r=json.loads((base/f'analysis/evidence/{model}.json').read_text(encoding='utf8'))
+ assert r['source']['sha256']==sha
+ assert r['overall']['all_samples_finite']
+ assert r['beat_estimate']['cuda_initialized'] is False
+ assert r['beat_estimate']['stability']=='variable_intervals'
+assert y['result']['truncated']=={'abc':False,'semantic':True}
+prior=json.loads(Path('docs/builds/20261106T093624.026444Z-cf0feb7592.json').read_text(encoding='utf8'))['source_fingerprint']['files']
+assert all(Path(p).is_file() and hashfile(Path(p))==h for p,h in prior.items())
+for p in scripts.glob('*.py'): ast.parse(p.read_text(encoding='utf8'),filename=str(p))
+for p in base.rglob('*.json'):json.loads(p.read_text(encoding='utf8'))
+files=[p for folder in (base,scripts) for p in folder.rglob('*') if p.is_file() and '__pycache__' not in p.parts]
+for p in files:
+ assert p.stat().st_size<4*1024**2
+ assert p.suffix not in ('.wav','.mp3','.flac','.npy','.pt','.safetensors','.zip')
+ assert not re.search(r'sk-(?:proj-)?[A-Za-z0-9_-]{24,}|-----BEGIN (?:RSA |OPENSSH |EC )?PRIVATE KEY-----',p.read_text(encoding='utf8'))
+records=[]
+for p in sorted(Path('docs/builds').glob('20261106T12*.json')):
+ if p.name<'20261106T121400':continue
+ r=json.loads(p.read_text(encoding='utf8'))
+ if r['status'] not in ('running','preflight'):records.append({'record':p.name,'action':r['action'],'status':r['status']})
+report={'checked_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'same_original_prompt':True,'effective_prompt_sha256':hashlib.sha256(prompt.encode()).hexdigest(),'seed':170611,'real_generation_attempts':{'ace':1,'yue2':1},'executed_scripts_match_final_source':True,'analysis_matches_generated_audio_hashes':True,'daw_build_source_files_unchanged':len(prior),'small_metadata_only':True,'listening_performed':False,'bpm170_verified':False,'yue2_semantic_capped':True,'scripts_sha256':{p.as_posix():hashfile(p) for p in scripts.glob('*.py')},'command_records':records}
+(base/'VERIFICATION.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf8')
+print('Verified original prompts/seeds, executed scripts, two audio hashes, finite outputs, CPU-only tempo, 257 unchanged DAW inputs and metadata-only local artifacts.')
+"`
+- Context: Correct local review UTF8 decoding after Windows GBK default failed; no generation rerun
+- Source SHA-256: `4221a990fe0915a6406e7354cbd8cba9dfade29079870ae4e27530d39120a6f8`; Git HEAD: `bfb78531713ab1471107856679ee86db7ef8960c`.
+- [Record](builds/20261106T122958.947334Z-d70bccb517.json) · [Raw log](../build-logs/20261106T122958.947334Z-d70bccb517.log)
+- [Exact process output](../build-logs/20261106T122958.947334Z-d70bccb517.raw.log)
+
+## 2026-11-06 Jungle生成对照完成
+
+- 完整原提示词1304字符，两模型均seed170611、空歌词，仅一次生成、无抽选重试。ACE实际120.000秒、热启动服务13.859秒；YuE2实际119.9987秒、外层107.948秒，完整ABC规划自然结束，semantic3000人为上限截断。两者条件/启动/后处理不同，不作普遍性能或音乐性排名。
+- CPU后分析：两个文件均有限、可解码、非空；BeatThis都给出明显不稳定拍点，未能确认全程170BPM，不据此断言真正变速。没有人工试听，Amen、MC碎片、六段结构及音乐性待验。
+- 云端统一试听入口 results/evaluations/jungle_20261106/analysis/index.html，24条引用存在且范围合法；浏览器播放未由用户确认。音频/latent/token都只在云端，没有E盘新音频下载或DAW导入。
+- 守护脚本问题在YuE2唯一GPU推理前修正，4项CPU故障测试通过，实际脚本与最终SHA匹配。首次Windows mock killpg问题和最终汇总UTF8/GBK读取失败均保留原始记录，修复不触发重复推理。
+- 最终证据复核d70bccb517通过：prompt、seed、执行脚本及生成/分析SHA一致；原0.12.1的257个构建源码输入未变，因此没有桌面构建。计划、RESULTS、CONTEXT、DEVELOPMENT和固定版本小档案更新；独立分支eval/jungle-ace-yue2-20261106，不合并main。

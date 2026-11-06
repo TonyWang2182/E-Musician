@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "html_checks": [
+    {
+      "html": "/root/autodl-tmp/emusician/results/evaluations/jungle_20261106/analysis/index.html",
+      "audio_controls": 2,
+      "verified_links": 8
+    },
+    {
+      "html": "/root/autodl-tmp/emusician/results/evaluations/jungle_20261106/analysis/ace/report.html",
+      "audio_controls": 1,
+      "verified_links": 8
+    },
+    {
+      "html": "/root/autodl-tmp/emusician/results/evaluations/jungle_20261106/analysis/yue2/report.html",
+      "audio_controls": 1,
+      "verified_links": 8
+    }
+  ],
+  "audio_sha_unchanged": true,
+  "cuda_initialized": false,
+  "listened": false,
+  "audio_copied_to_E": false
+}

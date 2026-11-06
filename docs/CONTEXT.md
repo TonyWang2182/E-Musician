@@ -1,4 +1,10 @@
-# 当前工作：云端模型库（2026-11-06，五模型短推理已验，MuScriptor 权重受阻）
+# 当前工作：用户 Jungle 提示词生成对照（2026-11-06，两次生成与客观检查完成，试听待验）
+
+用户要求用同一段170BPM UK jungle长提示词测试ACE和YuE2并报告。分支 `eval/jungle-ace-yue2-20261106`，基线bfb7853；[测试结果](review/2026-11-06-jungle-generation/RESULTS.md)。两模型各一次、完整原文、seed170611、无重抽。ACE实际120秒，热启动服务13.86秒；YuE2实际119.9987秒、含加载外层107.95秒，ABC规划自然完成而semantic3000人为上限截断。没有等价秒数硬控，不将截断当自然结尾。
+
+两文件正常解码、全为有限值，CPU BeatThis均未能确认稳定全曲170BPM；人工试听/六段结构/MC纹理/音乐性尚未验收。云端统一试听页 `results/evaluations/jungle_20261106/analysis/index.html`，24条引用路径已检查，浏览器播放待用户确认。GPU串行且已释放，ACE队列空/原PID保持。新音频继续留云端，本地仅脚本/小证据，未接DAW或改既有模型。下一步按试听反馈决定是否调整生成条件或进行自然结尾对照；没有新增推理授权假设。部署阶段已经完成的范围如下。
+
+# 保留基线：云端模型库（2026-11-06，五模型短推理已验，MuScriptor 权重受阻）
 
 用户最新明确只部署所需云端模型，不下载权重/音频/备份到E盘，不接入DAW。分支 `feature/cloud-model-library`，基线01936fa。YuE2、SCNet、TransKun、ChordMini、SheetSage2已分别通过文件/独立环境/真实CPU加载及一次受控GPU短推理；MuScriptor公共源码/环境通过，权重匿名401、未下载，不冒称推理就绪。精确范围、时间、显存和限制见[部署结果](review/2026-11-06-cloud-model-library/RESULTS.md)。YuE2只验低显存、短token上限渲染；其余分析仅8秒样本，无质量/长曲/听感结论。
 

@@ -1,0 +1,12 @@
+{
+  "request_id": "jungle-ace-20261106T121829Z-1a3810e6d6",
+  "kind": "generate",
+  "model_id": "ace-step-1.5-xl-turbo",
+  "prompt": "Dark UK jungle, instrumental, 170 BPM, raw early-90s pirate radio production. Heavy low-end pressure, chopped and heavily processed Amen break, rolling breakbeats, deep sub-bass, dark atmospheric pads, vinyl crackle, treated ragga MC toasting samples used as rhythmic texture (no full sung vocals). Structure: [Intro — Pirate Radio Static] filtered vinyl crackle, distant muffled ragga toast, low dark pad, filtered Amen ghost, no full drums; tape-stop into [Drop 1 — Sparse Power] sparse powerful chopped Amen, kick on 1, dry snare ghosts, deep sub hits on off-beats, punchy space between hits; [Roller — Sub Pressure] continuous rolling breakbeats with slight swing, gliding sub-bass, pads opening slightly, looping toasting in the background; [Breakdown — Dark Atmosphere] drums pull back, dark pads and sub drone widen, echoed toasting, filtered snare roll and reverse reverb riser; [Drop 2 — Heavy Roller] layered chopped Amen, heavier sub pressure with slight distortion, denser percussion, sparse ragga stabs, intense underground London energy; [Outro — Pirate Radio Fade] filter-down, vinyl crackle, distant Amen tail, radio static and tape hiss. Raw gritty mix, mono-leaning lo-fi texture, heavy sub, wide dark pads in the background, sparse powerful drops, underground London pirate radio vibe.",
+  "lyrics": "",
+  "instrumental": true,
+  "duration_seconds": 120,
+  "bpm": 170,
+  "time_signature": "4/4",
+  "seed": 170611
+}

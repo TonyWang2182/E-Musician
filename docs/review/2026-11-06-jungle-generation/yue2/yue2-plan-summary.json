@@ -1,0 +1,20 @@
+{
+  "truncated": false,
+  "timing": {
+    "seconds": 44.22335682809353,
+    "prefill_seconds": 0.3025396540760994,
+    "ttft_seconds": 0.5310867689549923,
+    "output_tokens": 3260,
+    "content_tokens": 3259,
+    "output_tps": 73.71670162155212,
+    "prefix_tokens": 329,
+    "cfg_branches": 1,
+    "execution": "eager",
+    "attention": "sdpa"
+  },
+  "abc_tokens": 3259,
+  "prefix_tokens": 3590,
+  "score_path": "/root/autodl-tmp/emusician/results/evaluations/jungle_20261106/yue2-20261106T122253Z/plan-stage/score.abc",
+  "score_sha256": "fa75cf672de48204f4868689ec9e46ab811ff59f01328b6e26ff125ac91d366f",
+  "warning": "Model ABC is not proof of six-section or no-singing adherence."
+}

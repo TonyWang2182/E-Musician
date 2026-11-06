@@ -1,0 +1,81 @@
+{
+  "status": "passed",
+  "inference_executed": false,
+  "cuda_initialized": false,
+  "script_sha256": "86d4f24aad6ed822c78e3ab7ced9f89d5044f03a4cdbea46a2193e9b56fec485",
+  "prompt_file_sha256": "5f080976c665d1917c3b9a56d41dcb39f6741237f3a45b57abd9230383834c52",
+  "effective_prompt_sha256": "d52750d660e226231a13f846b1ac8ceecbcfb11dc446c13456b0d853333e9678",
+  "prompt_characters": 1304,
+  "request": {
+    "id": "jungle-original-yue2-170611",
+    "style": "Dark UK jungle, instrumental, 170 BPM, raw early-90s pirate radio production. Heavy low-end pressure, chopped and heavily processed Amen break, rolling breakbeats, deep sub-bass, dark atmospheric pads, vinyl crackle, treated ragga MC toasting samples used as rhythmic texture (no full sung vocals). Structure: [Intro — Pirate Radio Static] filtered vinyl crackle, distant muffled ragga toast, low dark pad, filtered Amen ghost, no full drums; tape-stop into [Drop 1 — Sparse Power] sparse powerful chopped Amen, kick on 1, dry snare ghosts, deep sub hits on off-beats, punchy space between hits; [Roller — Sub Pressure] continuous rolling breakbeats with slight swing, gliding sub-bass, pads opening slightly, looping toasting in the background; [Breakdown — Dark Atmosphere] drums pull back, dark pads and sub drone widen, echoed toasting, filtered snare roll and reverse reverb riser; [Drop 2 — Heavy Roller] layered chopped Amen, heavier sub pressure with slight distortion, denser percussion, sparse ragga stabs, intense underground London energy; [Outro — Pirate Radio Fade] filter-down, vinyl crackle, distant Amen tail, radio static and tape hiss. Raw gritty mix, mono-leaning lo-fi texture, heavy sub, wide dark pads in the background, sparse powerful drops, underground London pirate radio vibe.",
+    "lyrics": "",
+    "cot": "full",
+    "seed": 170611
+  },
+  "generation_config": {
+    "abc": {
+      "temperature": 0.7,
+      "top_p": 0.9,
+      "top_k": 30,
+      "repetition_penalty": 1.005,
+      "penalty_window": 100,
+      "min_tokens": 32,
+      "max_tokens": 4096
+    },
+    "semantic": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 100,
+      "repetition_penalty": 1.2,
+      "penalty_window": 50,
+      "min_tokens": 2700,
+      "max_tokens": 3000
+    },
+    "ode_steps": 32,
+    "ode_method": "midpoint",
+    "context": 24576,
+    "version": "yue2-native-v1"
+  },
+  "request_prefix_tokens": 329,
+  "worst_planned_prefix_tokens": 4427,
+  "worst_case_acoustic_chunk_ranges": [
+    [
+      0,
+      3000
+    ]
+  ],
+  "source_revision": "1116bea76032bee5668e5f097294d082fa0b84f0",
+  "model_paths": {
+    "mot": "/root/autodl-tmp/emusician/models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1",
+    "vae": "/root/autodl-tmp/emusician/models/yue2/YuE2-Vae/152733a19ad43aa67e367f9b5503ef8075bb5126"
+  },
+  "torch": "2.10.0+cu128",
+  "runtime": {
+    "backend": "torch-eager",
+    "low_vram": true,
+    "memory_budget_gib": 8,
+    "batch_size": 1,
+    "quantization": "none",
+    "vae_core_frames": 512
+  },
+  "duration_control": {
+    "kind": "semantic_token_budget",
+    "min_tokens": 2700,
+    "max_tokens": 3000,
+    "nominal_seconds": [
+      108,
+      120
+    ],
+    "hard_seconds_argument": false,
+    "post_crop": false,
+    "description": "Nominal25Hz codec; natural decoded frames=1920*T-64. EOS/truncation recorded."
+  },
+  "supervisor": {
+    "deadline_seconds": 1200,
+    "admission_free_gpu_mib": 12288,
+    "stop_free_gpu_mib": 1024,
+    "ace_must_be_idle": true,
+    "retry": false
+  }
+}

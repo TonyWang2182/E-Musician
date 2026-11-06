@@ -1,0 +1,193 @@
+{
+  "listened": false,
+  "style_accuracy_evaluated": false,
+  "structure_evaluated": false,
+  "method": "Objective metrics plus uncorrected BeatThis CPU estimates; single-output comparison only",
+  "reports": [
+    {
+      "label": "ACE",
+      "source": {
+        "path": "/root/autodl-tmp/emusician/jobs/generation/jungle-ace-20261106T121829Z-1a3810e6d6/audio.wav",
+        "sha256": "0b01f1e6a15af055ce7483bba5f4cd2f647e39d1e34059684100ae6cfa9986f4",
+        "bytes": 23040044,
+        "frames": 5760000,
+        "duration_seconds": 120.0,
+        "sample_rate": 48000,
+        "channels": 2,
+        "container": "WAV",
+        "subtype": "PCM_16"
+      },
+      "overall": {
+        "frames": 5760000,
+        "sample_count_including_channels": 11520000,
+        "nonfinite_samples": 0,
+        "all_samples_finite": true,
+        "sample_peak_linear": 0.8912353515625,
+        "sample_peak_dbfs": -1.0001519038193567,
+        "rms_linear": 0.14532286068891614,
+        "rms_dbfs": -16.75332123226374,
+        "channel_rms_linear": [
+          0.14294292908662554,
+          0.14766443953015976
+        ],
+        "channel_peak_linear": [
+          0.80377197265625,
+          0.8912353515625
+        ],
+        "lr_pearson_correlation": 0.9744291930435751,
+        "near_full_scale_sample_fraction": 0.0,
+        "digital_rail_sample_fraction": 0.0,
+        "over_full_scale_sample_fraction": 0.0,
+        "exact_zero_sample_fraction": 0.0008455729166666667,
+        "silence_duration_fraction": 0.008833333333333334,
+        "invalid_silence_window_duration_fraction": 0.0
+      },
+      "generation_receipt_context": "既有ACE接口启用-1dB峰值归一化，随后保存PCM16。因此测到约-1dB峰值不代表模型天然留出了这份余量。",
+      "beat_estimate": {
+        "status": "estimated",
+        "raw_bpm": 123.39331619537285,
+        "median_single_interval_bpm": 166.66666666666652,
+        "stability": "variable_intervals",
+        "interval_iqr_over_median": 0.9444444444444531,
+        "half_raw_double_bpm": [
+          61.696658097686424,
+          123.39331619537285,
+          246.7866323907457
+        ],
+        "windows_20_seconds": [
+          {
+            "start_seconds": 0.0,
+            "end_seconds": 20.0,
+            "beat_count": 57,
+            "raw_bpm": 170.2127659574468
+          },
+          {
+            "start_seconds": 20.0,
+            "end_seconds": 40.0,
+            "beat_count": 49,
+            "raw_bpm": 150.9433962264151
+          },
+          {
+            "start_seconds": 40.0,
+            "end_seconds": 60.0,
+            "beat_count": 33,
+            "raw_bpm": 97.16599190283391
+          },
+          {
+            "start_seconds": 60.0,
+            "end_seconds": 80.0,
+            "beat_count": 29,
+            "raw_bpm": 85.1063829787234
+          },
+          {
+            "start_seconds": 80.0,
+            "end_seconds": 100.0,
+            "beat_count": 33,
+            "raw_bpm": 97.16599190283405
+          },
+          {
+            "start_seconds": 100.0,
+            "end_seconds": 120.0,
+            "beat_count": 23,
+            "raw_bpm": 113.20754716981108
+          }
+        ]
+      },
+      "report_path": "/root/autodl-tmp/emusician/results/evaluations/jungle_20261106/analysis/ace/report.json",
+      "report_sha256": "545769cb3782249c5281b59e457bbe6833da21e5ee17f20fc24fa6a834f35b4f"
+    },
+    {
+      "label": "YuE2",
+      "source": {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/jungle_20261106/yue2-20261106T122253Z/audio.wav",
+        "sha256": "eb6ed94cabb06043407fa392e83d38b988f023fc7d63caa3f5b179b4ff6ce989",
+        "bytes": 46079576,
+        "frames": 5759936,
+        "duration_seconds": 119.99866666666667,
+        "sample_rate": 48000,
+        "channels": 2,
+        "container": "WAV",
+        "subtype": "FLOAT"
+      },
+      "overall": {
+        "frames": 5759936,
+        "sample_count_including_channels": 11519872,
+        "nonfinite_samples": 0,
+        "all_samples_finite": true,
+        "sample_peak_linear": 1.0,
+        "sample_peak_dbfs": 0.0,
+        "rms_linear": 0.15147494619178054,
+        "rms_dbfs": -16.39318386210374,
+        "channel_rms_linear": [
+          0.14878911062634909,
+          0.15411398121723308
+        ],
+        "channel_peak_linear": [
+          1.0,
+          1.0
+        ],
+        "lr_pearson_correlation": 0.9116680632259682,
+        "near_full_scale_sample_fraction": 5.2951977244191605e-06,
+        "digital_rail_sample_fraction": 5.2951977244191605e-06,
+        "over_full_scale_sample_fraction": 0.0,
+        "exact_zero_sample_fraction": 0.0,
+        "silence_duration_fraction": 0.0,
+        "invalid_silence_window_duration_fraction": 0.0
+      },
+      "generation_receipt_context": "YuE2原管线将输出限制在[-1,1]，本次保存FLOAT。semantic达到3000 token预算而截断；ABC结束不等于音频自然完整结尾。",
+      "beat_estimate": {
+        "status": "estimated",
+        "raw_bpm": 173.91304347826053,
+        "median_single_interval_bpm": 176.47058823529235,
+        "stability": "variable_intervals",
+        "interval_iqr_over_median": 0.9411764705882162,
+        "half_raw_double_bpm": [
+          86.95652173913027,
+          173.91304347826053,
+          347.82608695652107
+        ],
+        "windows_20_seconds": [
+          {
+            "start_seconds": 0.0,
+            "end_seconds": 20.0,
+            "beat_count": 31,
+            "raw_bpm": 87.5912408759124
+          },
+          {
+            "start_seconds": 20.0,
+            "end_seconds": 40.0,
+            "beat_count": 34,
+            "raw_bpm": 106.43015521064306
+          },
+          {
+            "start_seconds": 40.0,
+            "end_seconds": 60.0,
+            "beat_count": 34,
+            "raw_bpm": 87.27272727272727
+          },
+          {
+            "start_seconds": 60.0,
+            "end_seconds": 80.0,
+            "beat_count": 58,
+            "raw_bpm": 173.91304347826053
+          },
+          {
+            "start_seconds": 80.0,
+            "end_seconds": 100.0,
+            "beat_count": 59,
+            "raw_bpm": 173.91304347826144
+          },
+          {
+            "start_seconds": 100.0,
+            "end_seconds": 119.99866666666667,
+            "beat_count": 58,
+            "raw_bpm": 173.913043478261
+          }
+        ]
+      },
+      "report_path": "/root/autodl-tmp/emusician/results/evaluations/jungle_20261106/analysis/yue2/report.json",
+      "report_sha256": "3f158174a81c8af386a2110b1999d0eef4cab7c96ba9a31f0d93dfa3b63a52e8"
+    }
+  ],
+  "html_builder_sha256": "c9973faf5bd0d10f70481b911dff69f3b1dce42b6b9a68e640edc088907c3ad4"
+}

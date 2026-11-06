@@ -1,0 +1,32 @@
+{
+  "protocol_version": 1,
+  "providers": [
+    {
+      "kind": "generate",
+      "model_id": "ace-step-1.5-xl-turbo",
+      "available": true,
+      "model": {
+        "id": "ace-step-1.5-xl-turbo",
+        "source_commit": "ca1e85fe9430179831e6bc6be790c332190a3866",
+        "weights_revision": "4228da3a418e1f1a04d9799e8040b62860d26b7a8c4e80ce374a17e5418cc4bf",
+        "weights_manifest": "ace-model-lock.json",
+        "source": "https://github.com/ace-step/ACE-Step-1.5",
+        "weights_source": "https://modelscope.cn/models/ACE-Step/acestep-v15-xl-turbo"
+      },
+      "min_duration_seconds": 10,
+      "max_duration_seconds": 120,
+      "time_signatures": [
+        "2/4",
+        "3/4",
+        "4/4",
+        "6/8"
+      ],
+      "lyrics": true,
+      "instrumental": true,
+      "audio_format": "wav",
+      "batch_size": 1
+    }
+  ],
+  "max_parallel_jobs": 1,
+  "max_queued_jobs": 16
+}

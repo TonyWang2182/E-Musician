@@ -1,0 +1,27 @@
+{
+  "files": [
+    {
+      "path": "scripts/cloud/evaluations/jungle_20261106/analyze.py",
+      "bytes": 15178,
+      "sha256": "064c8f87227785195b24618bbdf18a871134ac1d5768ce5155a2730b15b4195b"
+    },
+    {
+      "path": "scripts/cloud/evaluations/jungle_20261106/analyze_beats.py",
+      "bytes": 4578,
+      "sha256": "f86fd35d548651af08f80acf22dee3bc091a53fbb989f11f5a536f58507423fd"
+    },
+    {
+      "path": "scripts/cloud/evaluations/jungle_20261106/analyze_checks.py",
+      "bytes": 2353,
+      "sha256": "e93e100c92e905fdf74f2384a4a772b2bbcf30e111f9898d7a5b12403df063be"
+    },
+    {
+      "path": "scripts/cloud/evaluations/jungle_20261106/analyze_index.py",
+      "bytes": 5976,
+      "sha256": "c9973faf5bd0d10f70481b911dff69f3b1dce42b6b9a68e640edc088907c3ad4"
+    }
+  ],
+  "audio_downloaded_to_E": false,
+  "gpu_used_by_analysis": false,
+  "listened": false
+}
