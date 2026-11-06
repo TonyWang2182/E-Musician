@@ -7935,3 +7935,68 @@ print('PASS: unchanged baseline, 2 exact new cache files, both absent preference
 - Source SHA-256: `ebdfea33db3961af998df283ab6599d56e5736315039901561ff63def288c789`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
 - [Record](builds/20261106T080413.231293Z-8f2678c9da.json) · [Raw log](../build-logs/20261106T080413.231293Z-8f2678c9da.log)
 - [Exact process output](../build-logs/20261106T080413.231293Z-8f2678c9da.raw.log)
+
+### 2026-11-06T16:05:14+08:00 · cloud-generation-backup · failed
+
+- Config: PowerShell/SSH; exit code: 1; elapsed: 1727.891s.
+- Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:/MusicAgent&DAW/cloud-inference/tools/Save-CloudData.ps1`
+- Context: Full cloud data archive after all real inference and Agent jobs completed; download to E and verify archive SHA
+- Source SHA-256: `ebdfea33db3961af998df283ab6599d56e5736315039901561ff63def288c789`; Git HEAD: `0219f9adb26b258b7275112abc02f1e4d881458f`.
+- [Record](builds/20261106T080514.137904Z-97ce676029.json) · [Raw log](../build-logs/20261106T080514.137904Z-97ce676029.log)
+- [Exact process output](../build-logs/20261106T080514.137904Z-97ce676029.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T080514.137904Z-97ce676029.log
+
+### 2026-11-06T16:47:05+08:00 · agent-native-run · launched
+
+- Config: Release; exit code: None; elapsed: 0.413s.
+- Command: `E:\emusician-analysis-build\bin-0.12.0\Release\E-musician.exe --agent`
+- Context: Embedded Agent batch 2; physical audio acceptance remains manual
+- Source SHA-256: `ebdfea33db3961af998df283ab6599d56e5736315039901561ff63def288c789`; Git HEAD: `6bfeb5e65283aa40505c0ecaceffe3ff1d52a803`.
+- [Record](builds/20261106T084705.210427Z-5939d11c19.json) · [Raw log](../build-logs/20261106T084705.210427Z-5939d11c19.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261106T084705.210427Z-5939d11c19.raw.log)
+
+### 2026-11-06T16:47:14+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.643s.
+- Command: `C:\Python314\python.exe E:\emusician-analysis-source\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `ebdfea33db3961af998df283ab6599d56e5736315039901561ff63def288c789`; Git HEAD: `6bfeb5e65283aa40505c0ecaceffe3ff1d52a803`.
+- [Record](builds/20261106T084714.189294Z-a70a6e183f.json) · [Raw log](../build-logs/20261106T084714.189294Z-a70a6e183f.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-06T16:36:08+08:00 · cloud-generation-backup-parallel-resume · failed
+
+- Config: Python/SSH; exit code: 1; elapsed: 1588.344s.
+- Command: `C:\Python314\python.exe E:\MusicAgent&DAW\cloud-inference\backups\20261106T080515Z-7fa9b891\download_cloud_backup_parallel.py --directory E:\MusicAgent&DAW\cloud-inference\backups\20261106T080515Z-7fa9b891 --prefix-bytes 8543797248`
+- Context: Intentional switch from original single SCP; frozen 8.54GB prefix verified equal remote bytes; four bounded byte ranges then whole archive SHA
+- Source SHA-256: `ebdfea33db3961af998df283ab6599d56e5736315039901561ff63def288c789`; Git HEAD: `6bfeb5e65283aa40505c0ecaceffe3ff1d52a803`.
+- [Record](builds/20261106T083608.710317Z-f2475c7ad0.json) · [Raw log](../build-logs/20261106T083608.710317Z-f2475c7ad0.log)
+- [Exact process output](../build-logs/20261106T083608.710317Z-f2475c7ad0.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T083608.710317Z-f2475c7ad0.log
+
+### 2026-11-06T17:05:50+08:00 · cloud-backup-assemble · succeeded
+
+- Config: Release; exit code: 0; elapsed: 67.884s.
+- Command: `C:\Python314\python.exe E:\MusicAgent&DAW\cloud-inference\backups\20261106T080515Z-7fa9b891\download_cloud_backup_small_buffer.py --directory E:\MusicAgent&DAW\cloud-inference\backups\20261106T080515Z-7fa9b891 --prefix-bytes 8543797248`
+- Context: Retry completed 21.5GB transfer assembly using a reusable 256KiB buffer after MemoryError; all existing prefix/parts and failed assembly retained. No cloud requests if complete parts match plan.
+- Source SHA-256: `ebdfea33db3961af998df283ab6599d56e5736315039901561ff63def288c789`; Git HEAD: `6bfeb5e65283aa40505c0ecaceffe3ff1d52a803`.
+- [Record](builds/20261106T090550.797600Z-ca2c211fad.json) · [Raw log](../build-logs/20261106T090550.797600Z-ca2c211fad.log)
+- [Exact process output](../build-logs/20261106T090550.797600Z-ca2c211fad.raw.log)
+
+### 2026-11-06T17:07:22+08:00 · cloud-backup-verify-full · succeeded
+
+- Config: Release; exit code: 0; elapsed: 380.003s.
+- Command: `C:\Python314\python.exe scripts/cloud/verify_backup.py --archive E:\MusicAgent&DAW\cloud-inference\backups\20261106T080515Z-7fa9b891\emusician-20261106T080516Z-41218822.tar.gz --receipt E:\MusicAgent&DAW\cloud-inference\backups\20261106T080515Z-7fa9b891\receipt.json --report E:\MusicAgent&DAW\cloud-inference\backups\20261106T080515Z-7fa9b891\verification.json`
+- Context: Verify complete 21.5GB immutable E-drive archive: gzip CRC, EOF, archive SHA and all 1339 member sizes/checksums; no extraction or remote mutation.
+- Source SHA-256: `ebdfea33db3961af998df283ab6599d56e5736315039901561ff63def288c789`; Git HEAD: `6bfeb5e65283aa40505c0ecaceffe3ff1d52a803`.
+- [Record](builds/20261106T090722.253802Z-21cf51e6b2.json) · [Raw log](../build-logs/20261106T090722.253802Z-21cf51e6b2.log)
+- [Exact process output](../build-logs/20261106T090722.253802Z-21cf51e6b2.raw.log)
+
+### 2026-11-06 · 0.12 ACE 生成首批收尾 · 真实整链与完整备份已验证，人工待验
+
+- 实现提交 `6bfeb5e` 已推送 `feature/cloud-generation-v0120`；旧0.11程序保留，main未合并。真实ACE、原生和GPT-5-mini/ACE闭环、最终325项Agent回归均有独立证据，不替代实体设备和听感验收。
+- 云端32份模型25.25GB已固定版本与SHA；E盘归档21,506,401,522字节、1339文件，整包/成员SHA及gzip检查通过，耗时378.88秒，记录 `090722…21cf51e6b2`。首次SCP主动中止、四路续传合并MemoryError与256KiB缓冲重试均保留，不抹掉失败记录。
+- 清理仅涉及当前备份目录7个已验证临时文件。第一次PowerShell数组组成了一个无效路径，没有成功删除；不可靠的第一次清理回执另存并明确作废。修正后先逐一验证绝对路径/类型，再删除并确认最终归档存在，详见备份目录cleanup-result.json。
+- 最终253个应用/脚本源码输入与验收指纹完全一致，收尾只更新文档和证据。原始归档、receipt、verification、续传方案与脚本均在 `E:/MusicAgent&DAW/cloud-inference/backups/20261106T080515Z-7fa9b891`。云端模型/服务/实例保持，后续新数据需下次备份。
+- 用户可立即打开0.12手动测试；补齐插入位置冻结、试听设备/停止播放、确认前不增轨和工程资产成组保存说明。尚未确认真实鼠标/IME/ASIO/听感，也未演练跨实例恢复；YuE2与MIR升级不属于本批完成项。

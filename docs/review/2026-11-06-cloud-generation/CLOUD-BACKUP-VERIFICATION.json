@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "archive": "E:\\MusicAgent&DAW\\cloud-inference\\backups\\20261106T080515Z-7fa9b891\\emusician-20261106T080516Z-41218822.tar.gz",
+  "archive_size": 21506401522,
+  "archive_sha256": "159ef4d2bf65adcac2657f32937300be8aee569ee8fc8573143aaebd3ce56227",
+  "receipt_verified": true,
+  "file_count": 1339,
+  "content_bytes": 25341913343,
+  "member_checksums_verified": true,
+  "gzip_crc_verified": true,
+  "archive_read_passes": 1,
+  "manifest_created_utc": "20261106T080516Z",
+  "extracted": false,
+  "checked_utc": "2026-11-06T09:13:42.233565+00:00",
+  "elapsed_seconds": 378.88
+}

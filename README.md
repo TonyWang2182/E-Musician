@@ -2,7 +2,7 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
-**0.12.0 候选：云端音乐生成（真实整链通过，完整E盘备份中）**。ACE文字/歌词生成、手动下栏和Agent共用候选接口；试听后明确加入新轨，保存时携带本地音频。真实5090推理、原生及GPT-5-mini/ACE闭环、保存重开/离线渲染已验，Agent325项回归通过。人工听感/ASIO仍待验。状态见 [当前上下文](docs/CONTEXT.md)，操作见 [人工短测](docs/review/2026-11-06-cloud-generation/MANUAL-CHECK.md)；旧0.11程序保留，YuE2和MIR升级属后续批次。
+**0.12.0 候选：云端音乐生成（真实整链及E盘完整备份校验通过）**。ACE文字/歌词生成、手动下栏和Agent共用候选接口；试听后明确加入新轨，保存时携带本地音频。真实5090推理、原生及GPT-5-mini/ACE闭环、保存重开/离线渲染已验，Agent325项回归通过。人工听感/ASIO仍待验。状态见 [当前上下文](docs/CONTEXT.md)，操作见 [人工短测](docs/review/2026-11-06-cloud-generation/MANUAL-CHECK.md)；旧0.11程序保留，YuE2和MIR升级属后续批次。
 
 **0.11.0：易乐师品牌与工作区（自动验证通过，人工待验）**。树乐师 Logo 用于启动、Windows 图标和左上角；新的浅色工作区、搜索库、顶部播放控制、可调整装置下栏与连续调参。轨道右键 → Track colour 染色，颜色支持保存/Undo及 Agent。启动 `E:/MusicAgent&DAW/Start E-musician 0.11.0 Workspace.cmd`，旧0.10.0保留。Release、CTest11/11、Agent300、离线闭环与组件截图已验；真实设备/鼠标/听感按 [人工短测](docs/review/2026-11-06-workspace-brand/MANUAL-CHECK.md) 确认。[结果](docs/review/2026-11-06-workspace-brand/RESULTS.md) / [设计规范](DESIGN.md)。
 

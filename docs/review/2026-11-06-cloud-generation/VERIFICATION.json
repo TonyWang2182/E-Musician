@@ -1,6 +1,6 @@
 {
-  "checked_at": "2026-11-06T08:08:53.258637+00:00",
-  "status": "real_cloud_native_agent_passed_full_backup_running",
+  "checked_at": "2026-11-06T09:16:23.069858+00:00",
+  "status": "real_cloud_native_agent_and_full_backup_verified_manual_pending",
   "source_fingerprint": {
     "algorithm": "sha256",
     "digest": "ebdfea33db3961af998df283ab6599d56e5736315039901561ff63def288c789",
@@ -300,9 +300,56 @@
   "manual_audio_mouse_IME_ASIO": "not_tested",
   "cross_instance_restore": "not_tested",
   "backup": {
-    "status": "running",
-    "record": "20261106T080514.137904Z-97ce676029"
+    "status": "verified",
+    "initial_record": "20261106T080514.137904Z-97ce676029",
+    "initial_download_exit": "intentionally_stopped_to_resume_with_four_connections",
+    "directory": "E:\\MusicAgent&DAW\\cloud-inference\\backups\\20261106T080515Z-7fa9b891",
+    "receipt": {
+      "archive": "emusician-20261106T080516Z-41218822.tar.gz",
+      "size": 21506401522,
+      "sha256": "159ef4d2bf65adcac2657f32937300be8aee569ee8fc8573143aaebd3ce56227",
+      "file_count": 1339
+    },
+    "prefix": {
+      "prefix_bytes": 8543797248,
+      "prefix_sha256": "fb9b3c02082982e31aea826b74e3e8cc35c4286c0565561ae0326edcf61d05bd",
+      "remote_prefix_sha256": "fb9b3c02082982e31aea826b74e3e8cc35c4286c0565561ae0326edcf61d05bd",
+      "passed": true
+    },
+    "transfer_script_sha256": "bed21f265203cbb505853b6f0136f08df28b851850aa6dfcfba12b429ee9140a",
+    "transfer_record": "20261106T083608.710317Z-f2475c7ad0",
+    "transfer_record_result": "All segments downloaded; assembly failed with MemoryError. No final archive published by this attempt.",
+    "assembly_record": "20261106T090550.797600Z-ca2c211fad",
+    "assembly_buffer_bytes": 262144,
+    "assembly_script_sha256": "acbde5d20ac6d80c6e2e3ae7a0fa2acaed1874893d70ffc24144b3ebd28f764b",
+    "verification_record": "20261106T090722.253802Z-21cf51e6b2",
+    "verification": {
+      "status": "passed",
+      "archive": "E:\\MusicAgent&DAW\\cloud-inference\\backups\\20261106T080515Z-7fa9b891\\emusician-20261106T080516Z-41218822.tar.gz",
+      "archive_size": 21506401522,
+      "archive_sha256": "159ef4d2bf65adcac2657f32937300be8aee569ee8fc8573143aaebd3ce56227",
+      "receipt_verified": true,
+      "file_count": 1339,
+      "content_bytes": 25341913343,
+      "member_checksums_verified": true,
+      "gzip_crc_verified": true,
+      "archive_read_passes": 1,
+      "manifest_created_utc": "20261106T080516Z",
+      "extracted": false,
+      "checked_utc": "2026-11-06T09:13:42.233565+00:00",
+      "elapsed_seconds": 378.88
+    },
+    "verification_report_sha256": "d376f2ef084e7cbbeee85bd2626fe90a33d3fcf427e1fb996cf9854dbc87c2da",
+    "cleanup": {
+      "RemovedFiles": 7,
+      "FinalArchiveRetained": true,
+      "CheckedUtc": "2026-11-06T09:14:37.8931281Z",
+      "Correction": "First attempt constructed one invalid combined path; no deletion succeeded. Prior unconfirmed receipt is not valid cleanup evidence."
+    },
+    "snapshot_boundary": "Only files captured by archive created 20261106T080516Z; later jobs/models require another backup. envs/cache excluded, rebuild from pinned locks/freeze. No cross-instance restore performed."
   },
   "scope": "ACE text/lyrics generation only; YuE2 and MIR upgrades remain separate future work",
-  "final_source_matches_agent_regression": true
+  "final_source_matches_agent_regression": true,
+  "git_attributes_sha256": "68ecf2ac59477c05199e51f39964c00cbcd343c5e1ca4836aec5e61c27a20ee1",
+  "implementation_commit": "6bfeb5e"
 }

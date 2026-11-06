@@ -1,6 +1,6 @@
 # 0.12 云端生成接入
 
-2026-11-06，状态：实现中。用户授权按既有混合部署计划配置生成模型，接通 DAW 手动与 Agent；本批先交付 ACE 文字/歌词到音频闭环，YuE2 和 MIR 模型升级仍按后续批次。
+2026-11-06，状态：本批已实现，真实模型/原生/Agent整链及E盘完整备份校验通过，人工听感与设备共存待验。用户授权按既有混合部署计划配置生成模型，接通 DAW 手动与 Agent；本批先交付 ACE 文字/歌词到音频闭环，YuE2 和 MIR 模型升级仍按后续批次。证据见 [RESULTS](RESULTS.md) 与 [VERIFICATION](VERIFICATION.json)。
 
 基线 `0219f9adb26b258b7275112abc02f1e4d881458f`，工作分支 `feature/cloud-generation-v0120`，实际工作树 `E:/MusicAgent&DAW/worktrees/audio-analysis`。原有 SSH/混合部署文档、启动记录和 DEVLOG 修改保留；0.11.0 EXE 不覆盖。
 

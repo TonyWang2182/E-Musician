@@ -44,4 +44,6 @@ ready 的 `result` 含 `artifacts`、`model`、`parameters`、`conditioning`、`
 
 备份前停止提交并完成/取消任务。`backup_data.py` 先用 SQLite online backup API 将 committed WAL 内容写入 manifests/generation-queue.sqlite3，并验证 integrity_check，再归档选中目录；发现活跃任务则拒绝。不要直接 tar 正在写入的 SQLite/WAL。镜像不包含 AutoDL 数据盘；envs 不在此数据包，按固定锁和 freeze 重建。
 
+归档完成后，其下载和本地校验只读取该不可变归档，可以同时使用DAW并提交新生成任务；新任务及新部署文件不属于已经生成的备份，需要另一次备份。新模型使用独立环境和目录；单GPU推理仍需协调显存及队列。
+
 换实例恢复时：先停止网关，解包并校验文件，在新实例 `state/generation.sqlite3` 不存在时将 manifests/generation-queue.sqlite3 复制到该位置，再启动服务；**不要覆盖仍在运行实例的队列数据库**。重启会保留完成结果并将未结束项标为 interrupted。重新配置本地 SSH alias 指向新实例、检查 host key 后再连接。此说明不是跨实例恢复已验证的声明。

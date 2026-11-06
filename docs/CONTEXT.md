@@ -1,8 +1,8 @@
-# 当前进行：0.12 云端音乐生成（2026-11-06，真实整链通过，完整备份中）
+# 当前候选：0.12 云端音乐生成（2026-11-06，真实整链及完整备份通过，人工待验）
 
 实际工作树 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/cloud-generation-v0120`，基线0219f9ad。本批ACE文字/歌词生成已接通手动下栏与Agent：独立候选、试听状态、确认后一次导入、schema7来源和本地资产。旧0.11 EXE哈希保持。0.12 EXE SHA `017ced8e…`，253个源码输入 SHA `ebdfea33…`；完整CTest11/11后针对UI修正复测工作区及engine integration通过，最终Agent325/325、传输11、网关9和三份网页夹具通过，真实原生与真实GPT-5-mini/ACE整链均通过。
 
-云端5090/32GB、Torch2.10+cu128，32个模型文件25.25GB已完整校验，12秒纯音乐/人声和120秒上界均真实推理通过。E盘根 `E:/MusicAgent&DAW/cloud-inference`，登记available=true；模型在现有实例，单队列/驻留服务走SSH loopback18081。原生候选不改工程，确认导入/Undo/Redo/保存重开/云端禁用后的离线渲染已验；真实GPT-5-mini两次调用完成同等流程。正在执行完整E盘备份（记录080514…97ce676029），之后校验归档/发布保留并做[人工短测](review/2026-11-06-cloud-generation/MANUAL-CHECK.md)。证据见[VERIFICATION](review/2026-11-06-cloud-generation/VERIFICATION.json)、[云端结果](review/2026-11-06-cloud-generation/CLOUD-RESULTS.md)、[Agent结果](review/2026-11-06-cloud-generation/AGENT-RESULTS.md)。没有人工听感、ASIO共存或跨实例恢复结论；YuE2/MIR升级尚未实施。
+云端5090/32GB、Torch2.10+cu128，32个模型文件25.25GB已完整校验，12秒纯音乐/人声和120秒上界均真实推理通过。E盘根 `E:/MusicAgent&DAW/cloud-inference`，登记available=true；模型在现有实例，单队列/驻留服务走SSH loopback18081。原生候选不改工程，确认导入/Undo/Redo/保存重开/云端禁用后的离线渲染已验；真实GPT-5-mini两次调用完成同等流程。完整备份已落盘 `backups/20261106T080515Z-7fa9b891`：压缩包21,506,401,522字节、1339文件、整包/成员SHA及gzip完整性通过（记录090722…21cf51e6b2）。单连接主动中止、首次合并MemoryError与低缓冲重试均有记录；7个临时文件已按精确路径清理。下一步按[人工短测](review/2026-11-06-cloud-generation/MANUAL-CHECK.md)验收。证据见[VERIFICATION](review/2026-11-06-cloud-generation/VERIFICATION.json)、[云端结果](review/2026-11-06-cloud-generation/CLOUD-RESULTS.md)、[Agent结果](review/2026-11-06-cloud-generation/AGENT-RESULTS.md)。没有人工听感、ASIO共存或跨实例恢复结论；YuE2/MIR升级尚未实施。归档后的新增数据需要下次备份；新模型用独立环境，GPU推理与现有ACE协调。
 
 # AutoDL 远程开发已接通（2026-11-06，仅 H0 部分基础设施）
 

@@ -1,6 +1,6 @@
 # 0.12 云端生成接入结果
 
-2026-11-06。**真实模型、原生DAW和Agent整链通过；完整E盘备份进行中，人工试听待验。** 本批仅ACE文字/歌词到音频，保留0.11；YuE2、远程MIR替换、参考音频/续写/生成式补轨不属于已实现内容。
+2026-11-06。**真实模型、原生DAW和Agent整链及完整E盘备份校验通过，人工试听待验。** 本批仅ACE文字/歌词到音频，保留0.11；YuE2、远程MIR替换、参考音频/续写/生成式补轨不属于已实现内容。
 
 ## 已交付的行为
 
@@ -31,7 +31,7 @@
 | 原生＋真实ACE | 12秒候选到达17.31s；确认导入、重复接受不增轨、一次Undo/Redo、schema7保存、新进程禁用云端后重开/非静音渲染均通过。四组结果见 [NATIVE-END-TO-END.json](NATIVE-END-TO-END.json)。 |
 | Agent＋真实ACE | 确定性语言Provider的12秒候选审阅6.47s；七组真实操作通过。 |
 | GPT-5-mini＋真实ACE | 两次语言模型调用，12秒候选审阅40.64s；七组通过。输入17922／输出2590 tokens；用户工程、设置与密钥文件未改。见 [Agent结果](AGENT-RESULTS.md)。 |
-| 备份校验器 | 14项通过，旧小备份的整包与逐文件SHA实际通过；大模型备份待本轮完成后单独登记。 |
+| 备份校验器 | 14项通过，旧小备份及本轮21.5GB大模型备份的整包/逐文件SHA与gzip完整性均通过；本轮1339文件、内容25,341,913,343字节，记录 `090722…21cf51e6b2`，耗时378.88s。 |
 
 原生/Agent自动宿主为隔离的离线设备，**不等于硬件试听通过**。试听如实返回无音频输出，导入确认仍可用。主代理及子代理已查看组件PNG和网页截图；没有使用computer-use操作用户桌面。
 
@@ -41,9 +41,11 @@
 
 云端模型位于 `/root/autodl-tmp/emusician/models/ace/checkpoints`，32文件合计25,253,694,578字节；size/SHA完整验证，依赖锁、freeze、硬件和推理记录保留。环境在独立 `envs/ace`，原base未替换。
 
-本地候选在 `E:/MusicAgent&DAW/cloud-inference/jobs`；已接受且尚未保存的音频在 `assets`；探针样本在 `results`，实验工程和报告在 `experiments`，源码/环境档案在 `manifests`。完整云端数据备份目标 `backups/20261106T080515Z-7fa9b891`，记录 `20261106T080514.137904Z-97ce676029`，当前仍在打包/下载，尚不声明完整E盘归档通过。
+本地候选在 `E:/MusicAgent&DAW/cloud-inference/jobs`；已接受且尚未保存的音频在 `assets`；探针样本在 `results`，实验工程和报告在 `experiments`，源码/环境档案在 `manifests`。完整备份在 `backups/20261106T080515Z-7fa9b891/emusician-20261106T080516Z-41218822.tar.gz`，21,506,401,522字节，SHA256 `159ef4d2bf65adcac2657f32937300be8aee569ee8fc8573143aaebd3ce56227`。同目录保留receipt、verification和续传/清理记录；版本化报告见 [CLOUD-BACKUP-VERIFICATION.json](CLOUD-BACKUP-VERIFICATION.json)。
 
-备份在所有真实任务终态后开始；先对SQLite做online backup，再归档模型、代码、任务及清单。envs/cache不进数据包，依靠固定锁重建。整包和逐文件SHA通过也不等于换实例部署已验证；跨实例恢复仍待另一次演练。
+初始SCP主动中止后按已验证前缀四路续传；完整分段下载后首次8MiB合并发生MemoryError，改可复用256KiB缓冲后成功（记录 `090550…ca2c211fad`），没有重下模型。完整验证后仅清理本次7个临时分片/合并文件，未动云端归档、模型或服务；清理第一次路径数组错误未成功删除，修正及结果单独保留。详见 [传输记录](CLOUD-TRANSFER-PROBE.md)。
+
+备份在所有真实任务终态后开始；先对SQLite做online backup，再归档模型、代码、任务及清单。envs/cache不进数据包，依靠固定锁重建。归档后的传输和本地校验可与DAW测试并行，新结果和新模型需下次备份。整包和逐文件SHA通过也不等于换实例部署已验证；跨实例恢复仍待另一次演练。
 
 ## 审查、失败和剩余验收
 
