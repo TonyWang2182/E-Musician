@@ -5,6 +5,7 @@ Run with the provider's registered Python: run.py --request <job>/request.json.
 from __future__ import annotations
 
 import argparse
+import faulthandler
 from contextlib import redirect_stderr, redirect_stdout
 import importlib.metadata
 import hashlib
@@ -21,6 +22,8 @@ if __package__ in (None, ""):
 
 from scripts.audio_analysis.common import (AnalysisError, Cancelled, Job, atomic_json, provider_entry,
                                            sha256_file)
+from scripts.audio_analysis.resources import (MemoryGuard, check_admission, memory_error,
+                                              suppress_error_dialogs)
 
 
 def configure_environment(root: Path) -> None:
@@ -84,16 +87,19 @@ def prepare(job):
             raise AnalysisError("source_range", "The requested range exceeds the source audio duration.")
         count = min(count, stream.frames - first)
         stream.seek(first)
-        blocks = []
+        # One full PCM allocation, rather than retaining all decoded blocks and
+        # allocating another full copy in concatenate().
+        audio = np.empty((count, stream.channels), dtype=np.float32)
         remaining = count
+        position = 0
         while remaining:
             job.check_cancelled()
             block = stream.read(min(65536, remaining), dtype="float32", always_2d=True)
             if not len(block) or not np.isfinite(block).all():
                 raise AnalysisError("invalid_audio", "Source audio is truncated or contains NaN/Infinity.")
-            blocks.append(block)
+            audio[position:position + len(block)] = block
+            position += len(block)
             remaining -= len(block)
-        audio = np.concatenate(blocks, axis=0)
     after = source.stat()
     if (before.st_size, before.st_mtime_ns) != (after.st_size, after.st_mtime_ns):
         raise AnalysisError("source_changed", "The source file changed while its range was being frozen.")
@@ -110,6 +116,18 @@ def execute(job):
     configure_environment(job.root)
     kind = job.request["kind"]
     entry = provider_entry(job.root, "separate_6s" if kind == "separate" and job.request["parameters"]["stems"] == 6 else kind)
+    job.progress("checking_resources", 0., "Checking available system memory before loading analysis libraries.", "preparing")
+    # This runs before NumPy/SoundFile/Torch and before decoding the source.
+    report = check_admission(job.request, entry)
+    atomic_json(job.directory / "resource-budget.json", report)
+    guard = MemoryGuard(job.request)
+    original_check = job.check_cancelled
+
+    def guarded_check():
+        original_check()
+        guard.checkpoint()
+
+    job.check_cancelled = guarded_check
     with ResourceSampler() as resources:
         audio, rate, source = prepare(job)
         kind = job.request["kind"]
@@ -126,9 +144,9 @@ def execute(job):
                                              "license_status", "source_url", "experimental") if key in entry}
         model["id"] = model.pop("model_id", kind)
         implementation = hashlib.sha256()
-        for filename in ("__init__.py", "common.py", "chords.py", "providers.py", "beats.py", "run.py"):
+        for filename in ("__init__.py", "common.py", "chords.py", "providers.py", "beats.py", "resources.py", "run.py"):
             implementation.update((filename + "\0" + sha256_file(Path(__file__).with_name(filename)) + "\n").encode("utf-8"))
-        model["worker_version"] = "1.2.0"
+        model["worker_version"] = "1.2.1"
         if kind == "chords":
             # This algorithm ships with the worker, not with external weights;
             # do not report a stale v1 registry as the executed algorithm.
@@ -157,28 +175,51 @@ def execute(job):
 
 
 def main():
+    suppress_error_dialogs()
+    # Released on failure so a Python allocation error still has room for a
+    # small durable error receipt. Native faults are handled by the launcher.
+    emergency_reserve = bytearray(256 * 1024)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--request", required=True, type=Path)
     args = parser.parse_args()
     directory = args.request.resolve().parent
     if not directory.is_dir():
         return 2
-    with (directory / "worker.log").open("a", encoding="utf-8") as log, redirect_stdout(log), redirect_stderr(log):
+    with (directory / "worker.log").open("a", encoding="utf-8") as log, \
+            (directory / "fault.log").open("a", encoding="utf-8") as fault, redirect_stdout(log), redirect_stderr(log):
+        faulthandler.enable(file=fault, all_threads=True)
         try:
             job = Job(args.request)
             execute(job)
             return 0
         except BaseException as error:
+            emergency_reserve = None
             code = error.code if isinstance(error, AnalysisError) else "worker_failed"
-            if isinstance(error, MemoryError) or "out of memory" in str(error).lower():
+            if not isinstance(error, AnalysisError) and memory_error(error):
                 code = "out_of_memory"
-            message = str(error)[:2000] or type(error).__name__
-            traceback.print_exc()
+            message = ("Analysis stopped because system or GPU memory ran out. No automatic CPU retry was started. "
+                       "Close other memory-heavy apps and retry; the project was not changed.") if code == "out_of_memory" else str(error)[:2000] or type(error).__name__
+            try:
+                traceback.print_exc()
+            except (MemoryError, OSError):
+                pass
+            # Failed inference frames can retain the entire model. Release
+            # them before writing receipts; no model.cpu() allocation/retry.
+            cause, seen = error, set()
+            while cause is not None and id(cause) not in seen:
+                seen.add(id(cause))
+                if cause.__traceback__ is not None:
+                    traceback.clear_frames(cause.__traceback__)
+                cause = cause.__cause__ or cause.__context__
+            if hasattr(error, 'resource_report'):
+                atomic_json(directory / "resource-budget.json", error.resource_report)
             atomic_json(directory / "error.json", {"schema_version": 1, "code": code, "message": message})
             atomic_json(directory / "progress.json", {"schema_version": 1,
                         "status": "cancelled" if isinstance(error, Cancelled) else "failed",
                         "phase": code, "progress": 0, "detail": message})
             return 3 if isinstance(error, Cancelled) else 2
+        finally:
+            faulthandler.disable()
 
 
 if __name__ == "__main__":

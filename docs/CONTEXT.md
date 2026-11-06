@@ -1,4 +1,10 @@
-# 当前候选：0.12 云端音乐生成（2026-11-06，真实整链及完整备份通过，人工待验）
+# 当前候选：0.12.1 生成默认值与本地分离隔离（2026-11-06，自动验证通过、真实分离/人工待验）
+
+用户0.12.0人工测试报告反复追问BPM、生成音频分离时Python错误弹窗与DAW白屏。本地日志确认CUDA OOM及随后的CPU分配失败；75秒六轨异常的原生堆栈尚缺。本轮已实现工程默认生成参数、内存准入/少复制/禁止OOM隐式CPU重跑、Windows分析进程树隔离与可见失败。Release、CTest11/11、分析进程34项、Agent334、Worker44（43通过/1跳过，CPU Torch专项10项补覆盖）通过。一次真实GPT-5-mini决策直接发起生成并采用工程93BPM/3⁄4/播放头，未执行付费音乐生成。真实7秒本地分离因commit仅比硬门槛多6.83MiB而未启动，不能标为真实分离修复验收。见[结果](review/2026-11-06-generation-stability/RESULTS.md)/[人工短测](review/2026-11-06-generation-stability/MANUAL-CHECK.md)。
+
+分支 `fix/generation-stability-v0121`，基线61c9384，实际E盘工作树不变；EXE独立在bin-0.12.1，入口 `E:/MusicAgent&DAW/Start E-musician 0.12.1 Stability.cmd`，VS Code为E-musician-Stability.code-workspace。旧0.12.0 SHA保持。用户随后授权并行部署其他模型，云端MIR文件/环境准备另见[阶段计划](review/2026-11-06-cloud-mir-stage/PLAN.md)；当前DAW仍本地MIR、云端ACE，没有自由切换。容量实测208.09GB可用，剩余主权重17.77GB、含可选38.64GB，含环境/临时/结果保守预算139–189GB，见[容量清单](review/2026-11-06-hybrid-ai/CAPACITY-20261106.json)。不动用户工程、分页文件或其他程序；下一步区分云端安装、推理、接入验收，补人工短测。
+
+# 保留候选：0.12 云端音乐生成（2026-11-06，真实整链及完整备份通过，人工发现上述问题）
 
 实际工作树 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/cloud-generation-v0120`，基线0219f9ad。本批ACE文字/歌词生成已接通手动下栏与Agent：独立候选、试听状态、确认后一次导入、schema7来源和本地资产。旧0.11 EXE哈希保持。0.12 EXE SHA `017ced8e…`，253个源码输入 SHA `ebdfea33…`；完整CTest11/11后针对UI修正复测工作区及engine integration通过，最终Agent325/325、传输11、网关9和三份网页夹具通过，真实原生与真实GPT-5-mini/ACE整链均通过。
 

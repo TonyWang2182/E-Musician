@@ -141,31 +141,51 @@ juce::Result EngineSession::Impl::beginAnalysis(const juce::var& args,juce::var&
     a->source=object({{"project_id",juce::String(guard.projectId())},{"clip_id",clip->id},{"asset_id",clip->assetId},{"track_id",track->id},{"clip_timeline_start",p.time.getStart().inSeconds()},{"clip_source_offset",p.offset.inSeconds()},{"clip_duration",p.time.getLength().inSeconds()},
         {"bpm",edit->tempoSequence.getTempo(0)->getBpm()},{"range_start_seconds",start},{"duration_seconds",length},{"timeline_start",p.time.getStart().inSeconds()+start},{"sample_rate",clip->info.rate},{"input_role",role},{"warp_speed_ratio",warpState["items"][0]["warp_speed_ratio"]}});
     const auto script=juce::File(EMUSICIAN_SOURCE_DIR).getChildFile("scripts/audio_analysis/run.py");const auto preset=textArg(args,"preset");
-    a->job=startJob("analysis."+kind,[this,a,script,python,preset,length,sourceWarped,expectedOriginalHash](const auto& j){
+    const auto resourcePolicy=analysis_worker::Policy::forKind(kind);
+    a->job=startJob("analysis."+kind,[this,a,script,python,preset,length,sourceWarped,expectedOriginalHash,resourcePolicy](const auto& j){
         const auto cancelled=[j]{return j->cancel.load();};JobFingerprint before,after;
+        if(!a->directory.createDirectory()){jobStatus(j,"failed","Cannot create the analysis cache directory.");return;}
+        const auto launchMemory=analysis_worker::resources();
+        const auto launchRecord=object({{"schema_version",1},{"resource_policy",resourcePolicy.json()},{"resource_query_available",launchMemory.available},
+            {"available_commit_bytes",juce::int64(launchMemory.commit)},{"available_physical_bytes",juce::int64(launchMemory.physical)},
+            {"process_log","process.log"},{"recorded_utc",juce::Time::getCurrentTime().toISO8601(true)}});
+        if(!a->directory.getChildFile("worker-launch.json").replaceWithText(juce::JSON::toString(launchRecord))){jobStatus(j,"failed","Cannot write analysis worker diagnostics.");return;}
+        if(auto r=resourcePolicy.admit(launchMemory);r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}
         if(auto r=fingerprint(a->original,before,cancelled);r.failed()||!before.exists){jobStatus(j,cancelled()?"cancelled":"failed",r.failed()?r.getErrorMessage():"The source audio is missing.");return;}
         if(sourceWarped&&before.hash!=expectedOriginalHash){jobStatus(j,"stale","The original audio changed after Warp. Reimport it before analyzing.");return;}
         // AudioSource names each prepared MP3 WAV by the original MP3 hash.
         // External replacement must not analyze an old decode under a new hash.
         if(!sourceWarped&&a->original.hasFileExtension("mp3")&&a->sourceFile.getFileNameWithoutExtension()!=before.hash){jobStatus(j,"stale","The MP3 changed after import. Reimport it before analyzing.");return;}
-        if(!a->directory.createDirectory()){jobStatus(j,"failed","Cannot create the analysis cache directory.");return;}
         auto request=object({{"schema_version",1},{"job_id",a->id},{"kind",a->kind},{"preset",preset},{"source_path",a->sourceFile.getFullPathName()},
-            {"source_offset_seconds",double(a->source["clip_source_offset"])+double(a->source["range_start_seconds"])},{"duration_seconds",length},{"analysis_root",analysisRoot().getFullPathName()},{"source",a->source},{"parameters",a->parameters}});
+            {"source_offset_seconds",double(a->source["clip_source_offset"])+double(a->source["range_start_seconds"])},{"duration_seconds",length},{"analysis_root",analysisRoot().getFullPathName()},{"source",a->source},{"parameters",a->parameters},{"resource_policy",resourcePolicy.json()}});
         if(!a->directory.getChildFile("request.json").replaceWithText(juce::JSON::toString(request))){jobStatus(j,"failed","Cannot write the analysis request.");return;}
-        juce::ChildProcess process;juce::StringArray command{python,script.getFullPathName(),"--request",a->directory.getChildFile("request.json").getFullPathName()};
-        if(!process.start(command,0)){jobStatus(j,"failed","Cannot start the isolated analysis worker.");return;}
-        const auto began=juce::Time::getMillisecondCounterHiRes();bool terminated=false;
+        const auto beforeLaunch=analysis_worker::resources();
+        launchRecord.getDynamicObject()->setProperty("before_launch_available_commit_bytes",juce::int64(beforeLaunch.commit));
+        launchRecord.getDynamicObject()->setProperty("before_launch_available_physical_bytes",juce::int64(beforeLaunch.physical));
+        a->directory.getChildFile("worker-launch.json").replaceWithText(juce::JSON::toString(launchRecord));
+        if(auto r=resourcePolicy.admit(beforeLaunch);r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}
+        analysis_worker::Process process;juce::StringArray command{python,"-u","-X","faulthandler",script.getFullPathName(),"--request",a->directory.getChildFile("request.json").getFullPathName()};
+        if(auto r=process.start(command,a->directory.getChildFile("process.log"));r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}
+        const auto began=juce::Time::getMillisecondCounterHiRes();bool terminated=false;analysis_worker::CriticalPressure pressure;
         while(process.isRunning()){
             if(cancelled()||juce::Time::getMillisecondCounterHiRes()-began>60.0*60.0*1000.0){
-                a->directory.getChildFile("cancel").replaceWithText("cancel");if(!process.waitForProcessToFinish(500))process.kill();terminated=true;break;
+                a->directory.getChildFile("cancel").replaceWithText("cancel");if(!process.wait(500))process.terminate();terminated=true;break;
+            }
+            const auto memory=analysis_worker::resources();const auto now=juce::Time::getMillisecondCounterHiRes();
+            if(pressure.shouldStop(memory,now)){
+                    a->directory.getChildFile("cancel").replaceWithText("cancel");process.terminate();
+                    a->directory.getChildFile("worker-exit.json").replaceWithText(juce::JSON::toString(object({{"reason","critical_memory_pressure"},{"available_commit_bytes",juce::int64(memory.commit)},{"critical_available_commit_bytes",juce::int64(analysis_worker::Policy::criticalCommit)}})));
+                    jobStatus(j,"failed","Analysis stopped because Windows available commit memory stayed below 512 MiB. The project is unchanged; close memory-heavy apps before retrying.");return;
             }
             juce::var progress;if(analysisJson(a->directory.getChildFile("progress.json"),progress,32768).wasOk()){
                 std::lock_guard lock(j->mutex);j->phase=progress["phase"].toString().substring(0,128);j->detail=progress["detail"].toString().substring(0,512);
                 if(analysisNumber(progress["progress"]))j->progress=juce::jlimit(0.0,1.0,double(progress["progress"]));
             }std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
+        const auto exitCode=process.exitCode();
+        a->directory.getChildFile("worker-exit.json").replaceWithText(juce::JSON::toString(object({{"exit_code",juce::int64(exitCode)},{"exit_code_hex","0x"+juce::String::toHexString(exitCode).paddedLeft('0',8)},{"elapsed_seconds",(juce::Time::getMillisecondCounterHiRes()-began)/1000.0}})));
         if(terminated||cancelled()){jobStatus(j,cancelled()?"cancelled":"failed",cancelled()?"":"Analysis exceeded its one-hour worker limit.");return;}
-        if(process.getExitCode()!=0){juce::var error;analysisJson(a->directory.getChildFile("error.json"),error,32768);jobStatus(j,"failed",error["message"].toString().isNotEmpty()?error["message"].toString().substring(0,1024):"The analysis worker exited before producing a result.");return;}
+        if(exitCode!=0){juce::var error;analysisJson(a->directory.getChildFile("error.json"),error,32768);jobStatus(j,"failed",error["message"].toString().isNotEmpty()?error["message"].toString().substring(0,1024):analysis_worker::exitFailure(exitCode));return;}
         juce::var result;const auto file=a->directory.getChildFile("result.json");
         if(auto r=analysisJson(file,result);r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}
         if(auto r=validateAnalysisResult(result,a->id,a->kind,length,int(a->parameters.getProperty("stems",4)));r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}

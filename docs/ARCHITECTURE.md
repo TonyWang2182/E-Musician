@@ -1,5 +1,11 @@
 # E-musician 技术架构
 
+## 0.12.1 分析故障边界与生成默认值
+
+本地分析仍是 `GUI/Agent → 公共分析命令 → 文件工作线程 → 独立 Python Worker → 候选 → 明确接受`。Windows Worker 由私有 Job Object 拥有，在恢复运行前绑定，异常/取消仅回收自身进程树；启动及运行中的提交内存检查、Worker 音频缓冲预算与明确 OOM 终态共同防护。CUDA OOM 不再同进程隐式转 CPU。失败诊断保留在任务目录，UI 展示可滚动原因，不向工程提交伪结果。
+
+生成快照增加来自工程的 `generation_defaults`，普通请求自动沿用 BPM/拍号/播放头，默认 20 秒；小节时长由确定性代码换算。LLM 选工具，适配器校验，候选导入仍需确认。当前生成走云端 ACE、本地 MIR 走本机；正在准备的云端 MIR 文件和环境不构成本地/云端自由切换。详见 [ADR](decisions/2026-11-06-analysis-process-resource-isolation.md) 与 [本轮结果](review/2026-11-06-generation-stability/RESULTS.md)。
+
 ## 0.12 生成管线（真实云端/原生/Agent整链已验证）
 
 `GenerationPanel / Agent → EngineSession generation命令 → 后台Python helper → 受管SSH隧道 → loopback网关/SQLite/单GPU队列 → ACE → PCM16+SHA清单 → E盘候选 → 试听/明确接受 → 本地工程资产/一次Undo`。生成不假造源clip，不复用需要源音频的分析元数据；聊天模型只组织工具调用，音乐模型独立生成音频。所有网络、模型和文件校验都在后台，音频回调不参与。

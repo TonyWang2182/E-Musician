@@ -8,6 +8,7 @@ import math
 from pathlib import Path
 from statistics import median
 from .common import AnalysisError, sha256_file
+from .resources import check_gpu_headroom, run_inference_once
 
 CODE_REVISION = "b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c"
 CHECKPOINT_URL = "https://cloud.cp.jku.at/public.php/dav/files/7ik4RrBKTS273gp/final0.ckpt"
@@ -82,8 +83,11 @@ def analyze(job, audio, rate, entry):
     device = entry.get("device", "cpu")
     if device == "cuda" and not torch.cuda.is_available():
         device = "cpu"
-    if device == "cuda":torch.cuda.reset_peak_memory_stats()
-    fallback = False
+    gpu_admission = {}
+    if device == "cuda":
+        gpu_admission = check_gpu_headroom(torch, entry)
+        torch.cuda.reset_peak_memory_stats()
+    fallback = entry.get("device") == "cuda" and device == "cpu"
     def infer(selected_device):
         model = Audio2Beats(str(path), device=selected_device, float16=False, dbn=False)
         chunks = max(1, math.ceil(duration/29.76));done = 0
@@ -94,20 +98,14 @@ def analyze(job, audio, rate, entry):
         model.model.register_forward_pre_hook(progress)
         with torch.inference_mode():
             return model(np.asarray(audio, dtype=np.float32), rate)
-    try:
-        beats, downbeats = infer(device)
-    except torch.cuda.OutOfMemoryError:
-        if device != "cuda":raise
-        torch.cuda.empty_cache();device="cpu";fallback=True
-        job.progress("cpu_fallback", .2, "GPU memory busy; retrying beat tracking on CPU.")
-        beats, downbeats = infer(device)
+    beats, downbeats = run_inference_once(lambda: infer(device), 'Beat tracking')
     job.check_cancelled()
     # Silence is not a tempo source even if a network emits isolated guesses.
     if float(np.max(np.abs(audio), initial=0)) < 1e-7:
         beats, downbeats = [], []
     result = summarize(beats, downbeats, duration, job.request["parameters"]["meter"])
     result["waveform_peaks"] = waveform_peaks(audio)
-    result["runtime_metrics"] = {"device": device, "cpu_fallback": fallback}
+    result["runtime_metrics"] = {"device": device, "cpu_fallback": fallback, **gpu_admission}
     if device == "cuda":
         result["runtime_metrics"].update(peak_cuda_allocated_bytes=torch.cuda.max_memory_allocated(),
                                          peak_cuda_reserved_bytes=torch.cuda.max_memory_reserved())

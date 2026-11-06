@@ -1,0 +1,77 @@
+{
+  "captured_utc": "2026-11-06T09:25:55.425813+00:00",
+  "base_commit": "61c9384",
+  "gpu": "RTX3050 Laptop 4096MiB, driver555.99",
+  "physical_memory_bytes": 31923757056,
+  "raw_evidence_root": "build-logs\\generation-stability-20261106\\user-jobs",
+  "evidence_files": [
+    {
+      "job_id": "e63a101362cd4aebb74791e4eb7b61e2",
+      "file": "request.json",
+      "size": 1018,
+      "sha256": "7a07180bd1f033e4bd05868155cedc3c875ff93eee47687ebcefa1170874918c"
+    },
+    {
+      "job_id": "e63a101362cd4aebb74791e4eb7b61e2",
+      "file": "progress.json",
+      "size": 359,
+      "sha256": "9028ddbbbe5cf998fd27e762d4f7e187e1a13232fe452ea39c7b24c4c9a2e5b0"
+    },
+    {
+      "job_id": "e63a101362cd4aebb74791e4eb7b61e2",
+      "file": "error.json",
+      "size": 328,
+      "sha256": "d47e4790d925409f58c673383d181e4645bf7daf0345114fd043c798915c08e9"
+    },
+    {
+      "job_id": "e63a101362cd4aebb74791e4eb7b61e2",
+      "file": "worker.log",
+      "size": 3113,
+      "sha256": "671889f9715d06a982e551bd8eb457e0369903a586c420ef61c119e2865bee2b"
+    },
+    {
+      "job_id": "525db3543ff64d8fbadf76dabbd3bdf6",
+      "file": "request.json",
+      "size": 1021,
+      "sha256": "05e3ecf7d7a8e7951da3aecc528f4b2cfd8919e6e0533273f78f77f33c5f0d9e"
+    },
+    {
+      "job_id": "525db3543ff64d8fbadf76dabbd3bdf6",
+      "file": "progress.json",
+      "size": 205,
+      "sha256": "187560a281cc2f15824cd5a7ebaa912275e8ac2d4d9d8f168932f486be2b0c06"
+    },
+    {
+      "job_id": "525db3543ff64d8fbadf76dabbd3bdf6",
+      "file": "error.json",
+      "size": 174,
+      "sha256": "f00fb5da7606cea4fac1904880556c1f9545244abcc9efb1a63bfc21a2a831e1"
+    },
+    {
+      "job_id": "525db3543ff64d8fbadf76dabbd3bdf6",
+      "file": "worker.log",
+      "size": 5965,
+      "sha256": "2dac4e46c5ed26c1490025ec2f4645004f05ac1c1a9003c63e2224320ff29962"
+    },
+    {
+      "job_id": "b9d2c558386c46edb03297abf9df4908",
+      "file": "request.json",
+      "size": 978,
+      "sha256": "dc1aa3b8cfffa220f2f74cfb375f39174fcb0dd3e799d8279b57313b6a405b7b"
+    },
+    {
+      "job_id": "b9d2c558386c46edb03297abf9df4908",
+      "file": "progress.json",
+      "size": 211,
+      "sha256": "c543f1975ea92a3ac48e2f4da03d696c5feb920e54ea26209746d4d3ec51d971"
+    },
+    {
+      "job_id": "b9d2c558386c46edb03297abf9df4908",
+      "file": "worker.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "original_user_data_modified": false,
+  "exact_null_crash_stack_available": false
+}

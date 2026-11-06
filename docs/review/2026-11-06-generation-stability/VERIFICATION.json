@@ -1,0 +1,198 @@
+{
+  "checked_utc": "2026-11-06T09:55:01.804643+00:00",
+  "status": "automated checks passed; actual local MIR and manual acceptance pending",
+  "base_commit": "61c93840671ba1ea6fd0694d585255e4916b65cb",
+  "branch": "fix/generation-stability-v0121",
+  "build_source_digest": "fb10a30f8cc7490ca86d6f8ae2a582563352552065d1ff3278e4e4a7146fd09e",
+  "build_source_files": 257,
+  "recorded_build_inputs_still_match": true,
+  "executables": [
+    {
+      "version": "0.12.0",
+      "path": "E:\\emusician-analysis-build\\bin-0.12.0\\Release\\E-musician.exe",
+      "bytes": 22885888,
+      "sha256": "017ced8ef2309da0bc2d4228466369cab4b35b5b41e6df55ad270cd9601b3641"
+    },
+    {
+      "version": "0.12.1",
+      "path": "E:\\emusician-analysis-build\\bin-0.12.1\\Release\\E-musician.exe",
+      "bytes": 22913536,
+      "sha256": "09fae4dc15eddaec2830e9933198674d314c14fd20233d3f9e456ef6ee56b292"
+    }
+  ],
+  "records": [
+    {
+      "id": "20261106T093624.026444Z-cf0feb7592",
+      "action": "cloud-generation-build",
+      "status": "succeeded",
+      "started_at": "2026-11-06T09:36:24.026+00:00",
+      "finished_at": "2026-11-06T09:38:01.677+00:00",
+      "elapsed_seconds": 97.650214,
+      "exit_code": 0,
+      "log_path": null,
+      "source_changed_during_command": false
+    },
+    {
+      "id": "20261106T094014.415563Z-f401c0d9f2",
+      "action": "cloud-generation-test",
+      "status": "succeeded",
+      "started_at": "2026-11-06T09:40:14.416+00:00",
+      "finished_at": "2026-11-06T09:42:47.324+00:00",
+      "elapsed_seconds": 152.907233,
+      "exit_code": 0,
+      "log_path": null,
+      "source_changed_during_command": false
+    },
+    {
+      "id": "20261106T093049.883918Z-5ce0d9c8de",
+      "action": "test-agent-generation-stability-regression",
+      "status": "succeeded",
+      "started_at": "2026-11-06T09:30:49.884+00:00",
+      "finished_at": "2026-11-06T09:31:45.806+00:00",
+      "elapsed_seconds": 55.922158,
+      "exit_code": 0,
+      "log_path": null,
+      "source_changed_during_command": true
+    },
+    {
+      "id": "20261106T093353.979426Z-5a32c2a011",
+      "action": "mir-resource-guards-final-tests",
+      "status": "succeeded",
+      "started_at": "2026-11-06T09:33:53.980+00:00",
+      "finished_at": "2026-11-06T09:34:00.147+00:00",
+      "elapsed_seconds": 6.168048,
+      "exit_code": 0,
+      "log_path": null,
+      "source_changed_during_command": false
+    },
+    {
+      "id": "20261106T093400.425484Z-5c13eeb232",
+      "action": "mir-resource-guards-final-tests",
+      "status": "succeeded",
+      "started_at": "2026-11-06T09:34:00.425+00:00",
+      "finished_at": "2026-11-06T09:34:17.559+00:00",
+      "elapsed_seconds": 17.133894,
+      "exit_code": 0,
+      "log_path": null,
+      "source_changed_during_command": false
+    },
+    {
+      "id": "20261106T094811.065149Z-0ea0b588b8",
+      "action": "generation-default-one-live-decision",
+      "status": "succeeded",
+      "started_at": "2026-11-06T09:48:11.065+00:00",
+      "finished_at": "2026-11-06T09:48:30.315+00:00",
+      "elapsed_seconds": 19.250589,
+      "exit_code": 0,
+      "log_path": null,
+      "source_changed_during_command": false
+    },
+    {
+      "id": "20261106T095200.074167Z-ec75959be7",
+      "action": "short-mir-admission-probe",
+      "status": "succeeded",
+      "started_at": "2026-11-06T09:52:00.075+00:00",
+      "finished_at": "2026-11-06T09:52:01.032+00:00",
+      "elapsed_seconds": 0.958818,
+      "exit_code": 0,
+      "log_path": null,
+      "source_changed_during_command": false
+    }
+  ],
+  "live_language_decision": {
+    "passed": true,
+    "mode": "one-real-openai-decision",
+    "host": "simulated-read-only-project",
+    "actual_daw_used": false,
+    "cloud_music_requests": 0,
+    "tools_executed": 0,
+    "quality_claim": false,
+    "configuration_changed": false,
+    "provider_calls": 1,
+    "tool_names": [
+      "start_generation"
+    ],
+    "normalized": {
+      "project_bpm": 93.0,
+      "meter_numerator": 3,
+      "meter_denominator": 4,
+      "duration_seconds": 20.0,
+      "timeline_start_seconds": 17.5,
+      "description_provided": true,
+      "lyrics_characters": 0
+    },
+    "elapsed_seconds": 17.302,
+    "model": "gpt-5-mini",
+    "token_usage": {
+      "prompt_tokens": 6367,
+      "completion_tokens": 1214
+    }
+  },
+  "real_local_mir": {
+    "schema_version": 1,
+    "recorded_at_utc": "2026-11-06T09:52:00.941424+00:00",
+    "outcome": "not_started_insufficient_probe_margin",
+    "real_model_executed": false,
+    "native_daw_started": false,
+    "inference_attempts": 0,
+    "cpu_retry": false,
+    "physical_audio": false,
+    "system_settings_changed": false,
+    "probe": {
+      "kind": "separate",
+      "model": "htdemucs",
+      "stems": 4,
+      "quality": "fast",
+      "source_start_seconds": 0,
+      "duration_seconds": 7
+    },
+    "preflight": {
+      "measurement": "Windows-GetPerformanceInfo",
+      "available_commit_bytes": 4496859136,
+      "available_physical_bytes": 7857815552,
+      "policy_floor_bytes": 4294967296,
+      "known_buffer_bytes": 194729280,
+      "required_available_commit_bytes": 4489696576,
+      "headroom_above_policy_and_known_buffers_bytes": 7162560,
+      "additional_probe_margin_bytes": 1073741824,
+      "additional_margin_satisfied": false,
+      "gpu": {
+        "name": "NVIDIA GeForce RTX 3050 4GB Laptop GPU",
+        "free_mib": 3965,
+        "total_mib": 4096
+      },
+      "source": "Single preflight command before this recorder metadata command; no repeated admission attempt."
+    },
+    "reason": "Only 6.83 MiB commit remains above policy plus known buffers; below the additional 1 GiB probe margin for launching the DAW/runtime. No inference or DAW subprocess was started, and no retry was attempted.",
+    "executable": {
+      "path": "E:\\emusician-analysis-build\\bin-0.12.1\\Release\\E-musician.exe",
+      "sha256": "09fae4dc15eddaec2830e9933198674d314c14fd20233d3f9e456ef6ee56b292"
+    },
+    "source": {
+      "path": "E:\\MusicAgent&DAW\\cloud-inference\\assets\\8ea523bd83e0423f93abd472d91d13db\\da480d1551504d639b73ec1a94a3bb99\\audio.wav",
+      "sha256": "434615b54883d611190a3d819803151087aaa1bee028129d8a5776e2fd22d3ff",
+      "size_bytes": 4300844,
+      "original_duration_seconds": 22.4
+    },
+    "model": {
+      "id": "htdemucs",
+      "version": "4.1.0",
+      "registered_weight_sha256": "d9fa14133cfcc034a6758923bb3a8ca9f8dfd0b582134643bbf83f72c17576dd"
+    },
+    "checks_not_run": [
+      "real inference",
+      "host responsiveness during inference",
+      "four-output validation",
+      "accept and Undo"
+    ],
+    "limitations": "This is an admission-protection outcome, not a successful MIR integration or quality test. Existing native fault fixtures are separate evidence."
+  },
+  "limitations": [
+    "Original75s6stemNULLcrash stack unavailable",
+    "No new real local separation or ASIO listening acceptance",
+    "Memory guards are not a hard process memory limit",
+    "Python checkpoint reacts immediately; native monitor has1s grace",
+    "Non-Windows fallback lacks equivalent validation",
+    "Cloud MIR staging separate from DAW switchability"
+  ]
+}

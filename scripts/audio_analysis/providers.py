@@ -5,6 +5,7 @@ from math import gcd
 from pathlib import Path
 
 from .common import AnalysisError, sha256_file, validate_notes
+from .resources import check_gpu_headroom, run_inference_once
 
 
 def separation_settings(parameters):
@@ -46,7 +47,9 @@ def separate(job, audio, sample_rate, entry):
     torch.manual_seed(0)
     device = "cuda" if entry.get("device") == "cuda" and torch.cuda.is_available() else "cpu"
     fallback = entry.get("device") == "cuda" and device == "cpu"
+    gpu_admission = {}
     if device == "cuda":
+        gpu_admission = check_gpu_headroom(torch, entry)
         torch.cuda.reset_peak_memory_stats()
     path = checked_model(entry, job)
     job.progress("loading_model", .15, f"Loading HTDemucs on {device.upper()}; local evaluation checkpoint.")
@@ -87,31 +90,26 @@ def separate(job, audio, sample_rate, entry):
     if float(deviation) <= 1e-8:
         outputs = torch.zeros((len(model.sources), 2, len(audio)), dtype=torch.float32)
     else:
-        mix = (mix - mean) / deviation
-        try:
+        mix.sub_(mean).div_(deviation)
+
+        def infer_once():
             with torch.inference_mode():
-                outputs = apply_model(model, mix[None], split=True, **settings,
-                                      segment=segment, device=device, num_workers=0,
-                                      progress=False, callback=progress)[0]
-        except torch.cuda.OutOfMemoryError:
-            if device != "cuda":
-                raise
-            job.check_cancelled()
-            model.cpu()
-            torch.cuda.empty_cache()
-            device, fallback = "cpu", True
-            job.progress("cpu_fallback", .2, "GPU memory was insufficient; continuing on CPU (slower).")
-            with torch.inference_mode():
-                outputs = apply_model(model, mix[None], split=True, **settings,
-                                      segment=segment, device="cpu", num_workers=0,
-                                      progress=False, callback=progress)[0]
-        outputs = outputs * deviation + mean
+                return apply_model(model, mix[None], split=True, **settings,
+                                   segment=segment, device=device, num_workers=0,
+                                   progress=False, callback=progress)[0]
+
+        outputs = run_inference_once(infer_once, 'Separation')
+        # apply_model returns private full-track output. In-place restoration
+        # avoids two additional stem-count × duration float32 allocations.
+        with torch.inference_mode():
+            outputs.mul_(deviation).add_(mean)
     job.progress("writing_stems", .87, "Writing aligned float WAV stems; no per-stem normalization.")
     stems = []
     for index, name in enumerate(model.sources):
         job.check_cancelled()
         data = outputs[index].cpu().numpy().T
-        if len(data) != len(audio) or not np.isfinite(data).all():
+        if len(data) != len(audio) or any(not np.isfinite(data[start:start+65536]).all()
+                                        for start in range(0, len(data), 65536)):
             raise AnalysisError("invalid_result", "Separation produced invalid or misaligned audio.")
         destination = job.directory / f"{name}.wav"
         sf.write(destination, data, target, subtype="FLOAT")
@@ -122,12 +120,15 @@ def separate(job, audio, sample_rate, entry):
     stems.sort(key=lambda stem: ("vocals", "drums", "bass", "piano", "guitar", "other").index(stem["name"]))
     return {"stems": stems, "runtime_metrics": {"device": device, "cpu_fallback": fallback,
             "gpu_name": torch.cuda.get_device_name() if device == "cuda" else "",
+            **gpu_admission,
             "peak_cuda_allocated_bytes": torch.cuda.max_memory_allocated() if device == "cuda" else 0,
             "peak_cuda_reserved_bytes": torch.cuda.max_memory_reserved() if device == "cuda" else 0},
             "limitations": ["Other may contain several instruments; lead/backing voices and guitar roles are not separated.",
             *( ["Six-stem piano and guitar are experimental and may contain bleed or artifacts."] if len(stems) == 6 else []),
             "HTDemucs checkpoint is for local evaluation; redistribution rights are not cleared."],
             "timing": {"output_sample_rate": target, "segment_seconds": segment, **settings,
+                       "effective_forward_segment_seconds": max(segment, float(model.segment))
+                           if getattr(model, "use_train_segment", False) else segment,
                        "random_seed": 0, "global_normalization": "mean_std_restored", "independent_normalization": False,
                        "quantized": False}}
 

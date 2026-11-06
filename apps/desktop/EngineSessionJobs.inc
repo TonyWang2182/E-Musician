@@ -342,12 +342,19 @@ std::shared_ptr<EngineSession::Impl::Job> EngineSession::Impl::startJob(const ju
     }
     auto job=std::make_shared<Job>();job->kind=kind;job->projectId=guard.projectId();job->revision=guard.revision();jobs.push_back(job);
     publish("job_changed",object({{"job_id",job->id},{"status","queued"},{"kind",kind}}));status=kind.replaceCharacter('_',' ')+" queued.";
-    job->worker=std::thread([job,work=std::move(work)]{
-        jobStatus(job,"running",{},0);
-        try{if(job->cancel.load())jobStatus(job,"cancelled");else work(job);}
-        catch(const std::exception& e){jobStatus(job,"failed",e.what());}catch(...){jobStatus(job,"failed","Unexpected file task failure.");}
-        job->done.store(true,std::memory_order_release);
-    });return job;
+    try{
+        job->worker=std::thread([job,work=std::move(work)]()mutable{
+            jobStatus(job,"running",{},0);
+            try{if(job->cancel.load())jobStatus(job,"cancelled");else work(job);}
+            catch(const std::exception& e){jobStatus(job,"failed",e.what());}catch(...){jobStatus(job,"failed","Unexpected file task failure.");}
+            // Release worker-owned buffers/process handles before advertising
+            // completion; the UI must not join while their destructors wait.
+            work={};job->done.store(true,std::memory_order_release);
+        });
+    }catch(const std::exception& e){
+        jobStatus(job,"failed","Cannot create background worker: "+juce::String(e.what()));job->done=true;
+        fail(job->error);return {};
+    }return job;
 }
 
 void EngineSession::Impl::timerCallback()

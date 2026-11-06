@@ -1,0 +1,273 @@
+{
+  "checked_utc": "2026-11-06T09:40:24.682024+00:00",
+  "model_files_downloaded": false,
+  "unit": "bytes; GB=1e9; GiB=2**30",
+  "cloud_disk": {
+    "total_bytes": 268435456000,
+    "used_bytes": 60345856000,
+    "available_bytes": 208089600000
+  },
+  "remaining_models": [
+    {
+      "model": "htdemucs",
+      "tier": "main",
+      "revision": "cbc8a9b1a87023b7fd74e7b3412e6321c0eab003",
+      "files": [
+        {
+          "path": "955717e8.safetensors",
+          "bytes": 84025440
+        }
+      ],
+      "bytes": 84025440,
+      "source": "https://huggingface.co/adefossez/HTDemucs",
+      "method": "local installed file stat; registered source/revision"
+    },
+    {
+      "model": "htdemucs_6s",
+      "tier": "main",
+      "revision": "3c5ee475be622df764938de97e4281a7b07ffa58",
+      "files": [
+        {
+          "path": "5c90dfd2.safetensors",
+          "bytes": 54885744
+        }
+      ],
+      "bytes": 54885744,
+      "source": "https://huggingface.co/adefossez/HTDemucs-6s",
+      "method": "local installed file stat; registered source/revision"
+    },
+    {
+      "model": "basic-pitch",
+      "tier": "main",
+      "revision": "pypi-basic-pitch-0.4.0",
+      "files": [
+        {
+          "path": "nmp.onnx",
+          "bytes": 230444
+        }
+      ],
+      "bytes": 230444,
+      "source": "https://github.com/spotify/basic-pitch",
+      "method": "local installed file stat; registered source/revision"
+    },
+    {
+      "model": "beat-this-final0",
+      "tier": "main",
+      "revision": "b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c",
+      "files": [
+        {
+          "path": "final0.ckpt",
+          "bytes": 81058141
+        }
+      ],
+      "bytes": 81058141,
+      "source": "https://github.com/CPJKU/beat_this",
+      "method": "local installed file stat; registered source/revision"
+    },
+    {
+      "model": "TransKun V2 No Pedal Ext",
+      "tier": "main",
+      "repo": "Yujia-Yan/Transkun",
+      "revision": "c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6",
+      "files": [
+        {
+          "path": "transkun/pretrained/2.0.pt",
+          "bytes": 56408978
+        }
+      ],
+      "bytes": 56408978,
+      "source": "https://github.com/Yujia-Yan/Transkun",
+      "method": "official GitHub tree/release asset API and HTTP HEAD, reviewed by agent_generation"
+    },
+    {
+      "model": "ChordMini BTC",
+      "tier": "main",
+      "repo": "ptnghia-j/ChordMini",
+      "revision": "aa6e3a8d7b017f082fd2aaff9329d5c26af49c03",
+      "files": [
+        {
+          "path": "checkpoints/btc_model_best.pth",
+          "bytes": 35942692
+        }
+      ],
+      "bytes": 35942692,
+      "source": "https://github.com/ptnghia-j/ChordMini",
+      "method": "official GitHub tree/release asset API and HTTP HEAD, reviewed by agent_generation"
+    },
+    {
+      "model": "SCNet XL IHF",
+      "tier": "main",
+      "repo": "ZFTurbo/Music-Source-Separation-Training",
+      "revision": "a8a862231de29e6832a26c590e5c29f82f736f66",
+      "files": [
+        {
+          "path": "model_scnet_ep_36_sdr_10.0891.ckpt",
+          "bytes": 214063778
+        }
+      ],
+      "bytes": 214063778,
+      "source": "https://github.com/ZFTurbo/Music-Source-Separation-Training/releases/tag/v1.0.15",
+      "method": "official GitHub tree/release asset API and HTTP HEAD, reviewed by agent_generation"
+    },
+    {
+      "model": "YuE2 3B",
+      "tier": "main",
+      "repo": "m-a-p/YuE2-3B",
+      "revision": "8f24312f187763b9854adeec87e437e2b03bbff1",
+      "files": [
+        {
+          "path": "model.safetensors",
+          "bytes": 7261441640
+        }
+      ],
+      "bytes": 7261441640,
+      "source": "https://huggingface.co/m-a-p/YuE2-3B/tree/8f24312f187763b9854adeec87e437e2b03bbff1",
+      "gated": false
+    },
+    {
+      "model": "YuE2 required VAE",
+      "tier": "main",
+      "repo": "m-a-p/YuE2-Vae",
+      "revision": "152733a19ad43aa67e367f9b5503ef8075bb5126",
+      "files": [
+        {
+          "path": "model.safetensors",
+          "bytes": 530512720
+        }
+      ],
+      "bytes": 530512720,
+      "source": "https://huggingface.co/m-a-p/YuE2-Vae/tree/152733a19ad43aa67e367f9b5503ef8075bb5126",
+      "gated": false
+    },
+    {
+      "model": "SheetSage2 adapter",
+      "tier": "main",
+      "repo": "m-a-p/SheetSage2",
+      "revision": "b83c3d79a6d98bcffaf8f9ed112c90aa887887bc",
+      "files": [
+        {
+          "path": "model.safetensors",
+          "bytes": 228738564
+        }
+      ],
+      "bytes": 228738564,
+      "source": "https://huggingface.co/m-a-p/SheetSage2/tree/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc",
+      "gated": false
+    },
+    {
+      "model": "SheetSage2 required MERT2",
+      "tier": "main",
+      "repo": "m-a-p/MERT-v2-FullSong",
+      "revision": "d8ba1c745e733b3908ce6ad16ebeb17ac7600a42",
+      "files": [
+        {
+          "path": "model.safetensors",
+          "bytes": 2529812848
+        }
+      ],
+      "bytes": 2529812848,
+      "source": "https://huggingface.co/m-a-p/MERT-v2-FullSong/tree/d8ba1c745e733b3908ce6ad16ebeb17ac7600a42",
+      "method": "revision pinned by SheetSage2 config"
+    },
+    {
+      "model": "MuScriptor medium",
+      "tier": "main",
+      "repo": "MuScriptor/muscriptor-medium",
+      "revision": "f32236969308476e01fd3aae67357de5feb05a2d",
+      "files": [
+        {
+          "path": "model.safetensors",
+          "bytes": 1228144472
+        }
+      ],
+      "bytes": 1228144472,
+      "source": "https://huggingface.co/MuScriptor/muscriptor-medium/tree/f32236969308476e01fd3aae67357de5feb05a2d",
+      "gated": "auto"
+    },
+    {
+      "model": "MuScriptor large",
+      "tier": "main",
+      "repo": "MuScriptor/muscriptor-large",
+      "revision": "8809fdfbed2affa7ade94a7059e746e3880720e7",
+      "files": [
+        {
+          "path": "model.safetensors",
+          "bytes": 5465642136
+        }
+      ],
+      "bytes": 5465642136,
+      "source": "https://huggingface.co/MuScriptor/muscriptor-large/tree/8809fdfbed2affa7ade94a7059e746e3880720e7",
+      "gated": "auto"
+    },
+    {
+      "model": "Mel-Band RoFormer Vocal",
+      "tier": "optional",
+      "revision": "ac9b0614ab3cd7f77219e18ba494dfd93956c348",
+      "files": [
+        {
+          "path": "MelBandRoformer.ckpt",
+          "bytes": 913106900
+        }
+      ],
+      "bytes": 913106900,
+      "source": "https://huggingface.co/KimberleyJSN/melbandroformer/tree/ac9b0614ab3cd7f77219e18ba494dfd93956c348"
+    },
+    {
+      "model": "ACE XL Base incremental",
+      "tier": "optional",
+      "repo": "ACE-Step/acestep-v15-xl-base",
+      "revision": "220c1166efbdd9583eafcb12eb160594bbfcb241",
+      "files": [
+        {
+          "path": "model-00001-of-00004.safetensors",
+          "bytes": 4986971456
+        },
+        {
+          "path": "model-00002-of-00004.safetensors",
+          "bytes": 4986942776
+        },
+        {
+          "path": "model-00003-of-00004.safetensors",
+          "bytes": 4986942808
+        },
+        {
+          "path": "model-00004-of-00004.safetensors",
+          "bytes": 4988483464
+        },
+        {
+          "path": "silence_latent.pt",
+          "bytes": 3841215
+        }
+      ],
+      "bytes": 19953181719,
+      "source": "https://huggingface.co/ACE-Step/acestep-v15-xl-base/tree/220c1166efbdd9583eafcb12eb160594bbfcb241",
+      "gated": false
+    }
+  ],
+  "main_weights_bytes": 17770907597,
+  "all_weights_bytes": 38637196216,
+  "existing_ACE_excluded_bytes": 25253694578,
+  "additional_environment_budget_GB": [
+    60,
+    90
+  ],
+  "download_install_workspace_budget_GB": [
+    10,
+    20
+  ],
+  "results_budget_GB": [
+    30,
+    40
+  ],
+  "additional_total_budget_GB_rounded": [
+    139,
+    189
+  ],
+  "assumptions": [
+    "One selected checkpoint per listed model; both MuScriptor medium and large included for comparison.",
+    "Shared ACE LM/VAE/text components not duplicated; incompatible revisions must be budgeted again.",
+    "No training datasets, optimizer state, YuE legacy decoder, extra model versions or additional full cloud archive included.",
+    "Environment/cache/result allocations are planning budgets, not installed measurements.",
+    "MuScriptor file metadata is public; actual weights require accepting access conditions."
+  ]
+}

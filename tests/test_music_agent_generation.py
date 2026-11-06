@@ -3,6 +3,7 @@
 No GPU, music inference, audio-device operation or paid LLM requests occur here.
 """
 from copy import deepcopy
+import json
 from pathlib import Path
 import sys
 import tempfile
@@ -36,6 +37,49 @@ def candidate():
 
 
 class ContractTests(unittest.TestCase):
+    def test_omitted_fields_use_real_project_defaults_not_hardcoded_tempo(self):
+        ctx = context(); ctx.update(bpm=93., numerator=3, denominator=4, position_seconds=17.5)
+        before = deepcopy(ctx); frozen = freeze_scope(ctx)
+        defaults = g.generation_defaults(ctx, frozen); request = g.authorize_start(ctx, frozen, {})
+        self.assertEqual((defaults["bpm"], defaults["meter_numerator"], defaults["meter_denominator"]), (93., 3, 4))
+        self.assertAlmostEqual(defaults["seconds_per_bar"], 180/93)
+        self.assertEqual(request, {"prompt": g.DEFAULT_PROMPT, "lyrics": "", "duration_seconds": 20., "timeline_start_seconds": 17.5})
+        self.assertEqual(ctx, before)
+
+    def test_bar_duration_uses_actual_meter_and_does_not_reach_native_as_bars(self):
+        ctx = context(); ctx.update(numerator=6, denominator=8)
+        request = g.authorize_start(ctx, freeze_scope(ctx), {"prompt": "Guitar", "duration_bars": 8})
+        self.assertEqual(request["duration_seconds"], 12.)
+        self.assertNotIn("duration_bars", request); self.assertNotIn("bpm", request)
+
+    def test_default_duration_fits_short_valid_time_selection(self):
+        ctx = context(); ctx["selection_context"]["time_range"] = {"active": True, "start_seconds": 10, "end_seconds": 22}
+        request = g.authorize_start(ctx, freeze_scope(ctx), {"prompt": "Piano"})
+        self.assertEqual((request["duration_seconds"], request["timeline_start_seconds"]), (12., 10.))
+        with self.assertRaises(ScopeError): g.authorize_start(ctx, freeze_scope(ctx), {"prompt": "Piano", "duration_seconds": 16})
+
+    def test_short_selection_does_not_silently_widen_or_generate(self):
+        ctx = context(); ctx["selection_context"]["time_range"] = {"active": True, "start_seconds": 10, "end_seconds": 15}
+        self.assertFalse(g.generation_defaults(ctx, freeze_scope(ctx))["supported"])
+        with self.assertRaises(ValueError): g.authorize_start(ctx, freeze_scope(ctx), {})
+
+    def test_missing_invalid_and_unsupported_tempo_never_falls_back_to_120(self):
+        for value in (None, True, float("nan"), 20, 301):
+            ctx = context(); ctx["bpm"] = value
+            self.assertFalse(g.generation_defaults(ctx, freeze_scope(ctx))["supported"])
+            with self.assertRaises(ValueError): g.authorize_start(ctx, freeze_scope(ctx), {})
+        ctx = context(); ctx.update(numerator=7, denominator=8)
+        self.assertFalse(g.generation_defaults(ctx, freeze_scope(ctx))["supported"])
+
+    def test_explicit_duration_and_description_preserved_and_conflicts_rejected(self):
+        ctx = context(); args = {"prompt": "Jazz piano with brushed drums", "duration_seconds": 33, "lyrics": "Original lyric", "seed": 71}
+        request = g.authorize_start(ctx, freeze_scope(ctx), args)
+        for key, value in args.items(): self.assertEqual(request[key], value)
+        for extra in ({"duration_bars": 8}, {"bpm": 140}):
+            with self.assertRaises(ValueError): g.authorize_start(ctx, freeze_scope(ctx), {**args, **extra})
+        for bars in (True, float("nan"), 1, 1000):
+            with self.assertRaises(ValueError): g.authorize_start(ctx, freeze_scope(ctx), {"duration_bars": bars})
+
     def test_empty_project_generates_at_frozen_playhead_without_source(self):
         ctx = context(); scope = freeze_scope(ctx)
         request = g.authorize_start(ctx, scope, {"prompt": "Warm piano", "duration_seconds": 16})
@@ -199,6 +243,33 @@ class RuntimeTests(unittest.TestCase):
         r = self.make(tool("start_generation", {"prompt": "Warm piano", "duration_seconds": 16}), tool("propose_generation_import", {"result_id": "gen-r", "summary": "Add generated piano"}))
         r.plan_request("Generate piano", "selection"); s = self.finish(r)
         self.assertEqual(s["phase"], "ready", s); return r, s
+    def test_generation_without_bpm_or_duration_reaches_review_from_current_context(self):
+        r = self.make(tool("start_generation", {"prompt": "Jazz piano"}), tool("propose_generation_import", {"result_id": "gen-r", "summary": "Review generated jazz piano"}))
+        r.bridge.data.update(bpm=93., numerator=3, denominator=4)
+        r.bridge.candidate["source"].update(bpm=93., meter_numerator=3, meter_denominator=4)
+        r.plan_request("生成一段爵士钢琴", "selection"); state = self.finish(r)
+        self.assertEqual(state["phase"], "ready", state)
+        self.assertEqual(len(r.provider.requests), 2)
+        sent_context = json.loads(r.provider.requests[0][-1]["content"].split("当前工程数据（只读）：\n")[1])
+        self.assertEqual(sent_context["generation_defaults"]["bpm"], 93.)
+        self.assertIn('"bpm": 93.0', r.provider.requests[0][0]["content"])
+        started = [call[1] for call in r.bridge.calls if call[0] == "start"]
+        self.assertEqual(len(started), 1); self.assertEqual(started[0]["duration_seconds"], 20.)
+        self.assertEqual(started[0]["prompt"], "Jazz piano")
+        self.assertFalse(r.bridge.data["tracks"]); self.assertFalse(any(call[0] == "apply" for call in r.bridge.calls))
+
+    def test_bar_request_resolves_locally_before_generation(self):
+        r = self.make(tool("start_generation", {"prompt": "Guitar", "duration_bars": 8}), tool("propose_generation_import", {"result_id": "gen-r", "summary": "Review guitar"}))
+        r.bridge.data.update(numerator=6, denominator=8); r.bridge.candidate["source"].update(meter_numerator=6, meter_denominator=8)
+        r.plan_request("生成8小节吉他", "selection"); self.assertEqual(self.finish(r)["phase"], "ready")
+        request = next(call[1] for call in r.bridge.calls if call[0] == "start")
+        self.assertEqual(request["duration_seconds"], 12.); self.assertNotIn("duration_bars", request)
+
+    def test_information_question_is_not_forced_into_generation(self):
+        r = self.make({"message": {"role": "assistant", "content": "可以根据工程速度生成音乐，并先给出候选。"}, "usage": {}})
+        r.plan_request("你能生成音乐吗，先说明流程", "selection")
+        self.assertEqual(self.finish(r)["phase"], "done")
+        self.assertFalse(any(call[0] in {"start", "apply"} for call in r.bridge.calls))
     def test_generate_review_preview_apply_verify_and_one_undo(self):
         r, s = self.ready(); self.assertEqual(r.bridge.data["tracks"], []); self.assertEqual(len(r.provider.requests), 2)
         pid = s["plan"]["id"]; r.preview_generation_plan(pid); r.preview_generation_plan(stop=True)

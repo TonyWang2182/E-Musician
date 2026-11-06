@@ -8009,3 +8009,113 @@ print('PASS: unchanged baseline, 2 exact new cache files, both absent preference
 - Source SHA-256: `ebdfea33db3961af998df283ab6599d56e5736315039901561ff63def288c789`; Git HEAD: `86fb3c5d4993dc5b4eb05516366957adbf060a05`.
 - [Record](builds/20261106T091722.230304Z-af327ca9e3.json) · [Raw log](../build-logs/20261106T091722.230304Z-af327ca9e3.log)
 - [Exact process output](../build-logs/20261106T091722.230304Z-af327ca9e3.raw.log)
+
+### 2026-11-06T17:30:30+08:00 · test-agent-generation-defaults · succeeded
+
+- Config: Release; exit code: 0; elapsed: 9.172s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent_generation.py -v`
+- Context: Generation stability: explicit project-derived defaults and local bar duration without paid inference
+- Source SHA-256: `7940e6dce1fdea496828003e90600d011e5f4b86a1da78db5555cab2172b7c4b`; Git HEAD: `61c93840671ba1ea6fd0694d585255e4916b65cb`.
+- [Record](builds/20261106T093030.699747Z-5bd84a208f.json) · [Raw log](../build-logs/20261106T093030.699747Z-5bd84a208f.log)
+- [Exact process output](../build-logs/20261106T093030.699747Z-5bd84a208f.raw.log)
+
+### 2026-11-06T17:31:32+08:00 · mir-resource-guards-tests · succeeded
+
+- Config: Python3.10 isolated chords runtime; no models; exit code: 0; elapsed: 4.339s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe -m unittest discover -s tests -p test_audio_analysis*.py -v`
+- Context: 0.12.1: low-commit admission, no OOM CPU retry, one-allocation decode; lightweight tests only
+- Source SHA-256: `2567c46be0409a99fdddb8666a21b6e30de2c85b98aa046c885e5700c4bd46c9`; Git HEAD: `61c93840671ba1ea6fd0694d585255e4916b65cb`.
+- [Record](builds/20261106T093132.806164Z-06efd395e2.json) · [Raw log](../build-logs/20261106T093132.806164Z-06efd395e2.log)
+- [Exact process output](../build-logs/20261106T093132.806164Z-06efd395e2.raw.log)
+
+### 2026-11-06T17:30:49+08:00 · test-agent-generation-stability-regression · succeeded
+
+- Config: Release; exit code: 0; elapsed: 55.922s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: Offline Agent full regression after project-context generation defaults and local bars-to-seconds normalization
+- Source SHA-256: `7940e6dce1fdea496828003e90600d011e5f4b86a1da78db5555cab2172b7c4b`; Git HEAD: `61c93840671ba1ea6fd0694d585255e4916b65cb`.
+- [Record](builds/20261106T093049.883918Z-5ce0d9c8de.json) · [Raw log](../build-logs/20261106T093049.883918Z-5ce0d9c8de.log)
+- [Exact process output](../build-logs/20261106T093049.883918Z-5ce0d9c8de.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T17:33:53+08:00 · mir-resource-guards-final-tests · succeeded
+
+- Config: Python3.10 isolated runtimes; no real models; exit code: 0; elapsed: 6.168s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe -m unittest discover -s tests -p test_audio_analysis*.py -v`
+- Context: 0.12.1: unified host commit policy, fault logs, no separation/beat OOM retries; tiny CPU tensor provider stub only
+- Source SHA-256: `fb10a30f8cc7490ca86d6f8ae2a582563352552065d1ff3278e4e4a7146fd09e`; Git HEAD: `61c93840671ba1ea6fd0694d585255e4916b65cb`.
+- [Record](builds/20261106T093353.979426Z-5a32c2a011.json) · [Raw log](../build-logs/20261106T093353.979426Z-5a32c2a011.log)
+- [Exact process output](../build-logs/20261106T093353.979426Z-5a32c2a011.raw.log)
+
+### 2026-11-06T17:34:00+08:00 · mir-resource-guards-final-tests · succeeded
+
+- Config: Python3.10 isolated runtimes; no real models; exit code: 0; elapsed: 17.134s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/separation-py310/Scripts/python.exe -m unittest discover -s tests -p test_audio_analysis_resources.py -v`
+- Context: 0.12.1: unified host commit policy, fault logs, no separation/beat OOM retries; tiny CPU tensor provider stub only
+- Source SHA-256: `fb10a30f8cc7490ca86d6f8ae2a582563352552065d1ff3278e4e4a7146fd09e`; Git HEAD: `61c93840671ba1ea6fd0694d585255e4916b65cb`.
+- [Record](builds/20261106T093400.425484Z-5c13eeb232.json) · [Raw log](../build-logs/20261106T093400.425484Z-5c13eeb232.log)
+- [Exact process output](../build-logs/20261106T093400.425484Z-5c13eeb232.raw.log)
+
+### 2026-11-06T17:36:04+08:00 · cloud-generation-build · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 19.146s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.12.1`
+- Context: 0.12.1 generation/analysis stability; serial build for limited local memory; no physical audio acceptance inferred
+- Source SHA-256: `fb10a30f8cc7490ca86d6f8ae2a582563352552065d1ff3278e4e4a7146fd09e`; Git HEAD: `61c93840671ba1ea6fd0694d585255e4916b65cb`.
+- [Record](builds/20261106T093604.618988Z-c1548a25c9.json) · [Raw log](../build-logs/20261106T093604.618988Z-c1548a25c9.log)
+- [Exact process output](../build-logs/20261106T093604.618988Z-c1548a25c9.raw.log)
+
+### 2026-11-06T17:36:24+08:00 · cloud-generation-build · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 97.650s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: 0.12.1 generation/analysis stability; serial build for limited local memory; no physical audio acceptance inferred
+- Source SHA-256: `fb10a30f8cc7490ca86d6f8ae2a582563352552065d1ff3278e4e4a7146fd09e`; Git HEAD: `61c93840671ba1ea6fd0694d585255e4916b65cb`.
+- [Record](builds/20261106T093624.026444Z-cf0feb7592.json) · [Raw log](../build-logs/20261106T093624.026444Z-cf0feb7592.log)
+- [Exact process output](../build-logs/20261106T093624.026444Z-cf0feb7592.raw.log)
+
+### 2026-11-06T17:39:16+08:00 · test-generation-decision-probe-wrapper · succeeded
+
+- Config: Release; exit code: 0; elapsed: 2.707s.
+- Command: `C:\Python314\python.exe build-logs/generation_decision_probe.py --output build-logs/generation-decision-probe-offline.json`
+- Context: Offline self-check only: simulated host and canned decision, no provider API or music GPU request
+- Source SHA-256: `fb10a30f8cc7490ca86d6f8ae2a582563352552065d1ff3278e4e4a7146fd09e`; Git HEAD: `61c93840671ba1ea6fd0694d585255e4916b65cb`.
+- [Record](builds/20261106T093916.788889Z-fb9dcee725.json) · [Raw log](../build-logs/20261106T093916.788889Z-fb9dcee725.log)
+- [Exact process output](../build-logs/20261106T093916.788889Z-fb9dcee725.raw.log)
+
+### 2026-11-06T17:40:14+08:00 · cloud-generation-test · succeeded
+
+- Config: Release/Python; exit code: 0; elapsed: 152.907s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: 0.12.1 generation/analysis stability; serial build for limited local memory; no physical audio acceptance inferred
+- Source SHA-256: `fb10a30f8cc7490ca86d6f8ae2a582563352552065d1ff3278e4e4a7146fd09e`; Git HEAD: `61c93840671ba1ea6fd0694d585255e4916b65cb`.
+- [Record](builds/20261106T094014.415563Z-f401c0d9f2.json) · [Raw log](../build-logs/20261106T094014.415563Z-f401c0d9f2.log)
+- [Exact process output](../build-logs/20261106T094014.415563Z-f401c0d9f2.raw.log)
+
+### 2026-11-06T17:48:11+08:00 · generation-default-one-live-decision · succeeded
+
+- Config: Python3.14/OpenAI saved model; exit code: 0; elapsed: 19.251s.
+- Command: `C:\Python314\python.exe build-logs/generation_decision_probe.py --live --output build-logs/generation-decision-probe-live.json`
+- Context: One paid language decision; simulated read-only host; no tool execution or cloud music generation; no retries
+- Source SHA-256: `fb10a30f8cc7490ca86d6f8ae2a582563352552065d1ff3278e4e4a7146fd09e`; Git HEAD: `61c93840671ba1ea6fd0694d585255e4916b65cb`.
+- [Record](builds/20261106T094811.065149Z-0ea0b588b8.json) · [Raw log](../build-logs/20261106T094811.065149Z-0ea0b588b8.log)
+- [Exact process output](../build-logs/20261106T094811.065149Z-0ea0b588b8.raw.log)
+
+### 2026-11-06T17:52:00+08:00 · short-mir-admission-probe · succeeded
+
+- Config: Release/0.12.1; exit code: 0; elapsed: 0.959s.
+- Command: `C:\Python314\python.exe build-logs/short_mir_admission_probe.py`
+- Context: Single requested7s HTDemucs4 Fast preflight; insufficient 1GiB probe margin, no DAW/model started and no retry
+- Source SHA-256: `fb10a30f8cc7490ca86d6f8ae2a582563352552065d1ff3278e4e4a7146fd09e`; Git HEAD: `61c93840671ba1ea6fd0694d585255e4916b65cb`.
+- [Record](builds/20261106T095200.074167Z-ec75959be7.json) · [Raw log](../build-logs/20261106T095200.074167Z-ec75959be7.log)
+- [Exact process output](../build-logs/20261106T095200.074167Z-ec75959be7.raw.log)
+
+## 2026-11-06 / 0.12.1 stability verification and capacity audit
+
+- Implemented project-derived generation defaults, local MIR commit/resource admission, no same-process OOM CPU retry, fewer PCM copies, owned Windows worker process trees, and visible failure details.
+- Release build and CTest 11/11 passed with 257 input files frozen (fb10a30f8cc7490ca86d6f8ae2a582563352552065d1ff3278e4e4a7146fd09e); Agent334 and Worker44 (43 passed/1 skipped, covered by10 CPU Torch tests) passed. Independent review found no release blocker.
+- One real saved GPT-5-mini API decision passed: adopted93BPM/3-4/17.5s/default20s, no tools executed and no cloud music request. Record094811...0ea0b588b8. This is one synthetic-host decision, not general intent accuracy.
+- Real7s local separation was NOT started: only6.83MiB commit headroom above policy+known buffers; no extra1GiB probe margin. No retry/pagefile/process changes. Record095200...ec75959be7. Original75s NULL crash stack still unavailable; ASIO/manual acceptance pending.
+- New0.12.1 EXE SHA09fae4dc15eddaec2830e9933198674d314c14fd20233d3f9e456ef6ee56b292, independent launcher/workspace and release binaries copied/verified on E. Old0.12.0 SHA unchanged. See generation-stability RESULTS/VERIFICATION/MANUAL-CHECK.
+- Remaining main weights17,770,907,597B; including optional checkpoints38,637,196,216B. Available cloud208,089,600,000B before staging; additional full deployment budget139-189GB including estimated environments/temp/results, not measured installs. Exact sources/revisions in hybrid-ai/CAPACITY-20261106.json.
+- New user steering authorizes parallel cloud MIR preparation. Isolated HTDemucs4/6, BasicPitch ONNX and BeatThis staging is separate; DAW still routes MIR locally and ACE remotely, no free local/cloud switch yet. Do not infer runtime readiness from package installation.

@@ -78,7 +78,7 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         for (auto* control : std::initializer_list<juce::Component*> {
                  &separate, &transcribe, &chords, &source, &from, &length, &start, &cancel, &availability,
                  &threshold, &minimumNote, &thresholdLabel, &minimumLabel, &jobs, &status, &progress,
-                 &results, &emptyResults, &previous, &next, &page, &play, &stop, &accept, &guidance,
+                 &results, &emptyResults, &failureDetails, &previous, &next, &page, &play, &stop, &accept, &guidance,
                  &showSaved, &chordLabel, &chordStart, &chordEnd, &updateChord, &correctionHelp,
                  &canvas, &stemCount, &quality, &instrument, &vocabulary, &options,
                  &beats, &beatBpm, &beatFirst, &beatMeter, &beatBpmLabel, &beatFirstLabel, &halfTempo, &doubleTempo, &useTempo }) owner.addAndMakeVisible(control);
@@ -130,6 +130,13 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         guidance.setJustificationType(juce::Justification::topLeft);
         emptyResults.setJustificationType(juce::Justification::centred);
         emptyResults.setInterceptsMouseClicks(false, false);
+        failureDetails.setMultiLine(true, true); failureDetails.setReadOnly(true);
+        failureDetails.setScrollbarsShown(true); failureDetails.setCaretVisible(false);
+        failureDetails.setFont(mono(12));
+        failureDetails.setColour(juce::TextEditor::backgroundColourId, paper);
+        failureDetails.setColour(juce::TextEditor::textColourId, ink);
+        failureDetails.setColour(juce::TextEditor::outlineColourId, rule);
+        failureDetails.setName("Analysis failure details");
         for (auto* field : { &from, &length, &chordStart, &chordEnd, &beatBpm, &beatFirst }) {
             field->setFont(mono()); field->setInputRestrictions(16, "0123456789.");
             field->setColour(juce::TextEditor::backgroundColourId, paper);
@@ -357,8 +364,14 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         emptyResults.setText(savedView?uiText("No chords yet", "暂无和弦")
             :jobState=="ready"?(resultKind=="beats"?uiText("No steady beats found. Try a rhythmic section.", "未找到稳定节拍，请选择节奏明显的段落。"):uiText("No notes or chords found", "未检测到音符或和弦"))
             :busy?uiText("Analyzing…", "正在分析…"):uiText("Select audio, then Analyze", "选择音频，然后点击分析"),juce::dontSendNotification);
-        emptyResults.setVisible(items.empty());
-        if(items.empty())emptyResults.toFront(false);
+        const bool showFailure = items.empty() && error.isNotEmpty() && !busy && !savedView;
+        emptyResults.setVisible(items.empty() && !showFailure);
+        failureDetails.setVisible(showFailure);
+        if (showFailure) {
+            const auto detail = uiText("Analysis stopped. Your project is unchanged.", "分析已停止，工程未改动。") + "\n\n" + error;
+            if (failureDetails.getText() != detail) { failureDetails.setText(detail, false); failureDetails.setCaretPosition(0); }
+            failureDetails.toFront(false);
+        } else if(items.empty())emptyResults.toFront(false);
         previous.setEnabled(pageOffset>0);next.setEnabled(pageOffset+int(items.size())<total);
         previous.setVisible(total>pageSize);next.setVisible(total>pageSize);
         page.setText(total>pageSize?juce::String(pageOffset+1)+"-"+juce::String(pageOffset+int(items.size()))+" / "+juce::String(total)
@@ -469,7 +482,8 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
         const auto phase = job["phase"].toString(), detail = job["detail"].toString();
         progressValue = juce::jlimit(0.0, 1.0, double(job["progress"]));
         const auto failure = job["error"].toString();
-        const auto message=failure.isNotEmpty()?uiText("Analysis failed. Try again.", "分析失败，请重试。")
+        if (failure.isNotEmpty()) error = failure;
+        const auto message=failure.isNotEmpty()?uiText("Analysis stopped", "分析已停止")
             :jobState=="ready"?(kind=="beats"?uiText("Review tempo and first beat", "确认速度与首拍"):uiText("Ready to add", "可添加到编曲"))
             :jobState=="applied"?(kind=="beats"?uiText("Aligned", "已对齐"):uiText("Added to arrangement", "已添加到编曲"))
             :jobState=="cancelled"?uiText("Cancelled", "已取消")
@@ -625,7 +639,7 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
     juce::TextEditor beatBpm,beatFirst;juce::ComboBox beatMeter;juce::Label beatBpmLabel,beatFirstLabel;
     juce::TextButton halfTempo{"/2"},doubleTempo{"x2"},useTempo;juce::String beatResultId;juce::var beatPeaks;double beatDuration=0;
     juce::Label source, availability, thresholdLabel, minimumLabel, status, guidance, page, correctionHelp, emptyResults;
-    juce::TextEditor from, length, chordStart, chordEnd;
+    juce::TextEditor from, length, chordStart, chordEnd, failureDetails;
     juce::Slider threshold, minimumNote;
     juce::ComboBox jobs, chordLabel, stemCount, quality, instrument, vocabulary;
     juce::TextButton options; AnalysisCanvas canvas;
@@ -708,6 +722,7 @@ void AnalysisPanel::resized() {
     const int top=82,bottom=height-(beatResult?70:42)-correctionHeight;
     p.results.setBounds(p.right.getX(),top,p.right.getWidth(),juce::jmax(26,bottom-top));p.canvas.setBounds(p.results.getBounds());
     p.emptyResults.setBounds(p.results.getBounds().reduced(5));
+    p.failureDetails.setBounds(p.results.getBounds().reduced(5));
     for(juce::Component* c:std::initializer_list<juce::Component*>{&p.chordLabel,&p.chordStart,&p.chordEnd,&p.updateChord})c->setVisible(p.savedView);
     const int chordWidth=juce::jlimit(66,90,p.right.getWidth()/4),fieldWidth=juce::jmax(42,(p.right.getWidth()-chordWidth-70)/2);
     p.chordLabel.setBounds(p.right.getX(),bottom+3,chordWidth,25);p.chordStart.setBounds(p.chordLabel.getRight()+4,bottom+3,fieldWidth,25);
@@ -763,6 +778,18 @@ juce::Result AnalysisPanel::runInteractionSmokeTest(juce::DynamicObject& report,
     p.presentInProject = true; p.updateControls();
     if (p.accept.isEnabled() || p.accept.getButtonText() != uiText("Added", "已添加")) return juce::Result::fail("Redo import projection is incorrect.");
     p.resultId.clear(); p.resultLoaded = p.applied = p.presentInProject = false; p.total = 0; p.jobState.clear(); p.updateControls();
+    p.jobState = "failed"; p.error = "The isolated analysis worker crashed with an access violation (0xc0000005). The project is unchanged. See process.log.";
+    for (const auto size : { juce::Point<int>(600,260), juce::Point<int>(540,210) }) {
+        setSize(size.x,size.y); p.updateControls();
+        if (!p.failureDetails.isVisible() || !p.failureDetails.isReadOnly() || !p.failureDetails.getText().contains(p.error)
+            || p.failureDetails.getHeight() < 40 || p.accept.isEnabled())
+            return juce::Result::fail("Analysis failure is not visibly readable or can still be accepted.");
+        auto output = directory.getChildFile("ui-analysis-failed-"+juce::String(size.x)+"x"+juce::String(size.y)+"-synthetic.png").createOutputStream();
+        if (!output || !juce::PNGImageFormat().writeImageToStream(createComponentSnapshot(getLocalBounds()),*output))
+            return juce::Result::fail("Cannot capture analysis failure fixture.");
+    }
+    report.setProperty("analysis_ui_failure_visible_selectable_scrollable",true);
+    p.error.clear(); p.jobState.clear(); p.updateControls();
     // These are explicitly synthetic view fixtures; real inference and import
     // quality are separate process tests. No music is written by a screenshot.
     const auto oldLanguage=uiLanguageCode();

@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-11-06T09:52:00.941424+00:00",
+  "outcome": "not_started_insufficient_probe_margin",
+  "real_model_executed": false,
+  "native_daw_started": false,
+  "inference_attempts": 0,
+  "cpu_retry": false,
+  "physical_audio": false,
+  "system_settings_changed": false,
+  "probe": {
+    "kind": "separate",
+    "model": "htdemucs",
+    "stems": 4,
+    "quality": "fast",
+    "source_start_seconds": 0,
+    "duration_seconds": 7
+  },
+  "preflight": {
+    "measurement": "Windows-GetPerformanceInfo",
+    "available_commit_bytes": 4496859136,
+    "available_physical_bytes": 7857815552,
+    "policy_floor_bytes": 4294967296,
+    "known_buffer_bytes": 194729280,
+    "required_available_commit_bytes": 4489696576,
+    "headroom_above_policy_and_known_buffers_bytes": 7162560,
+    "additional_probe_margin_bytes": 1073741824,
+    "additional_margin_satisfied": false,
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3050 4GB Laptop GPU",
+      "free_mib": 3965,
+      "total_mib": 4096
+    },
+    "source": "Single preflight command before this recorder metadata command; no repeated admission attempt."
+  },
+  "reason": "Only 6.83 MiB commit remains above policy plus known buffers; below the additional 1 GiB probe margin for launching the DAW/runtime. No inference or DAW subprocess was started, and no retry was attempted.",
+  "executable": {
+    "path": "E:\\emusician-analysis-build\\bin-0.12.1\\Release\\E-musician.exe",
+    "sha256": "09fae4dc15eddaec2830e9933198674d314c14fd20233d3f9e456ef6ee56b292"
+  },
+  "source": {
+    "path": "E:\\MusicAgent&DAW\\cloud-inference\\assets\\8ea523bd83e0423f93abd472d91d13db\\da480d1551504d639b73ec1a94a3bb99\\audio.wav",
+    "sha256": "434615b54883d611190a3d819803151087aaa1bee028129d8a5776e2fd22d3ff",
+    "size_bytes": 4300844,
+    "original_duration_seconds": 22.4
+  },
+  "model": {
+    "id": "htdemucs",
+    "version": "4.1.0",
+    "registered_weight_sha256": "d9fa14133cfcc034a6758923bb3a8ca9f8dfd0b582134643bbf83f72c17576dd"
+  },
+  "checks_not_run": [
+    "real inference",
+    "host responsiveness during inference",
+    "four-output validation",
+    "accept and Undo"
+  ],
+  "limitations": "This is an admission-protection outcome, not a successful MIR integration or quality test. Existing native fault fixtures are separate evidence."
+}

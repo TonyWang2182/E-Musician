@@ -15,14 +15,17 @@ COMMANDS = {"get_generation_capabilities", "start_generation", "get_generation_j
             "stop_generation_preview", "accept_generation_result"}
 TERMINAL = {"ready", "applied", "failed", "cancelled", "stale", "interrupted"}
 SOURCE_FIELDS = {"project_id", "revision", "timeline_start", "bpm", "meter_numerator", "meter_denominator"}
+DEFAULT_DURATION_SECONDS = 20.0
+DEFAULT_PROMPT = "Instrumental music with a clear melody, balanced accompaniment and a natural ending."
 
 GENERATION_TOOLS = [
-    _tool("start_generation", "用已连接的云端音乐模型生成真实音频候选。只上传描述和可选歌词，不上传工程音频。无需选中音频或已有轨道；新工程也可使用。默认放在发送要求时的播放头，选了时间范围则从范围起点开始。不修改工程；本地等待完成，不要重复启动。BPM/拍号来自当前工程，时长是秒且10至120；小节数换算为bars*numerator*4/denominator*60/BPM。空歌词生成纯音乐，带歌词请求歌曲。结果时长/节拍需试听，不保证精确整小节。", {
-        "prompt": {"type": "string", "minLength": 1, "maxLength": 2000},
+    _tool("start_generation", "用户明确要求生成音乐时直接调用，不要求用户补填BPM、拍号、播放头或未指定的时长。实际BPM/拍号由当前工程提供，见generation_defaults。默认20秒，短时间选区会适配；也可传duration_bars由本地按工程节拍计算。seconds与bars只能选一个，均省略即可使用默认。prompt保留用户已给的音乐内容；没给风格时可省略，使用中性纯音乐描述。未给歌词则纯音乐。默认冻结播放头或时间选区起点，无需源片段/已有轨道，不修改工程。只上传描述和可选歌词；本地等待，不重复启动。生成后直接propose_generation_import呈现试听/加入轨道确认，不再口头问一次BPM或是否继续。时长/BPM是条件，不保证精确整小节。", {
+        "prompt": {"type": "string", "minLength": 1, "maxLength": 2000, "description": "音乐描述；保留用户已给的风格、乐器和情绪。完全未指定风格时可省略。"},
         "lyrics": {"type": "string", "maxLength": 4096},
-        "duration_seconds": {"type": "number", "minimum": 10, "maximum": 120},
+        "duration_seconds": {"type": "number", "minimum": 10, "maximum": 120, "description": "明确给定的秒数；与duration_bars二选一。省略使用generation_defaults.duration_seconds。"},
+        "duration_bars": {"type": "number", "minimum": .25, "maximum": 1024, "description": "明确给定的小节数；本地按当前工程BPM/拍号换算，不需要询问BPM。换算后须为10至120秒。"},
         "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647},
-        "timeline_start_seconds": {"type": "number", "minimum": 0, "maximum": 172800}}, ["prompt", "duration_seconds"]),
+        "timeline_start_seconds": {"type": "number", "minimum": 0, "maximum": 172800}}, []),
     _tool("get_generation_result", "读取已启动的音乐生成任务或完整单音频候选。job_id/result_id选一个。ready只是已下载可试听，applied才是加入工程。", {
         "job_id": {"type": "string"}, "result_id": {"type": "string"}}, []),
     _tool("cancel_generation", "请求取消正在计算的音乐生成，不删除原工程。本地停止不等于云端已取消；只有remote_cancel_confirmed为true才可称云端取消完成，否则说明仍在取消或无法确认。", {"job_id": {"type": "string"}}, ["job_id"]),
@@ -37,6 +40,34 @@ def number(value, low, high):
     if type(value) not in (int, float) or not math.isfinite(value) or not low <= value <= high:
         raise ValueError("生成参数必须是支持范围内的有限数值。")
     return float(value)
+
+
+def generation_defaults(context, frozen):
+    """Explicit host-owned defaults; no guessed tempo or hidden scope widening."""
+    try:
+        if type(context.get("bpm")) not in (int, float) or not math.isfinite(context["bpm"]):
+            raise ValueError("当前工程没有有效速度，无法按工程节拍生成；不会猜测BPM。")
+        if not 30 <= context["bpm"] <= 300:
+            raise ValueError("当前生成模型支持30至300 BPM；当前工程速度超出范围，不会擅自改速。")
+        bpm = number(context.get("bpm"), 30, 300)
+        numerator, denominator = context.get("numerator"), context.get("denominator")
+        if type(numerator) is not int or type(denominator) is not int or (numerator, denominator) not in {(2, 4), (3, 4), (4, 4), (6, 8)}:
+            raise ValueError("当前生成模型支持2/4、3/4、4/4和6/8；工程拍号尚不支持。")
+        timed = (frozen.get("selection") or {}).get("time_range") or {}
+        timed = timed if frozen.get("mode") == "selection" and timed.get("active") else {}
+        start = number(timed.get("start_seconds", context.get("position_seconds", 0)), 0, 172790)
+        duration = DEFAULT_DURATION_SECONDS
+        if timed:
+            span = number(timed.get("end_seconds"), start, 172800) - start
+            if span < 10:
+                raise ValueError("所选时间范围不足10秒，无法容纳生成模型的最短输出；不会扩大选区。")
+            duration = min(duration, span)
+        return {"supported": True, "bpm": bpm, "meter_numerator": numerator, "meter_denominator": denominator,
+                "seconds_per_bar": numerator*4/denominator*60/bpm, "timeline_start_seconds": start,
+                "duration_seconds": duration, "default_prompt": DEFAULT_PROMPT, "lyrics": "",
+                "timing_source": "current_project", "position_source": "selected_time_range" if timed else "frozen_playhead"}
+    except ValueError as exc:
+        return {"supported": False, "reason": str(exc), "timing_source": "current_project"}
 
 
 def _hash(value):
@@ -116,14 +147,20 @@ def safe_result(raw):
 
 def authorize_start(context, frozen, args):
     assert_scope_unchanged(frozen, context)
-    if not isinstance(args, dict) or set(args)-{"prompt", "lyrics", "duration_seconds", "seed", "timeline_start_seconds"} or not {"prompt", "duration_seconds"} <= set(args):
+    if not isinstance(args, dict) or set(args)-{"prompt", "lyrics", "duration_seconds", "duration_bars", "seed", "timeline_start_seconds"}:
         raise ValueError("生成只接受音乐描述、歌词、时长、种子和起点。")
-    prompt, lyrics = args["prompt"], args.get("lyrics", "")
+    defaults = generation_defaults(context, frozen)
+    if not defaults["supported"]: raise ValueError(defaults["reason"])
+    prompt, lyrics = args.get("prompt", DEFAULT_PROMPT), args.get("lyrics", "")
     if not isinstance(prompt, str) or not prompt.strip() or len(prompt) > 2000 or "\0" in prompt:
         raise ValueError("音乐描述应为1至2000字。")
     if not isinstance(lyrics, str) or len(lyrics) > 4096 or "\0" in lyrics:
         raise ValueError("歌词最多4096字。")
-    duration = number(args["duration_seconds"], 10, 120)
+    if "duration_seconds" in args and "duration_bars" in args:
+        raise ValueError("生成时长只能指定秒数或小节数中的一个。")
+    duration = (number(args["duration_bars"], .25, 1024)*defaults["seconds_per_bar"] if "duration_bars" in args
+                else args.get("duration_seconds", defaults["duration_seconds"]))
+    duration = number(duration, 10, 120)
     timed = (frozen.get("selection") or {}).get("time_range") or {}
     timed = timed if frozen.get("mode") == "selection" and timed.get("active") else {}
     start = number(args.get("timeline_start_seconds", timed.get("start_seconds", context.get("position_seconds", 0))), 0, 172800-duration)
