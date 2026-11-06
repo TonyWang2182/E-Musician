@@ -8166,3 +8166,85 @@ print('PASS: unchanged baseline, 2 exact new cache files, both absent preference
 - [Exact process output](../build-logs/20261106T095856.486196Z-e28b313d24.raw.log)
 
 - 0.12.1 preservation: implementation commit f6fe0a0; source archive 20,771,290B,1499entries,SHA b4a1c5ced9c818f9aa47f619ba1215676f5c8e1a88efa8b525474b8d73a691bb; ZIP CRC and all257 tested source hashes passed. EXE/PDB/launcher/workspace independently copied and verified. This is a local preservation bundle, not a portable installer.
+
+### 2026-11-06T17:59:14+08:00 · cloud-mir-stage-install · failed
+
+- Config: Linux Python 3.12 / isolated Torch and ONNX envs; exit code: 1; elapsed: 71.470s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/uv pip freeze --python /root/autodl-tmp/emusician/envs/ace/bin/python | sha256sum; bash /root/autodl-tmp/emusician/tools/mir_install.sh"`
+- Context: Pinned four MIR providers; CPU import/load checks only. CUDA_VISIBLE_DEVICES empty. Existing ACE env and service untouched.
+- Source SHA-256: `b896262e30c850485da3a19e2d4ee3fe8c14dac9ccaf34176c37fe99c9b8b595`; Git HEAD: `f6fe0a069334d4bdda2b04b503c64a8d58c35b4a`.
+- [Record](builds/20261106T095914.949541Z-521b2865d4.json) · [Raw log](../build-logs/20261106T095914.949541Z-521b2865d4.log)
+- [Exact process output](../build-logs/20261106T095914.949541Z-521b2865d4.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T095914.949541Z-521b2865d4.log
+
+### 2026-11-06T18:01:03+08:00 · cloud-mir-stage-path-fix · succeeded
+
+- Config: Windows to Linux path serialization; exit code: 0; elapsed: 3.060s.
+- Command: `C:\Python314\python.exe scripts/cloud/mir_stage.py prepare`
+- Context: First install completed but CPU check exposed Windows backslashes in staged remote paths. Fix POSIX serialization; preserve failed record; no weights or ACE changes.
+- Source SHA-256: `084958b2fdb41d925160c1034d3b3cf15b963fee099a1d0dd9e779c3a0f9c24e`; Git HEAD: `48f6a2b1a524f711f5d01044ae53b2324edaa8ea`.
+- [Record](builds/20261106T100103.223649Z-ecbbe06073.json) · [Raw log](../build-logs/20261106T100103.223649Z-ecbbe06073.log)
+- [Exact process output](../build-logs/20261106T100103.223649Z-ecbbe06073.raw.log)
+
+### 2026-11-06T18:01:06+08:00 · cloud-mir-stage-path-fix · succeeded
+
+- Config: Windows to Linux path serialization; exit code: 0; elapsed: 1.255s.
+- Command: `scp -o BatchMode=yes E:\MusicAgent&DAW\cloud-inference\tools\mir_stage.py E:\MusicAgent&DAW\cloud-inference\tools\mir_install.sh emusician-autodl:/root/autodl-tmp/emusician/tools/`
+- Context: First install completed but CPU check exposed Windows backslashes in staged remote paths. Fix POSIX serialization; preserve failed record; no weights or ACE changes.
+- Source SHA-256: `084958b2fdb41d925160c1034d3b3cf15b963fee099a1d0dd9e779c3a0f9c24e`; Git HEAD: `48f6a2b1a524f711f5d01044ae53b2324edaa8ea`.
+- [Record](builds/20261106T100106.632879Z-7ae5da925d.json) · [Raw log](../build-logs/20261106T100106.632879Z-7ae5da925d.log)
+- [Exact process output](../build-logs/20261106T100106.632879Z-7ae5da925d.raw.log)
+
+### 2026-11-06T18:01:08+08:00 · cloud-mir-stage-path-fix · succeeded
+
+- Config: Windows to Linux path serialization; exit code: 0; elapsed: 1.573s.
+- Command: `scp -o BatchMode=yes E:\MusicAgent&DAW\cloud-inference\environments\mir\mir-stage\manifests\mir-stage-assets.json emusician-autodl:/root/autodl-tmp/emusician/manifests/mir-stage-assets.json`
+- Context: First install completed but CPU check exposed Windows backslashes in staged remote paths. Fix POSIX serialization; preserve failed record; no weights or ACE changes.
+- Source SHA-256: `084958b2fdb41d925160c1034d3b3cf15b963fee099a1d0dd9e779c3a0f9c24e`; Git HEAD: `48f6a2b1a524f711f5d01044ae53b2324edaa8ea`.
+- [Record](builds/20261106T100108.157373Z-7135cbc8c6.json) · [Raw log](../build-logs/20261106T100108.157373Z-7135cbc8c6.log)
+- [Exact process output](../build-logs/20261106T100108.157373Z-7135cbc8c6.raw.log)
+
+### 2026-11-06T18:01:10+08:00 · cloud-mir-stage-path-fix · succeeded
+
+- Config: Windows to Linux path serialization; exit code: 0; elapsed: 11.165s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash /root/autodl-tmp/emusician/tools/mir_install.sh"`
+- Context: First install completed but CPU check exposed Windows backslashes in staged remote paths. Fix POSIX serialization; preserve failed record; no weights or ACE changes.
+- Source SHA-256: `084958b2fdb41d925160c1034d3b3cf15b963fee099a1d0dd9e779c3a0f9c24e`; Git HEAD: `48f6a2b1a524f711f5d01044ae53b2324edaa8ea`.
+- [Record](builds/20261106T100110.135982Z-3dd8deb5f9.json) · [Raw log](../build-logs/20261106T100110.135982Z-3dd8deb5f9.log)
+- [Exact process output](../build-logs/20261106T100110.135982Z-3dd8deb5f9.raw.log)
+
+### 2026-11-06T18:02:21+08:00 · cloud-mir-stage-evidence · succeeded
+
+- Config: Linux installed env audit / E drive copies; exit code: 0; elapsed: 1.176s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "sha256sum /root/autodl-tmp/emusician/manifests/ace-runtime.json /root/autodl-tmp/emusician/envs/ace/pyvenv.cfg; /root/miniconda3/bin/uv pip freeze --python /root/autodl-tmp/emusician/envs/ace/bin/python | sha256sum; curl -fsS http://127.0.0.1:18081/health; du -sb /root/autodl-tmp/emusician/envs/mir-torch /root/autodl-tmp/emusician/envs/mir-transcription /root/autodl-tmp/emusician/models/mir; df -B1 /root/autodl-tmp/emusician"`
+- Context: Capture exact lock/freeze/CPU check manifests and verify existing ACE remains healthy and unchanged. No inference.
+- Source SHA-256: `084958b2fdb41d925160c1034d3b3cf15b963fee099a1d0dd9e779c3a0f9c24e`; Git HEAD: `48f6a2b1a524f711f5d01044ae53b2324edaa8ea`.
+- [Record](builds/20261106T100221.804936Z-e8cb5c0255.json) · [Raw log](../build-logs/20261106T100221.804936Z-e8cb5c0255.log)
+- [Exact process output](../build-logs/20261106T100221.804936Z-e8cb5c0255.raw.log)
+
+### 2026-11-06T18:02:23+08:00 · cloud-mir-stage-evidence · succeeded
+
+- Config: Linux installed env audit / E drive copies; exit code: 0; elapsed: 3.206s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/mir-* E:\MusicAgent&DAW\cloud-inference\environments\mir\evidence`
+- Context: Capture exact lock/freeze/CPU check manifests and verify existing ACE remains healthy and unchanged. No inference.
+- Source SHA-256: `084958b2fdb41d925160c1034d3b3cf15b963fee099a1d0dd9e779c3a0f9c24e`; Git HEAD: `48f6a2b1a524f711f5d01044ae53b2324edaa8ea`.
+- [Record](builds/20261106T100223.274181Z-215f241098.json) · [Raw log](../build-logs/20261106T100223.274181Z-215f241098.log)
+- [Exact process output](../build-logs/20261106T100223.274181Z-215f241098.raw.log)
+
+### 2026-11-06T18:02:26+08:00 · cloud-mir-stage-evidence · succeeded
+
+- Config: Linux installed env audit / E drive copies; exit code: 0; elapsed: 1.414s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/workspace/mir-stage/*.in E:\MusicAgent&DAW\cloud-inference\environments\mir\evidence`
+- Context: Capture exact lock/freeze/CPU check manifests and verify existing ACE remains healthy and unchanged. No inference.
+- Source SHA-256: `084958b2fdb41d925160c1034d3b3cf15b963fee099a1d0dd9e779c3a0f9c24e`; Git HEAD: `48f6a2b1a524f711f5d01044ae53b2324edaa8ea`.
+- [Record](builds/20261106T100226.826200Z-3e01439180.json) · [Raw log](../build-logs/20261106T100226.826200Z-3e01439180.log)
+- [Exact process output](../build-logs/20261106T100226.826200Z-3e01439180.raw.log)
+
+### 2026-11-06T18:02:28+08:00 · cloud-mir-stage-evidence · succeeded
+
+- Config: Linux installed env audit / E drive copies; exit code: 0; elapsed: 0.649s.
+- Command: `C:\Python314\python.exe -m py_compile scripts/cloud/mir_stage.py scripts/cloud/mir_requirements.py`
+- Context: Capture exact lock/freeze/CPU check manifests and verify existing ACE remains healthy and unchanged. No inference.
+- Source SHA-256: `084958b2fdb41d925160c1034d3b3cf15b963fee099a1d0dd9e779c3a0f9c24e`; Git HEAD: `48f6a2b1a524f711f5d01044ae53b2324edaa8ea`.
+- [Record](builds/20261106T100228.576316Z-f3bac3a359.json) · [Raw log](../build-logs/20261106T100228.576316Z-f3bac3a359.log)
+- [Exact process output](../build-logs/20261106T100228.576316Z-f3bac3a359.raw.log)

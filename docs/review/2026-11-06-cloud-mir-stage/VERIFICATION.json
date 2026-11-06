@@ -1,0 +1,338 @@
+{
+  "schema_version": 1,
+  "stage": "environment-and-cpu-load-verified",
+  "providers": {
+    "separate": {
+      "model_id": "htdemucs",
+      "version": "4.1.0",
+      "source_revision": "cbc8a9b1a87023b7fd74e7b3412e6321c0eab003",
+      "source_url": "https://huggingface.co/adefossez/HTDemucs",
+      "weight_sha256": "d9fa14133cfcc034a6758923bb3a8ca9f8dfd0b582134643bbf83f72c17576dd",
+      "license_status": "code-MIT; checkpoint-redistribution-not-cleared-local-evaluation",
+      "available": false,
+      "status": "cpu-load-verified-awaiting-inference-and-routing",
+      "model_path": "/root/autodl-tmp/emusician/models/mir/demucs/htdemucs/cbc8a9b1a87023b7fd74e7b3412e6321c0eab003/955717e8.safetensors",
+      "python_executable": "/root/autodl-tmp/emusician/envs/mir-torch/bin/python"
+    },
+    "separate_6s": {
+      "model_id": "htdemucs_6s",
+      "version": "4.1.0",
+      "source_revision": "3c5ee475be622df764938de97e4281a7b07ffa58",
+      "source_url": "https://huggingface.co/adefossez/HTDemucs-6s",
+      "weight_sha256": "d2a1745f0744721f6b8ca5bf469b67c651ea5ed1b52998cab033b2158609d411",
+      "license_status": "code-MIT; checkpoint-redistribution-not-cleared-local-evaluation",
+      "available": false,
+      "status": "cpu-load-verified-awaiting-inference-and-routing",
+      "model_path": "/root/autodl-tmp/emusician/models/mir/demucs/htdemucs_6s/3c5ee475be622df764938de97e4281a7b07ffa58/5c90dfd2.safetensors",
+      "python_executable": "/root/autodl-tmp/emusician/envs/mir-torch/bin/python"
+    },
+    "transcribe": {
+      "model_id": "basic-pitch",
+      "version": "0.4.0",
+      "source_revision": "pypi-basic-pitch-0.4.0",
+      "source_url": "https://github.com/spotify/basic-pitch",
+      "weight_sha256": "2c3c1d144bfa61ad236e92e169c13535c880469a12a047d4e73451f2c059a0ec",
+      "license_status": "Apache-2.0-project-bundled-model",
+      "available": false,
+      "status": "cpu-load-verified-awaiting-inference-and-routing",
+      "model_path": "/root/autodl-tmp/emusician/models/mir/basic-pitch/0.4.0/nmp.onnx",
+      "python_executable": "/root/autodl-tmp/emusician/envs/mir-transcription/bin/python"
+    },
+    "beats": {
+      "model_id": "beat-this-final0",
+      "version": "1.1.0",
+      "source_revision": "b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c",
+      "source_url": "https://github.com/CPJKU/beat_this",
+      "weight_sha256": "8c328b45f59d8dd3dff219253ff6a8d6482be57d0133a29140e2febbf8eb8331",
+      "license_status": "MIT-code-and-published-weights; training-recording-rights-not-transferred",
+      "available": false,
+      "status": "cpu-load-verified-awaiting-inference-and-routing",
+      "model_path": "/root/autodl-tmp/emusician/models/mir/beat-this/b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c/final0.ckpt",
+      "python_executable": "/root/autodl-tmp/emusician/envs/mir-torch/bin/python"
+    }
+  },
+  "files": [
+    {
+      "path": "models/mir/demucs/htdemucs/cbc8a9b1a87023b7fd74e7b3412e6321c0eab003/955717e8.safetensors",
+      "bytes": 84025440,
+      "sha256": "d9fa14133cfcc034a6758923bb3a8ca9f8dfd0b582134643bbf83f72c17576dd"
+    },
+    {
+      "path": "models/mir/demucs/htdemucs/cbc8a9b1a87023b7fd74e7b3412e6321c0eab003/htdemucs.yaml",
+      "bytes": 21,
+      "sha256": "239c445d0b14454d541ad8bd9bb271c9e536d267e8a4625208744cbb2e7bb66c"
+    },
+    {
+      "path": "models/mir/demucs/htdemucs/cbc8a9b1a87023b7fd74e7b3412e6321c0eab003/README.md",
+      "bytes": 647,
+      "sha256": "b34c13f1b6c3473bf44978f70b5c62666ee309514d6d50b34cf44827f9a38104"
+    },
+    {
+      "path": "models/mir/demucs/htdemucs_6s/3c5ee475be622df764938de97e4281a7b07ffa58/5c90dfd2.safetensors",
+      "bytes": 54885744,
+      "sha256": "d2a1745f0744721f6b8ca5bf469b67c651ea5ed1b52998cab033b2158609d411"
+    },
+    {
+      "path": "models/mir/demucs/htdemucs_6s/3c5ee475be622df764938de97e4281a7b07ffa58/htdemucs_6s.yaml",
+      "bytes": 21,
+      "sha256": "207405151270af8fd81c2373c25d27950916682ac91dca7884a11ce13dad6f58"
+    },
+    {
+      "path": "models/mir/demucs/htdemucs_6s/3c5ee475be622df764938de97e4281a7b07ffa58/README.md",
+      "bytes": 656,
+      "sha256": "25f5ab85bd104a05700613f66925c1e0e7b93789faaedea451967416e9d70481"
+    },
+    {
+      "path": "models/mir/basic-pitch/0.4.0/nmp.onnx",
+      "bytes": 230444,
+      "sha256": "2c3c1d144bfa61ad236e92e169c13535c880469a12a047d4e73451f2c059a0ec"
+    },
+    {
+      "path": "models/mir/beat-this/b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c/final0.ckpt",
+      "bytes": 81058141,
+      "sha256": "8c328b45f59d8dd3dff219253ff6a8d6482be57d0133a29140e2febbf8eb8331"
+    },
+    {
+      "path": "models/mir/beat-this/b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c/README.md",
+      "bytes": 17037,
+      "sha256": "be7b51a9b6ff2041fdde81061d079c29451583f2c06c9733bece9282cc7afab0"
+    },
+    {
+      "path": "sources/beat-this-b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c.zip",
+      "bytes": 4957263,
+      "sha256": "b01cb9f5001080f577394b502de487fcb57b3fe755c0603d543afc46cd8cc5cf",
+      "source_url": "https://codeload.github.com/CPJKU/beat_this/zip/b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c",
+      "source_commit": "b95c8ab0c58c2d9fcfd40508ae8dffbc05ac4f5c"
+    }
+  ],
+  "gpu_inference_tested": false,
+  "daw_connected": false,
+  "weight_bytes": 220199769,
+  "checks": {
+    "torch": {
+      "schema_version": 1,
+      "check": "torch",
+      "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+      "platform": "Linux-5.15.0-119-generic-x86_64-with-glibc2.35",
+      "gpu_inference_tested": false,
+      "cpu_inference_tested": false,
+      "models": {
+        "separate": {
+          "loaded_on_cpu": true,
+          "parameter_count": 41984456,
+          "sources": [
+            "drums",
+            "bass",
+            "other",
+            "vocals"
+          ],
+          "sample_rate": 44100
+        },
+        "separate_6s": {
+          "loaded_on_cpu": true,
+          "parameter_count": 27414996,
+          "sources": [
+            "drums",
+            "bass",
+            "other",
+            "vocals",
+            "guitar",
+            "piano"
+          ],
+          "sample_rate": 44100
+        },
+        "beats": {
+          "loaded_on_cpu": true,
+          "parameter_count": 20251712,
+          "sources": [],
+          "sample_rate": null
+        }
+      },
+      "dependencies": {
+        "torch": "2.10.0+cu128",
+        "torchaudio": "2.10.0+cu128",
+        "demucs": "4.1.0",
+        "beat-this": "1.1.0",
+        "numpy": "1.26.4",
+        "safetensors": "0.8.0",
+        "rotary-embedding-torch": "0.6.4"
+      },
+      "torch_cuda_build": "12.8",
+      "compiled_architectures": [],
+      "cuda_initialized": false,
+      "elapsed_seconds": 1.675386257469654
+    },
+    "onnx": {
+      "schema_version": 1,
+      "check": "onnx",
+      "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+      "platform": "Linux-5.15.0-119-generic-x86_64-with-glibc2.35",
+      "gpu_inference_tested": false,
+      "cpu_inference_tested": false,
+      "models": {
+        "transcribe": {
+          "loaded_on_cpu": true,
+          "model_type": "ONNX",
+          "execution_providers": [
+            "CPUExecutionProvider"
+          ],
+          "inputs": [
+            {
+              "name": "serving_default_input_2:0",
+              "shape": [
+                "unk__749",
+                43844,
+                1
+              ]
+            }
+          ]
+        }
+      },
+      "dependencies": {
+        "basic-pitch": "0.4.0",
+        "onnxruntime": "1.20.1",
+        "numpy": "1.26.4",
+        "librosa": "0.10.2.post1",
+        "numba": "0.68.1"
+      },
+      "elapsed_seconds": 1.680751834064722
+    }
+  },
+  "activation_blockers": [
+    "shared GPU scheduler",
+    "bounded audio upload and result download",
+    "real inference evaluation",
+    "DAW local/cloud settings and routing"
+  ],
+  "disk": {
+    "baseline_utc": "2026-11-06T09:40:24.682024+00:00",
+    "baseline_available_bytes": 208089600000,
+    "final_utc": "2026-11-06T10:02:22Z",
+    "available_bytes": 199730733056,
+    "filesystem_used_delta_bytes": 8358866944,
+    "mir_torch_logical_bytes": 7504797457,
+    "mir_transcription_logical_bytes": 309034494,
+    "model_directory_logical_bytes": 220218752
+  },
+  "ace_unchanged": {
+    "health_before": "ok",
+    "health_after": "ok",
+    "runtime_manifest_sha256": "5d8299343ec9e985ab1befdb3ab8c03224896d953386ff0d0218a5de3eed5465",
+    "pyvenv_sha256": "c7af35696c9823a60a9884ddf1164fb1138a1af15195dda6ec1ba2359202a2ee",
+    "package_freeze_sha256": "495d47569e98bdfe8810cf0b063015b4f367d9cd91123f146ed09cb0b568e563"
+  },
+  "artifacts": {
+    "locks/mir-basic-pitch-overlay.lock.txt": {
+      "bytes": 240,
+      "sha256": "c1f1344124c8e7fc60e4c60c1b9e498a6e4d8e99da518130341e74664b473158"
+    },
+    "locks/mir-torch-freeze.txt": {
+      "bytes": 4306,
+      "sha256": "8c236541053a288b32eba89e4423dc9156c2b7836659bbaae1139b61dd84bf45"
+    },
+    "locks/mir-torch.lock.txt": {
+      "bytes": 65756,
+      "sha256": "040c4ae8c58920ade94b1753ea73a82c34d1c86c614f1b3344a3d3c3521986d2"
+    },
+    "locks/mir-transcription-freeze.txt": {
+      "bytes": 873,
+      "sha256": "fe99b6d4ebab68dc61f4101461d449ccfbeb7ae4271779a35ffcd02a87dcf218"
+    },
+    "locks/mir-transcription.lock.txt": {
+      "bytes": 58117,
+      "sha256": "74f4001950c8940710120348012459958b8f538f481866bc02aac30ca2b374d8"
+    },
+    "locks/torch.in": {
+      "bytes": 4061,
+      "sha256": "27aca7f290892cbc76fa59a78025b96211750d50371341af745aed45ebffda82"
+    },
+    "locks/transcription.in": {
+      "bytes": 224,
+      "sha256": "74ade624c941af6adb0eb42b97f2dc9216fd2b727bb6448b80e010442e796e16"
+    },
+    "scripts/cloud/mir_stage.py": {
+      "bytes": 11373,
+      "sha256": "4455482ff66615ce3a46fc1b31b99566545b31f012a8695e11501765d5c0aa9b"
+    },
+    "scripts/cloud/mir_requirements.py": {
+      "bytes": 2574,
+      "sha256": "39af75b1bf5a5b47320b28142b2a8b17677f59980c6b4ee09635b9ebd32bb5e5"
+    },
+    "scripts/cloud/mir_install.sh": {
+      "bytes": 2549,
+      "sha256": "118d196baff488860a60ced908b05ed1f870216cdb53408f105b7301bcd6c47b"
+    }
+  },
+  "command_records": [
+    {
+      "record": "20261106T095754.792357Z-c560b4cf73.json",
+      "action": "cloud-mir-stage-prepare",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T095816.912314Z-441f1bfb4b.json",
+      "action": "cloud-mir-stage-transfer",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T095818.417801Z-148777f402.json",
+      "action": "cloud-mir-stage-transfer",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T095820.481531Z-f32b4c4394.json",
+      "action": "cloud-mir-stage-transfer",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T095856.486196Z-e28b313d24.json",
+      "action": "cloud-mir-stage-transfer",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T095914.949541Z-521b2865d4.json",
+      "action": "cloud-mir-stage-install",
+      "status": "failed"
+    },
+    {
+      "record": "20261106T100103.223649Z-ecbbe06073.json",
+      "action": "cloud-mir-stage-path-fix",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T100106.632879Z-7ae5da925d.json",
+      "action": "cloud-mir-stage-path-fix",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T100108.157373Z-7135cbc8c6.json",
+      "action": "cloud-mir-stage-path-fix",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T100110.135982Z-3dd8deb5f9.json",
+      "action": "cloud-mir-stage-path-fix",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T100221.804936Z-e8cb5c0255.json",
+      "action": "cloud-mir-stage-evidence",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T100223.274181Z-215f241098.json",
+      "action": "cloud-mir-stage-evidence",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T100226.826200Z-3e01439180.json",
+      "action": "cloud-mir-stage-evidence",
+      "status": "succeeded"
+    },
+    {
+      "record": "20261106T100228.576316Z-f3bac3a359.json",
+      "action": "cloud-mir-stage-evidence",
+      "status": "succeeded"
+    }
+  ]
+}

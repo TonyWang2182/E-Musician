@@ -1,0 +1,12 @@
+setuptools==75.8.2
+numpy==1.26.4
+scipy==1.13.1
+soundfile==0.13.1
+onnxruntime==1.20.1
+librosa==0.10.2.post1
+mir-eval==0.8.2
+pretty-midi==0.2.11.post0
+resampy==0.4.2
+scikit-learn==1.7.2
+psutil==7.1.0
+typing-extensions==4.16.0

@@ -18,4 +18,4 @@
 
 ## 验收记录
 
-状态：实现中。结果与失败修正将写入本目录 RESULTS.md；不可根据本计划推断部署完成。
+状态：文件、独立环境与 CPU 模型加载已验证，部署冻结。推理、性能和 DAW 接入未验证；详见 [RESULTS](RESULTS.md) 与 [VERIFICATION](VERIFICATION.json)。

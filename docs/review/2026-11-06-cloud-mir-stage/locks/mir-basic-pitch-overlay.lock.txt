@@ -1,0 +1,1 @@
+basic-pitch @ https://mirrors.aliyun.com/pypi/packages/99/0e/3a36d22562daeb0ae3c78ac78da3f8dba96543c5576ed57d4acb8ddbab5b/basic_pitch-0.4.0-py2.py3-none-any.whl --hash=sha256:738adb503aae7fdfc7d1e1511aa0ce35052315f260a19531ef4c356708425db0

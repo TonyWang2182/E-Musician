@@ -52,5 +52,9 @@
   "portable_installer": false,
   "old_0120_preserved": true,
   "main_updated": false,
-  "remote_push": "pending"
+  "remote_push": {
+    "verified_branch_commit": "48f6a2b1a524f711f5d01044ae53b2324edaa8ea",
+    "implementation_commit": "f6fe0a0",
+    "main_commit_unchanged": "d4ed6c898af1303918e38b6325a915befabbb575"
+  }
 }
