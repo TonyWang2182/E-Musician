@@ -4,6 +4,8 @@
 
 权重、源码、环境、结果和证据分开管理，中央catalog只汇总验证状态，不激活Provider。现有ACE服务和本地MIR路由保持；基础云端MIR仍仅文件/环境/CPU加载通过。小型脚本、版本锁、记录纳入本地Git，大文件仅留云端。下一步先做真实多素材质量评测、MuScriptor授权，再单独实施统一GPU调度和远程Provider/DAW/Agent接入；本轮不提前做。0.12.1修复分支已推送01936fa，main保持d4ed6c8。下面为各版本历史状态，后文旧容量与“未部署”描述只代表对应阶段，不覆盖本节当前结果。
 
+实现0639d53已推送并核对远端 `feature/cloud-model-library`；[同步记录](review/2026-11-06-cloud-model-library/PUBLISH.json)。云盘最终可用166.71GB；ACE健康与三项环境哈希保持。没有新建DAW版本，原0.12.1的257个构建源码输入逐文件未变。
+
 # 当前候选：0.12.1 生成默认值与本地分离隔离（2026-11-06，自动验证通过、真实分离/人工待验）
 
 用户0.12.0人工测试报告反复追问BPM、生成音频分离时Python错误弹窗与DAW白屏。本地日志确认CUDA OOM及随后的CPU分配失败；75秒六轨异常的原生堆栈尚缺。本轮已实现工程默认生成参数、内存准入/少复制/禁止OOM隐式CPU重跑、Windows分析进程树隔离与可见失败。Release、CTest11/11、分析进程34项、Agent334、Worker44（43通过/1跳过，CPU Torch专项10项补覆盖）通过。一次真实GPT-5-mini决策直接发起生成并采用工程93BPM/3⁄4/播放头，未执行付费音乐生成。真实7秒本地分离因commit仅比硬门槛多6.83MiB而未启动，不能标为真实分离修复验收。见[结果](review/2026-11-06-generation-stability/RESULTS.md)/[人工短测](review/2026-11-06-generation-stability/MANUAL-CHECK.md)。
