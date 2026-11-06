@@ -1,6 +1,8 @@
-# 当前工作：云端模型库（2026-11-06，部署中）
+# 当前工作：云端模型库（2026-11-06，五模型短推理已验，MuScriptor 权重受阻）
 
-用户最新明确只部署所需云端模型，不下载权重/音频/备份到E盘，不接入DAW。新分支 `feature/cloud-model-library`，基线01936fa；三路分别部署YuE2、SCNet/TransKun/ChordMini、SheetSage2/MuScriptor，主代理维护汇总架构。脚本、版本锁与小日志纳入本地Git，大文件仅留云端；[本轮计划](review/2026-11-06-cloud-model-library/PLAN.md)。基础MIR阶段已完成文件/环境/CPU加载校验，云盘可用199.73GB，ACE未改；它们仍没有DAW云端路由。每个模型单独记录文件/环境/CPU/GPU状态，不混记可用。0.12.1修复分支已推送01936fa，main保持d4ed6c8。下面的修复结果和人工待验范围保留。
+用户最新明确只部署所需云端模型，不下载权重/音频/备份到E盘，不接入DAW。分支 `feature/cloud-model-library`，基线01936fa。YuE2、SCNet、TransKun、ChordMini、SheetSage2已分别通过文件/独立环境/真实CPU加载及一次受控GPU短推理；MuScriptor公共源码/环境通过，权重匿名401、未下载，不冒称推理就绪。精确范围、时间、显存和限制见[部署结果](review/2026-11-06-cloud-model-library/RESULTS.md)。YuE2只验低显存、短token上限渲染；其余分析仅8秒样本，无质量/长曲/听感结论。
+
+权重、源码、环境、结果和证据分开管理，中央catalog只汇总验证状态，不激活Provider。现有ACE服务和本地MIR路由保持；基础云端MIR仍仅文件/环境/CPU加载通过。小型脚本、版本锁、记录纳入本地Git，大文件仅留云端。下一步先做真实多素材质量评测、MuScriptor授权，再单独实施统一GPU调度和远程Provider/DAW/Agent接入；本轮不提前做。0.12.1修复分支已推送01936fa，main保持d4ed6c8。下面为各版本历史状态，后文旧容量与“未部署”描述只代表对应阶段，不覆盖本节当前结果。
 
 # 当前候选：0.12.1 生成默认值与本地分离隔离（2026-11-06，自动验证通过、真实分离/人工待验）
 

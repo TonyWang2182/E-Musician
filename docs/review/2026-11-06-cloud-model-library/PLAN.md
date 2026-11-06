@@ -1,6 +1,6 @@
 # 云端模型库部署：独立于 DAW 接入
 
-2026-11-06，状态：实施中。用户明确要求同时部署所需云端模型，暂不把权重/音频/备份下载到 E 盘，也不接入 DAW。代码、配置、精确版本与小型日志摘要仍纳入现有 Git 工程管理。分支 `feature/cloud-model-library`，基线 `01936fa`；此前 0.12.1 修复及基础 MIR 阶段已独立提交、推送并保留版本。
+2026-11-06，状态：五模型部署及短推理验证通过；MuScriptor权重访问受阻。实际验收见[RESULTS](RESULTS.md)，以下保留本批范围与规则。用户明确要求同时部署所需云端模型，暂不把权重/音频/备份下载到 E 盘，也不接入 DAW。代码、配置、精确版本与小型日志摘要仍纳入现有 Git 工程管理。分支 `feature/cloud-model-library`，基线 `01936fa`；此前 0.12.1 修复及基础 MIR 阶段已独立提交、推送并保留版本。
 
 ## 部署范围
 
@@ -32,7 +32,7 @@ cache/                            可复用下载缓存，不是模型唯一保�
 
 本机 `docs/review/2026-11-06-cloud-model-library/` 分为 yue2、mir-upgrades、scores 三个独立证据目录。负责人只修改各自脚本/目录；主代理管理顶层架构、汇总索引和状态。现有 ACE 的 gateway、SQLite 队列、envs/ace 和模型不混入本批环境，不改变 DAW 路由。
 
-首次 YuE2 探针已在 `workspace/models/yue2/probes/` 形成验证证据，保持原位置和 SHA，不为整理目录移动历史结果；后续入口统一到 `results/model-library/yue2/`。每次部署脚本上传后按 SHA 冻结，禁止覆盖仍由进程读取的脚本；修复与重试使用新的版本文件并记录差异。
+首次 YuE2 / SheetSage2 探针已在各自 `workspace/models/<id>/probes/` 形成验证证据，保持原位置和 SHA，不为整理目录移动历史结果；后续入口统一到 `results/model-library/<id>/`。每次部署脚本上传后按 SHA 冻结，禁止覆盖仍由进程读取的脚本；修复与重试使用新的版本文件并记录差异。
 
 ## 验证层次和运行规则
 

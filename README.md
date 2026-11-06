@@ -2,7 +2,7 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
-**当前云端工作：模型库部署**，分支 `feature/cloud-model-library`。YuE2、SCNet、TransKun、ChordMini、SheetSage2及MuScriptor访问检查使用独立目录、环境与版本清单；本批不接入DAW，不把权重/音频/备份下载到E盘。目录和验收层次见[部署计划](docs/review/2026-11-06-cloud-model-library/PLAN.md)，脚本入口见[scripts/cloud/models](scripts/cloud/models/README.md)。下方0.12.1仍为桌面候选，模型安装不自动增加桌面功能。
+**当前云端工作：五个新增模型已通过短推理**，分支 `feature/cloud-model-library`。YuE2、SCNet、TransKun、ChordMini、SheetSage2使用独立目录、环境与版本清单，真实GPU短探针通过；MuScriptor公共源码/环境通过、权重访问受阻。本批不接入DAW，不把权重/音频/备份下载到E盘。范围与限制见[部署结果](docs/review/2026-11-06-cloud-model-library/RESULTS.md)，脚本入口见[scripts/cloud/models](scripts/cloud/models/README.md)。下方0.12.1仍为桌面候选，模型安装不自动增加桌面功能。
 
 **0.12.1 候选：生成默认值和分析故障保护（自动验证通过）**。Agent 自动沿用工程速度/拍号/播放头；本地分离增加提交内存准入、进程树隔离、可见错误，禁止 CUDA OOM 后同进程盲目切 CPU。Release、CTest11组、Agent334、Worker回归及一次真实GPT决策通过；真实短分离因资源不足未启动，原75秒六轨及ASIO仍待验。启动 `E:/MusicAgent&DAW/Start E-musician 0.12.1 Stability.cmd`；[结果](docs/review/2026-11-06-generation-stability/RESULTS.md) / [人工短测](docs/review/2026-11-06-generation-stability/MANUAL-CHECK.md)。云端MIR正在独立准备，当前尚不能自由切换本地/云端。
 

@@ -1,0 +1,21 @@
+{
+  "checked_utc": "2026-11-06T10:44:38.671392+00:00",
+  "ace": {
+    "health": "ok",
+    "original_pid_5862_alive": true,
+    "active_jobs": [],
+    "runtime_manifest_sha256": "5d8299343ec9e985ab1befdb3ab8c03224896d953386ff0d0218a5de3eed5465",
+    "pyvenv_sha256": "c7af35696c9823a60a9884ddf1164fb1138a1af15195dda6ec1ba2359202a2ee",
+    "package_freeze_sha256": "495d47569e98bdfe8810cf0b063015b4f367d9cd91123f146ed09cb0b568e563",
+    "hashes_match_baseline": true
+  },
+  "gpu_csv": "NVIDIA GeForce RTX 5090, 580.76.05, 32607, 17337, 14774, 0",
+  "disk_bytes": {
+    "total": 268435456000,
+    "used": 101726781440,
+    "free": 166708674560
+  },
+  "model_inference_run_by_audit": false,
+  "command_record": "docs/builds/20261106T104437.281927Z-08c14fb844.json",
+  "collection_note": "Initial local JSON parse encountered uv informational stderr before JSON; extracted object from preserved command log without rerunning the remote audit."
+}

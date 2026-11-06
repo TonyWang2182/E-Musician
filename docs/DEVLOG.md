@@ -8248,3 +8248,1278 @@ print('PASS: unchanged baseline, 2 exact new cache files, both absent preference
 - Source SHA-256: `084958b2fdb41d925160c1034d3b3cf15b963fee099a1d0dd9e779c3a0f9c24e`; Git HEAD: `48f6a2b1a524f711f5d01044ae53b2324edaa8ea`.
 - [Record](builds/20261106T100228.576316Z-f3bac3a359.json) · [Raw log](../build-logs/20261106T100228.576316Z-f3bac3a359.log)
 - [Exact process output](../build-logs/20261106T100228.576316Z-f3bac3a359.raw.log)
+
+### 2026-11-06T18:07:16+08:00 · scores-cloud-inventory · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.099s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "df -B1 /root/autodl-tmp; find /root/autodl-tmp/emusician/envs -maxdepth 3 -path '*/bin/python*' -type l; /root/miniconda3/bin/uv python list --only-installed; du -sh /root/autodl-tmp/emusician/cache/uv /root/autodl-tmp/emusician/cache/wheels 2>/dev/null || true"`
+- Context: Read-only cloud scores deployment inventory; no inference or service change
+- Source SHA-256: `084958b2fdb41d925160c1034d3b3cf15b963fee099a1d0dd9e779c3a0f9c24e`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T100716.254519Z-b9e5d0b93a.json) · [Raw log](../build-logs/20261106T100716.254519Z-b9e5d0b93a.log)
+- [Exact process output](../build-logs/20261106T100716.254519Z-b9e5d0b93a.raw.log)
+
+### 2026-11-06T18:08:51+08:00 · cloud-model-library-mir-assets · succeeded
+
+- Config: AutoDL cloud-only / pinned source and three checkpoints; exit code: 0; elapsed: 1.327s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/tools/models/mir_upgrades"`
+- Context: Download only on existing remote data disk; verify Git blob or official SHA. No local model/audio copies and no GPU inference.
+- Source SHA-256: `93a1c9b9acc7691a207ae1ac0dc75cd8a2dc051b701db858d715fb8cee0c4bde`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T100851.974723Z-7ba9201d57.json) · [Raw log](../build-logs/20261106T100851.974723Z-7ba9201d57.log)
+- [Exact process output](../build-logs/20261106T100851.974723Z-7ba9201d57.raw.log)
+
+### 2026-11-06T18:08:53+08:00 · cloud-model-library-mir-assets · succeeded
+
+- Config: AutoDL cloud-only / pinned source and three checkpoints; exit code: 0; elapsed: 1.500s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/mir_upgrades/stage.py scripts/cloud/models/mir_upgrades/stage.sh emusician-autodl:/root/autodl-tmp/emusician/tools/models/mir_upgrades/`
+- Context: Download only on existing remote data disk; verify Git blob or official SHA. No local model/audio copies and no GPU inference.
+- Source SHA-256: `93a1c9b9acc7691a207ae1ac0dc75cd8a2dc051b701db858d715fb8cee0c4bde`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T100853.750298Z-35321ccdbb.json) · [Raw log](../build-logs/20261106T100853.750298Z-35321ccdbb.log)
+- [Exact process output](../build-logs/20261106T100853.750298Z-35321ccdbb.raw.log)
+
+### 2026-11-06T18:09:37+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.379s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/models/yue2 /root/autodl-tmp/emusician/manifests/model-library/yue2 /root/autodl-tmp/emusician/logs/model-library/yue2"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `ba81f616ce50e52513ab17d45b49ef890a9ad5705c5f599965571a417a1590e4`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T100937.115663Z-5d2d001bfb.json) · [Raw log](../build-logs/20261106T100937.115663Z-5d2d001bfb.log)
+- [Exact process output](../build-logs/20261106T100937.115663Z-5d2d001bfb.raw.log)
+
+### 2026-11-06T18:09:38+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.847s.
+- Command: `scp E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\install.sh E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\stage.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/yue2/`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `ba81f616ce50e52513ab17d45b49ef890a9ad5705c5f599965571a417a1590e4`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T100938.897118Z-38382d9cbe.json) · [Raw log](../build-logs/20261106T100938.897118Z-38382d9cbe.log)
+- [Exact process output](../build-logs/20261106T100938.897118Z-38382d9cbe.raw.log)
+
+### 2026-11-06T18:09:41+08:00 · cloud-yue2-source · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 6.359s.
+- Command: `ssh -o BatchMode=yes -o ServerAliveInterval=20 emusician-autodl "bash -lc 'set -eo pipefail; source /etc/network_turbo >/dev/null 2>&1; timeout 3600 /root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/yue2/stage.py source 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/yue2/source-$(date -u +%Y%m%dT%H%M%SZ).log'"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `ba81f616ce50e52513ab17d45b49ef890a9ad5705c5f599965571a417a1590e4`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T100941.596064Z-87e6279814.json) · [Raw log](../build-logs/20261106T100941.596064Z-87e6279814.log)
+- [Exact process output](../build-logs/20261106T100941.596064Z-87e6279814.raw.log)
+
+### 2026-11-06T18:10:16+08:00 · cloud-yue2-install · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 9.777s.
+- Command: `ssh -o BatchMode=yes -o ServerAliveInterval=20 emusician-autodl "bash -lc 'set -eo pipefail; source /etc/network_turbo >/dev/null 2>&1; timeout 3600 bash /root/autodl-tmp/emusician/workspace/models/yue2/install.sh 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/yue2/install-$(date -u +%Y%m%dT%H%M%SZ).log'"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `ba81f616ce50e52513ab17d45b49ef890a9ad5705c5f599965571a417a1590e4`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101016.122387Z-4791fdf28e.json) · [Raw log](../build-logs/20261106T101016.122387Z-4791fdf28e.log)
+- [Exact process output](../build-logs/20261106T101016.122387Z-4791fdf28e.raw.log)
+
+### 2026-11-06T18:08:55+08:00 · cloud-model-library-mir-assets · succeeded
+
+- Config: AutoDL cloud-only / pinned source and three checkpoints; exit code: 0; elapsed: 163.274s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash /root/autodl-tmp/emusician/tools/models/mir_upgrades/stage.sh"`
+- Context: Download only on existing remote data disk; verify Git blob or official SHA. No local model/audio copies and no GPU inference.
+- Source SHA-256: `93a1c9b9acc7691a207ae1ac0dc75cd8a2dc051b701db858d715fb8cee0c4bde`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T100855.616261Z-ed5aab25e3.json) · [Raw log](../build-logs/20261106T100855.616261Z-ed5aab25e3.log)
+- [Exact process output](../build-logs/20261106T100855.616261Z-ed5aab25e3.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T18:12:38+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.422s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/models/yue2 /root/autodl-tmp/emusician/manifests/model-library/yue2 /root/autodl-tmp/emusician/logs/model-library/yue2"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `61eb04542f3dbf5770cee3becbffa7263d94138d4b9025847f621af6d950400c`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101238.433439Z-a7e4cef1c4.json) · [Raw log](../build-logs/20261106T101238.433439Z-a7e4cef1c4.log)
+- [Exact process output](../build-logs/20261106T101238.433439Z-a7e4cef1c4.raw.log)
+
+### 2026-11-06T18:12:40+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.487s.
+- Command: `scp E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\cpu_check.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\install.sh E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\run.sh E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\stage.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/yue2/`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `61eb04542f3dbf5770cee3becbffa7263d94138d4b9025847f621af6d950400c`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101240.139354Z-2a499560fe.json) · [Raw log](../build-logs/20261106T101240.139354Z-2a499560fe.log)
+- [Exact process output](../build-logs/20261106T101240.139354Z-2a499560fe.raw.log)
+
+### 2026-11-06T18:13:07+08:00 · cloud-model-library-mir-env · succeeded
+
+- Config: Cloud-only isolated three Python 3.12 envs; exit code: 0; elapsed: 2.227s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/mir_upgrades/requirements.py scripts/cloud/models/mir_upgrades/runtime.py scripts/cloud/models/mir_upgrades/install.sh emusician-autodl:/root/autodl-tmp/emusician/tools/models/mir_upgrades/`
+- Context: Reuse pinned Torch2.10 cu128 immutable cache; no GPU inference or ACE/base MIR changes. Install inference deps then strict CPU load.
+- Source SHA-256: `2a1409862ebe5a20c174f9f4a88a81ac453a992ba372d5bfcc1e09a1be5c01aa`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101307.348486Z-c87a5ec151.json) · [Raw log](../build-logs/20261106T101307.348486Z-c87a5ec151.log)
+- [Exact process output](../build-logs/20261106T101307.348486Z-c87a5ec151.raw.log)
+
+### 2026-11-06T18:13:09+08:00 · cloud-model-library-mir-env · succeeded
+
+- Config: Cloud-only isolated three Python 3.12 envs; exit code: 0; elapsed: 24.988s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash /root/autodl-tmp/emusician/tools/models/mir_upgrades/install.sh scnet transkun chordmini"`
+- Context: Reuse pinned Torch2.10 cu128 immutable cache; no GPU inference or ACE/base MIR changes. Install inference deps then strict CPU load.
+- Source SHA-256: `2a1409862ebe5a20c174f9f4a88a81ac453a992ba372d5bfcc1e09a1be5c01aa`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101309.905919Z-35b4cc00ad.json) · [Raw log](../build-logs/20261106T101309.905919Z-35b4cc00ad.log)
+- [Exact process output](../build-logs/20261106T101309.905919Z-35b4cc00ad.raw.log)
+
+### 2026-11-06T18:14:03+08:00 · scores-cloud-stage-upload · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.296s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy /root/autodl-tmp/emusician/workspace/models/muscriptor /root/autodl-tmp/emusician/logs/model-library"`
+- Context: Upload only reviewed deployment scripts and small artifact coordinates; no model/audio transfer to E
+- Source SHA-256: `1a551ae07a9735d792abcf43c7457c5bc267e1366617420c17d61deddde60d10`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101403.708898Z-ffe8ae9aa4.json) · [Raw log](../build-logs/20261106T101403.708898Z-ffe8ae9aa4.log)
+- [Exact process output](../build-logs/20261106T101403.708898Z-ffe8ae9aa4.raw.log)
+
+### 2026-11-06T18:14:05+08:00 · scores-cloud-stage-upload · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.270s.
+- Command: `scp -q scripts/cloud/models/scores/stage.py scripts/cloud/models/scores/artifacts.json scripts/cloud/models/scores/install.sh emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/`
+- Context: Upload only reviewed deployment scripts and small artifact coordinates; no model/audio transfer to E
+- Source SHA-256: `1a551ae07a9735d792abcf43c7457c5bc267e1366617420c17d61deddde60d10`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101405.278046Z-bc22c816c7.json) · [Raw log](../build-logs/20261106T101405.278046Z-bc22c816c7.log)
+- [Exact process output](../build-logs/20261106T101405.278046Z-bc22c816c7.raw.log)
+
+### 2026-11-06T18:14:23+08:00 · scores-cloud-files-muscriptor · succeeded
+
+- Config: Release; exit code: 0; elapsed: 14.284s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; source /etc/network_turbo >/dev/null 2>&1; echo start $(date -u +%FT%TZ); timeout 600 /root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/stage.py stage --model muscriptor 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/muscriptor-files.log; result=${PIPESTATUS[0]}; echo end $(date -u +%FT%TZ); exit \"$result\"'"`
+- Context: Cloud-only reviewed MuScriptor public source and anonymous gated-weight check; no authentication or inference
+- Source SHA-256: `1a551ae07a9735d792abcf43c7457c5bc267e1366617420c17d61deddde60d10`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101423.986846Z-45e24c6c41.json) · [Raw log](../build-logs/20261106T101423.986846Z-45e24c6c41.log)
+- [Exact process output](../build-logs/20261106T101423.986846Z-45e24c6c41.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T18:15:18+08:00 · scores-install-entrypoint-update · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.474s.
+- Command: `scp -q scripts/cloud/models/scores/install.sh emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/install.sh`
+- Context: Separate environment installation and CPU model loading evidence while weights stage
+- Source SHA-256: `ddab0731e1e2aa495829ce1cea96e05ec28b5859cfdf4c699d517f12e7090a8f`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101518.122064Z-1a600d3c46.json) · [Raw log](../build-logs/20261106T101518.122064Z-1a600d3c46.log)
+- [Exact process output](../build-logs/20261106T101518.122064Z-1a600d3c46.raw.log)
+
+### 2026-11-06T18:15:18+08:00 · cloud-model-library-mir-cli · succeeded
+
+- Config: CPU CLI import only / no inference; exit code: 0; elapsed: 1.420s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/mir_upgrades/infer.py emusician-autodl:/root/autodl-tmp/emusician/tools/models/mir_upgrades/`
+- Context: Check narrow inference CLI and upstream TransKun/ChordMini command help with GPU hidden; no audio processing.
+- Source SHA-256: `ddab0731e1e2aa495829ce1cea96e05ec28b5859cfdf4c699d517f12e7090a8f`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101518.505755Z-685e60e64c.json) · [Raw log](../build-logs/20261106T101518.505755Z-685e60e64c.log)
+- [Exact process output](../build-logs/20261106T101518.505755Z-685e60e64c.raw.log)
+
+### 2026-11-06T18:15:20+08:00 · cloud-model-library-mir-cli · succeeded
+
+- Config: CPU CLI import only / no inference; exit code: 0; elapsed: 0.854s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "CUDA_VISIBLE_DEVICES= /root/autodl-tmp/emusician/envs/scnet/bin/python /root/autodl-tmp/emusician/tools/models/mir_upgrades/infer.py --help"`
+- Context: Check narrow inference CLI and upstream TransKun/ChordMini command help with GPU hidden; no audio processing.
+- Source SHA-256: `ddab0731e1e2aa495829ce1cea96e05ec28b5859cfdf4c699d517f12e7090a8f`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101520.284936Z-2601130e7a.json) · [Raw log](../build-logs/20261106T101520.284936Z-2601130e7a.log)
+- [Exact process output](../build-logs/20261106T101520.284936Z-2601130e7a.raw.log)
+
+### 2026-11-06T18:15:21+08:00 · cloud-model-library-mir-cli · succeeded
+
+- Config: CPU CLI import only / no inference; exit code: 0; elapsed: 2.160s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "CUDA_VISIBLE_DEVICES= PYTHONPATH=/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6 /root/autodl-tmp/emusician/envs/transkun/bin/python -m transkun.transcribe --help"`
+- Context: Check narrow inference CLI and upstream TransKun/ChordMini command help with GPU hidden; no audio processing.
+- Source SHA-256: `ddab0731e1e2aa495829ce1cea96e05ec28b5859cfdf4c699d517f12e7090a8f`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101521.456349Z-c59b97d1ed.json) · [Raw log](../build-logs/20261106T101521.456349Z-c59b97d1ed.log)
+- [Exact process output](../build-logs/20261106T101521.456349Z-c59b97d1ed.raw.log)
+
+### 2026-11-06T18:15:23+08:00 · cloud-model-library-mir-cli · succeeded
+
+- Config: CPU CLI import only / no inference; exit code: 0; elapsed: 5.013s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "CUDA_VISIBLE_DEVICES= MPLBACKEND=Agg /root/autodl-tmp/emusician/envs/chordmini/bin/python /root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03/src/evaluation/test_labeled_audio.py --help"`
+- Context: Check narrow inference CLI and upstream TransKun/ChordMini command help with GPU hidden; no audio processing.
+- Source SHA-256: `ddab0731e1e2aa495829ce1cea96e05ec28b5859cfdf4c699d517f12e7090a8f`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101523.950909Z-fcd4d2606a.json) · [Raw log](../build-logs/20261106T101523.950909Z-fcd4d2606a.log)
+- [Exact process output](../build-logs/20261106T101523.950909Z-fcd4d2606a.raw.log)
+
+### 2026-11-06T18:15:37+08:00 · cloud-yue2-tests · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 4.040s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -eo pipefail; export CUDA_VISIBLE_DEVICES=\"\" HF_HUB_OFFLINE=1 OMP_NUM_THREADS=2; timeout 300 /root/autodl-tmp/emusician/envs/yue2/bin/python -m pytest -q /root/autodl-tmp/emusician/workspace/models/yue2/YuE-1116bea76032bee5668e5f097294d082fa0b84f0/tests/test_protocol.py /root/autodl-tmp/emusician/workspace/models/yue2/YuE-1116bea76032bee5668e5f097294d082fa0b84f0/tests/test_preflight.py /root/autodl-tmp/emusician/workspace/models/yue2/YuE-1116bea76032bee5668e5f097294d082fa0b84f0/tests/test_storage.py /root/autodl-tmp/emusician/workspace/models/yue2/YuE-1116bea76032bee5668e5f097294d082fa0b84f0/tests/test_cli_public.py 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/yue2/cpu-tests-$(date -u +%Y%m%dT%H%M%SZ).log'"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `2eafbb2f966d98fd5979b7ff54e2414716d3236c2b38ee2b19e0384efa90a2d0`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101537.587072Z-3017ecf096.json) · [Raw log](../build-logs/20261106T101537.587072Z-3017ecf096.log)
+- [Exact process output](../build-logs/20261106T101537.587072Z-3017ecf096.raw.log)
+
+### 2026-11-06T18:09:54+08:00 · cloud-yue2-weights · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 366.948s.
+- Command: `ssh -o BatchMode=yes -o ServerAliveInterval=20 emusician-autodl "bash -lc 'set -eo pipefail; source /etc/network_turbo >/dev/null 2>&1; timeout 3600 /root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/yue2/stage.py weights 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/yue2/weights-$(date -u +%Y%m%dT%H%M%SZ).log'"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `ba81f616ce50e52513ab17d45b49ef890a9ad5705c5f599965571a417a1590e4`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T100954.901121Z-d011b3674b.json) · [Raw log](../build-logs/20261106T100954.901121Z-d011b3674b.log)
+- [Exact process output](../build-logs/20261106T100954.901121Z-d011b3674b.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T18:16:28+08:00 · scores-isolated-python-link-correction · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.634s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python -c 'from pathlib import Path; p=Path('\"'\"'/root/.local/bin/python3.11'\"'\"'); expected=Path('\"'\"'/root/autodl-tmp/emusician/workspace/models/sheetsage2/python/cpython-3.11.14-linux-x86_64-gnu/bin/python3.11'\"'\"'); assert p.is_symlink() and p.resolve()==expected.resolve(); p.unlink(); print('\"'\"'Removed task-created convenience symlink; isolated interpreter retained'\"'\"')'"`
+- Context: Remove only the newly created uv convenience symlink after verifying its exact owned interpreter target; keep all existing Python and environments
+- Source SHA-256: `bcb7dd9237f6555d3fb27de0efceadecbc6d56c567546ab01b5d37af66421e26`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101628.910088Z-faf5b2877d.json) · [Raw log](../build-logs/20261106T101628.910088Z-faf5b2877d.log)
+- [Exact process output](../build-logs/20261106T101628.910088Z-faf5b2877d.raw.log)
+
+### 2026-11-06T18:14:23+08:00 · scores-cloud-files-sheetsage2 · succeeded
+
+- Config: Release; exit code: 0; elapsed: 126.872s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; source /etc/network_turbo >/dev/null 2>&1; echo start $(date -u +%FT%TZ); timeout 2400 /root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/stage.py stage --model sheetsage2 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/sheetsage2-files.log; result=${PIPESTATUS[0]}; echo end $(date -u +%FT%TZ); exit \"$result\"'"`
+- Context: Cloud-only pinned SheetSage2 and MERT2 files; no GPU or service change
+- Source SHA-256: `1a551ae07a9735d792abcf43c7457c5bc267e1366617420c17d61deddde60d10`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101423.945774Z-a7f71bada4.json) · [Raw log](../build-logs/20261106T101423.945774Z-a7f71bada4.log)
+- [Exact process output](../build-logs/20261106T101423.945774Z-a7f71bada4.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T18:16:30+08:00 · scores-isolated-python-link-correction · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.136s.
+- Command: `scp -q scripts/cloud/models/scores/install.sh emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/install.sh`
+- Context: Remove only the newly created uv convenience symlink after verifying its exact owned interpreter target; keep all existing Python and environments
+- Source SHA-256: `bcb7dd9237f6555d3fb27de0efceadecbc6d56c567546ab01b5d37af66421e26`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101630.929862Z-121057a1c7.json) · [Raw log](../build-logs/20261106T101630.929862Z-121057a1c7.log)
+- [Exact process output](../build-logs/20261106T101630.929862Z-121057a1c7.raw.log)
+
+### 2026-11-06T18:16:08+08:00 · cloud-yue2-cpu · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 24.485s.
+- Command: `ssh -o BatchMode=yes -o ServerAliveInterval=20 emusician-autodl "bash -lc 'set -eo pipefail; source /etc/network_turbo >/dev/null 2>&1; timeout 600 /root/autodl-tmp/emusician/envs/yue2/bin/python /root/autodl-tmp/emusician/workspace/models/yue2/cpu_check.py 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/yue2/cpu-$(date -u +%Y%m%dT%H%M%SZ).log'"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `2eafbb2f966d98fd5979b7ff54e2414716d3236c2b38ee2b19e0384efa90a2d0`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101608.455864Z-e8c9be7a97.json) · [Raw log](../build-logs/20261106T101608.455864Z-e8c9be7a97.log)
+- [Exact process output](../build-logs/20261106T101608.455864Z-e8c9be7a97.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T18:16:50+08:00 · cloud-model-library-status-upload · succeeded
+
+- Config: SSH/stdlib; exit code: 0; elapsed: 1.368s.
+- Command: `scp -q scripts/cloud/models/library_status.py emusician-autodl:/root/autodl-tmp/emusician/tools/library_status.py`
+- Context: Upload read-only deployment catalog inspector; no activation/DAW/model transfers
+- Source SHA-256: `d6af2334b39972804562be59278dedc8c6ea1bdef4f7f6178baaf905a0e48191`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101650.758993Z-cad019eccd.json) · [Raw log](../build-logs/20261106T101650.758993Z-cad019eccd.log)
+- [Exact process output](../build-logs/20261106T101650.758993Z-cad019eccd.raw.log)
+
+### 2026-11-06T18:16:52+08:00 · cloud-model-library-current-status · succeeded
+
+- Config: SSH/stdlib; exit code: 0; elapsed: 0.809s.
+- Command: `ssh -o BatchMode=yes emusician-autodl /root/miniconda3/bin/python /root/autodl-tmp/emusician/tools/library_status.py`
+- Context: Read deployment records only; partial records remain incomplete; no activation
+- Source SHA-256: `d6af2334b39972804562be59278dedc8c6ea1bdef4f7f6178baaf905a0e48191`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101652.420217Z-9576d10d9a.json) · [Raw log](../build-logs/20261106T101652.420217Z-9576d10d9a.log)
+- [Exact process output](../build-logs/20261106T101652.420217Z-9576d10d9a.raw.log)
+
+### 2026-11-06T18:16:59+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 0.985s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/models/yue2 /root/autodl-tmp/emusician/manifests/model-library/yue2 /root/autodl-tmp/emusician/logs/model-library/yue2"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `d6af2334b39972804562be59278dedc8c6ea1bdef4f7f6178baaf905a0e48191`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101659.093183Z-bad02762a8.json) · [Raw log](../build-logs/20261106T101659.093183Z-bad02762a8.log)
+- [Exact process output](../build-logs/20261106T101659.093183Z-bad02762a8.raw.log)
+
+### 2026-11-06T18:17:00+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.771s.
+- Command: `scp E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\cpu_check.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\install.sh E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\run.sh E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\stage.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/yue2/`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `d6af2334b39972804562be59278dedc8c6ea1bdef4f7f6178baaf905a0e48191`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101700.427706Z-f2527c6e06.json) · [Raw log](../build-logs/20261106T101700.427706Z-f2527c6e06.log)
+- [Exact process output](../build-logs/20261106T101700.427706Z-f2527c6e06.raw.log)
+
+### 2026-11-06T18:17:02+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 0.955s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "chmod u+x /root/autodl-tmp/emusician/workspace/models/yue2/run.sh /root/autodl-tmp/emusician/workspace/models/yue2/install.sh"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `d6af2334b39972804562be59278dedc8c6ea1bdef4f7f6178baaf905a0e48191`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101702.568092Z-40a93a4337.json) · [Raw log](../build-logs/20261106T101702.568092Z-40a93a4337.log)
+- [Exact process output](../build-logs/20261106T101702.568092Z-40a93a4337.raw.log)
+
+### 2026-11-06T18:17:04+08:00 · cloud-yue2-collect · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 4.422s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/yue2/*.json emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/yue2/*.txt E:\MusicAgent&DAW\worktrees\audio-analysis\docs\review\2026-11-06-cloud-model-library\yue2`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `d6af2334b39972804562be59278dedc8c6ea1bdef4f7f6178baaf905a0e48191`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101704.318790Z-7a4f99c6b8.json) · [Raw log](../build-logs/20261106T101704.318790Z-7a4f99c6b8.log)
+- [Exact process output](../build-logs/20261106T101704.318790Z-7a4f99c6b8.raw.log)
+
+### 2026-11-06T18:17:14+08:00 · cloud-model-library-mir-gpu · succeeded
+
+- Config: RTX5090 / exclusive parent-approved slot / 8s fixture; exit code: 0; elapsed: 1.288s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/mir_upgrades/guarded_probe.py emusician-autodl:/root/autodl-tmp/emusician/tools/models/mir_upgrades/`
+- Context: One probe at a time; require8GiB free before each, monitor ACE queue and1GiB VRAM floor; kill only owned process group on contention; max180s; no retries/fallback/audio downloads.
+- Source SHA-256: `b099193a8d15972f1a4df59db03641e5312a332d50782d758d43f78d8c8d9e1d`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101714.455783Z-b63b130c62.json) · [Raw log](../build-logs/20261106T101714.455783Z-b63b130c62.log)
+- [Exact process output](../build-logs/20261106T101714.455783Z-b63b130c62.raw.log)
+
+### 2026-11-06T18:17:16+08:00 · cloud-model-library-mir-gpu · succeeded
+
+- Config: RTX5090 / exclusive parent-approved slot / 8s fixture; exit code: 0; elapsed: 6.447s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/tools/models/mir_upgrades/guarded_probe.py scnet"`
+- Context: One probe at a time; require8GiB free before each, monitor ACE queue and1GiB VRAM floor; kill only owned process group on contention; max180s; no retries/fallback/audio downloads.
+- Source SHA-256: `b099193a8d15972f1a4df59db03641e5312a332d50782d758d43f78d8c8d9e1d`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101716.000861Z-90aec93d76.json) · [Raw log](../build-logs/20261106T101716.000861Z-90aec93d76.log)
+- [Exact process output](../build-logs/20261106T101716.000861Z-90aec93d76.raw.log)
+
+### 2026-11-06T18:17:32+08:00 · cloud-model-library-mir-gpu · succeeded
+
+- Config: RTX5090 / exclusive parent-approved slot / 8s fixture; exit code: 0; elapsed: 7.237s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/tools/models/mir_upgrades/guarded_probe.py transkun"`
+- Context: One probe at a time; require8GiB free before each, monitor ACE queue and1GiB VRAM floor; kill only owned process group on contention; max180s; no retries/fallback/audio downloads.
+- Source SHA-256: `b099193a8d15972f1a4df59db03641e5312a332d50782d758d43f78d8c8d9e1d`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101732.158735Z-46743926e0.json) · [Raw log](../build-logs/20261106T101732.158735Z-46743926e0.log)
+- [Exact process output](../build-logs/20261106T101732.158735Z-46743926e0.raw.log)
+
+### 2026-11-06T18:17:39+08:00 · cloud-model-library-mir-gpu · succeeded
+
+- Config: RTX5090 / exclusive parent-approved slot / 8s fixture; exit code: 0; elapsed: 13.344s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/tools/models/mir_upgrades/guarded_probe.py chordmini"`
+- Context: One probe at a time; require8GiB free before each, monitor ACE queue and1GiB VRAM floor; kill only owned process group on contention; max180s; no retries/fallback/audio downloads.
+- Source SHA-256: `b099193a8d15972f1a4df59db03641e5312a332d50782d758d43f78d8c8d9e1d`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101739.677562Z-3c1589972b.json) · [Raw log](../build-logs/20261106T101739.677562Z-3c1589972b.log)
+- [Exact process output](../build-logs/20261106T101739.677562Z-3c1589972b.raw.log)
+
+## 2026-11-06 / cloud-only model library scope and ownership
+
+- User explicitly authorized needed cloudmodel deployment, no weights/audio/backups to E and no DAW integration. New branch feature/cloud-model-library from01936fa preserves separately published0.12.1 fix and baseMIRstage.
+- Split ownership: YuE2; MIRupgrades SCNet/TransKun/ChordMini; scores SheetSage2/MuScriptor; root owns architecture/catalog/status. Independentenvs and pinned model/source paths; existingACE/baseMIR not upgraded.
+- Catalog is an operational evidence index, not a production Provider registry. Files, environments, CPU load, GPU inference and DAW connection are separate facts. Gatedweights remain inaccessible withoutproperaccountauthorization.
+- GPU probes receive one exclusive slot and guard ACE read-only activejobs/freeVRAM; no ACE service stop or edit, ownedprobe cancels ifproductionworkarrives. This is bounded evaluation coordination, not a completed shared model scheduler. Rawcommands/failures use Recorder; precise results live in docs/review/2026-11-06-cloud-model-library.
+
+### 2026-11-06T18:19:44+08:00 · cloud-model-library-mir-audit · succeeded
+
+- Config: Cloud saved-artifact CPU validation / no inference; exit code: 0; elapsed: 1.788s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/mir_upgrades/audit.py emusician-autodl:/root/autodl-tmp/emusician/tools/models/mir_upgrades/`
+- Context: Rehash pinned sources/weights/locks; validate saved4WAVs, MIDI notes+CC64/67, contiguousLAB and finalize per-model deployment records. No audio/weight download to E.
+- Source SHA-256: `1e8e09d86b57c8c08ea935b506d14efdd1e0c8909e39d66ba96a1dd2f236517d`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101944.181870Z-d01f5da329.json) · [Raw log](../build-logs/20261106T101944.181870Z-d01f5da329.log)
+- [Exact process output](../build-logs/20261106T101944.181870Z-d01f5da329.raw.log)
+
+### 2026-11-06T18:19:46+08:00 · cloud-model-library-mir-audit · succeeded
+
+- Config: Cloud saved-artifact CPU validation / no inference; exit code: 0; elapsed: 1.142s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "CUDA_VISIBLE_DEVICES= /root/autodl-tmp/emusician/envs/scnet/bin/python /root/autodl-tmp/emusician/tools/models/mir_upgrades/audit.py scnet"`
+- Context: Rehash pinned sources/weights/locks; validate saved4WAVs, MIDI notes+CC64/67, contiguousLAB and finalize per-model deployment records. No audio/weight download to E.
+- Source SHA-256: `1e8e09d86b57c8c08ea935b506d14efdd1e0c8909e39d66ba96a1dd2f236517d`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101946.288836Z-c5072037db.json) · [Raw log](../build-logs/20261106T101946.288836Z-c5072037db.log)
+- [Exact process output](../build-logs/20261106T101946.288836Z-c5072037db.raw.log)
+
+### 2026-11-06T18:19:47+08:00 · cloud-model-library-mir-audit · succeeded
+
+- Config: Cloud saved-artifact CPU validation / no inference; exit code: 0; elapsed: 1.487s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "CUDA_VISIBLE_DEVICES= /root/autodl-tmp/emusician/envs/transkun/bin/python /root/autodl-tmp/emusician/tools/models/mir_upgrades/audit.py transkun"`
+- Context: Rehash pinned sources/weights/locks; validate saved4WAVs, MIDI notes+CC64/67, contiguousLAB and finalize per-model deployment records. No audio/weight download to E.
+- Source SHA-256: `1e8e09d86b57c8c08ea935b506d14efdd1e0c8909e39d66ba96a1dd2f236517d`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101947.741576Z-a5e4512b81.json) · [Raw log](../build-logs/20261106T101947.741576Z-a5e4512b81.log)
+- [Exact process output](../build-logs/20261106T101947.741576Z-a5e4512b81.raw.log)
+
+### 2026-11-06T18:19:49+08:00 · cloud-model-library-mir-audit · succeeded
+
+- Config: Cloud saved-artifact CPU validation / no inference; exit code: 0; elapsed: 0.959s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "CUDA_VISIBLE_DEVICES= /root/autodl-tmp/emusician/envs/chordmini/bin/python /root/autodl-tmp/emusician/tools/models/mir_upgrades/audit.py chordmini"`
+- Context: Rehash pinned sources/weights/locks; validate saved4WAVs, MIDI notes+CC64/67, contiguousLAB and finalize per-model deployment records. No audio/weight download to E.
+- Source SHA-256: `1e8e09d86b57c8c08ea935b506d14efdd1e0c8909e39d66ba96a1dd2f236517d`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101949.619110Z-588e834266.json) · [Raw log](../build-logs/20261106T101949.619110Z-588e834266.log)
+- [Exact process output](../build-logs/20261106T101949.619110Z-588e834266.raw.log)
+
+### 2026-11-06T18:19:50+08:00 · cloud-model-library-mir-audit · succeeded
+
+- Config: Cloud saved-artifact CPU validation / no inference; exit code: 0; elapsed: 0.931s.
+- Command: `C:\Python314\python.exe -m compileall -q scripts/cloud/models/mir_upgrades`
+- Context: Rehash pinned sources/weights/locks; validate saved4WAVs, MIDI notes+CC64/67, contiguousLAB and finalize per-model deployment records. No audio/weight download to E.
+- Source SHA-256: `1e8e09d86b57c8c08ea935b506d14efdd1e0c8909e39d66ba96a1dd2f236517d`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101950.885222Z-0ab6d2a767.json) · [Raw log](../build-logs/20261106T101950.885222Z-0ab6d2a767.log)
+- [Exact process output](../build-logs/20261106T101950.885222Z-0ab6d2a767.raw.log)
+
+### 2026-11-06T18:20:26+08:00 · scores-toolchain-upload · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.713s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/scores/toolchain.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/`
+- Context: Upload scoped pinned FFmpeg preparation script only
+- Source SHA-256: `edf3de2ac8d9f154fc484a8485788b43919ed55ea59ae978336291369963fc1b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102026.968902Z-0e152a7e92.json) · [Raw log](../build-logs/20261106T102026.968902Z-0e152a7e92.log)
+- [Exact process output](../build-logs/20261106T102026.968902Z-0e152a7e92.raw.log)
+
+### 2026-11-06T18:20:29+08:00 · cloud-model-library-mir-small-evidence · succeeded
+
+- Config: Small JSON/lock/log copies only; exit code: 0; elapsed: 1.835s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/scnet/*.json docs\review\2026-11-06-cloud-model-library\mir-upgrades\evidence\scnet`
+- Context: Copy only deployment metadata and dependency locks to review archive; never model weights, source audio, MIDI, WAV, LAB or full backup. Preserve existing ACE/base MIR.
+- Source SHA-256: `edf3de2ac8d9f154fc484a8485788b43919ed55ea59ae978336291369963fc1b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102029.797942Z-7ae81907cd.json) · [Raw log](../build-logs/20261106T102029.797942Z-7ae81907cd.log)
+- [Exact process output](../build-logs/20261106T102029.797942Z-7ae81907cd.raw.log)
+
+### 2026-11-06T18:20:31+08:00 · cloud-model-library-mir-small-evidence · succeeded
+
+- Config: Small JSON/lock/log copies only; exit code: 0; elapsed: 1.375s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/scnet/*.txt docs\review\2026-11-06-cloud-model-library\mir-upgrades\evidence\scnet`
+- Context: Copy only deployment metadata and dependency locks to review archive; never model weights, source audio, MIDI, WAV, LAB or full backup. Preserve existing ACE/base MIR.
+- Source SHA-256: `edf3de2ac8d9f154fc484a8485788b43919ed55ea59ae978336291369963fc1b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102031.974637Z-c99e2ac772.json) · [Raw log](../build-logs/20261106T102031.974637Z-c99e2ac772.log)
+- [Exact process output](../build-logs/20261106T102031.974637Z-c99e2ac772.raw.log)
+
+### 2026-11-06T18:20:33+08:00 · cloud-model-library-mir-small-evidence · succeeded
+
+- Config: Small JSON/lock/log copies only; exit code: 0; elapsed: 1.134s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/scnet/requirements.in docs\review\2026-11-06-cloud-model-library\mir-upgrades\evidence\scnet`
+- Context: Copy only deployment metadata and dependency locks to review archive; never model weights, source audio, MIDI, WAV, LAB or full backup. Preserve existing ACE/base MIR.
+- Source SHA-256: `edf3de2ac8d9f154fc484a8485788b43919ed55ea59ae978336291369963fc1b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102033.823214Z-787d37adcd.json) · [Raw log](../build-logs/20261106T102033.823214Z-787d37adcd.log)
+- [Exact process output](../build-logs/20261106T102033.823214Z-787d37adcd.raw.log)
+
+### 2026-11-06T18:20:35+08:00 · cloud-model-library-mir-small-evidence · succeeded
+
+- Config: Small JSON/lock/log copies only; exit code: 0; elapsed: 2.184s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/transkun/*.json docs\review\2026-11-06-cloud-model-library\mir-upgrades\evidence\transkun`
+- Context: Copy only deployment metadata and dependency locks to review archive; never model weights, source audio, MIDI, WAV, LAB or full backup. Preserve existing ACE/base MIR.
+- Source SHA-256: `edf3de2ac8d9f154fc484a8485788b43919ed55ea59ae978336291369963fc1b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102035.216288Z-df8d92840b.json) · [Raw log](../build-logs/20261106T102035.216288Z-df8d92840b.log)
+- [Exact process output](../build-logs/20261106T102035.216288Z-df8d92840b.raw.log)
+
+### 2026-11-06T18:15:29+08:00 · scores-cloud-environment-muscriptor · failed
+
+- Config: Release; exit code: 126; elapsed: 309.848s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; timeout 3600 bash /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/install.sh muscriptor 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/muscriptor-install.log; exit ${PIPESTATUS[0]}'"`
+- Context: Isolated hash-locked score-model environment; GPU hidden and no service change
+- Source SHA-256: `ddab0731e1e2aa495829ce1cea96e05ec28b5859cfdf4c699d517f12e7090a8f`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101529.671490Z-a16dcc434c.json) · [Raw log](../build-logs/20261106T101529.671490Z-a16dcc434c.log)
+- [Exact process output](../build-logs/20261106T101529.671490Z-a16dcc434c.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 126; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T101529.671490Z-a16dcc434c.log
+
+### 2026-11-06T18:20:37+08:00 · cloud-model-library-mir-small-evidence · succeeded
+
+- Config: Small JSON/lock/log copies only; exit code: 0; elapsed: 1.817s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/transkun/*.txt docs\review\2026-11-06-cloud-model-library\mir-upgrades\evidence\transkun`
+- Context: Copy only deployment metadata and dependency locks to review archive; never model weights, source audio, MIDI, WAV, LAB or full backup. Preserve existing ACE/base MIR.
+- Source SHA-256: `edf3de2ac8d9f154fc484a8485788b43919ed55ea59ae978336291369963fc1b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102037.787829Z-c3aebe9e96.json) · [Raw log](../build-logs/20261106T102037.787829Z-c3aebe9e96.log)
+- [Exact process output](../build-logs/20261106T102037.787829Z-c3aebe9e96.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T18:20:39+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 0.826s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/models/yue2 /root/autodl-tmp/emusician/manifests/model-library/yue2 /root/autodl-tmp/emusician/logs/model-library/yue2"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `2c2c027fc69f334c14375ff184c358ef4e76f0f3165452b38e21ae738b8ff22b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102039.675363Z-1e396facb0.json) · [Raw log](../build-logs/20261106T102039.675363Z-1e396facb0.log)
+- [Exact process output](../build-logs/20261106T102039.675363Z-1e396facb0.raw.log)
+
+### 2026-11-06T18:20:39+08:00 · cloud-model-library-mir-small-evidence · succeeded
+
+- Config: Small JSON/lock/log copies only; exit code: 0; elapsed: 1.680s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/transkun/requirements.in docs\review\2026-11-06-cloud-model-library\mir-upgrades\evidence\transkun`
+- Context: Copy only deployment metadata and dependency locks to review archive; never model weights, source audio, MIDI, WAV, LAB or full backup. Preserve existing ACE/base MIR.
+- Source SHA-256: `2c2c027fc69f334c14375ff184c358ef4e76f0f3165452b38e21ae738b8ff22b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102039.861359Z-67883eb303.json) · [Raw log](../build-logs/20261106T102039.861359Z-67883eb303.log)
+- [Exact process output](../build-logs/20261106T102039.861359Z-67883eb303.raw.log)
+
+### 2026-11-06T18:20:40+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.802s.
+- Command: `scp E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\cpu_check.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\gpu_smoke.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\install.sh E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\run.sh E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\stage.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/yue2/`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `2c2c027fc69f334c14375ff184c358ef4e76f0f3165452b38e21ae738b8ff22b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102040.768509Z-250b019a29.json) · [Raw log](../build-logs/20261106T102040.768509Z-250b019a29.log)
+- [Exact process output](../build-logs/20261106T102040.768509Z-250b019a29.raw.log)
+
+### 2026-11-06T18:20:41+08:00 · cloud-model-library-mir-small-evidence · succeeded
+
+- Config: Small JSON/lock/log copies only; exit code: 0; elapsed: 1.823s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/chordmini/*.json docs\review\2026-11-06-cloud-model-library\mir-upgrades\evidence\chordmini`
+- Context: Copy only deployment metadata and dependency locks to review archive; never model weights, source audio, MIDI, WAV, LAB or full backup. Preserve existing ACE/base MIR.
+- Source SHA-256: `2c2c027fc69f334c14375ff184c358ef4e76f0f3165452b38e21ae738b8ff22b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102041.806210Z-fa3d6f923c.json) · [Raw log](../build-logs/20261106T102041.806210Z-fa3d6f923c.log)
+- [Exact process output](../build-logs/20261106T102041.806210Z-fa3d6f923c.raw.log)
+
+### 2026-11-06T18:20:42+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 0.865s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "chmod u+x /root/autodl-tmp/emusician/workspace/models/yue2/run.sh /root/autodl-tmp/emusician/workspace/models/yue2/install.sh"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `2c2c027fc69f334c14375ff184c358ef4e76f0f3165452b38e21ae738b8ff22b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102042.874381Z-ea4f121ba8.json) · [Raw log](../build-logs/20261106T102042.874381Z-ea4f121ba8.log)
+- [Exact process output](../build-logs/20261106T102042.874381Z-ea4f121ba8.raw.log)
+
+### 2026-11-06T18:20:43+08:00 · cloud-model-library-mir-small-evidence · succeeded
+
+- Config: Small JSON/lock/log copies only; exit code: 0; elapsed: 1.655s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/chordmini/*.txt docs\review\2026-11-06-cloud-model-library\mir-upgrades\evidence\chordmini`
+- Context: Copy only deployment metadata and dependency locks to review archive; never model weights, source audio, MIDI, WAV, LAB or full backup. Preserve existing ACE/base MIR.
+- Source SHA-256: `2c2c027fc69f334c14375ff184c358ef4e76f0f3165452b38e21ae738b8ff22b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102043.906391Z-9e95691a33.json) · [Raw log](../build-logs/20261106T102043.906391Z-9e95691a33.log)
+- [Exact process output](../build-logs/20261106T102043.906391Z-9e95691a33.raw.log)
+
+### 2026-11-06T18:20:45+08:00 · cloud-model-library-mir-small-evidence · succeeded
+
+- Config: Small JSON/lock/log copies only; exit code: 0; elapsed: 1.148s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/chordmini/requirements.in docs\review\2026-11-06-cloud-model-library\mir-upgrades\evidence\chordmini`
+- Context: Copy only deployment metadata and dependency locks to review archive; never model weights, source audio, MIDI, WAV, LAB or full backup. Preserve existing ACE/base MIR.
+- Source SHA-256: `2c2c027fc69f334c14375ff184c358ef4e76f0f3165452b38e21ae738b8ff22b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102045.851623Z-f26480c584.json) · [Raw log](../build-logs/20261106T102045.851623Z-f26480c584.log)
+- [Exact process output](../build-logs/20261106T102045.851623Z-f26480c584.raw.log)
+
+### 2026-11-06T18:20:47+08:00 · cloud-model-library-mir-small-evidence · succeeded
+
+- Config: Small JSON/lock/log copies only; exit code: 0; elapsed: 0.844s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "sha256sum /root/autodl-tmp/emusician/manifests/ace-runtime.json /root/autodl-tmp/emusician/envs/ace/pyvenv.cfg; /root/miniconda3/bin/uv pip freeze --python /root/autodl-tmp/emusician/envs/ace/bin/python | sha256sum; curl -fsS http://127.0.0.1:18081/health; du -sb /root/autodl-tmp/emusician/models/scnet /root/autodl-tmp/emusician/models/transkun /root/autodl-tmp/emusician/models/chordmini; df -B1 /root/autodl-tmp/emusician"`
+- Context: Copy only deployment metadata and dependency locks to review archive; never model weights, source audio, MIDI, WAV, LAB or full backup. Preserve existing ACE/base MIR.
+- Source SHA-256: `2c2c027fc69f334c14375ff184c358ef4e76f0f3165452b38e21ae738b8ff22b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102047.300199Z-9e12ccc334.json) · [Raw log](../build-logs/20261106T102047.300199Z-9e12ccc334.log)
+- [Exact process output](../build-logs/20261106T102047.300199Z-9e12ccc334.raw.log)
+
+### 2026-11-06T18:21:45+08:00 · scores-resume-upload · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.756s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/scores/finalize.sh emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/finalize-20261106.sh`
+- Context: Upload immutable resume script; preserve earlier failure evidence
+- Source SHA-256: `e1806ee3e13d2f6ae465ba10442cd125c5dad502d6ccaef0b8d75be217bd69bc`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102145.308290Z-1142945e8c.json) · [Raw log](../build-logs/20261106T102145.308290Z-1142945e8c.log)
+- [Exact process output](../build-logs/20261106T102145.308290Z-1142945e8c.raw.log)
+
+### 2026-11-06T18:21:48+08:00 · muscriptor-env-resume · succeeded
+
+- Config: Release; exit code: 0; elapsed: 3.322s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; bash /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/finalize-20261106.sh muscriptor 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/muscriptor-env-resume.log; exit ${PIPESTATUS[0]}'"`
+- Context: Finish MuScriptor isolated environment from verified hash lock after recorded shell tail interruption
+- Source SHA-256: `e1806ee3e13d2f6ae465ba10442cd125c5dad502d6ccaef0b8d75be217bd69bc`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102148.377615Z-0b00e4c08f.json) · [Raw log](../build-logs/20261106T102148.377615Z-0b00e4c08f.log)
+- [Exact process output](../build-logs/20261106T102148.377615Z-0b00e4c08f.raw.log)
+
+### 2026-11-06T18:22:04+08:00 · muscriptor-public-cpu-check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 5.217s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; CUDA_VISIBLE_DEVICES= HF_HOME=/root/autodl-tmp/emusician/workspace/models/muscriptor/hf HF_HUB_OFFLINE=1 HF_HUB_DISABLE_IMPLICIT_TOKEN=1 OMP_NUM_THREADS=2 /root/autodl-tmp/emusician/envs/muscriptor/bin/python /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/stage.py cpu-check --model muscriptor 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/muscriptor-cpu-check.log; exit ${PIPESTATUS[0]}'"`
+- Context: CPU-only public MuScriptor import and upstream CLI help; gated weights not accessed
+- Source SHA-256: `e1806ee3e13d2f6ae465ba10442cd125c5dad502d6ccaef0b8d75be217bd69bc`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102204.079970Z-6da6792514.json) · [Raw log](../build-logs/20261106T102204.079970Z-6da6792514.log)
+- [Exact process output](../build-logs/20261106T102204.079970Z-6da6792514.raw.log)
+
+### 2026-11-06T18:20:30+08:00 · scores-toolchain · failed
+
+- Config: Release; exit code: 143; elapsed: 185.085s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; /root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/toolchain.py 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/sheetsage2-toolchain.log; exit ${PIPESTATUS[0]}'"`
+- Context: Cloud-only verified model-scoped FFmpeg extraction; no system changes
+- Source SHA-256: `edf3de2ac8d9f154fc484a8485788b43919ed55ea59ae978336291369963fc1b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102030.021065Z-2bb73da871.json) · [Raw log](../build-logs/20261106T102030.021065Z-2bb73da871.log)
+- [Exact process output](../build-logs/20261106T102030.021065Z-2bb73da871.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 143; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T102030.021065Z-2bb73da871.log
+
+### 2026-11-06T18:23:34+08:00 · sheetsage-ffmpeg-transfer-retry · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.020s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'python - <<'\"'\"'PY'\"'\"'
+from pathlib import Path
+import os,signal
+pid=13090
+s=Path('\"'\"'/proc'\"'\"')/str(pid)/'\"'\"'cmdline'\"'\"'
+if s.exists():
+ c=s.read_bytes()
+ assert b'\"'\"'/workspace/models/sheetsage2/deploy/toolchain.py'\"'\"' in c
+ os.kill(pid,signal.SIGTERM)
+ print('\"'\"'Stopped only owned scoped FFmpeg transfer'\"'\"',pid)
+PY'"`
+- Context: Stop owned stalled FFmpeg download; retry with configured cloud network route and no local relay
+- Source SHA-256: `e1806ee3e13d2f6ae465ba10442cd125c5dad502d6ccaef0b8d75be217bd69bc`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102334.093905Z-bff005871a.json) · [Raw log](../build-logs/20261106T102334.093905Z-bff005871a.log)
+- [Exact process output](../build-logs/20261106T102334.093905Z-bff005871a.raw.log)
+
+### 2026-11-06T18:23:22+08:00 · cloud-yue2-gpu · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 23.804s.
+- Command: `ssh -o BatchMode=yes -o ServerAliveInterval=20 emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/yue2/gpu_smoke.py --approved-slot"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; explicitly authorized single low-VRAM180s GPU probe
+- Source SHA-256: `e1806ee3e13d2f6ae465ba10442cd125c5dad502d6ccaef0b8d75be217bd69bc`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102322.038961Z-19a5b59536.json) · [Raw log](../build-logs/20261106T102322.038961Z-19a5b59536.log)
+- [Exact process output](../build-logs/20261106T102322.038961Z-19a5b59536.raw.log)
+
+### 2026-11-06T18:24:15+08:00 · sheetsage-resolver-diagnostic-stop · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.044s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'python - <<'\"'\"'PY'\"'\"'
+from pathlib import Path
+import os,signal
+pid=12271
+s=Path('\"'\"'/proc'\"'\"')/str(pid)/'\"'\"'cmdline'\"'\"'
+if s.exists():
+ c=s.read_bytes()
+ assert b'\"'\"'uv'\"'\"' in c and b'\"'\"'pip'\"'\"' in c and b'\"'\"'compile'\"'\"' in c and b'\"'\"'sheetsage2'\"'\"' in c
+ os.kill(pid,signal.SIGTERM)
+ print('\"'\"'Stopped only owned SheetSage resolver'\"'\"',pid)
+PY'"`
+- Context: Stop silent owned resolver to resume with diagnostic output and preserved cache
+- Source SHA-256: `e1806ee3e13d2f6ae465ba10442cd125c5dad502d6ccaef0b8d75be217bd69bc`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102415.764470Z-7560f41e94.json) · [Raw log](../build-logs/20261106T102415.764470Z-7560f41e94.log)
+- [Exact process output](../build-logs/20261106T102415.764470Z-7560f41e94.raw.log)
+
+### 2026-11-06T18:15:29+08:00 · scores-cloud-environment-sheetsage2 · failed
+
+- Config: Release; exit code: 143; elapsed: 527.187s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; timeout 3600 bash /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/install.sh sheetsage2 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/sheetsage2-install.log; exit ${PIPESTATUS[0]}'"`
+- Context: Isolated hash-locked score-model environment; GPU hidden and no service change
+- Source SHA-256: `ddab0731e1e2aa495829ce1cea96e05ec28b5859cfdf4c699d517f12e7090a8f`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T101529.603942Z-6b62fb9c50.json) · [Raw log](../build-logs/20261106T101529.603942Z-6b62fb9c50.log)
+- [Exact process output](../build-logs/20261106T101529.603942Z-6b62fb9c50.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 143; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T101529.603942Z-6b62fb9c50.log
+
+### 2026-11-06T18:25:01+08:00 · cloud-model-library-mir-guard-cpu-faults · succeeded
+
+- Config: Linux stdlib / CPU subprocess fault checks only; exit code: 0; elapsed: 1.793s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/mir_upgrades/guarded_probe.py scripts/cloud/models/mir_upgrades/test_guard.py emusician-autodl:/root/autodl-tmp/emusician/tools/models/mir_upgrades/`
+- Context: After GPU probes, harden exceptional cleanup and durable terminal receipts. CPU tests inject monitor failure and stubborn SIGTERM child; no GPU or ACE access.
+- Source SHA-256: `a3517678a9073e55fb72bfee614e8e1c572df698387c947b90e7385a29fe80e8`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102501.596758Z-476d97a4aa.json) · [Raw log](../build-logs/20261106T102501.596758Z-476d97a4aa.log)
+- [Exact process output](../build-logs/20261106T102501.596758Z-476d97a4aa.raw.log)
+
+### 2026-11-06T18:25:03+08:00 · cloud-model-library-mir-guard-cpu-faults · succeeded
+
+- Config: Linux stdlib / CPU subprocess fault checks only; exit code: 0; elapsed: 0.974s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "CUDA_VISIBLE_DEVICES= /root/miniconda3/bin/python /root/autodl-tmp/emusician/tools/models/mir_upgrades/test_guard.py"`
+- Context: After GPU probes, harden exceptional cleanup and durable terminal receipts. CPU tests inject monitor failure and stubborn SIGTERM child; no GPU or ACE access.
+- Source SHA-256: `a3517678a9073e55fb72bfee614e8e1c572df698387c947b90e7385a29fe80e8`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102503.755071Z-fc91eeea5d.json) · [Raw log](../build-logs/20261106T102503.755071Z-fc91eeea5d.log)
+- [Exact process output](../build-logs/20261106T102503.755071Z-fc91eeea5d.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T18:25:13+08:00 · scores-cdn-diagnostic · succeeded
+
+- Config: Release; exit code: 0; elapsed: 5.660s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'source /etc/network_turbo >/dev/null 2>&1; python - <<'\"'\"'PY'\"'\"'
+import subprocess,os,concurrent.futures,json
+url='\"'\"'https://download-r2.pytorch.org/whl/cu128/torch-2.8.0%2Bcu128-cp311-cp311-manylinux_2_28_x86_64.whl'\"'\"'
+def check(direct):
+ env=os.environ.copy()
+ if direct:
+  for k in ('\"'\"'http_proxy'\"'\"','\"'\"'https_proxy'\"'\"','\"'\"'HTTP_PROXY'\"'\"','\"'\"'HTTPS_PROXY'\"'\"','\"'\"'ALL_PROXY'\"'\"','\"'\"'all_proxy'\"'\"'):env.pop(k,None)
+ p=subprocess.run(['\"'\"'curl'\"'\"','\"'\"'-L'\"'\"','\"'\"'-sS'\"'\"','\"'\"'--max-time'\"'\"','\"'\"'15'\"'\"','\"'\"'--range'\"'\"','\"'\"'0-1048575'\"'\"','\"'\"'-o'\"'\"','\"'\"'/dev/null'\"'\"','\"'\"'-w'\"'\"','\"'\"'%{http_code} %{size_download} %{speed_download}'\"'\"',url],env=env,capture_output=True,text=True)
+ return {'\"'\"'direct'\"'\"':direct,'\"'\"'exit'\"'\"':p.returncode,'\"'\"'status_bytes_speed'\"'\"':p.stdout}
+with concurrent.futures.ThreadPoolExecutor(max_workers=2) as e:
+ print(json.dumps(list(e.map(check,[False,True]))))
+PY'"`
+- Context: Bounded cloud-only public CDN route timing; discard bytes on cloud
+- Source SHA-256: `490321d7c81b3123392f30cf623bbc4deec91d2261d71c186ce8c7c6b2f3bee4`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102513.137184Z-298cc99bef.json) · [Raw log](../build-logs/20261106T102513.137184Z-298cc99bef.log)
+- [Exact process output](../build-logs/20261106T102513.137184Z-298cc99bef.raw.log)
+
+### 2026-11-06T18:25:25+08:00 · cloud-yue2-guard-tests · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 3.979s.
+- Command: `C:\Python314\python.exe -m unittest discover -s E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2 -p test_gpu_smoke.py -v`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `490321d7c81b3123392f30cf623bbc4deec91d2261d71c186ce8c7c6b2f3bee4`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102525.748015Z-944a3aa48a.json) · [Raw log](../build-logs/20261106T102525.748015Z-944a3aa48a.log)
+- [Exact process output](../build-logs/20261106T102525.748015Z-944a3aa48a.raw.log)
+
+### 2026-11-06T18:25:57+08:00 · cloud-model-library-mir-freeze · succeeded
+
+- Config: Metadata and raw logs only / no model activity; exit code: 0; elapsed: 1.664s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/mir_upgrades/freeze.py emusician-autodl:/root/autodl-tmp/emusician/tools/models/mir_upgrades/`
+- Context: Freeze per-model provenance separating original GPU-tested guard from final CPU-fault-verified guard; copy small records only.
+- Source SHA-256: `f2ceca815d9184747f59d428a54084f502be62877a8dd07bb6ded8c2b39a7130`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102557.774796Z-5b3cbe067d.json) · [Raw log](../build-logs/20261106T102557.774796Z-5b3cbe067d.log)
+- [Exact process output](../build-logs/20261106T102557.774796Z-5b3cbe067d.raw.log)
+
+### 2026-11-06T18:25:59+08:00 · cloud-model-library-mir-freeze · succeeded
+
+- Config: Metadata and raw logs only / no model activity; exit code: 0; elapsed: 0.928s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/tools/models/mir_upgrades/freeze.py"`
+- Context: Freeze per-model provenance separating original GPU-tested guard from final CPU-fault-verified guard; copy small records only.
+- Source SHA-256: `f2ceca815d9184747f59d428a54084f502be62877a8dd07bb6ded8c2b39a7130`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102559.799519Z-d7c3e31f34.json) · [Raw log](../build-logs/20261106T102559.799519Z-d7c3e31f34.log)
+- [Exact process output](../build-logs/20261106T102559.799519Z-d7c3e31f34.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T18:26:01+08:00 · cloud-model-library-mir-freeze · succeeded
+
+- Config: Metadata and raw logs only / no model activity; exit code: 0; elapsed: 1.288s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/scnet/deployment.json docs/review/2026-11-06-cloud-model-library/mir-upgrades/evidence/scnet/deployment.json`
+- Context: Freeze per-model provenance separating original GPU-tested guard from final CPU-fault-verified guard; copy small records only.
+- Source SHA-256: `e36db1abc7040e072701de4eefd2d42c5934ad50eff24b70bfb51abe891bdf8b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102601.061494Z-562df3e583.json) · [Raw log](../build-logs/20261106T102601.061494Z-562df3e583.log)
+- [Exact process output](../build-logs/20261106T102601.061494Z-562df3e583.raw.log)
+
+### 2026-11-06T18:26:02+08:00 · cloud-model-library-mir-freeze · succeeded
+
+- Config: Metadata and raw logs only / no model activity; exit code: 0; elapsed: 1.227s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/transkun/deployment.json docs/review/2026-11-06-cloud-model-library/mir-upgrades/evidence/transkun/deployment.json`
+- Context: Freeze per-model provenance separating original GPU-tested guard from final CPU-fault-verified guard; copy small records only.
+- Source SHA-256: `e36db1abc7040e072701de4eefd2d42c5934ad50eff24b70bfb51abe891bdf8b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102602.822845Z-ca09598f7c.json) · [Raw log](../build-logs/20261106T102602.822845Z-ca09598f7c.log)
+- [Exact process output](../build-logs/20261106T102602.822845Z-ca09598f7c.raw.log)
+
+### 2026-11-06T18:26:04+08:00 · cloud-model-library-mir-freeze · succeeded
+
+- Config: Metadata and raw logs only / no model activity; exit code: 0; elapsed: 1.251s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/chordmini/deployment.json docs/review/2026-11-06-cloud-model-library/mir-upgrades/evidence/chordmini/deployment.json`
+- Context: Freeze per-model provenance separating original GPU-tested guard from final CPU-fault-verified guard; copy small records only.
+- Source SHA-256: `e36db1abc7040e072701de4eefd2d42c5934ad50eff24b70bfb51abe891bdf8b`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102604.582474Z-16dfd3ffd8.json) · [Raw log](../build-logs/20261106T102604.582474Z-16dfd3ffd8.log)
+- [Exact process output](../build-logs/20261106T102604.582474Z-16dfd3ffd8.raw.log)
+
+### 2026-11-06T18:26:08+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.309s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/models/yue2 /root/autodl-tmp/emusician/manifests/model-library/yue2 /root/autodl-tmp/emusician/logs/model-library/yue2"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `6cddc9af80f14b7745cbc130a55bd6bc1a33ab7f241ab391d6bf01746ab39b11`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102608.918622Z-fcfc58e239.json) · [Raw log](../build-logs/20261106T102608.918622Z-fcfc58e239.log)
+- [Exact process output](../build-logs/20261106T102608.918622Z-fcfc58e239.raw.log)
+
+### 2026-11-06T18:26:10+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.931s.
+- Command: `scp E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\cpu_check.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\finalize.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\gpu_smoke.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\install.sh E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\run.sh E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\stage.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\test_gpu_smoke.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/yue2/`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `6cddc9af80f14b7745cbc130a55bd6bc1a33ab7f241ab391d6bf01746ab39b11`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102610.551615Z-53ef1a2aa0.json) · [Raw log](../build-logs/20261106T102610.551615Z-53ef1a2aa0.log)
+- [Exact process output](../build-logs/20261106T102610.551615Z-53ef1a2aa0.raw.log)
+
+### 2026-11-06T18:26:12+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 0.788s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "chmod u+x /root/autodl-tmp/emusician/workspace/models/yue2/run.sh /root/autodl-tmp/emusician/workspace/models/yue2/install.sh"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `6cddc9af80f14b7745cbc130a55bd6bc1a33ab7f241ab391d6bf01746ab39b11`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102612.833740Z-572835d007.json) · [Raw log](../build-logs/20261106T102612.833740Z-572835d007.log)
+- [Exact process output](../build-logs/20261106T102612.833740Z-572835d007.raw.log)
+
+### 2026-11-06T18:26:10+08:00 · cloud-model-library-mir-freeze · succeeded
+
+- Config: Metadata and raw logs only / no model activity; exit code: 0; elapsed: 5.882s.
+- Command: `scp -o BatchMode=yes build-logs/20261106T100851.974723Z-7ba9201d57.raw.log build-logs/20261106T100853.750298Z-35321ccdbb.raw.log build-logs/20261106T100855.616261Z-ed5aab25e3.raw.log build-logs/20261106T101307.348486Z-c87a5ec151.raw.log build-logs/20261106T101309.905919Z-35b4cc00ad.raw.log build-logs/20261106T101518.505755Z-685e60e64c.raw.log build-logs/20261106T101520.284936Z-2601130e7a.raw.log build-logs/20261106T101521.456349Z-c59b97d1ed.raw.log build-logs/20261106T101523.950909Z-fcd4d2606a.raw.log build-logs/20261106T101714.455783Z-b63b130c62.raw.log build-logs/20261106T101716.000861Z-90aec93d76.raw.log build-logs/20261106T101732.158735Z-46743926e0.raw.log build-logs/20261106T101739.677562Z-3c1589972b.raw.log build-logs/20261106T101944.181870Z-d01f5da329.raw.log build-logs/20261106T101946.288836Z-c5072037db.raw.log build-logs/20261106T101947.741576Z-a5e4512b81.raw.log build-logs/20261106T101949.619110Z-588e834266.raw.log build-logs/20261106T101950.885222Z-0ab6d2a767.raw.log build-logs/20261106T102029.797942Z-7ae81907cd.raw.log build-logs/20261106T102031.974637Z-c99e2ac772.raw.log build-logs/20261106T102033.823214Z-787d37adcd.raw.log build-logs/20261106T102035.216288Z-df8d92840b.raw.log build-logs/20261106T102037.787829Z-c3aebe9e96.raw.log build-logs/20261106T102039.861359Z-67883eb303.raw.log build-logs/20261106T102041.806210Z-fa3d6f923c.raw.log build-logs/20261106T102043.906391Z-9e95691a33.raw.log build-logs/20261106T102045.851623Z-f26480c584.raw.log build-logs/20261106T102047.300199Z-9e12ccc334.raw.log build-logs/20261106T102501.596758Z-476d97a4aa.raw.log build-logs/20261106T102503.755071Z-fc91eeea5d.raw.log build-logs/20261106T102557.774796Z-5b3cbe067d.raw.log build-logs/20261106T102559.799519Z-d7c3e31f34.raw.log build-logs/20261106T102601.061494Z-562df3e583.raw.log build-logs/20261106T102602.822845Z-ca09598f7c.raw.log build-logs/20261106T102604.582474Z-16dfd3ffd8.raw.log emusician-autodl:/root/autodl-tmp/emusician/logs/model-library/`
+- Context: Freeze per-model provenance separating original GPU-tested guard from final CPU-fault-verified guard; copy small records only.
+- Source SHA-256: `6cddc9af80f14b7745cbc130a55bd6bc1a33ab7f241ab391d6bf01746ab39b11`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102610.512068Z-0bbb198d7d.json) · [Raw log](../build-logs/20261106T102610.512068Z-0bbb198d7d.log)
+- [Exact process output](../build-logs/20261106T102610.512068Z-0bbb198d7d.raw.log)
+
+### 2026-11-06T18:26:18+08:00 · cloud-yue2-finalize · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.456s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/yue2/finalize.py"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `6cddc9af80f14b7745cbc130a55bd6bc1a33ab7f241ab391d6bf01746ab39b11`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102618.857979Z-ffffeac9d5.json) · [Raw log](../build-logs/20261106T102618.857979Z-ffffeac9d5.log)
+- [Exact process output](../build-logs/20261106T102618.857979Z-ffffeac9d5.raw.log)
+
+### 2026-11-06T18:26:26+08:00 · cloud-yue2-collect · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 5.585s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/yue2/*.json emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/yue2/*.txt E:\MusicAgent&DAW\worktrees\audio-analysis\docs\review\2026-11-06-cloud-model-library\yue2`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `6cddc9af80f14b7745cbc130a55bd6bc1a33ab7f241ab391d6bf01746ab39b11`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102626.530152Z-3108ec8c40.json) · [Raw log](../build-logs/20261106T102626.530152Z-3108ec8c40.log)
+- [Exact process output](../build-logs/20261106T102626.530152Z-3108ec8c40.raw.log)
+
+### 2026-11-06T18:26:36+08:00 · scores-range-fetch-preparation · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.375s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'python - <<'\"'\"'PY'\"'\"'
+from pathlib import Path
+import os,signal
+for pid,needle in [(13708,b'\"'\"'sheetsage2/requirements.in'\"'\"'),(13630,b'\"'\"'sheetsage2/deploy/toolchain.py'\"'\"')]:
+ p=Path('\"'\"'/proc'\"'\"')/str(pid)/'\"'\"'cmdline'\"'\"'
+ if p.exists():
+  assert needle in p.read_bytes()
+  os.kill(pid,signal.SIGTERM)
+  print('\"'\"'Stopped owned transfer'\"'\"',pid)
+PY'"`
+- Context: Stop only duplicate owned transfers and upload pinned range downloader
+- Source SHA-256: `503d6e4b4d8dff8b199104f3c90c89324a13dc6b8837a3957e6d4338f9e2034f`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102636.805159Z-ba1a0aa498.json) · [Raw log](../build-logs/20261106T102636.805159Z-ba1a0aa498.log)
+- [Exact process output](../build-logs/20261106T102636.805159Z-ba1a0aa498.raw.log)
+
+### 2026-11-06T18:24:18+08:00 · sheetsage-resolver-diagnostic · failed
+
+- Config: Release; exit code: 143; elapsed: 140.066s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; source /etc/network_turbo >/dev/null 2>&1; export NO_PROXY=\"${NO_PROXY:-},mirrors.aliyun.com\"; export no_proxy=\"$NO_PROXY\"; export UV_CACHE_DIR=/root/autodl-tmp/emusician/workspace/models/sheetsage2/uv-cache UV_HTTP_TIMEOUT=45 UV_HTTP_RETRIES=1 UV_CONCURRENT_DOWNLOADS=3 CUDA_VISIBLE_DEVICES=; timeout 360 /root/miniconda3/bin/uv pip compile --verbose --python /root/autodl-tmp/emusician/envs/sheetsage2/bin/python --generate-hashes --index-url https://mirrors.aliyun.com/pypi/simple --find-links /root/autodl-tmp/emusician/cache/wheels /root/autodl-tmp/emusician/workspace/models/sheetsage2/requirements.in -o /root/autodl-tmp/emusician/manifests/model-library/sheetsage2/environment.lock.txt > /root/autodl-tmp/emusician/logs/model-library/sheetsage2-resolve-diagnostic.log 2>&1; result=$?; tail -55 /root/autodl-tmp/emusician/logs/model-library/sheetsage2-resolve-diagnostic.log; exit $result'"`
+- Context: Bounded verbose SheetSage dependency resolution using existing cloud cache
+- Source SHA-256: `e1806ee3e13d2f6ae465ba10442cd125c5dad502d6ccaef0b8d75be217bd69bc`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102418.112479Z-f010f914f8.json) · [Raw log](../build-logs/20261106T102418.112479Z-f010f914f8.log)
+- [Exact process output](../build-logs/20261106T102418.112479Z-f010f914f8.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 143; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T102418.112479Z-f010f914f8.log
+
+### 2026-11-06T18:26:38+08:00 · scores-range-fetch-preparation · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.106s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/scores/fetch_wheel.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/fetch_wheel-v1.py`
+- Context: Stop only duplicate owned transfers and upload pinned range downloader
+- Source SHA-256: `503d6e4b4d8dff8b199104f3c90c89324a13dc6b8837a3957e6d4338f9e2034f`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102638.552287Z-b5313608c3.json) · [Raw log](../build-logs/20261106T102638.552287Z-b5313608c3.log)
+- [Exact process output](../build-logs/20261106T102638.552287Z-b5313608c3.raw.log)
+
+### 2026-11-06T18:28:42+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.246s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/models/yue2 /root/autodl-tmp/emusician/manifests/model-library/yue2 /root/autodl-tmp/emusician/logs/model-library/yue2"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `18cff690c40de2484644c03540fb9bccfa0bd6c2f63cbb02172d2521a4b8ccf5`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102842.181335Z-1cff7f574c.json) · [Raw log](../build-logs/20261106T102842.181335Z-1cff7f574c.log)
+- [Exact process output](../build-logs/20261106T102842.181335Z-1cff7f574c.raw.log)
+
+### 2026-11-06T18:28:43+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 2.064s.
+- Command: `scp E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\cpu_check.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\finalize.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\gpu_smoke.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\install.sh E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\run.sh E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\stage.py E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\cloud\models\yue2\test_gpu_smoke.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/yue2/`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `18cff690c40de2484644c03540fb9bccfa0bd6c2f63cbb02172d2521a4b8ccf5`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102843.746769Z-d3ec8d6ccc.json) · [Raw log](../build-logs/20261106T102843.746769Z-d3ec8d6ccc.log)
+- [Exact process output](../build-logs/20261106T102843.746769Z-d3ec8d6ccc.raw.log)
+
+### 2026-11-06T18:28:46+08:00 · cloud-yue2-upload · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 0.733s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "chmod u+x /root/autodl-tmp/emusician/workspace/models/yue2/run.sh /root/autodl-tmp/emusician/workspace/models/yue2/install.sh"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `18cff690c40de2484644c03540fb9bccfa0bd6c2f63cbb02172d2521a4b8ccf5`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102846.155899Z-0d846c42b4.json) · [Raw log](../build-logs/20261106T102846.155899Z-0d846c42b4.log)
+- [Exact process output](../build-logs/20261106T102846.155899Z-0d846c42b4.raw.log)
+
+### 2026-11-06T18:28:52+08:00 · cloud-yue2-finalize · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.271s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/yue2/finalize.py"`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `18cff690c40de2484644c03540fb9bccfa0bd6c2f63cbb02172d2521a4b8ccf5`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102852.536978Z-7e416be098.json) · [Raw log](../build-logs/20261106T102852.536978Z-7e416be098.log)
+- [Exact process output](../build-logs/20261106T102852.536978Z-7e416be098.raw.log)
+
+### 2026-11-06T18:29:03+08:00 · cloud-yue2-collect · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 4.999s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/yue2/*.json emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/yue2/*.txt E:\MusicAgent&DAW\worktrees\audio-analysis\docs\review\2026-11-06-cloud-model-library\yue2`
+- Context: Cloud-only pinned YuE2 deployment; no DAW integration, no E model/audio/backup download; no GPU inference in this command
+- Source SHA-256: `18cff690c40de2484644c03540fb9bccfa0bd6c2f63cbb02172d2521a4b8ccf5`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102903.463507Z-833f0e7713.json) · [Raw log](../build-logs/20261106T102903.463507Z-833f0e7713.log)
+- [Exact process output](../build-logs/20261106T102903.463507Z-833f0e7713.raw.log)
+
+### 2026-11-06T18:28:59+08:00 · scores-cdn-host-comparison · succeeded
+
+- Config: Release; exit code: 0; elapsed: 21.456s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'source /etc/network_turbo >/dev/null 2>&1; python - <<'\"'\"'PY'\"'\"'
+import subprocess,concurrent.futures,json
+def check(host):
+ url='\"'\"'https://'\"'\"'+host+'\"'\"'/whl/cu128/torch-2.8.0%2Bcu128-cp311-cp311-manylinux_2_28_x86_64.whl'\"'\"'
+ p=subprocess.run(['\"'\"'curl'\"'\"','\"'\"'-L'\"'\"','\"'\"'-sS'\"'\"','\"'\"'--max-time'\"'\"','\"'\"'20'\"'\"','\"'\"'--range'\"'\"','\"'\"'104857600-105906175'\"'\"','\"'\"'-o'\"'\"','\"'\"'/dev/null'\"'\"','\"'\"'-w'\"'\"','\"'\"'%{http_code} %{size_download} %{speed_download}'\"'\"',url],capture_output=True,text=True)
+ return {'\"'\"'host'\"'\"':host,'\"'\"'exit'\"'\"':p.returncode,'\"'\"'status_bytes_speed'\"'\"':p.stdout}
+with concurrent.futures.ThreadPoolExecutor(max_workers=2) as e:print(json.dumps(list(e.map(check,['\"'\"'download-r2.pytorch.org'\"'\"','\"'\"'download.pytorch.org'\"'\"']))))
+PY'"`
+- Context: Read-only public wheel CDN range comparison; cloud-discarded bytes
+- Source SHA-256: `18cff690c40de2484644c03540fb9bccfa0bd6c2f63cbb02172d2521a4b8ccf5`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102859.969360Z-d5c14afc1e.json) · [Raw log](../build-logs/20261106T102859.969360Z-d5c14afc1e.log)
+- [Exact process output](../build-logs/20261106T102859.969360Z-d5c14afc1e.raw.log)
+
+### 2026-11-06T18:26:40+08:00 · scores-pinned-wheels-ranged · failed
+
+- Config: Release; exit code: 143; elapsed: 234.215s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; source /etc/network_turbo >/dev/null 2>&1; timeout 600 /root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/fetch_wheel-v1.py torch 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/sheetsage2-torch-ranged.log; exit ${PIPESTATUS[0]}'"`
+- Context: Parallel exact byte ranges on cloud with final pinned SHA256 verification; no version substitution
+- Source SHA-256: `503d6e4b4d8dff8b199104f3c90c89324a13dc6b8837a3957e6d4338f9e2034f`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102640.883372Z-137af7d73c.json) · [Raw log](../build-logs/20261106T102640.883372Z-137af7d73c.log)
+- [Exact process output](../build-logs/20261106T102640.883372Z-137af7d73c.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 143; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T102640.883372Z-137af7d73c.log
+
+### 2026-11-06T18:30:34+08:00 · sheetsage-pypi-source-fallback · succeeded
+
+- Config: Release; exit code: 0; elapsed: 8.964s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'python - <<'\"'\"'PY'\"'\"'
+from pathlib import Path
+import os,signal
+pid=14051
+p=Path('\"'\"'/proc'\"'\"')/str(pid)/'\"'\"'cmdline'\"'\"'
+if p.exists():
+ assert b'\"'\"'fetch_wheel-v1.py'\"'\"' in p.read_bytes()
+ os.kill(pid,signal.SIGTERM)
+ print('\"'\"'Stopped only owned slow official-index transfer'\"'\"')
+root=Path('\"'\"'/root/autodl-tmp/emusician'\"'\"')
+f=root/'\"'\"'workspace/models/sheetsage2/requirements.in'\"'\"'
+lines=[line for line in f.read_text().splitlines() if not line.startswith(('\"'\"'torch @'\"'\"','\"'\"'torchaudio @'\"'\"'))]
+lines+=['\"'\"'torch==2.8.0'\"'\"','\"'\"'torchaudio==2.8.0'\"'\"']
+(root/'\"'\"'workspace/models/sheetsage2/requirements-pypi.in'\"'\"').write_text('\"'\"'\n'\"'\"'.join(lines)+'\"'\"'\n'\"'\"')
+print('\"'\"'Created separately recorded PyPI release requirement input; original retained'\"'\"')
+PY
+source /etc/network_turbo >/dev/null 2>&1
+export NO_PROXY=\"${NO_PROXY:-},mirrors.aliyun.com\";export no_proxy=\"$NO_PROXY\";export CUDA_VISIBLE_DEVICES= UV_CACHE_DIR=/root/autodl-tmp/emusician/workspace/models/sheetsage2/uv-cache UV_HTTP_TIMEOUT=45 UV_HTTP_RETRIES=1
+timeout 180 /root/miniconda3/bin/uv pip compile --python /root/autodl-tmp/emusician/envs/sheetsage2/bin/python --generate-hashes --index-url https://mirrors.aliyun.com/pypi/simple /root/autodl-tmp/emusician/workspace/models/sheetsage2/requirements-pypi.in -o /root/autodl-tmp/emusician/manifests/model-library/sheetsage2/environment.lock.txt >/root/autodl-tmp/emusician/logs/model-library/sheetsage2-resolve-pypi.log 2>&1
+result=$?;tail -4 /root/autodl-tmp/emusician/logs/model-library/sheetsage2-resolve-pypi.log;exit $result'"`
+- Context: Stop owned slow CUDA-index download and use official PyPI pinned 2.8 release hashes via mirror
+- Source SHA-256: `6b58d8b6ff28f96cd49068ef31bb125978834d905389756b42a00a057b7c3924`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T103034.026795Z-4fd73bb6d8.json) · [Raw log](../build-logs/20261106T103034.026795Z-4fd73bb6d8.log)
+- [Exact process output](../build-logs/20261106T103034.026795Z-4fd73bb6d8.raw.log)
+
+### 2026-11-06T18:28:17+08:00 · sheetsage-ffmpeg-ranged · failed
+
+- Config: Release; exit code: 124; elapsed: 181.142s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; source /etc/network_turbo >/dev/null 2>&1; timeout 180 /root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/fetch_wheel-v1.py ffmpeg 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/sheetsage2-ffmpeg-ranged.log; exit ${PIPESTATUS[0]}'"`
+- Context: Cloud-only scoped FFmpeg wheel range transfer with pinned final hash
+- Source SHA-256: `50e6fd8e896cbacb1650a3dc21f6a6099cb06ffaa0c2c0828bc8d9f41166390a`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T102817.181126Z-a0433cc8f6.json) · [Raw log](../build-logs/20261106T102817.181126Z-a0433cc8f6.log)
+- [Exact process output](../build-logs/20261106T102817.181126Z-a0433cc8f6.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 124; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T102817.181126Z-a0433cc8f6.log
+
+### 2026-11-06T18:31:11+08:00 · scores-ffmpeg-mirror-url · succeeded
+
+- Config: Release; exit code: 0; elapsed: 6.445s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'NO_PROXY=mirrors.aliyun.com no_proxy=mirrors.aliyun.com python - <<'\"'\"'PY'\"'\"'
+import urllib.request,re
+s=urllib.request.urlopen('\"'\"'https://mirrors.aliyun.com/pypi/simple/imageio-ffmpeg/'\"'\"',timeout=20).read().decode()
+links=re.findall(r'\"'\"'href=\"([^\"]+)\"'\"'\"',s)
+print('\"'\"'\n'\"'\"'.join(x for x in links if '\"'\"'imageio_ffmpeg-0.6.0-py3-none-manylinux2014_x86_64.whl'\"'\"' in x))
+PY'"`
+- Context: Read public mirror wheel link matching pinned PyPI FFmpeg filename
+- Source SHA-256: `6b58d8b6ff28f96cd49068ef31bb125978834d905389756b42a00a057b7c3924`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T103111.989768Z-45772cc921.json) · [Raw log](../build-logs/20261106T103111.989768Z-45772cc921.log)
+- [Exact process output](../build-logs/20261106T103111.989768Z-45772cc921.raw.log)
+
+### 2026-11-06T18:31:52+08:00 · sheetsage-ffmpeg-mirror-verified · succeeded
+
+- Config: Release; exit code: 0; elapsed: 3.663s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/scores/toolchain.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/toolchain-v2.py`
+- Context: Same official PyPI wheel hash via mirror; immutable scoped extraction script v2
+- Source SHA-256: `587eb509cdddd189f6ef9c830abd8c23fa21b5565c2e42fabc342f428c38acdb`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T103152.628740Z-0dbd2397be.json) · [Raw log](../build-logs/20261106T103152.628740Z-0dbd2397be.log)
+- [Exact process output](../build-logs/20261106T103152.628740Z-0dbd2397be.raw.log)
+
+### 2026-11-06T18:31:56+08:00 · sheetsage-ffmpeg-mirror-verified · succeeded
+
+- Config: Release; exit code: 0; elapsed: 46.914s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; NO_PROXY=mirrors.aliyun.com no_proxy=mirrors.aliyun.com timeout 120 /root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/toolchain-v2.py 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/sheetsage2-toolchain-mirror.log; exit ${PIPESTATUS[0]}'"`
+- Context: Same official PyPI wheel hash via mirror; immutable scoped extraction script v2
+- Source SHA-256: `587eb509cdddd189f6ef9c830abd8c23fa21b5565c2e42fabc342f428c38acdb`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T103156.676054Z-ccfc6f0875.json) · [Raw log](../build-logs/20261106T103156.676054Z-ccfc6f0875.log)
+- [Exact process output](../build-logs/20261106T103156.676054Z-ccfc6f0875.raw.log)
+
+### 2026-11-06T18:32:54+08:00 · scores-probe-source-check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.448s.
+- Command: `python -m py_compile scripts/cloud/models/scores/stage.py scripts/cloud/models/scores/toolchain.py scripts/cloud/models/scores/fetch_wheel.py scripts/cloud/models/scores/gpu_probe.py`
+- Context: Compile cloud scripts without execution and stage immutable approved GPU probe
+- Source SHA-256: `2783ad69898f68aa31be2d4f84aa8aef9924b16cb57fdf04aa656b45d08f7ff2`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T103254.706030Z-1d4bde6d18.json) · [Raw log](../build-logs/20261106T103254.706030Z-1d4bde6d18.log)
+- [Exact process output](../build-logs/20261106T103254.706030Z-1d4bde6d18.raw.log)
+
+### 2026-11-06T18:32:56+08:00 · scores-probe-source-check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.147s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/scores/gpu_probe.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/gpu_probe-v1.py`
+- Context: Compile cloud scripts without execution and stage immutable approved GPU probe
+- Source SHA-256: `2783ad69898f68aa31be2d4f84aa8aef9924b16cb57fdf04aa656b45d08f7ff2`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T103256.575690Z-2e74c3063d.json) · [Raw log](../build-logs/20261106T103256.575690Z-2e74c3063d.log)
+- [Exact process output](../build-logs/20261106T103256.575690Z-2e74c3063d.raw.log)
+
+### 2026-11-06T18:35:18+08:00 · scores-cpu-entrypoint-upload · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.686s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/scores/stage.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/stage-cpu-v2.py`
+- Context: Immutable CPU verifier v2 adds default file decoder check without inference
+- Source SHA-256: `2520c1033dfd197606028543898aa29bd727bf912dccc434e2a1b4440b47857d`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T103518.965369Z-1743d235a6.json) · [Raw log](../build-logs/20261106T103518.965369Z-1743d235a6.log)
+- [Exact process output](../build-logs/20261106T103518.965369Z-1743d235a6.raw.log)
+
+### 2026-11-06T18:35:21+08:00 · scores-cpu-entrypoint-upload · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.334s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/scores/run_sheetsage2.sh emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/run_sheetsage2-v1.sh`
+- Context: Immutable CPU verifier v2 adds default file decoder check without inference
+- Source SHA-256: `2520c1033dfd197606028543898aa29bd727bf912dccc434e2a1b4440b47857d`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T103521.058731Z-92567564a5.json) · [Raw log](../build-logs/20261106T103521.058731Z-92567564a5.log)
+- [Exact process output](../build-logs/20261106T103521.058731Z-92567564a5.raw.log)
+
+### 2026-11-06T18:31:02+08:00 · sheetsage-pypi-env-install · succeeded
+
+- Config: Release; exit code: 0; elapsed: 366.602s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; bash /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/finalize-20261106.sh sheetsage2 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/sheetsage2-pypi-install.log; exit ${PIPESTATUS[0]}'"`
+- Context: Install official PyPI 2.8.0 distribution under hash lock; independent SheetSage environment
+- Source SHA-256: `6b58d8b6ff28f96cd49068ef31bb125978834d905389756b42a00a057b7c3924`; Git HEAD: `01936fa1c1ed7a685bb9e1fe63e2ace4e5b7a32c`.
+- [Record](builds/20261106T103102.010953Z-e2c3524c03.json) · [Raw log](../build-logs/20261106T103102.010953Z-e2c3524c03.log)
+- [Exact process output](../build-logs/20261106T103102.010953Z-e2c3524c03.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T18:37:31+08:00 · sheetsage-cpu-load-decode-cli · succeeded
+
+- Config: Release; exit code: 0; elapsed: 7.786s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; export CUDA_VISIBLE_DEVICES= HF_HOME=/root/autodl-tmp/emusician/workspace/models/sheetsage2/hf HF_HUB_OFFLINE=1 HF_HUB_DISABLE_IMPLICIT_TOKEN=1 OMP_NUM_THREADS=2; export PATH=/root/autodl-tmp/emusician/workspace/models/sheetsage2/toolchain/bin:$PATH; timeout 180 /root/autodl-tmp/emusician/envs/sheetsage2/bin/python /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/stage-cpu-v2.py cpu-check --model sheetsage2 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/sheetsage2-cpu-check.log; exit ${PIPESTATUS[0]}'"`
+- Context: Actual SheetSage2 plus MERT2 CPU weights, default WAV decode, upstream help; CUDA hidden
+- Source SHA-256: `e45c19484385c0d88cbb61df1139c5bb63ef55daee1f7644b655ddc22bdef0c3`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T103731.271726Z-6205e1a7cb.json) · [Raw log](../build-logs/20261106T103731.271726Z-6205e1a7cb.log)
+- [Exact process output](../build-logs/20261106T103731.271726Z-6205e1a7cb.raw.log)
+
+### 2026-11-06T18:37:52+08:00 · sheetsage-guarded-gpu-probe · succeeded
+
+- Config: Release; exit code: 0; elapsed: 8.189s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; timeout 205 /root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/gpu_probe-v1.py --approved-slot 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/sheetsage2-guarded-probe.log; exit ${PIPESTATUS[0]}'"`
+- Context: Root-authorized exclusive GPU smoke, default300s encoder/full tasks,8s cloud audio,10GiB cap180s watchdog
+- Source SHA-256: `e45c19484385c0d88cbb61df1139c5bb63ef55daee1f7644b655ddc22bdef0c3`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T103752.455745Z-9f79c2fab3.json) · [Raw log](../build-logs/20261106T103752.455745Z-9f79c2fab3.log)
+- [Exact process output](../build-logs/20261106T103752.455745Z-9f79c2fab3.raw.log)
+
+### 2026-11-06T18:38:41+08:00 · sheetsage-offline-upstream-loader · succeeded
+
+- Config: Release; exit code: 0; elapsed: 5.419s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'export CUDA_VISIBLE_DEVICES= HF_HOME=/root/autodl-tmp/emusician/workspace/models/sheetsage2/hf HF_HUB_OFFLINE=1 HF_HUB_DISABLE_IMPLICIT_TOKEN=1 OMP_NUM_THREADS=2; timeout 60 /root/autodl-tmp/emusician/envs/sheetsage2/bin/python - <<'\"'\"'PY'\"'\"'
+import torch
+from transformers import AutoModel
+torch.set_num_threads(2)
+model=AutoModel.from_pretrained('\"'\"'/root/autodl-tmp/emusician/models/sheetsage2'\"'\"',local_files_only=True,trust_remote_code=True)
+assert all(p.device.type=='\"'\"'cpu'\"'\"' for p in model.parameters())
+assert not torch.cuda.is_initialized()
+print('\"'\"'Upstream default parent resolution and CPU load passed without base_model_path override'\"'\"')
+PY
+result=$?; if [ $result -ne 0 ]; then exit $result; fi
+bash /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/run_sheetsage2-v1.sh --help >/root/autodl-tmp/emusician/manifests/model-library/sheetsage2/wrapper-help.txt'"`
+- Context: CPU-only upstream default loader resolves pinned parent from private offline cache; wrapper help
+- Source SHA-256: `e45c19484385c0d88cbb61df1139c5bb63ef55daee1f7644b655ddc22bdef0c3`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T103841.400536Z-28311d7404.json) · [Raw log](../build-logs/20261106T103841.400536Z-28311d7404.log)
+- [Exact process output](../build-logs/20261106T103841.400536Z-28311d7404.raw.log)
+
+### 2026-11-06T18:39:35+08:00 · scores-final-provenance-upload · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.408s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/scores/install.sh emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/install-pypi-v2.sh`
+- Context: Freeze reproducible installer and small manifest finalizer under new immutable paths
+- Source SHA-256: `13d9362593dfa428b0cbd75ed0591ac9a5eaae9687f884d27e91c82abceb7b03`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T103935.501332Z-1b4ec24f91.json) · [Raw log](../build-logs/20261106T103935.501332Z-1b4ec24f91.log)
+- [Exact process output](../build-logs/20261106T103935.501332Z-1b4ec24f91.raw.log)
+
+### 2026-11-06T18:39:37+08:00 · scores-final-provenance-upload · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.995s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/scores/finalize_manifest.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/finalize_manifest-v1.py`
+- Context: Freeze reproducible installer and small manifest finalizer under new immutable paths
+- Source SHA-256: `13d9362593dfa428b0cbd75ed0591ac9a5eaae9687f884d27e91c82abceb7b03`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T103937.178656Z-c18baeac74.json) · [Raw log](../build-logs/20261106T103937.178656Z-c18baeac74.log)
+- [Exact process output](../build-logs/20261106T103937.178656Z-c18baeac74.raw.log)
+
+### 2026-11-06T18:39:38+08:00 · scores-final-provenance-upload · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.783s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/finalize_manifest-v1.py"`
+- Context: Freeze reproducible installer and small manifest finalizer under new immutable paths
+- Source SHA-256: `13d9362593dfa428b0cbd75ed0591ac9a5eaae9687f884d27e91c82abceb7b03`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T103938.410246Z-88e18be2f6.json) · [Raw log](../build-logs/20261106T103938.410246Z-88e18be2f6.log)
+- [Exact process output](../build-logs/20261106T103938.410246Z-88e18be2f6.raw.log)
+
+### 2026-11-06T18:40:39+08:00 · scores-small-evidence-copy · succeeded
+
+- Config: Release; exit code: 0; elapsed: 2.336s.
+- Command: `scp -r -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/sheetsage2 docs\review\2026-11-06-cloud-model-library\scores\evidence`
+- Context: Copy only small manifests locks help and probe metadata; no model or audio artifacts
+- Source SHA-256: `13d9362593dfa428b0cbd75ed0591ac9a5eaae9687f884d27e91c82abceb7b03`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104039.047513Z-f744fcd53b.json) · [Raw log](../build-logs/20261106T104039.047513Z-f744fcd53b.log)
+- [Exact process output](../build-logs/20261106T104039.047513Z-f744fcd53b.raw.log)
+
+### 2026-11-06T18:40:41+08:00 · scores-small-evidence-copy · succeeded
+
+- Config: Release; exit code: 0; elapsed: 2.210s.
+- Command: `scp -r -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/muscriptor docs\review\2026-11-06-cloud-model-library\scores\evidence`
+- Context: Copy only small manifests locks help and probe metadata; no model or audio artifacts
+- Source SHA-256: `13d9362593dfa428b0cbd75ed0591ac9a5eaae9687f884d27e91c82abceb7b03`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104041.909637Z-4e29608e28.json) · [Raw log](../build-logs/20261106T104041.909637Z-4e29608e28.log)
+- [Exact process output](../build-logs/20261106T104041.909637Z-4e29608e28.raw.log)
+
+### 2026-11-06T18:41:17+08:00 · scores-final-source-check · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.018s.
+- Command: `python -m py_compile scripts\cloud\models\scores\fetch_wheel.py scripts\cloud\models\scores\finalize_manifest.py scripts\cloud\models\scores\gpu_probe.py scripts\cloud\models\scores\stage.py scripts\cloud\models\scores\toolchain.py`
+- Context: Final cloud score scripts syntax plus small evidence inventory; no model execution
+- Source SHA-256: `13d9362593dfa428b0cbd75ed0591ac9a5eaae9687f884d27e91c82abceb7b03`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104117.931476Z-4bf4b10f26.json) · [Raw log](../build-logs/20261106T104117.931476Z-4bf4b10f26.log)
+- [Exact process output](../build-logs/20261106T104117.931476Z-4bf4b10f26.raw.log)
+
+### 2026-11-06T18:43:11+08:00 · scores-guard-final-hardening · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.450s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/scores/gpu_probe.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/gpu_probe-final-v2.py`
+- Context: Immutable guard v2 and CPU-only fault tests; preserve original actual GPU guard v1
+- Source SHA-256: `df6cbabe1678578ac029b875ecdde05962f6976de390b1be038866ea8dafda9d`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104311.718050Z-09c6e70c54.json) · [Raw log](../build-logs/20261106T104311.718050Z-09c6e70c54.log)
+- [Exact process output](../build-logs/20261106T104311.718050Z-09c6e70c54.raw.log)
+
+### 2026-11-06T18:43:13+08:00 · scores-guard-final-hardening · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.979s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/scores/test_guard.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/test_guard-v1.py`
+- Context: Immutable guard v2 and CPU-only fault tests; preserve original actual GPU guard v1
+- Source SHA-256: `df6cbabe1678578ac029b875ecdde05962f6976de390b1be038866ea8dafda9d`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104313.435671Z-33bdbb6ddf.json) · [Raw log](../build-logs/20261106T104313.435671Z-33bdbb6ddf.log)
+- [Exact process output](../build-logs/20261106T104313.435671Z-33bdbb6ddf.raw.log)
+
+### 2026-11-06T18:43:14+08:00 · scores-guard-final-hardening · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.813s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; CUDA_VISIBLE_DEVICES= /root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/test_guard-v1.py 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/sheetsage2-guard-cpu-faults.log; exit ${PIPESTATUS[0]}'"`
+- Context: Immutable guard v2 and CPU-only fault tests; preserve original actual GPU guard v1
+- Source SHA-256: `df6cbabe1678578ac029b875ecdde05962f6976de390b1be038866ea8dafda9d`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104314.782516Z-f826c27363.json) · [Raw log](../build-logs/20261106T104314.782516Z-f826c27363.log)
+- [Exact process output](../build-logs/20261106T104314.782516Z-f826c27363.raw.log)
+
+### 2026-11-06T18:43:48+08:00 · cloud-library-catalog-upload · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.236s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/library_status.py emusician-autodl:/root/autodl-tmp/emusician/tools/library_status.py`
+- Context: Upload final evidence-only catalog inspector; no model activation
+- Source SHA-256: `df6cbabe1678578ac029b875ecdde05962f6976de390b1be038866ea8dafda9d`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104348.090249Z-dea738f1bb.json) · [Raw log](../build-logs/20261106T104348.090249Z-dea738f1bb.log)
+- [Exact process output](../build-logs/20261106T104348.090249Z-dea738f1bb.raw.log)
+
+### 2026-11-06T18:44:08+08:00 · scores-guard-final-cpu-faults · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.889s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/scores/gpu_probe.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/gpu_probe-final-v3.py`
+- Context: Guard v3 covers admission and diagnostic failures, race-safe owned cleanup, final receipt; no GPU
+- Source SHA-256: `10a7fbb56c5a7bf6a927352caa494092cc02c60b6ab8ba9834cf3def9051dc37`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104408.004383Z-a0a168d181.json) · [Raw log](../build-logs/20261106T104408.004383Z-a0a168d181.log)
+- [Exact process output](../build-logs/20261106T104408.004383Z-a0a168d181.raw.log)
+
+### 2026-11-06T18:44:10+08:00 · scores-guard-final-cpu-faults · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.474s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/scores/test_guard.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/test_guard-v2.py`
+- Context: Guard v3 covers admission and diagnostic failures, race-safe owned cleanup, final receipt; no GPU
+- Source SHA-256: `10a7fbb56c5a7bf6a927352caa494092cc02c60b6ab8ba9834cf3def9051dc37`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104410.203724Z-a743e674f3.json) · [Raw log](../build-logs/20261106T104410.203724Z-a743e674f3.log)
+- [Exact process output](../build-logs/20261106T104410.203724Z-a743e674f3.raw.log)
+
+### 2026-11-06T18:44:12+08:00 · scores-guard-final-cpu-faults · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.820s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "bash -lc 'set -o pipefail; CUDA_VISIBLE_DEVICES= /root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/test_guard-v2.py 2>&1 | tee /root/autodl-tmp/emusician/logs/model-library/sheetsage2-guard-cpu-faults-final.log; exit ${PIPESTATUS[0]}'"`
+- Context: Guard v3 covers admission and diagnostic failures, race-safe owned cleanup, final receipt; no GPU
+- Source SHA-256: `10a7fbb56c5a7bf6a927352caa494092cc02c60b6ab8ba9834cf3def9051dc37`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104412.119818Z-94b839b905.json) · [Raw log](../build-logs/20261106T104412.119818Z-94b839b905.log)
+- [Exact process output](../build-logs/20261106T104412.119818Z-94b839b905.raw.log)
+
+### 2026-11-06T18:44:37+08:00 · cloud-library-final-ace-audit · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.463s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python -c 'import base64;exec(base64.b64decode('\"'\"'CmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aAppbXBvcnQgZGF0ZXRpbWUsaGFzaGxpYixqc29uLHN1YnByb2Nlc3Msc2h1dGlsLHNxbGl0ZTMsdXJsbGliLnJlcXVlc3QKcm9vdD1QYXRoKCcvcm9vdC9hdXRvZGwtdG1wL2VtdXNpY2lhbicpCnNoYT1sYW1iZGEgcDpoYXNobGliLnNoYTI1NihwLnJlYWRfYnl0ZXMoKSkuaGV4ZGlnZXN0KCkKZnJlZXplPXN1YnByb2Nlc3MuY2hlY2tfb3V0cHV0KFsnL3Jvb3QvbWluaWNvbmRhMy9iaW4vdXYnLCdwaXAnLCdmcmVlemUnLCctLXB5dGhvbicsc3RyKHJvb3QvJ2VudnMvYWNlL2Jpbi9weXRob24nKV0sdGltZW91dD0zMCkKd2l0aCB1cmxsaWIucmVxdWVzdC51cmxvcGVuKCdodHRwOi8vMTI3LjAuMC4xOjE4MDgxL2hlYWx0aCcsdGltZW91dD04KSBhcyByZXNwb25zZToKIGhlYWx0aD1qc29uLmxvYWQocmVzcG9uc2UpCndpdGggc3FsaXRlMy5jb25uZWN0KGYnZmlsZTp7cm9vdH0vc3RhdGUvZ2VuZXJhdGlvbi5zcWxpdGUzP21vZGU9cm8nLHVyaT1UcnVlLHRpbWVvdXQ9MikgYXMgZGI6CiBhY3RpdmU9ZGIuZXhlY3V0ZSgiU0VMRUNUIHN0YXR1cyxDT1VOVCgqKSBGUk9NIGpvYnMgV0hFUkUgc3RhdHVzIE5PVCBJTiAoJ3JlYWR5JywnZmFpbGVkJywnY2FuY2VsbGVkJywnaW50ZXJydXB0ZWQnKSBHUk9VUCBCWSBzdGF0dXMiKS5mZXRjaGFsbCgpCnJlcG9ydD17J2NoZWNrZWRfdXRjJzpkYXRldGltZS5kYXRldGltZS5ub3coZGF0ZXRpbWUudGltZXpvbmUudXRjKS5pc29mb3JtYXQoKSwnYWNlJzp7J2hlYWx0aCc6aGVhbHRoLmdldCgnc3RhdHVzJyxoZWFsdGguZ2V0KCdvaycpKSwnb3JpZ2luYWxfcGlkXzU4NjJfYWxpdmUnOlBhdGgoJy9wcm9jLzU4NjInKS5pc19kaXIoKSwnYWN0aXZlX2pvYnMnOmFjdGl2ZSwncnVudGltZV9tYW5pZmVzdF9zaGEyNTYnOnNoYShyb290LydtYW5pZmVzdHMvYWNlLXJ1bnRpbWUuanNvbicpLCdweXZlbnZfc2hhMjU2JzpzaGEocm9vdC8nZW52cy9hY2UvcHl2ZW52LmNmZycpLCdwYWNrYWdlX2ZyZWV6ZV9zaGEyNTYnOmhhc2hsaWIuc2hhMjU2KGZyZWV6ZSkuaGV4ZGlnZXN0KCl9LCdncHVfY3N2JzpzdWJwcm9jZXNzLmNoZWNrX291dHB1dChbJ252aWRpYS1zbWknLCctLXF1ZXJ5LWdwdT1uYW1lLGRyaXZlcl92ZXJzaW9uLG1lbW9yeS50b3RhbCxtZW1vcnkudXNlZCxtZW1vcnkuZnJlZSx1dGlsaXphdGlvbi5ncHUnLCctLWZvcm1hdD1jc3Ysbm9oZWFkZXIsbm91bml0cyddLHRleHQ9VHJ1ZSx0aW1lb3V0PTgpLnN0cmlwKCksJ2Rpc2tfYnl0ZXMnOmRpY3QoemlwKCgndG90YWwnLCd1c2VkJywnZnJlZScpLHNodXRpbC5kaXNrX3VzYWdlKHJvb3QpKSksJ21vZGVsX2luZmVyZW5jZV9ydW5fYnlfYXVkaXQnOkZhbHNlfQpwcmludChqc29uLmR1bXBzKHJlcG9ydCxpbmRlbnQ9MikpCg=='\"'\"'))'"`
+- Context: Read-only ACE health, fixed environment hashes, idle queue, GPU and disk; no inference
+- Source SHA-256: `10a7fbb56c5a7bf6a927352caa494092cc02c60b6ab8ba9834cf3def9051dc37`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104437.281927Z-08c14fb844.json) · [Raw log](../build-logs/20261106T104437.281927Z-08c14fb844.log)
+- [Exact process output](../build-logs/20261106T104437.281927Z-08c14fb844.raw.log)
+
+### 2026-11-06T18:44:59+08:00 · cloud-library-audit-receipt · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.155s.
+- Command: `C:\Python314\python.exe -c "
+from pathlib import Path
+import json
+rid='20261106T104437.281927Z-08c14fb844'
+raw=(Path('build-logs')/(rid+'.log')).read_text(encoding='utf8')
+start=raw.index('{\n')
+report=json.JSONDecoder().raw_decode(raw[start:])[0]
+baseline=json.loads(Path('docs/review/2026-11-06-cloud-mir-stage/VERIFICATION.json').read_text())['ace_unchanged']
+report['ace']['hashes_match_baseline']=all(report['ace'][k]==baseline[k] for k in ('runtime_manifest_sha256','pyvenv_sha256','package_freeze_sha256'))
+report['command_record']=f'docs/builds/{rid}.json'
+report['collection_note']='Initial local JSON parse encountered uv informational stderr before JSON; extracted object from preserved command log without rerunning the remote audit.'
+assert report['ace']['hashes_match_baseline'] and report['ace']['health']=='ok'
+Path('docs/review/2026-11-06-cloud-model-library/FINAL-CLOUD-AUDIT.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf8')
+print('ACE baseline hashes, idle queue, health and 166.71GB free verified; audit receipt saved.')
+"`
+- Context: Recover audit JSON from preserved mixed stdout/stderr; prior SSH audit succeeded, initial local JSON parse failed
+- Source SHA-256: `10a7fbb56c5a7bf6a927352caa494092cc02c60b6ab8ba9834cf3def9051dc37`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104459.390567Z-3d1132e826.json) · [Raw log](../build-logs/20261106T104459.390567Z-3d1132e826.log)
+- [Exact process output](../build-logs/20261106T104459.390567Z-3d1132e826.raw.log)
+
+### 2026-11-06T18:45:06+08:00 · scores-final-guard-evidence · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.279s.
+- Command: `scp -o BatchMode=yes scripts/cloud/models/scores/finalize_manifest.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/finalize_manifest-v2.py`
+- Context: Preserve successful GPU guard hash separately from CPU-tested final guard and refresh small manifests
+- Source SHA-256: `5a9263780b4f7c19266d023299c825e66f5e4fb064a46698548aff6f43443288`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104506.584238Z-5c24fe9543.json) · [Raw log](../build-logs/20261106T104506.584238Z-5c24fe9543.log)
+- [Exact process output](../build-logs/20261106T104506.584238Z-5c24fe9543.raw.log)
+
+### 2026-11-06T18:45:08+08:00 · scores-final-guard-evidence · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.895s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/finalize_manifest-v2.py"`
+- Context: Preserve successful GPU guard hash separately from CPU-tested final guard and refresh small manifests
+- Source SHA-256: `5a9263780b4f7c19266d023299c825e66f5e4fb064a46698548aff6f43443288`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104508.315621Z-19f7a664cc.json) · [Raw log](../build-logs/20261106T104508.315621Z-19f7a664cc.log)
+- [Exact process output](../build-logs/20261106T104508.315621Z-19f7a664cc.raw.log)
+
+### 2026-11-06T18:45:09+08:00 · scores-final-guard-evidence · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.435s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/sheetsage2/deployment.json docs\review\2026-11-06-cloud-model-library\scores\evidence\sheetsage2\deployment.json`
+- Context: Preserve successful GPU guard hash separately from CPU-tested final guard and refresh small manifests
+- Source SHA-256: `5a9263780b4f7c19266d023299c825e66f5e4fb064a46698548aff6f43443288`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104509.587459Z-e0483efe0f.json) · [Raw log](../build-logs/20261106T104509.587459Z-e0483efe0f.log)
+- [Exact process output](../build-logs/20261106T104509.587459Z-e0483efe0f.raw.log)
+
+### 2026-11-06T18:45:11+08:00 · scores-final-guard-evidence · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.094s.
+- Command: `scp -o BatchMode=yes emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/muscriptor/deployment.json docs\review\2026-11-06-cloud-model-library\scores\evidence\muscriptor\deployment.json`
+- Context: Preserve successful GPU guard hash separately from CPU-tested final guard and refresh small manifests
+- Source SHA-256: `5a9263780b4f7c19266d023299c825e66f5e4fb064a46698548aff6f43443288`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104511.321465Z-e0211d8ffc.json) · [Raw log](../build-logs/20261106T104511.321465Z-e0211d8ffc.log)
+- [Exact process output](../build-logs/20261106T104511.321465Z-e0211d8ffc.raw.log)
+
+### 2026-11-06T18:45:28+08:00 · cloud-library-catalog-final · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.305s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/tools/library_status.py --write"`
+- Context: Validate six model descriptors and atomically write evidence-only cloud catalog; no activation
+- Source SHA-256: `5a9263780b4f7c19266d023299c825e66f5e4fb064a46698548aff6f43443288`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104528.463443Z-5063648da5.json) · [Raw log](../build-logs/20261106T104528.463443Z-5063648da5.log)
+- [Exact process output](../build-logs/20261106T104528.463443Z-5063648da5.raw.log)
+
+### 2026-11-06T18:47:00+08:00 · cloud-library-final-local-review · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.991s.
+- Command: `C:\Python314\python.exe -c "
+from pathlib import Path
+import ast,hashlib,json,datetime,subprocess,re
+root=Path.cwd(); review=Path('docs/review/2026-11-06-cloud-model-library')
+base=json.loads(Path('docs/builds/20261106T093624.026444Z-cf0feb7592.json').read_text())['source_fingerprint']
+changed=[p for p,h in base['files'].items() if not Path(p).is_file() or hashlib.sha256(Path(p).read_bytes()).hexdigest()!=h]
+assert not changed, changed
+python_files=list(Path('scripts/cloud/models').rglob('*.py'))
+for p in python_files: ast.parse(p.read_text(encoding='utf8'),filename=str(p))
+json_files=list(review.rglob('*.json'))
+for p in json_files: json.loads(p.read_text(encoding='utf8'))
+cat=json.loads((review/'CATALOG.json').read_text())
+assert len(cat['models'])==6 and len([m for m in cat['models'] if m['checks']['gpu_inference_verified']])==5
+assert all(m['daw_connected'] is False for m in cat['models']) and not cat['errors']
+local_files=[p for folder in (review,Path('scripts/cloud/models')) for p in folder.rglob('*') if p.is_file() and '__pycache__' not in p.parts]
+for p in local_files:
+ assert p.suffix.lower() not in ('.wav','.flac','.mp3','.pt','.pth','.ckpt','.safetensors','.zip','.gz','.exe','.dll'),p
+ assert p.stat().st_size<4*1024**2,p
+ text=p.read_text(encoding='utf8')
+ assert not re.search(r'sk-(?:proj-)?[A-Za-z0-9_-]{24,}|-----BEGIN (?:RSA |OPENSSH |EC )?PRIVATE KEY-----',text),str(p)+' credential-pattern'
+manifest_paths=list(review.rglob('deployment.json'))
+assert len(manifest_paths)==6
+for p in manifest_paths:
+ d=json.loads(p.read_text()); entry=next(m for m in cat['models'] if m['id']==d['id'])
+ assert d['checks']==entry['checks'],str(p)
+records=[]
+for p in sorted(Path('docs/builds').glob('20261106T*.json')):
+ if p.name<'20261106T100600': continue
+ d=json.loads(p.read_text())
+ if d['status'] in ('running','preflight'): continue
+ records.append({'record':p.name,'action':d['action'],'status':d['status']})
+report={'checked_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'scope':'cloud-model-library-final-review','daw_baseline_record':'20261106T093624.026444Z-cf0feb7592','daw_source_files_unchanged':len(base['files']),'new_python_files_parsed':len(python_files),'evidence_json_files_parsed':len(json_files),'small_evidence_and_script_files':len(local_files),'large_models_or_audio_in_local_batch':False,'credential_pattern_matches':0,'catalog_checks_match_six_final_manifests':True,'scripts_sha256':{p.as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in Path('scripts/cloud/models').rglob('*') if p.is_file() and '__pycache__' not in p.parts},'command_records':records,'no_native_build_needed':'No DAW/Agent/model Worker source from the verified 257-input 0.12.1 build changed; this phase only adds cloud deployment tools and records.'}
+(review/'VERIFICATION.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf8')
+print(json.dumps({k:v for k,v in report.items() if k not in ('scripts_sha256','command_records')},indent=2))
+print('terminal command receipts',len(records))
+"`
+- Context: Final source immutability, scripts syntax, six model flags, small metadata-only assets and credential-pattern check
+- Source SHA-256: `bb4c9f9d604bcec8dd78d6a8d7c5d51606f55b1a1f6d86efd722eda4b9444a76`; Git HEAD: `689e3cf741be5f63592fcb68d00b2730b495217e`.
+- [Record](builds/20261106T104700.293909Z-440584ec22.json) · [Raw log](../build-logs/20261106T104700.293909Z-440584ec22.log)
+- [Exact process output](../build-logs/20261106T104700.293909Z-440584ec22.raw.log)
+
+## 2026-11-06 云端模型库交付核对
+
+- 按用户最新范围，只部署云端，暂不将权重/音频/备份下载至 E，不连接 DAW。小型脚本、固定来源、环境锁和证据入 Git；分支 feature/cloud-model-library，基线01936fa。
+- YuE2、SCNet、TransKun、ChordMini、SheetSage2完成文件/独立环境/CPU加载和一次受控GPU短推理。YuE2仅8GiB low_vram短token渲染，分析仅8秒输入；没有完整歌曲、准确率、长曲或听感验收。MuScriptor公共源码/环境/CLI通过，权重匿名401受阻、未下载。
+- 每个模型单独deployment，catalog校验六条；权重、环境、源码、结果、记录分离。探针按共享锁串行，ACE活动/显存监测只回收自己进程组，不是生产多模型调度器。后置guard修正分别用纯CPU故障测试，保留实际GPU版本和最终版本SHA。
+- 最终ACE health=ok、PID5862保持、三项环境哈希不变；云盘可用166,708,670,464字节。根汇总初次被uv提示干扰JSON解析，已从同一原始日志恢复，未重新运行模型。失败/超时/修复都保留。
+- 最终本地审查257个既有DAW输入不变，21个部署Python文件解析通过，六模型状态一致；本轮没有DAW构建或代码变更。原0.12.1人工真实分离与ASIO验收仍待完成。
+- 详细证据：docs/review/2026-11-06-cloud-model-library/RESULTS.md、CATALOG.json、VERIFICATION.json。更新CONTEXT、DEVELOPMENT、ARCHITECTURE和独立ADR；暂不合并main。
+- 提交前核对补充：首次git diff --check指出原样CLI help的尾随空格；保留原始帮助输出并用.gitattributes明确其为逐字证据。scores/artifacts.json显式保留原始换行，定向重新暂存后全部部署脚本的Git字节与VERIFICATION记录SHA相同；没有修改已验证推理源码。

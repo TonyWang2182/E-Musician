@@ -1,0 +1,66 @@
+{
+  "files": [
+    {
+      "path": "scripts/cloud/models/scores/artifacts.json",
+      "bytes": 23518,
+      "sha256": "4b66b7d4fb94d08621066e7bf2979b6266c741b6c57a12662e6dca79872d259c"
+    },
+    {
+      "path": "scripts/cloud/models/scores/fetch_wheel.py",
+      "bytes": 4260,
+      "sha256": "0810f3f5ed6c5e8801a64081711dc4cdf57e35011672777532e3f1846bea646e"
+    },
+    {
+      "path": "scripts/cloud/models/scores/finalize.sh",
+      "bytes": 1484,
+      "sha256": "9d07f9f49f00fb4982bc77dfc81e2a14fbaf44df8ccafed4f33aad4a575785c0"
+    },
+    {
+      "path": "scripts/cloud/models/scores/finalize_manifest.py",
+      "bytes": 3506,
+      "sha256": "d5102a6b4209cad7612b55f112de029fce4753a5e4ce06a0fd390e80517f78d8"
+    },
+    {
+      "path": "scripts/cloud/models/scores/gpu_probe.py",
+      "bytes": 10286,
+      "sha256": "aeb829ca161770d7c478126ad9a01d95535b619645de6281aea3408aaeb9ec25"
+    },
+    {
+      "path": "scripts/cloud/models/scores/install.sh",
+      "bytes": 3890,
+      "sha256": "475caec77d5f7794d21b844d566ef297690f5c58758d9ab50f1ee4639ffca4d0"
+    },
+    {
+      "path": "scripts/cloud/models/scores/README.md",
+      "bytes": 3833,
+      "sha256": "7f23823c10c62b3170b561e91615a347edc6c2d0a324a2bf80dbd6a23b2a8c1c"
+    },
+    {
+      "path": "scripts/cloud/models/scores/run_sheetsage2.sh",
+      "bytes": 538,
+      "sha256": "0a8787302630d7b6e7bb93821baf788ea0e2fcdac7b94f14d983d230c9feadcb"
+    },
+    {
+      "path": "scripts/cloud/models/scores/stage.py",
+      "bytes": 11319,
+      "sha256": "cf60cc08e01682b262198b04a6f9bfb33e293e4fb21d2d350ac3a850576f29f2"
+    },
+    {
+      "path": "scripts/cloud/models/scores/test_guard.py",
+      "bytes": 5307,
+      "sha256": "b360f8404d0d0e06d252364364ba77ffd080b37b8266ec3dfdf36bf907d252ee"
+    },
+    {
+      "path": "scripts/cloud/models/scores/toolchain.py",
+      "bytes": 3140,
+      "sha256": "2e73711431ad0381c66bd78872e9087b67e4c068b53a4693475179967144004c"
+    }
+  ],
+  "gpu_probe_record": "20261106T103752.455745Z-9f79c2fab3",
+  "cpu_load_record": "20261106T103731.271726Z-6205e1a7cb",
+  "mu_public_env_record": "20261106T102204.079970Z-6da6792514",
+  "final_guard_cpu_fault_record": "20261106T104412.119818Z-94b839b905",
+  "final_guard_gpu_rerun": false,
+  "new_models_or_audio_on_E": false,
+  "daw_connected": false
+}

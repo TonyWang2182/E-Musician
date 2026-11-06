@@ -1,0 +1,40 @@
+usage: infer.py [-h] [--output OUTPUT] [--model MODEL] [--revision REVISION]
+                [--device DEVICE] [--dtype {bf16,fp32}]
+                [--preset {default,paper}] [--max-seconds MAX_SECONDS]
+                [--overlap OVERLAP] [--lookahead LOOKAHEAD]
+                [--prompts PROMPTS [PROMPTS ...]] [--melody-only]
+                [--export-logits] [--export-scores] [--export-embeddings]
+                [--all-layers] [--render-audio]
+                [--render-score [RENDER_SCORE]] [--render-parts RENDER_PARTS]
+                [--local-files-only]
+                audio
+
+SheetSage2: music audio to ABC, MIDI, annotations and features
+
+positional arguments:
+  audio
+
+options:
+  -h, --help            show this help message and exit
+  --output OUTPUT
+  --model MODEL
+  --revision REVISION   Model and code commit on Hugging Face
+  --device DEVICE
+  --dtype {bf16,fp32}
+  --preset {default,paper}
+  --max-seconds MAX_SECONDS
+  --overlap OVERLAP
+  --lookahead LOOKAHEAD
+  --prompts PROMPTS [PROMPTS ...]
+  --melody-only         Keep vocal and instrumental melodies; omit chords from
+                        ABC and playback
+  --export-logits
+  --export-scores
+  --export-embeddings
+  --all-layers          Also export all 24 MERT block features
+  --render-audio
+  --render-score [RENDER_SCORE]
+                        pdf,svg,png (default: pdf)
+  --render-parts RENDER_PARTS
+                        mix,melody,vocal,instrumental,chords,all
+  --local-files-only
