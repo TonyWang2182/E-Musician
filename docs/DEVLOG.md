@@ -8000,3 +8000,12 @@ print('PASS: unchanged baseline, 2 exact new cache files, both absent preference
 - 清理仅涉及当前备份目录7个已验证临时文件。第一次PowerShell数组组成了一个无效路径，没有成功删除；不可靠的第一次清理回执另存并明确作废。修正后先逐一验证绝对路径/类型，再删除并确认最终归档存在，详见备份目录cleanup-result.json。
 - 最终253个应用/脚本源码输入与验收指纹完全一致，收尾只更新文档和证据。原始归档、receipt、verification、续传方案与脚本均在 `E:/MusicAgent&DAW/cloud-inference/backups/20261106T080515Z-7fa9b891`。云端模型/服务/实例保持，后续新数据需下次备份。
 - 用户可立即打开0.12手动测试；补齐插入位置冻结、试听设备/停止播放、确认前不增轨和工程资产成组保存说明。尚未确认真实鼠标/IME/ASIO/听感，也未演练跨实例恢复；YuE2与MIR升级不属于本批完成项。
+
+### 2026-11-06T17:17:22+08:00 · cloud-generation-local-preservation · succeeded
+
+- Config: Release; exit code: 0; elapsed: 5.428s.
+- Command: `C:\Python314\python.exe build-logs/prepare_cloud_generation_release.py`
+- Context: Preserve 0.12 EXE/PDB/entrypoints and tracked source bytes at finalized evidence commit; verify all 253 source hashes and ZIP CRC. Not a portable installer or a new application build.
+- Source SHA-256: `ebdfea33db3961af998df283ab6599d56e5736315039901561ff63def288c789`; Git HEAD: `86fb3c5d4993dc5b4eb05516366957adbf060a05`.
+- [Record](builds/20261106T091722.230304Z-af327ca9e3.json) · [Raw log](../build-logs/20261106T091722.230304Z-af327ca9e3.log)
+- [Exact process output](../build-logs/20261106T091722.230304Z-af327ca9e3.raw.log)
