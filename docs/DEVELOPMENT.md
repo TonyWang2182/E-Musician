@@ -1,5 +1,15 @@
 # E-musician 开发计划
 
+## MuScriptor medium 授权部署（2026-11-06）
+
+- [x] 用户read token官方固定权重权限核验；云端私有凭据与离线推理隔离，未代接受条款。
+- [x] 同revision medium权重和config经官方源有界RAM中转到云盘，文件大小/SHA/Git blob核验，无本地模型文件。
+- [x] CPU全参数finite/设备验证及一次8秒GPU转录/MIDI输出通过；8项守护与7组接收故障检查。
+- [x] 中央catalog、版本、原始失败、部署/资源记录更新；旧模型及DAW不变。
+- [ ] MuScriptor整曲/多乐器准确率、商业许可及后续DAW/Agent适配器独立验收。
+
+依据见[本轮结果](review/2026-11-06-muscriptor-authorized/RESULTS.md)。
+
 ## 原文件 MIR 评测（2026-11-06）
 
 - [x] New Light与用户明确指定的Keyboard原文件上传、SHA校验；保留完整218.305/279.031秒。
@@ -21,12 +31,12 @@
 
 范围见[测试计划](review/2026-11-06-jungle-generation/PLAN.md)。
 
-## 云端模型库（2026-11-06，五模型短推理已验，MuScriptor 权重受阻）
+## 云端模型库首次部署（2026-11-06；原MuScriptor权限阻断已在后续解除）
 
 - [x] 独立分支与模型目录/文件归属、状态契约；禁止本轮DAW接入和E盘权重备份。
 - [x] YuE2、SCNet、TransKun、ChordMini、SheetSage2精确文件、独立环境、真实CPU加载及GPU短推理。
 - [x] MuScriptor访问条件和公共源码/环境/CLI验证。
-- [ ] MuScriptor权重及真实推理：匿名401，需要模型访问授权，未下载权重。
+- [x] MuScriptor权重及真实短推理：后续获用户令牌授权，medium文件/CPU/8秒GPU通过，见上方本轮部署；原匿名401记录保留。
 - [x] 云端可运行入口、各自验收状态和小型证据；原始失败与修复均保留。
 - [x] 六模型汇总清单通过、云盘剩余166.71GB；ACE健康和三项环境哈希保持。架构边界、成功/失败记录与固定版本纳入独立分支。
 - [ ] 后续独立任务：多素材质量/长曲、完整歌曲、统一GPU调度及DAW/Agent接入；本轮不做E盘大文件备份。

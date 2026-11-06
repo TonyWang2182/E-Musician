@@ -1,0 +1,281 @@
+{
+  "id": "muscriptor",
+  "task": "multi_instrument_transcription",
+  "source_revision": "8a1ef88672cc23c26619adaff37ec48d82c0b906",
+  "model_revisions": {
+    "medium": "f32236969308476e01fd3aae67357de5feb05a2d"
+  },
+  "paths": {
+    "model": "/root/autodl-tmp/emusician/models/muscriptor",
+    "environment": "/root/autodl-tmp/emusician/envs/muscriptor",
+    "source": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source",
+    "weights": "/root/autodl-tmp/emusician/models/muscriptor/model.safetensors",
+    "config": "/root/autodl-tmp/emusician/models/muscriptor/config.json"
+  },
+  "checks": {
+    "files_verified": true,
+    "environment_verified": true,
+    "cpu_load_verified": true,
+    "gpu_inference_verified": true
+  },
+  "daw_connected": false,
+  "blockers": [],
+  "artifacts": [
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/LICENSE",
+      "bytes": 1072,
+      "sha256": "317d9d7fcf4d2bf24136b6510336cb76fef52c873e72339fb29596934387278b"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/README.md",
+      "bytes": 8164,
+      "sha256": "f23863808368968194621aee582d687f277c1ac3b3a13dcb1d87ebca02c8833b"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/__init__.py",
+      "bytes": 292,
+      "sha256": "b1e246a7ee3469051ee5ecde51331e882862d445c0c055334ccd1cb1cace6fb4"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/__main__.py",
+      "bytes": 41,
+      "sha256": "1d7d81d3aa327231dc4a8f8e4c901485f4fc384be4ae4199635a98a8ba67cd86"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/accelerator.py",
+      "bytes": 2278,
+      "sha256": "1bc8001093c7fbc888191fc649c874c238d3966b3363d6458833157761ae40e5"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/events.py",
+      "bytes": 10958,
+      "sha256": "55f3c2239ebcfb68ab06158f46b97944501e922ddfe180073068ab3162be9171"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/main.py",
+      "bytes": 20119,
+      "sha256": "ced2b5da8ac558a5ec388717d9077eda762dd55b2443197f8ad68617e496c33d"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/models/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/models/lm.py",
+      "bytes": 20242,
+      "sha256": "8600f40d7b5242b37d0db5dbf16eddde6b493d2243ac4177bc86750bcea554a2"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/modules/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/modules/conditioners.py",
+      "bytes": 10693,
+      "sha256": "2f545e600f8a1f64b750ccb31363f1782098bbf5c6c35b7f0945011382a82892"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/modules/mel_spectrogram.py",
+      "bytes": 3299,
+      "sha256": "d456f638758f0e980dc21403db2342ec3f26647e9bf4d7f44110dabd8b867473"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/modules/streaming.py",
+      "bytes": 2548,
+      "sha256": "d03a1587e8546ab0c1aa22217b8ddfd77ebcbac70a347b1c1494bb7a1b08e68a"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/modules/transformer.py",
+      "bytes": 7853,
+      "sha256": "34959ace4333e6dcc675a1e20c03eb8ece4bf42f5508343a0f7f1417632ce171"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/server.py",
+      "bytes": 27170,
+      "sha256": "efb5bb65a9ed2739f6d3fce1c15bcfb840504fd120bd72d169a5f96a3aa5f273"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/soundfonts.py",
+      "bytes": 982,
+      "sha256": "61ce8459a4a578f8bff12f73a86b5df877ed377587098852c8b9ff564786666d"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/tokenizer/__init__.py",
+      "bytes": 102,
+      "sha256": "2d48a58c0a8e006176d7c0ccf11a684dc5e7505baff46417ba476bb1c5868883"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/tokenizer/mt3.py",
+      "bytes": 10569,
+      "sha256": "c37c7d9b101f6498bf8cf5964ab90df8b4df59f2e9960a192ed43b7fa9ae4a62"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/tokenizer/notes.py",
+      "bytes": 14551,
+      "sha256": "c8ddbaab0d6db7f7eb9886d2adf17052c6d643c95ac1db6421dfa9f0effa2a84"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/transcription_model.py",
+      "bytes": 32737,
+      "sha256": "1f12a7da7b12b876eb6104823a63629f12b60ef0570b52f5da93239c414e7f30"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/utils/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/utils/audio.py",
+      "bytes": 3818,
+      "sha256": "821ceead9f6350e30e0e6019f2fa2475a5c7573118dfbac721778a76b970d858"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/utils/auralization.py",
+      "bytes": 6299,
+      "sha256": "464563d7b76c2802f2685dd5a75cd0ad9ad2bbf6ebd65d31ea76373b09dc1806"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/utils/beats.py",
+      "bytes": 16436,
+      "sha256": "463cdfabc65a7fe2b2a0d2437f3bcfee9c0f6412a126375ffac3b3fb7de98c4f"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/utils/download.py",
+      "bytes": 4646,
+      "sha256": "d17e5489584c92c9003f83f248a7715746f399318b5d917465eb3836767aed4f"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/utils/midi.py",
+      "bytes": 19159,
+      "sha256": "42b9565d1f965a6102d9f3befdc778afca4554e958c9e047382552842e3aded2"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/utils/resample.py",
+      "bytes": 8039,
+      "sha256": "2b2a5bcae17334663007f98195837b0b35d4e55e0d44b8019e4bf21014025487"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/utils/sampling.py",
+      "bytes": 3380,
+      "sha256": "b0db94505b713f004aaabd613047e66cfd9e8cfc120ad69e9d96abc1236e36b2"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/utils/sheets.py",
+      "bytes": 17546,
+      "sha256": "75eb4a6e72c62d12827ad16c11d7bf2d643939724eaa5cac0ead8bee077087bf"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source/pyproject.toml",
+      "bytes": 2633,
+      "sha256": "dd75723daf22e504173b86b3305c22a72c123d81f4a271180c49fc0882b9a312"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/manifests/model-library/muscriptor/cli-help.txt",
+      "bytes": 23149,
+      "sha256": "79ff0ef6ba12a80e89dfd1ce9a8f21eab9f6646dac0b28e711e6d25a4510be00"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/manifests/model-library/muscriptor/environment.freeze.txt",
+      "bytes": 1839,
+      "sha256": "5df9b80012d454bfb610181c1a8373d18f7c7ee687f69afc11d2bc5f9f70d0af"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/manifests/model-library/muscriptor/environment.lock.txt",
+      "bytes": 100227,
+      "sha256": "ed84e189febdaf9995abbc48cc09207569f061ddc720058455acbf066d8a55e3"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/artifacts.json",
+      "bytes": 23518,
+      "sha256": "4b66b7d4fb94d08621066e7bf2979b6266c741b6c57a12662e6dca79872d259c"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/stage-cpu-v2.py",
+      "bytes": 11319,
+      "sha256": "cf60cc08e01682b262198b04a6f9bfb33e293e4fb21d2d350ac3a850576f29f2"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/finalize-20261106.sh",
+      "bytes": 1484,
+      "sha256": "9d07f9f49f00fb4982bc77dfc81e2a14fbaf44df8ccafed4f33aad4a575785c0"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/muscriptor/model.safetensors",
+      "bytes": 1228144472,
+      "sha256": "ac80adbdf85d87231735fd948af7013441c0afced316c4e9067fd5d8a7fb97ec"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/models/muscriptor/config.json",
+      "bytes": 126,
+      "sha256": "43e13a70fc9ae0af36b7447c06f3eac2282daeb69d79c1ff840ede7fdaa26a3b"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/results/muscriptor-authorized/cpu-20261106T134345Z-a573f284/guard.json",
+      "bytes": 1930,
+      "sha256": "f39deef69cad259a9be156278bcbffa5e992e449a88ffa4b64569db1c6f74d5e"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/results/muscriptor-authorized/cpu-20261106T134345Z-a573f284/result.json",
+      "bytes": 1171,
+      "sha256": "74f1779baeac45c84bffcb4bb2008ee35e46abe29dceee93603f2f0544534f95"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/results/muscriptor-authorized/gpu-20261106T134439Z-c8402e6a/guard.json",
+      "bytes": 4038,
+      "sha256": "462a200306f6f0ee16e3704f50e8d7f88cb3bcdd361950d0a3b9fb2d29b95e16"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/results/muscriptor-authorized/gpu-20261106T134439Z-c8402e6a/result.json",
+      "bytes": 3023,
+      "sha256": "df0dbec11850686a7c498f26573e695d462294c4bae86aec728afb4ad88bd855"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/manifests/model-library/muscriptor/authorized-access.json",
+      "bytes": 294,
+      "sha256": "0b0dcf4b2a6f62324ca5ee639b209320b04d45b1b25fabc243d66c3954d32dba"
+    },
+    {
+      "path": "/root/autodl-tmp/emusician/manifests/model-library/muscriptor/authorized-relay.json",
+      "bytes": 1104,
+      "sha256": "7eec6756f1cbd8b96fbab8c9edbcf801fbf7f4d94ee0a110076ea94476491f9e"
+    }
+  ],
+  "license": "CC-BY-NC-4.0 model weights; public source terms retained",
+  "velocity_limitation": "Not inferred; upstream MIDI default 100",
+  "stage_started_utc": "2026-11-06T10:14:25Z",
+  "updated_utc": "2026-11-06T13:45:24Z",
+  "cloud_free_bytes": 164741120000,
+  "source_files_verified": true,
+  "anonymous_weight_head_status": 401,
+  "cpu_load_seconds": 1.3531305193901062,
+  "upstream_cli_help_verified": true,
+  "cuda_initialized": false,
+  "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+  "torch": "2.10.0+cu128",
+  "entrypoints": {
+    "cpu_verifier": "/root/autodl-tmp/emusician/workspace/models/sheetsage2/deploy/stage-cpu-v2.py",
+    "guarded_probe": "/root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-4e17cf2f94b6/probe.py"
+  },
+  "retained_limitations": [
+    "Medium only; large not downloaded",
+    "One8second fixture only; no real-song transcription accuracy acceptance",
+    "MIDI default velocity100 is not measured dynamics; default120BPM metadata is not detected tempo",
+    "CC-BY-NC-4.0 model weights; separate commercial permission required",
+    "No DAW/Agent integration; existing services unchanged"
+  ],
+  "authorized_weight_access_verified": true,
+  "authorization_evidence": "/root/autodl-tmp/emusician/manifests/model-library/muscriptor/authorized-access.json",
+  "gpu_verified_scope": "Exactly first8seconds of Keyboard.mp3, two native5s chunks; structural MIDI checks only, no full-song or accuracy acceptance",
+  "gpu_probe": {
+    "receipt": "/root/autodl-tmp/emusician/results/muscriptor-authorized/gpu-20261106T134439Z-c8402e6a/guard.json",
+    "result": "/root/autodl-tmp/emusician/results/muscriptor-authorized/gpu-20261106T134439Z-c8402e6a/result.json"
+  },
+  "cpu_probe": {
+    "receipt": "/root/autodl-tmp/emusician/results/muscriptor-authorized/cpu-20261106T134345Z-a573f284/guard.json",
+    "result": "/root/autodl-tmp/emusician/results/muscriptor-authorized/cpu-20261106T134345Z-a573f284/result.json"
+  },
+  "parameter_count": 306503680,
+  "download_route": "Official HF HTTPS through bounded local RAM directly into SSH cloud receiver; no local weights file"
+}

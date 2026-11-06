@@ -1,0 +1,35 @@
+{
+  "model": "MuScriptor/muscriptor-medium",
+  "revision": "f32236969308476e01fd3aae67357de5feb05a2d",
+  "status": "passed",
+  "files": [
+    {
+      "status": "passed",
+      "path": "/root/autodl-tmp/emusician/models/muscriptor/config.json",
+      "bytes": 126,
+      "sha256": "43e13a70fc9ae0af36b7447c06f3eac2282daeb69d79c1ff840ede7fdaa26a3b",
+      "published": true
+    },
+    {
+      "status": "passed",
+      "path": "/root/autodl-tmp/emusician/models/muscriptor/model.safetensors",
+      "bytes": 1228144472,
+      "sha256": "ac80adbdf85d87231735fd948af7013441c0afced316c4e9067fd5d8a7fb97ec",
+      "published": true
+    }
+  ],
+  "local_model_files_written": false,
+  "chunk_bytes": 1048576,
+  "phase": "complete",
+  "script_sha256": "445e461db022cfac2e06f97890368c7b943552f870b612c06a8e26d30a4f91fe",
+  "config": {
+    "model_type": "muscriptor",
+    "variant": "medium",
+    "dim": 1024,
+    "num_heads": 16,
+    "num_layers": 24,
+    "card": 1395
+  },
+  "config_git_blob": "3862558703a8c30630ff1149b58e2f070179c774",
+  "elapsed_seconds": 278.837912899995
+}

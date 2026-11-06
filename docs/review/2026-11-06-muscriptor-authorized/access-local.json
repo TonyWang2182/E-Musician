@@ -1,0 +1,10 @@
+{
+  "model": "MuScriptor/muscriptor-medium",
+  "revision": "f32236969308476e01fd3aae67357de5feb05a2d",
+  "weight_access": true,
+  "credential_saved": true,
+  "endpoint": "https://huggingface.co",
+  "terms_accepted_by_agent": false,
+  "http_status": 302,
+  "credential_mode": "0600"
+}

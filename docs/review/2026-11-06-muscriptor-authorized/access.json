@@ -1,0 +1,11 @@
+{
+  "model": "MuScriptor/muscriptor-medium",
+  "revision": "f32236969308476e01fd3aae67357de5feb05a2d",
+  "token_valid": false,
+  "weight_access": false,
+  "credential_saved": false,
+  "terms_accepted_by_agent": false,
+  "error_type": "HfHubHTTPError",
+  "http_status": 503,
+  "reason": "Authenticated access not established; no terms accepted or access controls bypassed"
+}

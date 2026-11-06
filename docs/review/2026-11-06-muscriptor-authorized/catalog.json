@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "checked_utc": "2026-11-06T13:45:25.562193+00:00",
+  "scope": "cloud-only-deployment-evidence-not-a-service-registry",
+  "root": "/root/autodl-tmp/emusician",
+  "models": [
+    {
+      "id": "chordmini",
+      "task": "chords",
+      "level": "gpu-tested",
+      "checks": {
+        "files_verified": true,
+        "environment_verified": true,
+        "cpu_load_verified": true,
+        "gpu_inference_verified": true
+      },
+      "verification_scope": "See deployment record and probe evidence",
+      "daw_connected": false,
+      "blockers": [
+        "Independent quality/accuracy evaluation and long-audio load tests not performed",
+        "DAW integration not authorized in this phase"
+      ],
+      "source_revision": "aa6e3a8d7b017f082fd2aaff9329d5c26af49c03",
+      "model_revisions": {
+        "revision": "aa6e3a8d7b017f082fd2aaff9329d5c26af49c03",
+        "sha256": "e0a12ca6d881f81e01dfb459b4836ec7dac8d8f87b0170a412b5807256b3a1fc"
+      },
+      "paths": {
+        "model": "/root/autodl-tmp/emusician/models/chordmini/aa6e3a8d7b017f082fd2aaff9329d5c26af49c03",
+        "environment": "/root/autodl-tmp/emusician/envs/chordmini",
+        "source": "/root/autodl-tmp/emusician/workspace/models/chordmini-aa6e3a8d7b017f082fd2aaff9329d5c26af49c03"
+      },
+      "deployment_record": "/root/autodl-tmp/emusician/manifests/model-library/chordmini/deployment.json"
+    },
+    {
+      "id": "muscriptor",
+      "task": "multi_instrument_transcription",
+      "level": "gpu-tested",
+      "checks": {
+        "files_verified": true,
+        "environment_verified": true,
+        "cpu_load_verified": true,
+        "gpu_inference_verified": true
+      },
+      "verification_scope": "Exactly first8seconds of Keyboard.mp3, two native5s chunks; structural MIDI checks only, no full-song or accuracy acceptance",
+      "daw_connected": false,
+      "blockers": [],
+      "source_revision": "8a1ef88672cc23c26619adaff37ec48d82c0b906",
+      "model_revisions": {
+        "medium": "f32236969308476e01fd3aae67357de5feb05a2d"
+      },
+      "paths": {
+        "model": "/root/autodl-tmp/emusician/models/muscriptor",
+        "environment": "/root/autodl-tmp/emusician/envs/muscriptor",
+        "source": "/root/autodl-tmp/emusician/workspace/models/muscriptor/source",
+        "weights": "/root/autodl-tmp/emusician/models/muscriptor/model.safetensors",
+        "config": "/root/autodl-tmp/emusician/models/muscriptor/config.json"
+      },
+      "deployment_record": "/root/autodl-tmp/emusician/manifests/model-library/muscriptor/deployment.json"
+    },
+    {
+      "id": "scnet",
+      "task": "separate",
+      "level": "gpu-tested",
+      "checks": {
+        "files_verified": true,
+        "environment_verified": true,
+        "cpu_load_verified": true,
+        "gpu_inference_verified": true
+      },
+      "verification_scope": "See deployment record and probe evidence",
+      "daw_connected": false,
+      "blockers": [
+        "Independent quality/accuracy evaluation and long-audio load tests not performed",
+        "DAW integration not authorized in this phase"
+      ],
+      "source_revision": "a8a862231de29e6832a26c590e5c29f82f736f66",
+      "model_revisions": {
+        "revision": "v1.0.15",
+        "sha256": "ac25975f0f5704f3d1a3c3c251505b7a0f417a22eafe82773440ee4f7e14b74f"
+      },
+      "paths": {
+        "model": "/root/autodl-tmp/emusician/models/scnet/a8a862231de29e6832a26c590e5c29f82f736f66",
+        "environment": "/root/autodl-tmp/emusician/envs/scnet",
+        "source": "/root/autodl-tmp/emusician/workspace/models/scnet-a8a862231de29e6832a26c590e5c29f82f736f66"
+      },
+      "deployment_record": "/root/autodl-tmp/emusician/manifests/model-library/scnet/deployment.json"
+    },
+    {
+      "id": "sheetsage2",
+      "task": "lead_sheet_transcription",
+      "level": "gpu-tested",
+      "checks": {
+        "files_verified": true,
+        "environment_verified": true,
+        "cpu_load_verified": true,
+        "gpu_inference_verified": true
+      },
+      "verification_scope": "See deployment record and probe evidence",
+      "daw_connected": false,
+      "blockers": [],
+      "source_revision": "b83c3d79a6d98bcffaf8f9ed112c90aa887887bc",
+      "model_revisions": {
+        "sheetsage2": "b83c3d79a6d98bcffaf8f9ed112c90aa887887bc",
+        "mert2": "d8ba1c745e733b3908ce6ad16ebeb17ac7600a42"
+      },
+      "paths": {
+        "model": "/root/autodl-tmp/emusician/models/sheetsage2",
+        "environment": "/root/autodl-tmp/emusician/envs/sheetsage2",
+        "source": "/root/autodl-tmp/emusician/models/sheetsage2",
+        "parent_model": "/root/autodl-tmp/emusician/models/mert2"
+      },
+      "deployment_record": "/root/autodl-tmp/emusician/manifests/model-library/sheetsage2/deployment.json"
+    },
+    {
+      "id": "transkun",
+      "task": "piano_transcription",
+      "level": "gpu-tested",
+      "checks": {
+        "files_verified": true,
+        "environment_verified": true,
+        "cpu_load_verified": true,
+        "gpu_inference_verified": true
+      },
+      "verification_scope": "See deployment record and probe evidence",
+      "daw_connected": false,
+      "blockers": [
+        "Independent quality/accuracy evaluation and long-audio load tests not performed",
+        "DAW integration not authorized in this phase"
+      ],
+      "source_revision": "c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6",
+      "model_revisions": {
+        "revision": "c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6",
+        "sha256": "50a80010effc2a59ffcd068a95cd2b29bd7f23a27a3515bc3ccd209c89a3d44c"
+      },
+      "paths": {
+        "model": "/root/autodl-tmp/emusician/models/transkun/c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6",
+        "environment": "/root/autodl-tmp/emusician/envs/transkun",
+        "source": "/root/autodl-tmp/emusician/workspace/models/transkun-c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6"
+      },
+      "deployment_record": "/root/autodl-tmp/emusician/manifests/model-library/transkun/deployment.json"
+    },
+    {
+      "id": "yue2",
+      "task": "music_generation",
+      "level": "gpu-tested",
+      "checks": {
+        "files_verified": true,
+        "environment_verified": true,
+        "cpu_load_verified": true,
+        "gpu_inference_verified": true
+      },
+      "verification_scope": "official low_vram, budget8GiB, torch-eager, one short cot-off instrumental request",
+      "daw_connected": false,
+      "blockers": [
+        "Default24GiB/full-song/symbolic-plan GPU path has not been validated."
+      ],
+      "source_revision": "1116bea76032bee5668e5f097294d082fa0b84f0",
+      "model_revisions": {
+        "m-a-p/YuE2-3B": "8f24312f187763b9854adeec87e437e2b03bbff1",
+        "m-a-p/YuE2-Vae": "152733a19ad43aa67e367f9b5503ef8075bb5126"
+      },
+      "paths": {
+        "model": {
+          "mot": "/root/autodl-tmp/emusician/models/yue2/YuE2-3B/8f24312f187763b9854adeec87e437e2b03bbff1",
+          "vae": "/root/autodl-tmp/emusician/models/yue2/YuE2-Vae/152733a19ad43aa67e367f9b5503ef8075bb5126"
+        },
+        "environment": "/root/autodl-tmp/emusician/envs/yue2",
+        "source": "/root/autodl-tmp/emusician/workspace/models/yue2/YuE-1116bea76032bee5668e5f097294d082fa0b84f0",
+        "cli": "/root/autodl-tmp/emusician/workspace/models/yue2/run.sh"
+      },
+      "deployment_record": "/root/autodl-tmp/emusician/manifests/model-library/yue2/deployment.json"
+    }
+  ],
+  "errors": [],
+  "legacy_manifests": [
+    "/root/autodl-tmp/emusician/manifests/ace-runtime.json",
+    "/root/autodl-tmp/emusician/manifests/mir-stage-status.json"
+  ],
+  "disk_bytes": {
+    "total": 268435456000,
+    "used": 103694340096,
+    "free": 164741115904
+  },
+  "minimum_free_budget_bytes": 50000000000,
+  "minimum_free_budget_satisfied": true,
+  "model_data_copied_by_this_tool": false,
+  "service_activation_performed": false
+}

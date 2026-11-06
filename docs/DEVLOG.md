@@ -10483,3 +10483,471 @@ print('preflight failure preserved; frozen script SHA matches all three actual r
 - 云端原始ZIP为308,835,729字节、38文件，整包及逐成员CRC/SHA通过。本地仅脚本和小证据，没有改动DAW或现有模型服务；257个DAW构建输入逐文件不变。
 - 20项CPU检查通过；SCNet首次CPU前检笔误、一次SSH reset、最终审查字段KeyError均保留，修正后通过，没有因此重复模型推理。
 - 版本、参数、输入身份、耗时边界、MuScriptor访问步骤和人工检查范围见 [本次结果](review/2026-11-06-real-audio/RESULTS.md) / [验证](review/2026-11-06-real-audio/VERIFICATION.json)。
+
+### 2026-11-06T21:20:48+08:00 · muscriptor-pinned-source-review · succeeded
+
+- Config: cloud/read-only; exit code: 0; elapsed: 1.293s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "grep -n -A110 'def load_model' /root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/transcription_model.py"`
+- Context: Read public source only; no credentials, no HF network, no model loading
+- Source SHA-256: `360975e6736f6f9d1607a1968adc55fa6f02a8a5087a4ddc81438f63f5c48e0a`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132048.020709Z-6241c908b5.json) · [Raw log](../build-logs/20261106T132048.020709Z-6241c908b5.log)
+- [Exact process output](../build-logs/20261106T132048.020709Z-6241c908b5.raw.log)
+
+### 2026-11-06T21:20:49+08:00 · muscriptor-pinned-source-review · succeeded
+
+- Config: cloud/read-only; exit code: 0; elapsed: 2.061s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "cat /root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/utils/download.py"`
+- Context: Read public source only; no credentials, no HF network, no model loading
+- Source SHA-256: `360975e6736f6f9d1607a1968adc55fa6f02a8a5087a4ddc81438f63f5c48e0a`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132049.727820Z-d808d63c7a.json) · [Raw log](../build-logs/20261106T132049.727820Z-d808d63c7a.log)
+- [Exact process output](../build-logs/20261106T132049.727820Z-d808d63c7a.raw.log)
+
+### 2026-11-06T21:20:52+08:00 · muscriptor-pinned-source-review · succeeded
+
+- Config: cloud/read-only; exit code: 0; elapsed: 2.485s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "grep -n -A40 -B4 'medium' /root/autodl-tmp/emusician/workspace/models/muscriptor/source/README.md"`
+- Context: Read public source only; no credentials, no HF network, no model loading
+- Source SHA-256: `360975e6736f6f9d1607a1968adc55fa6f02a8a5087a4ddc81438f63f5c48e0a`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132052.336662Z-e84aa5ee85.json) · [Raw log](../build-logs/20261106T132052.336662Z-e84aa5ee85.log)
+- [Exact process output](../build-logs/20261106T132052.336662Z-e84aa5ee85.raw.log)
+
+### 2026-11-06T21:21:07+08:00 · muscriptor-config-source-review · succeeded
+
+- Config: cloud/read-only; exit code: 0; elapsed: 1.655s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "sed -n '1,235p' /root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/transcription_model.py"`
+- Context: Inspect public local config resolution and model declarations only; no credentials or GPU
+- Source SHA-256: `360975e6736f6f9d1607a1968adc55fa6f02a8a5087a4ddc81438f63f5c48e0a`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132107.415420Z-02d44d3006.json) · [Raw log](../build-logs/20261106T132107.415420Z-02d44d3006.log)
+- [Exact process output](../build-logs/20261106T132107.415420Z-02d44d3006.raw.log)
+
+### 2026-11-06T21:21:24+08:00 · muscriptor-auth-stage · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 1.694s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-authorized-v1"`
+- Context: Stage credential-free authentication helper; no token present.
+- Source SHA-256: `cc3e10b565853ae24e0baf1f0e8a68e4d06be9bda4d91d85f59cdf33bdad7b10`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132124.449827Z-4b609222f0.json) · [Raw log](../build-logs/20261106T132124.449827Z-4b609222f0.log)
+- [Exact process output](../build-logs/20261106T132124.449827Z-4b609222f0.raw.log)
+
+### 2026-11-06T21:21:26+08:00 · muscriptor-auth-stage · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 2.877s.
+- Command: `scp scripts/cloud/models/muscriptor_authorized/auth.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-authorized-v1/auth.py`
+- Context: Stage credential-free authentication helper; no token present.
+- Source SHA-256: `cc3e10b565853ae24e0baf1f0e8a68e4d06be9bda4d91d85f59cdf33bdad7b10`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132126.594204Z-7f3c4c7fd9.json) · [Raw log](../build-logs/20261106T132126.594204Z-7f3c4c7fd9.log)
+- [Exact process output](../build-logs/20261106T132126.594204Z-7f3c4c7fd9.raw.log)
+
+### 2026-11-06T21:21:52+08:00 · muscriptor-authorized-access · failed
+
+- Config: cloud/Linux;local/hidden-console-input; exit code: 1; elapsed: 90.774s.
+- Command: `ssh -T -o BatchMode=yes -o ConnectTimeout=10 emusician-autodl "/root/autodl-tmp/emusician/envs/muscriptor/bin/python /root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-authorized-v1/auth.py"`
+- Context: Read token via hidden input and SSH stdin; no token in argv, logs, Git or local files. No terms acceptance.
+- Source SHA-256: `cc3e10b565853ae24e0baf1f0e8a68e4d06be9bda4d91d85f59cdf33bdad7b10`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132152.960293Z-2da88b6062.json) · [Raw log](../build-logs/20261106T132152.960293Z-2da88b6062.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: TimeoutExpired
+
+### 2026-11-06T21:24:59+08:00 · muscriptor-authorized-probe-prepare · succeeded
+
+- Config: cloud/Linux/CPU; no weights load or CUDA; exit code: 0; elapsed: 2.151s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-7664a74111d4"`
+- Context: Stage immutable authorized-medium probe and run CPU-only lifecycle tests. No credentials or model downloads.
+- Source SHA-256: `6c21e6143ef0bb42f8d3581c0ad426f533b649677601e1b33ea84f338691e56c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132459.201277Z-0854d9c8d7.json) · [Raw log](../build-logs/20261106T132459.201277Z-0854d9c8d7.log)
+- [Exact process output](../build-logs/20261106T132459.201277Z-0854d9c8d7.raw.log)
+
+### 2026-11-06T21:25:03+08:00 · muscriptor-auth-network-diagnosis · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 2.438s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python -c 'from pathlib import Path;import os,signal; p=Path('\"'\"'/proc/21465/cmdline'\"'\"'); expected=b'\"'\"'/root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-authorized-v1/auth.py'\"'\"'; exists=p.exists(); match=exists and expected in p.read_bytes().split(bytes([0])); print({'\"'\"'owned_auth_process'\"'\"':match}); os.kill(21465,signal.SIGTERM) if match else None; print({'\"'\"'credential_present'\"'\"':Path('\"'\"'/root/autodl-tmp/emusician/workspace/models/muscriptor/hf/token'\"'\"').is_file()})'"`
+- Context: First authenticated request timed out before a status; terminate only matching owned auth process, then inspect public connectivity without credentials.
+- Source SHA-256: `6c21e6143ef0bb42f8d3581c0ad426f533b649677601e1b33ea84f338691e56c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132503.060362Z-d0bc1dae1d.json) · [Raw log](../build-logs/20261106T132503.060362Z-d0bc1dae1d.log)
+- [Exact process output](../build-logs/20261106T132503.060362Z-d0bc1dae1d.raw.log)
+
+### 2026-11-06T21:25:01+08:00 · muscriptor-authorized-probe-prepare · succeeded
+
+- Config: cloud/Linux/CPU; no weights load or CUDA; exit code: 0; elapsed: 3.500s.
+- Command: `scp scripts/cloud/models/muscriptor_authorized/auth.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-7664a74111d4/auth.py`
+- Context: Stage immutable authorized-medium probe and run CPU-only lifecycle tests. No credentials or model downloads.
+- Source SHA-256: `6c21e6143ef0bb42f8d3581c0ad426f533b649677601e1b33ea84f338691e56c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132501.924592Z-aff445862d.json) · [Raw log](../build-logs/20261106T132501.924592Z-aff445862d.log)
+- [Exact process output](../build-logs/20261106T132501.924592Z-aff445862d.raw.log)
+
+### 2026-11-06T21:25:06+08:00 · muscriptor-authorized-probe-prepare · succeeded
+
+- Config: cloud/Linux/CPU; no weights load or CUDA; exit code: 0; elapsed: 2.804s.
+- Command: `scp scripts/cloud/models/muscriptor_authorized/auth_local.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-7664a74111d4/auth_local.py`
+- Context: Stage immutable authorized-medium probe and run CPU-only lifecycle tests. No credentials or model downloads.
+- Source SHA-256: `6c21e6143ef0bb42f8d3581c0ad426f533b649677601e1b33ea84f338691e56c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132506.140308Z-eae5d3e09e.json) · [Raw log](../build-logs/20261106T132506.140308Z-eae5d3e09e.log)
+- [Exact process output](../build-logs/20261106T132506.140308Z-eae5d3e09e.raw.log)
+
+### 2026-11-06T21:25:09+08:00 · muscriptor-authorized-probe-prepare · succeeded
+
+- Config: cloud/Linux/CPU; no weights load or CUDA; exit code: 0; elapsed: 3.100s.
+- Command: `scp scripts/cloud/models/muscriptor_authorized/download.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-7664a74111d4/download.py`
+- Context: Stage immutable authorized-medium probe and run CPU-only lifecycle tests. No credentials or model downloads.
+- Source SHA-256: `6c21e6143ef0bb42f8d3581c0ad426f533b649677601e1b33ea84f338691e56c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132509.664035Z-620626d5cb.json) · [Raw log](../build-logs/20261106T132509.664035Z-620626d5cb.log)
+- [Exact process output](../build-logs/20261106T132509.664035Z-620626d5cb.raw.log)
+
+### 2026-11-06T21:25:13+08:00 · muscriptor-authorized-probe-prepare · succeeded
+
+- Config: cloud/Linux/CPU; no weights load or CUDA; exit code: 0; elapsed: 4.176s.
+- Command: `scp scripts/cloud/models/muscriptor_authorized/probe.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-7664a74111d4/probe.py`
+- Context: Stage immutable authorized-medium probe and run CPU-only lifecycle tests. No credentials or model downloads.
+- Source SHA-256: `6c21e6143ef0bb42f8d3581c0ad426f533b649677601e1b33ea84f338691e56c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132513.492453Z-eea6a9bd46.json) · [Raw log](../build-logs/20261106T132513.492453Z-eea6a9bd46.log)
+- [Exact process output](../build-logs/20261106T132513.492453Z-eea6a9bd46.raw.log)
+
+### 2026-11-06T21:25:18+08:00 · muscriptor-authorized-probe-prepare · succeeded
+
+- Config: cloud/Linux/CPU; no weights load or CUDA; exit code: 0; elapsed: 3.459s.
+- Command: `scp scripts/cloud/models/muscriptor_authorized/tests.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-7664a74111d4/tests.py`
+- Context: Stage immutable authorized-medium probe and run CPU-only lifecycle tests. No credentials or model downloads.
+- Source SHA-256: `6c21e6143ef0bb42f8d3581c0ad426f533b649677601e1b33ea84f338691e56c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132518.354644Z-598c199432.json) · [Raw log](../build-logs/20261106T132518.354644Z-598c199432.log)
+- [Exact process output](../build-logs/20261106T132518.354644Z-598c199432.raw.log)
+
+### 2026-11-06T21:25:22+08:00 · muscriptor-authorized-probe-prepare · succeeded
+
+- Config: cloud/Linux/CPU; no weights load or CUDA; exit code: 0; elapsed: 3.043s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-7664a74111d4/tests.py"`
+- Context: Stage immutable authorized-medium probe and run CPU-only lifecycle tests. No credentials or model downloads.
+- Source SHA-256: `6c21e6143ef0bb42f8d3581c0ad426f533b649677601e1b33ea84f338691e56c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132522.456237Z-66cc327634.json) · [Raw log](../build-logs/20261106T132522.456237Z-66cc327634.log)
+- [Exact process output](../build-logs/20261106T132522.456237Z-66cc327634.raw.log)
+
+### 2026-11-06T21:25:49+08:00 · muscriptor-auth-network-stage · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 1.677s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-authorized-v2"`
+- Context: Use existing network_turbo HTTPS route; explicitly pin HF official endpoint; never log proxy configuration or credentials.
+- Source SHA-256: `0b80874d8973d777ade2957a88b59336c188dac248913e6d85e9cb993c127d9c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132549.682628Z-0acda52c6d.json) · [Raw log](../build-logs/20261106T132549.682628Z-0acda52c6d.log)
+- [Exact process output](../build-logs/20261106T132549.682628Z-0acda52c6d.raw.log)
+
+### 2026-11-06T21:25:51+08:00 · muscriptor-auth-network-stage · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 2.769s.
+- Command: `scp scripts/cloud/models/muscriptor_authorized/auth.py scripts/cloud/models/muscriptor_authorized/download.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-authorized-v2/`
+- Context: Use existing network_turbo HTTPS route; explicitly pin HF official endpoint; never log proxy configuration or credentials.
+- Source SHA-256: `0b80874d8973d777ade2957a88b59336c188dac248913e6d85e9cb993c127d9c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132551.899745Z-4f92fc8982.json) · [Raw log](../build-logs/20261106T132551.899745Z-4f92fc8982.log)
+- [Exact process output](../build-logs/20261106T132551.899745Z-4f92fc8982.raw.log)
+
+### 2026-11-06T21:25:54+08:00 · muscriptor-authorized-probe-scope-correction · succeeded
+
+- Config: cloud/Linux/files only; no inference; exit code: 0; elapsed: 2.079s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-6fd8d00c55db"`
+- Context: Replace broad upload glob with explicit probe.py/tests.py allowlist. Remove only three accidental source copies in owned immutable staging directory; original root scripts and credential files untouched.
+- Source SHA-256: `0b80874d8973d777ade2957a88b59336c188dac248913e6d85e9cb993c127d9c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132554.984513Z-abf7ba8053.json) · [Raw log](../build-logs/20261106T132554.984513Z-abf7ba8053.log)
+- [Exact process output](../build-logs/20261106T132554.984513Z-abf7ba8053.raw.log)
+
+### 2026-11-06T21:25:57+08:00 · muscriptor-authorized-probe-scope-correction · succeeded
+
+- Config: cloud/Linux/files only; no inference; exit code: 0; elapsed: 2.919s.
+- Command: `scp scripts/cloud/models/muscriptor_authorized/probe.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-6fd8d00c55db/probe.py`
+- Context: Replace broad upload glob with explicit probe.py/tests.py allowlist. Remove only three accidental source copies in owned immutable staging directory; original root scripts and credential files untouched.
+- Source SHA-256: `0b80874d8973d777ade2957a88b59336c188dac248913e6d85e9cb993c127d9c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132557.567642Z-42d0094942.json) · [Raw log](../build-logs/20261106T132557.567642Z-42d0094942.log)
+- [Exact process output](../build-logs/20261106T132557.567642Z-42d0094942.raw.log)
+
+### 2026-11-06T21:26:01+08:00 · muscriptor-authorized-probe-scope-correction · succeeded
+
+- Config: cloud/Linux/files only; no inference; exit code: 0; elapsed: 2.347s.
+- Command: `scp scripts/cloud/models/muscriptor_authorized/tests.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-6fd8d00c55db/tests.py`
+- Context: Replace broad upload glob with explicit probe.py/tests.py allowlist. Remove only three accidental source copies in owned immutable staging directory; original root scripts and credential files untouched.
+- Source SHA-256: `0b80874d8973d777ade2957a88b59336c188dac248913e6d85e9cb993c127d9c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132601.250192Z-348b64ad0b.json) · [Raw log](../build-logs/20261106T132601.250192Z-348b64ad0b.log)
+- [Exact process output](../build-logs/20261106T132601.250192Z-348b64ad0b.raw.log)
+
+### 2026-11-06T21:26:04+08:00 · muscriptor-authorized-probe-scope-correction · succeeded
+
+- Config: cloud/Linux/files only; no inference; exit code: 0; elapsed: 2.454s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python -c 'from pathlib import Path;base=Path(\"/root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-7664a74111d4\").resolve();assert base.is_relative_to(Path(\"/root/autodl-tmp/emusician/workspace/models/muscriptor/probes\"));[(base/name).unlink() for name in (\"auth.py\",\"auth_local.py\",\"download.py\")];print(\"Removed three accidental source copies only\")'"`
+- Context: Replace broad upload glob with explicit probe.py/tests.py allowlist. Remove only three accidental source copies in owned immutable staging directory; original root scripts and credential files untouched.
+- Source SHA-256: `0b80874d8973d777ade2957a88b59336c188dac248913e6d85e9cb993c127d9c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132604.398270Z-cc45b58de8.json) · [Raw log](../build-logs/20261106T132604.398270Z-cc45b58de8.log)
+- [Exact process output](../build-logs/20261106T132604.398270Z-cc45b58de8.raw.log)
+
+### 2026-11-06T21:25:55+08:00 · muscriptor-auth-network-stage · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 14.174s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "source /etc/network_turbo >/dev/null 2>&1; /root/miniconda3/bin/python -c 'import urllib.request; r=urllib.request.urlopen('\"'\"'https://huggingface.co'\"'\"',timeout=15); print({'\"'\"'public_hf_http'\"'\"':r.status})'"`
+- Context: Use existing network_turbo HTTPS route; explicitly pin HF official endpoint; never log proxy configuration or credentials.
+- Source SHA-256: `0b80874d8973d777ade2957a88b59336c188dac248913e6d85e9cb993c127d9c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132555.344356Z-88b64e28ea.json) · [Raw log](../build-logs/20261106T132555.344356Z-88b64e28ea.log)
+- [Exact process output](../build-logs/20261106T132555.344356Z-88b64e28ea.raw.log)
+
+### 2026-11-06T21:26:25+08:00 · muscriptor-authorized-access · failed
+
+- Config: cloud/Linux;local/hidden-console-input; exit code: 1; elapsed: 25.554s.
+- Command: `ssh -T -o BatchMode=yes -o ConnectTimeout=10 emusician-autodl "source /etc/network_turbo >/dev/null 2>&1; export HF_ENDPOINT=https://huggingface.co; exec /root/autodl-tmp/emusician/envs/muscriptor/bin/python /root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-authorized-v2/auth.py"`
+- Context: Read token via hidden input and SSH stdin; no token in argv, logs, Git or local files. No terms acceptance.
+- Source SHA-256: `0b80874d8973d777ade2957a88b59336c188dac248913e6d85e9cb993c127d9c`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132625.146406Z-0e60e7475f.json) · [Raw log](../build-logs/20261106T132625.146406Z-0e60e7475f.log)
+
+### 2026-11-06T21:28:12+08:00 · muscriptor-local-auth-stage · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 2.108s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-authorized-v3"`
+- Context: Stage credential-free receiver; local verifies official gated file before any credential transfer.
+- Source SHA-256: `d427c3ae8c405acca3a310df34ef23fe9a874cea611c543dc698cd732b5438d1`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132812.669513Z-eadf860c1a.json) · [Raw log](../build-logs/20261106T132812.669513Z-eadf860c1a.log)
+- [Exact process output](../build-logs/20261106T132812.669513Z-eadf860c1a.raw.log)
+
+### 2026-11-06T21:28:15+08:00 · muscriptor-local-auth-stage · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 2.408s.
+- Command: `scp scripts/cloud/models/muscriptor_authorized/receive.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-authorized-v3/receive.py`
+- Context: Stage credential-free receiver; local verifies official gated file before any credential transfer.
+- Source SHA-256: `d427c3ae8c405acca3a310df34ef23fe9a874cea611c543dc698cd732b5438d1`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132815.173740Z-ce648ae05f.json) · [Raw log](../build-logs/20261106T132815.173740Z-ce648ae05f.log)
+- [Exact process output](../build-logs/20261106T132815.173740Z-ce648ae05f.raw.log)
+
+### 2026-11-06T21:28:41+08:00 · muscriptor-official-local-access · succeeded
+
+- Config: Windows/Python3.14 -> official HF HTTPS; exit code: 0; elapsed: 4.509s.
+- Command: `official-HF-gated-weight-HEAD credential-via-hidden-input`
+- Context: Cloud auth API503; local official HEAD, no cross-host Authorization redirects, approved credential to cloud SSH stdin only.
+- Source SHA-256: `d427c3ae8c405acca3a310df34ef23fe9a874cea611c543dc698cd732b5438d1`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132841.539228Z-58dcbb9ca1.json) · [Raw log](../build-logs/20261106T132841.539228Z-58dcbb9ca1.log)
+
+### 2026-11-06T21:29:05+08:00 · muscriptor-pinned-download · failed
+
+- Config: cloud/Linux/official-HF; exit code: 1; elapsed: 22.064s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=20 emusician-autodl "source /etc/network_turbo >/dev/null 2>&1; timeout 1800 /root/autodl-tmp/emusician/envs/muscriptor/bin/python /root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-authorized-v2/download.py"`
+- Context: Authorized read credential is private cloud file; download medium locked revision plus matching config only, hash verification, no token in command/log, no E audio/model download.
+- Source SHA-256: `d427c3ae8c405acca3a310df34ef23fe9a874cea611c543dc698cd732b5438d1`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T132905.758170Z-e80e671ea4.json) · [Raw log](../build-logs/20261106T132905.758170Z-e80e671ea4.log)
+- [Exact process output](../build-logs/20261106T132905.758170Z-e80e671ea4.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T132905.758170Z-e80e671ea4.log
+
+### 2026-11-06T21:30:11+08:00 · muscriptor-probe-readonly-review · succeeded
+
+- Config: cloud/Linux/read-only; exit code: 0; elapsed: 1.852s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "grep -n -A115 'def events_to_midi_bytes' /root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/transcription_model.py"`
+- Context: Inspect pinned public event/MIDI conversion code; no token, model load or inference.
+- Source SHA-256: `d427c3ae8c405acca3a310df34ef23fe9a874cea611c543dc698cd732b5438d1`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T133011.261628Z-2bfd94782a.json) · [Raw log](../build-logs/20261106T133011.261628Z-2bfd94782a.log)
+- [Exact process output](../build-logs/20261106T133011.261628Z-2bfd94782a.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T21:30:13+08:00 · muscriptor-probe-readonly-review · succeeded
+
+- Config: cloud/Linux/read-only; exit code: 0; elapsed: 1.822s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "cat /root/autodl-tmp/emusician/workspace/models/muscriptor/source/muscriptor/events.py"`
+- Context: Inspect pinned public event/MIDI conversion code; no token, model load or inference.
+- Source SHA-256: `111f7b8595a6aa7c39d6b7e540efad8f88823921a1187e1dd5aa89483f01a0b3`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T133013.508872Z-5ac4b485c8.json) · [Raw log](../build-logs/20261106T133013.508872Z-5ac4b485c8.log)
+- [Exact process output](../build-logs/20261106T133013.508872Z-5ac4b485c8.raw.log)
+
+### 2026-11-06T21:30:12+08:00 · muscriptor-direct-file-download · succeeded
+
+- Config: cloud/Linux/official-HF; exit code: 0; elapsed: 3.811s.
+- Command: `scp scripts/cloud/models/muscriptor_authorized/download_direct.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-authorized-v3/download_direct.py`
+- Context: Cloud model-info API returned503; try fixed-revision official file endpoints with verified model token. No token logged, no mirror or E weights.
+- Source SHA-256: `111f7b8595a6aa7c39d6b7e540efad8f88823921a1187e1dd5aa89483f01a0b3`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T133012.682360Z-100b73e8f8.json) · [Raw log](../build-logs/20261106T133012.682360Z-100b73e8f8.log)
+- [Exact process output](../build-logs/20261106T133012.682360Z-100b73e8f8.raw.log)
+
+### 2026-11-06T21:30:17+08:00 · muscriptor-direct-file-download · failed
+
+- Config: cloud/Linux/official-HF; exit code: 1; elapsed: 22.655s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=20 emusician-autodl "source /etc/network_turbo >/dev/null 2>&1; timeout 600 /root/autodl-tmp/emusician/envs/muscriptor/bin/python /root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-authorized-v3/download_direct.py"`
+- Context: Cloud model-info API returned503; try fixed-revision official file endpoints with verified model token. No token logged, no mirror or E weights.
+- Source SHA-256: `111f7b8595a6aa7c39d6b7e540efad8f88823921a1187e1dd5aa89483f01a0b3`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T133017.029564Z-f9150a778b.json) · [Raw log](../build-logs/20261106T133017.029564Z-f9150a778b.log)
+- [Exact process output](../build-logs/20261106T133017.029564Z-f9150a778b.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T133017.029564Z-f9150a778b.log
+
+### 2026-11-06T21:31:10+08:00 · muscriptor-authorized-probe-review-fix · succeeded
+
+- Config: cloud/Linux/CPU; no weights load or CUDA; exit code: 0; elapsed: 3.625s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-4e17cf2f94b6"`
+- Context: After independent review require nonempty note events and MIDI for this non-silent fixture. Freeze explicit two-file allowlist and repeat CPU-only guard checks; no inference.
+- Source SHA-256: `8d1afc88fac98e5d01d245ad3604b2166468ed9d63eb1404c6cffaba706bd873`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T133110.224655Z-d07a5cde4a.json) · [Raw log](../build-logs/20261106T133110.224655Z-d07a5cde4a.log)
+- [Exact process output](../build-logs/20261106T133110.224655Z-d07a5cde4a.raw.log)
+
+### 2026-11-06T21:31:14+08:00 · muscriptor-authorized-probe-review-fix · succeeded
+
+- Config: cloud/Linux/CPU; no weights load or CUDA; exit code: 0; elapsed: 2.915s.
+- Command: `scp scripts/cloud/models/muscriptor_authorized/probe.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-4e17cf2f94b6/probe.py`
+- Context: After independent review require nonempty note events and MIDI for this non-silent fixture. Freeze explicit two-file allowlist and repeat CPU-only guard checks; no inference.
+- Source SHA-256: `8d1afc88fac98e5d01d245ad3604b2166468ed9d63eb1404c6cffaba706bd873`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T133114.315123Z-5334c18a99.json) · [Raw log](../build-logs/20261106T133114.315123Z-5334c18a99.log)
+- [Exact process output](../build-logs/20261106T133114.315123Z-5334c18a99.raw.log)
+
+### 2026-11-06T21:31:17+08:00 · muscriptor-authorized-probe-review-fix · succeeded
+
+- Config: cloud/Linux/CPU; no weights load or CUDA; exit code: 0; elapsed: 2.376s.
+- Command: `scp scripts/cloud/models/muscriptor_authorized/tests.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-4e17cf2f94b6/tests.py`
+- Context: After independent review require nonempty note events and MIDI for this non-silent fixture. Freeze explicit two-file allowlist and repeat CPU-only guard checks; no inference.
+- Source SHA-256: `8d1afc88fac98e5d01d245ad3604b2166468ed9d63eb1404c6cffaba706bd873`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T133117.798500Z-0603831ba4.json) · [Raw log](../build-logs/20261106T133117.798500Z-0603831ba4.log)
+- [Exact process output](../build-logs/20261106T133117.798500Z-0603831ba4.raw.log)
+
+### 2026-11-06T21:31:20+08:00 · muscriptor-authorized-probe-review-fix · succeeded
+
+- Config: cloud/Linux/CPU; no weights load or CUDA; exit code: 0; elapsed: 2.620s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-4e17cf2f94b6/tests.py"`
+- Context: After independent review require nonempty note events and MIDI for this non-silent fixture. Freeze explicit two-file allowlist and repeat CPU-only guard checks; no inference.
+- Source SHA-256: `8d1afc88fac98e5d01d245ad3604b2166468ed9d63eb1404c6cffaba706bd873`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T133120.478693Z-ddfd0a8f63.json) · [Raw log](../build-logs/20261106T133120.478693Z-ddfd0a8f63.log)
+- [Exact process output](../build-logs/20261106T133120.478693Z-ddfd0a8f63.raw.log)
+
+### 2026-11-06T21:35:24+08:00 · muscriptor-relay-cpu-check · succeeded
+
+- Config: local/Windows/Python; exit code: 0; elapsed: 1.503s.
+- Command: `C:\Python314\python.exe build-logs/muscriptor-relay-synthetic-check.py`
+- Context: Synthetic small-byte receiver tests; no credentials/model weights/network/GPU.
+- Source SHA-256: `18f64da0b8d419b98b8fe94882a1dca933a949a411bda6c6ec33621c8fe853b0`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T133524.715266Z-ecad26d614.json) · [Raw log](../build-logs/20261106T133524.715266Z-ecad26d614.log)
+- [Exact process output](../build-logs/20261106T133524.715266Z-ecad26d614.raw.log)
+
+### 2026-11-06T21:35:27+08:00 · muscriptor-relay-stage · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 1.536s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-relay-v1"`
+- Context: Stage bounded binary receiver; no credentials or model bytes in source.
+- Source SHA-256: `18f64da0b8d419b98b8fe94882a1dca933a949a411bda6c6ec33621c8fe853b0`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T133527.682255Z-212f8a2d78.json) · [Raw log](../build-logs/20261106T133527.682255Z-212f8a2d78.log)
+- [Exact process output](../build-logs/20261106T133527.682255Z-212f8a2d78.raw.log)
+
+### 2026-11-06T21:35:29+08:00 · muscriptor-relay-stage · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 4.173s.
+- Command: `scp scripts/cloud/models/muscriptor_authorized/relay_receive.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-relay-v1/relay_receive.py`
+- Context: Stage bounded binary receiver; no credentials or model bytes in source.
+- Source SHA-256: `18f64da0b8d419b98b8fe94882a1dca933a949a411bda6c6ec33621c8fe853b0`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T133529.626171Z-9f5e716372.json) · [Raw log](../build-logs/20261106T133529.626171Z-9f5e716372.log)
+- [Exact process output](../build-logs/20261106T133529.626171Z-9f5e716372.raw.log)
+
+### 2026-11-06T21:37:45+08:00 · muscriptor-official-ram-relay · succeeded
+
+- Config: Windows/Python3.14 -> SSH/cloud; exit code: 0; elapsed: 278.842s.
+- Command: `official-HF-HTTPS bounded-RAM-relay SSH-stdin-cloud-receiver`
+- Context: Official HF download through local 1MiB memory blocks directly to cloud; no local model file, no credential in argv/log, no unauthorized endpoint.
+- Source SHA-256: `8c049bab777aa702acab9717a5c12f31b08b67b4ca8e63c604a6261865ebecad`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T133745.466955Z-791b0abe72.json) · [Raw log](../build-logs/20261106T133745.466955Z-791b0abe72.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T21:43:44+08:00 · muscriptor-authorized-real-cpu-load · succeeded
+
+- Config: cloud/Linux/Python3.11;Torch2.10.0+cu128;CUDAhidden;2threads;180sdeadline; exit code: 0; elapsed: 6.262s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python -c 'import hashlib,subprocess;from pathlib import Path;p=Path('\"'\"'/root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-4e17cf2f94b6/probe.py'\"'\"');assert hashlib.sha256(p.read_bytes()).hexdigest()==\"00dc3c7064715059fef1c02a2a01f1a7d892aec8ccbb81109a51f53ef3c4d007\";raise SystemExit(subprocess.call([\"/root/miniconda3/bin/python\",str(p),\"--mode\",\"cpu\",\"--authorized-weights\"]))'"`
+- Context: Authorized fixed medium weight+config already verified. Real offline CPU load/all-parameter finite verification only, no inference or token access.
+- Source SHA-256: `e553b2053a109458b845d9ad07ba875f192f2985238153c59335d56b82862440`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T134344.284285Z-34337b82ce.json) · [Raw log](../build-logs/20261106T134344.284285Z-34337b82ce.log)
+- [Exact process output](../build-logs/20261106T134344.284285Z-34337b82ce.raw.log)
+
+### 2026-11-06T21:44:02+08:00 · muscriptor-finalization-stage · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 2.067s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-final-v1"`
+- Context: Stage credential-free finalizer and small authorization/relay evidence; no token transfer in these files.
+- Source SHA-256: `e553b2053a109458b845d9ad07ba875f192f2985238153c59335d56b82862440`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T134402.418908Z-24f67d1557.json) · [Raw log](../build-logs/20261106T134402.418908Z-24f67d1557.log)
+- [Exact process output](../build-logs/20261106T134402.418908Z-24f67d1557.raw.log)
+
+### 2026-11-06T21:44:04+08:00 · muscriptor-finalization-stage · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 3.732s.
+- Command: `scp scripts/cloud/models/muscriptor_authorized/finalize.py scripts/cloud/models/library_status.py emusician-autodl:/root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-final-v1/`
+- Context: Stage credential-free finalizer and small authorization/relay evidence; no token transfer in these files.
+- Source SHA-256: `e553b2053a109458b845d9ad07ba875f192f2985238153c59335d56b82862440`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T134404.979750Z-354cbf982b.json) · [Raw log](../build-logs/20261106T134404.979750Z-354cbf982b.log)
+- [Exact process output](../build-logs/20261106T134404.979750Z-354cbf982b.raw.log)
+
+### 2026-11-06T21:44:09+08:00 · muscriptor-finalization-stage · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 2.163s.
+- Command: `scp docs/review/2026-11-06-muscriptor-authorized/access-local.json emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/muscriptor/authorized-access.json`
+- Context: Stage credential-free finalizer and small authorization/relay evidence; no token transfer in these files.
+- Source SHA-256: `e553b2053a109458b845d9ad07ba875f192f2985238153c59335d56b82862440`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T134409.477204Z-7a8424c583.json) · [Raw log](../build-logs/20261106T134409.477204Z-7a8424c583.log)
+- [Exact process output](../build-logs/20261106T134409.477204Z-7a8424c583.raw.log)
+
+### 2026-11-06T21:44:12+08:00 · muscriptor-finalization-stage · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 6.113s.
+- Command: `scp docs/review/2026-11-06-muscriptor-authorized/relay.json emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/muscriptor/authorized-relay.json`
+- Context: Stage credential-free finalizer and small authorization/relay evidence; no token transfer in these files.
+- Source SHA-256: `e553b2053a109458b845d9ad07ba875f192f2985238153c59335d56b82862440`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T134412.466610Z-3ac0fd245d.json) · [Raw log](../build-logs/20261106T134412.466610Z-3ac0fd245d.log)
+- [Exact process output](../build-logs/20261106T134412.466610Z-3ac0fd245d.raw.log)
+
+### 2026-11-06T21:44:38+08:00 · muscriptor-authorized-real-gpu-smoke · succeeded
+
+- Config: cloud/Linux/RTX5090;Torch2.10.0+cu128;FP32weights/nativeautocast;8sfixture;180sdeadline; exit code: 0; elapsed: 5.797s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python -c 'import hashlib,subprocess;from pathlib import Path;p=Path('\"'\"'/root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-4e17cf2f94b6/probe.py'\"'\"');assert hashlib.sha256(p.read_bytes()).hexdigest()==\"00dc3c7064715059fef1c02a2a01f1a7d892aec8ccbb81109a51f53ef3c4d007\";raise SystemExit(subprocess.call([\"/root/miniconda3/bin/python\",str(p),\"--mode\",\"gpu\",\"--authorized-weights\",\"--approved-slot\"]))'"`
+- Context: CPU load passed. One explicit first8seconds Keyboard deployment probe, not whole-song/quality. No extra tempo-model/download, no DAW, preserve raw events/MIDI and guard receipt.
+- Source SHA-256: `e553b2053a109458b845d9ad07ba875f192f2985238153c59335d56b82862440`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T134438.033519Z-6910b6dbaa.json) · [Raw log](../build-logs/20261106T134438.033519Z-6910b6dbaa.log)
+- [Exact process output](../build-logs/20261106T134438.033519Z-6910b6dbaa.raw.log)
+
+### 2026-11-06T21:45:21+08:00 · muscriptor-evidence-promote · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 4.281s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=10 emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/models/muscriptor/deploy-final-v1/finalize.py --cpu /root/autodl-tmp/emusician/results/muscriptor-authorized/cpu-20261106T134345Z-a573f284 --gpu /root/autodl-tmp/emusician/results/muscriptor-authorized/gpu-20261106T134439Z-c8402e6a"`
+- Context: Publish only after full pinned files, unchanged previous artifacts, CPU finite parameters and actual8s GPU output hashes pass. No DAW activation.
+- Source SHA-256: `e553b2053a109458b845d9ad07ba875f192f2985238153c59335d56b82862440`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T134521.242244Z-3144fa6363.json) · [Raw log](../build-logs/20261106T134521.242244Z-3144fa6363.log)
+- [Exact process output](../build-logs/20261106T134521.242244Z-3144fa6363.raw.log)
+
+### 2026-11-06T21:45:26+08:00 · muscriptor-evidence-promote · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 1.303s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/muscriptor/deployment.json docs/review/2026-11-06-muscriptor-authorized/deployment.json`
+- Context: Publish only after full pinned files, unchanged previous artifacts, CPU finite parameters and actual8s GPU output hashes pass. No DAW activation.
+- Source SHA-256: `e553b2053a109458b845d9ad07ba875f192f2985238153c59335d56b82862440`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T134526.286991Z-df20379207.json) · [Raw log](../build-logs/20261106T134526.286991Z-df20379207.log)
+- [Exact process output](../build-logs/20261106T134526.286991Z-df20379207.raw.log)
+
+### 2026-11-06T21:45:28+08:00 · muscriptor-evidence-promote · succeeded
+
+- Config: cloud/Linux; exit code: 0; elapsed: 1.166s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/manifests/model-library/catalog.json docs/review/2026-11-06-muscriptor-authorized/catalog.json`
+- Context: Publish only after full pinned files, unchanged previous artifacts, CPU finite parameters and actual8s GPU output hashes pass. No DAW activation.
+- Source SHA-256: `e553b2053a109458b845d9ad07ba875f192f2985238153c59335d56b82862440`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T134528.296470Z-c04fc45693.json) · [Raw log](../build-logs/20261106T134528.296470Z-c04fc45693.log)
+- [Exact process output](../build-logs/20261106T134528.296470Z-c04fc45693.raw.log)
+
+### 2026-11-06T21:45:28+08:00 · muscriptor-authorized-probe-small-evidence · succeeded
+
+- Config: cloud/read-only JSON receipts; exit code: 0; elapsed: 1.449s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/results/muscriptor-authorized/cpu-20261106T134345Z-a573f284/guard.json docs\review\2026-11-06-muscriptor-authorized\probe\evidence\cpu-guard.json`
+- Context: Copy CPU/GPU audit receipts only. No input audio, fixture, MIDI or weights downloaded to E.
+- Source SHA-256: `e553b2053a109458b845d9ad07ba875f192f2985238153c59335d56b82862440`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T134528.380788Z-e1a33144aa.json) · [Raw log](../build-logs/20261106T134528.380788Z-e1a33144aa.log)
+- [Exact process output](../build-logs/20261106T134528.380788Z-e1a33144aa.raw.log)
+
+### 2026-11-06T21:45:30+08:00 · muscriptor-authorized-probe-small-evidence · succeeded
+
+- Config: cloud/read-only JSON receipts; exit code: 0; elapsed: 0.821s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/results/muscriptor-authorized/gpu-20261106T134439Z-c8402e6a/guard.json docs\review\2026-11-06-muscriptor-authorized\probe\evidence\gpu-guard.json`
+- Context: Copy CPU/GPU audit receipts only. No input audio, fixture, MIDI or weights downloaded to E.
+- Source SHA-256: `e553b2053a109458b845d9ad07ba875f192f2985238153c59335d56b82862440`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T134530.252161Z-b8d25d1814.json) · [Raw log](../build-logs/20261106T134530.252161Z-b8d25d1814.log)
+- [Exact process output](../build-logs/20261106T134530.252161Z-b8d25d1814.raw.log)
+
+### 2026-11-06T21:49:06+08:00 · muscriptor-final-local-audit · succeeded
+
+- Config: local/Python3.14; exit code: 0; elapsed: 1.112s.
+- Command: `C:\Python314\python.exe scripts/cloud/models/muscriptor_authorized/audit.py`
+- Context: Verify authorization/relay/model receipts and final executed source hashes, unchanged257DAW inputs, no credential-like strings or model/audio files in new repository folders.
+- Source SHA-256: `a6e00165c049a295a8cc1668c6c0d45232d247713491ffb72eda30d49ec85d3b`; Git HEAD: `3f8d89f36a05b21ba6b706ae30173c9d0c235d52`.
+- [Record](builds/20261106T134906.850229Z-26692cdd7b.json) · [Raw log](../build-logs/20261106T134906.850229Z-26692cdd7b.log)
+- [Exact process output](../build-logs/20261106T134906.850229Z-26692cdd7b.raw.log)
+
+### 2026-11-06T21:50:15+08:00 - MuScriptor authorized medium deployment complete
+
+- Official gated-file permission verified using user-supplied read token; cloud-only scoped0600 credential, absent from repository/logs. Cloud HF503 preserved; officialHTTPS through1MiB RAM to SSH cloud receiver succeeded, no E weights file.
+- Fixed medium1,228,144,472bytes plus126byte config verified; CPU306,503,680finite parameters; one8s GPU probe produced61notes, raw MIDI valid. Full-song quality/velocity/tempo not established; DAW not connected.
+- 8guard+7receiver CPU checks and final receipt/source/credential-pattern audit passed. Original257DAW build inputs unchanged; catalog updated with164.74GBfree.
+- [Results](review/2026-11-06-muscriptor-authorized/RESULTS.md) / [Verification](review/2026-11-06-muscriptor-authorized/VERIFICATION.json).

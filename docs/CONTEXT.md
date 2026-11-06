@@ -1,4 +1,12 @@
-# 当前工作：原文件 MIR 评测（2026-11-06，四项真实推理与原文件包校验完成，音乐质量待验）
+# 当前工作：MuScriptor medium 授权部署（2026-11-06，文件/CPU加载/8秒GPU探针通过）
+
+用户提供HF只读令牌以继续原被授权阻断的部署。分支 `feature/muscriptor-authorized-20261106`、基线3f8d89f。官方固定权重访问已验证，私有云凭据0700/0600，不在本地/Git/日志中保存。云端HF接口连续503后改用官方HTTPS→本地1MiB RAM→SSH直接云盘中转，1,228,144,472字节权重与126字节medium配置SHA通过，E盘未保存权重。
+
+CPU加载306,503,680参数全部finite、CUDA未初始化；Keyboard前8秒一次GPU转录61音符，模型输出acoustic_piano，MIDI8秒。含加载1.799秒、外层4.691秒；力度100/120BPM是导出默认值，不是预测。六个新增模型的短推理现均已验证，模型catalog按证据更新，DAW/Agent尚未接入这些新能力，整曲准确率仍未验。[结果](review/2026-11-06-muscriptor-authorized/RESULTS.md)。下一步按需要单独做MuScriptor整曲/多乐器评测及模型适配器接入，不自动重跑已有四项整曲结果。
+
+最终审查 `20261106T134906.850229Z-26692cdd7b` 通过：实际中转/推理脚本SHA与最终源码一致，新源码及档案无凭据串/模型音频文件，257个DAW构建输入逐文件保持。8项guard和7组receiver合成检查通过，模型/中转首次真实执行各一次；认证及直接下载网络失败记录全部保留。cloud catalog无错误、余量164.74GB。
+
+# 保留工作：原文件 MIR 评测（2026-11-06，四项真实推理与原文件包校验完成，音乐质量待验）
 
 用户指定完整 New Light（218.305秒）做SCNet分离、ChordMini和弦和SheetSage2综合分析；明确指定 `E:/E-musician/test-projects/test9-newlight/Keyboard.mp3`（279.031秒）做TransKun。两份输入SHA上传后核对一致，四项各一次真实推理通过，无裁切，GPU已释放、ACE队列空。分支 `eval/real-audio-mir-20261106`，基线0c21c01。[结果与原文件路径](review/2026-11-06-real-audio/RESULTS.md)。原始结果继续留云端、不接DAW、不备份模型或音频到E。
 

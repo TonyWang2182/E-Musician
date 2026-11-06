@@ -1,0 +1,15 @@
+{
+  "files": [
+    {
+      "path": "scripts/cloud/models/muscriptor_authorized/probe.py",
+      "sha256": "00dc3c7064715059fef1c02a2a01f1a7d892aec8ccbb81109a51f53ef3c4d007",
+      "bytes": 14411
+    },
+    {
+      "path": "scripts/cloud/models/muscriptor_authorized/tests.py",
+      "sha256": "617d5794aac865662c0bf805560e558d04dce443867427494f626136dcf9651d",
+      "bytes": 5064
+    }
+  ],
+  "remote_directory": "/root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-4e17cf2f94b6"
+}

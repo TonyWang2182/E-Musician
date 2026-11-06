@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "checked_utc": "2026-11-06T13:49:07.933582+00:00",
+  "official_gated_weight_access": true,
+  "pinned_weight_and_config_verified": true,
+  "cpu_load_verified": true,
+  "gpu_inference_verified": true,
+  "gpu_scope_seconds": 8,
+  "actual_gpu_inference_count": 1,
+  "daw_build_inputs_unchanged": 257,
+  "no_credential_like_text_in_new_sources_or_evidence": true,
+  "no_local_model_or_audio_files": true,
+  "daw_connected": false,
+  "quality_evaluation": false,
+  "scripts_sha256": {
+    "scripts/cloud/models/muscriptor_authorized/audit.py": "8e6f273b9aebc4e03ceb79c7de4ec68356f1852400ac226a0412f3d548a1db18",
+    "scripts/cloud/models/muscriptor_authorized/auth.py": "7e671ad70bb1d4e20076f339deef4b4a8a3765c3c1c530fe1adbf229aef109e9",
+    "scripts/cloud/models/muscriptor_authorized/auth_initial.py": "d59bafcbd1facdddd72fccc8bcfa22149d920e1f2551b4e2aa314082f54584ba",
+    "scripts/cloud/models/muscriptor_authorized/auth_local.py": "572438ebaa43373bdac34025b0c8cac3f0a6bde58f22947a6421e25d12ba98db",
+    "scripts/cloud/models/muscriptor_authorized/auth_local_initial.py": "847bfa711939175e6dbf727cfdb413adf921159e7a11987844b09939e24658dd",
+    "scripts/cloud/models/muscriptor_authorized/auth_local_official.py": "72bb84ad7512da13adfa04c2a2053ec2c8d220d506355eb0defb232a38b062b3",
+    "scripts/cloud/models/muscriptor_authorized/download.py": "006abe3f6c81af7f58aab08ba8d0c1d2d5b0da6e272b2eaf8434a2721f4c2b82",
+    "scripts/cloud/models/muscriptor_authorized/download_direct.py": "4b7caa5af3bdabf3a7673a15cf93a18918851705e5d96b38dbc00491c883fb4c",
+    "scripts/cloud/models/muscriptor_authorized/finalize.py": "55103aec46e9c579ca713b117f6dd7c98e73bbd15f159ca75d328bd558324986",
+    "scripts/cloud/models/muscriptor_authorized/probe.py": "00dc3c7064715059fef1c02a2a01f1a7d892aec8ccbb81109a51f53ef3c4d007",
+    "scripts/cloud/models/muscriptor_authorized/receive.py": "078a8b95e0fecc7bb9d2ca840e22854810f7c7bfc28da1e86c465813865ca810",
+    "scripts/cloud/models/muscriptor_authorized/relay_local.py": "445e461db022cfac2e06f97890368c7b943552f870b612c06a8e26d30a4f91fe",
+    "scripts/cloud/models/muscriptor_authorized/relay_receive.py": "f68882b4866a4c9e4390651783b5991e97131da275046e704c61bc892cd94d6f",
+    "scripts/cloud/models/muscriptor_authorized/tests.py": "617d5794aac865662c0bf805560e558d04dce443867427494f626136dcf9651d"
+  }
+}

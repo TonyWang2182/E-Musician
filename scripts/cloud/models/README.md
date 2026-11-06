@@ -6,6 +6,7 @@ implement DAW Providers or activate the production generation gateway.
 - `yue2/`: YuE2 source, 3B/VAE checkpoints and its isolated inference environment.
 - `mir_upgrades/`: independent SCNet, TransKun and ChordMini environments.
 - `scores/`: SheetSage2/MERT2 and MuScriptor deployment/access checks.
+- `muscriptor_authorized/`: pinned medium authorization, official-source RAM relay, offline CPU/GPU probes and evidence finalizer. Credentials never belong in this repository.
 - `library_status.py`: read-only aggregation of per-model deployment records.
 
 Each model owns `/root/autodl-tmp/emusician/manifests/model-library/<id>/deployment.json`.

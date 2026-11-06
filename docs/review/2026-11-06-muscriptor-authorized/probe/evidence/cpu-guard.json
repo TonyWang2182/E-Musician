@@ -1,0 +1,59 @@
+{
+  "id": "muscriptor-medium",
+  "mode": "cpu",
+  "status": "passed",
+  "started_utc": "2026-11-06T13:43:45Z",
+  "script": {
+    "path": "/root/autodl-tmp/emusician/workspace/models/muscriptor/probes/authorized-4e17cf2f94b6/probe.py",
+    "bytes": 14411,
+    "sha256": "00dc3c7064715059fef1c02a2a01f1a7d892aec8ccbb81109a51f53ef3c4d007"
+  },
+  "output": "/root/autodl-tmp/emusician/results/muscriptor-authorized/cpu-20261106T134345Z-a573f284",
+  "log": "/root/autodl-tmp/emusician/logs/model-library/muscriptor-cpu-20261106T134345Z-a573f284.log",
+  "deadline_seconds": 180,
+  "exit_code": 0,
+  "elapsed_seconds": 5.002203401178122,
+  "minimum_free_gpu_mib": null,
+  "result": {
+    "id": "muscriptor-medium",
+    "status": "passed",
+    "mode": "cpu",
+    "source_revision": "8a1ef88672cc23c26619adaff37ec48d82c0b906",
+    "model_revision": "f32236969308476e01fd3aae67357de5feb05a2d",
+    "artifacts": [
+      {
+        "path": "/root/autodl-tmp/emusician/models/muscriptor/model.safetensors",
+        "bytes": 1228144472,
+        "sha256": "ac80adbdf85d87231735fd948af7013441c0afced316c4e9067fd5d8a7fb97ec"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/models/muscriptor/config.json",
+        "bytes": 126,
+        "sha256": "43e13a70fc9ae0af36b7447c06f3eac2282daeb69d79c1ff840ede7fdaa26a3b"
+      }
+    ],
+    "config": {
+      "dim": 1024,
+      "num_heads": 16,
+      "num_layers": 24,
+      "card": 1395
+    },
+    "parameter_count": 306503680,
+    "load_seconds": 1.3531305193901062,
+    "network_used": false,
+    "packages": {
+      "muscriptor": "0.4.0",
+      "torch": "2.10.0+cu128",
+      "numpy": "2.5.4",
+      "soundfile": "0.14.0",
+      "mido": "1.3.3",
+      "safetensors": "0.8.0"
+    },
+    "daw_connected": false,
+    "quality_evaluation": false,
+    "all_parameters_finite": true,
+    "cuda_initialized": false,
+    "inference_performed": false,
+    "elapsed_seconds": 1.7094945274293423
+  }
+}
