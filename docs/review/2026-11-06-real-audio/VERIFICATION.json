@@ -1,0 +1,61 @@
+{
+  "checked_utc": "2026-11-06T12:58:29.222812+00:00",
+  "status": "passed",
+  "original_inputs_unchanged": true,
+  "complete_original_inputs_processed": true,
+  "daw_build_source_files_unchanged": 257,
+  "executed_model_scripts_match_final_source": true,
+  "results": {
+    "scnet": {
+      "output": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/scnet-20261106T125207Z-22e9bebf",
+      "wall_seconds": 27.430266615003347,
+      "input_sha256": "885891e2076ca629d3e60685a68df3be07e20da00f0ee45038b5da547519826b",
+      "actual_inference_count": 1
+    },
+    "chordmini": {
+      "output": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/chordmini-20261106T125321Z-31c71300",
+      "wall_seconds": 4.652178645133972,
+      "input_sha256": "885891e2076ca629d3e60685a68df3be07e20da00f0ee45038b5da547519826b",
+      "actual_inference_count": 1
+    },
+    "transkun": {
+      "output": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/transkun-20261106T125401Z-ed271438",
+      "wall_seconds": 9.518265757709742,
+      "input_sha256": "5b425c8fe09cf82f99a530ae529fe7607c0b792e93d0f91455cc338fd95b632f",
+      "actual_inference_count": 1
+    },
+    "sheetsage2": {
+      "output": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531",
+      "wall_seconds": 14.777258947491646,
+      "input_sha256": "885891e2076ca629d3e60685a68df3be07e20da00f0ee45038b5da547519826b",
+      "actual_inference_count": 1
+    }
+  },
+  "scripts_sha256": {
+    "scripts/cloud/evaluations/real_audio_20261106/audit.py": "de598c5b4c02332de0c0b2cc8be5c1fc9170b8e53cc8172b93593388f44fc6da",
+    "scripts/cloud/evaluations/real_audio_20261106/bundle.py": "3070f64bbaa0460fa8bcd51f9e53b8c1345290baa9732a80bf139a87ea3d5ca9",
+    "scripts/cloud/evaluations/real_audio_20261106/bundle_test.py": "612708acb4775ecb1e36db84ebdb146a1d50581e09f1d1bdcdc24ce7bf52baac",
+    "scripts/cloud/evaluations/real_audio_20261106/bundle_verify.py": "d17d47b46877eb9a5dcde2e8079bdb0695f72c50b61c60b04faf4a4ed26997ae",
+    "scripts/cloud/evaluations/real_audio_20261106/manage.py": "5cf95617a0f04467896173502b4be93742b2f0bbd7249ed9df591efb83c3aa0d",
+    "scripts/cloud/evaluations/real_audio_20261106/mir/guard.py": "0879672f45a8fb32417b25dd0cae103ca3c97be8b63d294db8e890f7e2ffe011",
+    "scripts/cloud/evaluations/real_audio_20261106/mir/test_guard.py": "19551b12a613af8555143ce359a859a99e5c4ecd54377b8b51ed857f1abd9579",
+    "scripts/cloud/evaluations/real_audio_20261106/mir/whole_file.py": "8b3aa4c41b651754befd53a798661931ee29e3f52b7d8e21776d3c5dacf18480",
+    "scripts/cloud/evaluations/real_audio_20261106/scores/check_guard.py": "65e046cf3016a84f8848db6667bed7ba26109d3f99ab3ab47dee08aa3c953b4a",
+    "scripts/cloud/evaluations/real_audio_20261106/scores/run.py": "db54d98bb211d24dbdeecb03e05e948f88e919b7588a41247aaacb0c294c2d8a"
+  },
+  "delivery": {
+    "status": "passed",
+    "archive": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/NewLight-Keyboard-raw-results.zip",
+    "bytes": 308835729,
+    "sha256": "e272a3eae957ab30fcc9bbc5f82585bb7bf9a1b419c56b0238cbe84860dfd347",
+    "members_verified": 38,
+    "raw_bytes": 308815517,
+    "whole_archive_sha_verified": true,
+    "crc_and_member_sha_verified": true,
+    "extraction_performed": false,
+    "audio_downloaded_to_e": false
+  },
+  "quality_or_listening_verified": false,
+  "muscriptor_weights_authorized": false,
+  "no_model_or_audio_download_to_e": true
+}

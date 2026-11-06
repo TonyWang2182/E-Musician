@@ -1,0 +1,15 @@
+{
+  "files": [
+    {
+      "path": "scripts/cloud/evaluations/real_audio_20261106/scores/check_guard.py",
+      "sha256": "65e046cf3016a84f8848db6667bed7ba26109d3f99ab3ab47dee08aa3c953b4a",
+      "bytes": 5136
+    },
+    {
+      "path": "scripts/cloud/evaluations/real_audio_20261106/scores/run.py",
+      "sha256": "db54d98bb211d24dbdeecb03e05e948f88e919b7588a41247aaacb0c294c2d8a",
+      "bytes": 11820
+    }
+  ],
+  "remote_directory": "/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/scripts/scores-e8bb19237de6"
+}

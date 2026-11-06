@@ -1,0 +1,67 @@
+{
+  "model": "transkun",
+  "status": "passed",
+  "input": {
+    "path": "/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/piano.mp3",
+    "sha256": "5b425c8fe09cf82f99a530ae529fe7607c0b792e93d0f91455cc338fd95b632f",
+    "bytes": 11163733,
+    "frames": 12305266,
+    "sample_rate": 44100,
+    "channels": 2,
+    "duration_seconds": 279.03097505668933,
+    "format": "MP3",
+    "subtype": "MPEG_LAYER_III",
+    "scope": "complete_original_file",
+    "crop_applied": false,
+    "required_available_host_bytes": 8589934592
+  },
+  "source_revision": "c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6",
+  "model_revisions": {
+    "revision": "c5cb8370e17b4a1650b5971ba87ee4b0d208e5b6",
+    "sha256": "50a80010effc2a59ffcd068a95cd2b29bd7f23a27a3515bc3ccd209c89a3d44c"
+  },
+  "script_sha256": "8b3aa4c41b651754befd53a798661931ee29e3f52b7d8e21776d3c5dacf18480",
+  "model_load_seconds": 0.3889933191239834,
+  "torch": "2.10.0+cu128",
+  "cuda_runtime": "12.8",
+  "daw_connected": false,
+  "quality_verified": false,
+  "outputs": [
+    {
+      "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/transkun-20261106T125401Z-ed271438/data/piano.mid",
+      "notes": 2178,
+      "control_changes": 172,
+      "control_numbers": [
+        64,
+        67
+      ],
+      "latest_event_seconds": 276.9557291666667,
+      "events_beyond_source_seconds": 0,
+      "structurally_valid": true,
+      "pedal_events_dropped": false,
+      "bytes": 14986,
+      "sha256": "46e4319cca39d08a14d4e1a62a1c53f84f20ce571a50d88fccf20553216cc23a"
+    }
+  ],
+  "decoded_input_frames": 12305266,
+  "model_input_frames": 12305266,
+  "model_sample_rate": 44100,
+  "resampling": "none",
+  "processing": {
+    "upstream": "TransKun.transcribe + Data.writeMidi",
+    "segment_seconds": 16,
+    "hop_seconds": 8,
+    "stepInSecond_argument": null,
+    "segmentSizeInSecond_argument": null,
+    "discardSecondHalf": false,
+    "mergeIncompleteEvent": true,
+    "post_trim": false,
+    "event_times_preserved": true
+  },
+  "inference_and_output_seconds": 6.778065472841263,
+  "total_seconds": 7.167059749364853,
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "peak_cuda_allocated_bytes": 984705536,
+  "peak_cuda_reserved_bytes": 1195376640,
+  "allocator_cap_bytes": 8589934592
+}

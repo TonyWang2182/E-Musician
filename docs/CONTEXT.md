@@ -1,4 +1,12 @@
-# 当前工作：用户 Jungle 提示词生成对照（2026-11-06，两次生成与客观检查完成，试听待验）
+# 当前工作：原文件 MIR 评测（2026-11-06，四项真实推理与原文件包校验完成，音乐质量待验）
+
+用户指定完整 New Light（218.305秒）做SCNet分离、ChordMini和弦和SheetSage2综合分析；明确指定 `E:/E-musician/test-projects/test9-newlight/Keyboard.mp3`（279.031秒）做TransKun。两份输入SHA上传后核对一致，四项各一次真实推理通过，无裁切，GPU已释放、ACE队列空。分支 `eval/real-audio-mir-20261106`，基线0c21c01。[结果与原文件路径](review/2026-11-06-real-audio/RESULTS.md)。原始结果继续留云端、不接DAW、不备份模型或音频到E。
+
+外层时间SCNet27.43秒、ChordMini4.65秒、TransKun9.52秒、SheetSage2 14.78秒；不是听感或准确率验收。和弦147段；钢琴2178音符+172CC；综合模型输出未触token上限。SCNet原始浮点存在超过unity峰值，未归一化。首次CPU前检笔误及一次SSH reset均保留记录，不计为额外模型推理。MuScriptor需用户在HF页面接受非商业权重条款后以同账号read token登录，当前仍未授权。下一步是原始结果试听与音乐内容核查，再据反馈决定模型/管线改动；不自动接入DAW。
+
+最终原始包为云端结果根目录的 `NewLight-Keyboard-raw-results.zip`，308,835,729字节，38文件；整包与逐成员CRC/SHA通过。20项CPU守护/打包检查通过。最终审查 `20261106T125828.288522Z-bf61536931` 确认两份本地原文件未变、四项执行脚本与收据一致、DAW原257个构建输入未变、本地仅小型证据。第一次汇总审查误把ChordMini的CQT收据当作PCM收据而KeyError，修正审查字段后通过，无模型重跑。见[验证](review/2026-11-06-real-audio/VERIFICATION.json)。
+
+# 保留工作：用户 Jungle 提示词生成对照（2026-11-06，两次生成与客观检查完成，试听待验）
 
 用户要求用同一段170BPM UK jungle长提示词测试ACE和YuE2并报告。分支 `eval/jungle-ace-yue2-20261106`，基线bfb7853；[测试结果](review/2026-11-06-jungle-generation/RESULTS.md)。两模型各一次、完整原文、seed170611、无重抽。ACE实际120秒，热启动服务13.86秒；YuE2实际119.9987秒、含加载外层107.95秒，ABC规划自然完成而semantic3000人为上限截断。没有等价秒数硬控，不将截断当自然结尾。
 

@@ -1,0 +1,14 @@
+{
+  "id": "piano",
+  "source": "E:\\E-musician\\test-projects\\test9-newlight\\Keyboard.mp3",
+  "original_filename": "Keyboard.mp3",
+  "bytes": 11163733,
+  "sha256": "5b425c8fe09cf82f99a530ae529fe7607c0b792e93d0f91455cc338fd95b632f",
+  "cloud_path": "/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/piano.mp3",
+  "trimmed": false,
+  "frames": 12305266,
+  "sample_rate": 44100,
+  "channels": 2,
+  "duration_seconds": 279.03097505668933,
+  "cloud_sha_verified_record": "20261106T125027.538642Z-9da43bc2ad"
+}

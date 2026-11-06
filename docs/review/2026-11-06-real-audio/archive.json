@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "archive": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/NewLight-Keyboard-raw-results.zip",
+  "bytes": 308835729,
+  "sha256": "e272a3eae957ab30fcc9bbc5f82585bb7bf9a1b419c56b0238cbe84860dfd347",
+  "file_count": 38,
+  "raw_bytes": 308815517,
+  "manifest_member": "MANIFEST.json",
+  "selected_directories": [
+    "scnet-20261106T125207Z-22e9bebf",
+    "chordmini-20261106T125321Z-31c71300",
+    "transkun-20261106T125401Z-ed271438",
+    "sheetsage2-20261106T125454Z-75be3531"
+  ],
+  "audio_downloaded_to_e": false
+}

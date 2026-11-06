@@ -10020,3 +10020,466 @@ print('Verified original prompts/seeds, executed scripts, two audio hashes, fini
 - 云端统一试听入口 results/evaluations/jungle_20261106/analysis/index.html，24条引用存在且范围合法；浏览器播放未由用户确认。音频/latent/token都只在云端，没有E盘新音频下载或DAW导入。
 - 守护脚本问题在YuE2唯一GPU推理前修正，4项CPU故障测试通过，实际脚本与最终SHA匹配。首次Windows mock killpg问题和最终汇总UTF8/GBK读取失败均保留原始记录，修复不触发重复推理。
 - 最终证据复核d70bccb517通过：prompt、seed、执行脚本及生成/分析SHA一致；原0.12.1的257个构建源码输入未变，因此没有桌面构建。计划、RESULTS、CONTEXT、DEVELOPMENT和固定版本小档案更新；独立分支eval/jungle-ace-yue2-20261106，不合并main。
+
+### 2026-11-06T20:44:53+08:00 · q1-yue2-length-source-read · succeeded
+
+- Config: cloud/read-only; exit code: 0; elapsed: 0.994s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "grep -n -C 3 -E 'max_tokens|min_tokens|truncated|MUSIC_END|ABC_END|CONTEXT|context' /root/autodl-tmp/emusician/workspace/models/yue2/YuE-1116bea76032bee5668e5f097294d082fa0b84f0/src/yue2/sampling.py"`
+- Context: Inspect fixed source constraints only; no GPU or model load
+- Source SHA-256: `4221a990fe0915a6406e7354cbd8cba9dfade29079870ae4e27530d39120a6f8`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T124453.788431Z-5e18241738.json) · [Raw log](../build-logs/20261106T124453.788431Z-5e18241738.log)
+- [Exact process output](../build-logs/20261106T124453.788431Z-5e18241738.raw.log)
+
+### 2026-11-06T20:45:27+08:00 · real-audio-mir-source-inspection · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.902s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python -c \"import base64; exec(base64.b64decode('aW1wb3J0IGpzb24scGF0aGxpYgpyPXBhdGhsaWIuUGF0aCgnL3Jvb3QvYXV0b2RsLXRtcC9lbXVzaWNpYW4nKQpmb3IgbmFtZSBpbiBbJ3NjbmV0JywndHJhbnNrdW4nLCdjaG9yZG1pbmknXToKIGQ9anNvbi5sb2Fkcygoci8nbWFuaWZlc3RzL21vZGVsLWxpYnJhcnknL25hbWUvJ2RlcGxveW1lbnQuanNvbicpLnJlYWRfdGV4dCgpKQogcHJpbnQobmFtZSxkWydwYXRocyddKQogZm9yIHJlbGF0aXZlIGluIHsnc2NuZXQnOlsndXRpbHMvbW9kZWxfdXRpbHMucHknXSwndHJhbnNrdW4nOlsndHJhbnNrdW4vTW9kZWxUcmFuc2Zvcm1lci5weScsJ3RyYW5za3VuL01vZGVsLnB5J10sJ2Nob3JkbWluaSc6WydzcmMvZXZhbHVhdGlvbi91dGlscy9jb21tb24ucHknLCdzcmMvZXZhbHVhdGlvbi91dGlscy9pbmZlcmVuY2UucHknXX1bbmFtZV06CiAgcD1wYXRobGliLlBhdGgoZFsncGF0aHMnXVsnc291cmNlJ10pL3JlbGF0aXZlCiAgaWYgcC5leGlzdHMoKToKICAgbGluZXM9cC5yZWFkX3RleHQoKS5zcGxpdGxpbmVzKCkKICAgaGl0cz1baSBmb3IgaSxzIGluIGVudW1lcmF0ZShsaW5lcykgaWYgYW55KHQgaW4gcyBmb3IgdCBpbiBbJ2RlZiBkZW1peCcsJ2RlZiB0cmFuc2NyaWJlKCcsJ2RlZiBleHRyYWN0X3NvbmdfZmVhdHVyZXMnLCdkZWYgcHJlZGljdF9zbGlkaW5nX3dpbmRvd3MnXSldCiAgIGZvciBpIGluIGhpdHM6IHByaW50KHJlbGF0aXZlLCdcbicuam9pbihzdHIoaisxKSsnOiAnK2xpbmVzW2pdIGZvciBqIGluIHJhbmdlKG1heCgwLGktMyksbWluKGxlbihsaW5lcyksaSsyMjApKSkpCg=='))\""`
+- Context: Read-only pinned upstream whole-song allocation/segmentation inspection; no GPU or downloads
+- Source SHA-256: `4221a990fe0915a6406e7354cbd8cba9dfade29079870ae4e27530d39120a6f8`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T124527.024327Z-b0039708a1.json) · [Raw log](../build-logs/20261106T124527.024327Z-b0039708a1.log)
+- [Exact process output](../build-logs/20261106T124527.024327Z-b0039708a1.raw.log)
+
+### 2026-11-06T20:45:55+08:00 · real-audio-upload-newlight · succeeded
+
+- Config: cloud/Linux/RTX5090;local/Python3.14; exit code: 0; elapsed: 0.958s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs"`
+- Context: Original user input; no DAW integration or model/audio download to E.
+- Source SHA-256: `7a74e3571567bd661ae07b9eb117eabd25d4132e8cdb2f70b83530f2ce2d0b7f`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T124555.794864Z-16c64830c8.json) · [Raw log](../build-logs/20261106T124555.794864Z-16c64830c8.log)
+- [Exact process output](../build-logs/20261106T124555.794864Z-16c64830c8.raw.log)
+
+### 2026-11-06T20:45:57+08:00 · real-audio-upload-newlight · succeeded
+
+- Config: cloud/Linux/RTX5090;local/Python3.14; exit code: 0; elapsed: 2.331s.
+- Command: `scp "E:\E-musician\test-projects\test9-newlight\New Light()\New Light.mp3" emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/newlight.mp3`
+- Context: Original user input; no DAW integration or model/audio download to E.
+- Source SHA-256: `7a74e3571567bd661ae07b9eb117eabd25d4132e8cdb2f70b83530f2ce2d0b7f`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T124557.089457Z-753086d596.json) · [Raw log](../build-logs/20261106T124557.089457Z-753086d596.log)
+- [Exact process output](../build-logs/20261106T124557.089457Z-753086d596.raw.log)
+
+### 2026-11-06T20:45:59+08:00 · real-audio-upload-newlight · succeeded
+
+- Config: cloud/Linux/RTX5090;local/Python3.14; exit code: 0; elapsed: 0.991s.
+- Command: `scp E:\MusicAgent&DAW\worktrees\audio-analysis\docs\review\2026-11-06-real-audio\newlight-input.json emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/newlight-input.json`
+- Context: Original user input; no DAW integration or model/audio download to E.
+- Source SHA-256: `7a74e3571567bd661ae07b9eb117eabd25d4132e8cdb2f70b83530f2ce2d0b7f`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T124559.656933Z-8c025926fc.json) · [Raw log](../build-logs/20261106T124559.656933Z-8c025926fc.log)
+- [Exact process output](../build-logs/20261106T124559.656933Z-8c025926fc.raw.log)
+
+### 2026-11-06T20:46:07+08:00 · real-audio-inspect-newlight · succeeded
+
+- Config: cloud/Linux/RTX5090;local/Python3.14; exit code: 0; elapsed: 0.963s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/autodl-tmp/emusician/envs/scnet/bin/python -c 'import hashlib,json,soundfile as sf;from pathlib import Path;p=Path('\"'\"'/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/newlight.mp3'\"'\"');h=hashlib.file_digest(p.open(\"rb\"),\"sha256\").hexdigest();assert h=='\"'\"'885891e2076ca629d3e60685a68df3be07e20da00f0ee45038b5da547519826b'\"'\"';i=sf.info(str(p));print(json.dumps(dict(path=str(p),sha256=h,bytes=p.stat().st_size,frames=i.frames,sample_rate=i.samplerate,channels=i.channels,duration_seconds=i.duration,format=i.format,subtype=i.subtype)))'"`
+- Context: Original user input; no DAW integration or model/audio download to E.
+- Source SHA-256: `7a74e3571567bd661ae07b9eb117eabd25d4132e8cdb2f70b83530f2ce2d0b7f`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T124607.386453Z-66b32ab524.json) · [Raw log](../build-logs/20261106T124607.386453Z-66b32ab524.log)
+- [Exact process output](../build-logs/20261106T124607.386453Z-66b32ab524.raw.log)
+
+### 2026-11-06T20:50:00+08:00 · real-audio-mir-stage · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.944s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/mir"`
+- Context: Independent whole-file runners; no baseline/model/service changes
+- Source SHA-256: `fe8cfe314053586986adefe47c08efcce60e9e29a6aab5480a7de255605284df`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125000.276197Z-b6e302a721.json) · [Raw log](../build-logs/20261106T125000.276197Z-b6e302a721.log)
+- [Exact process output](../build-logs/20261106T125000.276197Z-b6e302a721.raw.log)
+
+### 2026-11-06T20:50:01+08:00 · real-audio-mir-stage · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.205s.
+- Command: `scp -o BatchMode=yes scripts\cloud\evaluations\real_audio_20261106\mir\guard.py scripts\cloud\evaluations\real_audio_20261106\mir\test_guard.py scripts\cloud\evaluations\real_audio_20261106\mir\whole_file.py emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/mir/`
+- Context: Independent whole-file runners; no baseline/model/service changes
+- Source SHA-256: `fe8cfe314053586986adefe47c08efcce60e9e29a6aab5480a7de255605284df`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125001.465278Z-644280305d.json) · [Raw log](../build-logs/20261106T125001.465278Z-644280305d.log)
+- [Exact process output](../build-logs/20261106T125001.465278Z-644280305d.raw.log)
+
+### 2026-11-06T20:50:02+08:00 · real-audio-mir-cpu-guard-tests · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.874s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/mir/test_guard.py"`
+- Context: Five meaningful CPU-only cleanup/receipt fault checks; no models or GPU
+- Source SHA-256: `fe8cfe314053586986adefe47c08efcce60e9e29a6aab5480a7de255605284df`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125002.929397Z-9553ff950b.json) · [Raw log](../build-logs/20261106T125002.929397Z-9553ff950b.log)
+- [Exact process output](../build-logs/20261106T125002.929397Z-9553ff950b.raw.log)
+
+### 2026-11-06T20:50:20+08:00 · real-audio-scnet-full-song · failed
+
+- Config: Release; exit code: 1; elapsed: 1.189s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/mir/guard.py scnet --input /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/newlight.mp3 --sha256 885891e2076ca629d3e60685a68df3be07e20da00f0ee45038b5da547519826b --approved-slot"`
+- Context: One full uploaded New Light MP3, 218.30478458s, pinned SCNet four-stem; no crop/retry/DAW
+- Source SHA-256: `fe8cfe314053586986adefe47c08efcce60e9e29a6aab5480a7de255605284df`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125020.300752Z-72fa38eb9a.json) · [Raw log](../build-logs/20261106T125020.300752Z-72fa38eb9a.log)
+- [Exact process output](../build-logs/20261106T125020.300752Z-72fa38eb9a.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T125020.300752Z-72fa38eb9a.log
+
+### 2026-11-06T20:50:20+08:00 · real-audio-upload-piano · succeeded
+
+- Config: cloud/Linux/RTX5090;local/Python3.14; exit code: 0; elapsed: 0.851s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs"`
+- Context: Original user input; no DAW integration or model/audio download to E.
+- Source SHA-256: `fe8cfe314053586986adefe47c08efcce60e9e29a6aab5480a7de255605284df`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125020.878381Z-0933ed7473.json) · [Raw log](../build-logs/20261106T125020.878381Z-0933ed7473.log)
+- [Exact process output](../build-logs/20261106T125020.878381Z-0933ed7473.raw.log)
+
+### 2026-11-06T20:50:22+08:00 · real-audio-upload-piano · succeeded
+
+- Config: cloud/Linux/RTX5090;local/Python3.14; exit code: 0; elapsed: 0.733s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/autodl-tmp/emusician/envs/scnet/bin/python -c 'from pathlib import Path;import hashlib;p=Path('\"'\"'/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/piano.mp3'\"'\"');assert not p.exists() or hashlib.file_digest(p.open(\"rb\"),\"sha256\").hexdigest()=='\"'\"'5b425c8fe09cf82f99a530ae529fe7607c0b792e93d0f91455cc338fd95b632f'\"'\"',\"Existing input differs\"'"`
+- Context: Original user input; no DAW integration or model/audio download to E.
+- Source SHA-256: `fe8cfe314053586986adefe47c08efcce60e9e29a6aab5480a7de255605284df`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125022.003817Z-5452d56151.json) · [Raw log](../build-logs/20261106T125022.003817Z-5452d56151.log)
+- [Exact process output](../build-logs/20261106T125022.003817Z-5452d56151.raw.log)
+
+### 2026-11-06T20:50:23+08:00 · real-audio-upload-piano · succeeded
+
+- Config: cloud/Linux/RTX5090;local/Python3.14; exit code: 0; elapsed: 2.596s.
+- Command: `scp E:\E-musician\test-projects\test9-newlight\Keyboard.mp3 emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/piano.mp3`
+- Context: Original user input; no DAW integration or model/audio download to E.
+- Source SHA-256: `fe8cfe314053586986adefe47c08efcce60e9e29a6aab5480a7de255605284df`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125023.017678Z-9e8e7e89bd.json) · [Raw log](../build-logs/20261106T125023.017678Z-9e8e7e89bd.log)
+- [Exact process output](../build-logs/20261106T125023.017678Z-9e8e7e89bd.raw.log)
+
+### 2026-11-06T20:50:25+08:00 · real-audio-upload-piano · succeeded
+
+- Config: cloud/Linux/RTX5090;local/Python3.14; exit code: 0; elapsed: 1.022s.
+- Command: `scp E:\MusicAgent&DAW\worktrees\audio-analysis\docs\review\2026-11-06-real-audio\piano-input.json emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/piano-input.json`
+- Context: Original user input; no DAW integration or model/audio download to E.
+- Source SHA-256: `fe8cfe314053586986adefe47c08efcce60e9e29a6aab5480a7de255605284df`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125025.923130Z-3b9b58f4de.json) · [Raw log](../build-logs/20261106T125025.923130Z-3b9b58f4de.log)
+- [Exact process output](../build-logs/20261106T125025.923130Z-3b9b58f4de.raw.log)
+
+### 2026-11-06T20:50:27+08:00 · real-audio-inspect-piano · succeeded
+
+- Config: cloud/Linux/RTX5090;local/Python3.14; exit code: 0; elapsed: 0.931s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/autodl-tmp/emusician/envs/scnet/bin/python -c 'import hashlib,json,soundfile as sf;from pathlib import Path;p=Path('\"'\"'/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/piano.mp3'\"'\"');h=hashlib.file_digest(p.open(\"rb\"),\"sha256\").hexdigest();assert h=='\"'\"'5b425c8fe09cf82f99a530ae529fe7607c0b792e93d0f91455cc338fd95b632f'\"'\"';i=sf.info(str(p));print(json.dumps(dict(path=str(p),sha256=h,bytes=p.stat().st_size,frames=i.frames,sample_rate=i.samplerate,channels=i.channels,duration_seconds=i.duration,format=i.format,subtype=i.subtype)))'"`
+- Context: Original user input; no DAW integration or model/audio download to E.
+- Source SHA-256: `fe8cfe314053586986adefe47c08efcce60e9e29a6aab5480a7de255605284df`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125027.538642Z-9da43bc2ad.json) · [Raw log](../build-logs/20261106T125027.538642Z-9da43bc2ad.log)
+- [Exact process output](../build-logs/20261106T125027.538642Z-9da43bc2ad.raw.log)
+
+### 2026-11-06T20:51:09+08:00 · real-audio-mir-preflight-correction · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.369s.
+- Command: `scp -o BatchMode=yes scripts/cloud/evaluations/real_audio_20261106/mir/whole_file.py scripts/cloud/evaluations/real_audio_20261106/mir/guard.py emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/mir/`
+- Context: Initial preflight TypeError st_size() fixed before any model load; apply effective cgroup memory reserve; explicit TransKun merge parameter
+- Source SHA-256: `d08fedd7f91e026a4668bdffc02fcdaeaff44d011426d3ee643601368aced9d8`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125109.873993Z-3465433296.json) · [Raw log](../build-logs/20261106T125109.873993Z-3465433296.log)
+- [Exact process output](../build-logs/20261106T125109.873993Z-3465433296.raw.log)
+
+### 2026-11-06T20:51:11+08:00 · real-audio-mir-preflight-correction · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.827s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/autodl-tmp/emusician/envs/scnet/bin/python /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/mir/whole_file.py scnet --input /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/newlight.mp3 --sha256 885891e2076ca629d3e60685a68df3be07e20da00f0ee45038b5da547519826b --inspect"`
+- Context: Initial preflight TypeError st_size() fixed before any model load; apply effective cgroup memory reserve; explicit TransKun merge parameter
+- Source SHA-256: `d08fedd7f91e026a4668bdffc02fcdaeaff44d011426d3ee643601368aced9d8`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125111.514749Z-5e613c6a01.json) · [Raw log](../build-logs/20261106T125111.514749Z-5e613c6a01.log)
+- [Exact process output](../build-logs/20261106T125111.514749Z-5e613c6a01.raw.log)
+
+### 2026-11-06T20:51:12+08:00 · real-audio-mir-preflight-correction · failed
+
+- Config: Release; exit code: 255; elapsed: 1.942s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/mir/test_guard.py"`
+- Context: Initial preflight TypeError st_size() fixed before any model load; apply effective cgroup memory reserve; explicit TransKun merge parameter
+- Source SHA-256: `d08fedd7f91e026a4668bdffc02fcdaeaff44d011426d3ee643601368aced9d8`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125112.669058Z-1c58943951.json) · [Raw log](../build-logs/20261106T125112.669058Z-1c58943951.log)
+- [Exact process output](../build-logs/20261106T125112.669058Z-1c58943951.raw.log)
+- Error: Command failed with code 255; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T125112.669058Z-1c58943951.log
+
+### 2026-11-06T20:51:49+08:00 · real-audio-mir-guard-recheck · succeeded
+
+- Config: Release; exit code: 0; elapsed: 1.258s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=10 emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/mir/test_guard.py"`
+- Context: One bounded reconnect after SSH reset; CPU guard only; no inference retry
+- Source SHA-256: `d08fedd7f91e026a4668bdffc02fcdaeaff44d011426d3ee643601368aced9d8`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125149.559452Z-2884e256e4.json) · [Raw log](../build-logs/20261106T125149.559452Z-2884e256e4.log)
+- [Exact process output](../build-logs/20261106T125149.559452Z-2884e256e4.raw.log)
+
+### 2026-11-06T20:52:05+08:00 · real-audio-scnet-full-song · succeeded
+
+- Config: Release; exit code: 0; elapsed: 29.873s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=20 emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/mir/guard.py scnet --input /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/newlight.mp3 --sha256 885891e2076ca629d3e60685a68df3be07e20da00f0ee45038b5da547519826b --approved-slot"`
+- Context: Corrected preflight; first actual SCNet inference on complete218.3048s input; retain earlier no-GPU failure
+- Source SHA-256: `d08fedd7f91e026a4668bdffc02fcdaeaff44d011426d3ee643601368aced9d8`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125205.389283Z-e9f0cec391.json) · [Raw log](../build-logs/20261106T125205.389283Z-e9f0cec391.log)
+- [Exact process output](../build-logs/20261106T125205.389283Z-e9f0cec391.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T20:53:11+08:00 · real-audio-chordmini-full-song · succeeded
+
+- Config: Release; exit code: 0; elapsed: 14.370s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=20 emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/mir/guard.py chordmini --input /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/newlight.mp3 --sha256 885891e2076ca629d3e60685a68df3be07e20da00f0ee45038b5da547519826b --approved-slot"`
+- Context: First ChordMini inference on complete218.3048s New Light MP3; native170-label vocabulary; no crop/smoothing
+- Source SHA-256: `c316c6ca10117e601c530e0cd961e49ee9191d502dee4522259e6d0224ad98b8`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125311.502792Z-7147533edd.json) · [Raw log](../build-logs/20261106T125311.502792Z-7147533edd.log)
+- [Exact process output](../build-logs/20261106T125311.502792Z-7147533edd.raw.log)
+
+### 2026-11-06T20:53:26+08:00 · real-audio-scores-stage-cpu-tests · succeeded
+
+- Config: cloud/Linux/CPU; no CUDA; frozen-source e8bb19237de6; exit code: 0; elapsed: 1.542s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "mkdir -p /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/scripts/scores-e8bb19237de6"`
+- Context: Stage immutable SheetSage2 full-song runner and run only CPU lifecycle tests; no audio/model inference.
+- Source SHA-256: `c316c6ca10117e601c530e0cd961e49ee9191d502dee4522259e6d0224ad98b8`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125326.056207Z-fe17274dcb.json) · [Raw log](../build-logs/20261106T125326.056207Z-fe17274dcb.log)
+- [Exact process output](../build-logs/20261106T125326.056207Z-fe17274dcb.raw.log)
+
+### 2026-11-06T20:53:29+08:00 · real-audio-bundle-cpu-tests · succeeded
+
+- Config: local/Windows/Python3.14; exit code: 0; elapsed: 1.405s.
+- Command: `C:\Python314\python.exe -m unittest discover -s scripts/cloud/evaluations/real_audio_20261106 -p bundle_test.py -v`
+- Context: Synthetic ZIP safety/integrity tests; no actual audio or remote work
+- Source SHA-256: `080b894d78f5bdb72c1013a10046d37bfaa8a6f80c8ed474c33d652eadac7c4d`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125329.405918Z-bf6abbab01.json) · [Raw log](../build-logs/20261106T125329.405918Z-bf6abbab01.log)
+- [Exact process output](../build-logs/20261106T125329.405918Z-bf6abbab01.raw.log)
+
+### 2026-11-06T20:53:27+08:00 · real-audio-scores-stage-cpu-tests · succeeded
+
+- Config: cloud/Linux/CPU; no CUDA; frozen-source e8bb19237de6; exit code: 0; elapsed: 2.942s.
+- Command: `scp scripts/cloud/evaluations/real_audio_20261106/scores/check_guard.py emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/scripts/scores-e8bb19237de6/check_guard.py`
+- Context: Stage immutable SheetSage2 full-song runner and run only CPU lifecycle tests; no audio/model inference.
+- Source SHA-256: `c316c6ca10117e601c530e0cd961e49ee9191d502dee4522259e6d0224ad98b8`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125327.974346Z-0d3e2561cb.json) · [Raw log](../build-logs/20261106T125327.974346Z-0d3e2561cb.log)
+- [Exact process output](../build-logs/20261106T125327.974346Z-0d3e2561cb.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-06T20:53:31+08:00 · real-audio-scores-stage-cpu-tests · succeeded
+
+- Config: cloud/Linux/CPU; no CUDA; frozen-source e8bb19237de6; exit code: 0; elapsed: 1.906s.
+- Command: `scp scripts/cloud/evaluations/real_audio_20261106/scores/run.py emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/scripts/scores-e8bb19237de6/run.py`
+- Context: Stage immutable SheetSage2 full-song runner and run only CPU lifecycle tests; no audio/model inference.
+- Source SHA-256: `080b894d78f5bdb72c1013a10046d37bfaa8a6f80c8ed474c33d652eadac7c4d`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125331.622440Z-3949fc1cb1.json) · [Raw log](../build-logs/20261106T125331.622440Z-3949fc1cb1.log)
+- [Exact process output](../build-logs/20261106T125331.622440Z-3949fc1cb1.raw.log)
+
+### 2026-11-06T20:53:34+08:00 · real-audio-scores-stage-cpu-tests · succeeded
+
+- Config: cloud/Linux/CPU; no CUDA; frozen-source e8bb19237de6; exit code: 0; elapsed: 1.541s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/scripts/scores-e8bb19237de6/check_guard.py"`
+- Context: Stage immutable SheetSage2 full-song runner and run only CPU lifecycle tests; no audio/model inference.
+- Source SHA-256: `080b894d78f5bdb72c1013a10046d37bfaa8a6f80c8ed474c33d652eadac7c4d`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125334.245695Z-10b6a4ef77.json) · [Raw log](../build-logs/20261106T125334.245695Z-10b6a4ef77.log)
+- [Exact process output](../build-logs/20261106T125334.245695Z-10b6a4ef77.raw.log)
+
+### 2026-11-06T20:53:58+08:00 · real-audio-transkun-full-piano · succeeded
+
+- Config: Release; exit code: 0; elapsed: 12.450s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=20 emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/mir/guard.py transkun --input /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/piano.mp3 --sha256 5b425c8fe09cf82f99a530ae529fe7607c0b792e93d0f91455cc338fd95b632f --approved-slot"`
+- Context: First TransKun inference on user-confirmed Keyboard.mp3 complete279.030975s; preserve native notes/CC and timing; no crop/retry
+- Source SHA-256: `080b894d78f5bdb72c1013a10046d37bfaa8a6f80c8ed474c33d652eadac7c4d`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125358.860792Z-d262c74a62.json) · [Raw log](../build-logs/20261106T125358.860792Z-d262c74a62.log)
+- [Exact process output](../build-logs/20261106T125358.860792Z-d262c74a62.raw.log)
+
+### 2026-11-06T20:54:42+08:00 · real-audio-mir-small-evidence · succeeded
+
+- Config: Release; exit code: 0; elapsed: 7.196s.
+- Command: `scp -o BatchMode=yes -o ConnectTimeout=10 emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/scnet-20261106T125021Z-399a479b/attempt.json emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/scnet-20261106T125021Z-399a479b/preflight.log docs\review\2026-11-06-real-audio\mir\evidence\scnet-preflight-failure`
+- Context: Download only small attempt/result/preflight metadata; original WAV/MIDI/LAB stay cloud
+- Source SHA-256: `080b894d78f5bdb72c1013a10046d37bfaa8a6f80c8ed474c33d652eadac7c4d`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125442.054893Z-dc5e1d577e.json) · [Raw log](../build-logs/20261106T125442.054893Z-dc5e1d577e.log)
+- [Exact process output](../build-logs/20261106T125442.054893Z-dc5e1d577e.raw.log)
+
+### 2026-11-06T20:54:50+08:00 · real-audio-mir-small-evidence · succeeded
+
+- Config: Release; exit code: 0; elapsed: 4.161s.
+- Command: `scp -o BatchMode=yes -o ConnectTimeout=10 emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/scnet-20261106T125207Z-22e9bebf/attempt.json emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/scnet-20261106T125207Z-22e9bebf/data/result.json docs\review\2026-11-06-real-audio\mir\evidence\scnet`
+- Context: Download only small attempt/result/preflight metadata; original WAV/MIDI/LAB stay cloud
+- Source SHA-256: `080b894d78f5bdb72c1013a10046d37bfaa8a6f80c8ed474c33d652eadac7c4d`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125450.017528Z-42d6baee2c.json) · [Raw log](../build-logs/20261106T125450.017528Z-42d6baee2c.log)
+- [Exact process output](../build-logs/20261106T125450.017528Z-42d6baee2c.raw.log)
+
+### 2026-11-06T20:54:54+08:00 · real-audio-mir-small-evidence · succeeded
+
+- Config: Release; exit code: 0; elapsed: 12.219s.
+- Command: `scp -o BatchMode=yes -o ConnectTimeout=10 emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/chordmini-20261106T125321Z-31c71300/attempt.json emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/chordmini-20261106T125321Z-31c71300/data/result.json docs\review\2026-11-06-real-audio\mir\evidence\chordmini`
+- Context: Download only small attempt/result/preflight metadata; original WAV/MIDI/LAB stay cloud
+- Source SHA-256: `080b894d78f5bdb72c1013a10046d37bfaa8a6f80c8ed474c33d652eadac7c4d`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125454.921170Z-55f36bdc1e.json) · [Raw log](../build-logs/20261106T125454.921170Z-55f36bdc1e.log)
+- [Exact process output](../build-logs/20261106T125454.921170Z-55f36bdc1e.raw.log)
+
+### 2026-11-06T20:54:52+08:00 · real-audio-sheetsage2-whole-newlight · succeeded
+
+- Config: cloud/Linux/RTX5090;PyTorch2.8.0+cu128;BF16;full218.3048s;600sdeadline; exit code: 0; elapsed: 16.660s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python -c 'import hashlib,subprocess;from pathlib import Path;p=Path('\"'\"'/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/scripts/scores-e8bb19237de6/run.py'\"'\"');assert hashlib.sha256(p.read_bytes()).hexdigest()==\"db54d98bb211d24dbdeecb03e05e948f88e919b7588a41247aaacb0c294c2d8a\";raise SystemExit(subprocess.call([\"/root/miniconda3/bin/python\",str(p),\"--approved-slot\"]))'"`
+- Context: Explicit GPU slot; original whole New Light MP3, no trimming and full task prompts. Raw outputs cloud only; no accuracy claim or DAW integration.
+- Source SHA-256: `080b894d78f5bdb72c1013a10046d37bfaa8a6f80c8ed474c33d652eadac7c4d`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125452.523291Z-2026784c25.json) · [Raw log](../build-logs/20261106T125452.523291Z-2026784c25.log)
+- [Exact process output](../build-logs/20261106T125452.523291Z-2026784c25.raw.log)
+
+### 2026-11-06T20:55:24+08:00 · real-audio-transkun-small-evidence · succeeded
+
+- Config: Release; exit code: 0; elapsed: 8.708s.
+- Command: `scp -o BatchMode=yes -o ConnectTimeout=10 emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/transkun-20261106T125401Z-ed271438/attempt.json emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/transkun-20261106T125401Z-ed271438/data/result.json docs\review\2026-11-06-real-audio\mir\evidence\transkun`
+- Context: Only attempt/result JSON metadata; no audio/MIDI/model downloads
+- Source SHA-256: `080b894d78f5bdb72c1013a10046d37bfaa8a6f80c8ed474c33d652eadac7c4d`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125524.795150Z-9b33ec26f3.json) · [Raw log](../build-logs/20261106T125524.795150Z-9b33ec26f3.log)
+- [Exact process output](../build-logs/20261106T125524.795150Z-9b33ec26f3.raw.log)
+
+### 2026-11-06T20:55:45+08:00 · real-audio-scores-small-evidence · succeeded
+
+- Config: cloud/read-only; no CUDA; exit code: 0; elapsed: 4.463s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/guard-receipt.json docs\review\2026-11-06-real-audio\scores\evidence\guard-receipt.json`
+- Context: Copy only two small audit receipts and read native key/structure labels. Raw music/score outputs remain cloud-only.
+- Source SHA-256: `080b894d78f5bdb72c1013a10046d37bfaa8a6f80c8ed474c33d652eadac7c4d`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125545.880547Z-2dee4f4bc9.json) · [Raw log](../build-logs/20261106T125545.880547Z-2dee4f4bc9.log)
+- [Exact process output](../build-logs/20261106T125545.880547Z-2dee4f4bc9.raw.log)
+
+### 2026-11-06T20:55:51+08:00 · real-audio-scores-small-evidence · succeeded
+
+- Config: cloud/read-only; no CUDA; exit code: 0; elapsed: 4.061s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/result-receipt.json docs\review\2026-11-06-real-audio\scores\evidence\result-receipt.json`
+- Context: Copy only two small audit receipts and read native key/structure labels. Raw music/score outputs remain cloud-only.
+- Source SHA-256: `080b894d78f5bdb72c1013a10046d37bfaa8a6f80c8ed474c33d652eadac7c4d`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125551.135667Z-5ca48b5ea7.json) · [Raw log](../build-logs/20261106T125551.135667Z-5ca48b5ea7.log)
+- [Exact process output](../build-logs/20261106T125551.135667Z-5ca48b5ea7.raw.log)
+
+### 2026-11-06T20:55:55+08:00 · real-audio-scores-small-evidence · succeeded
+
+- Config: cloud/read-only; no CUDA; exit code: 0; elapsed: 5.343s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python -c 'from pathlib import Path;import json;root=Path('\"'\"'/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531'\"'\"');print(json.dumps({name:(root/\"transcription\"/name).read_text() for name in (\"key.lab\",\"structure.lab\")},ensure_ascii=False))'"`
+- Context: Copy only two small audit receipts and read native key/structure labels. Raw music/score outputs remain cloud-only.
+- Source SHA-256: `080b894d78f5bdb72c1013a10046d37bfaa8a6f80c8ed474c33d652eadac7c4d`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125555.979928Z-17327b3330.json) · [Raw log](../build-logs/20261106T125555.979928Z-17327b3330.log)
+- [Exact process output](../build-logs/20261106T125555.979928Z-17327b3330.raw.log)
+
+### 2026-11-06T20:56:18+08:00 · real-audio-bundle-cloud · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 5.233s.
+- Command: `scp scripts\cloud\evaluations\real_audio_20261106\bundle.py emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/bundle-3070f64bbaa0.py`
+- Context: Explicit four successful result directories; no model/GPU; audio remains cloud-only
+- Source SHA-256: `d71c247efd13c29927d12461d969ad79f2faf83a45ee3ad863be016f4cdd72c2`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125618.060834Z-1062f4be23.json) · [Raw log](../build-logs/20261106T125618.060834Z-1062f4be23.log)
+- [Exact process output](../build-logs/20261106T125618.060834Z-1062f4be23.raw.log)
+
+### 2026-11-06T20:56:24+08:00 · real-audio-bundle-cloud · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.683s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python -c 'import hashlib;from pathlib import Path;p=Path('\"'\"'/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/bundle-3070f64bbaa0.py'\"'\"');assert hashlib.sha256(p.read_bytes()).hexdigest()=='\"'\"'3070f64bbaa0460fa8bcd51f9e53b8c1345290baa9732a80bf139a87ea3d5ca9'\"'\"';print('\"'\"'bundle.py sha256=3070f64bbaa0460fa8bcd51f9e53b8c1345290baa9732a80bf139a87ea3d5ca9'\"'\"')'"`
+- Context: Explicit four successful result directories; no model/GPU; audio remains cloud-only
+- Source SHA-256: `5572a0488ea837c6d08b517d0125382a3fd99930bec196d1647e354df96f0260`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125624.185755Z-33e6128047.json) · [Raw log](../build-logs/20261106T125624.185755Z-33e6128047.log)
+- [Exact process output](../build-logs/20261106T125624.185755Z-33e6128047.raw.log)
+
+### 2026-11-06T20:56:26+08:00 · real-audio-bundle-cloud · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 2.177s.
+- Command: `scp scripts\cloud\evaluations\real_audio_20261106\bundle_verify.py emusician-autodl:/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/bundle_verify-d17d47b46877.py`
+- Context: Explicit four successful result directories; no model/GPU; audio remains cloud-only
+- Source SHA-256: `5572a0488ea837c6d08b517d0125382a3fd99930bec196d1647e354df96f0260`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125626.536102Z-30e07870b8.json) · [Raw log](../build-logs/20261106T125626.536102Z-30e07870b8.log)
+- [Exact process output](../build-logs/20261106T125626.536102Z-30e07870b8.raw.log)
+
+### 2026-11-06T20:56:29+08:00 · real-audio-bundle-cloud · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.567s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python -c 'import hashlib;from pathlib import Path;p=Path('\"'\"'/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/bundle_verify-d17d47b46877.py'\"'\"');assert hashlib.sha256(p.read_bytes()).hexdigest()=='\"'\"'d17d47b46877eb9a5dcde2e8079bdb0695f72c50b61c60b04faf4a4ed26997ae'\"'\"';print('\"'\"'bundle_verify.py sha256=d17d47b46877eb9a5dcde2e8079bdb0695f72c50b61c60b04faf4a4ed26997ae'\"'\"')'"`
+- Context: Explicit four successful result directories; no model/GPU; audio remains cloud-only
+- Source SHA-256: `5572a0488ea837c6d08b517d0125382a3fd99930bec196d1647e354df96f0260`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125629.453684Z-6e449c669c.json) · [Raw log](../build-logs/20261106T125629.453684Z-6e449c669c.log)
+- [Exact process output](../build-logs/20261106T125629.453684Z-6e449c669c.raw.log)
+
+### 2026-11-06T20:56:31+08:00 · real-audio-bundle-cloud · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 2.368s.
+- Command: `ssh -o BatchMode=yes -o ServerAliveInterval=20 emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/bundle-3070f64bbaa0.py --input-dir /root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/scnet-20261106T125207Z-22e9bebf --input-dir /root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/chordmini-20261106T125321Z-31c71300 --input-dir /root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/transkun-20261106T125401Z-ed271438 --input-dir /root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531 --output /root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/NewLight-Keyboard-raw-results.zip"`
+- Context: Explicit four successful result directories; no model/GPU; audio remains cloud-only
+- Source SHA-256: `5572a0488ea837c6d08b517d0125382a3fd99930bec196d1647e354df96f0260`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125631.755099Z-d329834d4f.json) · [Raw log](../build-logs/20261106T125631.755099Z-d329834d4f.log)
+- [Exact process output](../build-logs/20261106T125631.755099Z-d329834d4f.raw.log)
+
+### 2026-11-06T20:57:02+08:00 · real-audio-bundle-verify · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 1.902s.
+- Command: `ssh -o BatchMode=yes -o ServerAliveInterval=20 emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/bundle_verify-d17d47b46877.py --archive /root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/NewLight-Keyboard-raw-results.zip --receipt /root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/NewLight-Keyboard-raw-results.manifest.json --report /root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/NewLight-Keyboard-raw-results.verification.json"`
+- Context: Read-only streaming ZIP CRC/member SHA and whole archive SHA; collect JSON metadata only
+- Source SHA-256: `5572a0488ea837c6d08b517d0125382a3fd99930bec196d1647e354df96f0260`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125702.129080Z-b90dc3e54b.json) · [Raw log](../build-logs/20261106T125702.129080Z-b90dc3e54b.log)
+- [Exact process output](../build-logs/20261106T125702.129080Z-b90dc3e54b.raw.log)
+
+### 2026-11-06T20:57:04+08:00 · real-audio-bundle-verify · succeeded
+
+- Config: cloud/Linux/Python3.12; exit code: 0; elapsed: 2.166s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/NewLight-Keyboard-raw-results.verification.json docs/review/2026-11-06-real-audio/delivery.json`
+- Context: Read-only streaming ZIP CRC/member SHA and whole archive SHA; collect JSON metadata only
+- Source SHA-256: `5572a0488ea837c6d08b517d0125382a3fd99930bec196d1647e354df96f0260`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125704.510846Z-fb5085ccae.json) · [Raw log](../build-logs/20261106T125704.510846Z-fb5085ccae.log)
+- [Exact process output](../build-logs/20261106T125704.510846Z-fb5085ccae.raw.log)
+
+### 2026-11-06T20:57:40+08:00 · real-audio-mir-evidence-freeze · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.989s.
+- Command: `C:\Python314\python.exe -c "from pathlib import Path
+import json,hashlib
+base=Path('docs/review/2026-11-06-real-audio/mir/evidence')
+source=Path('scripts/cloud/evaluations/real_audio_20261106/mir')
+worker=hashlib.sha256((source/'whole_file.py').read_bytes()).hexdigest()
+guard=hashlib.sha256((source/'guard.py').read_bytes()).hexdigest()
+for name in ['scnet','chordmini','transkun']:
+ a=json.loads((base/name/'attempt.json').read_text(encoding='utf-8'))
+ r=json.loads((base/name/'result.json').read_text(encoding='utf-8'))
+ assert a['status']==r['status']=='passed' and a['result']==r
+ assert a['guard_sha256']==guard and r['script_sha256']==worker
+ assert not r['input']['crop_applied'] and r['input']['scope']=='complete_original_file'
+ assert r['input']['sha256']==a['expected_input_sha256']
+ assert a['after']['active_ace_jobs']==[]
+ assert all(len(o['sha256'])==64 and o['bytes']>0 for o in r['outputs'])
+ print(name,'verified',r['input']['duration_seconds'],len(r['outputs']))
+f=json.loads((base/'scnet-preflight-failure/attempt.json').read_text(encoding='utf-8'))
+assert f['status']=='failed' and f['exit_code'] is None
+print('preflight failure preserved; frozen script SHA matches all three actual runs')
+"`
+- Context: Compare exact executed script SHA, complete input identities, raw output inventories, and success receipts; no inference
+- Source SHA-256: `5572a0488ea837c6d08b517d0125382a3fd99930bec196d1647e354df96f0260`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125739.999456Z-e5820a7c2d.json) · [Raw log](../build-logs/20261106T125739.999456Z-e5820a7c2d.log)
+- [Exact process output](../build-logs/20261106T125739.999456Z-e5820a7c2d.raw.log)
+
+### 2026-11-06T20:57:41+08:00 · real-audio-mir-evidence-freeze · succeeded
+
+- Config: Release; exit code: 0; elapsed: 0.494s.
+- Command: `git diff --check -- scripts/cloud/evaluations/real_audio_20261106/mir docs/review/2026-11-06-real-audio/mir`
+- Context: Compare exact executed script SHA, complete input identities, raw output inventories, and success receipts; no inference
+- Source SHA-256: `5572a0488ea837c6d08b517d0125382a3fd99930bec196d1647e354df96f0260`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125741.517968Z-920609e8bc.json) · [Raw log](../build-logs/20261106T125741.517968Z-920609e8bc.log)
+- [Exact process output](../build-logs/20261106T125741.517968Z-920609e8bc.raw.log)
+
+### 2026-11-06T20:57:57+08:00 · real-audio-final-audit · succeeded
+
+- Config: local/Python3.14;cloud/Linux; exit code: 0; elapsed: 14.146s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/NewLight-Keyboard-raw-results.manifest.json docs/review/2026-11-06-real-audio/archive.json`
+- Context: Verify original input hashes, four model receipts, executed script hashes, raw ZIP evidence and unchanged DAW build inputs; no new model inference or audio download.
+- Source SHA-256: `21380087996097aed0e4e8b15b59f9c9da22725d1e488bd9f7a80016080fc0d6`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125757.405200Z-19abd9d3ba.json) · [Raw log](../build-logs/20261106T125757.405200Z-19abd9d3ba.log)
+- [Exact process output](../build-logs/20261106T125757.405200Z-19abd9d3ba.raw.log)
+
+### 2026-11-06T20:58:12+08:00 · real-audio-final-audit · failed
+
+- Config: local/Python3.14;cloud/Linux; exit code: 1; elapsed: 1.352s.
+- Command: `C:\Python314\python.exe scripts/cloud/evaluations/real_audio_20261106/audit.py`
+- Context: Verify original input hashes, four model receipts, executed script hashes, raw ZIP evidence and unchanged DAW build inputs; no new model inference or audio download.
+- Source SHA-256: `21380087996097aed0e4e8b15b59f9c9da22725d1e488bd9f7a80016080fc0d6`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125812.368039Z-cca37335eb.json) · [Raw log](../build-logs/20261106T125812.368039Z-cca37335eb.log)
+- [Exact process output](../build-logs/20261106T125812.368039Z-cca37335eb.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261106T125812.368039Z-cca37335eb.log
+
+### 2026-11-06T20:58:28+08:00 · real-audio-final-audit · succeeded
+
+- Config: local/Python3.14; exit code: 0; elapsed: 0.953s.
+- Command: `C:\Python314\python.exe scripts/cloud/evaluations/real_audio_20261106/audit.py`
+- Context: Correct audit field distinction: ChordMini uses full-song CQT features rather than the SCNet/TransKun PCM decoder receipt; preserve first audit KeyError. No new inference.
+- Source SHA-256: `360975e6736f6f9d1607a1968adc55fa6f02a8a5087a4ddc81438f63f5c48e0a`; Git HEAD: `0c21c013d6e21de923fe4751993a2e38e5a8613c`.
+- [Record](builds/20261106T125828.288522Z-bf61536931.json) · [Raw log](../build-logs/20261106T125828.288522Z-bf61536931.log)
+- [Exact process output](../build-logs/20261106T125828.288522Z-bf61536931.raw.log)
+
+### 2026-11-06T20:59:00+08:00 ? ??? MIR ????
+
+- New Light??218.305???SCNet/ChordMini/SheetSage2?????Keyboard??279.031???TransKun????????????/?????27.43/4.65/14.78/9.52???????????
+- ????ZIP 308,835,729???38?????/???CRC?SHA?????????????????DAW??????????257?DAW??????????
+- 20?CPU???????SCNet CPU???????SSH reset?????????KeyError????????????????????
+- ????????????????MuScriptor???????????? [????](review/2026-11-06-real-audio/RESULTS.md) / [??](review/2026-11-06-real-audio/VERIFICATION.json)?
+
+### 2026-11-06T20:59:30+08:00 · 更正：原文件 MIR 评测交付
+
+上一条人工摘要经 PowerShell 管道写入时中文被替换为问号；保留原记录，以下补记正确内容，不影响模型结果和JSON证据。
+
+- New Light完整218.305秒完成SCNet/ChordMini/SheetSage2；用户明确Keyboard完整279.031秒完成TransKun。各一次真实推理，无裁切或重抽。外层27.43/4.65/14.78/9.52秒；听感及准确率未验。
+- 云端原始ZIP为308,835,729字节、38文件，整包及逐成员CRC/SHA通过。本地仅脚本和小证据，没有改动DAW或现有模型服务；257个DAW构建输入逐文件不变。
+- 20项CPU检查通过；SCNet首次CPU前检笔误、一次SSH reset、最终审查字段KeyError均保留，修正后通过，没有因此重复模型推理。
+- 版本、参数、输入身份、耗时边界、MuScriptor访问步骤和人工检查范围见 [本次结果](review/2026-11-06-real-audio/RESULTS.md) / [验证](review/2026-11-06-real-audio/VERIFICATION.json)。

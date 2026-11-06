@@ -1,0 +1,250 @@
+{
+  "model": "sheetsage2",
+  "status": "passed",
+  "started_utc": "2026-11-06T12:54:54Z",
+  "before": {
+    "active_ace_jobs": [],
+    "free_gpu_mib": 14774
+  },
+  "output": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531",
+  "log": "/root/autodl-tmp/emusician/logs/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531.log",
+  "deadline_seconds": 600,
+  "guard_script": {
+    "path": "/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/scripts/scores-e8bb19237de6/run.py",
+    "bytes": 11820,
+    "sha256": "db54d98bb211d24dbdeecb03e05e948f88e919b7588a41247aaacb0c294c2d8a"
+  },
+  "input_sha256": "885891e2076ca629d3e60685a68df3be07e20da00f0ee45038b5da547519826b",
+  "exit_code": 0,
+  "elapsed_seconds": 14.777258947491646,
+  "minimum_free_gpu_mib": 10710,
+  "after": {
+    "active_ace_jobs": [],
+    "free_gpu_mib": 14774
+  },
+  "result": {
+    "status": "passed",
+    "actual_model_inference": true,
+    "input": {
+      "path": "/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/newlight.mp3",
+      "bytes": 8734346,
+      "sha256": "885891e2076ca629d3e60685a68df3be07e20da00f0ee45038b5da547519826b"
+    },
+    "input_frames": 9627241,
+    "input_sample_rate": 44100,
+    "input_channels": 2,
+    "input_duration_seconds": 218.30478458049888,
+    "model_duration_seconds": 218.30479166666666,
+    "whole_input_decoded": true,
+    "max_seconds": null,
+    "input_cropped": false,
+    "elapsed_seconds": 12.206302464008331,
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "torch": "2.8.0+cu128",
+    "cuda_runtime": "12.8",
+    "peak_allocated_bytes": 3534086144,
+    "peak_reserved_bytes": 3617587200,
+    "allocator_cap_bytes": 10737418240,
+    "window_seconds": 300.0,
+    "preset": "default",
+    "dtype": "bf16",
+    "prompts": [
+      "timestamp",
+      "downbeat_meter",
+      "structure",
+      "key",
+      "chord_full",
+      "melody_full"
+    ],
+    "full_task_prompts": true,
+    "quality_evaluation": false,
+    "daw_connected": false,
+    "abc_present": true,
+    "abc_error": null,
+    "event_count": 720,
+    "first_event_seconds": 0.01,
+    "last_event_seconds": 217.01,
+    "windows": [
+      {
+        "start": 0.0,
+        "end": 218.30479166666666,
+        "accept_start": 0.0,
+        "accept_end": 218.30479166666666,
+        "prefix_end": 0.0,
+        "generation_stop": null,
+        "window_index": 0,
+        "prefix_tokens": 0,
+        "tokens": 2809,
+        "events": 720,
+        "accepted_events": 720,
+        "elapsed_seconds": 7.653544642031193
+      }
+    ],
+    "max_output_sequence_length": 5120,
+    "token_limit_reached": false,
+    "warnings": [],
+    "midi": [
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/melody.mid",
+        "seconds": 217.0104166666673,
+        "note_on_count": 544
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/melody_vocal.mid",
+        "seconds": 203.95052083333374,
+        "note_on_count": 388
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/melody_instrumental.mid",
+        "seconds": 217.01041666666688,
+        "note_on_count": 156
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/transcription.mid",
+        "seconds": 218.30520833333404,
+        "note_on_count": 1071
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/chords.mid",
+        "seconds": 218.30520833333318,
+        "note_on_count": 527
+      }
+    ],
+    "artifacts": [
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/beat.lab",
+        "bytes": 5618,
+        "sha256": "98bae1d129b862767a8caee7b59b5d8b748be6321aff3d9ed339f807199a4fba"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/chord.lab",
+        "bytes": 2169,
+        "sha256": "77b3dec82d66fd4305076ab009af9a35229d98717b58c47e385dc7e99a567611"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/chords.mid",
+        "bytes": 3343,
+        "sha256": "7feb6cdf5a7605a74a3e5bde987c7542821a4b56d237b9cb3d69d6e8a006b71a"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/downbeat.lab",
+        "bytes": 726,
+        "sha256": "33fb1d0bf99660b3b4361d7ae99a7522124204f06eca8e12bcec8118ef2bf00f"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/events.json",
+        "bytes": 402069,
+        "sha256": "4ef3c318a9eeda32ae1125da54ae2a528a45e520eeb7a4245d10149bb7a7a266"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/events.tsv",
+        "bytes": 56116,
+        "sha256": "1a26029ebee67d7657adfb0939088d3954e5b8e64bc8d6c80133d8e9a299929c"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/key.lab",
+        "bytes": 32,
+        "sha256": "2b90d34a79757d5f1ce74e46cea8ba932086ae454dd48ebd236d12d81d39b390"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/melody.mid",
+        "bytes": 3967,
+        "sha256": "77658c99de575304fba181a0f52f9c72214fe76d84e02fe28a0a3ab3e79fa555"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/melody_full.lab",
+        "bytes": 11509,
+        "sha256": "3bdd4ea7ead9093869f59e1bee48d39e39f6e1731344361768993cbb9b21b674"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/melody_instrumental.lab",
+        "bytes": 2921,
+        "sha256": "daa8889886bc3fc4d81faf499a7db42226acdd777afc23e15aae022fa5486323"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/melody_instrumental.mid",
+        "bytes": 1205,
+        "sha256": "43f1b48316b187da26e683118632faf067e0572a7cf90cb42704c29605e6dc42"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/melody_vocal.lab",
+        "bytes": 7500,
+        "sha256": "dddeb4ed409be6a99dbdaa9a1beb7ebe98ae19ff976cffee4b44e8bcf6411572"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/melody_vocal.mid",
+        "bytes": 2849,
+        "sha256": "175570d74b38e3c454eab2d8f9261fd1bbe30de15240087b17add6fff6f89e7f"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/notation/song_beats.txt",
+        "bytes": 5681,
+        "sha256": "dd024f73bf27bd406acea9fe76fe570ea861967c728e72503bacb21771b2d9ed"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/notation/song_chords.txt",
+        "bytes": 2169,
+        "sha256": "77b3dec82d66fd4305076ab009af9a35229d98717b58c47e385dc7e99a567611"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/notation/song_keys.txt",
+        "bytes": 32,
+        "sha256": "2b90d34a79757d5f1ce74e46cea8ba932086ae454dd48ebd236d12d81d39b390"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/notation/song_melody.mid",
+        "bytes": 3967,
+        "sha256": "77658c99de575304fba181a0f52f9c72214fe76d84e02fe28a0a3ab3e79fa555"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/notation/song_structures.txt",
+        "bytes": 270,
+        "sha256": "6cedb61acdf8fdd5eeb2d20f1bae79d1de2f215c64eae650a52fce14b08680b0"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/playback.json",
+        "bytes": 171429,
+        "sha256": "08baf8ebb7822788d71d76fd0f94d84a2c6b6ded2764d14cbbb30f17605b9604"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/result.json",
+        "bytes": 1037,
+        "sha256": "396f6da8b8e80f506b01f9771ee737216374ba9ee75ccab7e5dba45ba5e4c390"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/rhythm_events.lab",
+        "bytes": 13353,
+        "sha256": "f139bd85fb3882d61f737a2fb1e6620a0e938770aa0b3d1ce1a24809f75d9f73"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/score.abc",
+        "bytes": 2940,
+        "sha256": "496c574efcdb43e9e2ba9fffa49c16033e0d537eb6df637f285259ff2b3d6030"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/structure.lab",
+        "bytes": 270,
+        "sha256": "6cedb61acdf8fdd5eeb2d20f1bae79d1de2f215c64eae650a52fce14b08680b0"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/tokens.json",
+        "bytes": 18244,
+        "sha256": "b7b2304b5909a440eb1a907070b0fbbdb8db92660eea5d4156a8f8ba27991e51"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/tokens.txt",
+        "bytes": 73951,
+        "sha256": "dc99af296d83a8343e7c45ccefe798804e06e780cd82be00f687ba2253426dea"
+      },
+      {
+        "path": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/sheetsage2-20261106T125454Z-75be3531/transcription/transcription.mid",
+        "bytes": 7269,
+        "sha256": "a911d887b7d48b06879d53b7150662f0521337a308a6cb764a6219ccd01de52d"
+      }
+    ],
+    "source_revisions": {
+      "sheetsage2": "b83c3d79a6d98bcffaf8f9ed112c90aa887887bc",
+      "mert2": "d8ba1c745e733b3908ce6ad16ebeb17ac7600a42"
+    }
+  }
+}

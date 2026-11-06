@@ -1,0 +1,35 @@
+{
+  "model": "scnet",
+  "status": "failed",
+  "started_utc": "20261106T125021Z-399a479b",
+  "input": "/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/newlight.mp3",
+  "expected_input_sha256": "885891e2076ca629d3e60685a68df3be07e20da00f0ee45038b5da547519826b",
+  "output": "/root/autodl-tmp/emusician/results/evaluations/real_audio_20261106/scnet-20261106T125021Z-399a479b",
+  "deadline_seconds": 1800,
+  "guard_sha256": "a669c152606e79d8e39e0ecf7b487c77ba4d65dafde16cb5212617897f72cf63",
+  "daw_connected": false,
+  "audio_downloaded_to_e": false,
+  "quality_verified": false,
+  "attempts": 1,
+  "policy": {
+    "admission_gpu_mib": 8192,
+    "stop_gpu_mib": 1024,
+    "stop_available_host_bytes": 2147483648,
+    "max_owned_worker_rss_bytes": 12884901888
+  },
+  "before": {
+    "active_ace_jobs": [],
+    "free_gpu_mib": 14774,
+    "available_host_bytes": 699503267840,
+    "free_disk_bytes": 166602248192
+  },
+  "error": "RuntimeError: Whole-file preflight failed; see preflight.log",
+  "exit_code": null,
+  "wall_seconds": 0.10978791490197182,
+  "after": {
+    "active_ace_jobs": [],
+    "free_gpu_mib": 14774,
+    "available_host_bytes": 699260346368,
+    "free_disk_bytes": 166602244096
+  }
+}

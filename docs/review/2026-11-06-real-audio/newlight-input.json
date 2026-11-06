@@ -1,0 +1,14 @@
+{
+  "id": "newlight",
+  "source": "E:\\E-musician\\test-projects\\test9-newlight\\New Light()\\New Light.mp3",
+  "original_filename": "New Light.mp3",
+  "bytes": 8734346,
+  "sha256": "885891e2076ca629d3e60685a68df3be07e20da00f0ee45038b5da547519826b",
+  "cloud_path": "/root/autodl-tmp/emusician/workspace/evaluations/real_audio_20261106/inputs/newlight.mp3",
+  "trimmed": false,
+  "frames": 9627241,
+  "sample_rate": 44100,
+  "channels": 2,
+  "duration_seconds": 218.30478458049888,
+  "cloud_sha_verified_record": "20261106T124607.386453Z-66b32ab524"
+}
