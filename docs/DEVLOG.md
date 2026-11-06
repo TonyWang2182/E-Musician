@@ -8119,3 +8119,50 @@ print('PASS: unchanged baseline, 2 exact new cache files, both absent preference
 - New0.12.1 EXE SHA09fae4dc15eddaec2830e9933198674d314c14fd20233d3f9e456ef6ee56b292, independent launcher/workspace and release binaries copied/verified on E. Old0.12.0 SHA unchanged. See generation-stability RESULTS/VERIFICATION/MANUAL-CHECK.
 - Remaining main weights17,770,907,597B; including optional checkpoints38,637,196,216B. Available cloud208,089,600,000B before staging; additional full deployment budget139-189GB including estimated environments/temp/results, not measured installs. Exact sources/revisions in hybrid-ai/CAPACITY-20261106.json.
 - New user steering authorizes parallel cloud MIR preparation. Isolated HTDemucs4/6, BasicPitch ONNX and BeatThis staging is separate; DAW still routes MIR locally and ACE remotely, no free local/cloud switch yet. Do not infer runtime readiness from package installation.
+
+### 2026-11-06T17:57:54+08:00 · cloud-mir-stage-prepare · succeeded
+
+- Config: Python stdlib / local E assets; exit code: 0; elapsed: 7.144s.
+- Command: `C:\Python314\python.exe scripts/cloud/mir_stage.py prepare`
+- Context: Copy only four registered MIR weights and exact BeatThis source; verify registered SHA before packing. No model loading.
+- Source SHA-256: `b896262e30c850485da3a19e2d4ee3fe8c14dac9ccaf34176c37fe99c9b8b595`; Git HEAD: `61c93840671ba1ea6fd0694d585255e4916b65cb`.
+- [Record](builds/20261106T095754.792357Z-c560b4cf73.json) · [Raw log](../build-logs/20261106T095754.792357Z-c560b4cf73.log)
+- [Exact process output](../build-logs/20261106T095754.792357Z-c560b4cf73.raw.log)
+
+### 2026-11-06T17:58:16+08:00 · cloud-mir-stage-transfer · succeeded
+
+- Config: SCP / existing AutoDL instance; exit code: 0; elapsed: 1.130s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "sha256sum /root/autodl-tmp/emusician/manifests/ace-runtime.json /root/autodl-tmp/emusician/envs/ace/pyvenv.cfg; curl -fsS http://127.0.0.1:18081/health"`
+- Context: Transfer verified 225 MB staging archive and new MIR-only tools. No ACE mutation or GPU task.
+- Source SHA-256: `b896262e30c850485da3a19e2d4ee3fe8c14dac9ccaf34176c37fe99c9b8b595`; Git HEAD: `f6fe0a069334d4bdda2b04b503c64a8d58c35b4a`.
+- [Record](builds/20261106T095816.912314Z-441f1bfb4b.json) · [Raw log](../build-logs/20261106T095816.912314Z-441f1bfb4b.log)
+- [Exact process output](../build-logs/20261106T095816.912314Z-441f1bfb4b.raw.log)
+
+### 2026-11-06T17:58:18+08:00 · cloud-mir-stage-transfer · succeeded
+
+- Config: SCP / existing AutoDL instance; exit code: 0; elapsed: 1.550s.
+- Command: `scp -o BatchMode=yes E:\MusicAgent&DAW\cloud-inference\tools\mir_stage.py E:\MusicAgent&DAW\cloud-inference\tools\mir_requirements.py E:\MusicAgent&DAW\cloud-inference\tools\mir_install.sh emusician-autodl:/root/autodl-tmp/emusician/tools/`
+- Context: Transfer verified 225 MB staging archive and new MIR-only tools. No ACE mutation or GPU task.
+- Source SHA-256: `b896262e30c850485da3a19e2d4ee3fe8c14dac9ccaf34176c37fe99c9b8b595`; Git HEAD: `f6fe0a069334d4bdda2b04b503c64a8d58c35b4a`.
+- [Record](builds/20261106T095818.417801Z-148777f402.json) · [Raw log](../build-logs/20261106T095818.417801Z-148777f402.log)
+- [Exact process output](../build-logs/20261106T095818.417801Z-148777f402.raw.log)
+
+### 2026-11-06T17:58:20+08:00 · cloud-mir-stage-transfer · succeeded
+
+- Config: SCP / existing AutoDL instance; exit code: 0; elapsed: 35.736s.
+- Command: `scp -o BatchMode=yes E:\MusicAgent&DAW\cloud-inference\environments\mir\mir-stage-assets.tar E:\MusicAgent&DAW\cloud-inference\environments\mir\mir-stage-transfer.json emusician-autodl:/root/autodl-tmp/emusician/cache/`
+- Context: Transfer verified 225 MB staging archive and new MIR-only tools. No ACE mutation or GPU task.
+- Source SHA-256: `b896262e30c850485da3a19e2d4ee3fe8c14dac9ccaf34176c37fe99c9b8b595`; Git HEAD: `f6fe0a069334d4bdda2b04b503c64a8d58c35b4a`.
+- [Record](builds/20261106T095820.481531Z-f32b4c4394.json) · [Raw log](../build-logs/20261106T095820.481531Z-f32b4c4394.log)
+- [Exact process output](../build-logs/20261106T095820.481531Z-f32b4c4394.raw.log)
+
+### 2026-11-06T17:58:56+08:00 · cloud-mir-stage-transfer · succeeded
+
+- Config: SCP / existing AutoDL instance; exit code: 0; elapsed: 1.281s.
+- Command: `ssh -o BatchMode=yes emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/tools/mir_stage.py unpack"`
+- Context: Transfer verified 225 MB staging archive and new MIR-only tools. No ACE mutation or GPU task.
+- Source SHA-256: `b896262e30c850485da3a19e2d4ee3fe8c14dac9ccaf34176c37fe99c9b8b595`; Git HEAD: `f6fe0a069334d4bdda2b04b503c64a8d58c35b4a`.
+- [Record](builds/20261106T095856.486196Z-e28b313d24.json) · [Raw log](../build-logs/20261106T095856.486196Z-e28b313d24.log)
+- [Exact process output](../build-logs/20261106T095856.486196Z-e28b313d24.raw.log)
+
+- 0.12.1 preservation: implementation commit f6fe0a0; source archive 20,771,290B,1499entries,SHA b4a1c5ced9c818f9aa47f619ba1215676f5c8e1a88efa8b525474b8d73a691bb; ZIP CRC and all257 tested source hashes passed. EXE/PDB/launcher/workspace independently copied and verified. This is a local preservation bundle, not a portable installer.

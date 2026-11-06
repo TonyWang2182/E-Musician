@@ -1,0 +1,56 @@
+{
+  "checked_utc": "2026-11-06T09:58:56.937330+00:00",
+  "source_commit": "f6fe0a069334d4bdda2b04b503c64a8d58c35b4a",
+  "branch": "fix/generation-stability-v0121",
+  "release_directory": "E:\\MusicAgent&DAW\\releases\\0.12.1-20261106-generation-stability",
+  "archive": {
+    "name": "source-and-records.zip",
+    "bytes": 20771290,
+    "sha256": "b4a1c5ced9c818f9aa47f619ba1215676f5c8e1a88efa8b525474b8d73a691bb",
+    "entries": 1499,
+    "zip_crc_passed": true,
+    "exact_build_source_files_verified": 257
+  },
+  "binary_manifest": {
+    "created_utc": "2026-11-06T09:56:27.012344+00:00",
+    "base_commit": "61c93840671ba1ea6fd0694d585255e4916b65cb",
+    "build_source_digest": "fb10a30f8cc7490ca86d6f8ae2a582563352552065d1ff3278e4e4a7146fd09e",
+    "files": [
+      {
+        "file": "E-musician.exe",
+        "bytes": 22913536,
+        "sha256": "09fae4dc15eddaec2830e9933198674d314c14fd20233d3f9e456ef6ee56b292"
+      },
+      {
+        "file": "E-musician.pdb",
+        "bytes": 167727104,
+        "sha256": "dda41ebfd3d6f118d76bc246a7f8d8db963879bfb08c183a9c91264e0282600e"
+      },
+      {
+        "file": "Start E-musician 0.12.1 Stability.cmd",
+        "bytes": 209,
+        "sha256": "ca09783d6fc4c5645b492321b49f544bb23c3641a4c433f1f64c0ba59be556b1"
+      },
+      {
+        "file": "E-musician-Stability.code-workspace",
+        "bytes": 1642,
+        "sha256": "fc8e18a9b9d64d8caef5d0234715333422e37735575b8754836f6895504db6e7"
+      }
+    ],
+    "source_archive": {
+      "name": "source-and-records.zip",
+      "bytes": 20771290,
+      "sha256": "b4a1c5ced9c818f9aa47f619ba1215676f5c8e1a88efa8b525474b8d73a691bb",
+      "entries": 1499,
+      "zip_crc_passed": true,
+      "exact_build_source_files_verified": 257
+    },
+    "portable_installer": false,
+    "requires": "matching repository scripts, local model environments and optional cloud service; no keys bundled",
+    "source_commit": "f6fe0a069334d4bdda2b04b503c64a8d58c35b4a"
+  },
+  "portable_installer": false,
+  "old_0120_preserved": true,
+  "main_updated": false,
+  "remote_push": "pending"
+}
