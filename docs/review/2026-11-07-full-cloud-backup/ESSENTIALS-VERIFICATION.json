@@ -1,0 +1,8 @@
+{
+  "phase": "verified",
+  "scope": "Recovery configuration and queue snapshots ONLY; no full model weights/environments",
+  "name": "recovery-essentials.zip",
+  "size": 5590138,
+  "sha256": "0982d6565543ea19fa7aa62b632042957b5dadbec0e15a108b872c3bf3318a9d",
+  "files": 141
+}

@@ -1,5 +1,11 @@
 # E-musician 技术架构
 
+## 运维备份边界（2026-11-07）
+
+新增独立`scripts/cloud/full_backup.py`与`pull_full_backup.py`：云端空闲调度锁下对两个SQLite做一致快照，归档模型/环境/部署/任务/结果及其Python解释器；本地四路有界SSH续传、分块SHA、流式tar成员核对。它不进入DAW、Agent或实时回调。AutoDL系统镜像与数据盘备份分离；凭据不随模型包迁移。
+
+云端快照生成、E盘下载、完整性验证、异机恢复是四种独立状态。本轮前者与小型恢复资料验证已通过，全量下载仍后台进行；不把“已启动下载”声明为“全部可恢复”。接口/范围/恢复限制以[本轮档案](review/2026-11-07-full-cloud-backup/RESULTS.md)为准。旧backup_data.py只覆盖早期ACE范围，不用于本次全量备份。
+
 ## 0.13 统一计算管线（2026-11-07，七模型整链已验证，人工待验）
 
 `GUI / Agent → EngineSession 公共命令 → 冻结来源与修订 → 本地 Worker 或 SSH 后的 protocol 2 任务服务 → 校验本地候选 → 明确接受 → Edit / Undo / 本地资产`。实时音频回调不调用网络、模型、文件解析或任务轮询。新服务和宿主的完整验收记录以[本轮档案](review/2026-11-07-hybrid-pipeline/PLAN.md)为准；下文旧“尚不接入”是历史基线。

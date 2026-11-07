@@ -1,3 +1,9 @@
+# 当前运维：云端全量备份（2026-11-07，传输与验证进行中）
+
+用户因欠费停机/GPU被占用，已报告保存系统镜像并无卡开机，授权全量备份到E。真实SSH已恢复，数据仍在；无卡cgroup0.5CPU/2GiB，不启动推理。维护分支maintenance/cloud-backup-20261107，基线6da1857。覆盖模型、9个环境、源码、部署、结果、两个SQLite一致快照及/root/miniconda3；保留链接，排除凭据/旧备份与可重建缓存。详见[本轮计划](review/2026-11-07-full-cloud-backup/PLAN.md)。
+
+云端归档`exports/full-20261107T080330Z`已生成：85,416,949,760字节、160块、311031成员。E盘目的`E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z`，141文件的小型恢复资料/82MB清单/双SQLite/2668链接审查已验；31项合成检查通过。慢链路改为隐藏后台四路、部分块续传，记录d7f62143f8。分块归档/传输不等于最终校验成功；全量以verification.json为准。此前ACE21.5GB旧备份保留。DAW0.13不变，不合并main，不释放实例；异机恢复/推理尚未验。详情见[阶段结果](review/2026-11-07-full-cloud-backup/RESULTS.md)，下次首先读目的目录progress.json/verification.json并核查后台进程。
+
 # 当前候选：0.13.0 架构 2–4 统一计算与 DAW/Agent 接入（2026-11-07，自动验证通过、人工待验）
 
 用户要求完成后统一验收最终版。基线a6951f3，分支`feature/hybrid-pipeline-v0130`，实际工作树仍是E盘audio-analysis。统一云任务服务/单GPU调度、多模型数据契约和本地/云端路由、原生与Agent同步接入已完成。旧0.12.0/0.12.1 EXE SHA和用户工程保持；不自动合并main。源码/日志/边界见[结果](review/2026-11-07-hybrid-pipeline/RESULTS.md)，同步与归档以PUBLISH记录为准。

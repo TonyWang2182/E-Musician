@@ -1,0 +1,75 @@
+{
+  "phase": "metadata-and-essentials-verified",
+  "full_payload_verified": false,
+  "members_in_manifest": 311031,
+  "models": {
+    "ace": {
+      "files": 32,
+      "bytes": 25253687004
+    },
+    "yue2": {
+      "files": 21,
+      "bytes": 7794656016
+    },
+    "scnet": {
+      "files": 2,
+      "bytes": 214069684
+    },
+    "transkun": {
+      "files": 1,
+      "bytes": 56408978
+    },
+    "chordmini": {
+      "files": 1,
+      "bytes": 35942692
+    },
+    "muscriptor": {
+      "files": 2,
+      "bytes": 1228144598
+    },
+    "sheetsage2": {
+      "files": 32,
+      "bytes": 229037220
+    },
+    "mert2": {
+      "files": 10,
+      "bytes": 2529875084
+    },
+    "mir": {
+      "files": 9,
+      "bytes": 220218151
+    }
+  },
+  "envs": [
+    "ace",
+    "chordmini",
+    "mir-torch",
+    "mir-transcription",
+    "muscriptor",
+    "scnet",
+    "sheetsage2",
+    "transkun",
+    "yue2"
+  ],
+  "symbolic_links": 2668,
+  "unresolved_links": 0,
+  "queues": {
+    "compute.sqlite3": {
+      "integrity_check": "ok",
+      "terminal_status_counts": {
+        "cancelled": 1,
+        "failed": 1,
+        "interrupted": 1,
+        "ready": 11
+      }
+    },
+    "generation.sqlite3": {
+      "integrity_check": "ok",
+      "terminal_status_counts": {
+        "cancelled": 2,
+        "ready": 10
+      }
+    }
+  },
+  "archive_bytes_expected": 85416949760
+}

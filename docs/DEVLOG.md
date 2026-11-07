@@ -11733,3 +11733,234 @@ print(json.dumps({'\"'\"'passed'\"'\"':True,'\"'\"'checked_at'\"'\"':datetime.da
 - [Record](builds/20261106T183458.862437Z-fdc56e6906.json) · [Raw log](../build-logs/20261106T183458.862437Z-fdc56e6906.log)
 - [Exact process output](../build-logs/20261106T183458.862437Z-fdc56e6906.raw.log)
 - 发布补记：实现提交 88f2f6f177a19ac5d68590b9d37f18ce77209b85 已推送并核对远端 feature/hybrid-pipeline-v0130；远端 main 观察值 d4ed6c898af1303918e38b6325a915befabbb575，本轮未写 main。PUBLISH.json 和 PACKAGE.json 保存同步/保留包证据。
+
+### 2026-11-07T16:01:51+08:00 · hybrid-compute-command · failed
+
+- Config: Release/0.13.0; exit code: 1; elapsed: 2.306s.
+- Command: `C:/Python314/python.exe -m unittest discover -s tests -p test_full_backup_capture.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `1e8ff9c3ad46146b5ad23f0f6a6fba4ec27449b030384268a17444500f29b55d`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T080151.461985Z-5486753fe9.json) · [Raw log](../build-logs/20261107T080151.461985Z-5486753fe9.log)
+- [Exact process output](../build-logs/20261107T080151.461985Z-5486753fe9.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261107T080151.461985Z-5486753fe9.log
+
+### 2026-11-07T16:02:13+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 1.249s.
+- Command: `C:/Python314/python.exe -m unittest discover -s tests -p test_full_backup_capture.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `6e3cf0835dd319524ce2e0d76242979212f21530d1c0ebe8672cb57a28ec5c03`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T080213.730952Z-49a553f41f.json) · [Raw log](../build-logs/20261107T080213.730952Z-49a553f41f.log)
+- [Exact process output](../build-logs/20261107T080213.730952Z-49a553f41f.raw.log)
+
+### 2026-11-07T16:02:15+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 0.989s.
+- Command: `scp scripts/cloud/full_backup.py emusician-autodl:/root/autodl-tmp/emusician/tools/full_backup_20261107.py`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `6e3cf0835dd319524ce2e0d76242979212f21530d1c0ebe8672cb57a28ec5c03`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T080215.935858Z-8834426a0f.json) · [Raw log](../build-logs/20261107T080215.935858Z-8834426a0f.log)
+- [Exact process output](../build-logs/20261107T080215.935858Z-8834426a0f.raw.log)
+
+### 2026-11-07T16:02:31+08:00 · hybrid-compute-command · failed
+
+- Config: Release/0.13.0; exit code: 127; elapsed: 1.085s.
+- Command: `ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=4 emusician-autodl "python /root/autodl-tmp/emusician/tools/full_backup_20261107.py --destination /root/autodl-tmp/emusician/exports/full-20261107T080220Z"`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `6e3cf0835dd319524ce2e0d76242979212f21530d1c0ebe8672cb57a28ec5c03`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T080231.436414Z-0ef3edaa53.json) · [Raw log](../build-logs/20261107T080231.436414Z-0ef3edaa53.log)
+- [Exact process output](../build-logs/20261107T080231.436414Z-0ef3edaa53.raw.log)
+- Error: Command failed with code 127; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261107T080231.436414Z-0ef3edaa53.log
+
+### 2026-11-07T16:02:47+08:00 · hybrid-compute-command · failed
+
+- Config: Release/0.13.0; exit code: 1; elapsed: 1.160s.
+- Command: `ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=4 emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/tools/full_backup_20261107.py --destination /root/autodl-tmp/emusician/exports/full-20261107T080220Z"`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `6e3cf0835dd319524ce2e0d76242979212f21530d1c0ebe8672cb57a28ec5c03`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T080247.349518Z-ffd999c7f9.json) · [Raw log](../build-logs/20261107T080247.349518Z-ffd999c7f9.log)
+- [Exact process output](../build-logs/20261107T080247.349518Z-ffd999c7f9.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261107T080247.349518Z-ffd999c7f9.log
+
+### 2026-11-07T16:03:20+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 1.753s.
+- Command: `scp scripts/cloud/full_backup.py emusician-autodl:/root/autodl-tmp/emusician/tools/full_backup_20261107.py`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `bc8d861c92bae85c044ddaeac76907ce6d8b22e073d8364ff8bb54ce08992239`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T080320.742897Z-51f9eef677.json) · [Raw log](../build-logs/20261107T080320.742897Z-51f9eef677.log)
+- [Exact process output](../build-logs/20261107T080320.742897Z-51f9eef677.raw.log)
+
+### 2026-11-07T16:05:27+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 2.325s.
+- Command: `C:/Python314/python.exe -m unittest discover -s tests -p test_full_backup_transport.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `e95a16455117e4734aa43b05087cb46cd500b42008d09736086e086111406100`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T080527.689559Z-1517df8696.json) · [Raw log](../build-logs/20261107T080527.689559Z-1517df8696.log)
+- [Exact process output](../build-logs/20261107T080527.689559Z-1517df8696.raw.log)
+
+### 2026-11-07T16:06:37+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 2.086s.
+- Command: `C:/Python314/python.exe -m unittest discover -s tests -p test_full_backup_transport.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `59adb615a4760494d7da1e04f1b3585d6172c38771a6f84011138f3d69c3b161`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T080637.098434Z-0fe84382e6.json) · [Raw log](../build-logs/20261107T080637.098434Z-0fe84382e6.log)
+- [Exact process output](../build-logs/20261107T080637.098434Z-0fe84382e6.raw.log)
+
+### 2026-11-07T16:03:23+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 735.024s.
+- Command: `ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=4 emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/tools/full_backup_20261107.py --destination /root/autodl-tmp/emusician/exports/full-20261107T080330Z"`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `bc8d861c92bae85c044ddaeac76907ce6d8b22e073d8364ff8bb54ce08992239`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T080323.428167Z-fe22aad7c2.json) · [Raw log](../build-logs/20261107T080323.428167Z-fe22aad7c2.log)
+- [Exact process output](../build-logs/20261107T080323.428167Z-fe22aad7c2.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-07T16:16:11+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 1.926s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/exports/full-20261107T080330Z/receipt.json E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z/receipt.remote.json`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `d54a8a56ba17629914992e7ec5fead423df4fa294306b2758031a1876c34a465`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T081611.623270Z-132053dcdd.json) · [Raw log](../build-logs/20261107T081611.623270Z-132053dcdd.log)
+- [Exact process output](../build-logs/20261107T081611.623270Z-132053dcdd.raw.log)
+
+### 2026-11-07T16:17:04+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 3.064s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/exports/full-20261107T080330Z/inventory.json emusician-autodl:/root/autodl-tmp/emusician/exports/full-20261107T080330Z/system.json E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z/`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `c5d66f096f58adc009e64f9ac1fc4a3131aaadbc26a9f308587efe57244b459a`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T081704.104646Z-320e843cc7.json) · [Raw log](../build-logs/20261107T081704.104646Z-320e843cc7.log)
+- [Exact process output](../build-logs/20261107T081704.104646Z-320e843cc7.raw.log)
+
+### 2026-11-07T16:17:04+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 4.521s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/exports/full-20261107T080330Z/links.json E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z/links.json`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `c5d66f096f58adc009e64f9ac1fc4a3131aaadbc26a9f308587efe57244b459a`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T081704.088524Z-b3e6ee6744.json) · [Raw log](../build-logs/20261107T081704.088524Z-b3e6ee6744.log)
+- [Exact process output](../build-logs/20261107T081704.088524Z-b3e6ee6744.raw.log)
+
+### 2026-11-07T16:06:40+08:00 · hybrid-compute-command · failed
+
+- Config: Release/0.13.0; exit code: 1; elapsed: 700.071s.
+- Command: `C:/Python314/python.exe scripts/cloud/pull_full_backup.py pull --host emusician-autodl --remote-root /root/autodl-tmp/emusician/exports/full-20261107T080330Z --destination E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `59adb615a4760494d7da1e04f1b3585d6172c38771a6f84011138f3d69c3b161`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T080640.115692Z-e52938d55c.json) · [Raw log](../build-logs/20261107T080640.115692Z-e52938d55c.log)
+- [Exact process output](../build-logs/20261107T080640.115692Z-e52938d55c.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261107T080640.115692Z-e52938d55c.log
+
+### 2026-11-07T16:18:18+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 1.495s.
+- Command: `taskkill /PID 22708 /T /F`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `0d2424526fbddb123a12b1336929e8a30484b7def40e18217d6173ab015e5b25`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T081818.699578Z-fadfd752eb.json) · [Raw log](../build-logs/20261107T081818.699578Z-fadfd752eb.log)
+- [Exact process output](../build-logs/20261107T081818.699578Z-fadfd752eb.raw.log)
+
+### 2026-11-07T16:18:21+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 3.223s.
+- Command: `C:/Python314/python.exe -m unittest discover -s tests -p test_full_backup_transport.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `0d2424526fbddb123a12b1336929e8a30484b7def40e18217d6173ab015e5b25`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T081821.266194Z-f554aee6b6.json) · [Raw log](../build-logs/20261107T081821.266194Z-f554aee6b6.log)
+- [Exact process output](../build-logs/20261107T081821.266194Z-f554aee6b6.raw.log)
+
+### 2026-11-07T16:22:28+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 1.385s.
+- Command: `scp scripts/cloud/backup_essentials.py emusician-autodl:/root/autodl-tmp/emusician/exports/backup_essentials_20261107.py`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `4341c70544a133a04207f46096f955281b03301a000ac62413e4ec223a98343a`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T082228.684008Z-283153e341.json) · [Raw log](../build-logs/20261107T082228.684008Z-283153e341.log)
+- [Exact process output](../build-logs/20261107T082228.684008Z-283153e341.raw.log)
+
+### 2026-11-07T16:22:30+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 3.186s.
+- Command: `ssh emusician-autodl "/root/miniconda3/bin/python /root/autodl-tmp/emusician/exports/backup_essentials_20261107.py create /root/autodl-tmp/emusician/exports/full-20261107T080330Z"`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `4341c70544a133a04207f46096f955281b03301a000ac62413e4ec223a98343a`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T082230.996665Z-5938f90d10.json) · [Raw log](../build-logs/20261107T082230.996665Z-5938f90d10.log)
+- [Exact process output](../build-logs/20261107T082230.996665Z-5938f90d10.raw.log)
+
+### 2026-11-07T16:23:23+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 3.087s.
+- Command: `C:/Python314/python.exe -m unittest discover -s tests -p test_full_backup_*.py -v`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `4341c70544a133a04207f46096f955281b03301a000ac62413e4ec223a98343a`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T082323.685434Z-8fdcef873d.json) · [Raw log](../build-logs/20261107T082323.685434Z-8fdcef873d.log)
+- [Exact process output](../build-logs/20261107T082323.685434Z-8fdcef873d.raw.log)
+
+### 2026-11-07T16:17:23+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 382.271s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/exports/full-20261107T080330Z/manifest.jsonl E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z/manifest.jsonl.download`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `c5d66f096f58adc009e64f9ac1fc4a3131aaadbc26a9f308587efe57244b459a`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T081723.579480Z-7483c8d715.json) · [Raw log](../build-logs/20261107T081723.579480Z-7483c8d715.log)
+- [Exact process output](../build-logs/20261107T081723.579480Z-7483c8d715.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-07T16:23:29+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 58.354s.
+- Command: `scp emusician-autodl:/root/autodl-tmp/emusician/exports/full-20261107T080330Z/recovery-essentials.zip emusician-autodl:/root/autodl-tmp/emusician/exports/full-20261107T080330Z/recovery-essentials.receipt.json E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z/`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `4341c70544a133a04207f46096f955281b03301a000ac62413e4ec223a98343a`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T082329.450194Z-067d5a7a79.json) · [Raw log](../build-logs/20261107T082329.450194Z-067d5a7a79.log)
+- [Exact process output](../build-logs/20261107T082329.450194Z-067d5a7a79.raw.log)
+
+### 2026-11-07T16:24:34+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 1.709s.
+- Command: `taskkill /PID 54208 /T /F`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `9c9f4b92151d60c255788bd97f92f985b11a905213f3c9e5cc746337bd6fb83c`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T082434.114481Z-9203daaae0.json) · [Raw log](../build-logs/20261107T082434.114481Z-9203daaae0.log)
+- [Exact process output](../build-logs/20261107T082434.114481Z-9203daaae0.raw.log)
+
+### 2026-11-07T16:18:25+08:00 · hybrid-compute-command · failed
+
+- Config: Release/0.13.0; exit code: 1; elapsed: 370.342s.
+- Command: `C:/Python314/python.exe scripts/cloud/pull_full_backup.py pull --host emusician-autodl --remote-root /root/autodl-tmp/emusician/exports/full-20261107T080330Z --destination E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z --direct-file --workers 4`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `0d2424526fbddb123a12b1336929e8a30484b7def40e18217d6173ab015e5b25`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T081825.481141Z-dd4b7259fd.json) · [Raw log](../build-logs/20261107T081825.481141Z-dd4b7259fd.log)
+- [Exact process output](../build-logs/20261107T081825.481141Z-dd4b7259fd.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261107T081825.481141Z-dd4b7259fd.log
+
+### 2026-11-07T16:25:13+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 0.826s.
+- Command: `C:/Python314/python.exe scripts/cloud/backup_essentials.py verify E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z/recovery-essentials.zip`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `9c9f4b92151d60c255788bd97f92f985b11a905213f3c9e5cc746337bd6fb83c`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T082513.456081Z-fe9fd80c58.json) · [Raw log](../build-logs/20261107T082513.456081Z-fe9fd80c58.log)
+- [Exact process output](../build-logs/20261107T082513.456081Z-fe9fd80c58.raw.log)
+
+### 2026-11-07T16:26:26+08:00 · hybrid-compute-command · succeeded
+
+- Config: Release/0.13.0; exit code: 0; elapsed: 3.555s.
+- Command: `C:/Python314/python.exe scripts/cloud/audit_full_backup.py E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `1c5f42e24817eb7dd9dded265f240fc10f9167bf6b1bcabaa2de5efdd6d1faee`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T082626.275930Z-ec8e08883d.json) · [Raw log](../build-logs/20261107T082626.275930Z-ec8e08883d.log)
+- [Exact process output](../build-logs/20261107T082626.275930Z-ec8e08883d.raw.log)
+
+### 2026-11-07 · 无卡全量备份阶段交付（后台传输中）
+
+- 用户授权全量备份到E；维护分支maintenance/cloud-backup-20261107。云端85,416,949,760字节/160块快照已生成，141文件小型恢复资料与双SQLite、九环境/模型清单、2668链接已核对；31项合成检查通过。
+- 下载链路较慢，四路直写/部分块续传后台运行d7f62143f8；全量下载、逐成员核验及异机恢复未完成，不能释放云实例。结果以目的目录verification.json为准。
+- [范围/结果/失败](review/2026-11-07-full-cloud-backup/RESULTS.md) · [恢复说明](review/2026-11-07-full-cloud-backup/RESTORE.md) · [传输测量](review/2026-11-07-full-cloud-backup/TRANSPORT.md)。原有用户日志与10份未跟踪记录保持；本轮没有DAW构建或GPU推理。
