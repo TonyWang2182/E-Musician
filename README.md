@@ -2,6 +2,8 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
+云端备份进度：双击 `E:/查看备份进度.cmd` 查看自动更新的百分比、余量和校验状态；关闭窗口不停止下载。[使用与验证](docs/review/2026-11-07-backup-monitor/RESULTS.md)。
+
 **当前候选 0.13.0：统一云端计算与七模型接入，自动验证通过、人工待验。** 分析支持 Auto/Local/Cloud 与模型选择；SCNet、TransKun、ChordMini、MuScriptor、SheetSage2 的结果可预览、确认入轨、撤销、保存与离线重开，保留踏板、乐器通道、原和弦标签、拍点和段落。生成可选 ACE／YuE2，明确提示长度预算截断。Agent 使用相同命令和候选。Release、CTest11/11、Agent349及七模型真实短段整链通过，物理声卡与听感仍需人工验收。[结果](docs/review/2026-11-07-hybrid-pipeline/RESULTS.md) / [最终人工清单](docs/review/2026-11-07-hybrid-pipeline/MANUAL-CHECK.md)。
 
 双击 `E:/MusicAgent&DAW/Start E-musician 0.13.0 Hybrid.cmd`，确认标题0.13.0。新缓存和临时文件在E盘，模型权重仍在云端；旧版本和工程保留。下方条目均为历史版本状态。

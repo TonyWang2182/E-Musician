@@ -2,6 +2,8 @@
 
 ## 运维备份边界（2026-11-07）
 
+本地 `backup_progress.py → backup_monitor.py` 是只读投影：小型进度/收据文件→后台读取线程→Tk 主线程，2 秒刷新；下载器独立运行。UI 不发 SSH、不读取归档、不管理下载进程，不接入 DAW/Agent/音频回调。下载百分比与分块校验、全量校验完成分开；无新权威状态。安装副本与启动入口见[进度窗口](review/2026-11-07-backup-monitor/RESULTS.md)。
+
 新增独立`scripts/cloud/full_backup.py`与`pull_full_backup.py`：云端空闲调度锁下对两个SQLite做一致快照，归档模型/环境/部署/任务/结果及其Python解释器；本地四路有界SSH续传、分块SHA、流式tar成员核对。它不进入DAW、Agent或实时回调。AutoDL系统镜像与数据盘备份分离；凭据不随模型包迁移。
 
 云端快照生成、E盘下载、完整性验证、异机恢复是四种独立状态。本轮前者与小型恢复资料验证已通过，全量下载仍后台进行；不把“已启动下载”声明为“全部可恢复”。接口/范围/恢复限制以[本轮档案](review/2026-11-07-full-cloud-backup/RESULTS.md)为准。旧backup_data.py只覆盖早期ACE范围，不用于本次全量备份。

@@ -1,0 +1,50 @@
+{
+  "downloader_ids": [
+    21128,
+    44696
+  ],
+  "monitors": [
+    {
+      "Id": 18436,
+      "MainWindowTitle": "4.92% · 备份进度 · E-musician",
+      "WorkingSet64": 39743488,
+      "CPU": 2.9375
+    }
+  ],
+  "status": "passed",
+  "checked_utc": "2026-11-07T10:38:56.590618+00:00",
+  "copied_sources_match": true,
+  "progress": {
+    "schema": 2,
+    "phase": "pulling",
+    "started_utc": "2026-11-07T08:24:39.416973+00:00",
+    "parts_verified": 7,
+    "bytes_verified": 3758096384,
+    "current_part_bytes": 446857216,
+    "downloaded_parts": 7,
+    "reused_parts": 0,
+    "workers": 4,
+    "direct_file": true,
+    "active_parts": {
+      "part-000007.tarpart": {
+        "bytes": 294715392,
+        "attempt": 1
+      },
+      "part-000008.tarpart": {
+        "bytes": 46366720,
+        "attempt": 1
+      },
+      "part-000009.tarpart": {
+        "bytes": 67796992,
+        "attempt": 1
+      },
+      "part-000010.tarpart": {
+        "bytes": 37978112,
+        "attempt": 1
+      }
+    },
+    "updated_utc": "2026-11-07T10:38:55.620503+00:00",
+    "elapsed_seconds": 8056.15,
+    "current_part": "part-000010.tarpart"
+  }
+}

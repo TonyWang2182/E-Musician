@@ -11964,3 +11964,92 @@ print(json.dumps({'\"'\"'passed'\"'\"':True,'\"'\"'checked_at'\"'\"':datetime.da
 - 用户授权全量备份到E；维护分支maintenance/cloud-backup-20261107。云端85,416,949,760字节/160块快照已生成，141文件小型恢复资料与双SQLite、九环境/模型清单、2668链接已核对；31项合成检查通过。
 - 下载链路较慢，四路直写/部分块续传后台运行d7f62143f8；全量下载、逐成员核验及异机恢复未完成，不能释放云实例。结果以目的目录verification.json为准。
 - [范围/结果/失败](review/2026-11-07-full-cloud-backup/RESULTS.md) · [恢复说明](review/2026-11-07-full-cloud-backup/RESTORE.md) · [传输测量](review/2026-11-07-full-cloud-backup/TRANSPORT.md)。原有用户日志与10份未跟踪记录保持；本轮没有DAW构建或GPU推理。
+
+### 2026-11-07T18:31:22+08:00 · backup-monitor-tests · succeeded
+
+- Config: Python 3.14 / Windows / utility; exit code: 0; elapsed: 2.894s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_backup_progress.py -v`
+- Context: Read-only backup monitor model tests; not DAW build or full payload verification
+- Source SHA-256: `ef3a928476a384241487d94f41b3c7f4e6b666612ae47742903a1dcd296346c5`; Git HEAD: `8f0dc56f8788d0933e823168db12e11085888c55`.
+- [Record](builds/20261107T103122.740267Z-2759e01d17.json) · [Raw log](../build-logs/20261107T103122.740267Z-2759e01d17.log)
+- [Exact process output](../build-logs/20261107T103122.740267Z-2759e01d17.raw.log)
+
+### 2026-11-07T18:31:44+08:00 · backup-monitor-native-smoke · succeeded
+
+- Config: Python 3.14 / Tk / Windows; exit code: 0; elapsed: 20.751s.
+- Command: `C:\Python314\python.exe scripts/cloud/check_backup_monitor.py --backup-dir E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z --output-dir build/backup-monitor-qa`
+- Context: Own-window capture and live local metadata refresh only; no remote requests or downloader changes
+- Source SHA-256: `ec652ccc7240f4e12d9b755b756c3a0b6626f4fdffb17054e2809e445c57b0a8`; Git HEAD: `8f0dc56f8788d0933e823168db12e11085888c55`.
+- [Record](builds/20261107T103144.583366Z-93332fa4bb.json) · [Raw log](../build-logs/20261107T103144.583366Z-93332fa4bb.log)
+- [Exact process output](../build-logs/20261107T103144.583366Z-93332fa4bb.raw.log)
+
+### 2026-11-07T18:34:30+08:00 · backup-monitor-install · succeeded
+
+- Config: Python 3.14 / Windows / utility; exit code: 0; elapsed: 0.913s.
+- Command: `C:\Python314\python.exe scripts/cloud/install_backup_monitor.py --backup-dir E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z --shortcut-dir E:/ --shortcut-dir E:/MusicAgent&DAW`
+- Context: Install readonly monitor copies and E drive launchers; downloader unchanged
+- Source SHA-256: `ae767e173da68fb38c807a15284a0bfc4d0830785406a81412dfec909ca100c8`; Git HEAD: `8f0dc56f8788d0933e823168db12e11085888c55`.
+- [Record](builds/20261107T103430.988559Z-c03231d598.json) · [Raw log](../build-logs/20261107T103430.988559Z-c03231d598.log)
+- [Exact process output](../build-logs/20261107T103430.988559Z-c03231d598.raw.log)
+
+### 2026-11-07T18:34:30+08:00 · backup-monitor-tests-final · succeeded
+
+- Config: Python 3.14 / Windows / utility; exit code: 0; elapsed: 2.259s.
+- Command: `C:\Python314\python.exe -m unittest discover -s tests -p test_backup_progress.py -v`
+- Context: Final model, corrupt metadata, resumed transfer and real tiny archive verification integration
+- Source SHA-256: `ae767e173da68fb38c807a15284a0bfc4d0830785406a81412dfec909ca100c8`; Git HEAD: `8f0dc56f8788d0933e823168db12e11085888c55`.
+- [Record](builds/20261107T103430.973475Z-43b68c88b7.json) · [Raw log](../build-logs/20261107T103430.973475Z-43b68c88b7.log)
+- [Exact process output](../build-logs/20261107T103430.973475Z-43b68c88b7.raw.log)
+
+### 2026-11-07T18:35:21+08:00 · backup-monitor-installed-smoke · succeeded
+
+- Config: Python 3.14 / Tk / Windows 150% DPI; exit code: 0; elapsed: 18.871s.
+- Command: `C:\Python314\python.exe scripts/cloud/check_backup_monitor.py --backup-dir E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z --module-dir E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z/tools --output-dir build/backup-monitor-installed-qa`
+- Context: Exercise deployed copies: real updates, resize, clipboard, synthetic verifying/error render, close; no downloader change
+- Source SHA-256: `8a14ea12d5df40430bb83a12335dcb5b76b3d4c260a999535a47bc72170c58ce`; Git HEAD: `8f0dc56f8788d0933e823168db12e11085888c55`.
+- [Record](builds/20261107T103521.099834Z-ee34110078.json) · [Raw log](../build-logs/20261107T103521.099834Z-ee34110078.log)
+- [Exact process output](../build-logs/20261107T103521.099834Z-ee34110078.raw.log)
+
+### 2026-11-07T18:36:50+08:00 · backup-monitor-delivery · succeeded
+
+- Config: Python 3.14 / Tk / Windows 150% DPI; exit code: 0; elapsed: 1.549s.
+- Command: `C:\Python314\python.exe scripts/cloud/install_backup_monitor.py --backup-dir E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z --shortcut-dir E:/ --shortcut-dir E:/MusicAgent&DAW`
+- Context: Final install and deployed smoke after error-state ETA fix; backup stays running
+- Source SHA-256: `925b00287ce4aa2612da371f1db418fb0c70f7d3d438784b44c728e3c171872b`; Git HEAD: `8f0dc56f8788d0933e823168db12e11085888c55`.
+- [Record](builds/20261107T103650.443745Z-f3717416a1.json) · [Raw log](../build-logs/20261107T103650.443745Z-f3717416a1.log)
+- [Exact process output](../build-logs/20261107T103650.443745Z-f3717416a1.raw.log)
+
+### 2026-11-07T18:36:52+08:00 · backup-monitor-delivery · succeeded
+
+- Config: Python 3.14 / Tk / Windows 150% DPI; exit code: 0; elapsed: 19.125s.
+- Command: `C:\Python314\python.exe scripts/cloud/check_backup_monitor.py --backup-dir E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z --module-dir E:/MusicAgent&DAW/cloud-inference/backups/full-20261107T080330Z/tools --output-dir build/backup-monitor-final-qa`
+- Context: Final install and deployed smoke after error-state ETA fix; backup stays running
+- Source SHA-256: `925b00287ce4aa2612da371f1db418fb0c70f7d3d438784b44c728e3c171872b`; Git HEAD: `8f0dc56f8788d0933e823168db12e11085888c55`.
+- [Record](builds/20261107T103652.535735Z-cc5a107bf6.json) · [Raw log](../build-logs/20261107T103652.535735Z-cc5a107bf6.log)
+- [Exact process output](../build-logs/20261107T103652.535735Z-cc5a107bf6.raw.log)
+
+### 2026-11-07T18:37:57+08:00 · backup-monitor-launch-check · failed
+
+- Config: Python 3.14 / Windows / installed launcher; exit code: 1; elapsed: 6.022s.
+- Command: `C:\Python314\python.exe build/launch_backup_monitor_check.py`
+- Context: Launch visible monitor from E drive shortcut, confirm window and copied source hashes, downloader still alive
+- Source SHA-256: `925b00287ce4aa2612da371f1db418fb0c70f7d3d438784b44c728e3c171872b`; Git HEAD: `8f0dc56f8788d0933e823168db12e11085888c55`.
+- [Record](builds/20261107T103757.667871Z-760aa0528b.json) · [Raw log](../build-logs/20261107T103757.667871Z-760aa0528b.log)
+- [Exact process output](../build-logs/20261107T103757.667871Z-760aa0528b.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261107T103757.667871Z-760aa0528b.log
+
+### 2026-11-07T18:38:55+08:00 · backup-monitor-launch-confirm · succeeded
+
+- Config: Python 3.14 / Windows / installed launcher; exit code: 0; elapsed: 1.441s.
+- Command: `C:\Python314\python.exe build/launch_backup_monitor_check.py`
+- Context: Prior fixed four-second probe was too short; confirm existing visible monitor with bounded polling, avoid duplicate windows
+- Source SHA-256: `925b00287ce4aa2612da371f1db418fb0c70f7d3d438784b44c728e3c171872b`; Git HEAD: `8f0dc56f8788d0933e823168db12e11085888c55`.
+- [Record](builds/20261107T103855.206589Z-9c0aecd786.json) · [Raw log](../build-logs/20261107T103855.206589Z-9c0aecd786.log)
+- [Exact process output](../build-logs/20261107T103855.206589Z-9c0aecd786.raw.log)
+
+### 2026-11-07 · 本地只读备份进度窗口交付
+
+- 按用户要求在 E 盘提供“查看备份进度.cmd”，窗口已打开，显示百分比、容量、分块/全量校验、近一分钟速度和预计下载剩余时间；关闭不停止独立下载。
+- 14 项边界/真实小归档验证通过；最终已安装副本在本机 150% DPI 下 16 秒/8 次刷新、窄窗和模拟校验/错误排版通过。首次快捷方式四秒探测超时，随后有界检查确认窗口存在，失败记录保留。
+- 18:38 快照约 4.92%、剩余 81.21GB，备份仍传输中；不声称全量备份/异机恢复成功，也无传输提速或 DAW 性能结论。下载器、云实例、DAW 与模型未改动。
+- [计划/归属](review/2026-11-07-backup-monitor/PLAN.md) · [结果/入口/验证证据](review/2026-11-07-backup-monitor/RESULTS.md)。原有四条用户日志及十份启动记录保持；维护分支交付，不合并 main。
