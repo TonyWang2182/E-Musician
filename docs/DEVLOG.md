@@ -12593,3 +12593,9 @@ print(json.dumps({'\"'\"'passed'\"'\"':True,'\"'\"'checked_at'\"'\"':datetime.da
 - 两次Release构建均成功，最终bf75fc0851；最终CTest 1ccfefae75为11/11，113.50秒。全库bd46d280f4、最终四插件b52b363926、隔离5fccf26dee及所有早期探针失败均保留。最终127项原生和24项Agent/web输入对齐；核对bb43c47b10通过。
 - 0.13.2已打开，窗口响应、助手子进程及本地控制连接正常；启动e3757621ad。入口Start E-musician 0.13.2.cmd，EXE在bin-0.13.2-final/Release，旧入口保留。计划、模型分工、逐插件矩阵、实际结果和人工步骤位于docs/review/2026-11-08-plugin-agent-stability/。
 - CONTEXT、DEVELOPMENT、ARCHITECTURE、README已同步；本轮仅准备提交维护分支，main不自动更新。既有用户启动日志/构建记录与本轮分开纳管。
+
+## 2026-11-08 / 0.13.2 maintenance branch published
+
+- Implementation af0fb6c24072d63b37f024f731b71ff690531f60 pushed and verified on fix/plugin-agent-stability-v0132. Main remains d4ed6c898af1303918e38b6325a915befabbb575.
+- Preserved 10 unrelated user DEVLOG entries and 16 pre-existing build records outside this commit; working log history was not rewritten. Staged credentials and whitespace checks passed.
+- Release/source/Agent verification is recorded in this iteration VERIFICATION.json. This publication changes documentation only; no additional build or cloud inference was run.

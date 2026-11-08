@@ -1,0 +1,12 @@
+{
+  "verified_utc": "2026-11-08T07:29:18.277551+00:00",
+  "branch": "fix/plugin-agent-stability-v0132",
+  "implementation_commit": "af0fb6c24072d63b37f024f731b71ff690531f60",
+  "verified_remote_implementation_commit": "af0fb6c24072d63b37f024f731b71ff690531f60",
+  "main_unchanged": "d4ed6c898af1303918e38b6325a915befabbb575",
+  "unrelated_user_devlog_entries_preserved": 10,
+  "unrelated_user_build_records_preserved": 16,
+  "credential_pattern_check": "passed",
+  "source_or_runtime_changed_by_publish": false,
+  "receipt_scope": "Implementation push verified; this receipt is a subsequent documentation-only commit."
+}
