@@ -1,6 +1,7 @@
 #include "EngineSession.h"
 #include "MainComponent.h"
 #include "Branding.h"
+#include "WorkspaceLookAndFeel.h"
 #include "PluginHost.h"
 #include "ControlServer.h"
 #include <juce_gui_extra/juce_gui_extra.h>
@@ -22,6 +23,7 @@ public:
     }
     void initialise(const juce::String& commandLine) override
     {
+        juce::LookAndFeel::setDefaultLookAndFeel(&workspaceLook);
         auto args = juce::StringArray::fromTokens(commandLine, true);
         for(auto& argument:args)argument=argument.unquoted();
         if(args.size()==1&&args.contains("--control-output-probe-child")){
@@ -144,7 +146,11 @@ public:
             quit();
         }
     }
-    void shutdown() override { control.reset(); window.reset(); session.reset(); controlStdio.reset(); }
+    void shutdown() override
+    {
+        control.reset(); window.reset(); session.reset(); controlStdio.reset();
+        juce::LookAndFeel::setDefaultLookAndFeel(nullptr);
+    }
     void systemRequestedQuit() override
     {
         if (window) static_cast<MainComponent*>(window->getContentComponent())->requestClose([this] { quit(); });
@@ -155,6 +161,9 @@ public:
         if (window) { window->setVisible(true); window->toFront(true); }
     }
 private:
+    // Application-owned: unattached popup menus and async alerts use this theme.
+    // It outlives all windows, controls and plug-in teardown.
+    design::WorkspaceLookAndFeel workspaceLook;
     // Declared first and explicitly reset last: plugin teardown may log stdout.
     std::unique_ptr<ControlStdio> controlStdio;
     std::unique_ptr<ControlServer> control;

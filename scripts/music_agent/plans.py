@@ -10,6 +10,7 @@ from copy import deepcopy
 import math
 import re
 import uuid
+from .localization import L, english
 
 
 class PlanError(ValueError):
@@ -426,8 +427,9 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
         clip = None
         if "clip_id" in args:
             track, clip = existing(args["clip_id"], clips, "clip_id")
-        clip_label = (f"「{track['name']}」{clip['start_seconds']:g} 秒起的 "
-                      f"{'MIDI' if clip['kind'] == 'midi' else '音频'}片段") if clip is not None else ""
+        clip_label = L(f"「{track['name']}」{clip['start_seconds']:g} 秒起的 "
+                      f"{'MIDI' if clip['kind'] == 'midi' else '音频'}片段",
+                      f"{'MIDI' if clip['kind'] == 'midi' else 'Audio'} clip on “{track['name']}” at {clip['start_seconds']:g} s") if clip is not None else ""
         target = existing(args["target_track_id"], tracks, "target_track_id") if "target_track_id" in args else None
         command = {"command": kind, "args": args}
         extra_commands = []
@@ -455,7 +457,7 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
                     audio.update(warp_target_bpm=value,warp_speed_ratio=value/source_bpm)
                     audio["playback_source_offset"]=audio.get("source_offset",0)/(value/source_bpm)
                     following+=1
-            description = f"速度：{old:g} → {value:g} BPM；MIDI 与 {following} 个跟随音频片段同步，其他音频保持原速。"
+            description = L(f"速度：{old:g} → {value:g} BPM；MIDI 与 {following} 个跟随音频片段同步，其他音频保持原速。", f"Tempo: {old:g} → {value:g} BPM. MIDI and {following} tempo-following audio clips update; other audio keeps its speed.")
         elif kind == "create_track":
             if args["kind"] not in ("audio", "instrument", "bus"):
                 raise PlanError("轨道类型必须是 audio、instrument 或 bus。")
@@ -467,7 +469,7 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
             tracks[new_id] = new
             state["tracks"].append(new)
             aliases[alias] = "track"
-            description = f"新建 {args['kind']} 轨道「{args['name']}」（不自动加载插件）"
+            description = L(f"新建 {args['kind']} 轨道「{args['name']}」（不自动加载插件）", f"Create {args['kind']} track “{args['name']}” (no plug-in is loaded automatically)")
         elif kind == "add_native_effect":
             effect_type = args.pop("effect_type")
             effect_state = _default_effect(effect_type)
@@ -479,7 +481,7 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
             touched_effects.add(new_id)
             aliases[alias] = "effect"
             args["type"] = effect_type
-            description = f"轨道「{track['name']}」添加 {plugin['name']}（默认参数）"
+            description = L(f"轨道「{track['name']}」添加 {plugin['name']}（默认参数）", f"Add {plugin['name']} to “{track['name']}” with default settings")
         elif kind in {"set_native_effect", "set_native_effect_parameter"}:
             effect_track, plugin = existing(args["device_id"], effects, "device_id")
             if effect_track["id"] != track["id"] or plugin.get("format") != "E-musician" or plugin.get("is_instrument") is not False:
@@ -533,7 +535,7 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
             changed = old != wanted
             args["state"] = state["native_effects"][args["device_id"]] = wanted
             touched_effects.add(args["device_id"])
-            description = f"轨道「{track['name']}」设置 {expected_name} 参数：{old} → {wanted}"
+            description = L(f"轨道「{track['name']}」设置 {expected_name} 参数：{old} → {wanted}", f"Set {expected_name} on “{track['name']}”: {old} → {wanted}")
         elif kind in {"set_native_pad", "set_native_sampler"}:
             inst = state["native_instruments"].get(track["id"])
             if not isinstance(inst,dict) or inst.get("type") not in {"sampler","drum_rack"} or inst.get("load_status") != "ready":
@@ -546,7 +548,7 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
                 pad = 0; old = {k:inst[k] for k in ("root_note","start","end")}
                 inst.update(root_note=root,start=start,end=end); args.update(root_note=root,start=start,end=end)
                 changed = old != {k:inst[k] for k in old}
-                description = f"轨道「{track['name']}」采样器 root/start/end：{old} → {root}/{start:g}/{end:g}"
+                description = L(f"轨道「{track['name']}」采样器 root/start/end：{old} → {root}/{start:g}/{end:g}", f"Sampler root/start/end on “{track['name']}”: {old} → {root}/{start:g}/{end:g}")
             else:
                 pad = _number(args["pad"],"pad",0,15,True)
                 if inst["type"] == "sampler" and pad != 0: raise PlanError("采样器只有一个采样位。")
@@ -566,7 +568,7 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
                     desired["one_shot"]=args["one_shot"]
                 item.update(desired); args.update(pad=pad,**desired)
                 changed=old != desired
-                description=f"轨道「{track['name']}」采样位 {pad} 参数：{old} → {desired}"
+                description=L(f"轨道「{track['name']}」采样位 {pad} 参数：{old} → {desired}", f"Sample slot {pad} on “{track['name']}”: {old} → {desired}")
             if not any(p.get("index") == pad and p.get("sample_sha256") for p in inst.get("pads",[])):
                 raise PlanError("只能修改已载入、准备完成的采样。")
             touched_instruments.add(track["id"])
@@ -588,8 +590,8 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
             old = track.get(field, "") if field == "colour" else track[field]
             track[field] = args[field] = value
             changed = not _same(old, value, field)
-            description = (f"轨道「{track['name']}」颜色：{old or '默认'} → {value or '默认'}（不改变声音）" if field == "colour"
-                           else f"轨道「{track['name']}」{field}：{old} → {value}")
+            description = (L(f"轨道「{track['name']}」颜色：{old or '默认'} → {value or '默认'}（不改变声音）", f"Track “{track['name']}” colour: {old or 'Default'} → {value or 'Default'} (sound unchanged)") if field == "colour"
+                           else L(f"轨道「{track['name']}」{field}：{old} → {value}", f"Track “{track['name']}” {field}: {old} → {value}"))
         elif kind in {"create_midi_clip", "duplicate_clip"}:
             if sum(t.get("clip_count", len(t.get("clips", []))) for t in tracks.values()) >= 4096:
                 raise PlanError("工程最多支持 4096 个片段。")
@@ -602,7 +604,7 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
                 new = {"id": new_id, "kind": "midi", "start_beats": start, "length_beats": length, "note_count": 0}
                 state["clip_notes"][new_id] = []
                 bars = length / (state.get("numerator", 4) * 4 / state.get("denominator", 4))
-                description = f"「{track['name']}」新建空 MIDI 片段：第 {start:g} 四分音符拍起，{length:g} 拍 / {bars:g} 小节"
+                description = L(f"「{track['name']}」新建空 MIDI 片段：第 {start:g} 四分音符拍起，{length:g} 拍 / {bars:g} 小节", f"Create an empty MIDI clip on “{track['name']}” at quarter-note beat {start:g}: {length:g} beats / {bars:g} bars")
             else:
                 new = deepcopy(clip)
                 new["id"] = new_id
@@ -622,7 +624,7 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
                     # Native duplicate retains controllers; write_notes only replaces
                     # note sequence, so this establishes locally known UUIDs safely.
                     extra_commands.append({"command": "write_notes", "args": {"clip_id": new_id, "notes": deepcopy(notes)}})
-                description = f"复制{clip_label}，放在 {new['start_seconds']:g} 秒处，紧接原片段之后（保留控制器）"
+                description = L(f"复制{clip_label}，放在 {new['start_seconds']:g} 秒处，紧接原片段之后（保留控制器）", f"Duplicate {english(clip_label)} at {new['start_seconds']:g} s, directly after the original (controllers preserved)")
             count_clip(track, 1)
             track.setdefault("clips", []).append(new)
             clips[new_id] = (track, new)
@@ -648,7 +650,7 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
             clip["start_seconds"] = value
             if clip["kind"] == "midi":
                 clip["start_beats"] = value * state["bpm"] / 60
-            description = f"{clip_label}：{old:g} → {value:g} 秒，目标「{target['name']}」"
+            description = L(f"{clip_label}：{old:g} → {value:g} 秒，目标「{target['name']}」", f"{english(clip_label)}: {old:g} → {value:g} s, destination “{target['name']}”")
         elif kind == "trim_clip":
             start = _number(args["start_seconds"], "start_seconds", 0, MAX_SECONDS)
             end = _number(args["end_seconds"], "end_seconds", 0, MAX_SECONDS)
@@ -683,7 +685,7 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
                 clip["fade_in_seconds"] = min(clip.get("fade_in_seconds", 0.0), duration)
                 clip["fade_out_seconds"] = min(clip.get("fade_out_seconds", 0.0), duration-clip["fade_in_seconds"])
             clip.update(start_seconds=start, duration_seconds=end-start)
-            description = f"{clip_label}裁剪：[{old_start:g}, {old_end:g}] → [{start:g}, {end:g}] 秒（区间外音符移除，边界音符缩短）"
+            description = L(f"{clip_label}裁剪：[{old_start:g}, {old_end:g}] → [{start:g}, {end:g}] 秒（区间外音符移除，边界音符缩短）", f"Trim {english(clip_label)}: [{old_start:g}, {old_end:g}] → [{start:g}, {end:g}] s (notes outside the range removed, boundary notes shortened)")
         elif kind == "delete_clip":
             command = {"command": "delete_clips", "args": {"clip_ids": [clip["id"]]}}
             count_clip(track, -1)
@@ -693,7 +695,7 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
             touched_notes.discard(clip["id"])
             preserved_notes.discard(clip["id"])
             deleted_clips.add(clip["id"])
-            description = f"删除{clip_label}（可撤销，不删除源文件）"
+            description = L(f"删除{clip_label}（可撤销，不删除源文件）", f"Delete {english(clip_label)} (undoable; source file retained)")
         else:
             notes = loaded(clip)
             upsert, delete_ids = [], []
@@ -708,7 +710,7 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
                     upsert.append({"id": fresh_note(index, n), **raw})
                 notes.extend(upsert)
                 clip["note_count"] = len(notes)
-                detail = f"新增 {len(upsert)} 个明确音符"
+                detail = L(f"新增 {len(upsert)} 个明确音符", f"Add {len(upsert)} specified notes")
                 selected = {n["id"] for n in upsert}
             else:
                 selected = args.get("note_ids", [note["id"] for note in notes])
@@ -722,26 +724,26 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
                     delete_ids = sorted(selected)
                     notes = [n for n in notes if n["id"] not in selected]
                     clip["note_count"] = len(notes)
-                    detail = f"删除 {len(delete_ids)} 个音符"
+                    detail = L(f"删除 {len(delete_ids)} 个音符", f"Delete {len(delete_ids)} notes")
                 else:
                     if kind == "transpose_notes":
                         amount = _number(args["semitones"], "semitones", -127, 127, True)
-                        detail = f"移调 {amount:+d} 半音"
+                        detail = L(f"移调 {amount:+d} 半音", f"Transpose {amount:+d} semitones")
                     elif kind == "set_note_velocity":
                         amount = _number(args["velocity"], "velocity", 1, 127, True)
-                        detail = f"力度设为 {amount}"
+                        detail = L(f"力度设为 {amount}", f"Set velocity to {amount}")
                     elif kind == "set_note_length":
                         amount = _number(args["length_beats"], "length_beats", 0, clip["length_beats"])
-                        detail = f"时长设为 {amount:g} 四分音符拍"
+                        detail = L(f"时长设为 {amount:g} 四分音符拍", f"Set length to {amount:g} quarter-note beats")
                     elif kind == "move_notes":
                         amount = _number(args["delta_beats"], "delta_beats", -clip["length_beats"], clip["length_beats"])
-                        detail = f"音符移动 {amount:+g} 四分音符拍"
+                        detail = L(f"音符移动 {amount:+g} 四分音符拍", f"Move notes {amount:+g} quarter-note beats")
                     else:
                         denominator = _number(args["grid_denominator"], "grid_denominator", 1, 16384, True)
                         if denominator & (denominator-1):
                             raise PlanError("网格分母必须是 1–16384 内的 2 的幂。")
                         amount = 4/denominator
-                        detail = f"起音量化到 1/{denominator}（保留时长）"
+                        detail = L(f"起音量化到 1/{denominator}（保留时长）", f"Quantize starts to 1/{denominator} (lengths preserved)")
                     for note in notes:
                         if note["id"] not in selected:
                             continue
@@ -761,7 +763,7 @@ def _compile_plan(payload: dict, context: dict, authorizer=None, allow_noop=Fals
             touched_notes.add(clip["id"])
             command = {"command": "edit_notes", "args": {"clip_id": clip["id"], "upsert": deepcopy(upsert), "delete_ids": delete_ids}}
             changed = bool(upsert or delete_ids)
-            description = f"{clip_label}：{detail}；改变 {len(upsert)+len(delete_ids)} / 选定 {len(selected)} 个音符"
+            description = L(f"{clip_label}：{detail}；改变 {len(upsert)+len(delete_ids)} / 选定 {len(selected)} 个音符", f"{english(clip_label)}: {english(detail)}; changed {len(upsert)+len(delete_ids)} of {len(selected)} selected notes")
         _validate_timeline(state)
         if changed:
             commands.extend([command, *extra_commands])

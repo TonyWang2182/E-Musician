@@ -233,11 +233,12 @@ def compile_import(result, context, frozen, summary):
         raise ValueError("请提供简短的生成导入说明。")
     if len(context.get("tracks", [])) >= 64:
         raise ValueError("导入后会超过64轨上限。")
-    label = "新建1条音频轨，加入生成音乐"
+    from .localization import L
+    label = L("新建1条音频轨，加入生成音乐", "Add generated music to a new audio track")
     return {"project_id": context["project_id"], "revision": context["revision"], "summary": summary.strip(),
             "execution_kind": "generation_import", "commands": [{"command": "accept_generation_result", "args": {"result_id": result["result_id"], "result_hash": result["result_hash"]}}],
-            "changes": [label, f"起点 {result['source']['timeline_start']:.3f} 秒，实际时长 {result['audio']['duration_seconds']:.3f} 秒", "保留现有轨道；生成音频已保存在本地，确认后可一次撤销。"],
-            "steps": [{"index": 1, "label": "核对生成候选与工程版本"}, {"index": 2, "label": label}],
+            "changes": [label, L(f"起点 {result['source']['timeline_start']:.3f} 秒，实际时长 {result['audio']['duration_seconds']:.3f} 秒", f"Start at {result['source']['timeline_start']:.3f} s. Actual duration: {result['audio']['duration_seconds']:.3f} s"), L("保留现有轨道；生成音频已保存在本地，确认后可一次撤销。", "Keep existing tracks. Generated audio is saved locally; undo the import in one step.")],
+            "steps": [{"index": 1, "label": L("核对生成候选与工程版本", "Check the generation candidate and project revision")}, {"index": 2, "label": label}],
             "checks": [], "note_clip_ids": [], "generation": result, "scope": deepcopy(frozen)}
 
 

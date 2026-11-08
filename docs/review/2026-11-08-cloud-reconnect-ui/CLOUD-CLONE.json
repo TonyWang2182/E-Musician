@@ -1,0 +1,58 @@
+{
+  "checked_utc": "2026-11-08T04:55:53.658897+00:00",
+  "status": "failed",
+  "model_upload_performed": false,
+  "inference_performed": false,
+  "release": "ed7d6a920487a651c988",
+  "release_files_verified": true,
+  "environments": {
+    "ace": {
+      "interpreter": "/root/autodl-tmp/emusician/envs/ace/bin/python",
+      "python": "3.12.3"
+    },
+    "chordmini": {
+      "interpreter": "/root/autodl-tmp/emusician/envs/chordmini/bin/python",
+      "python": "3.12.3"
+    },
+    "mir-torch": {
+      "interpreter": "/root/autodl-tmp/emusician/envs/mir-torch/bin/python",
+      "python": "3.12.3"
+    },
+    "mir-transcription": {
+      "interpreter": "/root/autodl-tmp/emusician/envs/mir-transcription/bin/python",
+      "python": "3.12.3"
+    },
+    "muscriptor": {
+      "interpreter": "/root/autodl-tmp/emusician/envs/muscriptor/bin/python",
+      "python": "3.12.3"
+    },
+    "scnet": {
+      "interpreter": "/root/autodl-tmp/emusician/envs/scnet/bin/python",
+      "python": "3.12.3"
+    },
+    "sheetsage2": {
+      "interpreter": "/root/autodl-tmp/emusician/envs/sheetsage2/bin/python",
+      "python": "3.11.14"
+    },
+    "transkun": {
+      "interpreter": "/root/autodl-tmp/emusician/envs/transkun/bin/python",
+      "python": "3.12.3"
+    },
+    "yue2": {
+      "interpreter": "/root/autodl-tmp/emusician/envs/yue2/bin/python",
+      "python": "3.12.3"
+    }
+  },
+  "databases": {
+    "compute.sqlite3": {
+      "integrity": "ok",
+      "active_jobs": 0
+    },
+    "generation.sqlite3": {
+      "integrity": "ok",
+      "active_jobs": 0
+    }
+  },
+  "ffmpeg": null,
+  "error": "AssertionError: ffmpeg missing"
+}

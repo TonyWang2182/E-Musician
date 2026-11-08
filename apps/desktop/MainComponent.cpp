@@ -10,10 +10,12 @@
 #include "NativeEffectsPanel.h"
 #include "DeviceChainStrip.h"
 #include "UiDesign.h"
+#include "WorkspaceLookAndFeel.h"
 #include "Branding.h"
 #include "WorkspaceBrowser.h"
 #include "UiLanguage.h"
 #include "WorkflowPanels.h"
+#include "../../tests/PopupStyleSmoke.h"
 #include "core/time/MusicalPosition.hpp"
 #include "core/time/EditGrid.hpp"
 #include <algorithm>
@@ -75,7 +77,7 @@ void openCorners(juce::Graphics& g, juce::Rectangle<float> bounds, juce::Colour 
     g.strokePath(p, juce::PathStrokeType(1.0f));
 }
 
-class InstrumentLook final : public juce::LookAndFeel_V4 {
+class InstrumentLook final : public design::WorkspaceLookAndFeel {
 public:
     InstrumentLook()
     {
@@ -96,10 +98,6 @@ public:
         setColour(juce::ComboBox::textColourId, ink);
         setColour(juce::ComboBox::outlineColourId, rule);
         setColour(juce::ComboBox::arrowColourId, ink);
-        setColour(juce::PopupMenu::backgroundColourId, paper);
-        setColour(juce::PopupMenu::textColourId, ink);
-        setColour(juce::PopupMenu::highlightedBackgroundColourId, ink);
-        setColour(juce::PopupMenu::highlightedTextColourId, paper);
         setColour(juce::TooltipWindow::backgroundColourId, paper);
         setColour(juce::TooltipWindow::textColourId, ink);
         setColour(juce::TooltipWindow::outlineColourId, rule);
@@ -108,8 +106,11 @@ public:
     juce::Font getTextButtonFont(juce::TextButton&, int) override { return design::labelFont(13.0f); }
     juce::Font getLabelFont(juce::Label& label) override { return label.getFont(); }
     juce::Font getComboBoxFont(juce::ComboBox&) override { return design::labelFont(13.0f); }
-    void drawButtonBackground(juce::Graphics& g, juce::Button& button, const juce::Colour&, bool over, bool down) override
+    void drawButtonBackground(juce::Graphics& g, juce::Button& button, const juce::Colour& colour, bool over, bool down) override
     {
+        if (button.findParentComponentOfClass<juce::AlertWindow>() != nullptr) {
+            design::WorkspaceLookAndFeel::drawButtonBackground(g, button, colour, over, down); return;
+        }
         const auto bounds = button.getLocalBounds().toFloat().reduced(1.5f);
         const bool flat = static_cast<bool>(button.getProperties()["flat"]);
         if (button.isEnabled() && (over || down || button.getToggleState())) {
@@ -125,8 +126,11 @@ public:
             g.drawRoundedRectangle(bounds.reduced(2.0f), 3.0f, 1.5f);
         }
     }
-    void drawButtonText(juce::Graphics& g, juce::TextButton& button, bool, bool) override
+    void drawButtonText(juce::Graphics& g, juce::TextButton& button, bool over, bool down) override
     {
+        if (button.findParentComponentOfClass<juce::AlertWindow>() != nullptr) {
+            design::WorkspaceLookAndFeel::drawButtonText(g, button, over, down); return;
+        }
         g.setColour(button.isEnabled() ? (button.getToggleState() ? paper : ink) : secondary);
         g.setFont(design::labelFont(13.0f));
         g.drawFittedText(button.getButtonText(), button.getLocalBounds().reduced(5, 2), juce::Justification::centred, 1);

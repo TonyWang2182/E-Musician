@@ -8,6 +8,7 @@ import secrets
 import threading
 from urllib.parse import urlsplit
 from .secrets import redact
+from .localization import normalize_language, public_response
 
 WEB = Path(__file__).with_name("web")
 class AgentServer(ThreadingHTTPServer):
@@ -65,6 +66,7 @@ class Handler(BaseHTTPRequestHandler):
             except (ValueError, OSError):
                 pass
         if not isinstance(value, bytes):
+            value = public_response(value, self.headers.get("X-Agent-Language", "zh-CN"))
             value = redact(json.dumps(value, ensure_ascii=False, allow_nan=False)).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", mime)
@@ -146,7 +148,8 @@ class Handler(BaseHTTPRequestHandler):
             runtime = self.server.runtime
             path = urlsplit(self.path).path
             if path == "/api/plan" and set(value) in ({"prompt"}, {"prompt","scope"}):
-                result = runtime.plan_request(value["prompt"], value.get("scope","selection"))
+                language = normalize_language(self.headers.get("X-Agent-Language", "zh-CN"))
+                result = runtime.plan_request(value["prompt"], value.get("scope","selection"), language=language)
             elif path == "/api/apply" and set(value) == {"plan_id"}:
                 result = runtime.apply(value["plan_id"])
             elif path == "/api/generation/preview" and set(value) == {"plan_id"}:

@@ -13,11 +13,14 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from music_agent import analysis as a, generation as g
 from music_agent.selection import freeze_scope
+from music_agent.localization import public_response
 from test_music_agent_analysis import context, result
 from GenerationAgentWebSmoke import fixture as generation_fixture
 
 OUTPUT = ROOT / "build/hybrid-agent-web"
 WEB = ROOT / "scripts/music_agent/web"
+USER_PROJECT = "User project / 用户工程"
+USER_MESSAGE = "Keep the name 用户钢琴 unchanged."
 HARNESS = r"""<script>
 window.__smokeErrors=[];window.addEventListener('error',e=>window.__smokeErrors.push(e.message));
 let attempts=0;const checker=setInterval(()=>{
@@ -26,16 +29,31 @@ let attempts=0;const checker=setInterval(()=>{
  document.body.setAttribute('data-analysis-smoke',JSON.stringify({
   visible:!plan.hidden,changes:document.getElementById('changes').textContent,
   preview:document.getElementById('analysis-preview-items').textContent,
+  steps:document.getElementById('plan-steps').textContent,
+  progress:document.getElementById('busy-detail').textContent,
+  assistant:[...document.querySelectorAll('.message.assistant .message-body')].map(n=>n.textContent).join('\n'),
+  user:[...document.querySelectorAll('.message.user .message-body')].map(n=>n.textContent).join('\n'),
+  project:document.getElementById('project-title').textContent,
   widthOK:document.documentElement.scrollWidth<=innerWidth,
   language:document.documentElement.lang,errors:window.__smokeErrors}));
 },100);</script>"""
+
+
+def with_language_fixture(state):
+    # Authored diagnostics must pass through the production response projection;
+    # deliberately mixed-script project/user data must remain untouched.
+    state["snapshot"]["name"] = USER_PROJECT
+    state["messages"] = [{"role": "user", "content": USER_MESSAGE},
+        {"role": "assistant", "origin": "runtime", "content": "方案已准备；尚未修改工程"}]
+    state["progress"] = {"stage": "ready", "label": "候选已准备；确认后才导入工程"}
+    return state
 
 
 def fixture(kind):
     state = generation_fixture()
     if kind == "generate":
         state["plan"]["generation"].update(model_id="yue2", execution="cloud", completion={"truncated": True, "reason": "token_budget", "timing_is_exact": False})
-        return state
+        return with_language_fixture(state)
     ctx = context(); ctx["name"] = "Synthetic hybrid review / no model"
     raw = result(kind)
     raw.update(model_id="muscriptor" if kind == "transcribe" else "sheetsage2", execution="cloud",
@@ -45,7 +63,7 @@ def fixture(kind):
     plan = a.compile_import(a.safe_result(raw), ctx, freeze_scope(ctx), "Review synthetic candidate")
     plan["id"] = "synthetic-hybrid"
     state.update(snapshot=ctx, plan=plan)
-    return state
+    return with_language_fixture(state)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -53,7 +71,12 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         path = self.path.split("?", 1)[0]
         if path == "/api/state":
-            data = json.dumps(self.server.fixture, ensure_ascii=False).encode(); mime = "application/json"
+            language = self.headers.get("X-Agent-Language", "zh-CN")
+            self.server.request_languages.append(language)
+            # Match production Handler._send, rather than bypassing localization
+            # by serializing the untranslated fixture directly.
+            view = public_response(self.server.fixture, language)
+            data = json.dumps(view, ensure_ascii=False).encode(); mime = "application/json"
         elif path in ("/", "/app.js", "/style.css", "/i18n.js"):
             data = (WEB / ("index.html" if path == "/" else path[1:])).read_bytes()
             if path == "/": data = data.replace(b"</body>", HARNESS.encode() + b"</body>")
@@ -69,7 +92,7 @@ def main():
     reports = []
     for kind, width, language in (("transcribe", 340, "en"), ("score", 400, "zh-CN"), ("score", 340, "en"), ("generate", 340, "en")):
         label = f"hybrid-{kind}-{width}-{language}"
-        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler); server.fixture = fixture(kind)
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler); server.fixture = fixture(kind); server.request_languages = []
         thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
         try:
             url = f"http://127.0.0.1:{server.server_port}/?embedded=1&lang={language}#token=synthetic-ui-test"
@@ -82,6 +105,17 @@ def main():
             checks = json.loads(html.unescape(match.group(1)))
             assert checks["visible"] and checks["widthOK"] and not checks["errors"] and checks["language"] == language, checks
             assert "undefined" not in checks["preview"], checks
+            assert server.request_languages and all(value == language for value in server.request_languages), server.request_languages
+            assert checks["project"] == USER_PROJECT and checks["user"] == USER_MESSAGE, checks
+            authored_copy = "\n".join(checks[field] for field in ("changes", "preview", "steps", "progress", "assistant"))
+            if language == "en":
+                assert not re.search(r"[\u4e00-\u9fff]", authored_copy), checks
+                assert checks["assistant"] == "Plan ready; project unchanged", checks
+                assert checks["progress"] == "Candidate ready. Review before importing", checks
+            else:
+                assert checks["assistant"] == "方案已准备；尚未修改工程", checks
+                assert checks["progress"] == "候选已准备；确认后才导入工程", checks
+            assert server.fixture["messages"][-1]["content"] == "方案已准备；尚未修改工程"
             if kind == "generate": assert "budget" in checks["changes"] and "yue2" in checks["changes"], checks
             else:
                 assert "2" in checks["changes"] and "3" in checks["changes"] and "MIDI" in checks["changes"], checks

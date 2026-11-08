@@ -1,0 +1,19 @@
+{
+  "checked_utc": "2026-11-08T05:19:44.871009+00:00",
+  "status": "passed",
+  "registry": "E:\\MusicAgent&DAW\\cloud-inference\\compute-registry.json",
+  "registry_sha256": "0c289a2a7d6d05e604c07fd9965020c0107efc6173ac3068b564b41739c34ec4",
+  "ssh_alias": "emusician-autodl",
+  "ssh_port": 44800,
+  "remote_service_port": 18082,
+  "language": "en",
+  "application": {
+    "Id": 47876,
+    "Path": "E:\\emusician-analysis-build\\bin-0.13.1\\Release\\E-musician.exe",
+    "MainWindowTitle": "E-musician 0.13.1 - Audio workspace",
+    "Responding": true
+  },
+  "agent_helper_authenticated": true,
+  "physical_audio_verified": false,
+  "vscode_window_switched": false
+}

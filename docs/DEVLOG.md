@@ -12114,3 +12114,235 @@ print(json.dumps({'\"'\"'passed'\"'\"':True,'\"'\"'checked_at'\"'\"':datetime.da
 - 发现原清单stat类型位与tar纯权限模式不一致，严格归一化并保留类型/权限验证；未修改原始备份或哈希。64项回归、真实首项和交付审查通过；独立工具副本同步。
 - 未新建DAW构建、启动云下载/模型、创建或释放实例；全量备份校验及异机恢复仍待执行。原用户启动日志和记录保留，维护分支同步，不合并main。
 - [计划](review/2026-11-08-quark-recovery/PLAN.md) · [完整后续清单](review/2026-11-08-quark-recovery/CHECKLIST.md) · [结果与证据](review/2026-11-08-quark-recovery/RESULTS.md)。
+
+### 2026-11-08T12:53:45+08:00 · cloud-reconnect-command · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 1.385s.
+- Command: `ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15 -p 44800 emusician-autodl "printf 'CONNECTED\n'; uname -m; nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader; df -h /root/autodl-tmp /root; test -d /root/autodl-tmp/emusician && printf 'EMUSICIAN_DATA_PRESENT\n'"`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `cd13a084d7c539c30055d9022e023f5a9ef0b5fa791c0c75ba17c855ce42ef6e`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T045345.137073Z-d6e6fefc0a.json) · [Raw log](../build-logs/20261108T045345.137073Z-d6e6fefc0a.log)
+- [Exact process output](../build-logs/20261108T045345.137073Z-d6e6fefc0a.raw.log)
+
+### 2026-11-08T12:54:24+08:00 · cloud-reconnect-command · failed
+
+- Config: Release/0.13.1; exit code: 7; elapsed: 1.480s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=15 -p 44800 emusician-autodl "ls -ld /root/miniconda3/bin/python /root/autodl-tmp/emusician/tools/compute /root/autodl-tmp/emusician/tools/compute_start.py; /root/miniconda3/bin/python --version; ls /root/autodl-tmp/emusician/envs; ls /root/autodl-tmp/emusician/manifests/model-library; curl -s --max-time 3 http://127.0.0.1:18082/health"`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `cd13a084d7c539c30055d9022e023f5a9ef0b5fa791c0c75ba17c855ce42ef6e`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T045424.619957Z-baa1a5db63.json) · [Raw log](../build-logs/20261108T045424.619957Z-baa1a5db63.log)
+- [Exact process output](../build-logs/20261108T045424.619957Z-baa1a5db63.raw.log)
+- Error: Command failed with code 7; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261108T045424.619957Z-baa1a5db63.log
+
+### 2026-11-08T12:55:51+08:00 · cloud-reconnect-command · failed
+
+- Config: Release/0.13.1; exit code: 1; elapsed: 2.176s.
+- Command: `C:/Python314/python.exe -X utf8 scripts/clone_reconnect_check.py --ssh-port 44800 --start --output docs/review/2026-11-08-cloud-reconnect-ui/CLOUD-CLONE.json`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `ee881cd12815027305e110d3408f9f090a8a2fa6eccde91aeec58fc9c9b322ed`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T045551.471989Z-cac8ec69ec.json) · [Raw log](../build-logs/20261108T045551.471989Z-cac8ec69ec.log)
+- [Exact process output](../build-logs/20261108T045551.471989Z-cac8ec69ec.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261108T045551.471989Z-cac8ec69ec.log
+
+### 2026-11-08T12:56:20+08:00 · cloud-reconnect-command · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 15.435s.
+- Command: `ssh -o BatchMode=yes -o ConnectTimeout=15 -p 44800 emusician-autodl "apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ffmpeg libsndfile1 libgomp1"`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `5ba68b12ad2178686d5ceab486a831f74ffce85e73fd4e00530260dc1c544abc`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T045620.467253Z-4c104cfa85.json) · [Raw log](../build-logs/20261108T045620.467253Z-4c104cfa85.log)
+- [Exact process output](../build-logs/20261108T045620.467253Z-4c104cfa85.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-08T12:57:11+08:00 · cloud-reconnect-command · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 2.307s.
+- Command: `C:/Python314/python.exe -X utf8 scripts/clone_reconnect_check.py --ssh-port 44800 --start --output docs/review/2026-11-08-cloud-reconnect-ui/CLOUD-CLONE-READY.json`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `29f086d7cf5a1f9a4d9e5f3d50a4dd7808b1c175671a93a17dc0ee773df64723`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T045711.733945Z-e6d8f00fe0.json) · [Raw log](../build-logs/20261108T045711.733945Z-e6d8f00fe0.log)
+- [Exact process output](../build-logs/20261108T045711.733945Z-e6d8f00fe0.raw.log)
+
+### 2026-11-08T12:57:50+08:00 · cloud-reconnect-command · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 2.977s.
+- Command: `C:/Python314/python.exe -X utf8 build/switch_clone_connection.py`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `1165093ae89250ed6fde5d22cc570daa11729a6ab2dcb50053f00c293d0e8228`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T045750.851261Z-7659db0a37.json) · [Raw log](../build-logs/20261108T045750.851261Z-7659db0a37.log)
+- [Exact process output](../build-logs/20261108T045750.851261Z-7659db0a37.raw.log)
+
+### 2026-11-08T12:59:55+08:00 · cloud-reconnect-configure · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 41.888s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.13.1`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `33f7223fc6a48bcd4663a2153eb2636e99216feefb2981e309215e6c77b25f11`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T045955.376747Z-eae6053e0c.json) · [Raw log](../build-logs/20261108T045955.376747Z-eae6053e0c.log)
+- [Exact process output](../build-logs/20261108T045955.376747Z-eae6053e0c.raw.log)
+
+### 2026-11-08T13:02:29+08:00 · cloud-reconnect-command · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 13.375s.
+- Command: `C:/Python314/python.exe -X utf8 tests/HybridAgentWebSmoke.py`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `b18a393f3aea9b92234287fbcdd66a72bf39d1abdd0a455205a77724b918e67e`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T050229.141822Z-6a359f9bda.json) · [Raw log](../build-logs/20261108T050229.141822Z-6a359f9bda.log)
+- [Exact process output](../build-logs/20261108T050229.141822Z-6a359f9bda.raw.log)
+
+### 2026-11-08T13:02:29+08:00 · cloud-reconnect-command · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 104.856s.
+- Command: `C:/Python314/python.exe -X utf8 -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `b18a393f3aea9b92234287fbcdd66a72bf39d1abdd0a455205a77724b918e67e`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T050229.127501Z-d5afa69325.json) · [Raw log](../build-logs/20261108T050229.127501Z-d5afa69325.log)
+- [Exact process output](../build-logs/20261108T050229.127501Z-d5afa69325.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-08T13:02:05+08:00 · cloud-reconnect-build · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 166.738s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `b18a393f3aea9b92234287fbcdd66a72bf39d1abdd0a455205a77724b918e67e`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T050205.512999Z-bddeadc966.json) · [Raw log](../build-logs/20261108T050205.512999Z-bddeadc966.log)
+- [Exact process output](../build-logs/20261108T050205.512999Z-bddeadc966.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-08T13:05:11+08:00 · english-live-probe-shell-preflight · failed
+
+- Config: Python 3.14 / Windows; exit code: 2; elapsed: 0.704s.
+- Command: `preflight`
+- Context: No provider call or child process started
+- Source SHA-256: `1a1dc4ed9531f5b830255b44f65a54a159039012e3d0fe6a6b2e748841df3166`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T050511.668467Z-e55075043e.json) · [Raw log](../build-logs/20261108T050511.668467Z-e55075043e.log)
+- Error: PowerShell rejected the first invocation because the E-drive output path containing an ampersand was not quoted; corrected before retry.
+
+### 2026-11-08T13:05:13+08:00 · cloud-reconnect-command · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 12.477s.
+- Command: `C:/Python314/python.exe -X utf8 tests/EnglishAgentLiveProbe.py --live --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/english-live-v0131`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `1a1dc4ed9531f5b830255b44f65a54a159039012e3d0fe6a6b2e748841df3166`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T050513.794709Z-0cd43a65a0.json) · [Raw log](../build-logs/20261108T050513.794709Z-0cd43a65a0.log)
+- [Exact process output](../build-logs/20261108T050513.794709Z-0cd43a65a0.raw.log)
+
+### 2026-11-08T13:05:58+08:00 · cloud-reconnect-command · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 4.407s.
+- Command: `C:/Python314/python.exe -X utf8 -m unittest discover -s tests -p test_music_agent_localization.py -v`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `1a1dc4ed9531f5b830255b44f65a54a159039012e3d0fe6a6b2e748841df3166`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T050558.897467Z-f7af3f2a14.json) · [Raw log](../build-logs/20261108T050558.897467Z-f7af3f2a14.log)
+- [Exact process output](../build-logs/20261108T050558.897467Z-f7af3f2a14.raw.log)
+
+### 2026-11-08T13:10:18+08:00 · cloud-reconnect-command · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 10.212s.
+- Command: `C:/Python314/python.exe -X utf8 tests/HybridAgentWebSmoke.py`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `36e6f57c57a4bc502ac51e2455258c7611bfa4b1e025b4e38574b0db5f399023`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T051018.718238Z-a8c3d6b6f2.json) · [Raw log](../build-logs/20261108T051018.718238Z-a8c3d6b6f2.log)
+- [Exact process output](../build-logs/20261108T051018.718238Z-a8c3d6b6f2.raw.log)
+
+### 2026-11-08T13:09:02+08:00 · cloud-reconnect-test · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 138.608s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `1a1dc4ed9531f5b830255b44f65a54a159039012e3d0fe6a6b2e748841df3166`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T050902.807757Z-204f8502af.json) · [Raw log](../build-logs/20261108T050902.807757Z-204f8502af.log)
+- [Exact process output](../build-logs/20261108T050902.807757Z-204f8502af.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-08T13:12:53+08:00 · cloud-reconnect-command · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 0.879s.
+- Command: `C:/Python314/python.exe -X utf8 build/create_reconnect_launchers.py`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `ad89c79fd57e86481016f0c5d160506915805ede0004cd1bb3857e4596836542`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T051253.016589Z-05bad13566.json) · [Raw log](../build-logs/20261108T051253.016589Z-05bad13566.log)
+- [Exact process output](../build-logs/20261108T051253.016589Z-05bad13566.raw.log)
+
+### 2026-11-08T13:13:07+08:00 · cloud-reconnect-build · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 32.690s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `ad89c79fd57e86481016f0c5d160506915805ede0004cd1bb3857e4596836542`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T051307.611910Z-bb66b52f16.json) · [Raw log](../build-logs/20261108T051307.611910Z-bb66b52f16.log)
+- [Exact process output](../build-logs/20261108T051307.611910Z-bb66b52f16.raw.log)
+
+### 2026-11-08T13:11:33+08:00 · cloud-reconnect-command · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 318.420s.
+- Command: `C:/Python314/python.exe -X utf8 tests/HybridComputeEndToEnd.py --exe E:/emusician-analysis-build/bin-0.13.1/Release/E-musician.exe --out E:/MusicAgent&DAW/cloud-inference/experiments/hybrid-clone-v0131-20261108`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `36e6f57c57a4bc502ac51e2455258c7611bfa4b1e025b4e38574b0db5f399023`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T051133.188811Z-72ec595616.json) · [Raw log](../build-logs/20261108T051133.188811Z-72ec595616.log)
+- [Exact process output](../build-logs/20261108T051133.188811Z-72ec595616.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-08T13:17:09+08:00 · cloud-reconnect-command · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 2.078s.
+- Command: `C:/Python314/python.exe -X utf8 scripts/clone_reconnect_check.py --ssh-port 44800 --output docs/review/2026-11-08-cloud-reconnect-ui/CLOUD-FINAL.json`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `ad89c79fd57e86481016f0c5d160506915805ede0004cd1bb3857e4596836542`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T051709.319506Z-c274070f82.json) · [Raw log](../build-logs/20261108T051709.319506Z-c274070f82.log)
+- [Exact process output](../build-logs/20261108T051709.319506Z-c274070f82.raw.log)
+
+### 2026-11-08T13:17:09+08:00 · cloud-reconnect-command · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 20.467s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure -R workspace.brand_colour`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `ad89c79fd57e86481016f0c5d160506915805ede0004cd1bb3857e4596836542`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T051709.320688Z-daa95056f5.json) · [Raw log](../build-logs/20261108T051709.320688Z-daa95056f5.log)
+- [Exact process output](../build-logs/20261108T051709.320688Z-daa95056f5.raw.log)
+
+### 2026-11-08T13:17:36+08:00 · cloud-reconnect-command · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 8.717s.
+- Command: `C:/Python314/python.exe -X utf8 build/collect_reconnect_evidence.py`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `ad89c79fd57e86481016f0c5d160506915805ede0004cd1bb3857e4596836542`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T051736.327252Z-3a05f5a694.json) · [Raw log](../build-logs/20261108T051736.327252Z-3a05f5a694.log)
+- [Exact process output](../build-logs/20261108T051736.327252Z-3a05f5a694.raw.log)
+
+### 2026-11-08T13:18:07+08:00 · cloud-reconnect-run · launched
+
+- Config: Release/0.13.1; exit code: None; elapsed: 0.558s.
+- Command: `E:/emusician-analysis-build/bin-0.13.1/Release/E-musician.exe --agent`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `ad89c79fd57e86481016f0c5d160506915805ede0004cd1bb3857e4596836542`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T051807.054656Z-8acf5744d0.json) · [Raw log](../build-logs/20261108T051807.054656Z-8acf5744d0.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261108T051807.054656Z-8acf5744d0.raw.log)
+
+### 2026-11-08T13:18:14+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 3.010s.
+- Command: `C:\Python314\python.exe E:\emusician-analysis-source\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `ad89c79fd57e86481016f0c5d160506915805ede0004cd1bb3857e4596836542`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T051814.385377Z-51ea7a5224.json) · [Raw log](../build-logs/20261108T051814.385377Z-51ea7a5224.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-08T13:19:43+08:00 · cloud-reconnect-command · succeeded
+
+- Config: Release/0.13.1; exit code: 0; elapsed: 1.478s.
+- Command: `C:/Python314/python.exe -X utf8 build/final_connection_receipt.py`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `a6db1dd412e4daabfe1db9b15e4e9ae148c65d1d5c7683e2dd1f6aa145db9b9c`; Git HEAD: `12aa587f77758805573a061f782d38e46f69f523`.
+- [Record](builds/20261108T051943.421379Z-88f10f2435.json) · [Raw log](../build-logs/20261108T051943.421379Z-88f10f2435.log)
+- [Exact process output](../build-logs/20261108T051943.421379Z-88f10f2435.raw.log)
+
+### 2026-11-08 · 0.13.1 克隆重连、统一弹出主题与英文Agent交付
+
+用户新克隆实例44800端口已通过原密钥接入；九环境/固定release/两个SQLite检查，补齐缺失系统FFmpeg，恢复protocol2/18082与本地SSH隧道，无E盘模型重传。新共享主题覆盖菜单/下拉/Options/关闭保存，保留原保存回调；UI语言进入Agent任务指令与来源标记的系统文案投影，用户文本保持。
+
+两次Release成功、CTest11/11、Agent360、最终locale9、最终Web4、原生弹出40检查及两次真实GPT英文回答通过。七模型各一次短段真实整链通过：候选→接受一次→Undo/Redo→保存禁云重开→本地资产渲染；总流程306.85s，不代表质量/实时性能。最后一处原生变化仅为测试菜单省略号乱码，重建并workspace复测，126其余原生输入不变；旧三个EXE/用户工程保持。完整失败、源码差异、构建记录与机器/方法见docs/review/2026-11-08-cloud-reconnect-ui/RESULTS.md。
+
+英文0.13.1已打开、窗口响应、内嵌helper认证就绪；新启动入口/VS Code任务、英文视频分镜、SSH说明、七模型人工清单完成。实际鼠标/DPI、ASIO、整曲和听感待验；不使用computer-use，不自动合并main。源码同步见该目录PUBLISH.md；原用户DEVLOG与启动记录保留。

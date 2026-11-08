@@ -26,6 +26,8 @@ The ten track identity colours are Sage, Blue, Lavender, Rose, Sand, Moss, Teal,
 
 ## Workspace hierarchy
 
+Popup surfaces follow the same tokens (0.13.1): 28 px menu rows, separate label and shortcut columns, paper backgrounds, 3 px corners and fine rule borders. Use a restrained accent fill for selection and a clear focus outline. Options callouts retain their anchor and use an opaque paper shell. Confirmation dialogs use a quiet footer and 32 px buttons; keep Save/Discard/Cancel semantics and keyboard order. Avoid oversized decorative question marks or heavy stock shadows. The app owns a shared default look so detached menus and alerts receive these rules; OS file pickers and external plug-in windows remain outside this theme.
+
 Top controls keep project identity and save state near File/Save, followed by one transport, exact position, BPM/meter, metronome and count-in. Settings and Agent remain easy to reach. The editing row groups Library, add/edit/device/source/analysis actions with Undo/Redo, ruler, snap, grid, follow and zoom. Bottom status exposes jobs, device/resource information and master output; it does not repeat the transport.
 
 The left Library is a compact searchable catalogue of native devices, scanned plug-ins and existing project audio. A device can activate on the current appropriate target or be dropped onto a track; project audio entries locate the existing clip. Search and category controls remain usable by keyboard. Do not imply a managed sample collection, cloud catalogue, favourites or preset browser where none exists.

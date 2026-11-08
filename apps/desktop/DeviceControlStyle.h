@@ -2,7 +2,7 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <cmath>
-#include "UiDesign.h"
+#include "WorkspaceLookAndFeel.h"
 
 namespace emusician::deviceui {
 inline const auto paper=design::paper,surface=design::panel,ink=design::ink,quiet=design::secondary,rule=design::rule,accent=design::accent;
@@ -11,7 +11,7 @@ inline juce::Font valueFont(float size) { return design::numberFont(size); }
 // Shared device controls. The look must outlive every slider using it.
 // No model or engine state is stored here; normal Slider callbacks remain the
 // only edit path, so graph/knob/text input share command and Undo semantics.
-class ControlLook final : public juce::LookAndFeel_V4 {
+class ControlLook final : public design::WorkspaceLookAndFeel {
 public:
     ControlLook() {
         setColour(juce::Slider::textBoxTextColourId, ink);

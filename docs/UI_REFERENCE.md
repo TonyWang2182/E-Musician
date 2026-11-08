@@ -1,5 +1,11 @@
 # UI 参考与交互规格
 
+## 0.13.1 弹出组件与英文一致性
+
+File/右键/子菜单、设备下拉、分析Options和保存确认复用根DESIGN的纸白、细线及青绿焦点色。菜单行高28px，命令名与快捷键分列；选项层保持原锚点，采用不透明纸白外壳。关闭保存框保留Save/Discard/Cancel、Esc取消和Tab顺序，使用32px按钮及浅色底栏，移除默认大问号和重阴影。系统文件选择器与外部插件不由本应用主题重绘。
+
+English界面下Agent的系统进度、方案摘要、错误和回答要求使用英文；切换界面不会改写用户轨名、文件名、原输入或歌词。原生组件截图与实际模型回复分开验证；物理鼠标/DPI仍按[人工清单](review/2026-11-08-cloud-reconnect-ui/MODEL-TESTS.md)验收。
+
 ## 0.11.0 批准的品牌工作区（自动验证通过，人工待验）
 
 以 [批准设计图](review/2026-11-06-workspace-brand/approved-workspace.png) 为构图依据，Logo 为 [用户原件](../assets/brand/yi-yue-shi-logo.png)，用于 Windows 图标、约 0.9 秒启动淡入淡出与左上角。详细 token 与状态原则统一在根 [DESIGN](../DESIGN.md)，不在多处维护不同标准。

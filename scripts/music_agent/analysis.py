@@ -13,6 +13,8 @@ from audio_analysis.common import PARAMETERS as ANALYSIS_PARAMETERS
 from audio_analysis.common import OPTIONS as ANALYSIS_OPTIONS
 from audio_analysis.common import INSTRUMENT_RANGES
 
+from .localization import L
+
 KINDS = {"separate": "音源分离", "transcribe": "分轨转 MIDI", "chords": "和弦识别", "beats": "节拍 / 速度", "score": "综合分析"}
 COMMANDS = {"get_analysis_capabilities", "start_analysis", "get_analysis_job",
             "get_analysis_result", "cancel_analysis_job", "accept_analysis_result"}
@@ -355,19 +357,19 @@ def compile_import(result, context, frozen, summary):
     if not isinstance(result_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", result_hash):
         raise ValueError("候选缺少不可变内容标识，不能提交导入。")
     source = result["source"]
-    label = {"separate": f"新建 {total} 条音频轨并导入候选分轨", "transcribe": f"新建 {new_tracks} 条 MIDI 轨，导入 {counts.get('note_count', total)} 个候选音符",
-             "chords": f"添加 {total} 个和弦标签区间",
-             "score": f"添加综合分析：{new_tracks} 条 MIDI 轨、{counts.get('chord_count', 0)} 个和弦"}[kind]
-    changes = [label, f"保持原时间位置：{source['timeline_start']:.3f} 秒起；原音频保留"]
+    label = {"separate": L(f"新建 {total} 条音频轨并导入候选分轨", f"Create {total} audio tracks and add the separated stems"), "transcribe": L(f"新建 {new_tracks} 条 MIDI 轨，导入 {counts.get('note_count', total)} 个候选音符", f"Create {new_tracks} MIDI tracks with {counts.get('note_count', total)} candidate notes"),
+             "chords": L(f"添加 {total} 个和弦标签区间", f"Add {total} chord regions"),
+             "score": L(f"添加综合分析：{new_tracks} 条 MIDI 轨、{counts.get('chord_count', 0)} 个和弦", f"Add music analysis: {new_tracks} MIDI tracks and {counts.get('chord_count', 0)} chords")}[kind]
+    changes = [label, L(f"保持原时间位置：{source['timeline_start']:.3f} 秒起；原音频保留", f"Keep the source position at {source['timeline_start']:.3f} s and retain the original audio")]
     if kind in {"transcribe", "score"}:
-        changes.append(f"保留 {counts.get('controller_count', 0)} 个控制事件；新 MIDI 轨需选择乐器才能发声。" if counts else "仅导入音符；不恢复原插件音色、弯音和踏板。新 MIDI 轨需选择乐器才能发声。")
+        changes.append(L(f"保留 {counts.get('controller_count', 0)} 个控制事件；新 MIDI 轨需选择乐器才能发声。", f"Preserve {counts.get('controller_count', 0)} controller events. Select an instrument on each new MIDI track to hear it.") if counts else L("仅导入音符；不恢复原插件音色、弯音和踏板。新 MIDI 轨需选择乐器才能发声。", "Import notes only, without the original plug-in sound, pitch bends or pedal events. Select an instrument on each new MIDI track to hear it."))
     if kind == "score":
-        changes.append("节拍和结构作为分析标记保留；不会自动改变工程速度或拍号。")
+        changes.append(L("节拍和结构作为分析标记保留；不会自动改变工程速度或拍号。", "Keep beats and structure as analysis markers. Project tempo and meter stay unchanged."))
     elif kind == "chords":
-        changes.append("添加和弦轨，可直接修正标签和时间。")
+        changes.append(L("添加和弦轨，可直接修正标签和时间。", "Add a chord lane with editable labels and timing."))
     return {"project_id": context["project_id"], "revision": context["revision"], "summary": summary.strip(),
             "execution_kind": "analysis_import", "commands": [{"command": "accept_analysis_result", "args": {"result_id": result["result_id"]}}],
-            "changes": changes, "steps": [{"index": 1, "label": "核对来源、候选和工程版本"}, {"index": 2, "label": label}],
+            "changes": changes, "steps": [{"index": 1, "label": L("核对来源、候选和工程版本", "Check the source, candidate and project revision")}, {"index": 2, "label": label}],
             "checks": [], "note_clip_ids": [], "analysis": deepcopy(result), "scope": deepcopy(frozen)}
 
 def authorize_chord_read(context, frozen, clip_id):
@@ -414,7 +416,7 @@ def compile_chord_edit(args, region, context, frozen):
         raise ValueError("和弦已经是这些值，无需修改。")
     return {"project_id": context["project_id"], "revision": context["revision"], "summary": args["summary"].strip(),
         "execution_kind": "chord_edit", "commands": [{"command": "edit_chord_region", "args": {"id": region["id"], **changes}}],
-        "changes": [f"和弦 {region['label']} → {after['label']}", f"时间 {region['start_seconds']:.3f}–{region['end_seconds']:.3f} 秒 → {start:.3f}–{end:.3f} 秒"],
+        "changes": [L(f"和弦 {region['label']} → {after['label']}", f"Chord {region['label']} → {after['label']}"), L(f"时间 {region['start_seconds']:.3f}–{region['end_seconds']:.3f} 秒 → {start:.3f}–{end:.3f} 秒", f"Time {region['start_seconds']:.3f}–{region['end_seconds']:.3f} s → {start:.3f}–{end:.3f} s")],
         "checks": [], "note_clip_ids": [], "chord_before": deepcopy(region), "chord_after": after, "chord_clip_id": cid, "scope": deepcopy(frozen)}
 
 def capability_groups(context, host, analysis):

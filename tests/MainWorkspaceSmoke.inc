@@ -47,6 +47,8 @@ juce::Result MainComponent::runWorkspaceUISmoke(const juce::File& directory)
         require(view.getLocalBounds().contains(p.titleBounds) && !p.titleBounds.intersects(p.saveButton.getBounds()), label + " project title clearance");
     };
     try {
+        const auto popupStyle = style_smoke::run(directory.getChildFile("popup-style"), p.look);
+        require(popupStyle.wasOk(), "popup/dialog style: " + popupStyle.getErrorMessage());
         require(brand::logo().isValid(), "approved logo decoded");
         brand::Startup startup("0.11.0 / synthetic smoke");
         startup.setSize(640, 420); startup.start();

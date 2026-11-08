@@ -1,3 +1,17 @@
+# 0.13.1 本轮进度（2026-11-08）
+
+- [x] 建维护分支并明确归属，保留旧EXE、工程和用户启动记录；[计划](review/2026-11-08-cloud-reconnect-ui/PLAN.md)。
+- [x] 新克隆SSH/九环境/两个SQLite/固定release核对，补装FFmpeg，恢复原服务与本地隧道；无模型重传。
+- [x] 共享菜单、下拉、Options与保存确认主题；40项原生组件检查和真实截图查看。
+- [x] UI语言进入Agent任务与系统文案投影，用户数据保留；360项回归、最终本地化9项、最终网页4项、真实英文API两次。
+- [x] 独立0.13.1 Release、CTest11/11；修正测试夹具字符串后重编译并针对workspace复测。
+- [x] SCNet/TransKun/ChordMini/MuScriptor/SheetSage2/ACE/YuE2真实短段候选→接受→Undo/Redo→保存离线重开及渲染；原始完整报告在本轮档案。
+- [x] 新启动入口和VS Code任务；打开英文0.13.1，确认窗口响应与helper认证；[启动](review/2026-11-08-cloud-reconnect-ui/OPENED.json)。
+- [x] 英文演示脚本、SSH连接说明、人工模型与界面清单。
+- [ ] 用户真实鼠标/DPI、ASIO共存、整曲质量/长任务和英文复杂任务验收。
+
+证据、精确构建差异、已知限制与失败记录见[RESULTS](review/2026-11-08-cloud-reconnect-ui/RESULTS.md)。下文是历史阶段，不把其中旧连接状态当当前状态。
+
 # E-musician 开发计划
 
 ## 夸克副本交接与校验兼容（2026-11-08）

@@ -1,3 +1,13 @@
+# 当前候选：0.13.1 克隆重连与弹出界面/英文Agent（2026-11-08，自动通过、人工待验）
+
+用户新实例已克隆原数据；实际工作树仍为E:/MusicAgent&DAW/worktrees/audio-analysis，分支fix/cloud-reconnect-ui-v0131，基线12aa587。已通过原SSH密钥将别名emusician-autodl切到44800端口；复用云端/root/autodl-tmp/emusician的九环境与固定release ed7d6a920487a651c988，补装缺失FFmpeg并恢复protocol2/18082服务，无E盘模型重传。最终两个SQLite完整性通过、活动队列0、七模型真实短段整链全部通过；不据此证明夸克备份可恢复。
+
+0.13.1已统一应用内部菜单/下拉/Options/关闭保存框主题，Agent系统文案与新模型回答按UI语言；用户原文保留。Release两次成功、CTest11/11、Agent360及最终locale9、最终网页4场景、原生弹出40检查、GPT-5-mini两次真实英文回答通过。最后只修测试菜单省略号，重编译及workspace复测；七模型使用修正前冻结EXE，126项其余原生输入相同，精确差异已核对。旧0.13/0.12.1/0.12 EXE与用户项目保持。
+
+已打开标题0.13.1的英文窗口并确认响应、内嵌helper认证连接；未用computer-use或声称声卡/听感验收。启动E:/MusicAgent&DAW/Start E-musician 0.13.1.cmd，本地VS Code入口E-musician-0.13.1.code-workspace。VS Code远程窗口未切换，连接步骤见[SSH工作区](review/2026-11-08-cloud-reconnect-ui/SSH-WORKSPACE.md)。当前云服务保持在线；DAW按任务独立建隧道，不依赖VS Code打开。
+
+下一步由用户按[七模型/界面清单](review/2026-11-08-cloud-reconnect-ui/MODEL-TESTS.md)做8–20秒试听、鼠标/DPI、ASIO及保存确认，再扩展整曲；英文[视频脚本](review/2026-11-08-cloud-reconnect-ui/DEMO-SCRIPT.md)已完成。源码/测试/失败与边界见[结果](review/2026-11-08-cloud-reconnect-ui/RESULTS.md)，Git提交和远端同步以[PUBLISH](review/2026-11-08-cloud-reconnect-ui/PUBLISH.md)为准，不自动合并main。以下是历史阶段记录，不是当前连接/发布状态。
+
 # 当前运维：夸克副本交接（2026-11-08，用户报告上传完成、全量核验待执行）
 
 用户报告 full-20261107T080330Z 已完整保存在夸克；尚未读取该副本，不能据此标记备份可恢复。本机旧SSH目录最新记录 failed（2026-11-08 00:24 CST），63完整块、含部分块约34.44GB，没有全量verification。本轮不重启旧下载、不连接云端、不租机/推理或删除实例。

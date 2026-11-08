@@ -1,5 +1,13 @@
 # E-musician 技术架构
 
+## 0.13.1 克隆重连与界面语言边界（2026-11-08）
+
+云端计算协议和权威工程没有改变。`emusician-autodl` SSH别名改指新实例44800端口；本地Worker按任务创建SSH隧道，访问远程loopback18082的protocol 2服务。模型环境、清单和固定release复用克隆数据，缺失的系统FFmpeg补装；没有从E盘重传模型。VS Code远程窗口仅供开发管理，不是DAW运行依赖。服务恢复、七模型推理与人工听感分别取证，见[本轮结果](review/2026-11-08-cloud-reconnect-ui/RESULTS.md)。
+
+原生主题由应用持有`WorkspaceLookAndFeel`，作为全局默认，同时被工作区及装置控件主题继承。未挂在目标组件树中的PopupMenu、异步AlertWindow以及CallOutBox因此使用同一套token。只改变绘制、间距和焦点表现；原Save/Discard/Cancel结果ID、异步保存和工程命令保持不变。主题在窗口和引擎清理后解除，不进入实时回调。第三方插件窗口和Windows文件选择器使用自身主题。
+
+Agent网页每次请求携带`X-Agent-Language`；服务在任务开始时冻结回答语言并加入模型系统指令，响应时按当前UI语言投影系统文案。运行器文案带来源标记，动态计划摘要使用双语字符串；不翻译命令ID、路径、工程数据、用户轨名/歌词或模型已有内容。原始状态仍留在运行器，未知后端中文错误可显示简短英文并保留诊断，不通过删中文字符破坏用户数据。认证、作用范围、候选接受、原子应用和一次撤销路径保持原样。取舍见[ADR](decisions/2026-11-08-shared-popup-agent-locale.md)。
+
 ## 运维备份边界（2026-11-07）
 
 本地 `backup_progress.py → backup_monitor.py` 是只读投影：小型进度/收据文件→后台读取线程→Tk 主线程，2 秒刷新；下载器独立运行。UI 不发 SSH、不读取归档、不管理下载进程，不接入 DAW/Agent/音频回调。下载百分比与分块校验、全量校验完成分开；无新权威状态。安装副本与启动入口见[进度窗口](review/2026-11-07-backup-monitor/RESULTS.md)。

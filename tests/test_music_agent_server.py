@@ -29,12 +29,13 @@ class FakeRuntime:
         if self.fail_state:
             raise Exception("private internal traceback and file path")
         return {"phase": "idle", "snapshot": {"name": "Synthetic"}}
-    def plan_request(self, prompt, scope="selection"):
+    def plan_request(self, prompt, scope="selection", *, language="zh-CN"):
         if self.fail_plan:
             raise Exception("private internal traceback and file path")
         if scope not in ("selection", "project"):
             raise ValueError("Invalid scope")
         self.calls.append(("plan", prompt, scope))
+        self.language = language
         return {"phase": "planning"}
     def apply(self, plan_id):
         self.calls.append(("apply", plan_id))
@@ -182,6 +183,19 @@ class ServerTests(unittest.TestCase):
         status, _, _ = self.request("POST", "/api/plan", {"prompt": "把工程速度改为100", "scope": "project"})
         self.assertEqual(status, 200)
         self.assertEqual(self.runtime.calls, [("plan", "把工程速度改为100", "project")])
+
+    def test_ui_language_header_reaches_request_without_changing_prompt(self):
+        status, _, _ = self.request("POST", "/api/plan", {"prompt": "保留这段歌词", "scope": "project"}, {"X-Agent-Language": "en"})
+        self.assertEqual(status, 200)
+        self.assertEqual(self.runtime.language, "en")
+        self.assertEqual(self.runtime.calls, [("plan", "保留这段歌词", "project")])
+
+    def test_english_http_error_and_chinese_mode(self):
+        self.runtime.fail_plan = True
+        for language, expected in (("en", "The local service failed."), ("zh-CN", "本地服务异常")):
+            status, _, body = self.request("POST", "/api/plan", {"prompt": "x"}, {"X-Agent-Language": language})
+            self.assertEqual(status, 500)
+            self.assertIn(expected, json.loads(body)["error"])
     def test_invalid_scope_is_rejected(self):
         for scope in (None, True, [], "all"):
             with self.subTest(scope=scope):

@@ -1,0 +1,30 @@
+{
+  "checked_utc": "2026-11-08T05:05:16.258109+00:00",
+  "passed": true,
+  "model": "gpt-5-mini",
+  "real_language_provider": true,
+  "project": "synthetic read-only fixture, 120 BPM and 4/4",
+  "music_inference": false,
+  "daw_commands": 0,
+  "cases": [
+    {
+      "input_language": "English",
+      "ui_language": "en",
+      "phase": "done",
+      "answer": "The current project tempo is 120 BPM and the time signature is 4/4.",
+      "error": null
+    },
+    {
+      "input_language": "Chinese",
+      "ui_language": "en",
+      "phase": "done",
+      "answer": "The current project tempo is 120 BPM and the time signature is 4/4.",
+      "error": null
+    }
+  ],
+  "usage": {
+    "calls": 2,
+    "prompt_tokens": 12380,
+    "completion_tokens": 467
+  }
+}

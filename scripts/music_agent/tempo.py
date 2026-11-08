@@ -87,10 +87,11 @@ def _summary(args):
 
 
 def _plan(context,frozen,args,command,checks,changes,before,analysis=None):
+    from .localization import L
     plan={"project_id":context["project_id"],"revision":context["revision"],"scope":deepcopy(frozen),"summary":_summary(args),
         "execution_kind":"beat_apply" if analysis else "audio_warp","commands":[command],"checks":[],"note_clip_ids":[],
         "warp_before":deepcopy(before),"warp_checks":checks,"changes":changes,
-        "steps":[{"index":1,"label":"检查片段与版本"},{"index":2,"label":"后台处理后一次提交并回读"}]}
+        "steps":[{"index":1,"label":L("检查片段与版本", "Check the clip and project revision")},{"index":2,"label":L("后台处理后一次提交并回读", "Prepare in the background, then apply once and verify")}]}
     if analysis:plan["analysis"]=deepcopy(analysis)
     return plan
 
@@ -121,9 +122,10 @@ def compile_warp(args,context,frozen,states):
         number(start,0,172800);number(start+duration,0,172800)
         expected.append({"clip_id":clip["id"],"enabled":enabled,"follow_tempo":native.get("follow_tempo",False),"warp_speed_ratio":ratio,
             "timeline_start_seconds":start,"duration_seconds":duration,**({"source_bpm":native["source_bpm"],"target_bpm":native["target_bpm"]} if enabled else {})})
-    changes=[f"修改 {len(clips)} 个音频片段的 Warp；一次确认、一次撤销。",
-        f"源速度 {native['source_bpm']:g} → 目标 {native['target_bpm']:g} BPM；保留音高。" if enabled else "关闭 Warp，恢复原始音频速度。"]
-    if aligned:changes.append(f"当前片段内 {native['first_beat_seconds']:.3f} 秒对齐工程 {native['align_start_seconds']:.3f} 秒。")
+    from .localization import L
+    changes=[L(f"修改 {len(clips)} 个音频片段的 Warp；一次确认、一次撤销。", f"Change Warp on {len(clips)} audio clips in one undoable edit."),
+        L(f"源速度 {native['source_bpm']:g} → 目标 {native['target_bpm']:g} BPM；保留音高。", f"Source {native['source_bpm']:g} → target {native['target_bpm']:g} BPM, preserving pitch.") if enabled else L("关闭 Warp，恢复原始音频速度。", "Disable Warp and restore the original audio speed.")]
+    if aligned:changes.append(L(f"当前片段内 {native['first_beat_seconds']:.3f} 秒对齐工程 {native['align_start_seconds']:.3f} 秒。", f"Align {native['first_beat_seconds']:.3f} s within the current clip to {native['align_start_seconds']:.3f} s in the project."))
     return _plan(context,frozen,args,{"command":"set_audio_warp","args":native},expected,changes,states)
 
 
@@ -159,10 +161,11 @@ def compile_beats(args,result,context,frozen,states):
     expected={"clip_id":cid,"warp_speed_ratio":ratio,"timeline_start_seconds":start,"duration_seconds":duration,
         "follow_tempo":follow if mode=="audio_to_project" else False}
     if mode=="audio_to_project":expected.update(enabled=True,source_bpm=bpm/old_ratio,target_bpm=context["bpm"])
-    changes=[f"候选速度 {bpm:g} BPM；首拍 {first:.3f} 秒（分析范围内）。",
-        f"将首拍对齐工程 {target:.3f} 秒；不创建音轨。",
-        "保持工程速度，只对源片段保音高拉伸。" if mode=="audio_to_project" else "整个工程采用音频速度与拍号；源片段保持速度，其他跟随工程的音频也会更新。"]
-    if tempo.get("variable_tempo"):changes.append("候选存在节奏波动；本次只应用固定比例，不会逐拍矫直。")
+    from .localization import L
+    changes=[L(f"候选速度 {bpm:g} BPM；首拍 {first:.3f} 秒（分析范围内）。", f"Candidate tempo: {bpm:g} BPM. First downbeat: {first:.3f} s within the analyzed range."),
+        L(f"将首拍对齐工程 {target:.3f} 秒；不创建音轨。", f"Align the first downbeat to {target:.3f} s in the project. No track is created."),
+        L("保持工程速度，只对源片段保音高拉伸。", "Keep project tempo and stretch only the source clip, preserving pitch.") if mode=="audio_to_project" else L("整个工程采用音频速度与拍号；源片段保持速度，其他跟随工程的音频也会更新。", "Adopt the audio tempo and meter for the whole project. The source keeps its speed; other tempo-following audio also updates.")]
+    if tempo.get("variable_tempo"):changes.append(L("候选存在节奏波动；本次只应用固定比例，不会逐拍矫直。", "Tempo varies. This edit uses a fixed ratio and does not straighten individual beats."))
     plan=_plan(context,frozen,args,{"command":"apply_beat_analysis","args":native},[expected],changes,states,result)
     plan["tempo_check"]={"bpm":bpm,"numerator":n,"denominator":d} if mode=="project_to_audio" else {"bpm":context["bpm"]}
     return plan

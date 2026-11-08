@@ -1,0 +1,20 @@
+{
+  "checked_utc": "2026-11-08T04:57:53.720161+00:00",
+  "status": "passed",
+  "ssh_alias": "emusician-autodl",
+  "ssh_port": 44800,
+  "remote_service_port": 18082,
+  "history": "E:\\MusicAgent&DAW\\cloud-inference\\connection\\history\\20261108T045751Z-44800",
+  "registry_sha256": "bea86424ce93cb94ccfb2bfd4e06c86bda8551c50efd2b7a8c5fedcf544e361d",
+  "providers": [
+    "ace-step-1.5-xl-turbo",
+    "yue2",
+    "scnet",
+    "transkun",
+    "chordmini",
+    "muscriptor",
+    "sheetsage2"
+  ],
+  "native_transport_tunnel_verified": true,
+  "inference_performed": false
+}
