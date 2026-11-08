@@ -17,6 +17,7 @@ import posixpath
 import re
 import shlex
 import sqlite3
+import stat
 import subprocess
 import tarfile
 import threading
@@ -260,6 +261,19 @@ def fetch_verified(remote, metadata, directory, *, retries=3, progress=None, dir
     raise BackupError('No transfer attempt completed')
 
 
+def manifest_mode(mode, kind):
+    # The original producer recorded gettarinfo().mode before tar serialization
+    # removes stat file-type bits. Keep those immutable manifests compatible,
+    # while validating the type separately instead of masking arbitrary bits.
+    if type(mode) is not int or mode < 0 or mode & ~0o177777:
+        raise BackupError('Invalid manifest mode')
+    expected_type = {'file': stat.S_IFREG, 'dir': stat.S_IFDIR,
+                     'symlink': stat.S_IFLNK, 'hardlink': stat.S_IFREG}[kind]
+    if stat.S_IFMT(mode) not in {0, expected_type}:
+        raise BackupError('Manifest mode type differs from tar member')
+    return stat.S_IMODE(mode)
+
+
 def member_name(name):
     if (not isinstance(name, str) or not name or len(name) > 4096
             or '\\' in name or ':' in name or any(ord(c) < 32 for c in name)):
@@ -372,9 +386,10 @@ def verify(directory, receipt=None, *, progress=None):
                         else 'symlink' if member.issym() else 'hardlink' if member.islnk() else None)
                 if kind is None or member.sparse is not None:
                     raise BackupError('Unsupported special or sparse tar member')
+                expected_mode = manifest_mode(entry.get('mode'), kind)
                 if (entry.get('name') != name or entry.get('type') != kind
                         or type(entry.get('size')) is not int or entry['size'] != member.size
-                        or type(entry.get('mode')) is not int or entry['mode'] != member.mode
+                        or expected_mode != member.mode
                         or entry.get('linkname', '') != member.linkname):
                     raise BackupError('Tar metadata differs from manifest: ' + name)
                 if not 0 <= member.mode <= 0o7777 or member.size < 0:

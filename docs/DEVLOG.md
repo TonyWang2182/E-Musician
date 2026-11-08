@@ -12053,3 +12053,64 @@ print(json.dumps({'\"'\"'passed'\"'\"':True,'\"'\"'checked_at'\"'\"':datetime.da
 - 14 项边界/真实小归档验证通过；最终已安装副本在本机 150% DPI 下 16 秒/8 次刷新、窄窗和模拟校验/错误排版通过。首次快捷方式四秒探测超时，随后有界检查确认窗口存在，失败记录保留。
 - 18:38 快照约 4.92%、剩余 81.21GB，备份仍传输中；不声称全量备份/异机恢复成功，也无传输提速或 DAW 性能结论。下载器、云实例、DAW 与模型未改动。
 - [计划/归属](review/2026-11-07-backup-monitor/PLAN.md) · [结果/入口/验证证据](review/2026-11-07-backup-monitor/RESULTS.md)。原有四条用户日志及十份启动记录保持；维护分支交付，不合并 main。
+
+### 2026-11-07T16:24:38+08:00 · hybrid-compute-command · failed
+
+- Config: Release/0.13.0; exit code: 1073807364; elapsed: 18102.256s.
+- Command: `C:/Python314/python.exe scripts/cloud/pull_full_backup.py pull --host emusician-autodl --remote-root /root/autodl-tmp/emusician/exports/full-20261107T080330Z --destination E:\MusicAgent&DAW\cloud-inference\backups\full-20261107T080330Z --direct-file --workers 4`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `9c9f4b92151d60c255788bd97f92f985b11a905213f3c9e5cc746337bd6fb83c`; Git HEAD: `6da1857a457f18a4494012b13b2f8459c38665c4`.
+- [Record](builds/20261107T082438.642229Z-d7f62143f8.json) · [Raw log](../build-logs/20261107T082438.642229Z-d7f62143f8.log)
+- [Exact process output](../build-logs/20261107T082438.642229Z-d7f62143f8.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1073807364; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261107T082438.642229Z-d7f62143f8.log
+
+### 2026-11-07T21:35:13+08:00 · 电脑中断后恢复全量备份
+
+- 旧任务 d7f62143f8 于21:26退出；7.603GB/13完整块及4部分块保留。核查无旧写入者后只启动一次 Resume-FullCloudBackup.ps1，新任务742b107caa，已复用13块且部分块继续增长。
+- 窗口不具备系统级下载守护，跨进程互斥尚缺；本次不改运行代码。对象存储/CDN仅讨论，未开通或上传。全量备份未完成。
+- [诊断、命令与证据](review/2026-11-07-full-cloud-backup/RESUME-2134.md)。
+
+### 2026-11-07T21:34:17+08:00 · hybrid-compute-command · failed
+
+- Config: Release/0.13.0; exit code: 1; elapsed: 10184.560s.
+- Command: `C:/Python314/python.exe scripts/cloud/pull_full_backup.py pull --host emusician-autodl --remote-root /root/autodl-tmp/emusician/exports/full-20261107T080330Z --destination E:\MusicAgent&DAW\cloud-inference\backups\full-20261107T080330Z --direct-file --workers 4`
+- Context: Unified cloud task pipeline; automatic checks do not establish physical audio or musical accuracy acceptance
+- Source SHA-256: `925b00287ce4aa2612da371f1db418fb0c70f7d3d438784b44c728e3c171872b`; Git HEAD: `5d859414bc9836f6cf7430e7d573cdcfb216aa37`.
+- [Record](builds/20261107T133417.170988Z-742b107caa.json) · [Raw log](../build-logs/20261107T133417.170988Z-742b107caa.log)
+- [Exact process output](../build-logs/20261107T133417.170988Z-742b107caa.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261107T133417.170988Z-742b107caa.log
+
+### 2026-11-08T10:01:47+08:00 · backup-mode-regression · succeeded
+
+- Config: Python 3.14 / Windows / utility; exit code: 0; elapsed: 22.000s.
+- Command: `C:\Python314\python.exe -X utf8 -m unittest discover -s tests -p test_*backup*.py -v`
+- Context: Strict legacy stat-mode compatibility; archive bytes and manifest stay immutable; synthetic regression is not full-backup verification
+- Source SHA-256: `dd0fe62278a7089f4360458e72e9a01f20cf952345255d93b031aa5968dd5376`; Git HEAD: `5d859414bc9836f6cf7430e7d573cdcfb216aa37`.
+- [Record](builds/20261108T020147.764567Z-d59661d2c3.json) · [Raw log](../build-logs/20261108T020147.764567Z-d59661d2c3.log)
+- [Exact process output](../build-logs/20261108T020147.764567Z-d59661d2c3.raw.log)
+
+### 2026-11-08T10:02:36+08:00 · backup-real-header-probe · succeeded
+
+- Config: Python 3.14 / Windows / read-only prefix; exit code: 0; elapsed: 0.985s.
+- Command: `C:\Python314\python.exe -X utf8 docs/review/2026-11-08-quark-recovery/check_first_header.py`
+- Context: Read only real first manifest entry and first tar header; not full backup or Quark verification
+- Source SHA-256: `dd0fe62278a7089f4360458e72e9a01f20cf952345255d93b031aa5968dd5376`; Git HEAD: `5d859414bc9836f6cf7430e7d573cdcfb216aa37`.
+- [Record](builds/20261108T020236.993256Z-2bafbea02f.json) · [Raw log](../build-logs/20261108T020236.993256Z-2bafbea02f.log)
+- [Exact process output](../build-logs/20261108T020236.993256Z-2bafbea02f.raw.log)
+
+### 2026-11-08T10:04:37+08:00 · quark-handoff-audit · succeeded
+
+- Config: Python 3.14 / Windows / documentation and utility; exit code: 0; elapsed: 1.038s.
+- Command: `C:\Python314\python.exe -X utf8 build/check_quark_handoff.py`
+- Context: Validate documentation links, UTF-8, successful evidence, installed helper hash and git whitespace; no backup payload verification
+- Source SHA-256: `dd0fe62278a7089f4360458e72e9a01f20cf952345255d93b031aa5968dd5376`; Git HEAD: `5d859414bc9836f6cf7430e7d573cdcfb216aa37`.
+- [Record](builds/20261108T020437.320129Z-ad1ecbeb57.json) · [Raw log](../build-logs/20261108T020437.320129Z-ad1ecbeb57.log)
+- [Exact process output](../build-logs/20261108T020437.320129Z-ad1ecbeb57.raw.log)
+
+### 2026-11-08 · 夸克备份交接清单与校验兼容修复
+
+- 用户报告full-20261107T080330Z已完整存夸克；形成E盘独立核验、系统镜像、异机原路径恢复、七模型短测、DAW/Agent接回与长期保全清单。夸克副本未读取，旧SSH任务已失败，不将网盘上传或目录名当完整性验收。
+- 发现原清单stat类型位与tar纯权限模式不一致，严格归一化并保留类型/权限验证；未修改原始备份或哈希。64项回归、真实首项和交付审查通过；独立工具副本同步。
+- 未新建DAW构建、启动云下载/模型、创建或释放实例；全量备份校验及异机恢复仍待执行。原用户启动日志和记录保留，维护分支同步，不合并main。
+- [计划](review/2026-11-08-quark-recovery/PLAN.md) · [完整后续清单](review/2026-11-08-quark-recovery/CHECKLIST.md) · [结果与证据](review/2026-11-08-quark-recovery/RESULTS.md)。

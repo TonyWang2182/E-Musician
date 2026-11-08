@@ -27,12 +27,12 @@ def artifact(name, data):
     return {'name': name, 'size': len(data), 'sha256': checksum(data)}
 
 
-def build_tar(entries):
+def build_tar(entries, *, directory_mode=0o755):
     stream, lines = io.BytesIO(), []
     with tarfile.open(fileobj=stream, mode='w', format=tarfile.PAX_FORMAT) as archive:
         for kind, name, content in entries:
             member = tarfile.TarInfo(name)
-            member.mode = 0o755 if kind == 'dir' else 0o644
+            member.mode = directory_mode if kind == 'dir' else 0o644
             member.type = {'file': tarfile.REGTYPE, 'dir': tarfile.DIRTYPE,
                            'symlink': tarfile.SYMTYPE, 'hardlink': tarfile.LNKTYPE}[kind]
             member.linkname = content if kind in {'symlink', 'hardlink'} else ''
@@ -110,6 +110,69 @@ class ArchiveTests(unittest.TestCase):
         receipt = write_archive(self.directory, data, entries)
         with self.assertRaisesRegex(backup.BackupError, 'metadata differs'):
             backup.verify(self.directory, receipt)
+
+    def test_original_manifest_directory_mode_matches_real_first_header(self):
+        # Exact mode values observed in full-20261107T080330Z, without requiring
+        # the private 85 GB archive or altering its hash-anchored manifest.
+        data, entries = build_tar([('dir', BASE + '/manifests', b'')],
+                                  directory_mode=0o700)
+        with tarfile.open(fileobj=io.BytesIO(data), mode='r|') as archive:
+            self.assertEqual(next(iter(archive)).mode, 448)
+        entries[0]['mode'] = 16832  # stat.S_IFDIR | 0o700
+        receipt = write_archive(self.directory, data, entries)
+        report = backup.verify(self.directory, receipt)
+        self.assertEqual(report['members']['dir'], 1)
+        self.assertEqual(entries[0]['mode'], 16832)
+
+    def test_original_stat_modes_preserve_file_directory_and_link_checks(self):
+        data, entries = self.standard()
+        type_bits = {'file': 0o100000, 'dir': 0o040000,
+                     'symlink': 0o120000, 'hardlink': 0o100000}
+        for entry in entries:
+            entry['mode'] |= type_bits[entry['type']]
+        self.assertEqual(entries[2]['mode'], 33188)  # Actual regular-file mode.
+        receipt = write_archive(self.directory, data, entries)
+        manifest_before = (self.directory / 'manifest.jsonl').read_bytes()
+        report = backup.verify(self.directory, receipt)
+        self.assertEqual(report['members'], {'file': 2, 'dir': 2, 'symlink': 2, 'hardlink': 1})
+        self.assertEqual(report['raw_tar_sha256'], checksum(data))
+        self.assertEqual((self.directory / 'manifest.jsonl').read_bytes(), manifest_before)
+
+    def test_rejects_stat_mode_type_mismatches_for_every_member_kind(self):
+        indexes = {'file': 2, 'dir': 0, 'symlink': 4, 'hardlink': 3}
+        expected = {'file': 0o100000, 'dir': 0o040000,
+                    'symlink': 0o120000, 'hardlink': 0o100000}
+        for kind, index in indexes.items():
+            for type_bits in (0o010000, 0o020000, 0o030000, 0o040000,
+                              0o060000, 0o100000, 0o120000, 0o140000, 0o170000):
+                if type_bits == expected[kind]:
+                    continue
+                with self.subTest(kind=kind, type_bits=oct(type_bits)):
+                    data, entries = self.standard()
+                    entries[index]['mode'] |= type_bits
+                    receipt = write_archive(self.directory, data, entries)
+                    with self.assertRaisesRegex(backup.BackupError, 'mode type differs'):
+                        backup.verify(self.directory, receipt)
+
+    def test_rejects_invalid_manifest_modes_without_masking_them(self):
+        for invalid in (True, False, None, '33188', 33188.0, -1,
+                        0o200644, 0o1000644, (1 << 64) | 0o100644):
+            with self.subTest(mode=invalid):
+                data, entries = self.standard()
+                entries[2]['mode'] = invalid
+                receipt = write_archive(self.directory, data, entries)
+                with self.assertRaisesRegex(backup.BackupError, 'Invalid manifest mode'):
+                    backup.verify(self.directory, receipt)
+
+    def test_stat_mode_normalization_still_rejects_permission_changes(self):
+        for index, type_bits in ((0, 0o040000), (2, 0o100000),
+                                 (3, 0o100000), (4, 0o120000)):
+            with self.subTest(kind_index=index):
+                data, entries = self.standard()
+                entries[index]['mode'] = type_bits | (entries[index]['mode'] ^ 0o100)
+                receipt = write_archive(self.directory, data, entries)
+                with self.assertRaisesRegex(backup.BackupError, 'metadata differs'):
+                    backup.verify(self.directory, receipt)
 
     def test_rejects_hidden_tar_tail_even_with_valid_part_hashes(self):
         data, entries = self.standard()

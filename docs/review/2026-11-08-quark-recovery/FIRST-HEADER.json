@@ -1,0 +1,12 @@
+{
+  "checked_utc": "2026-11-08T02:02:37.942998+00:00",
+  "scope": "first manifest entry and first tar header only",
+  "status": "passed",
+  "manifest_mode": 16832,
+  "tar_header_mode": 448,
+  "normalized_mode": 448,
+  "verifier_sha256": "cbb01c0b7051d5dc291e546a21d0458cd2363d4245201f20701ce265c3960459",
+  "full_backup_verified": false,
+  "quark_copy_read": false,
+  "restore_tested": false
+}

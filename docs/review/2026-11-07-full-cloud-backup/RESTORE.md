@@ -1,6 +1,6 @@
 # 备份与恢复说明
 
-本轮包为Linux原路径快照，不是Windows可运行环境，也不是完整操作系统镜像。用户报告保存的AutoDL系统镜像与此数据备份互补。完成状态以目的目录verification.json的phase=verified为准；下载中不能删除原实例。
+本轮包为Linux原路径快照，不是Windows可运行环境，也不是完整操作系统镜像。用户报告保存的AutoDL系统镜像与此数据备份互补。2026-11-08补充：使用修正stat mode兼容性的校验器，要求本次verify退出码0及新写入verification.json；单看旧报告或phase不够。夸克副本交接、文件数/容量和全部后续步骤见[清单](../2026-11-08-quark-recovery/CHECKLIST.md)。下载中不能删除原实例。
 
 ## 文件组织
 
@@ -22,7 +22,7 @@ HF令牌目录、SSH/API凭据、旧备份、VS Code服务器、Git对象、pyca
 1. 首选用户已保存的AutoDL系统镜像，在兼容Linux x86_64/NVIDIA驱动实例启动；先不要运行模型服务。系统镜像包含的内容以AutoDL保存结果为准，本轮未通过平台API核验镜像。
 2. 上传本目录全部完整tarpart、receipt、manifest及校验脚本；先重新verify，确认phase=verified。备份目录本身与恢复目标分开，不能边下载边恢复。
 3. 在新建且无用户工作负载的实例恢复原路径；常规GNU tar可按顺序拼接文件并解包。例如先在空的暂存目录做解包检查：`cat part-*.tarpart | tar -xpf - -C /mnt/restore-check`。该目录必须已经存在并有足够空间；绝对符号链接仍指向原绝对路径，暂存解包不是可运行环境。
-4. 系统镜像已恢复匹配的miniconda时，只需要将data根恢复到/root/autodl-tmp/emusician；归档从其子目录开始，需预建该数据根并设为0700。如另行恢复runtime，应先核对系统依赖/驱动，不能覆盖正在使用的Python。保留Linux权限与所有软/硬链接；环境不能直接随意换绝对路径。
+4. 系统镜像已恢复匹配的miniconda时，只需恢复数据目录。成员实际带`root/autodl-tmp/emusician/...`或`root/miniconda3/...`前缀；先确认解包根与成员前缀映射，不可直接把整个归档解到/root/autodl-tmp/emusician而造成重复目录。归档未记录数据根目录本身，需预建该根并设为0700。如另行恢复runtime，应先核对系统依赖/驱动，不能覆盖正在使用的Python。保留Linux权限与所有软/硬链接；环境不能直接随意换绝对路径。
 5. 先核对两个数据库PRAGMA integrity_check、模型锁与权重SHA、Python版本和关键import，再启动统一compute服务、检查protocol2和能力目录。最后才执行短样本CPU/GPU验证。
 6. 新实例SSH主机/端口/密钥可能改变，更新本机SSH alias和compute注册连接；不要把旧PID/锁作为正在运行的服务状态。DAW使用本地资产的工程仍可离线打开。
 
