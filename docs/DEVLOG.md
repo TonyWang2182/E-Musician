@@ -12346,3 +12346,7 @@ print(json.dumps({'\"'\"'passed'\"'\"':True,'\"'\"'checked_at'\"'\"':datetime.da
 两次Release成功、CTest11/11、Agent360、最终locale9、最终Web4、原生弹出40检查及两次真实GPT英文回答通过。七模型各一次短段真实整链通过：候选→接受一次→Undo/Redo→保存禁云重开→本地资产渲染；总流程306.85s，不代表质量/实时性能。最后一处原生变化仅为测试菜单省略号乱码，重建并workspace复测，126其余原生输入不变；旧三个EXE/用户工程保持。完整失败、源码差异、构建记录与机器/方法见docs/review/2026-11-08-cloud-reconnect-ui/RESULTS.md。
 
 英文0.13.1已打开、窗口响应、内嵌helper认证就绪；新启动入口/VS Code任务、英文视频分镜、SSH说明、七模型人工清单完成。实际鼠标/DPI、ASIO、整曲和听感待验；不使用computer-use，不自动合并main。源码同步见该目录PUBLISH.md；原用户DEVLOG与启动记录保留。
+
+### 2026-11-08T13:24:18+08:00 · 0.13.1 维护分支同步
+
+代码/证据提交8857ed7031e88f81c030fa7972c72c319ed62f21已推送并经ls-remote核对。main保持d4ed6c898af1303918e38b6325a915befabbb575；本条及PUBLISH为仅文档收尾，不重建。8条用户DEVLOG及14份旧记录仍未暂存，本轮无凭据/权重/测试音频上传。英文DAW与认证helper已打开，人工听感/ASIO待验。
