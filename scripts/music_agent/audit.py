@@ -23,7 +23,9 @@ class Audit:
     def write(self, event, **values):
         allowed = {"task_id", "plan_id", "project_id", "revision", "command_count",
                    "commands_sha256", "status", "calls", "prompt_tokens", "completion_tokens",
-                   "model", "code", "duration_ms", "job_id", "result_id", "result_hash", "request_sha256", "language"}
+                   "model", "code", "duration_ms", "job_id", "result_id", "result_hash", "request_sha256", "language",
+                   "provider", "returned_model", "round", "scope", "tool_names", "tool_count", "reasoning_effort",
+                   "timeout_seconds", "exception_type", "http_status", "context_chars"}
         record = {"time": datetime.now(timezone.utc).isoformat(), "event": event}
         record.update({k:v for k,v in values.items() if k in allowed})
         line = redact(json.dumps(record, ensure_ascii=False, allow_nan=False))

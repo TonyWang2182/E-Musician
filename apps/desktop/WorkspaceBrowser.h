@@ -50,6 +50,27 @@ public:
     }
     void resized() override {search.setBounds(9,38,getWidth()-18,28);category.setBounds(9,74,getWidth()-18,28);open.setBounds(9,getHeight()-39,getWidth()-18,30);list.setBounds(0,111,getWidth()-1,juce::jmax(0,getHeight()-158));}
     void focusSearch(){search.grabKeyboardFocus();search.selectAll();}
+    static juce::Result runActivationLifetimeSmoke(juce::DynamicObject& report) {
+        auto browser = std::make_unique<WorkspaceBrowser>();
+        EngineSession::Snapshot state; state.projectId = "browser-lifetime-fixture"; state.revision = 1;
+        EngineSession::PluginDescriptorSnapshot plugin; plugin.id = "fixture-plugin-id"; plugin.name = "Fixture plugin"; plugin.format = "VST3";
+        state.pluginCatalog.push_back(plugin); browser->update(state);
+        int row = -1;
+        for (int i = 0; i < int(browser->filtered.size()); ++i) if (browser->filtered[std::size_t(i)].id == plugin.id) row = i;
+        if (row < 0) return juce::Result::fail("Browser lifetime fixture plugin was not found.");
+        bool rebuilt = false, survivedDestruction = false;
+        browser->onActivate = [&](const Item& item) {
+            ++state.revision; state.pluginCatalog.clear(); browser->update(state);
+            rebuilt = item.kind == "plugin" && item.id == plugin.id && item.name == plugin.name;
+            browser->onActivate = {}; browser.reset();
+            survivedDestruction = item.kind == "plugin" && item.id == plugin.id;
+        };
+        browser->activate(row);
+        report.setProperty("library_activation_survives_catalog_rebuild", rebuilt);
+        report.setProperty("library_activation_survives_callback_and_browser_destruction", survivedDestruction && !browser);
+        return rebuilt && survivedDestruction && !browser ? juce::Result::ok()
+            : juce::Result::fail("Library activation lost the item or callback while rebuilding/destroying the browser.");
+    }
 private:
     int getNumRows() override{return int(filtered.size());}
     void paintListBoxItem(int row,juce::Graphics& g,int width,int height,bool selected) override {
@@ -67,7 +88,13 @@ private:
         description->setProperty("kind",item.kind);description->setProperty("id",item.id);return juce::var(description);
     }
     void selectedRowsChanged(int row) override{open.setEnabled(row>=0&&row<int(filtered.size()));}
-    void activate(int row){if(row>=0&&row<int(filtered.size())&&onActivate)onActivate(filtered[std::size_t(row)]);}
+    void activate(int row){
+        if(row<0||row>=int(filtered.size())||!onActivate)return;
+        // Adding a device can synchronously rebuild the catalogue, replace this
+        // callback, or close the browser. Both arguments must outlive that work.
+        const auto item=filtered[std::size_t(row)];const auto callback=onActivate;
+        callback(item);
+    }
     void filter(){
         const auto selected=list.getSelectedRow();juce::String selectedId;
         if(selected>=0&&selected<int(filtered.size()))selectedId=filtered[std::size_t(selected)].kind+":"+filtered[std::size_t(selected)].id;

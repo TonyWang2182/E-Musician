@@ -29,6 +29,10 @@ def normalize_language(value):
 
 
 COPY = {
+    "模型达到输出与推理预算上限，尚未产生完整方案；未修改工程。请缩小任务，或在模型设置中降低推理强度后重试。": "The model reached its output and reasoning token limit before completing a plan. No edits were made. Request a smaller task, or lower reasoning effort in model settings before retrying.",
+    "混音读取超出当前范围；全工程混音请先选择整个工程。": "Mix inspection exceeds the current scope. Choose Whole project to work on the entire mix.",
+    "请先选择要混音的轨道，或将范围切换到整个工程。": "Select tracks to mix, or choose Whole project scope.",
+    "每份方案需要 1–16 个操作。": "One plan supports 1–16 actions. Request a smaller track group or one mixing stage at a time. No edits were applied.",
     "正在规划": "Preparing a plan",
     "正在检查": "Checking",
     "已暂停；工程未修改": "Paused; project unchanged",

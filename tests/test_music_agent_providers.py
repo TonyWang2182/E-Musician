@@ -55,6 +55,18 @@ def tool_response():
     return result
 
 class ResponsesTests(unittest.TestCase):
+    def test_reasoning_output_budget_exhaustion_is_distinct_from_generic_incomplete(self):
+        response={"status":"incomplete","incomplete_details":{"reason":"max_output_tokens"},"output":[]}
+        opener=Opener([Response(response)])
+        provider=OpenAIProvider(reasoning_effort="high",api_key=KEY,opener=opener)
+        with self.assertRaises(ProviderError) as caught:
+            provider.complete([{"role":"user","content":"Synthetic bounded planning"}],[TOOL])
+        self.assertEqual(caught.exception.code,"output_limit")
+        self.assertEqual(len(opener.requests),1)
+        payload=json.loads(opener.requests[0].data)
+        self.assertEqual(payload["reasoning"],{"effort":"high"})
+        self.assertEqual(payload["max_output_tokens"],4096)
+
     def test_network_failure_names_selected_provider_without_leaking_reason(self):
         with self.assertRaises(ProviderError) as caught:
             OpenAIProvider(api_key=KEY, opener=Opener([URLError(KEY)])).list_models()

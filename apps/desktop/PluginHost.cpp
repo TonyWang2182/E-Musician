@@ -25,6 +25,15 @@ void requireMessageThread()
     jassert(juce::MessageManager::getInstance()->isThisTheMessageThread());
 }
 bool supportedFormat(const juce::String& format) { return format == "VST" || format == "VST3"; }
+bool isVst3BundleInterior(const juce::File& file)
+{
+    // A recursive VST2 search also sees support DLLs inside VST3 bundles.
+    // Those DLLs (e.g. Steinberg's REX library) are not independently loadable
+    // plugins. Keep the bundle as the only scan identity, including in caches.
+    for (auto parent = file.getParentDirectory(); parent != parent.getParentDirectory(); parent = parent.getParentDirectory())
+        if (parent.hasFileExtension("vst3")) return true;
+    return false;
+}
 bool sameIdentity(const juce::PluginDescription& a, const juce::PluginDescription& b)
 {
     return a.pluginFormatName == b.pluginFormatName && a.uniqueId == b.uniqueId
@@ -415,6 +424,7 @@ struct PluginHost::Impl final : private juce::Thread {
         for (const auto& item : *array) {
             CatalogEntry entry;
             if (!readDescription(item.getProperty("description", {}), entry.description)) continue;
+            if (isVst3BundleInterior(juce::File(entry.description.fileOrIdentifier))) continue;
             entry.id = PluginHost::catalogId(entry.description);
             entry.available = bool(item.getProperty("available", true)) && juce::File(entry.description.fileOrIdentifier).exists();
             entry.error = item.getProperty("error", {}).toString();
@@ -456,6 +466,8 @@ struct PluginHost::Impl final : private juce::Thread {
             if(!juce::File::isAbsolutePath(module.getFullPathName())||!module.exists()
                 ||!(module.hasFileExtension("vst3")||(module.hasFileExtension("dll")&&module.existsAsFile())))
                 return juce::Result::fail("Explicit modules must be existing VST2 .dll files or VST3 files/bundles.");
+            if (isVst3BundleInterior(module))
+                return juce::Result::fail("Select the top-level VST3 bundle, not a support library or binary inside it.");
         }
         paths = search;
         explicitModules = modules;
@@ -471,6 +483,7 @@ struct PluginHost::Impl final : private juce::Thread {
         struct Module { juce::String format, path; };
         std::vector<Module> modules;
         auto addModule=[&](const juce::String& format,const juce::String& path){
+            if (isVst3BundleInterior(juce::File(path))) return;
             if(modules.size()<maximumCatalogEntries&&std::none_of(modules.begin(),modules.end(),[&](const auto& m){return m.format==format&&juce::File(m.path)==juce::File(path);}))
                 modules.push_back({format,path});
         };
@@ -529,7 +542,11 @@ struct PluginHost::Impl final : private juce::Thread {
                         else for (const auto& value : *types) {
                             juce::PluginDescription description;
                             if (!readDescription(value, description) || description.pluginFormatName != module.format
-                                || juce::File(description.fileOrIdentifier) != juce::File(module.path)) { error = "Plugin scanner returned an invalid identity."; break; }
+                                || !sameModuleReference(module.format, module.path, description.fileOrIdentifier)) { error = "Plugin scanner returned an invalid identity."; break; }
+                            // JUCE may identify a Windows VST3 by its exact
+                            // standard bundle binary. Canonicalise only that
+                            // alias; retain the scanned class IDs and format.
+                            description.fileOrIdentifier = module.path;
                             found.push_back(std::move(description));
                         }
                     } else error = "Plugin scanner returned an invalid list.";
@@ -612,7 +629,10 @@ int PluginHost::runScanWorker(const juce::StringArray& arguments)
     for (auto* format : formats.getFormats()) if (format->getName() == formatName) selected = format;
     auto reply = object();
     juce::Array<juce::var> types;
-    if (!selected) {
+    if (isVst3BundleInterior(juce::File(module))) {
+        reply.getDynamicObject()->setProperty("status", "failed");
+        reply.getDynamicObject()->setProperty("error", "Select the top-level VST3 bundle, not a support library or binary inside it.");
+    } else if (!selected) {
         reply.getDynamicObject()->setProperty("status", "failed");
         reply.getDynamicObject()->setProperty("error", "This build does not include the requested plugin format.");
     } else {
@@ -622,6 +642,59 @@ int PluginHost::runScanWorker(const juce::StringArray& arguments)
         for (auto* description : descriptions) types.add(description->createXml()->toString());
         reply.getDynamicObject()->setProperty("status", "completed");
         reply.getDynamicObject()->setProperty("types", types);
+        // Explicit diagnostic only: the ordinary catalog scan remains metadata
+        // only. The supervisor owns this worker's deadline and process lifetime.
+        // A hidden native peer checks editor/peer ownership without a visible
+        // editor, hardware device, or the user's live Edit. JUCE/plugin code may
+        // defer IPlugView::attached until visible: this does not prove native
+        // attachment or GUI acceptance.
+        if (arguments.contains("--probe-editor") && !descriptions.isEmpty()) {
+            auto reportStage = [&](const juce::String& stage) {
+                reply.getDynamicObject()->setProperty("probe_stage", stage);
+                reply.getDynamicObject()->setProperty("status", "running");
+                return writeJson(juce::File(outputPath), reply).wasOk();
+            };
+            try {
+                if (!reportStage("instantiate")) return 4;
+                juce::String error;
+                auto processor = formats.createPluginInstance(*descriptions[0], 48000.0, 512, error);
+                if (!processor) throw std::runtime_error(error.toStdString());
+                if (!processor->setBusesLayout(simpleLayout(*processor, descriptions[0]->isInstrument ? 0 : 2, 2))
+                    && !processor->setBusesLayout(simpleLayout(*processor, descriptions[0]->isInstrument ? 0 : 1, 1)))
+                    throw std::runtime_error("Plugin does not support the host's mono/stereo layout.");
+                processor->setRateAndBufferSizeDetails(48000.0, 512);
+                processor->prepareToPlay(48000.0, 512);
+                if (!reportStage("create_editor_no_peer")) return 4;
+                std::unique_ptr<juce::AudioProcessorEditor> editor(processor->createEditorIfNeeded());
+                reply.getDynamicObject()->setProperty("has_native_editor", editor != nullptr);
+                if (editor) {
+                    juce::MessageManager::getInstance()->runDispatchLoopUntil(200);
+                    if (!reportStage("attach_hidden_peer")) return 4;
+                    juce::Component hiddenHost;
+                    hiddenHost.setBounds(0, 0, juce::jmax(1, editor->getWidth()), juce::jmax(1, editor->getHeight()));
+                    hiddenHost.addToDesktop(juce::ComponentPeer::windowIsTemporary | juce::ComponentPeer::windowIgnoresKeyPresses);
+                    hiddenHost.addAndMakeVisible(*editor);
+                    juce::MessageManager::getInstance()->runDispatchLoopUntil(600);
+                    if (!reportStage("detach_hidden_peer")) return 4;
+                    hiddenHost.removeChildComponent(editor.get());
+                    editor.reset();
+                    hiddenHost.removeFromDesktop();
+                    juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+                }
+                if (!reportStage("release_processor")) return 4;
+                processor->releaseResources();
+                processor.reset();
+                reply.getDynamicObject()->setProperty("probe_stage", "completed");
+                reply.getDynamicObject()->setProperty("status", "completed");
+                reply.getDynamicObject()->setProperty("visible_editor_tested", false);
+            } catch (const std::exception& e) {
+                reply.getDynamicObject()->setProperty("status", "failed");
+                reply.getDynamicObject()->setProperty("error", juce::String(e.what()));
+            } catch (...) {
+                reply.getDynamicObject()->setProperty("status", "failed");
+                reply.getDynamicObject()->setProperty("error", "Plugin editor probe threw an exception.");
+            }
+        }
     }
     return writeJson(juce::File(outputPath), reply).wasOk() ? 0 : 4;
 }

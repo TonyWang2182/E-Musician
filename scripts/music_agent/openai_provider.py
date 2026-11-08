@@ -38,11 +38,16 @@ class OpenAIProvider(KimiProvider):
     label = "OpenAI"
     allowed_base_urls = {"https://api.openai.com/v1"}
 
-    def __init__(self, model="gpt-5-mini", base_url="https://api.openai.com/v1", timeout=45,
+    def __init__(self, model="gpt-5-mini", base_url="https://api.openai.com/v1", timeout=None,
                  *, api_key=None, opener=None, reasoning_effort="medium"):
         if not isinstance(reasoning_effort, str) or reasoning_effort not in REASONING_EFFORTS:
             raise ProviderError("configuration", "推理强度必须是 low、medium 或 high。")
         self.reasoning_effort = reasoning_effort
+        # Non-streaming reasoning may legitimately take more than 45 seconds.
+        # Waiting longer does not change the selected model, effort or token cap,
+        # and never triggers an automatic second paid request.
+        if timeout is None:
+            timeout = 120 if model in REASONING_MODELS else 45
         super().__init__(model, base_url, timeout, api_key=api_key, opener=opener)
 
     @property
@@ -178,6 +183,9 @@ class OpenAIProvider(KimiProvider):
                     "parameters": copy.deepcopy(function["parameters"]), "strict": False})
             payload.update(tools=converted, tool_choice="auto", parallel_tool_calls=False)
         response = self._request("/responses", payload)
+        details = response.get("incomplete_details")
+        if response.get("status") == "incomplete" and isinstance(details, dict) and details.get("reason") == "max_output_tokens":
+            raise ProviderError("output_limit", "模型达到输出与推理预算上限，尚未产生完整方案；未修改工程。请缩小任务，或在模型设置中降低推理强度后重试。")
         if response.get("status") != "completed" or response.get("incomplete_details") or response.get("error"):
             raise ProviderError("incomplete", "OpenAI 未完整结束此请求；工程没有被修改。")
         output = response.get("output")

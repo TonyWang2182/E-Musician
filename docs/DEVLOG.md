@@ -12350,3 +12350,246 @@ print(json.dumps({'\"'\"'passed'\"'\"':True,'\"'\"'checked_at'\"'\"':datetime.da
 ### 2026-11-08T13:24:18+08:00 · 0.13.1 维护分支同步
 
 代码/证据提交8857ed7031e88f81c030fa7972c72c319ed62f21已推送并经ls-remote核对。main保持d4ed6c898af1303918e38b6325a915befabbb575；本条及PUBLISH为仅文档收尾，不重建。8条用户DEVLOG及14份旧记录仍未暂存，本轮无凭据/权重/测试音频上传。英文DAW与认证helper已打开，人工听感/ASIO待验。
+
+### 2026-11-08T14:43:50+08:00 · cloud-reconnect-command · failed
+
+- Config: Release/0.13.1; exit code: 1; elapsed: 21.208s.
+- Command: `C:/Python314/python.exe -X utf8 tests/InstalledPluginProbe.py --exe E:/emusician-analysis-build/bin-0.13.1/Release/E-musician.exe --module "C:/Program Files/Common Files/VST3/uJAM/BM-COZY.vst3" --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/plugin-compat/cozy-baseline --skip-scan`
+- Context: Clone reconnect and shared theme/English Agent; physical audio and musical accuracy remain manual
+- Source SHA-256: `83477508b20791e73238437330476e886ee8f7942d9f2dc507925d54c27bb2e2`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T064350.637475Z-50c98b29da.json) · [Raw log](../build-logs/20261108T064350.637475Z-50c98b29da.log)
+- [Exact process output](../build-logs/20261108T064350.637475Z-50c98b29da.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261108T064350.637475Z-50c98b29da.log
+
+### 2026-11-08T14:46:28+08:00 · plugin-agent-stability-command · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 7.750s.
+- Command: `C:/Python314/python.exe -X utf8 tests/InstalledPluginProbe.py --exe E:/emusician-analysis-build/bin-0.13.1/Release/E-musician.exe --module "C:/Program Files/Common Files/VST3/uJAM/BM-COZY.vst3" --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/plugin-compat/cozy-baseline-corrected --skip-scan`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `db4a31cbf8b9b0a2be3c96924523de57474487697e05edb3d9511d22dedb9136`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T064628.115384Z-a2d9b0f308.json) · [Raw log](../build-logs/20261108T064628.115384Z-a2d9b0f308.log)
+- [Exact process output](../build-logs/20261108T064628.115384Z-a2d9b0f308.raw.log)
+
+### 2026-11-08T14:47:27+08:00 · plugin-agent-stability-configure · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 26.661s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.13.2`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `c21755b22a8aa60ce4827ffa831bc1303a27f4850c5f23ef9b7efa92686dd1cd`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T064727.799537Z-8706a0582a.json) · [Raw log](../build-logs/20261108T064727.799537Z-8706a0582a.log)
+- [Exact process output](../build-logs/20261108T064727.799537Z-8706a0582a.raw.log)
+
+### 2026-11-08T14:48:18+08:00 · plugin-agent-stability-command · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 3.557s.
+- Command: `C:/Python314/python.exe -X utf8 -m unittest discover -s tests -p test_music_agent_mixing.py -v`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `dd516d3336bb0bad00960a55652ca8b342afb82051bf65f55ec09953b38bed86`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T064818.940748Z-61089a9cd7.json) · [Raw log](../build-logs/20261108T064818.940748Z-61089a9cd7.log)
+- [Exact process output](../build-logs/20261108T064818.940748Z-61089a9cd7.raw.log)
+
+### 2026-11-08T14:49:51+08:00 · plugin-agent-stability-command · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 50.567s.
+- Command: `C:/Python314/python.exe -X utf8 -m unittest discover -s tests -p test_music_agent*.py -v`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `c412deca0053894c84b7037a60b4fe3e6c49db885a238175b57e3e8b6a3856a5`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T064951.841987Z-b9c850ad3d.json) · [Raw log](../build-logs/20261108T064951.841987Z-b9c850ad3d.log)
+- [Exact process output](../build-logs/20261108T064951.841987Z-b9c850ad3d.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-08T14:50:55+08:00 · plugin-agent-stability-command · failed
+
+- Config: Release/0.13.2; exit code: 1; elapsed: 2.729s.
+- Command: `C:/Python314/python.exe -X utf8 tests/InstalledPluginAuditTests.py -v`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `ab686e9c16e44507135f6053d0b637785e1333c5a75dd145250cd6298c2d1932`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T065055.312960Z-618666e50f.json) · [Raw log](../build-logs/20261108T065055.312960Z-618666e50f.log)
+- [Exact process output](../build-logs/20261108T065055.312960Z-618666e50f.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261108T065055.312960Z-618666e50f.log
+
+### 2026-11-08T14:49:02+08:00 · plugin-agent-stability-build · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 118.331s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `b40b2ace58624c151d1a3399d08f7728838b80272e6f5d3ff4e6196a4411f8cb`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T064902.140311Z-242037a9f0.json) · [Raw log](../build-logs/20261108T064902.140311Z-242037a9f0.log)
+- [Exact process output](../build-logs/20261108T064902.140311Z-242037a9f0.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-08T14:50:11+08:00 · plugin-agent-stability-command · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 55.679s.
+- Command: `C:/Python314/python.exe -X utf8 tests/AgentMixLiveEval.py`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `c412deca0053894c84b7037a60b4fe3e6c49db885a238175b57e3e8b6a3856a5`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T065011.099879Z-af7989d67c.json) · [Raw log](../build-logs/20261108T065011.099879Z-af7989d67c.log)
+- [Exact process output](../build-logs/20261108T065011.099879Z-af7989d67c.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-08T14:51:08+08:00 · plugin-agent-stability-command · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 2.631s.
+- Command: `C:/Python314/python.exe -X utf8 tests/InstalledPluginAuditTests.py -v`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `e71c0d374bcc47169a73c886cdb30b56ef9475797b25d1292b95b231c9ac26fc`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T065108.438739Z-4f235f39a8.json) · [Raw log](../build-logs/20261108T065108.438739Z-4f235f39a8.log)
+- [Exact process output](../build-logs/20261108T065108.438739Z-4f235f39a8.raw.log)
+
+### 2026-11-08T14:52:01+08:00 · plugin-agent-stability-command · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 7.615s.
+- Command: `C:/Python314/python.exe -X utf8 tests/AgentMixWebSmoke.py`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `779df5436c9ba3242d1fea8ffb9b199465f7553e3ca57604931078bba1798903`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T065201.662670Z-bfffd0039a.json) · [Raw log](../build-logs/20261108T065201.662670Z-bfffd0039a.log)
+- [Exact process output](../build-logs/20261108T065201.662670Z-bfffd0039a.raw.log)
+
+### 2026-11-08T14:53:14+08:00 · plugin-agent-stability-command · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 5.274s.
+- Command: `C:/Python314/python.exe -X utf8 tests/AgentMixWebSmoke.py`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `4350f7dd0d2d529cb449872b3993e67f1118ea6d1a589ee81e2ec2da11aca358`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T065314.557565Z-2e034e6a40.json) · [Raw log](../build-logs/20261108T065314.557565Z-2e034e6a40.log)
+- [Exact process output](../build-logs/20261108T065314.557565Z-2e034e6a40.raw.log)
+
+### 2026-11-08T14:53:43+08:00 · plugin-agent-stability-command · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 21.061s.
+- Command: `C:/Python314/python.exe -X utf8 tests/InstalledPluginAudit.py --exe E:/emusician-analysis-build/bin-0.13.2/Release/E-musician.exe --module "C:/Program Files/Common Files/VST3/uJAM/BM-COZY.vst3" --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/plugin-compat/cozy-candidate --probe-editors`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `4350f7dd0d2d529cb449872b3993e67f1118ea6d1a589ee81e2ec2da11aca358`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T065343.235426Z-af620bf810.json) · [Raw log](../build-logs/20261108T065343.235426Z-af620bf810.log)
+- [Exact process output](../build-logs/20261108T065343.235426Z-af620bf810.raw.log)
+
+### 2026-11-08T14:54:24+08:00 · plugin-agent-stability-test · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 113.375s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `4350f7dd0d2d529cb449872b3993e67f1118ea6d1a589ee81e2ec2da11aca358`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T065424.012393Z-ace113f741.json) · [Raw log](../build-logs/20261108T065424.012393Z-ace113f741.log)
+- [Exact process output](../build-logs/20261108T065424.012393Z-ace113f741.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-08T14:56:54+08:00 · plugin-agent-stability-command · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 13.935s.
+- Command: `C:/Python314/python.exe -X utf8 tests/InstalledPluginLiveInit.py --exe E:/emusician-analysis-build/bin-0.13.2/Release/E-musician.exe --module "C:/Program Files/Common Files/VST3/uJAM/BM-COZY.vst3" --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/plugin-compat/cozy-live-init`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `e6e0d428f21bfc6114d2b62bd80727947d059bbda590cc383710ad47beb3d4e9`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T065654.497900Z-0694337853.json) · [Raw log](../build-logs/20261108T065654.497900Z-0694337853.log)
+- [Exact process output](../build-logs/20261108T065654.497900Z-0694337853.raw.log)
+
+### 2026-11-08T15:03:10+08:00 · plugin-agent-stability-command · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 2.300s.
+- Command: `C:/Python314/python.exe -X utf8 tests/InstalledPluginScanDetails.py --exe E:/emusician-analysis-build/bin-0.13.2/Release/E-musician.exe --module "C:/Program Files/Common Files/VST3/Steinberg/Groove Agent SE.vst3" --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/plugin-compat/groove-scan-identity`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `d930b64bcb6c2cb627bd67588ae9c5aa50d87b87317d12c42d627793666f91ee`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T070310.812782Z-4ef45a7fb3.json) · [Raw log](../build-logs/20261108T070310.812782Z-4ef45a7fb3.log)
+- [Exact process output](../build-logs/20261108T070310.812782Z-4ef45a7fb3.raw.log)
+
+### 2026-11-08T15:08:06+08:00 · plugin-agent-stability-command · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 2.936s.
+- Command: `C:/Python314/python.exe -X utf8 tests/InstalledPluginAuditTests.py -v`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `b9fcf55498594811ec473e10c921e41d50b95867b64be9de4a6a684792f75ecb`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T070806.334738Z-7623e6d098.json) · [Raw log](../build-logs/20261108T070806.334738Z-7623e6d098.log)
+- [Exact process output](../build-logs/20261108T070806.334738Z-7623e6d098.raw.log)
+
+### 2026-11-08T15:11:45+08:00 · plugin-agent-stability-configure · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 14.822s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.13.2-final`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `201c29d6cf4837a9d715c2055bb770555899eebfec95c31cd62f05c2892510ef`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T071145.938196Z-f557218608.json) · [Raw log](../build-logs/20261108T071145.938196Z-f557218608.log)
+- [Exact process output](../build-logs/20261108T071145.938196Z-f557218608.raw.log)
+
+### 2026-11-08T15:12:14+08:00 · plugin-agent-stability-build · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 52.999s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `201c29d6cf4837a9d715c2055bb770555899eebfec95c31cd62f05c2892510ef`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T071214.674312Z-bf75fc0851.json) · [Raw log](../build-logs/20261108T071214.674312Z-bf75fc0851.log)
+- [Exact process output](../build-logs/20261108T071214.674312Z-bf75fc0851.raw.log)
+
+### 2026-11-08T14:57:19+08:00 · plugin-agent-stability-command · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 982.570s.
+- Command: `C:/Python314/python.exe -X utf8 tests/InstalledPluginAudit.py --exe E:/emusician-analysis-build/bin-0.13.2/Release/E-musician.exe --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/plugin-compat/installed-0.13.2`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `e6e0d428f21bfc6114d2b62bd80727947d059bbda590cc383710ad47beb3d4e9`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T065719.875665Z-bd46d280f4.json) · [Raw log](../build-logs/20261108T065719.875665Z-bd46d280f4.log)
+- [Exact process output](../build-logs/20261108T065719.875665Z-bd46d280f4.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-08T15:14:46+08:00 · plugin-agent-stability-test · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 116.159s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `201c29d6cf4837a9d715c2055bb770555899eebfec95c31cd62f05c2892510ef`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T071446.081084Z-1ccfefae75.json) · [Raw log](../build-logs/20261108T071446.081084Z-1ccfefae75.log)
+- [Exact process output](../build-logs/20261108T071446.081084Z-1ccfefae75.raw.log)
+
+### 2026-11-08T15:17:58+08:00 · plugin-agent-stability-command · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 39.800s.
+- Command: `C:/Python314/python.exe -X utf8 tests/InstalledPluginAudit.py --exe E:/emusician-analysis-build/bin-0.13.2-final/Release/E-musician.exe --module "C:/Program Files/Common Files/VST3/Steinberg/Groove Agent SE.vst3" --module "C:/Program Files/Common Files/VST3/Steinberg/Padshop.vst3" --module "C:/Program Files/Common Files/VST3/Steinberg/Retrologue.vst3" --module "C:/Program Files/Common Files/VST3/uJAM/BM-COZY.vst3" --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/plugin-compat/final-focused-0.13.2`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `201c29d6cf4837a9d715c2055bb770555899eebfec95c31cd62f05c2892510ef`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T071758.295885Z-b52b363926.json) · [Raw log](../build-logs/20261108T071758.295885Z-b52b363926.log)
+- [Exact process output](../build-logs/20261108T071758.295885Z-b52b363926.raw.log)
+
+### 2026-11-08T15:18:47+08:00 · plugin-agent-stability-command · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 0.756s.
+- Command: `C:/Python314/python.exe -X utf8 tests/InstalledPluginQuarantine.py --audit E:/MusicAgent&DAW/worktrees/audio-analysis/build/plugin-compat/installed-0.13.2/audit.json --module "C:/Program Files/Common Files/VST3/Audio Modeling/SWAM Double Bass 3.vst3" --module "C:/Program Files/Common Files/VST3/Audio Modeling/SWAM Viola 3.vst3" --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/plugin-compat/swam-quarantine`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `201c29d6cf4837a9d715c2055bb770555899eebfec95c31cd62f05c2892510ef`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T071847.909589Z-5fccf26dee.json) · [Raw log](../build-logs/20261108T071847.909589Z-5fccf26dee.log)
+- [Exact process output](../build-logs/20261108T071847.909589Z-5fccf26dee.raw.log)
+
+### 2026-11-08T15:19:38+08:00 · plugin-agent-stability-run · launched
+
+- Config: Release/0.13.2; exit code: None; elapsed: 0.529s.
+- Command: `E:/emusician-analysis-build/bin-0.13.2-final/Release/E-musician.exe --agent`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `201c29d6cf4837a9d715c2055bb770555899eebfec95c31cd62f05c2892510ef`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T071938.512626Z-e3757621ad.json) · [Raw log](../build-logs/20261108T071938.512626Z-e3757621ad.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261108T071938.512626Z-e3757621ad.raw.log)
+
+### 2026-11-08T15:19:45+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.248s.
+- Command: `C:\Python314\python.exe E:\emusician-analysis-source\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `201c29d6cf4837a9d715c2055bb770555899eebfec95c31cd62f05c2892510ef`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T071945.604654Z-4ac22fb680.json) · [Raw log](../build-logs/20261108T071945.604654Z-4ac22fb680.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-08T15:22:36+08:00 · plugin-agent-stability-command · succeeded
+
+- Config: Release/0.13.2; exit code: 0; elapsed: 4.197s.
+- Command: `C:/Python314/python.exe -X utf8 build/check_stability.py`
+- Context: Plugin compatibility and compact controls/Agent tool diagnostics; scan success is not universal plug-in compatibility
+- Source SHA-256: `201c29d6cf4837a9d715c2055bb770555899eebfec95c31cd62f05c2892510ef`; Git HEAD: `1dd66215f55eccd1dcc0d946aa1ddd3166e571dc`.
+- [Record](builds/20261108T072236.441613Z-bb43c47b10.json) · [Raw log](../build-logs/20261108T072236.441613Z-bb43c47b10.log)
+- [Exact process output](../build-logs/20261108T072236.441613Z-bb43c47b10.raw.log)
+
+## 2026-11-08 — 0.13.2 插件、轨头与Agent稳定性候选
+
+- 基线1dd6621，维护分支fix/plugin-agent-stability-v0132；旧0.13.1 EXE SHA保持，云端模型/SSH未改，无GPU调用，不使用computer-use。
+- 修复Library激活项/回调被同步刷新销毁后的引用，以及PluginPanel插件初始化和结果回调后的失效SafePointer；四项真实组件回归通过。修正M/S/R紧凑文字边距；实际轨头与最终115项主题检查、离屏截图通过。首轮atlas因绘图提交时机无效，修复并记录，没有把编码成功当视觉通过。
+- VST3扫描排除包内支持DLL，并仅接受精确标准bundle二进制别名。53项隔离审计首轮42通过，最终Steinberg三项和COZY复测全过，累计45完整路径通过（38非零PCM、7默认静音），8项未过。两SWAM在成功输出后控制宿主退出，已精确隔离；Ample Bass A超时、Ample SJ重开missing、四款多输出VST2拒绝仍保留限制，未假称所有插件兼容。M-Audio当前不在线，实际停止加载仅DirectSound/AirPods，设置原字节恢复。
+- Agent新增批量混音读取、白名单路由/电平摘要、轮次/等待与分类错误。保留gpt-5-mini/high/4096，默认推理等待120秒，无自动收费重试。371项回归、最终2网页场景、真实2任务3次API请求通过，未修改工程。不是整曲听辨混音；Apply/Undo及听感留人工。
+- 两次Release构建均成功，最终bf75fc0851；最终CTest 1ccfefae75为11/11，113.50秒。全库bd46d280f4、最终四插件b52b363926、隔离5fccf26dee及所有早期探针失败均保留。最终127项原生和24项Agent/web输入对齐；核对bb43c47b10通过。
+- 0.13.2已打开，窗口响应、助手子进程及本地控制连接正常；启动e3757621ad。入口Start E-musician 0.13.2.cmd，EXE在bin-0.13.2-final/Release，旧入口保留。计划、模型分工、逐插件矩阵、实际结果和人工步骤位于docs/review/2026-11-08-plugin-agent-stability/。
+- CONTEXT、DEVELOPMENT、ARCHITECTURE、README已同步；本轮仅准备提交维护分支，main不自动更新。既有用户启动日志/构建记录与本轮分开纳管。

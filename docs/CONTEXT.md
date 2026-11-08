@@ -1,4 +1,14 @@
-# 当前候选：0.13.1 克隆重连与弹出界面/英文Agent（2026-11-08，自动通过、人工待验）
+# 当前候选：0.13.2 插件兼容与Agent基础混音（2026-11-08，自动已验、已打开、人工待验）
+
+实际工作树E:/MusicAgent&DAW/worktrees/audio-analysis，维护分支fix/plugin-agent-stability-v0132，基线1dd6621，0.13.1 EXE保持。已修Library列表刷新后的悬空引用和PluginPanel回调失效指针；COZY最终完整宿主路径及初轮DirectSound停止加载通过，原事故未取得同栈复现。M-Audio当前未连接，ASIO人工待验。53模块审计+最终针对性修复复测后累计45完整通过（38非零PCM/7默认静音），8未通过；两SWAM退出项已精确隔离，Ample Bass A超时、Ample SJ重开missing、四款多输出VST2拒绝仍未解决。详见[结果和逐项矩阵](review/2026-11-08-plugin-agent-stability/RESULTS.md)，不能声明所有插件兼容。
+
+共享主题已修正24px轨头M/S/R的文字空间；最终Release、CTest11/11、115项主题检查和4项生命周期检查通过，原生截图已查看。Agent保留GPT-5-mini/high/4096，新增批量混音读取、等待/错误可视化及Basic mix示例。371项Agent回归、两个真实API合成工程方案和两项网页场景通过；没有自动修改工程，整曲混音听感待验。云端模型/SSH/部署未改，本轮无GPU推理。最终127项原生输入和24项Agent/web输入已核对；0.13.2窗口响应、助手本地连接正常，已打开。
+
+入口E:/MusicAgent&DAW/Start E-musician 0.13.2.cmd，EXE位于E:/emusician-analysis-build/bin-0.13.2-final/Release，VS Code入口E-musician-0.13.2.code-workspace。下一步按[人工短测](review/2026-11-08-plugin-agent-stability/MANUAL-CHECK.md)验收；之后优先补恢复错误诊断、定位SWAM退出，多输出及整曲混音测量需独立设计与测试。
+
+每次构建/测试经scripts/dev_stability.py记录；用户已有启动记录保持，DEVLOG只追加，不自动合并main。下文为历史阶段。
+
+# 保留候选：0.13.1 克隆重连与弹出界面/英文Agent（2026-11-08，自动通过、人工待验）
 
 用户新实例已克隆原数据；实际工作树仍为E:/MusicAgent&DAW/worktrees/audio-analysis，分支fix/cloud-reconnect-ui-v0131，基线12aa587。已通过原SSH密钥将别名emusician-autodl切到44800端口；复用云端/root/autodl-tmp/emusician的九环境与固定release ed7d6a920487a651c988，补装缺失FFmpeg并恢复protocol2/18082服务，无E盘模型重传。最终两个SQLite完整性通过、活动队列0、七模型真实短段整链全部通过；不据此证明夸克备份可恢复。
 

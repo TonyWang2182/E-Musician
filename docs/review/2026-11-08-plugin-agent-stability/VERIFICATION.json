@@ -1,0 +1,28 @@
+{
+  "checked_utc": "2026-11-08T07:22:40.595749+00:00",
+  "status": "passed",
+  "native_inputs": 127,
+  "native_inputs_changed": [],
+  "agent_and_web_inputs_verified": 24,
+  "python_test_record": "b9c850ad3d",
+  "web_test_record": "2e034e6a40",
+  "build_record": "bf75fc0851",
+  "ctest_record": "1ccfefae75",
+  "exe": "E:\\emusician-analysis-build\\bin-0.13.2-final\\Release\\E-musician.exe",
+  "exe_sha256": "06dc0946bb4ff13dc04f99388388064d034ed904035184dfc1b4fa774670b925",
+  "old_native_exe_preserved": true,
+  "application": {
+    "pid": 24792,
+    "path": "E:\\emusician-analysis-build\\bin-0.13.2-final\\Release\\E-musician.exe",
+    "title": "E-musician 0.13.2 - Audio workspace",
+    "responding": true,
+    "helper_pid": 24912,
+    "helper_alive": true,
+    "control_socket_connected": true,
+    "ready_file_consumed": true,
+    "age_seconds": 181.50223499999998
+  },
+  "helper_connection_evidence": "owned Python child, matching established control socket, consumed ready file after 45-second startup limit",
+  "hardware_audio_or_listening_verified": false,
+  "cloud_models_changed": false
+}

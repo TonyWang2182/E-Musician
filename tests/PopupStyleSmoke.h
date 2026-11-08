@@ -2,7 +2,9 @@
 
 #include "../apps/desktop/WorkspaceLookAndFeel.h"
 #include "../apps/desktop/DeviceControlStyle.h"
+#include <set>
 #include <stdexcept>
+#include <string>
 
 namespace emusician::style_smoke {
 inline juce::Result run(const juce::File& directory, design::WorkspaceLookAndFeel& look)
@@ -37,6 +39,58 @@ inline juce::Result run(const juce::File& directory, design::WorkspaceLookAndFee
         require(look.findColour(juce::AlertWindow::backgroundColourId) == design::paper
                 && look.findColour(juce::PopupMenu::highlightedTextColourId) == design::ink,
                 "popup and alert palettes match workspace");
+
+        {
+            juce::Image atlas(juce::Image::RGB, 500, 360, true);
+            { // Finish deferred native drawing before reading or encoding pixels.
+            juce::Graphics sheet(atlas); sheet.fillAll(design::paper);
+            auto& application = static_cast<design::WorkspaceLookAndFeel&>(juce::LookAndFeel::getDefaultLookAndFeel());
+            int column = 0;
+            for (auto* theme : { static_cast<design::WorkspaceLookAndFeel*>(&device), &application }) {
+                const int left = column * 250;
+                sheet.setColour(design::ink); sheet.setFont(design::labelFont(13, true));
+                sheet.drawText(column == 0 ? "Track / device controls" : "Application controls", left + 8, 4, 234, 24, juce::Justification::centredLeft);
+                int row = 0;
+                for (const int size : { 20, 24, 28 }) for (int state = 0; state < 3; ++state) {
+                    const int top = 36 + row++ * 35;
+                    sheet.setColour(design::secondary); sheet.setFont(design::labelFont(11));
+                    sheet.drawText(juce::String(size) + "px / " + (state == 0 ? "off" : state == 1 ? "on" : "disabled"), left + 8, top, 98, 28, juce::Justification::centredLeft);
+                    std::set<std::string> shapes;
+                    int index = 0;
+                    for (const auto* label : { "M", "S", "R" }) {
+                        juce::TextButton button(label); button.setLookAndFeel(theme); button.setSize(size, size); button.setVisible(true);
+                        button.setToggleState(state == 1, juce::dontSendNotification); button.setEnabled(state != 2);
+                        juce::Image glyph(juce::Image::ARGB, size, size, true);
+                        { juce::Graphics textGraphics(glyph); theme->drawButtonText(textGraphics, button, false, false); }
+                        int occupiedRows = 0; std::string shape;
+                        for (int y = 0; y < size; ++y) {
+                            bool occupied = false;
+                            for (int x = 0; x < size; ++x) {
+                                const bool painted = glyph.getPixelAt(x, y).getAlpha() > 48;
+                                occupied |= painted; shape += painted ? '1' : '0';
+                            }
+                            if (occupied) ++occupiedRows;
+                        }
+                        require(occupiedRows >= 5, "compact " + juce::String(label) + " remains a full-height glyph at " + juce::String(size) + "px state " + juce::String(state));
+                        shapes.insert(std::move(shape));
+                        sheet.drawImageAt(button.createComponentSnapshot(button.getLocalBounds(), true), left + 112 + index++ * 38, top);
+                        button.setLookAndFeel(nullptr);
+                    }
+                    require(shapes.size() == 3, "M S R remain distinct instead of identical ellipses at " + juce::String(size) + "px state " + juce::String(state));
+                }
+                ++column;
+            }
+            }
+            require(atlas.getPixelAt(0, 0) == design::paper, "compact atlas background is committed before encoding");
+            int inkPixels = 0;
+            for (int y = 36; y < atlas.getHeight(); ++y) for (int x = 112; x < 230; ++x)
+                if (atlas.getPixelAt(x, y).getBrightness() < 0.5f) ++inkPixels;
+            require(inkPixels > 100, "compact atlas contains painted control labels instead of an empty image");
+            juce::MemoryOutputStream bytes;
+            require(juce::PNGImageFormat().writeImageToStream(atlas, bytes)
+                    && directory.getChildFile("ui-compact-track-buttons.png").replaceWithData(bytes.getData(), bytes.getDataSize()),
+                    "capture actual compact button raster states");
+        }
 
         juce::PopupMenu submenu; submenu.addItem(31, "Sampler"); submenu.addItem(32, "Drum Rack");
         juce::PopupMenu menu;

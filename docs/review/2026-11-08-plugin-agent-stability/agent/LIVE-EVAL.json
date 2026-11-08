@@ -1,0 +1,137 @@
+{
+  "fixture": "Three synthetic tracks (Drums, Bass, Pad), one native compressor per track; stopped transport; no real audio",
+  "provider": "openai",
+  "model": "gpt-5-mini",
+  "reasoning_effort": "high",
+  "max_output_tokens": 4096,
+  "request_limit_per_task": 3,
+  "tasks": [
+    {
+      "name": "basic_mix",
+      "synthetic_prompt": "Give this project a conservative starting mix. Keep the arrangement and routing intact. Prepare the changes for review; I will audition them.",
+      "seconds": 36.576,
+      "phase": "ready",
+      "error_code": null,
+      "error": null,
+      "calls": [
+        {
+          "status": "returned",
+          "seconds": 13.21,
+          "model": "gpt-5-mini-2025-08-07",
+          "usage": {
+            "prompt_tokens": 6999,
+            "completion_tokens": 618,
+            "total_tokens": 7617
+          },
+          "tools": [
+            "read_mix_context"
+          ]
+        },
+        {
+          "status": "returned",
+          "seconds": 23.344,
+          "model": "gpt-5-mini-2025-08-07",
+          "usage": {
+            "prompt_tokens": 8349,
+            "completion_tokens": 1442,
+            "total_tokens": 9791
+          },
+          "tools": [
+            "propose_plan"
+          ]
+        }
+      ],
+      "read_devices": 3,
+      "summary": "Conservative starting mix: reduce individual track gains to create headroom and pull the Bass closer to center. Keep arrangement, routing and current mute/solo states intact. Native compressors unchanged. Ready for you to audition and request refinements.",
+      "changes": [
+        "Track “Drums” gain_db: 4 → 1.0",
+        "Track “Bass” gain_db: 0 → -2.0",
+        "Track “Bass” pan: 0.7 → 0.2",
+        "Track “Pad” gain_db: 0 → -3.0"
+      ],
+      "commands": [
+        {
+          "command": "set_track_gain",
+          "args": {
+            "track_id": "t0",
+            "gain_db": 1.0
+          }
+        },
+        {
+          "command": "set_track_gain",
+          "args": {
+            "track_id": "t1",
+            "gain_db": -2.0
+          }
+        },
+        {
+          "command": "set_track_pan",
+          "args": {
+            "track_id": "t1",
+            "pan": 0.2
+          }
+        },
+        {
+          "command": "set_track_gain",
+          "args": {
+            "track_id": "t2",
+            "gain_db": -3.0
+          }
+        }
+      ],
+      "engine_unchanged": true,
+      "mutations": 0,
+      "status": "passed"
+    },
+    {
+      "name": "ordinary_edit",
+      "synthetic_prompt": "Rename the Bass track to Sub Bass and lower its current level by 2 dB. Keep everything else unchanged.",
+      "seconds": 16.113,
+      "phase": "ready",
+      "error_code": null,
+      "error": null,
+      "calls": [
+        {
+          "status": "returned",
+          "seconds": 16.098,
+          "model": "gpt-5-mini-2025-08-07",
+          "usage": {
+            "prompt_tokens": 6996,
+            "completion_tokens": 576,
+            "total_tokens": 7572
+          },
+          "tools": [
+            "propose_plan"
+          ]
+        }
+      ],
+      "read_devices": 0,
+      "summary": "Rename 'Bass' track to 'Sub Bass' and reduce its gain by 2 dB; keep everything else unchanged.",
+      "changes": [
+        "Track “Sub Bass” name: Bass → Sub Bass",
+        "Track “Sub Bass” gain_db: 0 → -2.0"
+      ],
+      "commands": [
+        {
+          "command": "rename_track",
+          "args": {
+            "track_id": "t1",
+            "name": "Sub Bass"
+          }
+        },
+        {
+          "command": "set_track_gain",
+          "args": {
+            "track_id": "t1",
+            "gain_db": -2.0
+          }
+        }
+      ],
+      "engine_unchanged": true,
+      "mutations": 0,
+      "status": "passed"
+    }
+  ],
+  "limitations": "Plan validity and tool use only; not listening/mixing quality or real engine apply.",
+  "status": "passed"
+}

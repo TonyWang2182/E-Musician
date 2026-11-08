@@ -48,7 +48,7 @@
   "云端生成，结果下载到本地；不需要选中音频。": "Generate in the cloud and download locally. No audio selection needed.",
   "在生成面板检查云端连接与模型状态。": "Check the cloud connection and model in the Generate panel.",
   "按当前工程速度生成16秒轻快的纯音乐，先试听，加入新轨道前让我确认。": "Generate 16 seconds of upbeat instrumental music at the project tempo. Preview it and let me review before adding a new track.",
-  "发送工程结构与必要音符；分析在本机，生成描述和歌词发送至配置的云端。": "Uses project structure and relevant notes. Analysis is local; generation sends your prompt and lyrics to the configured cloud.",
+  "发送工程结构与必要音符。音频分析使用所选本地或云端模型；生成使用配置的云端。": "Uses project structure and relevant notes. Audio analysis uses the selected local or cloud model; generation uses the configured cloud.",
   "选择对象后编辑；也可以直接描述要生成的音乐。": "Select objects to edit, or describe music to generate.",
   "轨道颜色": "Track colour",
   "把选中的轨道设为灰绿色 #BFD2CF，先列出修改。": "Set the selected track colour to muted teal #BFD2CF. Show the change first.",

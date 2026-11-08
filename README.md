@@ -2,7 +2,9 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
-**当前候选0.13.1已打开：新克隆云端重连、统一弹出界面与英文Agent。** 七个云模型短段整链、CTest11/11、Agent360及英文真实API检查通过；音乐质量、物理ASIO与鼠标/DPI仍需人工验收。双击`E:/MusicAgent&DAW/Start E-musician 0.13.1.cmd`，本地VS Code打开`E:/MusicAgent&DAW/E-musician-0.13.1.code-workspace`。旧程序和工程保留。
+**当前维护候选0.13.2已打开：插件入口生命周期、M/S/R文字与Agent基础混音修复。** 最终Release、CTest11/11、Agent371和两项真实GPT方案通过；53个已发现模块累计45完整宿主路径通过、8项仍有问题，逐项限制见[本轮结果](docs/review/2026-11-08-plugin-agent-stability/RESULTS.md)。真实ASIO、原COZY事故和听感待人工验收，没有完整整曲自动混音能力。入口`E:/MusicAgent&DAW/Start E-musician 0.13.2.cmd`，本地VS Code打开`E:/MusicAgent&DAW/E-musician-0.13.2.code-workspace`。0.13.1原生程序、入口和工程保留。
+
+[本轮计划](docs/review/2026-11-08-plugin-agent-stability/PLAN.md) · [人工短测](docs/review/2026-11-08-plugin-agent-stability/MANUAL-CHECK.md) · [实际模型分工](docs/review/2026-11-08-plugin-agent-stability/MODEL-MAP.md) · [Agent评测与混音步骤](docs/review/2026-11-08-plugin-agent-stability/agent/README.md)。云端模型部署本轮未改，上一版本的重连与七模型验证如下。
 
 [本轮结果](docs/review/2026-11-08-cloud-reconnect-ui/RESULTS.md) · [七模型测试](docs/review/2026-11-08-cloud-reconnect-ui/MODEL-TESTS.md) · [英文演示脚本](docs/review/2026-11-08-cloud-reconnect-ui/DEMO-SCRIPT.md) · [远程SSH工作区](docs/review/2026-11-08-cloud-reconnect-ui/SSH-WORKSPACE.md)。以下版本与备份条目为历史记录；克隆接通不代表夸克归档已做全量恢复验证。
 
@@ -46,7 +48,7 @@ Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、M
 
 ## 打开与开发
 
-本轮工作树为 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/hybrid-pipeline-v0130`。本机 VS Code 打开 `E:/MusicAgent&DAW/E-musician-Hybrid.code-workspace`：Ctrl+Shift+B 配置/构建 Release，运行 CTest 任务，F5 调试0.13.0。命令行先执行 `python scripts/dev_compute.py configure`，再分别执行 `build`、`test`、`transport-tests`、`agent-tests`。`tests/HybridComputeEndToEnd.py` 会调用租用GPU，应通过 `dev_compute.py command` 记录并明确传入EXE。所有步骤保留命令、时间、退出码、源码指纹和日志。
+本轮工作树为 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `fix/plugin-agent-stability-v0132`。本机 VS Code 打开 `E:/MusicAgent&DAW/E-musician-0.13.2.code-workspace`：Ctrl+Shift+B 配置/构建 Release，运行 CTest 任务，F5 调试0.13.2。命令行先执行 `python scripts/dev_stability.py configure`，再分别执行 `build`、`test`；其他检查通过 `command` 子命令记录。`tests/HybridComputeEndToEnd.py` 会调用租用GPU，本轮没有重跑。所有实际步骤保留命令、时间、退出码、源码指纹和日志。
 
 本机使用目录联接 `E:/emusician-analysis-source` 作为 CMake 源目录，构建目录 `E:/emusician-analysis-build`，避免上游 MSBuild 对路径中 `&` 的处理问题。固定 JUCE 8.0.6 / Tracktion Engine 3.2.0，具体 commit 和配置以本轮构建记录为准。其他机器需按 [BUILDING](docs/BUILDING.md) 准备依赖并调整工作区路径；现有 `dev_agent.py` 的历史默认构建目录不是这次 0.9.0 的入口。
 

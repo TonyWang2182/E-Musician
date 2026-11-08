@@ -1509,6 +1509,25 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
                 if(!header->getLocalBounds().contains(control->getBounds()))return juce::Result::fail("Compact track header control is outside its row.");
             if(header->arm.getBounds().intersects(header->devices.getBounds())||header->rename.getBounds().intersects(header->mute.getBounds()))
                 return juce::Result::fail("Track header controls overlap.");
+            for (auto* button : { &header->mute, &header->solo, &header->arm }) {
+                juce::Image glyph(juce::Image::ARGB, button->getWidth(), button->getHeight(), true);
+                { juce::Graphics text(glyph); button->getLookAndFeel().drawButtonText(text, *button, false, false); }
+                int occupiedRows = 0;
+                for (int y = 0; y < glyph.getHeight(); ++y) {
+                    bool occupied = false;
+                    for (int x = 0; x < glyph.getWidth(); ++x) occupied |= glyph.getPixelAt(x, y).getAlpha() > 48;
+                    if (occupied) ++occupiedRows;
+                }
+                if (occupiedRows < 5) return juce::Result::fail("Actual track M/S/R label collapsed into ellipsis or empty text.");
+            }
+        }
+        report.setProperty("actual_compact_track_button_glyphs_readable", true);
+        if(outputDirectory!=juce::File()){
+            const auto buttons = p.canvas.createComponentSnapshot({0,0,p.labelWidth(),juce::jmin(p.canvas.getHeight(),p.rowHeight*2)}, true, 2.0f);
+            juce::MemoryOutputStream data;
+            if(!juce::PNGImageFormat().writeImageToStream(buttons,data)
+                ||!outputDirectory.getChildFile("arrangement-track-buttons-200.png").replaceWithData(data.getData(),data.getDataSize()))
+                return juce::Result::fail("Could not save actual track button close-up.");
         }
         // Explicit synthetic colour projection, not a persistent edit.
         auto fixture=p.state;fixture.tracks[0].colour="#7EA49D";fixture.tracks[1].colour="#91A7C3";update(fixture);

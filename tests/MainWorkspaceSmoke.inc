@@ -47,6 +47,10 @@ juce::Result MainComponent::runWorkspaceUISmoke(const juce::File& directory)
         require(view.getLocalBounds().contains(p.titleBounds) && !p.titleBounds.intersects(p.saveButton.getBounds()), label + " project title clearance");
     };
     try {
+        const auto browserLifetime = WorkspaceBrowser::runActivationLifetimeSmoke(*report);
+        require(browserLifetime.wasOk(), "library activation lifetime: " + browserLifetime.getErrorMessage());
+        const auto pluginLifetime = PluginPanel::runLifetimeSmokeTest(fixture, *report);
+        require(pluginLifetime.wasOk(), "plugin panel callback lifetime: " + pluginLifetime.getErrorMessage());
         const auto popupStyle = style_smoke::run(directory.getChildFile("popup-style"), p.look);
         require(popupStyle.wasOk(), "popup/dialog style: " + popupStyle.getErrorMessage());
         require(brand::logo().isValid(), "approved logo decoded");

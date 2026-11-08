@@ -133,7 +133,7 @@
     $("connection-settings").open = providerReady(entry) && !entry.configured;
   }
   function renderProviders() {
-    providers = Array.isArray(state.providers) && state.providers.length ? state.providers : [{...state.provider, id: state.provider?.id || "kimi", label: state.provider?.label || "Kimi", adapter_ready: true}];
+    providers = Array.isArray(state.providers) && state.providers.length ? state.providers : [{...state.provider, id: state.provider?.id || "kimi", label: state.provider?.label || state.provider?.id || "Kimi", adapter_ready: true}];
     const active = state.provider || {}, signature = JSON.stringify(providers);
     const selected = settingsDirty ? $("provider").value : active.id || providers[0]?.id;
     if (signature !== providerSignature) {
@@ -150,7 +150,7 @@
     } else if (providers.some((entry) => entry.id === selected)) $("provider").value = selected;
     const label = active.label || providers.find((entry) => entry.id === active.id)?.label || active.id || "Kimi";
     text("current-model", active.model ? `${label} · ${active.model}` : t("选择模型"));
-    $("current-model").title = $("current-model").textContent;
+    $("current-model").title = `${$("current-model").textContent}${active.reasoning_effort ? ` · ${active.reasoning_effort}` : ""}${state.model_request?.timeout_seconds ? ` · ${state.model_request.timeout_seconds}s` : ""}`;
   }
   function scopeContext() {
     const snapshot = state?.snapshot || {}, context = snapshot.selection_context;
@@ -225,6 +225,7 @@
       : phase === "cancelled" ? t("正在结束当前请求，完成后可以继续。") : t("正在读取工程并生成方案，尚未修改工程。") : "";
     let detail = typeof progress.label === "string" && progress.label.trim() ? t(progress.label)
       : typeof state?.detail === "string" && state.detail ? t(state.detail) : fallback;
+    if (state?.model_request?.waiting) detail += ` · ${state.model_request.elapsed_seconds}s / ${state.model_request.timeout_seconds}s`;
     if (stage === "generating") {
       const job = state?.generation_jobs?.at(-1), generationPhase = job?.phase || job?.status;
       const labels = {connecting: "正在连接生成服务", reconnecting: "正在重连原生成任务", queued: "生成任务正在排队", loading: "正在加载生成模型", running: "正在生成音频", downloading: "正在下载并校验音频", ready: "音频已下载，可以试听"};
@@ -386,7 +387,7 @@
     const usage = state.usage || {}, format = (value) => Number(value || 0).toLocaleString(window.emusicianI18n.locale);
     text("usage", t`${format(usage.calls)} 次请求 · 输入 ${format(usage.prompt_tokens)} / 输出 ${format(usage.completion_tokens)} tokens`);
     renderProviders();
-    notice(localNotice || state.error || (visible && !readablePlan(plan) ? t("方案说明不完整，请放弃并重新生成。") : "")
+    notice(localNotice || (state.error ? `${state.error}${state.error_code ? ` [${state.error_code}]` : ""}` : "") || (visible && !readablePlan(plan) ? t("方案说明不完整，请放弃并重新生成。") : "")
       || (!state.provider?.configured ? t("先展开顶部模型设置，配置所选服务的密钥。") : "")); updateControls();
     if (visible && plan.id !== shownPlanId) {
       shownPlanId = plan.id;

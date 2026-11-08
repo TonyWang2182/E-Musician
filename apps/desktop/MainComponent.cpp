@@ -760,6 +760,28 @@ public:
         output.setProperty("plugin_missing_open_error", true);
         return juce::Result::ok();
     }
+    static juce::Result runLifetimeSmokeTest(EngineSession& engine, juce::DynamicObject& output)
+    {
+        std::unique_ptr<PluginPanel> panel;
+        int callbacks = 0;
+        const auto prepare = [&] {
+            panel = std::make_unique<PluginPanel>(engine, [&](const juce::Result&) { ++callbacks; panel.reset(); });
+            EngineSession::PluginDescriptorSnapshot missing; missing.id = "nonexistent-lifetime-smoke-plugin"; missing.name = "Missing lifetime fixture";
+            panel->filtered = { missing }; panel->catalog.updateContent(); panel->catalog.selectRow(0);
+            panel->beginAdd();
+        };
+        prepare();
+        const auto end = juce::Time::getMillisecondCounterHiRes() + 2000;
+        while (panel && juce::Time::getMillisecondCounterHiRes() < end)
+            juce::MessageManager::getInstance()->runDispatchLoopUntil(10);
+        if (panel || callbacks != 1) return juce::Result::fail("Plugin add callback did not safely close its own panel.");
+        output.setProperty("plugin_add_report_can_destroy_panel", true);
+        prepare(); panel.reset();
+        juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
+        if (callbacks != 1) return juce::Result::fail("Closed plugin panel received a pending add callback.");
+        output.setProperty("plugin_pending_add_ignores_destroyed_panel", true);
+        return juce::Result::ok();
+    }
     void paint(juce::Graphics& g) override
     {
         g.fillAll(paper); g.setColour(ink); g.setFont(mono(15));
@@ -807,8 +829,12 @@ private:
             const auto result = safe->session.snapshot().projectId != projectId
                 ? juce::Result::fail("The project changed before the plugin was added. Please try again.")
                 : safe->session.execute("add_plugin", arguments({ { "track_id", track }, { "catalog_id", plugin.id } }), expectedRevision);
+            // Plug-in initialisation may pump messages and close this panel.
+            if (!safe) return;
             safe->adding = false;
-            if (safe->report) safe->report(result);
+            const auto callback = safe->report;
+            if (callback) callback(result);
+            if (!safe) return;
             safe->timerCallback();
             if (result.failed()) {
                 safe->status.setText(result.getErrorMessage(), juce::dontSendNotification);
@@ -821,10 +847,14 @@ private:
     }
     void run(const juce::String& command, const juce::var& args)
     {
+        const auto safe = juce::Component::SafePointer<PluginPanel>(this);
         const auto result = session.execute(command, args, session.snapshot().revision);
-        if (report) report(result);
-        if (result.failed()) status.setText(result.getErrorMessage(), juce::dontSendNotification);
-        timerCallback();
+        if (!safe) return;
+        const auto callback = safe->report;
+        if (callback) callback(result);
+        if (!safe) return;
+        if (result.failed()) safe->status.setText(result.getErrorMessage(), juce::dontSendNotification);
+        safe->timerCallback();
     }
     void withSlot(const juce::String& command)
     {

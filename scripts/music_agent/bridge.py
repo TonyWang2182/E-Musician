@@ -21,7 +21,8 @@ def public_snapshot(raw):
     fields = ("project_id", "revision", "name", "dirty", "bpm", "numerator",
               "denominator", "duration_seconds", "position_seconds", "playing",
               "selected_track_id", "selected_clip_id", "can_undo", "can_redo",
-              "recording", "recording_finalizing", "counting_in", "tracks", "master_plugins", "selection_context")
+              "recording", "recording_finalizing", "counting_in", "tracks", "master_plugins", "selection_context",
+              "master_gain_db", "master_peak_left_db", "master_peak_right_db", "master_overloaded", "master_automation")
     result = {k: copy.deepcopy(raw[k]) for k in fields if k in raw}
     def public_plugins(plugins):
         if not isinstance(plugins,list): return []
@@ -36,12 +37,26 @@ def public_snapshot(raw):
             safe.append(item)
         return safe
     result["master_plugins"] = public_plugins(result.get("master_plugins",[]))
+    def summaries(values, fields):
+        return [{k: copy.deepcopy(v) for k, v in item.items() if k in fields}
+                for item in values if isinstance(item, dict)] if isinstance(values, list) else []
+    automation_fields = {"id", "target", "plugin_id", "parameter_id", "enabled", "point_count"}
+    if "master_automation" in result:
+        result["master_automation"] = summaries(result["master_automation"], automation_fields)
     for track in result.get("tracks", []):
         for key in list(track):
             if key not in {"id", "name", "kind", "gain_db", "pan", "muted", "solo", "colour",
-                           "clips", "clip_count", "clips_truncated", "plugins"}:
+                           "clips", "clip_count", "clips_truncated", "plugins", "output_target_id", "sends", "automation",
+                           "peak_left_db", "peak_right_db", "overloaded"}:
                 del track[key]
         track["plugins"] = public_plugins(track.get("plugins",[]))
+        if "sends" in track:
+            track["sends"] = summaries(track["sends"], {"id", "target_track_id", "gain_db", "pre_fader", "enabled"})
+        if "automation" in track:
+            track["automation"] = summaries(track["automation"], automation_fields)
+    result["meter_observation"] = {"kind": "instantaneous_peak_snapshot", "freshness_verified": False,
+        "whole_song_loudness_available": False,
+        "warning": "Peak displays can decay or be stale, especially while stopped. Not RMS/LUFS or a listening assessment."}
     result["clip_notes"] = {}
     from .analysis import safe_job
     result["analysis_jobs"] = [safe_job(j) for j in raw.get("analysis_jobs", [])[-12:] if isinstance(j, dict)]

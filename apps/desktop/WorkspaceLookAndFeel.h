@@ -185,7 +185,10 @@ public:
     void drawButtonText(juce::Graphics& g, juce::TextButton& button, bool, bool) override
     {
         g.setColour(button.isEnabled() ? ink : secondary); g.setFont(getTextButtonFont(button, button.getHeight()));
-        g.drawFittedText(button.getButtonText(), button.getLocalBounds().reduced(10, 2), juce::Justification::centred, 1);
+        // Track M/S/R buttons are only 24px wide. Dialog-sized padding would
+        // leave four pixels and silently turn their labels into ellipses.
+        const int padding = button.getWidth() < 40 ? 2 : button.getWidth() < 72 ? 4 : 10;
+        g.drawFittedText(button.getButtonText(), button.getLocalBounds().reduced(padding, 2), juce::Justification::centred, 1);
     }
     void fillTextEditorBackground(juce::Graphics& g, int width, int height, juce::TextEditor& editor) override
     {

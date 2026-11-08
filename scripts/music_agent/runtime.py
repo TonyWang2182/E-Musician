@@ -21,6 +21,7 @@ from .analysis import (ANALYSIS_TOOLS, KINDS, TERMINAL, authorize_start, authori
 from .tempo import TEMPO_TOOLS, authorize_clips, compile_warp, compile_beats, verify_tempo_plan
 from . import generation as music_generation
 from .localization import L, english, authored, response_instruction, normalize_language
+from .mixing import MIX_TOOL, MIX_INSTRUCTION, read_mix_context, capability_group as mix_capability_group
 
 READ_TOOL = {"type":"function","function":{"name":"read_clip_notes",
     "description":"读取已存在 MIDI 片段的完整音符到本地校验器，返回统计和24个示例。仅接受现有真实ID，不能读取本方案尚未创建的@别名；提交方案时本地会自动补齐校验所需数据。",
@@ -51,6 +52,11 @@ TransKun为钢琴专用，保留实际CC/踏板；MuScriptor为多乐器转录�
 """
 BUSY = {"planning", "paused", "applying"}
 MAX_MODEL_ROUNDS = 6
+SYSTEM += MIX_INSTRUCTION
+
+
+class PlanningRoundLimit(ValueError):
+    code = "tool_round_limit"
 
 class AgentRuntime:
     def __init__(self, bridge, provider=None, audit=None):
@@ -70,6 +76,9 @@ class AgentRuntime:
         self.before = None
         self.messages = []
         self.error = None
+        self.error_code = None
+        self.model_request_started = None
+        self.model_round = 0
         self.last_result = ""
         self.usage = {"calls":0, "prompt_tokens":0, "completion_tokens":0}
         self.undo_target = None
@@ -128,12 +137,16 @@ class AgentRuntime:
             public = copy.deepcopy(self.snapshot)
             public.pop("clip_notes", None)
             return {"phase":self.phase, "busy":self.busy(), "snapshot":public,
-                    "capability_groups": capability_groups(self.snapshot, self.host_capabilities, self.analysis_capabilities) + [music_generation.capability_group(self.host_capabilities, self.generation_capabilities)],
+                    "capability_groups": capability_groups(self.snapshot, self.host_capabilities, self.analysis_capabilities) + [mix_capability_group(self.host_capabilities), music_generation.capability_group(self.host_capabilities, self.generation_capabilities)],
                     "analysis_jobs": copy.deepcopy(list(self.analysis_jobs.values())[-12:]),
                     "generation_jobs": copy.deepcopy(list(self.generation_jobs.values())[-12:]),
                     "generation_preview": copy.deepcopy(self.generation_preview),
                     "pause_requested":self.pause_requested, "progress":dict(self.progress),
-                    "plan":plan, "messages":copy.deepcopy(self.messages), "error":self.error,
+                    "plan":plan, "messages":copy.deepcopy(self.messages), "error":self.error, "error_code":self.error_code,
+                    "model_request":{"waiting":self.model_request_started is not None,
+                        "elapsed_seconds":int(time.monotonic()-self.model_request_started) if self.model_request_started is not None else 0,
+                        "round":self.model_round, "max_rounds":MAX_MODEL_ROUNDS,
+                        "timeout_seconds":getattr(self.provider,"timeout",45)},
                     "provider":{"id":getattr(self.provider,"provider_id","kimi"),
                                 "configured":has_key(provider=getattr(self.provider,"provider_id","kimi")), "model":self.provider.model,
                                 "base_url":self.provider.base_url,"capabilities":getattr(self.provider,"capabilities",{}),
@@ -145,7 +158,9 @@ class AgentRuntime:
     def _start(self, phase, target):
         if self.busy():
             raise ValueError("上一项任务仍在结束，请稍候。")
-        self.phase, self.error = phase, None
+        self.phase, self.error, self.error_code = phase, None, None
+        self.model_request_started = None
+        self.model_round = 0
         self._generation += 1
         self.pause_requested = False
         self.resume_event.set()
@@ -162,15 +177,19 @@ class AgentRuntime:
             with self.lock:
                 self.phase = "cancelled" if self.cancel_event.is_set() else "error"
                 if self.phase == "error":
+                    code = getattr(exc, "code", type(exc).__name__)
+                    self.error_code = code if isinstance(code,str) and re.fullmatch(r"[A-Za-z0-9_]{1,64}",code) else type(exc).__name__
                     if isinstance(exc, (ValueError, BridgeError, ProviderError, ConfigError)):
                         self.error = redact(str(exc))[:700]
+                        if exc.args and isinstance(exc.args[0], L):
+                            self.error = L(self.error, redact(english(exc.args[0]))[:700])
                     else:
                         self.error = "任务异常，已停止后续动作。请检查本地日志或重新启动助手。"
                     self._message("assistant", self.error, runtime=True)
                 self.progress = {"stage":self.phase, "label":self.error or self.last_result,
                                  "completed":0, "total":0}
                 self.audit.write("task_finished", task_id=self.task_id, status=self.phase,
-                                 code=type(exc).__name__)
+                                 code=self.error_code, exception_type=type(exc).__name__, http_status=getattr(exc,"status",None))
 
     def plan_request(self, prompt, scope="selection", *, language="zh-CN"):
         if not isinstance(prompt, str) or not prompt.strip() or len(prompt) > 6000:
@@ -287,8 +306,10 @@ class AgentRuntime:
         messages.append({"role":"user","content":prompt + "\n\n当前工程数据（只读）：\n" +
             redact(json.dumps(context, ensure_ascii=False, allow_nan=False))})
         self.audit.write("task_started", task_id=self.task_id, project_id=context["project_id"],
-                         revision=context["revision"], model=self.provider.model, language=language)
-        for _ in range(MAX_MODEL_ROUNDS):
+                         revision=context["revision"], model=self.provider.model, language=language, scope=scope,
+                         provider=getattr(self.provider,"provider_id","unknown"),
+                         reasoning_effort=getattr(self.provider,"reasoning_effort",None), timeout_seconds=getattr(self.provider,"timeout",45))
+        for model_round in range(1, MAX_MODEL_ROUNDS+1):
             if self._cancelled():
                 return
             self._check_planning_context(context,frozen)
@@ -304,19 +325,38 @@ class AgentRuntime:
                     # This is the dispatch boundary; later pause waits for this response.
                     self.usage["calls"] += 1
                     break
-            tools = [READ_TOOL, READ_EFFECT_TOOL, READ_INSTRUMENT_TOOL, PLAN_TOOL]
+            tools = [READ_TOOL, READ_EFFECT_TOOL, READ_INSTRUMENT_TOOL, MIX_TOOL, PLAN_TOOL]
             if hasattr(self.bridge, "analysis_result"):
                 tools += ANALYSIS_TOOLS
             if hasattr(self.bridge,"audio_warp"):
                 tools += TEMPO_TOOLS
             if hasattr(self.bridge, "generation_result"):
                 tools += music_generation.GENERATION_TOOLS
-            response = self.provider.complete(messages, tools)
+            with self.lock:
+                self.model_round = model_round
+                self.model_request_started = time.monotonic()
+            self._progress("model", L(f"等待模型 · 第 {model_round}/{MAX_MODEL_ROUNDS} 轮；尚未修改工程",
+                f"Waiting for model · round {model_round}/{MAX_MODEL_ROUNDS}; project unchanged"))
+            request_started = time.monotonic()
+            self.audit.write("provider_requested", task_id=self.task_id, round=model_round,
+                context_chars=sum(len(str(m.get("content") or "")) for m in messages))
+            try:
+                response = self.provider.complete(messages, tools)
+            except ProviderError as exc:
+                self.audit.write("provider_failed",task_id=self.task_id,round=model_round,
+                    code=exc.code if isinstance(exc.code,str) and re.fullmatch(r"[a-z0-9_]{1,64}",exc.code) else "provider_error",
+                    http_status=exc.status,duration_ms=int((time.monotonic()-request_started)*1000))
+                raise
+            finally:
+                with self.lock: self.model_request_started = None
             usage = response.get("usage") or {}
             with self.lock:
                 for field in ("prompt_tokens","completion_tokens"):
                     self.usage[field] += max(0, int(usage.get(field, 0)))
-                self.audit.write("provider_returned", task_id=self.task_id, **self.usage)
+                returned_model=response.get("model",self.provider.model)
+                if not isinstance(returned_model,str) or not re.fullmatch(r"[A-Za-z0-9_.:-]{1,128}",returned_model): returned_model="unknown"
+                self.audit.write("provider_returned", task_id=self.task_id, **self.usage, round=model_round,
+                    returned_model=returned_model, duration_ms=int((time.monotonic()-request_started)*1000))
             if self._cancelled():
                 return
             self._check_planning_context(context,frozen)
@@ -332,11 +372,15 @@ class AgentRuntime:
                         self._message("assistant", message.get("content") or "没有提出修改方案，请明确目标和操作。", runtime=not bool(message.get("content")))
                         self.phase = "done"
                         self.progress = {"stage":"done", "label":"已回答；没有修改工程", "completed":0, "total":0}
+                        self.audit.write("task_finished",task_id=self.task_id,status="answered_no_edit",round=model_round)
                         break
                 return
             if len(calls) > 4:
                 raise ValueError("模型一次提出过多工具请求，未执行修改。")
             names = [c.get("function",{}).get("name") for c in calls]
+            known_names = {t["function"]["name"] for t in tools}
+            self.audit.write("tools_requested",task_id=self.task_id,round=model_round,tool_count=len(calls),
+                tool_names=[n if isinstance(n,str) and n in known_names else "unsupported" for n in names])
             if "propose_generation_import" in names:
                 if len(calls) != 1: raise ValueError("生成候选导入需单独提出一份方案。")
                 args = self._arguments(calls[0])
@@ -462,6 +506,12 @@ class AgentRuntime:
             messages.append(message)  # Keep reasoning_content/_provider_state only inside this task.
             for call in calls:
                 name = call.get("function",{}).get("name")
+                if name == "read_mix_context":
+                    self._progress("reading", L("正在读取混音设置与原生装置；尚未修改工程", "Reading mix settings and native devices; project unchanged"))
+                    result = read_mix_context(self.bridge, context, frozen, self._arguments(call))
+                    if self.cancel_event.is_set(): return
+                    messages.append({"role":"tool","tool_call_id":call["id"],"content":json.dumps(result,ensure_ascii=False,allow_nan=False)})
+                    continue
                 if name in {"start_generation", "get_generation_result", "cancel_generation", "preview_generation"}:
                     result = self._generation_tool(name, self._arguments(call), context, frozen)
                     if self.cancel_event.is_set(): return
@@ -508,7 +558,8 @@ class AgentRuntime:
                           "pitch_max":max((n["pitch"] for n in notes),default=None)}
                 messages.append({"role":"tool","tool_call_id":call["id"],
                                  "content":json.dumps(result,ensure_ascii=False,allow_nan=False)})
-        raise ValueError(f"已达到本次 {MAX_MODEL_ROUNDS} 次模型调用上限；未应用任何修改，请缩小任务。")
+        raise PlanningRoundLimit(L(f"已达到本次 {MAX_MODEL_ROUNDS} 次模型调用上限；未应用任何修改，请缩小任务。",
+            f"Reached the {MAX_MODEL_ROUNDS}-round planning limit. No edits were applied. Select a smaller track group or request one stage at a time."))
 
     def _generation_tool(self, name, args, context, frozen):
         if name == "start_generation":
