@@ -9,7 +9,7 @@
 +        // defaults to off even if this device previously used a global mode.
 +        const auto overrideMode = t.state.getProperty ("emMonitorMode").toString();
 +        if (overrideMode == "on")   return true;
-+        if (overrideMode == "auto") return isRecordingEnabled (t.itemID);
++        if (overrideMode == "auto") return false; // Legacy Auto never grants live monitoring.
 +        if (overrideMode == "off" || t.state.hasProperty ("emKind")) return false;
  
          switch (owner.getMonitorMode())

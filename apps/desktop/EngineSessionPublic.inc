@@ -129,6 +129,9 @@ EngineSession::Snapshot EngineSession::snapshot()const
 
 juce::Result EngineSession::execute(const juce::String& command,const juce::var& args,std::uint64_t expected,juce::var* commandResult)
 {
+    requireControlThread();
+    if(impl->controlOperationActive)return juce::Result::fail("Wait for the current device or project operation to finish.");
+    const juce::ScopedValueSetter<bool> busy(impl->controlOperationActive,true);
     if(command=="get_audio_warp"){juce::var data;auto r=impl->getAudioWarp(args,data);if(commandResult)*commandResult=std::move(data);return r;}
     requireControlThread();
     if(commandResult)*commandResult=juce::var();
@@ -247,6 +250,9 @@ juce::Result EngineSession::execute(const juce::String& command,const juce::var&
 juce::Result EngineSession::importFile(const juce::File& f,std::uint64_t r){return importFiles({f},r);}
 juce::Result EngineSession::importFiles(const juce::Array<juce::File>& files,std::uint64_t revision)
 {
+    requireControlThread();
+    if(impl->controlOperationActive)return juce::Result::fail("Wait for the current device or project operation to finish.");
+    const juce::ScopedValueSetter<bool> busy(impl->controlOperationActive,true);
     // Synchronous compatibility entry for controlled tests. Interactive import uses jobs.
     if(impl->recordingBusy())return impl->fail("Stop recording before importing audio.");
     requireControlThread();if(auto r=impl->preflight(revision);r.failed())return r;impl->cancelEffectGesture();
@@ -262,6 +268,9 @@ juce::Result EngineSession::importFiles(const juce::Array<juce::File>& files,std
 }
 juce::Result EngineSession::newProject(std::uint64_t expected)
 {
+    requireControlThread();
+    if(impl->controlOperationActive)return juce::Result::fail("Wait for the current device or project operation to finish.");
+    const juce::ScopedValueSetter<bool> busy(impl->controlOperationActive,true);
     if(impl->nativePending)return impl->fail("Wait for the native instrument edit before creating a project.");
     if(impl->recordingBusy())return impl->fail("Stop recording before creating a project.");
     requireControlThread();if(auto r=impl->preflight(expected);r.failed())return r;impl->cancelEffectGesture();
@@ -272,6 +281,9 @@ juce::Result EngineSession::newProject(std::uint64_t expected)
 }
 juce::Result EngineSession::saveProject(const juce::File& file,std::uint64_t expected)
 {
+    requireControlThread();
+    if(impl->controlOperationActive)return juce::Result::fail("Wait for the current device or project operation to finish.");
+    const juce::ScopedValueSetter<bool> busy(impl->controlOperationActive,true);
     if(impl->nativePending)return impl->fail("Wait for the native instrument edit before saving.");
     // Test/legacy compatibility only. GUI and Agent use the asynchronous save_project job.
     if(impl->recordingBusy())return impl->fail("Stop recording before saving a project.");
@@ -283,6 +295,9 @@ juce::Result EngineSession::saveProject(const juce::File& file,std::uint64_t exp
 }
 juce::Result EngineSession::openProject(const juce::File& file,std::uint64_t expected)
 {
+    requireControlThread();
+    if(impl->controlOperationActive)return juce::Result::fail("Wait for the current device or project operation to finish.");
+    const juce::ScopedValueSetter<bool> busy(impl->controlOperationActive,true);
     if(impl->nativePending)return impl->fail("Wait for the native instrument edit before opening a project.");
     if(impl->recordingBusy())return impl->fail("Stop recording before opening a project.");
     requireControlThread();if(auto r=impl->preflight(expected);r.failed())return r;impl->cancelEffectGesture();storage::StoredProject state;
@@ -293,8 +308,8 @@ juce::Result EngineSession::openProject(const juce::File& file,std::uint64_t exp
     impl->adopt(std::move(next),std::move(bs),{});impl->projectFile=file;impl->savedKey=impl->currentKey=contentKey(impl->capture());impl->pluginDirty=false;
     impl->publish("project_opened");impl->status="Project opened.";return juce::Result::ok();
 }
-void EngineSession::selectTrack(const juce::String& id){requireControlThread();if(impl->find(id))impl->choose(id);}
-void EngineSession::selectClip(const juce::String& id){requireControlThread();Impl::Binding* parent=nullptr;if(impl->findClip(id,&parent))impl->choose(parent->id,id);}
+void EngineSession::selectTrack(const juce::String& id){requireControlThread();if(impl->controlOperationActive)return;if(impl->find(id))impl->choose(id);}
+void EngineSession::selectClip(const juce::String& id){requireControlThread();if(impl->controlOperationActive)return;Impl::Binding* parent=nullptr;if(impl->findClip(id,&parent))impl->choose(parent->id,id);}
 juce::Result EngineSession::moveClip(const juce::String& id,double start,std::uint64_t rev){return execute("move_clip",object({{"clip_id",id},{"start_seconds",start}}),rev);}
 juce::Result EngineSession::setTrackGain(const juce::String& id,float db,std::uint64_t rev){return execute("set_track_gain",object({{"track_id",id},{"gain_db",std::isfinite(db)?stableGain(db):db}}),rev);}
 juce::Result EngineSession::setTrackMuted(const juce::String& id,bool v,std::uint64_t rev){return execute("set_track_muted",object({{"track_id",id},{"muted",v}}),rev);}
@@ -302,19 +317,22 @@ juce::Result EngineSession::setTrackSolo(const juce::String& id,bool v,std::uint
 juce::Result EngineSession::removeTrack(const juce::String& id,std::uint64_t rev){return execute("remove_track",object({{"track_id",id}}),rev);}
 juce::Result EngineSession::undo(std::uint64_t rev){return execute("undo",object({}),rev);}
 juce::Result EngineSession::redo(std::uint64_t rev){return execute("redo",object({}),rev);}
-void EngineSession::beginEditGesture(){requireControlThread();impl->cancelEffectGesture();impl->finishGesture();impl->edit->getUndoManager().beginNewTransaction("Adjust gain");impl->gesture=true;}
-void EngineSession::endEditGesture(){requireControlThread();impl->finishGesture();}
+void EngineSession::beginEditGesture(){requireControlThread();if(impl->controlOperationActive)return;impl->cancelEffectGesture();impl->finishGesture();impl->edit->getUndoManager().beginNewTransaction("Adjust gain");impl->gesture=true;}
+void EngineSession::endEditGesture(){requireControlThread();if(impl->controlOperationActive)return;impl->finishGesture();}
 void EngineSession::togglePlay(){
+    requireControlThread();if(impl->controlOperationActive)return;
     ++impl->analysisPreviewGeneration;if(impl->analysisPreview)impl->analysisPreview->stop();
     if(impl->recordingBusy()){stop();return;}
+    const juce::ScopedValueSetter<bool> busy(impl->controlOperationActive,true);
     requireControlThread();if(impl->duration<=0&&!impl->edit->clickTrackEnabled.get())return;auto& t=impl->edit->getTransport();if(t.isPlaying()){t.stop(false,false);impl->status="Paused.";return;}
     if(!snapshot().deviceAvailable){impl->status="Choose an output in audio settings.";return;}t.play(false);impl->status="Playing.";
 }
-void EngineSession::stop(){requireControlThread();++impl->analysisPreviewGeneration;if(impl->analysisPreview)impl->analysisPreview->stop();const bool recording=impl->recordingBusy();if(recording)impl->recording.execute("stop_recording",object({}));else impl->edit->getTransport().stop(false,false);if(!recording)impl->edit->getTransport().setPosition(te::TimePosition::fromSeconds(0));impl->finishRecording();impl->status=impl->recordingBusy()?"Finishing recording...":"Stopped.";}
-void EngineSession::seek(double seconds){requireControlThread();if(impl->recordingBusy())return;if(std::isfinite(seconds))impl->edit->getTransport().setPosition(te::TimePosition::fromSeconds(juce::jlimit(0.0,storage::maximumTimelineSeconds,seconds)));}
+void EngineSession::stop(){requireControlThread();if(impl->controlOperationActive)return;const juce::ScopedValueSetter<bool> busy(impl->controlOperationActive,true);++impl->analysisPreviewGeneration;if(impl->analysisPreview)impl->analysisPreview->stop();const bool recording=impl->recordingBusy();if(recording)impl->recording.execute("stop_recording",object({}));else impl->edit->getTransport().stop(false,false);if(!recording)impl->edit->getTransport().setPosition(te::TimePosition::fromSeconds(0));impl->finishRecording();impl->status=impl->recordingBusy()?"Finishing recording...":"Stopped.";}
+void EngineSession::seek(double seconds){requireControlThread();if(impl->controlOperationActive)return;const juce::ScopedValueSetter<bool> busy(impl->controlOperationActive,true);if(impl->recordingBusy())return;if(std::isfinite(seconds))impl->edit->getTransport().setPosition(te::TimePosition::fromSeconds(juce::jlimit(0.0,storage::maximumTimelineSeconds,seconds)));}
 void EngineSession::setLoop(bool enabled){execute("set_loop",object({{"enabled",enabled}}),impl->guard.revision());}
 void EngineSession::setGain(float db){execute("set_master_gain",object({{"gain_db",std::isfinite(db)?stableGain(db):db}}),impl->guard.revision());}
 juce::AudioDeviceManager& EngineSession::deviceManager(){requireControlThread();return impl->engine.getDeviceManager().deviceManager;}
+bool EngineSession::isControlBusy()const{requireControlThread();return impl->controlOperationActive;}
 bool EngineSession::hasActiveJobs()const{if(impl->nativePending)return true;for(const auto& j:impl->jobs)if(j->worker.joinable())return true;return impl->pluginHost.scanSnapshot().running;}
 void EngineSession::cancelAllJobs(){for(auto& j:impl->jobs)j->cancel=true;impl->pluginHost.cancelScan();}
 
@@ -357,7 +375,7 @@ juce::var EngineSession::capabilities()const
         }
         instruments.add(object({{"type",name},{"readable",true},{"scope","project"},{"asynchronous",true},{"single_action",true},{"sample_must_be_loaded",true},{"model_can_assign_path",false},{"model_can_create",false},{"actions",actions}}));
     }
-    return object({{"protocol_version",1},{"batch_result_refs",true},{"batch_result_refs_version",1},{"project_schema_version",6},{"native_effect_catalog",object({{"version",1},{"types",types}})},{"native_instrument_catalog",object({{"version",1},{"types",instruments}})},{"max_controller_events",100000},{"max_automation_points",100000},{"max_automation_page",1000},{"max_sends_per_track",32},{"max_sends",512},{"recording_mode","linear_take"},{"monitor_scope","track_and_input_device"},{"commands",commands},{"default_bpm",120},{"tempo_min",20},{"tempo_max",300},{"max_tracks",64},{"max_clips",4096},{"max_notes",100000},{"max_note_page",1000},{"max_clip_page",256},{"max_catalog_page",256},{"snapshot_clips_per_track",64},{"snapshot_clips_total",256},{"snapshot_includes_note_content",false},{"plugin_formats",juce::var(juce::Array<juce::var>{"VST","VST3"})},{"network_control",false},{"event_sequence",juce::int64(impl->eventSequence)}});
+    return object({{"protocol_version",1},{"batch_result_refs",true},{"batch_result_refs_version",1},{"project_schema_version",6},{"native_effect_catalog",object({{"version",1},{"types",types}})},{"native_instrument_catalog",object({{"version",1},{"types",instruments}})},{"max_controller_events",100000},{"max_automation_points",100000},{"max_automation_page",1000},{"max_sends_per_track",32},{"max_sends",512},{"recording_mode","linear_take"},{"monitor_scope","track"},{"monitor_modes",juce::var(juce::Array<juce::var>{"off","on"})},{"commands",commands},{"default_bpm",120},{"tempo_min",20},{"tempo_max",300},{"max_tracks",64},{"max_clips",4096},{"max_notes",100000},{"max_note_page",1000},{"max_clip_page",256},{"max_catalog_page",256},{"snapshot_clips_per_track",64},{"snapshot_clips_total",256},{"snapshot_includes_note_content",false},{"plugin_formats",juce::var(juce::Array<juce::var>{"VST","VST3"})},{"network_control",false},{"event_sequence",juce::int64(impl->eventSequence)}});
 }
 namespace {
 juce::var controlClipJson(const EngineSession::ClipSnapshot& c)
@@ -386,6 +404,7 @@ juce::var EngineSession::executeRequest(const juce::var& envelope)
 {
     requireControlThread();auto command=textArg(envelope,"command"),request=textArg(envelope,"request_id");
     auto reply=[&](const juce::String& status,juce::var result,juce::String error={}){return object({{"request_id",request},{"status",status},{"project_id",juce::String(impl->guard.projectId())},{"revision",juce::int64(impl->guard.revision())},{"result",result},{"error",error}});};
+    if(impl->controlOperationActive)return reply("busy",{},"Wait for the current device or project operation to finish.");
     if(!envelope.isObject())return reply("invalid",{},"Request must be an object.");
     auto args=envelope.getProperty("args",object({}));
     if(!args.isObject())return reply("invalid",{},"Request args must be an object.");

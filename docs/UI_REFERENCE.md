@@ -128,7 +128,7 @@ click开关与count-in独立，选项提供音量和仅录音发声。预备拍�
 
 `audio settings`使用受控Driver/Device或Input/Output表单，`apply`走统一配置命令，`Active:`回读实际设备、采样率与buffer。更换设备先用默认配置，再调整其实际支持的采样率/缓冲；失败显示原因及回滚后的值，录音前关闭设置窗。ASIO是否可用取决于已安装驱动。MIDI端口选择和Arm仍在轨道`I/O + sends`，不通过设置窗里的另一套MIDI开关。
 
-新输入默认`monitor off`；off/auto/on的作用域是输入设备，多轨共享该设备时也共享监听模式。off关闭软件监听，不禁止录音。`add...` → `New bus / group track`建立Bus；轨道`track output`可到Master或Bus，`send to bus`选目标后点`add send`，支持增益、`post-fader`/`pre-fader`、旁路和删除。禁止形成反馈环，失败显示引擎返回的原因。当前不提供任意插件多输出/侧链矩阵。
+0.13.5起新轨默认`monitor off`；界面只提供Off/On，逐轨独立，只有On开启实时输入监听。R只控制该轨录音准备，Off不禁止录音；旧Auto请求兼容为Off。同输入多轨不会因一轨开关而联动。实际构建/测试状态见CONTEXT。`add...` → `New bus / group track`建立Bus；轨道`track output`可到Master或Bus，`send to bus`选目标后点`add send`，支持增益、`post-fader`/`pre-fader`、旁路和删除。禁止形成反馈环，失败显示引擎返回的原因。当前不提供任意插件多输出/侧链矩阵。
 
 Automation 页枚举当前轨道或 Master 的真实增益、声像和插件参数。双击加点，拖动修改时间/归一化值，Alt-drag 修改曲率，Delete 删除选中点；支持 lane 旁路/删除。纵轴以 0–100% 统一表示，当前值附引擎/插件返回的单位文字。曲线手势按开始时的 project/revision 提交，冲突丢弃预览并回读。当前包含曲线播放和手工编辑，不含 Touch/Latch/Write 模式；Inspector 滑块不承诺实时追随播放中的自动化值。
 

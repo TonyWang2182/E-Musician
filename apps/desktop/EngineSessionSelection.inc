@@ -110,7 +110,7 @@ void EngineSession::Impl::refreshSelectionContext(const juce::var* proposed)
 }
 
 void EngineSession::setSelectionContext(const juce::var& context)
-{ requireControlThread();impl->refreshSelectionContext(&context); }
+{ requireControlThread();if(!impl->controlOperationActive)impl->refreshSelectionContext(&context); }
 juce::var EngineSession::selectionContext() const
 { requireControlThread();impl->refreshSelectionContext();return impl->selectionState.clone(); }
 

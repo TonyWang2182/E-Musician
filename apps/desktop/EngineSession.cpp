@@ -289,6 +289,10 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     std::vector<PluginDescriptorSnapshot> catalogCache;
     double catalogReadAt=-100000.0;
     bool catalogWasScanning=false;
+    // Message-thread reentrancy, not an audio-thread lock. Vendor code may pump
+    // nested UI messages while loading, saving or creating an editor.
+    bool controlOperationActive=false;
+    std::vector<native::NativeLoadQueue::Completion> deferredNativeCompletions;
     struct NativeRuntime {
         juce::String signature, status="queued", error;
         std::uint64_t token=0, generation=0;
@@ -317,7 +321,11 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
 
     explicit Impl(bool enable=true):engine(sessionProperties(enable),plugins::createUIBehaviour(),std::make_unique<OutputOnlyBehaviour>(enable)){
         if(!edit)throw std::runtime_error("Unable to create audio session");
-        nativeQueue=std::make_unique<native::NativeLoadQueue>([this](native::NativeLoadQueue::Completion result){completeNative(std::move(result));});
+        nativeQueue=std::make_unique<native::NativeLoadQueue>([this](native::NativeLoadQueue::Completion result){
+            if(controlOperationActive){deferredNativeCompletions.push_back(std::move(result));return;}
+            const juce::ScopedValueSetter<bool> busy(controlOperationActive,true);
+            completeNative(std::move(result));
+        });
         edit->tempoSequence.getTempo(0)->set(te::BeatPosition::fromBeats(0),120,0,false);edit->getMasterVolumePlugin()->setVolumeDb(-6);
         transactionControl=std::make_unique<te::Edit::UndoTransactionInhibitor>(*edit);
         edit->state.addListener(this);

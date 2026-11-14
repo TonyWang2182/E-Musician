@@ -64,15 +64,36 @@
       "path": "modules/tracktion_engine/playback/devices/tracktion_MidiInputDevice.cpp",
       "patch": "recording-midi-controller-boundary.patch",
       "before_sha256_lf": "90b39337fadc3b942d90f632a64b1aa4806635e86daf945daf88df432d652b3c",
-      "after_sha256_lf": "7b0550c31c9c00753ba600121423567d44d3e37c3ca299c21665584cb2e34b4d",
-      "patch_sha256_lf": "73a5511f4326fb86d21f1a8e227f294c8eff9f177cd0ce91d4b2996949aff078"
+      "after_sha256_lf": "a8288c012f0a17ad919fa74a57ee668fae50476a819254c4c7430f4c80c78bff",
+      "patch_sha256_lf": "9aac4049ed6afc9f9666e4b2d167cd891542de067b76b4d24b51d5666c9c9d0f"
     },
     {
       "path": "modules/tracktion_engine/playback/devices/tracktion_InputDevice.cpp",
       "patch": "per-track-monitor.patch",
       "before_sha256_lf": "15da708f2755f149ef0175c7149ba81ded3d99a53092767d87f47efab3d972d4",
-      "after_sha256_lf": "0cf9b78f8e05fe4ccc6a7f5a598e2b717e3374657bbd444bd57528015c0ead08",
-      "patch_sha256_lf": "46a2554233c0f7821f479e86cfcf18a28eb3dab6eb9cb8b7d5a88e2c1b601f12"
+      "after_sha256_lf": "9f60718e3cccbb5ec351e7365ce7c5ca6cd3acf150e36e2d5e1cd223f47c7097",
+      "patch_sha256_lf": "0f51b88c324d3b5d8e9a58c7c43fde8d306e618216e9d3e35aa16832511b1fe2"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/devices/tracktion_InputDevice.h",
+      "patch": "per-track-midi-release.patch",
+      "before_sha256_lf": "363c8e8b54f8e069c0f20bf66d01a8b4be677359aefeb0f0d161bae7973c432b",
+      "after_sha256_lf": "31312dbbbc5f0e7604e4d14a42d75b088c8b59cfd7705c33c90fb783afd80960",
+      "patch_sha256_lf": "6d2b7fe3c17b73c3be22091f678380e25c2ef8c29ddd0338dbda900072986703"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp",
+      "patch": "empty-instrument-midi-injection.patch",
+      "before_sha256_lf": "4a55f6be2a8fc38d10d2529fa4ba6a4663d8b818b55b128e87340d7b9337ce5c",
+      "after_sha256_lf": "68b30572334da59307de5188cbd85c340a3a73fee4654b066327747756d638fb",
+      "patch_sha256_lf": "68b7f593c6864f6b022470a7d2c0f89b70a38a180c6edae5616dfe1333090980"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.cpp",
+      "patch": "stable-empty-midi-injection-id.patch",
+      "before_sha256_lf": "ab8042c1cdbc586f01c252c1d3fec97304c08f6f13e9a0553e5ff579b3e1b2c7",
+      "after_sha256_lf": "d69a04a60ca93b45cc7d4b1de5028f33da0bbd35c2b87d85bb44bdba34e645af",
+      "patch_sha256_lf": "72156f308eab4b60303a392c8e6a067ca1795bdf2b42a426e9653cc97b5e4047"
     }
   ]
 }

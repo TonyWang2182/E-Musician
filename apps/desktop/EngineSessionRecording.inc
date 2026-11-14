@@ -289,31 +289,45 @@ juce::Result RecordingController::execute(const juce::String& command, const juc
         return s.bind(*track, true);
     }
     if (command == "set_input_monitor") {
-        const auto id = args["input_device_id"].toString(), mode = args["mode"].toString();
-        if (mode != "off" && mode != "auto" && mode != "on") return graphError("Input monitor must be off, auto, or on.");
+        const auto id = args["input_device_id"].toString(), requestedMode = args["mode"].toString();
+        if (requestedMode != "off" && requestedMode != "auto" && requestedMode != "on") return graphError("Input monitor must be off or on.");
+        // Legacy Auto requests resolve safely to Off. Record-arm no longer
+        // grants live monitoring; the user must explicitly choose On.
+        const juce::String mode = requestedMode == "on" ? "on" : "off";
+        te::AudioTrack* track = nullptr;
         if (args.hasProperty("track_id")) {
-            auto* track = graphTrack(*s.edit, args["track_id"].toString());
+            track = graphTrack(*s.edit, args["track_id"].toString());
             if (!track || track->state["emKind"].toString() == "bus") return graphError("Select an audio or MIDI track for monitoring.");
-            const auto selected = s.selectedInput(*track);
-            if (!s.device(selected)) return graphError("Selected recording input is unavailable.");
-            if (mode != "off") {
-                auto* input = s.instance(selected);
-                const bool armed = input && input->isRecordingEnabled(track->itemID);
-                if (auto r = s.bind(*track, armed); r.failed()) return r;
+            if (args.hasProperty("input_device_id") && id != s.selectedInput(*track))
+                return graphError("The input device does not belong to the selected track.");
+        } else {
+            // Compatibility with old clients is deliberately unambiguous:
+            // device identity may resolve one track, never a device-wide toggle.
+            for (auto* candidate : te::getAudioTracks(*s.edit)) if (s.selectedInput(*candidate) == id) {
+                if (track) return graphError("This input is shared by multiple tracks. Specify track_id to change monitoring.");
+                track = candidate;
             }
-            track->state.setProperty("emMonitorMode", mode, nullptr);
-            te::TransportControl::restartAllTransports(s.engine, false);
-            return juce::Result::ok();
+            if (!track) return graphError("Select a track assigned to this recording input first.");
         }
-        if (mode != "off") for (auto* track : te::getAudioTracks(*s.edit)) if (s.selectedInput(*track) == id) {
-            auto* i = s.instance(id); const bool armed = i && i->isRecordingEnabled(track->itemID);
+        const auto selected = s.selectedInput(*track);
+        if (mode == "on") {
+            if (!s.device(selected)) return graphError("Selected recording input is unavailable.");
+            auto* input = s.instance(selected);
+            const bool armed = input && input->isRecordingEnabled(track->itemID);
             if (auto r = s.bind(*track, armed); r.failed()) return r;
         }
-        auto* device = s.device(id); if (!device) return graphError("Input device not found.");
-        for (auto* track : te::getAudioTracks(*s.edit)) if (s.selectedInput(*track) == id) track->state.setProperty("emMonitorMode", mode, nullptr);
-        const auto previousMode = device->getMonitorMode();
-        device->setMonitorMode(mode == "on" ? te::InputDevice::MonitorMode::on : mode == "auto" ? te::InputDevice::MonitorMode::automatic : te::InputDevice::MonitorMode::off);
-        if (previousMode == device->getMonitorMode()) te::TransportControl::restartAllTransports(s.engine, false);
+        if (mode != "on" && track->state["emMonitorMode"].toString() == "on")
+            if (auto* input = s.instance(selected)) input->releaseLiveMidiForTarget(track->itemID);
+        if (track->state["emMonitorMode"].toString() != mode) {
+            track->state.setProperty("emMonitorMode", mode, nullptr);
+            // Rebuild this Edit only; never change the shared physical input's
+            // monitor mode or touch another Edit's transport/recording state.
+            s.edit->restartPlayback();
+            // Publish the new graph before this command returns. Deferring to
+            // Edit's timer lets a subsequent MIDI block enter the old On graph
+            // after its held-note cleanup, leaving an unpaired voice at Off.
+            s.edit->dispatchPendingUpdatesSynchronously();
+        }
         return juce::Result::ok();
     }
     if (command == "start_recording") {
@@ -344,7 +358,7 @@ juce::var RecordingController::state() const {
         tracks.add(graphObject({ {"track_id", track->state["emId"].toString()}, {"input_device_id", inputId}, {"armed", input && input->isRecordingEnabled(track->itemID)}, {"monitor", overrideMode.isNotEmpty() ? overrideMode : "off"}, {"input_available", device != nullptr} }));
     }
     const auto remaining=s.countingIn()?juce::jlimit(0.0,double(s.countBars*s.edit->tempoSequence.getTimeSig(0)->numerator),(s.punchTime-s.position())*s.edit->tempoSequence.getTempo(0)->getBpm()/60.0*s.edit->tempoSequence.getTimeSig(0)->denominator/4.0):0.0;
-    return graphObject({ {"counting_in",s.countingIn()},{"count_in_beats_remaining",remaining},{"recording_start_seconds",s.punchTime}, {"recording", s.edit && s.edit->getTransport().isRecording()}, {"finalizing", s.edit && (s.edit->getTransport().isRecordingStopping() || s.finishingInputs > 0 || (s.activeTake && !s.edit->getTransport().isRecording()))}, {"error", s.error}, {"tracks", tracks}, {"recording_directory", s.directory.getFullPathName()}, {"monitor_scope", "track_and_input_device"} });
+    return graphObject({ {"counting_in",s.countingIn()},{"count_in_beats_remaining",remaining},{"recording_start_seconds",s.punchTime}, {"recording", s.edit && s.edit->getTransport().isRecording()}, {"finalizing", s.edit && (s.edit->getTransport().isRecordingStopping() || s.finishingInputs > 0 || (s.activeTake && !s.edit->getTransport().isRecording()))}, {"error", s.error}, {"tracks", tracks}, {"recording_directory", s.directory.getFullPathName()}, {"monitor_scope", "track"} });
 }
 juce::var RecordingController::preferences() const {
     const auto& s=*data;

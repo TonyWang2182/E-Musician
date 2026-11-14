@@ -184,6 +184,7 @@ public:
     void setLoop(bool enabled);
     void setGain(float decibels);
     juce::AudioDeviceManager& deviceManager();
+    bool isControlBusy() const;
     juce::Result runOfflineSmokeTest(const juce::File& outputDirectory);
     juce::Result runProjectSmokeTest(const juce::File& outputDirectory, const juce::File& fixtureDirectory);
     juce::Result runClipSmokeTest(const juce::File& outputDirectory);

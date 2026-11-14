@@ -1,0 +1,250 @@
+{
+  "status": "final_installed_module_paths_verified_manual_audio_pending",
+  "baseline_executable_sha256": "c99d9b0894687f1066bc09febe9c4d6ee5afbc4e38413fac5d6620a101245d5a",
+  "protocol": "exact identity/add/read/native open/settle/save/new/reopen/2s 48k PCM16 export/exit",
+  "manual_editor_gestures_verified": false,
+  "hardware_playback_verified": false,
+  "modules": [
+    {
+      "name": "BM-COZY.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "process_seconds": 22.275,
+      "nonzero_render": true
+    },
+    {
+      "name": "BM-BERSERK.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "process_seconds": 19.019,
+      "nonzero_render": true
+    },
+    {
+      "name": "BM-CIRCUITS.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "process_seconds": 20.163,
+      "nonzero_render": true
+    },
+    {
+      "name": "BM-DOPE.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "process_seconds": 13.884,
+      "nonzero_render": true
+    },
+    {
+      "name": "BM-EDEN.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "process_seconds": 15.981,
+      "nonzero_render": true
+    },
+    {
+      "name": "BM-GLORY.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "process_seconds": 15.053,
+      "nonzero_render": true
+    },
+    {
+      "name": "BM-HUSTLE.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "process_seconds": 17.638,
+      "nonzero_render": true
+    },
+    {
+      "name": "BM-HYPE.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "process_seconds": 17.267,
+      "nonzero_render": true
+    },
+    {
+      "name": "BM-IDOL.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "process_seconds": 16.831,
+      "nonzero_render": true
+    },
+    {
+      "name": "BM-KANDY.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "process_seconds": 17.522,
+      "nonzero_render": true
+    },
+    {
+      "name": "BM-NEMESIS.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "process_seconds": 17.036,
+      "nonzero_render": true
+    },
+    {
+      "name": "BM-RICO.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "process_seconds": 17.792,
+      "nonzero_render": true
+    },
+    {
+      "name": "BM-VICE.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "process_seconds": 18.121,
+      "nonzero_render": true
+    },
+    {
+      "name": "BM-VOID.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "process_seconds": 18.556,
+      "nonzero_render": true
+    }
+  ],
+  "final_executable_sha256": "d7ccb64ef704d1f29a81ce893d66e86ffc379202a3af62b275c68267fdc093eb",
+  "final_record": "20261114T174045.347487Z-c26fcd7ab7",
+  "final_protocol": "exact add/read/native editor/save/new/reopen/2s48kPCM16/exit plus separate no-stdio Library/Add/Open/Remove handlers",
+  "final_modules": [
+    {
+      "name": "BM-BERSERK.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "nonzero_render": true,
+      "actual_gui_handlers": "passed",
+      "host_process_seconds": 17.559,
+      "gui_process_seconds": 11.346
+    },
+    {
+      "name": "BM-CIRCUITS.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "nonzero_render": true,
+      "actual_gui_handlers": "passed",
+      "host_process_seconds": 15.27,
+      "gui_process_seconds": 12.389
+    },
+    {
+      "name": "BM-COZY.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "nonzero_render": true,
+      "actual_gui_handlers": "passed",
+      "host_process_seconds": 15.526,
+      "gui_process_seconds": 12.506
+    },
+    {
+      "name": "BM-DOPE.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "nonzero_render": true,
+      "actual_gui_handlers": "passed",
+      "host_process_seconds": 16.464,
+      "gui_process_seconds": 12.21
+    },
+    {
+      "name": "BM-EDEN.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "nonzero_render": true,
+      "actual_gui_handlers": "passed",
+      "host_process_seconds": 18.442,
+      "gui_process_seconds": 13.489
+    },
+    {
+      "name": "BM-GLORY.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "nonzero_render": true,
+      "actual_gui_handlers": "passed",
+      "host_process_seconds": 17.364,
+      "gui_process_seconds": 11.313
+    },
+    {
+      "name": "BM-HUSTLE.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "nonzero_render": true,
+      "actual_gui_handlers": "passed",
+      "host_process_seconds": 17.742,
+      "gui_process_seconds": 11.784
+    },
+    {
+      "name": "BM-HYPE.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "nonzero_render": true,
+      "actual_gui_handlers": "passed",
+      "host_process_seconds": 16.401,
+      "gui_process_seconds": 10.69
+    },
+    {
+      "name": "BM-IDOL.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "nonzero_render": true,
+      "actual_gui_handlers": "passed",
+      "host_process_seconds": 17.616,
+      "gui_process_seconds": 10.462
+    },
+    {
+      "name": "BM-KANDY.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "nonzero_render": true,
+      "actual_gui_handlers": "passed",
+      "host_process_seconds": 17.418,
+      "gui_process_seconds": 10.736
+    },
+    {
+      "name": "BM-NEMESIS.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "nonzero_render": true,
+      "actual_gui_handlers": "passed",
+      "host_process_seconds": 17.401,
+      "gui_process_seconds": 10.463
+    },
+    {
+      "name": "BM-RICO.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "nonzero_render": true,
+      "actual_gui_handlers": "passed",
+      "host_process_seconds": 17.123,
+      "gui_process_seconds": 9.963
+    },
+    {
+      "name": "BM-VICE.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "nonzero_render": true,
+      "actual_gui_handlers": "passed",
+      "host_process_seconds": 19.468,
+      "gui_process_seconds": 10.483
+    },
+    {
+      "name": "BM-VOID.vst3",
+      "version": "2.2.1",
+      "status": "passed",
+      "nonzero_render": true,
+      "actual_gui_handlers": "passed",
+      "host_process_seconds": 17.293,
+      "gui_process_seconds": 11.217
+    }
+  ],
+  "final_hardware_lifecycle": {
+    "status": "passed",
+    "record": "20261114T174811.212163Z-9cbee19f9b",
+    "module": "BM-COZY",
+    "driver": "M-Audio M-Track Solo and Duo ASIO",
+    "sample_rate": 44100,
+    "buffer_size": 512,
+    "midi_input": "SL GRAND",
+    "transport_played": false,
+    "physical_keyboard_performance_verified": false,
+    "settings_restored_byte_exact": true
+  }
+}

@@ -1,0 +1,12 @@
+--- a/modules/tracktion_engine/playback/devices/tracktion_InputDevice.h
++++ b/modules/tracktion_engine/playback/devices/tracktion_InputDevice.h
+@@ -133,6 +133,9 @@
+ 
+     /** Whether the track should monitor the input or not. */
+     virtual bool isLivePlayEnabled (const Track&) const;
++
++    /** Releases this input's held live MIDI on one destination only. Message thread. */
++    virtual void releaseLiveMidiForTarget (EditItemID) {}
+ 
+     /** Returns true if recording is enabled and the input is connected to any target. */
+     virtual bool isRecordingActive() const;

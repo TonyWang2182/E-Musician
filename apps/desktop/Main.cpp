@@ -20,7 +20,7 @@ public:
         const auto args = juce::StringArray::fromTokens(getCommandLineParameters(), true);
         return args.contains("--workspace-smoke") || args.contains("--agent-sidebar-smoke") || args.contains("--smoke-test") || args.contains("--review-project") || args.contains("--control-stdio")
             || args.contains("--plugin-scan-worker") || args.contains("--render-worker") || args.contains("--performance-test")
-            || args.contains("--control-output-probe-child") || args.contains("--plugin-notification-test") || args.contains("--production-test");
+            || args.contains("--control-output-probe-child") || args.contains("--plugin-notification-test") || args.contains("--production-test") || args.contains("--plugin-ui-test");
     }
     void initialise(const juce::String& commandLine) override
     {
@@ -36,7 +36,7 @@ public:
         const int reviewIndex = args.indexOf("--review-project");
         const bool smoke = smokeIndex >= 0;
         const bool review = reviewIndex >= 0;
-        if (args.contains("--workspace-smoke") || args.contains("--agent-sidebar-smoke") || (smoke && args.contains("--offline")) || args.contains("--production-test") || args.contains("--control-output-probe"))
+        if (args.contains("--workspace-smoke") || args.contains("--agent-sidebar-smoke") || args.contains("--plugin-ui-test") || (smoke && args.contains("--offline")) || args.contains("--production-test") || args.contains("--control-output-probe"))
             EngineSession::setOfflineTestMode(true);
         reviewMode = review;
         try {
@@ -58,6 +58,21 @@ public:
                 setApplicationReturnValue(result.wasOk() ? 0 : 1); quit(); return;
             }
             session = std::make_unique<EngineSession>();
+            if(args.contains("--plugin-ui-test")){
+                if(args.size()!=4 || args[0]!="--plugin-ui-test" || !juce::File::isAbsolutePath(args[2]) || args[3]!="--offline"){
+                    setApplicationReturnValue(2);quit();return;
+                }
+                const juce::File directory(args[2]);require(!directory.exists(),"Plug-in UI probe output must be fresh");
+                require(directory.createDirectory().wasOk(),"Create plug-in UI probe output");
+                window=std::make_unique<Window>(*session,false);
+                window->setTopLeftPosition(-3000,-3000);window->setVisible(true);
+                const auto catalogId=args[1];
+                after(100,directory,[this,directory,catalogId]{
+                    const auto result=static_cast<MainComponent*>(window->getContentComponent())->runInstalledPluginUISmoke(catalogId,directory);
+                    if(result.failed())std::cerr<<result.getErrorMessage()<<std::endl;
+                    setApplicationReturnValue(result.wasOk()?0:1);quit();
+                });return;
+            }
             if(args.contains("--workspace-smoke")){
                 if(args.size()!=3||args[0]!="--workspace-smoke"||!juce::File::isAbsolutePath(args[1])||args[2]!="--offline"){setApplicationReturnValue(2);quit();return;}
                 const juce::File directory(args[1]);require(!directory.exists(),"Workspace smoke output must be fresh");require(directory.createDirectory().wasOk(),"Create workspace smoke output");
@@ -141,7 +156,7 @@ public:
             }
         } catch (const std::exception& e) {
             std::cerr << e.what() << std::endl;
-            if (!smoke && !review && !args.contains("--workspace-smoke") && !args.contains("--agent-sidebar-smoke") && !args.contains("--control-stdio") && !args.contains("--production-test"))
+            if (!smoke && !review && !args.contains("--workspace-smoke") && !args.contains("--agent-sidebar-smoke") && !args.contains("--plugin-ui-test") && !args.contains("--control-stdio") && !args.contains("--production-test"))
                 juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Unable to start", e.what());
             setApplicationReturnValue(1);
             quit();

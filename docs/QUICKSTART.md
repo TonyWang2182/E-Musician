@@ -67,7 +67,7 @@ python scripts/dev.py run --config Release --note "日常使用"
 1. 停止播放，点顶部 `audio settings`。在 `Driver` 选驱动，ASIO在 `Device` 选厂商声卡；分离输入/输出的驱动分别选 `Input` 和 `Output`。点 `apply`，以面板 `Active:` 显示的实际配置为准。
 2. 更换设备后先应用默认配置，再选它实际支持的 `Sample rate` / `Buffer size` 并应用。失败时面板显示错误及回读值。**关闭设置窗后才能开始录音。** MIDI键盘输入在下一步选择，无需在此寻找MIDI总开关。
 3. 音频录音先建 `New audio track`；MIDI录音建乐器轨，并按上节加载乐器。选轨 → 轨头 `devices` → 底部 `I/O + sends`，在 `recording input` 下拉框选麦克风/线路或MIDI端口，再点 `arm record`，按钮变为 `armed`。已选输入后也可用轨头 `R` 切换预备录制。
-4. 新输入默认 `monitor off`，仍可录音，只关闭软件输入监听。需要听到输入时选择 `monitor auto`（随录制预备状态监听）或 `monitor on`（持续监听已连接轨道）。**监听属于共享输入设备：多轨用了同一个输入，修改模式会一起生效。** MIDI键盘要经插件实时发声也需要监听；已有片段播放不受这个输入开关控制。
+4. 0.13.5起每轨单独设置 `monitor off/on`：只有 **On** 才听到该轨实时输入；Off即使R开启也不监听，但可以录音。R关闭、On开启可以练习而不录入。多轨共用键盘时开关独立，选中某轨不会改变其他轨；已有片段播放不受监听开关控制。旧Auto按Off兼容，实际构建/测试状态见CONTEXT。
 5. 关闭底部 `loop`，定位录音起点。需要预备拍时先停止播放，打开 `count-in` 并选 `1 bar`、`2 bars` 或 `4 bars`，再点 `rec`。界面显示剩余拍数；预备期间 `stop` 取消，不提交空录音。未开预备拍则直接线性录音。
 6. 点 `stop` 结束录音。等待 `Finishing recording...` 消失，片段提交后再保存。预备、录音及收尾时编辑、保存和设备切换暂不可用；一次录制可整体Undo。
 

@@ -359,7 +359,11 @@ std::shared_ptr<EngineSession::Impl::Job> EngineSession::Impl::startJob(const ju
 
 void EngineSession::Impl::timerCallback()
 {
-    if(shuttingDown)return;
+    if(shuttingDown||controlOperationActive)return;
+    const juce::ScopedValueSetter<bool> busy(controlOperationActive,true);
+    auto completions=std::move(deferredNativeCompletions);
+    deferredNativeCompletions.clear();
+    for(auto& completion:completions)completeNative(std::move(completion));
     finishRecording();
     auto changed=pluginHost.takeChangedPluginIds();juce::Array<juce::var> ids;
     for(const auto& id:changed)if(livePlugin(*edit,id))ids.add(id);

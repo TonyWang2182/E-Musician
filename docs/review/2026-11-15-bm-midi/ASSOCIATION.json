@@ -1,0 +1,35 @@
+{
+  "extension_default": {
+    "data": "E-musician.Project",
+    "type": 1
+  },
+  "user_choice": null,
+  "user_choice_latest": {
+    "data": "Applications\\E-musician.exe",
+    "type": 1
+  },
+  "registered_icon": {
+    "data": "\"E:\\emusician-analysis-build\\bin-0.13.5\\Release\\E-musician.exe\",0",
+    "type": 1
+  },
+  "registered_command": {
+    "data": "\"E:\\emusician-analysis-build\\bin-0.13.5\\Release\\E-musician.exe\" --agent --open-project \"%1\"",
+    "type": 1
+  },
+  "application_icon": {
+    "data": "\"E:\\emusician-analysis-build\\bin-0.13.5\\Release\\E-musician.exe\",0",
+    "type": 1
+  },
+  "application_command": {
+    "data": "\"E:\\emusician-analysis-build\\bin-0.13.5\\Release\\E-musician.exe\" --agent --open-project \"%1\"",
+    "type": 1
+  },
+  "effective_command": "\"E:\\emusician-analysis-build\\bin-0.13.5\\Release\\E-musician.exe\" --agent --open-project \"%1\"",
+  "effective_executable": "E:\\emusician-analysis-build\\bin-0.13.5\\Release\\E-musician.exe",
+  "effective_icon": "\"E:\\emusician-analysis-build\\bin-0.13.5\\Release\\E-musician.exe\",0",
+  "executable_icon_groups": 2,
+  "backup": "E:\\MusicAgent&DAW\\worktrees\\audio-analysis\\build-logs\\bm-midi-association-before.json",
+  "foreign_default_preserved": false,
+  "foreign_application_handler_preserved": false,
+  "user_choice_unchanged": true
+}

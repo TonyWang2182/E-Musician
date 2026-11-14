@@ -8,10 +8,45 @@ juce::Result EngineSession::runWorkspaceEngineSmokeTest(juce::DynamicObject& rep
     const auto child=[](const char* command,juce::var args){return object({{"command",command},{"args",args}});};
     try{
         okay(outputDirectory.createDirectory(),"fixture output directory");
+        check(test.capabilities()["monitor_scope"].toString()=="track"&&test.capabilities()["monitor_modes"].size()==2,"capabilities advertise track-scoped explicit Off/On monitoring");
         okay(runAnalysisWorkerProcessSmoke(report,outputDirectory.getChildFile("analysis-process")),"analysis process isolation");
         okay(runGenerationEngineSmokeTest(report,outputDirectory.getChildFile("generation")),"generation contracts");
         okay(run("create_track",object({{"kind","instrument"},{"name","Colour fixture"}})),"create fixture track");
         const auto id=test.snapshot().tracks.front().id;
+        // Emulate a vendor pumping the message loop while its owning Edit is
+        // on the stack. Nested GUI/control commands must not replace it, run
+        // a save capture, or commit a ready background operation.
+        {
+            auto* originalEdit=test.impl->edit.get();
+            const auto revision=test.snapshot().revision;
+            int preparations=0;bool dispatched=false;
+            auto pending=std::make_shared<Impl::Job>();
+            pending->preparation=[&]{++preparations;};
+            test.impl->jobs.push_back(pending);
+            {
+                const juce::ScopedValueSetter<bool> vendorCall(test.impl->controlOperationActive,true);
+                juce::MessageManager::callAsync([&]{
+                    check(test.isControlBusy(),"vendor nested dispatch exposes busy state");
+                    check(run("remove_track",object({{"track_id",id}})).failed(),"nested track removal rejected");
+                    check(test.newProject(revision).failed(),"nested project replacement rejected");
+                    check(test.openProject(outputDirectory.getChildFile("absent.emproj"),revision).failed(),"nested project open rejected");
+                    check(test.saveProject(outputDirectory.getChildFile("must-not-save.emproj"),revision).failed(),"nested capture rejected");
+                    check(test.undo(revision).failed(),"nested undo rejected");
+                    check(test.executeRequest(object({{"command","new_project"},{"request_id","reentrant"}}))["status"].toString()=="busy","nested Agent command reports busy");
+                    test.beginEditGesture();test.seek(8.0);test.stop();test.impl->timerCallback();
+                    check(preparations==0&&!test.impl->gesture,"nested timer and gesture deferred");
+                    dispatched=true;
+                });
+                juce::MessageManager::getInstance()->runDispatchLoopUntil(60);
+                check(dispatched&&test.impl->edit.get()==originalEdit&&test.snapshot().revision==revision,
+                    "nested dispatch preserves Edit and revision");
+            }
+            test.impl->timerCallback();
+            check(preparations==1&&!test.isControlBusy(),"background work resumes after vendor returns");
+            test.impl->jobs.erase(std::find(test.impl->jobs.begin(),test.impl->jobs.end(),pending));
+            okay(run("rename_track",object({{"track_id",id},{"name","Colour fixture"}})),"normal commands resume after vendor returns");
+            report.setProperty("control_reentrancy_guard",true);
+        }
         okay(run("create_midi_clip",object({{"track_id",id},{"start_beats",0.0},{"length_beats",4.0}})),"create fixture clip");
         const auto clipId=test.snapshot().tracks.front().clips.front().id;
         okay(run("write_notes",object({{"clip_id",clipId},{"notes",juce::Array<juce::var>{object({{"id","colour-note"},{"pitch",60},{"start_beats",0.0},{"length_beats",1.0},{"velocity",90},{"channel",1}})}}})),"write fixture note");

@@ -711,7 +711,7 @@ void AnalysisPanel::visibilityChanged() {
         if (impl->previewing) { impl->request("stop_analysis_preview", object({})); impl->previewing = false; impl->previewJobId.clear(); }
     }
 }
-void AnalysisPanel::timerCallback() { impl->refresh(); }
+void AnalysisPanel::timerCallback() { if(!impl->session.isControlBusy())impl->refresh(); }
 void AnalysisPanel::refreshLanguage() { impl->applyLanguage(); impl->refresh(); repaint(); }
 void AnalysisPanel::showBeats() { impl->refresh(); impl->chooseMode("beats"); }
 void AnalysisPanel::setSelectedTimeRange(double startSeconds, double endSeconds) {

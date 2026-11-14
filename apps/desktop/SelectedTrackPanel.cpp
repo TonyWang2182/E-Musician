@@ -123,9 +123,9 @@ struct SelectedTrackPanel::Impl {
         input.setTextWhenNothingSelected(uiText("Choose recording input"));
         input.onChange = [this] { if (!updating) { const int i = input.getSelectedId() - 1; if (i >= 0 && i < int(inputs.size())) run("set_track_input", object({ {"track_id", ownerId()}, {"input_device_id", inputs[size_t(i)]["id"]} })); } };
         arm.onClick = [this] { if (const auto* t = track()) run("set_track_armed", object({ {"track_id", t->id}, {"armed", !t->armed} })); };
-        uiComboItem(monitor, 1, "monitor off"); uiComboItem(monitor, 2, "monitor auto"); uiComboItem(monitor, 3, "monitor on");
+        uiComboItem(monitor, 1, "monitor off"); uiComboItem(monitor, 3, "monitor on");
         monitor.setTooltip("Monitoring applies to this track only.");
-        monitor.onChange = [this] { if (!updating) if (const auto* t = track()) run("set_input_monitor", object({ {"track_id", t->id}, {"mode", monitor.getSelectedId() == 3 ? "on" : monitor.getSelectedId() == 2 ? "auto" : "off"} })); };
+        monitor.onChange = [this] { if (!updating) if (const auto* t = track()) run("set_input_monitor", object({ {"track_id", t->id}, {"mode", monitor.getSelectedId() == 3 ? "on" : "off"} })); };
         output.onChange = [this] { if (!updating && output.getSelectedId() > 0) run("set_track_output", object({ {"track_id", ownerId()}, {"target_track_id", destinations[output.getSelectedId() - 1]} })); };
         send.onChange = [this] { refreshSend(); };
         sendGain.setRange(-60, 6, 0.1); sendGain.setSliderStyle(juce::Slider::LinearHorizontal); sendGain.setTextBoxStyle(juce::Slider::TextBoxRight, false, 64, 28); sendGain.setTextValueSuffix(" dB");
@@ -212,7 +212,7 @@ struct SelectedTrackPanel::Impl {
         send.clear(juce::dontSendNotification);
         if (const auto* t = track()) {
             output.setSelectedId(destinations.indexOf(t->outputTargetId) + 1, juce::dontSendNotification);
-            monitor.setSelectedId(t->monitorMode == "on" ? 3 : t->monitorMode == "auto" ? 2 : 1, juce::dontSendNotification);
+            monitor.setSelectedId(t->monitorMode == "on" ? 3 : 1, juce::dontSendNotification);
             uiButton(arm, t->armed ? "armed" : "arm record"); arm.setToggleState(t->armed, juce::dontSendNotification);
             for (size_t i = 0; i < t->sends.size(); ++i) { juce::String name = t->sends[i].targetTrackId; for (const auto& b : state.tracks) if (b.id == name) name = b.name; send.addItem(juce::String(int(i) + 1) + ". " + name, int(i) + 1); }
             send.setSelectedId(t->sends.empty() ? 0 : juce::jlimit(1, int(t->sends.size()), oldSend), juce::dontSendNotification);

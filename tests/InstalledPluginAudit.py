@@ -1,4 +1,4 @@
-"""Sequential, bounded installed-plugin audit. Never show a plugin editor.
+"""Sequential, bounded installed-plugin audit. Native editors are opt-in.
 
 Each module has an independent offline DAW process. Windows Job Objects bound
 the entire owned child tree, including the renderer, to the module's deadline.
@@ -119,6 +119,9 @@ def main():
     parser.add_argument('--deadline', type=int, default=180)
     parser.add_argument('--editor-deadline', type=int, default=45)
     parser.add_argument('--probe-editors', action='store_true')
+    parser.add_argument('--open-editors', action='store_true', help='Exercise production open_plugin in each owned offline host')
+    parser.add_argument('--ui-handlers', action='store_true', help='Also exercise actual Library/Add/Open/Remove GUI callbacks without control-stdio')
+    parser.add_argument('--skip-scan', action='store_true', help='Read existing exact descriptors without changing the catalog')
     args = parser.parse_args()
     if not args.exe.is_file(): parser.error('EXE does not exist')
     if not 30 <= args.deadline <= 600: parser.error('Deadline must be 30..600 seconds')
@@ -142,6 +145,8 @@ def main():
         result['items'].append(item); save()
         command = [sys.executable, '-X', 'utf8', str(ROOT / 'tests/InstalledPluginProbe.py'),
                    '--exe', str(args.exe), '--module', str(module), '--out', str(folder / 'host')]
+        if args.open_editors: command.append('--open-editor')
+        if args.skip_scan: command.append('--skip-scan')
         item['host_process'] = bounded_run(command, folder / 'host.log', args.deadline)
         report = folder / 'host/report.json'
         if report.exists(): item['host'] = json.loads(report.read_text(encoding='utf-8'))
@@ -155,6 +160,18 @@ def main():
             if output.exists(): item['editor'] = json.loads(output.read_text(encoding='utf-8-sig'))
             if item['editor_process']['exit_code']!=0 or item.get('editor', {}).get('status')!='completed':
                 item['status']='editor_failed'
+        if args.ui_handlers and item['status']=='passed':
+            descriptor=next(p for p in item['host']['descriptors'] if p['available'])
+            if descriptor['is_instrument']:
+                output=folder/'gui'
+                command=[str(args.exe),'--plugin-ui-test',descriptor['id'],str(output.resolve()),'--offline']
+                item['gui_process']=bounded_run(command,folder/'gui.log',args.deadline)
+                if (output/'plugin-ui-report.json').exists():
+                    item['gui']=json.loads((output/'plugin-ui-report.json').read_text(encoding='utf-8-sig'))
+                if item['gui_process']['exit_code']!=0 or item.get('gui',{}).get('status')!='passed':
+                    item['status']='gui_failed'
+            else:
+                item['gui']={'status':'not_tested','reason':'instrument-only UI handler harness'}
         result['completed']=index+1; save()
         print(json.dumps({'completed':index+1,'total':len(paths),'module':module.name,
                           'status':item['status'],'stage':item.get('host',{}).get('stage')},ensure_ascii=False),flush=True)

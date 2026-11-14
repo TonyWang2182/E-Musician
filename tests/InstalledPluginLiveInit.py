@@ -1,4 +1,4 @@
-"""Explicit one-module stopped live-device add probe; never play/open an editor."""
+"""Explicit one-module stopped live-device add probe; optional native editor."""
 import argparse
 import hashlib
 import json
@@ -22,7 +22,8 @@ def child(args):
     client=None
     try:
         stage('start_live_device')
-        client=Client(args.exe,timeout=60,offline_test=False)
+        client=Client(args.exe,timeout=60,show=args.show,offline_test=False)
+        report['main_window_and_timers']=args.show
         report['audio_devices']=client.completed(client.request({'command':'get_audio_devices'}))
         client.request({'command':'stop'})
         if args.driver_type:
@@ -42,6 +43,11 @@ def child(args):
         track=client.state()['tracks'][-1]['id']
         stage('live_add_plugin')
         client.request({'command':'add_plugin','args':{'track_id':track,'catalog_id':descriptor['id']}})
+        if args.open_editor:
+            stage('live_open_plugin_editor')
+            slot=next(t for t in client.state()['tracks'] if t['id']==track)['plugins'][-1]
+            client.request({'command':'open_plugin','args':{'track_id':track,'plugin_id':slot['id']}})
+            report['native_editor_open_command']=True
         stage('stopped_graph_settle')
         end=time.monotonic()+10
         while time.monotonic()<end:
@@ -49,6 +55,35 @@ def child(args):
             slots=[p for t in state['tracks'] for p in t['plugins']]
             if len(slots)!=1 or slots[0].get('missing'):raise RuntimeError('Live instance missing')
             time.sleep(.25)
+        if args.lifecycle:
+            stage('live_editor_input_monitor_arm_toggles')
+            inputs=client.completed(client.request({'command':'get_recording_inputs'}))['inputs']
+            midi=next((i for i in inputs if i.get('midi')),None)
+            report['midi_input_for_lifecycle']=midi
+            if midi:
+                client.request({'command':'set_track_input','args':{'track_id':track,'input_device_id':midi['id']}})
+                for _ in range(3):
+                    for armed,mode in ((True,'on'),(False,'off'),(True,'off'),(False,'on')):
+                        client.request({'command':'set_track_armed','args':{'track_id':track,'armed':armed}})
+                        client.request({'command':'set_input_monitor','args':{'track_id':track,'mode':mode}})
+                        client.state();time.sleep(.05)
+                client.request({'command':'set_input_monitor','args':{'track_id':track,'mode':'off'}})
+                client.request({'command':'set_track_armed','args':{'track_id':track,'armed':False}})
+            stage('live_editor_save_remove_undo')
+            project=args.out/'lifecycle.emproj'
+            client.request({'command':'save_project','args':{'path':str(project)}})
+            slot=next(t for t in client.state()['tracks'] if t['id']==track)['plugins'][-1]
+            client.request({'command':'remove_plugin','args':{'track_id':track,'plugin_id':slot['id']}})
+            client.request({'command':'undo'})
+            slot=next(t for t in client.state()['tracks'] if t['id']==track)['plugins'][-1]
+            client.request({'command':'open_plugin','args':{'track_id':track,'plugin_id':slot['id']}})
+            stage('live_editor_new_and_reopen')
+            client.request({'command':'new_project'})
+            client.request({'command':'open_project','args':{'path':str(project)}})
+            slot=next(t for t in client.state()['tracks'] if t['id']==track)['plugins'][-1]
+            client.request({'command':'open_plugin','args':{'track_id':track,'plugin_id':slot['id']}})
+            client.state();time.sleep(.5)
+            report['editor_lifecycle_commands']=True
         stage('close')
         client.close()
         report['process_exit_code']=client.process.poll()
@@ -71,8 +106,13 @@ def main():
     parser.add_argument('--driver-type')
     parser.add_argument('--device-name')
     parser.add_argument('--child',action='store_true')
+    parser.add_argument('--open-editor',action='store_true')
+    parser.add_argument('--show',action='store_true',help='Enable the actual MainComponent and its timers')
+    parser.add_argument('--lifecycle',action='store_true',help='Stopped input/monitor/arm, save/remove/undo/new/reopen with editor')
     args=parser.parse_args()
+    args.out=args.out.resolve()
     if bool(args.driver_type)!=bool(args.device_name):parser.error('Specify both driver type and exact device name.')
+    if args.lifecycle and not args.open_editor:parser.error('Lifecycle probe requires --open-editor.')
     if args.child:return child(args)
     args.out.mkdir(parents=True,exist_ok=False)
     settings=Path(os.environ['APPDATA'])/'E-musician/Settings.xml'
@@ -83,7 +123,10 @@ def main():
         command=[sys.executable,'-X','utf8',str(Path(__file__).resolve()),'--child','--exe',str(args.exe),
                  '--module',str(args.module),'--out',str(args.out)]
         if args.driver_type:command.extend(['--driver-type',args.driver_type,'--device-name',args.device_name])
-        report['process']=bounded_run(command,args.out/'live-host.log',90)
+        if args.open_editor:command.append('--open-editor')
+        if args.show:command.append('--show')
+        if args.lifecycle:command.append('--lifecycle')
+        report['process']=bounded_run(command,args.out/'live-host.log',180 if args.lifecycle else 90)
     finally:
         after=settings.read_bytes() if settings.exists() else None
         report['settings_sha256_before']=hashlib.sha256(original).hexdigest() if original is not None else None

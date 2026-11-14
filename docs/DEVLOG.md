@@ -13386,3 +13386,401 @@ API真实诊断为HTTP429/insufficient_quota；用户明确还在处理、先做
 ### 2026-11-14 20:00 CST · 0.13.4 Agent demo delivery publication
 
 实现提交608783bd0186ae8632a577af8e5ba027809c3783已推送origin/feature/agent-demo-v0134，并由git ls-remote核实；远端main仍为d4ed6c898af1303918e38b6325a915befabbb575。本条与PUBLISH为独立文档补记，不改变已验证构建输入。用户原有DEVLOG改动及20个旧构建记录未暂存、未覆盖；大媒体和模型不入Git。API额度修复仍待用户完成，本轮未追加语言调用，人工GUI、ASIO与听感验收保留待验。交付入口为E盘demo-video/2026-11-14/OPEN-FIRST.md。
+
+### 2026-11-15T00:57:30+08:00 · bm-midi-command · failed
+
+- Config: Release/0.13.5; exit code: 1; elapsed: 3.570s.
+- Command: `python tests/InstalledPluginProbe.py --exe E:/emusician-analysis-build/bin-0.13.4/Release/E-musician.exe --module "C:/Program Files/Common Files/VST3/uJAM/BM-COZY.vst3" --out build/bm-midi/baseline-cozy --skip-scan`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `46f5bfa14fcbd609e8c0bec8b438aba4456bf835882a5774d70f00ceffb3215e`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T165730.435961Z-7e6ea1711b.json) · [Raw log](../build-logs/20261114T165730.435961Z-7e6ea1711b.log)
+- [Exact process output](../build-logs/20261114T165730.435961Z-7e6ea1711b.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T165730.435961Z-7e6ea1711b.log
+
+### 2026-11-15T00:57:50+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 6.994s.
+- Command: `python tests/InstalledPluginProbe.py --exe E:/emusician-analysis-build/bin-0.13.4/Release/E-musician.exe --module "C:/Program Files/Common Files/VST3/uJAM/BM-COZY.vst3" --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/bm-midi/baseline-cozy-absolute --skip-scan`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `46f5bfa14fcbd609e8c0bec8b438aba4456bf835882a5774d70f00ceffb3215e`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T165750.971010Z-042f86daa7.json) · [Raw log](../build-logs/20261114T165750.971010Z-042f86daa7.log)
+- [Exact process output](../build-logs/20261114T165750.971010Z-042f86daa7.raw.log)
+
+### 2026-11-15T00:59:24+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 23.372s.
+- Command: `python tests/InstalledPluginAudit.py --exe E:/emusician-analysis-build/bin-0.13.4/Release/E-musician.exe --module "C:/Program Files/Common Files/VST3/uJAM/BM-COZY.vst3" --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/bm-midi/baseline-cozy-editor --skip-scan --open-editors --deadline 90`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `e66164e657aa37caba308d8e0f6b201be04248be559b1b2bbd9d1068b1b651d2`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T165924.904297Z-2a60ef24d2.json) · [Raw log](../build-logs/20261114T165924.904297Z-2a60ef24d2.log)
+- [Exact process output](../build-logs/20261114T165924.904297Z-2a60ef24d2.raw.log)
+
+### 2026-11-15T01:01:58+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 18.458s.
+- Command: `python tests/InstalledPluginLiveInit.py --exe E:/emusician-analysis-build/bin-0.13.4/Release/E-musician.exe --module "C:/Program Files/Common Files/VST3/uJAM/BM-COZY.vst3" --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/bm-midi/baseline-cozy-live-editor --open-editor`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `cfd7ccd3f77368e603ac1700164d55289ae5e8fc2ff3b8d2fc523aff76b097a2`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T170158.025615Z-5299340f4f.json) · [Raw log](../build-logs/20261114T170158.025615Z-5299340f4f.log)
+- [Exact process output](../build-logs/20261114T170158.025615Z-5299340f4f.raw.log)
+
+### 2026-11-15T01:00:52+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 225.988s.
+- Command: `python tests/InstalledPluginAudit.py --exe E:/emusician-analysis-build/bin-0.13.4/Release/E-musician.exe --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/bm-midi/baseline-other-bm-editors --skip-scan --open-editors --deadline 90 --module "C:\Program Files\Common Files\VST3\uJAM\BM-BERSERK.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-CIRCUITS.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-DOPE.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-EDEN.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-GLORY.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-HUSTLE.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-HYPE.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-IDOL.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-KANDY.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-NEMESIS.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-RICO.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-VICE.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-VOID.vst3"`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `e66164e657aa37caba308d8e0f6b201be04248be559b1b2bbd9d1068b1b651d2`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T170052.863404Z-69cacd06c3.json) · [Raw log](../build-logs/20261114T170052.863404Z-69cacd06c3.log)
+- [Exact process output](../build-logs/20261114T170052.863404Z-69cacd06c3.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-15T01:07:37+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 29.333s.
+- Command: `python tests/InstalledPluginLiveInit.py --exe E:/emusician-analysis-build/bin-0.13.4/Release/E-musician.exe --module "C:/Program Files/Common Files/VST3/uJAM/BM-COZY.vst3" --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/bm-midi/baseline-cozy-gui-lifecycle --open-editor --show --lifecycle`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `5fbd77692a57b97562f2d14b37faf52147198c4010edfb4735e85f7889eb1a91`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T170737.103697Z-aea179374c.json) · [Raw log](../build-logs/20261114T170737.103697Z-aea179374c.log)
+- [Exact process output](../build-logs/20261114T170737.103697Z-aea179374c.raw.log)
+
+### 2026-11-15T01:10:43+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 0.644s.
+- Command: `python -m py_compile tests/InstalledPluginAudit.py tests/InstalledPluginProbe.py tests/InstalledPluginLiveInit.py`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `45fdac8b8e79cc08b12374a89fea6910d597561e9098f0098e9c6c7630663cb3`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T171043.963588Z-787666640b.json) · [Raw log](../build-logs/20261114T171043.963588Z-787666640b.log)
+- [Exact process output](../build-logs/20261114T171043.963588Z-787666640b.raw.log)
+
+### 2026-11-15T01:10:41+08:00 · bm-midi-configure · failed
+
+- Config: Release/0.13.5; exit code: 1; elapsed: 4.410s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.13.5`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `45fdac8b8e79cc08b12374a89fea6910d597561e9098f0098e9c6c7630663cb3`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T171041.584701Z-a9309fbb24.json) · [Raw log](../build-logs/20261114T171041.584701Z-a9309fbb24.log)
+- [Exact process output](../build-logs/20261114T171041.584701Z-a9309fbb24.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T171041.584701Z-a9309fbb24.log
+
+### 2026-11-15T01:10:49+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 0.884s.
+- Command: `python build-logs/check-midi-patches.py`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `45fdac8b8e79cc08b12374a89fea6910d597561e9098f0098e9c6c7630663cb3`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T171049.882961Z-7861eaf3d2.json) · [Raw log](../build-logs/20261114T171049.882961Z-7861eaf3d2.log)
+- [Exact process output](../build-logs/20261114T171049.882961Z-7861eaf3d2.raw.log)
+
+### 2026-11-15T01:11:18+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 1.152s.
+- Command: `python build-logs/refresh-midi-patched-copy.py`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `aee5ea88da8fb084cffb3104e4e3a30408efea5e067cefe5612390ad6394d845`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T171118.235189Z-c80b9bdeff.json) · [Raw log](../build-logs/20261114T171118.235189Z-c80b9bdeff.log)
+- [Exact process output](../build-logs/20261114T171118.235189Z-c80b9bdeff.raw.log)
+
+### 2026-11-15T01:11:31+08:00 · bm-midi-configure · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 26.527s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.13.5`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `aee5ea88da8fb084cffb3104e4e3a30408efea5e067cefe5612390ad6394d845`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T171131.890710Z-db4581f247.json) · [Raw log](../build-logs/20261114T171131.890710Z-db4581f247.log)
+- [Exact process output](../build-logs/20261114T171131.890710Z-db4581f247.raw.log)
+
+### 2026-11-15T01:20:29+08:00 · bm-midi-command · failed
+
+- Config: Release/0.13.5; exit code: 1; elapsed: 4.873s.
+- Command: `E:/emusician-analysis-build/bin-0.13.5/Release/E-musician.exe --production-test E:/emusician-analysis-build/bm-midi-production-first`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `aee5ea88da8fb084cffb3104e4e3a30408efea5e067cefe5612390ad6394d845`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T172029.180150Z-2857ee4cc5.json) · [Raw log](../build-logs/20261114T172029.180150Z-2857ee4cc5.log)
+- [Exact process output](../build-logs/20261114T172029.180150Z-2857ee4cc5.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T172029.180150Z-2857ee4cc5.log
+
+### 2026-11-15T01:21:08+08:00 · bm-midi-test · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 13.111s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure -R workspace.brand_colour`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `ba89e052b8b4d8f1e484d2a10a459efab375d5615227604f068d52bb86cee6f2`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T172108.091056Z-4a28e4ef75.json) · [Raw log](../build-logs/20261114T172108.091056Z-4a28e4ef75.log)
+- [Exact process output](../build-logs/20261114T172108.091056Z-4a28e4ef75.raw.log)
+
+### 2026-11-15T01:22:53+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 0.939s.
+- Command: `python -m py_compile tests/InstalledPluginAudit.py tests/InstalledPluginProbe.py tests/InstalledPluginLiveInit.py`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `7d205acebc5028028a7cafd6fa78f9db1175e8684eacad7e84f9fa2cdcd4eeab`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T172253.085448Z-7a5cfd7996.json) · [Raw log](../build-logs/20261114T172253.085448Z-7a5cfd7996.log)
+- [Exact process output](../build-logs/20261114T172253.085448Z-7a5cfd7996.raw.log)
+
+### 2026-11-15T01:12:12+08:00 · bm-midi-build · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 684.088s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `aee5ea88da8fb084cffb3104e4e3a30408efea5e067cefe5612390ad6394d845`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T171212.959257Z-cf6bc45158.json) · [Raw log](../build-logs/20261114T171212.959257Z-cf6bc45158.log)
+- [Exact process output](../build-logs/20261114T171212.959257Z-cf6bc45158.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-15T01:24:36+08:00 · bm-midi-command · failed
+
+- Config: Release/0.13.5; exit code: 1; elapsed: 1.161s.
+- Command: `python scripts/apply_engine_patches.py apply`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `de7ab80f67fa440eae76caa2a64337bea8f2074a3b44ce2ccd462136c692bc3e`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T172436.597635Z-697076db51.json) · [Raw log](../build-logs/20261114T172436.597635Z-697076db51.log)
+- [Exact process output](../build-logs/20261114T172436.597635Z-697076db51.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T172436.597635Z-697076db51.log
+
+### 2026-11-15T01:24:38+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 0.960s.
+- Command: `python build-logs/check-midi-patches.py`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `de7ab80f67fa440eae76caa2a64337bea8f2074a3b44ce2ccd462136c692bc3e`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T172438.492525Z-0ba5386172.json) · [Raw log](../build-logs/20261114T172438.492525Z-0ba5386172.log)
+- [Exact process output](../build-logs/20261114T172438.492525Z-0ba5386172.raw.log)
+
+### 2026-11-15T01:25:23+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 0.759s.
+- Command: `python scripts/apply_engine_patches.py apply`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `8a124d89d719bd7d5695f1c19b4cef03a593c29aaf26230f3779bcfe86b4f037`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T172523.083820Z-59cdab8a60.json) · [Raw log](../build-logs/20261114T172523.083820Z-59cdab8a60.log)
+- [Exact process output](../build-logs/20261114T172523.083820Z-59cdab8a60.raw.log)
+
+### 2026-11-15T01:25:57+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 1.949s.
+- Command: `python tests/test_engine_patches.py`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `91ac9b80da57fae0c27e0ad4bf770d165c0f62d63e886e15800f5ef580d24fa7`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T172557.971583Z-5015f51e0b.json) · [Raw log](../build-logs/20261114T172557.971583Z-5015f51e0b.log)
+- [Exact process output](../build-logs/20261114T172557.971583Z-5015f51e0b.raw.log)
+
+### 2026-11-15T01:26:00+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 1.224s.
+- Command: `python build-logs/check-midi-patches.py`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `91ac9b80da57fae0c27e0ad4bf770d165c0f62d63e886e15800f5ef580d24fa7`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T172600.867396Z-70b57237d8.json) · [Raw log](../build-logs/20261114T172600.867396Z-70b57237d8.log)
+- [Exact process output](../build-logs/20261114T172600.867396Z-70b57237d8.raw.log)
+
+### 2026-11-15T01:26:23+08:00 · bm-midi-configure · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 9.351s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.13.5`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `91ac9b80da57fae0c27e0ad4bf770d165c0f62d63e886e15800f5ef580d24fa7`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T172623.024123Z-ca2dd4a322.json) · [Raw log](../build-logs/20261114T172623.024123Z-ca2dd4a322.log)
+- [Exact process output](../build-logs/20261114T172623.024123Z-ca2dd4a322.raw.log)
+
+### 2026-11-15T01:26:54+08:00 · bm-midi-build · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 162.949s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `91ac9b80da57fae0c27e0ad4bf770d165c0f62d63e886e15800f5ef580d24fa7`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T172654.657783Z-28d3a4bdb8.json) · [Raw log](../build-logs/20261114T172654.657783Z-28d3a4bdb8.log)
+- [Exact process output](../build-logs/20261114T172654.657783Z-28d3a4bdb8.raw.log)
+
+### 2026-11-15T01:29:30+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 13.116s.
+- Command: `E:/emusician-analysis-build/bin-0.13.5/Release/E-musician.exe --production-test E:/emusician-analysis-build/bm-midi-production-second`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `91ac9b80da57fae0c27e0ad4bf770d165c0f62d63e886e15800f5ef580d24fa7`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T172930.454617Z-ceefdc7811.json) · [Raw log](../build-logs/20261114T172930.454617Z-ceefdc7811.log)
+- [Exact process output](../build-logs/20261114T172930.454617Z-ceefdc7811.raw.log)
+
+### 2026-11-15T01:30:08+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 15.596s.
+- Command: `python -c "import sys,json; from pathlib import Path; sys.path.insert(0,'tests'); from InstalledPluginAudit import bounded_run; p=Path('build/bm-midi/final-cozy-gui'); p.mkdir(parents=True,exist_ok=False); r=bounded_run(['E:/emusician-analysis-build/bin-0.13.5/Release/E-musician.exe','--plugin-ui-test','267b37eca2cb6b0878f072c66b079bef0c91ea91028699618fd97849fb6c06e5',str((p/'gui').resolve()),'--offline'],p/'gui.log',90); (p/'process.json').write_text(json.dumps(r,indent=2)); print(json.dumps(r)); sys.exit(r['exit_code'])"`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `91ac9b80da57fae0c27e0ad4bf770d165c0f62d63e886e15800f5ef580d24fa7`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T173008.688177Z-6b483bdac5.json) · [Raw log](../build-logs/20261114T173008.688177Z-6b483bdac5.log)
+- [Exact process output](../build-logs/20261114T173008.688177Z-6b483bdac5.raw.log)
+
+### 2026-11-15T01:30:37+08:00 · bm-midi-command · failed
+
+- Config: Release/0.13.5; exit code: 4294967295; elapsed: 93.212s.
+- Command: `python tests/InstalledPluginAudit.py --exe E:/emusician-analysis-build/bin-0.13.5/Release/E-musician.exe --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/bm-midi/final-all-bm-editors-ui --skip-scan --open-editors --ui-handlers --deadline 90 --module "C:\Program Files\Common Files\VST3\uJAM\BM-BERSERK.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-CIRCUITS.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-COZY.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-DOPE.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-EDEN.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-GLORY.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-HUSTLE.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-HYPE.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-IDOL.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-KANDY.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-NEMESIS.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-RICO.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-VICE.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-VOID.vst3"`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `91ac9b80da57fae0c27e0ad4bf770d165c0f62d63e886e15800f5ef580d24fa7`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T173037.480873Z-c5c6789db8.json) · [Raw log](../build-logs/20261114T173037.480873Z-c5c6789db8.log)
+- [Exact process output](../build-logs/20261114T173037.480873Z-c5c6789db8.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 4294967295; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T173037.480873Z-c5c6789db8.log
+
+### 2026-11-15T01:35:29+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 1.183s.
+- Command: `python -m unittest discover -s tests -p test_control_busy_retry.py -v`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `851825b11a386a74b65655a7ce618d6b45d0eafb19fbeb152ab96c4bc115e205`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T173529.652951Z-640d9bd67f.json) · [Raw log](../build-logs/20261114T173529.652951Z-640d9bd67f.log)
+- [Exact process output](../build-logs/20261114T173529.652951Z-640d9bd67f.raw.log)
+
+### 2026-11-15T01:34:29+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 62.324s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --target EMusician --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `b10c17505f8d419969e8797cf33cefbd709648fcd4f1fcd46e633ebd70fa50ee`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T173429.933673Z-2e12ddff5e.json) · [Raw log](../build-logs/20261114T173429.933673Z-2e12ddff5e.log)
+- [Exact process output](../build-logs/20261114T173429.933673Z-2e12ddff5e.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-15T01:35:35+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 2.140s.
+- Command: `python -m unittest discover -s tests -p test_music_agent_embedded.py -v`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `851825b11a386a74b65655a7ce618d6b45d0eafb19fbeb152ab96c4bc115e205`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T173535.999343Z-0f623948aa.json) · [Raw log](../build-logs/20261114T173535.999343Z-0f623948aa.log)
+- [Exact process output](../build-logs/20261114T173535.999343Z-0f623948aa.raw.log)
+
+### 2026-11-15T01:35:45+08:00 · bm-midi-command · failed
+
+- Config: Release/0.13.5; exit code: 1; elapsed: 4.384s.
+- Command: `E:/emusician-analysis-build/bin-0.13.5/Release/E-musician.exe --production-test E:/emusician-analysis-build/bm-midi-production-rapid`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `851825b11a386a74b65655a7ce618d6b45d0eafb19fbeb152ab96c4bc115e205`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T173545.204281Z-5d716dce73.json) · [Raw log](../build-logs/20261114T173545.204281Z-5d716dce73.log)
+- [Exact process output](../build-logs/20261114T173545.204281Z-5d716dce73.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T173545.204281Z-5d716dce73.log
+
+### 2026-11-15T01:36:09+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 28.081s.
+- Command: `python tests/InstalledPluginAudit.py --exe E:/emusician-analysis-build/bin-0.13.5/Release/E-musician.exe --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/bm-midi/cozy-busy-fix-check --module "C:/Program Files/Common Files/VST3/uJAM/BM-COZY.vst3" --skip-scan --open-editors --ui-handlers --deadline 90`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `851825b11a386a74b65655a7ce618d6b45d0eafb19fbeb152ab96c4bc115e205`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T173609.613158Z-48a82737e8.json) · [Raw log](../build-logs/20261114T173609.613158Z-48a82737e8.log)
+- [Exact process output](../build-logs/20261114T173609.613158Z-48a82737e8.raw.log)
+
+### 2026-11-15T01:37:07+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 1.197s.
+- Command: `python -m unittest discover -s tests -p test_control_busy_retry.py -v`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `bdbd4fcaf607df8e2bd6a831579cfb4640a8fe6825ea4a356b206e339201cfc9`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T173707.442518Z-b7936621e8.json) · [Raw log](../build-logs/20261114T173707.442518Z-b7936621e8.log)
+- [Exact process output](../build-logs/20261114T173707.442518Z-b7936621e8.raw.log)
+
+### 2026-11-15T01:37:57+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 1.087s.
+- Command: `python -m unittest discover -s tests -p test_control_busy_retry.py -v`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `b51d5ce760b3c1e00cc06e59e8141afff65801f3d6c096b7c01fd8d4322c8be4`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T173757.952267Z-dd148447b4.json) · [Raw log](../build-logs/20261114T173757.952267Z-dd148447b4.log)
+- [Exact process output](../build-logs/20261114T173757.952267Z-dd148447b4.raw.log)
+
+### 2026-11-15T01:37:58+08:00 · bm-midi-build · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 60.664s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `b51d5ce760b3c1e00cc06e59e8141afff65801f3d6c096b7c01fd8d4322c8be4`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T173758.630028Z-441bbdd301.json) · [Raw log](../build-logs/20261114T173758.630028Z-441bbdd301.log)
+- [Exact process output](../build-logs/20261114T173758.630028Z-441bbdd301.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-15T01:37:40+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 78.946s.
+- Command: `python -m unittest discover -s tests -p test_music_agent*.py`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `6ace03b6dd6541a11afdf4466881050849beeaac9a74de81261c651aaeaa8e8b`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T173740.615336Z-6cd1e5edf1.json) · [Raw log](../build-logs/20261114T173740.615336Z-6cd1e5edf1.log)
+- [Exact process output](../build-logs/20261114T173740.615336Z-6cd1e5edf1.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-15T01:39:11+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 1.079s.
+- Command: `python -m unittest discover -s tests -p test_music_agent_control_busy.py`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `20741ba2b0875e7b1f83ea4c2f9c6a7e56524d9a2d47a555172679656576a1ed`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T173911.136774Z-7e1563c6f4.json) · [Raw log](../build-logs/20261114T173911.136774Z-7e1563c6f4.log)
+- [Exact process output](../build-logs/20261114T173911.136774Z-7e1563c6f4.raw.log)
+
+### 2026-11-15T01:39:27+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 16.181s.
+- Command: `E:/emusician-analysis-build/bin-0.13.5/Release/E-musician.exe --production-test E:/emusician-analysis-build/bm-midi-production-final`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `20741ba2b0875e7b1f83ea4c2f9c6a7e56524d9a2d47a555172679656576a1ed`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T173927.003853Z-0e29a8c611.json) · [Raw log](../build-logs/20261114T173927.003853Z-0e29a8c611.log)
+- [Exact process output](../build-logs/20261114T173927.003853Z-0e29a8c611.raw.log)
+
+### 2026-11-15T01:40:37+08:00 · bm-midi-test · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 109.083s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `20741ba2b0875e7b1f83ea4c2f9c6a7e56524d9a2d47a555172679656576a1ed`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T174037.621782Z-5978acfb5f.json) · [Raw log](../build-logs/20261114T174037.621782Z-5978acfb5f.log)
+- [Exact process output](../build-logs/20261114T174037.621782Z-5978acfb5f.raw.log)
+
+### 2026-11-15T01:40:45+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 401.424s.
+- Command: `python tests/InstalledPluginAudit.py --exe E:/emusician-analysis-build/bin-0.13.5/Release/E-musician.exe --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/bm-midi/final-all-bm-build4 --skip-scan --open-editors --ui-handlers --deadline 90 --module "C:\Program Files\Common Files\VST3\uJAM\BM-BERSERK.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-CIRCUITS.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-COZY.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-DOPE.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-EDEN.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-GLORY.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-HUSTLE.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-HYPE.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-IDOL.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-KANDY.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-NEMESIS.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-RICO.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-VICE.vst3" --module "C:\Program Files\Common Files\VST3\uJAM\BM-VOID.vst3"`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `20741ba2b0875e7b1f83ea4c2f9c6a7e56524d9a2d47a555172679656576a1ed`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T174045.347487Z-c26fcd7ab7.json) · [Raw log](../build-logs/20261114T174045.347487Z-c26fcd7ab7.log)
+- [Exact process output](../build-logs/20261114T174045.347487Z-c26fcd7ab7.raw.log)
+
+### 2026-11-15T01:46:11+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 76.211s.
+- Command: `python -m unittest discover -s tests -p test_music_agent*.py`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `20741ba2b0875e7b1f83ea4c2f9c6a7e56524d9a2d47a555172679656576a1ed`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T174611.741158Z-941c78f583.json) · [Raw log](../build-logs/20261114T174611.741158Z-941c78f583.log)
+- [Exact process output](../build-logs/20261114T174611.741158Z-941c78f583.raw.log)
+
+### 2026-11-15T01:48:09+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 1.233s.
+- Command: `python docs/review/2026-11-15-bm-midi/verify.py`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `20741ba2b0875e7b1f83ea4c2f9c6a7e56524d9a2d47a555172679656576a1ed`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T174809.257950Z-d3be2030a0.json) · [Raw log](../build-logs/20261114T174809.257950Z-d3be2030a0.log)
+- [Exact process output](../build-logs/20261114T174809.257950Z-d3be2030a0.raw.log)
+
+### 2026-11-15T01:48:15+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 0.702s.
+- Command: `python scripts/register_project_file.py apply --exe E:/emusician-analysis-build/bin-0.13.5/Release/E-musician.exe --backup build-logs/bm-midi-association-before.json`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `20741ba2b0875e7b1f83ea4c2f9c6a7e56524d9a2d47a555172679656576a1ed`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T174815.567185Z-6b88b3f1b6.json) · [Raw log](../build-logs/20261114T174815.567185Z-6b88b3f1b6.log)
+- [Exact process output](../build-logs/20261114T174815.567185Z-6b88b3f1b6.raw.log)
+
+### 2026-11-15T01:48:11+08:00 · bm-midi-command · succeeded
+
+- Config: Release/0.13.5; exit code: 0; elapsed: 25.794s.
+- Command: `python tests/InstalledPluginLiveInit.py --exe E:/emusician-analysis-build/bin-0.13.5/Release/E-musician.exe --module "C:/Program Files/Common Files/VST3/uJAM/BM-COZY.vst3" --out E:/MusicAgent&DAW/worktrees/audio-analysis/build/bm-midi/final-cozy-asio-lifecycle --open-editor --show --lifecycle`
+- Context: BM plug-in lifecycle and independent per-track MIDI monitoring/recording; physical playback remains separate
+- Source SHA-256: `20741ba2b0875e7b1f83ea4c2f9c6a7e56524d9a2d47a555172679656576a1ed`; Git HEAD: `bcad8f043a5290a1196fb7fc0d61a07ff14ee077`.
+- [Record](builds/20261114T174811.212163Z-9cbee19f9b.json) · [Raw log](../build-logs/20261114T174811.212163Z-9cbee19f9b.log)
+- [Exact process output](../build-logs/20261114T174811.212163Z-9cbee19f9b.raw.log)
+
+### 2026-11-15T01:55:00+08:00 · bm-midi-iteration · verified-automated
+
+- 0.13.5 isolated Release; fixed plug-in add timer reentry, guarded native control transactions and queued busy reads. All 14 installed BM 2.2.1 modules passed actual Library/Add/Open/Remove callbacks, native editor, state save/reopen, nonzero audio render and exit. The earlier user crash stack was not captured.
+- Explicit per-track Monitor Off/On and independent Rec; legacy Auto maps to Off and ambiguous device targets fail before mutation. Target-local held-note/pedal cleanup, stable empty instrument input and synchronous graph publication address shared input and rapid-Off leakage.
+- Final Release 441bbdd301, CTest 5978acfb5f (11/11), production 0e29a8c611 (461 checks), Agent 941c78f583 (390/390), all BM c26fcd7ab7 (14/14), COZY M-Audio ASIO 9cbee19f9b (44.1kHz/512 lifecycle). Final native/helper/patch verification d3be2030a0 passed; prior failed and interrupted records are retained.
+- Preserved 0.13.4 and original projects/settings. New launcher and VS Code workspace on E:; backed up project association and switched its executable/icon to 0.13.5 (6b88b3f1b6). No paid model calls or computer-use. Physical keyboard, vendor presets and listening remain manual acceptance.
+- [Results](review/2026-11-15-bm-midi/RESULTS.md) · [Manual check](review/2026-11-15-bm-midi/MANUAL-CHECK.md) · [Verification](review/2026-11-15-bm-midi/VERIFICATION.json). Branch fix/bm-midi-isolation-v0135; publication state is recorded separately, no main merge.

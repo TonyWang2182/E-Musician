@@ -2,7 +2,11 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
-**最新维护候选0.13.4：** 中英Agent简明进度、生成结果选择/试听、Apply/Undo与折叠详情，修复Beats路由。独立Release、CTest11/11及Agent/web/原生事务检查已过；真实GPT补验仍受API额度阻断。先保存关闭旧版，再打开 `E:/MusicAgent&DAW/Start E-musician 0.13.4.cmd`。[操作与提示词](docs/demo/2026-11-14-demo-runbook-v0134.md) · [验证边界](docs/review/2026-11-14-agent-demo-v0134/RESULTS.md) · [Jungle素材](docs/review/2026-11-14-agent-demo-v0134/JUNGLE-MATERIALS.md) · [视频动效](docs/review/2026-11-14-agent-demo-v0134/MOTION.md)。以下记录为历史版本，不覆盖本条状态。
+**最新维护候选 0.13.5：** 修复插件添加时的宿主重入风险，14 款已安装 UJAM BM 通过实际按钮、原生窗口、保存重开与音频导出测试。Monitor Off/On 与 Rec 逐轨独立，修复共享键盘、持音及快速关闭监听问题。Release、CTest 11/11、Agent 390/390 与 Hosted MIDI/PCM 461 项通过；物理键盘和听感待人工验收。启动 `E:/MusicAgent&DAW/Start E-musician 0.13.5.cmd`，VS Code 打开 `E:/MusicAgent&DAW/E-musician-0.13.5.code-workspace`。旧版保留。[结果与限制](docs/review/2026-11-15-bm-midi/RESULTS.md) · [人工验收](docs/review/2026-11-15-bm-midi/MANUAL-CHECK.md)。
+
+以下为保留版本和历史验证记录：
+
+**保留维护候选0.13.4：** 中英Agent简明进度、生成结果选择/试听、Apply/Undo与折叠详情，修复Beats路由。独立Release、CTest11/11及Agent/web/原生事务检查已过；真实GPT补验仍受API额度阻断。先保存关闭旧版，再打开 `E:/MusicAgent&DAW/Start E-musician 0.13.4.cmd`。[操作与提示词](docs/demo/2026-11-14-demo-runbook-v0134.md) · [验证边界](docs/review/2026-11-14-agent-demo-v0134/RESULTS.md) · [Jungle素材](docs/review/2026-11-14-agent-demo-v0134/JUNGLE-MATERIALS.md) · [视频动效](docs/review/2026-11-14-agent-demo-v0134/MOTION.md)。以下记录为历史版本，不覆盖本条状态。
 
 **2026-11-14 演示彩排补充：** [六条英文提示词与操作稿](docs/demo/2026-11-14-demo-operations.md) · [实际验证结果](docs/review/2026-11-14-demo-rehearsal/RESULTS.md) · [手动模型入口](docs/review/2026-11-14-demo-rehearsal/MANUAL-FALLBACK.md)。ACE原样GPT操作链已过；之后语言API返回`insufficient_quota`，其余提示词待恢复额度补验，结构化模型管线与人工听感分开记录。本轮沿用0.13.3，不重新构建；以下“本次无推理”指早先重连迭代。
 

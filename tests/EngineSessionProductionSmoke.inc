@@ -9,6 +9,7 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
     auto okay = [&](const juce::Result& r, const juce::String& context) { check(r.wasOk(), context + ": " + r.getErrorMessage()); };
     auto command = [&](EngineSession& target, const juce::String& name, juce::var args = object({})) { okay(target.execute(name, args, target.snapshot().revision), name); };
     try {
+#include "EngineSessionMidiIsolationSmoke.inc"
         {
             EngineSession fixture(false);
             auto analysis=std::make_shared<Impl::Job>();analysis->kind="analysis.separate";analysis->status="running";
@@ -420,9 +421,9 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
         check(monitoredInput->isRecordingEnabled(firstMonitorTrack->itemID) && monitoredInput->isRecordingEnabled(secondMonitorTrack->itemID), "monitor changes preserve independent recording arms");
         check(monitoredInput->isLivePlayEnabled(*firstMonitorTrack) && !monitoredInput->isLivePlayEnabled(*secondMonitorTrack), "on and off isolate two armed tracks sharing one MIDI device");
         command(isolated, "set_input_monitor", object({ {"track_id", monitorTrackId}, {"mode", "auto"} }));
-        check(monitoredInput->isLivePlayEnabled(*secondMonitorTrack), "auto monitors while the second track is armed");
+        check(!monitoredInput->isLivePlayEnabled(*secondMonitorTrack) && isolated.snapshot().tracks[2].monitorMode == "off", "legacy auto resolves to off even when the second track is armed");
         command(isolated, "set_track_armed", object({ {"track_id", monitorTrackId}, {"armed", false} }));
-        check(!monitoredInput->isLivePlayEnabled(*secondMonitorTrack) && monitoredInput->isLivePlayEnabled(*firstMonitorTrack), "auto stops monitoring after disarm without affecting the other track");
+        check(!monitoredInput->isLivePlayEnabled(*secondMonitorTrack) && monitoredInput->isLivePlayEnabled(*firstMonitorTrack), "disarm preserves explicit monitor off without affecting the other track");
         command(isolated, "set_input_monitor", object({ {"track_id", monitorTrackId}, {"mode", "on"} }));
         check(monitoredInput->isLivePlayEnabled(*secondMonitorTrack) && !monitoredInput->isRecordingEnabled(secondMonitorTrack->itemID), "on monitors without arming or recording the track");
         command(isolated, "set_track_input", object({ {"track_id", monitorTrackId}, {"input_device_id", ""} }));
@@ -439,9 +440,9 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
         const auto beforeSave = isolated.impl->capture(); const auto projectFile = workspace.getChildFile("recorded.emproj");
         okay(isolated.saveProject(projectFile, isolated.snapshot().revision), "save captured audio, MIDI controllers, routing and curve");
         command(isolated, "set_input_monitor", object({ {"input_device_id", beforeSave.tracks[0].inputDeviceId}, {"mode", "on"} }));
-        command(isolated, "set_input_monitor", object({ {"input_device_id", midiId}, {"mode", "auto"} }));
-        check(isolated.snapshot().tracks[0].monitorMode == "on" && isolated.snapshot().tracks[1].monitorMode == "auto", "test explicitly sets non-off monitor modes before reopening");
-        command(isolated, "set_input_monitor", object({ {"input_device_id", midiId}, {"mode", "on"} }));
+        command(isolated, "set_input_monitor", object({ {"track_id", midiTrackId}, {"mode", "auto"} }));
+        check(isolated.snapshot().tracks[0].monitorMode == "on" && isolated.snapshot().tracks[1].monitorMode == "off", "legacy auto is canonical off before reopening");
+        command(isolated, "set_input_monitor", object({ {"track_id", midiTrackId}, {"mode", "on"} }));
         command(isolated, "create_track", object({ {"kind", "instrument"}, {"name", "New track defaults off"} }));
         const auto newTrackId = isolated.snapshot().tracks.back().id;
         command(isolated, "set_track_input", object({ {"track_id", newTrackId}, {"input_device_id", midiId} }));
@@ -449,7 +450,7 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
         auto* newTrack = production::graphTrack(*recordingEdit, newTrackId);
         te::InputDeviceInstance* newTrackInput = nullptr;
         for (auto* input : recordingEdit->getAllInputDevices()) if (input->getInputDevice().getDeviceID() == midiId) newTrackInput = input;
-        check(newTrack && newTrackInput && !newTrackInput->isLivePlayEnabled(*newTrack), "new track defaults monitor off even when a legacy device-level command enabled monitoring");
+        check(newTrack && newTrackInput && !newTrackInput->isLivePlayEnabled(*newTrack), "new armed track defaults monitor off while another track sharing the input monitors on");
         okay(isolated.openProject(projectFile, isolated.snapshot().revision), "reopen recorded project"); const auto afterOpen = isolated.impl->capture();
         check(afterOpen.tracks[0].outputTargetId == busId && afterOpen.tracks[0].automation.size() == 1 && afterOpen.tracks[0].automation[0].points.size() == 2, "schema4 restores public routing and curve");
         check(afterOpen.tracks[1].clips[0].controllers.size() == beforeSave.tracks[1].clips[0].controllers.size() && afterOpen.tracks[1].clips[0].notes.size() == beforeSave.tracks[1].clips[0].notes.size(), "schema4 restores recorded notes and pedal events");

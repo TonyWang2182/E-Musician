@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "native_input_count": 133,
+  "helper_input_count": 25,
+  "dependency_patches": 13,
+  "executable": "E:\\emusician-analysis-build\\bin-0.13.5\\Release\\E-musician.exe",
+  "executable_sha256": "d7ccb64ef704d1f29a81ce893d66e86ffc379202a3af62b275c68267fdc093eb",
+  "old_executable_preserved": true,
+  "ctest": "11/11",
+  "agent_tests": "390/390",
+  "installed_bm_modules": "14/14",
+  "physical_keyboard_and_listening": "manual acceptance pending"
+}

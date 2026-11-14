@@ -120,7 +120,7 @@ MIDI导入支持SMF0/1的PPQN时基。当前工程只有固定速度，复杂tem
 
 1. 停止播放，打开`audio settings`，选择`Driver`和`Device`（分离I/O驱动显示`Input`/`Output`），点`apply`。更换设备先应用默认配置，再选择该设备支持的`Sample rate`/`Buffer size`，以`Active:`实际回读值为准。M-Audio使用列表实际返回的厂商ASIO驱动名；仅安装SDK不会安装驱动。设置窗关闭后才能开始录音。
 2. 新建音频轨或MIDI/乐器轨，点击轨头`devices` → 底部`I/O + sends`，在`recording input`选择输入，再点`arm record`，或在已配置输入后用轨头`R`预备录音。MIDI监听发声还需要可用乐器插件。SL GRAND与MIDIIN2 (SL GRAND)是本机枚举到的两个端口，不能假定用途相同，须实测选择。
-3. 新输入默认`monitor off`；可改为`monitor auto`/`monitor on`。监听模式是输入设备级，同一输入共享模式；auto随arm监听，on持续监听已连接轨道，off关闭软件监听但不禁止录音。关闭`loop`后点击`rec`开始线性录音，`stop`结束。
+3. 0.13.5起新轨默认`monitor off`，只有该轨`monitor on`才开启实时输入监听；每轨独立，旧Auto按Off兼容。R仅控制本轨录音准备：Off+R可以静默录入，On且R关闭可以演奏但不录入。关闭`loop`后点击全局`rec`开始线性录音，`stop`结束。实际构建/测试状态见CONTEXT。
 4. 等待`Finishing recording...`结束再保存。一次take的全部录音轨道作为一个Undo事务；Undo不删源WAV，Redo继续引用。录制及结束认领期间暂停工程编辑/设备切换/保存，不能把半写入文件归档成完成工程。
 
 音频新take使用24-bit WAV，录音文件先落到独立会话目录（正常路径为`%APPDATA%/E-musician/recordings/<project-id>`），保存再归档到工程资产。MIDI录音保留音符、踏板等CC、pitchbend、程序切换与压力事件；仍采用单通道clip模型，不声明MPE/SysEx或循环comping。真实输入、掉线恢复及长时间录音仍应在各自验证报告中单列。

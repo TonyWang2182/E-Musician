@@ -298,7 +298,7 @@ VST2/VST3只支持Windows x64。MIDI轨需要安装并加载可用乐器才发�
 | configure_audio_device | driver_type；device_name可同时指定输入/输出（ASIO）；或input_device_name/output_device_name；sample_rate、buffer_size、input_channels（可选0起索引数组） |
 | set_track_input | track_id, input_device_id；空字符串清除选择，选择保存在工程中 |
 | set_track_armed | track_id, armed（布尔）；仅音频/乐器轨；运行时状态，不写入工程 |
-| set_input_monitor | `track_id`、`mode: off/auto/on`：逐轨运行时监听；旧版 `input_device_id` 仍支持，并同时修改该设备当前所选的全部轨道 |
+| set_input_monitor | `track_id`、`mode: off/on`：逐轨运行时监听。0.13.5旧 `auto` 请求兼容为off；旧 `input_device_id` 仅允许唯一轨道目标，多轨共用时须传track_id，不再广播。实际构建验证状态见CONTEXT。 |
 | start_recording / stop_recording | 无；线性新take，开始前须关闭loop并选择/arm输入 |
 | set_recording_preferences | 部分更新metronome_enabled、metronome_record_only、count_in_enabled（布尔）、metronome_gain_db（-36到0）、count_in_bars（1/2/4） |
 | reset_meters | 无；重置轨道、音频输入及Master电平/过载保持，不重置xruns |
@@ -318,12 +318,12 @@ VST2/VST3只支持Windows x64。MIDI轨需要安装并加载可用乐器才发�
 {"command":"configure_audio_device","args":{"driver_type":"ASIO","device_name":"M-Audio M-Track Solo and Duo ASIO","sample_rate":44100,"buffer_size":256,"input_channels":[0,1]}}
 {"command":"set_track_input","args":{"track_id":"audio-track-id","input_device_id":"从get_recording_inputs取得"}}
 {"command":"set_track_armed","args":{"track_id":"audio-track-id","armed":true}}
-{"command":"set_input_monitor","args":{"input_device_id":"从get_recording_inputs取得","mode":"auto"}}
+{"command":"set_input_monitor","args":{"track_id":"audio-track-id","mode":"on"}}
 {"command":"start_recording","args":{}}
 {"command":"stop_recording","args":{}}
 ```
 
-`monitor_scope`为 `track_and_input_device`。推荐使用 `track_id`：即使多轨选择同一个输入，每轨的 off/auto/on 也独立；auto 在该轨 arm 时监听，on 不依赖 arm，off 关闭该轨软件监听而不取消录音准备。新轨和重新打开的工程默认 off。旧调用 `input_device_id` 会对当前选择这个输入的所有轨统一设置，不应当用它实现逐轨控制。选择新输入时，on 轨会在控制线程重新绑定；若绑定失败会报告错误，同一次失败的选择不会无限重试，可重新设置监听或 arm 重试。监听是运行状态，离线回归覆盖共享输入、录音准备和切换输入，实体设备与听感仍需验收；按住键时关闭监听的尾音尚待专项处理。音频采用24-bit WAV新take，MIDI录入notes及CC、程序切换、pitchbend、poly-aftertouch/channel pressure。当前每MIDI片段沿用单通道模型，尚不声明MPE/SysEx、循环叠录与comping。
+0.13.5的监听作用域为轨道，调用方始终应传 `track_id`。只有该轨 `on` 才开启实时输入监听，`off` 时即使arm也不监听；旧`auto`按off处理。Rec/arm仅控制该轨录音准备，仍需全局start_recording才写入。多轨共用输入不联动开关，片段回放不受输入监听开关控制。新轨和重新打开的工程默认off。旧 `input_device_id` 请求在没有唯一轨道目标时失败，不能用它批量修改轨道。选择新输入时，on轨会在控制线程重新绑定；失败显示错误，不无限重试，可显式重设监听或arm重试。具体合成输入、持音及硬件验收状态见[本轮计划](review/2026-11-15-bm-midi/PLAN.md)与CONTEXT。音频采用24-bit WAV新take，MIDI录入notes及CC、程序切换、pitchbend、poly-aftertouch/channel pressure。当前每MIDI片段沿用单通道模型，尚不声明MPE/SysEx、循环叠录与comping。
 
 Stop受理后继续读recording/finalizing；finalizing结束并收到recording_completed后，片段才进入工程绑定并生成一次revision。所有同时录入轨道组成一次撤销事务，Undo保留录音源供Redo。录音/结束认领期间禁止音乐编辑、换设备、工程切换与保存；先Stop并等待finalizing=false再提交。设备、arm、monitor及播放位置不按音频块推进revision；完成take才改变音乐版本。工程重开不会自动arm输入。
 

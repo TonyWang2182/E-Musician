@@ -261,6 +261,7 @@ NativeEffectsPanel::NativeEffectsPanel(EngineSession& session, juce::String trac
 NativeEffectsPanel::~NativeEffectsPanel() { stopTimer(); }
 void NativeEffectsPanel::visibilityChanged() {if(!impl)return;if(!isShowing()&&impl->dragging)impl->cancelGesture();if(isVisible()){if(isShowing())impl->update();startTimer(isShowing()?50:1000);}else stopTimer();}
 void NativeEffectsPanel::timerCallback() {
+    if(impl->session.isControlBusy())return;
     if (!isVisible()) { stopTimer(); return; }
     if(!isShowing()){if(impl->dragging)impl->cancelGesture();startTimer(1000);return;}
     if(getTimerInterval()!=50)startTimer(50);

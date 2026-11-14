@@ -357,6 +357,7 @@ void NativeDevicePanel::visibilityChanged() {
     updatePollingInterval();
 }
 void NativeDevicePanel::timerCallback() {
+    if(impl->session.isControlBusy())return;
     const auto showing = isShowing();
     if (showing != impl->previouslyShowing) {
         impl->waveform.setActive(showing);

@@ -7,7 +7,8 @@ import re
 import select
 import socket
 import threading
-from agent_client import ControlError
+import time
+from agent_client import ControlError, retry_busy_read
 
 MAX_BYTES = 1024 * 1024
 
@@ -91,6 +92,7 @@ class SocketClient:
         self.closed = True
         if type(timeout) not in (int, float) or not math.isfinite(timeout) or timeout <= 0:
             raise ValueError("Invalid embedded connection timeout.")
+        self.timeout = timeout
         try:
             self.socket = socket.create_connection(("127.0.0.1", session["port"]), timeout=timeout)
             self.socket.settimeout(timeout)
@@ -119,11 +121,19 @@ class SocketClient:
                 connection, stream = self.socket, self.stream
                 if connection is None or stream is None:
                     raise ControlError("Embedded DAW disconnected.")
-                connection.sendall(encoded)
-                line=stream.readline(MAX_BYTES+1)
-                if not line.endswith(b"\n") or len(line)>MAX_BYTES:
-                    raise ControlError("Embedded DAW reply incomplete or oversized.")
-                return _object(line)
+                def exchange(remaining):
+                    deadline = time.monotonic() + remaining
+                    connection.settimeout(remaining)
+                    connection.sendall(encoded)
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise TimeoutError("Embedded DAW request timed out.")
+                    connection.settimeout(remaining)
+                    line=stream.readline(MAX_BYTES+1)
+                    if not line.endswith(b"\n") or len(line)>MAX_BYTES:
+                        raise ControlError("Embedded DAW reply incomplete or oversized.")
+                    return _object(line)
+                return retry_busy_read(request, exchange, self.timeout)
             except (ControlError, OSError, UnicodeError, ValueError, RecursionError) as exc:
                 # A late response could belong to a previous mutation. Poison
                 # the entire stream; no caller may reuse it after ambiguity.

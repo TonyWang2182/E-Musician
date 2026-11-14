@@ -1,3 +1,11 @@
+# 当前候选：0.13.5 BM 与 MIDI 隔离（2026-11-15，自动已验、人工待验）
+
+实际工作树 E:/MusicAgent&DAW/worktrees/audio-analysis，分支 fix/bm-midi-isolation-v0135，基线 bcad8f0。修复插件添加定时器被厂商嵌套消息循环重入的宿主缺陷；控制层防重入、完成回调延后、控制服务保留待处理请求，只读客户端按原截止时间有限重试 busy。14 款已安装 BM 2.2.1 通过实际 Library/Add/Open/Remove 回调、编辑器、保存重开、非零音频渲染与退出测试。此前用户崩溃的精确调用栈没有捕获，不能宣称所有厂商行为都已验证。见[结果](review/2026-11-15-bm-midi/RESULTS.md)。
+
+逐轨显式 Monitor Off/On，旧 Auto 按 Off 兼容；Rec 独立，仅全局录音中的已 Arm 轨写入。目标清理不广播到同输入其他轨，空乐器轨稳定注入节点与同步发布输入图修复持音及快速 Off 后漏入新音符。最终真实 Hosted MIDI/PCM/录音验证 461 项、双轨 16 种状态组合通过；CTest 11/11、Agent 单元 390/390，通过核对 133 个原生输入、25 个辅助源码及 13 个固定引擎补丁。COZY 在 M-Audio ASIO 44.1kHz/512 下窗口及状态生命周期通过；物理键盘演奏、插件预设和听感仍待人工验收。
+
+入口 E:/MusicAgent&DAW/Start E-musician 0.13.5.cmd，VS Code 工作区 E-musician-0.13.5.code-workspace；工程文件关联已备份后切到 0.13.5。0.13.4、原用户工程及原开发日志修改保留；本轮无 computer-use、付费 API 或云端模型调用。下一步按[人工清单](review/2026-11-15-bm-midi/MANUAL-CHECK.md)验证。构建与失败记录已归档，Git 发布状态见本轮 PUBLISH；不自动合并 main。
+
 # 当前候选：0.13.4 Agent 审阅与演示包（2026-11-14）
 
 实际工作树 E:/MusicAgent&DAW/worktrees/audio-analysis，分支 feature/agent-demo-v0134，基线768c5d6。中英Agent已收敛为指令→真实阶段活动条→结果/试听→Apply→Undo；历史对话、用量、技术路线折叠。最近六项当前工程生成候选可切换重新审阅，不重生成、不调LLM、不自动应用。选择/修订/hash守护保持；API 429明确额度分类；Cloud和弦切Beats的Local筛选修复。原生0.13.3保留，0.13.4独立Release和CTest11/11通过；具体Agent/web及真实颜色/混音证据见[RESULTS](review/2026-11-14-agent-demo-v0134/RESULTS.md)。未操作用户GUI/声卡。

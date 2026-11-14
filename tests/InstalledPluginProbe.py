@@ -1,7 +1,8 @@
-"""One installed module in a disposable offline DAW; never open its editor.
+"""One installed module in a disposable offline DAW.
 
 Run from the compatibility supervisor with a bounded per-module deadline. This
-does not test licences, preset libraries, hardware I/O or native editor actions.
+does not test licences, preset libraries or hardware I/O. --open-editor exercises
+the production native editor opening path, without clicking its controls.
 """
 import argparse
 import hashlib
@@ -22,7 +23,9 @@ def main():
     parser.add_argument('--module', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--skip-scan', action='store_true')
+    parser.add_argument('--open-editor', action='store_true')
     args = parser.parse_args()
+    args.out = args.out.resolve()
     args.out.mkdir(parents=True, exist_ok=False)
     start = time.monotonic()
     report = {'module':str(args.module), 'status':'running', 'stage':'start', 'checks':[],
@@ -65,6 +68,16 @@ def main():
         stage('parameter_read')
         report['parameter_count']=len(page(client,'get_plugin_parameters','parameters',{'plugin_id':slot['id']}))
         report['checks'].append('read parameters')
+        if args.open_editor:
+            stage('open_native_editor')
+            client.request({'command':'open_plugin','args':{'track_id':track,'plugin_id':slot['id']}})
+            stage('native_editor_settle')
+            until=time.monotonic()+3.0
+            while time.monotonic()<until:
+                client.state()
+                time.sleep(.1)
+            report['native_editor_tested']=True
+            report['checks'].append('production open_plugin and three-second event loop (no editor gestures)')
         stage('save_state')
         project=args.out/'project.emproj'
         client.request({'command':'save_project','args':{'path':str(project)}})

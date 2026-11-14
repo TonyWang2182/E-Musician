@@ -26,6 +26,7 @@ public:
     void showAgent();
     juce::Result runAgentSidebarSmokeTest(const juce::File&);
     juce::Result runWorkspaceUISmoke(const juce::File&);
+    juce::Result runInstalledPluginUISmoke(const juce::String& catalogId, const juce::File&);
 private:
     struct Impl;
     EngineSession& session;

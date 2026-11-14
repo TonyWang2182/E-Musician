@@ -781,6 +781,64 @@ public:
         juce::MessageManager::getInstance()->runDispatchLoopUntil(100);
         if (callbacks != 1) return juce::Result::fail("Closed plugin panel received a pending add callback.");
         output.setProperty("plugin_pending_add_ignores_destroyed_panel", true);
+        // Native plug-ins can run a nested message loop while initialising.
+        // Keep that work outside JUCE's self-deleting one-shot timer callback:
+        // the old direct callback could fire a second time and delete itself
+        // before the original callback returned.
+        int nestedCallbacks = 0;
+        panel = std::make_unique<PluginPanel>(engine, [&](const juce::Result&) {
+            if (++nestedCallbacks == 1)
+                // Exceed TimerThread's 300 ms message retry interval too.
+                juce::MessageManager::getInstance()->runDispatchLoopUntil(450);
+        });
+        EngineSession::PluginDescriptorSnapshot missing;
+        missing.id = "nonexistent-nested-loop-smoke-plugin"; missing.name = "Nested message-loop fixture";
+        panel->filtered = { missing }; panel->catalog.updateContent(); panel->catalog.selectRow(0);
+        panel->beginAdd();
+        const auto nestedEnd = juce::Time::getMillisecondCounterHiRes() + 2000;
+        while (panel->adding && juce::Time::getMillisecondCounterHiRes() < nestedEnd)
+            juce::MessageManager::getInstance()->runDispatchLoopUntil(10);
+        if (panel->adding || nestedCallbacks != 1)
+            return juce::Result::fail("Nested plug-in initialisation dispatched the delayed add more than once.");
+        panel.reset();
+        output.setProperty("plugin_delayed_add_survives_nested_dispatch_once", true);
+        return juce::Result::ok();
+    }
+    static juce::Result runInstalledPluginSmoke(EngineSession& engine, const juce::String& catalogId,
+        const juce::String& trackId, juce::DynamicObject& output, const std::function<void(const juce::String&)>& phase)
+    {
+        int callbacks = 0;
+        auto last = juce::Result::fail("No panel callback.");
+        PluginPanel panel(engine, [&](const juce::Result& r) { ++callbacks; last = r; });
+        panel.selectTarget(trackId);
+        int catalogRow = -1;
+        for (int i = 0; i < int(panel.filtered.size()); ++i)
+            if (panel.filtered[std::size_t(i)].id == catalogId) catalogRow = i;
+        if (catalogRow < 0) return juce::Result::fail("Exact installed instrument is not listed in Add plugin.");
+        panel.catalog.selectRow(catalogRow);
+        const auto before = engine.snapshot().revision;
+        phase("panel_add_callback");
+        panel.add.onClick(); panel.add.onClick();
+        const auto deadline = juce::Time::getMillisecondCounterHiRes() + 60000;
+        while (panel.adding && juce::Time::getMillisecondCounterHiRes() < deadline)
+            juce::MessageManager::getInstance()->runDispatchLoopUntil(10);
+        if (panel.adding || callbacks != 1 || last.failed())
+            return juce::Result::fail("Real Add callback failed or repeated: " + last.getErrorMessage());
+        panel.timerCallback();
+        if (engine.snapshot().revision != before + 1 || panel.slots.size() != 1 || panel.slots.front().missing)
+            return juce::Result::fail("Real Add did not commit exactly one available slot/revision.");
+        output.setProperty("panel_real_add_and_duplicate_suppression", true);
+        panel.chain.selectRow(0);
+        phase("panel_open_callback");
+        panel.open.onClick();
+        if (callbacks != 2 || last.failed()) return juce::Result::fail("Panel Open failed: " + last.getErrorMessage());
+        juce::MessageManager::getInstance()->runDispatchLoopUntil(500);
+        output.setProperty("panel_real_native_editor_open", true);
+        phase("panel_remove_with_editor_open");
+        panel.remove.onClick();
+        if (callbacks != 3 || last.failed() || !panel.slots.empty())
+            return juce::Result::fail("Panel removal/visible-editor teardown failed: " + last.getErrorMessage());
+        output.setProperty("panel_real_remove_with_editor_open", true);
         return juce::Result::ok();
     }
     void paint(juce::Graphics& g) override
@@ -826,24 +884,29 @@ private:
         // Allow the status to paint before entering the plugin's message-thread
         // initialisation. Third-party code may still block that thread.
         juce::Timer::callAfterDelay(50, [safe = juce::Component::SafePointer<PluginPanel>(this), track, plugin, before, expectedRevision, projectId] {
-            if (!safe) return;
-            const auto result = safe->session.snapshot().projectId != projectId
-                ? juce::Result::fail("The project changed before the plugin was added. Please try again.")
-                : safe->session.execute("add_plugin", arguments({ { "track_id", track }, { "catalog_id", plugin.id } }), expectedRevision);
-            // Plug-in initialisation may pump messages and close this panel.
-            if (!safe) return;
-            safe->adding = false;
-            const auto callback = safe->report;
-            if (callback) callback(result);
-            if (!safe) return;
-            safe->timerCallback();
-            if (result.failed()) {
-                safe->status.setText(result.getErrorMessage(), juce::dontSendNotification);
-            } else if (safe->targetId() == track) {
-                safe->selectAdded(before);
-                safe->status.setText("Added " + plugin.name + ". Select it in the signal chain and choose open to show its editor.", juce::dontSendNotification);
-            }
-            safe->refreshButtons();
+            // Pinned JUCE deletes this one-shot timer only after its callback.
+            // Return first: a plug-in's nested message loop must not re-enter
+            // the timer and load twice (or delete the timer twice).
+            juce::MessageManager::callAsync([safe, track, plugin, before, expectedRevision, projectId] {
+                if (!safe) return;
+                const auto result = safe->session.snapshot().projectId != projectId
+                    ? juce::Result::fail("The project changed before the plugin was added. Please try again.")
+                    : safe->session.execute("add_plugin", arguments({ { "track_id", track }, { "catalog_id", plugin.id } }), expectedRevision);
+                // Plug-in initialisation may pump messages and close this panel.
+                if (!safe) return;
+                safe->adding = false;
+                const auto callback = safe->report;
+                if (callback) callback(result);
+                if (!safe) return;
+                safe->timerCallback();
+                if (result.failed()) {
+                    safe->status.setText(result.getErrorMessage(), juce::dontSendNotification);
+                } else if (safe->targetId() == track) {
+                    safe->selectAdded(before);
+                    safe->status.setText("Added " + plugin.name + ". Select it in the signal chain and choose open to show its editor.", juce::dontSendNotification);
+                }
+                safe->refreshButtons();
+            });
         });
     }
     void run(const juce::String& command, const juce::var& args)
@@ -889,6 +952,7 @@ private:
     }
     void timerCallback() override
     {
+        if (session.isControlBusy()) return;
         auto next = session.snapshot();
         const bool tracksChanged = next.revision != state.revision || next.projectId != state.projectId || next.tracks.size() != state.tracks.size();
         const bool catalogChanged = next.pluginCatalog.size() != state.pluginCatalog.size() || next.pluginScanning != state.pluginScanning;
@@ -1575,9 +1639,11 @@ juce::Result MainComponent::runAgentSidebarSmokeTest(const juce::File& directory
 
 #include "MainWorkspace.inc"
 #include "../../tests/MainWorkspaceSmoke.inc"
+#include "../../tests/MainPluginUiSmoke.inc"
 
 void MainComponent::refreshSnapshot()
 {
+    if(session.isControlBusy())return;
     auto& p = *impl;
     if (p.languageRevision != uiLanguageRevision()) refreshInterfaceLanguage();
     auto next = session.snapshot();
@@ -2844,6 +2910,10 @@ void MainComponent::importSources(const juce::Array<juce::File>& files, std::uin
 }
 void MainComponent::withUnsavedGuard(std::function<void()> proceed)
 {
+    if(session.isControlBusy()){
+        impl->error="Wait for the current device or project operation to finish.";
+        return;
+    }
     if (impl->saveDialog) { impl->saveDialog->toFront(true); return; }
     const auto recordingState = session.snapshot();
     if (blockNativeTransition(recordingState, [this](const auto& message) { showResult(juce::Result::fail(message)); })) return;

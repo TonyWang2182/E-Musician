@@ -144,7 +144,7 @@ GenerationPanel::GenerationPanel(EngineSession& s):impl(std::make_unique<Impl>(*
 GenerationPanel::~GenerationPanel(){stopTimer();impl->request("stop_generation_preview",generationObject({}));}
 void GenerationPanel::visibilityChanged(){if(!isVisible())impl->stopPreview();else{impl->capabilityCountdown=0;impl->poll();}}
 void GenerationPanel::refreshLanguage(){impl->language();impl->poll();}
-void GenerationPanel::timerCallback(){if(isShowing())impl->poll();}
+void GenerationPanel::timerCallback(){if(isShowing()&&!impl->session.isControlBusy())impl->poll();}
 void GenerationPanel::resized(){
     auto& p=*impl;auto area=getLocalBounds().reduced(12,8);auto header=area.removeFromTop(30);p.title.setBounds(header.removeFromLeft(130));p.model.setBounds(header.removeFromLeft(juce::jmin(178,header.getWidth()/2)));header.removeFromLeft(6);header.removeFromRight(64);p.history.setBounds(header);
     auto actions=area.removeFromBottom(32);p.run.setBounds(actions.removeFromLeft(90));actions.removeFromLeft(6);p.cancel.setBounds(actions.removeFromLeft(70));p.add.setBounds(actions.removeFromRight(104));actions.removeFromRight(6);p.stop.setBounds(actions.removeFromRight(66));actions.removeFromRight(6);p.preview.setBounds(actions.removeFromRight(82));
