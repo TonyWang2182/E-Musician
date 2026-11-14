@@ -13382,3 +13382,7 @@ API真实诊断为HTTP429/insufficient_quota；用户明确还在处理、先做
 补充实际素材宿主检查：17WAV/7MIDI全部导入成24轨277音符，Rack8样本和Sampler根音/SHA正确，保存重开一致，源文件与受保护用户配置保持。发现当前Rack合法垫位36–51，已将可选Cowbell从GM56改51并重制/校验ZIP，新SHA224b81c3e34d5ce6345f9fdef7460ac71e9b6106096900cf06f4db040cf24fbc；首要36/38/42/46不变。模型未重跑，未控制GUI或声卡。
 
 最终交付核对20261114T115506.878939Z-6e0070fa6e通过：112构建输入匹配，旧EXE保持，六真实模型工程在0.13.4再次重开状态相同，11音频资产hash保持，三个最终ZIP完整，39本地文档链接有效。原115330素材宿主报告、此前初次artifact检查及已替换ZIP的旧/新hash都已留档。代码/日志准备同步feature/agent-demo-v0134，main保持，用户API仍待恢复。
+
+### 2026-11-14 20:00 CST · 0.13.4 Agent demo delivery publication
+
+实现提交608783bd0186ae8632a577af8e5ba027809c3783已推送origin/feature/agent-demo-v0134，并由git ls-remote核实；远端main仍为d4ed6c898af1303918e38b6325a915befabbb575。本条与PUBLISH为独立文档补记，不改变已验证构建输入。用户原有DEVLOG改动及20个旧构建记录未暂存、未覆盖；大媒体和模型不入Git。API额度修复仍待用户完成，本轮未追加语言调用，人工GUI、ASIO与听感验收保留待验。交付入口为E盘demo-video/2026-11-14/OPEN-FIRST.md。
