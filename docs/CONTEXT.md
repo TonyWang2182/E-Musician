@@ -1,3 +1,11 @@
+# 当前工作：0.13.3 演示提示词与操作彩排（2026-11-14）
+
+实际工作树E:/MusicAgent&DAW/worktrees/audio-analysis，分支docs/demo-rehearsal-v0133，基线9286573。本轮仅新增验证器、演示步骤与证据，产品源码/模型部署/原生EXE未改，不重新构建、不控制用户GUI。入口和云端仍沿用下方0.13.3。
+
+六条英文提示词及纯TXT、New Light 24秒和Tea for Two钢琴16秒摘段已准备。ACE原样提示词经真实GPT完成生成→候选→Apply→Undo/Redo→保存重开。随后YuE2首次GPT请求HTTP429，一次小请求诊断确认insufficient_quota；停止语言调用。其他路线通过显式结构化参数执行真实音乐模型和生产工程管线，不能将其当作原样英文Agent指令通过。逐项事实/收据以[RESULTS](review/2026-11-14-demo-rehearsal/RESULTS.md)为准；[操作稿](demo/2026-11-14-demo-operations.md)及[手动入口](review/2026-11-14-demo-rehearsal/MANUAL-FALLBACK.md)可供用户执行。原始音频、工程与偏好保持；产物在E:/MusicAgent&DAW/demo-video/2026-11-14/rehearsal，保留emproj与配套assets。
+
+下一步：恢复语言API可用性后补验其余五条原样提示词，再人工试听/GUI/指定插件/真实MIDI与人声录制及ASIO录屏。YuE2本次32秒预算有token_budget截断，不能当完整歌曲；64小节90BPM超当前120秒上限。已发现Cloud和弦切Beats后执行位置遗留：手动需先在Chords改Local再切Beats，本轮未修产品代码，后续UI迭代应修正。不自动合并main，Git状态见本轮PUBLISH；下方为此前迭代。
+
 # 当前候选：0.13.3 新克隆重连、工程图标与轨头（2026-11-14，自动已验、人工待验）
 
 实际工作树仍为E:/MusicAgent&DAW/worktrees/audio-analysis，维护分支fix/reconnect-file-icons-v0133，基线912e68f。SSH别名emusician-autodl已切到用户指定bjb1/22095新克隆主机，原密钥可用，没有使用或保存本次密码。复用固定release ed7d6a920487a651c988及九环境，两个数据库、服务和同款SSH隧道通过；七云端能力已登记。VS Code独立远程窗口已连接/root/autodl-tmp/emusician，现有本地工作区保留；本轮无模型推理或上传。

@@ -1,0 +1,28 @@
+[
+  {
+    "track_name": "New Light Source",
+    "original": "E:\\E-musician\\test-projects\\test9-newlight\\New Light()\\New Light.mp3",
+    "original_sha256": "885891e2076ca629d3e60685a68df3be07e20da00f0ee45038b5da547519826b",
+    "source_start_seconds": 60,
+    "duration_seconds": 24,
+    "output": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\sources\\new-light-60-84.wav",
+    "sha256": "4ce4a1e857a5a4645163896bf08c6a3e3998d766b8694c96f0901c8efc1eb33d",
+    "sample_rate": 44100,
+    "peak": 1.063109040260315,
+    "source_unchanged": true,
+    "listening_verified": false
+  },
+  {
+    "track_name": "Tea Piano Source",
+    "original": "E:\\E-musician\\test-projects\\test7-MIR task 2\\T42-2.assets\\a3ae0af6ad564f97a02099b556276e7c\\2376f6baa7fe420d9f084da3379dfc2d.wav",
+    "original_sha256": "cf1ee170c92d26cec83567b18e987eb62e6aa818faf2766a77aed290f497a8a8",
+    "source_start_seconds": 20,
+    "duration_seconds": 16,
+    "output": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\sources\\tea-piano-20-36.wav",
+    "sha256": "cb1d929ebce7d9dcdf169dfeff6298e16b93d32c7ff174e99bb59ab6a0264968",
+    "sample_rate": 44100,
+    "peak": 0.40198343992233276,
+    "source_unchanged": true,
+    "listening_verified": false
+  }
+]

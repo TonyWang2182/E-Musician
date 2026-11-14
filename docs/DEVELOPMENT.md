@@ -1,3 +1,13 @@
+# 0.13.3 演示彩排（2026-11-14，无新原生构建）
+
+- [x] 独立维护分支、六条原样英文提示词/纯TXT、逐步操作、32秒生成预算及真实源音频摘段；原件保持。
+- [x] 真实GPT→ACE候选/Apply/Undo/Redo/保存重开；不追问已有BPM，实际lyrics非空。
+- [x] 保留YuE2语言入口HTTP429失败；一次小请求诊断insufficient_quota，停止后续GPT调用。显式direct-pipeline将音乐模型/原生管线与语言理解验收分开；逐项结果见[收据](review/2026-11-14-demo-rehearsal/RESULTS.md)。
+- [x] [完整操作稿](demo/2026-11-14-demo-operations.md)与[手动模型入口](review/2026-11-14-demo-rehearsal/MANUAL-FALLBACK.md)，录音镜头提前配置输入/预备拍，采样提前加载。
+- [ ] 语言API额度恢复后补验YuE2/SCNet/ChordMini/Beat This+Warp/TransKun五条原样提示词。
+- [ ] 用户完成Preview/准确性、GUI、指定VST3、实际MIDI/麦克风录制与录屏捕获声音验收，随后拍摄240秒成片。
+- [ ] 后续UI修复：Cloud和弦切Beats遗留执行位置，当前先改Local再切Beats；本轮不改产品代码。
+
 # 0.13.3 本轮进度（2026-11-14，自动已验、人工待验）
 
 - [x] 保留旧EXE/用户已有修改，独立维护分支及[归属计划](review/2026-11-14-reconnect-icons/PLAN.md)。

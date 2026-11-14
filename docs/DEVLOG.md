@@ -12866,3 +12866,150 @@ print(json.dumps({'\"'\"'passed'\"'\"':True,'\"'\"'checked_at'\"'\"':datetime.da
 - M/S/R固定字母禁用省略号；72个组件渲染组合、截图和完整实际工作区图像通过。两次Release成功；初轮CTest10/11，新增测试误将异步打开当同步；仅改测试等待后workspace1/1通过。128项原生输入仅测试文件变化，生产源码未再改，旧两份EXE哈希保持。
 - 注册回归中REG_NONE空值表示、首次只注册ProgID不能改变实际入口、提取图标数量断言三项失败与修正都保留。一次带&路径未引用的PowerShell命令在解析时拒绝，未进入注册脚本；正确引用后成功。
 - 新版0.13.3已打开，窗口响应、Agent helper认证连接和ready消费通过；未把启动状态视作声卡或模型效果验收。资料：[结果](review/2026-11-14-reconnect-icons/RESULTS.md)、[功能/模型清单](review/2026-11-14-reconnect-icons/CAPABILITIES.md)、[人工检查](review/2026-11-14-reconnect-icons/MANUAL-CHECK.md)。Git维护分支fix/reconnect-file-icons-v0133，不自动合并main；用户旧日志/未跟踪记录保留。
+
+### 2026-11-14T18:53:28+08:00 · demo-rehearsal-check · succeeded
+
+- Config: 0.13.3/Release; no native build; exit code: 0; elapsed: 3.297s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe docs/review/2026-11-14-demo-rehearsal/prepare_sources.py`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `200571934304683ecc2f523b473900907c53e4e28c488170a8d6bc3d812209a4`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T105328.509530Z-bf717c04ff.json) · [Raw log](../build-logs/20261114T105328.509530Z-bf717c04ff.log)
+- [Exact process output](../build-logs/20261114T105328.509530Z-bf717c04ff.raw.log)
+
+### 2026-11-14T18:53:43+08:00 · demo-rehearsal-check · succeeded
+
+- Config: 0.13.3/Release; no native build; exit code: 0; elapsed: 3.888s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe scripts/cloud/register_compute.py`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `200571934304683ecc2f523b473900907c53e4e28c488170a8d6bc3d812209a4`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T105343.292283Z-900a41948f.json) · [Raw log](../build-logs/20261114T105343.292283Z-900a41948f.log)
+- [Exact process output](../build-logs/20261114T105343.292283Z-900a41948f.raw.log)
+
+### 2026-11-14T18:56:15+08:00 · demo-rehearsal-check · succeeded
+
+- Config: 0.13.3/Release; no native build; exit code: 0; elapsed: 0.826s.
+- Command: `C:/Python314/python.exe docs/review/2026-11-14-demo-rehearsal/export_prompts.py`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `4bef43471802747d46595375c1d04d242a395ff3f9e7dc892e58806d729fedfb`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T105615.783296Z-6c9fbdb012.json) · [Raw log](../build-logs/20261114T105615.783296Z-6c9fbdb012.log)
+- [Exact process output](../build-logs/20261114T105615.783296Z-6c9fbdb012.raw.log)
+
+### 2026-11-14T18:57:48+08:00 · demo-rehearsal-check · succeeded
+
+- Config: 0.13.3/Release; no native build; exit code: 0; elapsed: 154.807s.
+- Command: `C:/Python314/python.exe tests/DemoPromptLiveCheck.py --exe E:/emusician-analysis-build/bin-0.13.3/Release/E-musician.exe --cases docs/review/2026-11-14-demo-rehearsal/cases.json --case D1-ACE --output-root E:/MusicAgent&DAW/demo-video/2026-11-14/rehearsal`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `cd85e29a4f18dbf2b1a9ff2aeeb049f722173ae5242587bb78efb43b79559854`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T105748.393788Z-f2bc2d2d24.json) · [Raw log](../build-logs/20261114T105748.393788Z-f2bc2d2d24.log)
+- [Exact process output](../build-logs/20261114T105748.393788Z-f2bc2d2d24.raw.log)
+
+### 2026-11-14T19:02:52+08:00 · demo-rehearsal-check · failed
+
+- Config: 0.13.3/Release; no native build; exit code: 1; elapsed: 10.175s.
+- Command: `C:/Python314/python.exe tests/DemoPromptLiveCheck.py --exe E:/emusician-analysis-build/bin-0.13.3/Release/E-musician.exe --cases docs/review/2026-11-14-demo-rehearsal/cases.json --case D1-YuE2 --output-root E:/MusicAgent&DAW/demo-video/2026-11-14/rehearsal`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `cd85e29a4f18dbf2b1a9ff2aeeb049f722173ae5242587bb78efb43b79559854`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T110252.090367Z-5334455c42.json) · [Raw log](../build-logs/20261114T110252.090367Z-5334455c42.log)
+- [Exact process output](../build-logs/20261114T110252.090367Z-5334455c42.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T110252.090367Z-5334455c42.log
+
+### 2026-11-14T19:05:22+08:00 · demo-rehearsal-check · succeeded
+
+- Config: 0.13.3/Release; no native build; exit code: 0; elapsed: 3.475s.
+- Command: `C:/Python314/python.exe -X utf8 docs/review/2026-11-14-demo-rehearsal/api_diagnostic.py --out E:/MusicAgent&DAW/demo-video/2026-11-14/rehearsal/api-admission-diagnostic-01.json`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `cd85e29a4f18dbf2b1a9ff2aeeb049f722173ae5242587bb78efb43b79559854`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T110522.098890Z-1be8c6f815.json) · [Raw log](../build-logs/20261114T110522.098890Z-1be8c6f815.log)
+- [Exact process output](../build-logs/20261114T110522.098890Z-1be8c6f815.raw.log)
+
+### 2026-11-14T19:07:37+08:00 · demo-rehearsal-check · succeeded
+
+- Config: 0.13.3/Release; no native build; exit code: 0; elapsed: 0.838s.
+- Command: `C:/Python314/python.exe -c "import ast,hashlib; from pathlib import Path; p=Path('tests/DemoPromptLiveCheck.py'); ast.parse(p.read_text(encoding='utf-8')); print('AST valid'); print(hashlib.sha256(p.read_bytes()).hexdigest())"`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `4d5297ebaed7f7f00c130704c33222e3dffff403a6d117f8bb88f358efdc3856`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T110737.580808Z-1b601a9cf7.json) · [Raw log](../build-logs/20261114T110737.580808Z-1b601a9cf7.log)
+- [Exact process output](../build-logs/20261114T110737.580808Z-1b601a9cf7.raw.log)
+
+### 2026-11-14T19:07:55+08:00 · demo-rehearsal-check · succeeded
+
+- Config: 0.13.3/Release; no native build; exit code: 0; elapsed: 145.102s.
+- Command: `C:/Python314/python.exe tests/DemoPromptLiveCheck.py --exe E:/emusician-analysis-build/bin-0.13.3/Release/E-musician.exe --cases docs/review/2026-11-14-demo-rehearsal/cases.json --case D1-YuE2 --direct-pipeline --output-root E:/MusicAgent&DAW/demo-video/2026-11-14/rehearsal`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `4d5297ebaed7f7f00c130704c33222e3dffff403a6d117f8bb88f358efdc3856`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T110755.437972Z-ea9e18e702.json) · [Raw log](../build-logs/20261114T110755.437972Z-ea9e18e702.log)
+- [Exact process output](../build-logs/20261114T110755.437972Z-ea9e18e702.raw.log)
+
+### 2026-11-14T19:11:13+08:00 · demo-rehearsal-check · succeeded
+
+- Config: 0.13.3/Release; no native build; exit code: 0; elapsed: 28.015s.
+- Command: `C:/Python314/python.exe tests/DemoPromptLiveCheck.py --exe E:/emusician-analysis-build/bin-0.13.3/Release/E-musician.exe --cases docs/review/2026-11-14-demo-rehearsal/cases.json --case D2-Chords --direct-pipeline --output-root E:/MusicAgent&DAW/demo-video/2026-11-14/rehearsal`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `4d5297ebaed7f7f00c130704c33222e3dffff403a6d117f8bb88f358efdc3856`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T111113.368036Z-01f3bf0695.json) · [Raw log](../build-logs/20261114T111113.368036Z-01f3bf0695.log)
+- [Exact process output](../build-logs/20261114T111113.368036Z-01f3bf0695.raw.log)
+
+### 2026-11-14T19:12:29+08:00 · demo-rehearsal-check · succeeded
+
+- Config: 0.13.3/Release; no native build; exit code: 0; elapsed: 33.320s.
+- Command: `C:/Python314/python.exe tests/DemoPromptLiveCheck.py --exe E:/emusician-analysis-build/bin-0.13.3/Release/E-musician.exe --cases docs/review/2026-11-14-demo-rehearsal/cases.json --case D3-Piano --direct-pipeline --output-root E:/MusicAgent&DAW/demo-video/2026-11-14/rehearsal`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `4d5297ebaed7f7f00c130704c33222e3dffff403a6d117f8bb88f358efdc3856`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T111229.848285Z-b1a439ee19.json) · [Raw log](../build-logs/20261114T111229.848285Z-b1a439ee19.log)
+- [Exact process output](../build-logs/20261114T111229.848285Z-b1a439ee19.raw.log)
+
+### 2026-11-14T19:12:29+08:00 · demo-rehearsal-check · succeeded
+
+- Config: 0.13.3/Release; no native build; exit code: 0; elapsed: 45.198s.
+- Command: `C:/Python314/python.exe tests/DemoPromptLiveCheck.py --exe E:/emusician-analysis-build/bin-0.13.3/Release/E-musician.exe --cases docs/review/2026-11-14-demo-rehearsal/cases.json --case D2-Warp --direct-pipeline --output-root E:/MusicAgent&DAW/demo-video/2026-11-14/rehearsal`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `4d5297ebaed7f7f00c130704c33222e3dffff403a6d117f8bb88f358efdc3856`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T111229.834119Z-9cbddf5525.json) · [Raw log](../build-logs/20261114T111229.834119Z-9cbddf5525.log)
+- [Exact process output](../build-logs/20261114T111229.834119Z-9cbddf5525.raw.log)
+
+### 2026-11-14T19:10:38+08:00 · demo-rehearsal-check · succeeded
+
+- Config: 0.13.3/Release; no native build; exit code: 0; elapsed: 594.715s.
+- Command: `C:/Python314/python.exe tests/DemoPromptLiveCheck.py --exe E:/emusician-analysis-build/bin-0.13.3/Release/E-musician.exe --cases docs/review/2026-11-14-demo-rehearsal/cases.json --case D1-SCNet --direct-pipeline --output-root E:/MusicAgent&DAW/demo-video/2026-11-14/rehearsal`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `4d5297ebaed7f7f00c130704c33222e3dffff403a6d117f8bb88f358efdc3856`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T111038.922963Z-0d8f0c621f.json) · [Raw log](../build-logs/20261114T111038.922963Z-0d8f0c621f.log)
+- [Exact process output](../build-logs/20261114T111038.922963Z-0d8f0c621f.raw.log)
+
+### 2026-11-14T19:25:28+08:00 · demo-rehearsal-check · succeeded
+
+- Config: 0.13.3/Release; no native build; exit code: 0; elapsed: 0.861s.
+- Command: `C:/Python314/python.exe docs/review/2026-11-14-demo-rehearsal/collect_results.py`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `4d5297ebaed7f7f00c130704c33222e3dffff403a6d117f8bb88f358efdc3856`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T112528.667031Z-31a4379048.json) · [Raw log](../build-logs/20261114T112528.667031Z-31a4379048.log)
+- [Exact process output](../build-logs/20261114T112528.667031Z-31a4379048.raw.log)
+
+### 2026-11-14T19:25:29+08:00 · demo-rehearsal-check · failed
+
+- Config: 0.13.3/Release; no native build; exit code: 1; elapsed: 0.925s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe docs/review/2026-11-14-demo-rehearsal/verify_delivery.py`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `4d5297ebaed7f7f00c130704c33222e3dffff403a6d117f8bb88f358efdc3856`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T112529.965138Z-1f1a2c197e.json) · [Raw log](../build-logs/20261114T112529.965138Z-1f1a2c197e.log)
+- [Exact process output](../build-logs/20261114T112529.965138Z-1f1a2c197e.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T112529.965138Z-1f1a2c197e.log
+
+### 2026-11-14T19:26:14+08:00 · demo-rehearsal-check · succeeded
+
+- Config: 0.13.3/Release; no native build; exit code: 0; elapsed: 1.189s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe docs/review/2026-11-14-demo-rehearsal/verify_delivery.py`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `e0840b97001f6670895bd6061c734aaf9e494846350e36f0a4a8f99565ba170a`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T112614.079714Z-798dda08d7.json) · [Raw log](../build-logs/20261114T112614.079714Z-798dda08d7.log)
+- [Exact process output](../build-logs/20261114T112614.079714Z-798dda08d7.raw.log)
+### 2026-11-14 19:27 CST · demo-rehearsal-v0133
+
+- 交付六条英文提示词、逐步流程、原4分钟分镜链接和手动模型入口；真实New Light/Tea钢琴摘段原件保持。
+- 冻结0.13.3：ACE通过真实GPT完整链；YuE2语言请求HTTP429，一次小请求确定insufficient_quota后停止语言调用，其余五项改显式结构化管线，绝不冒充提示词通过。
+- 六个真实音乐模型/工程链均通过候选、接受、Undo/Redo、保存重开；SCNet四stem、ChordMini15和弦、Beat This125到120BPM且15区段随动、TransKun132音符/17CC/1 program-change。YuE2近32秒、token_budget截断；听感与真实设备仍待验。
+- 六份工程和13个保存音频资产逐项hash/非空/有限PCM检查通过；六提示词与TXT/清单完全一致，24本地链接有效。首次交付检查发现PowerShell管道编码导致中文替换失败/一行问号，已修文档并复测通过，失败记录保留。
+- 本轮无产品源码/部署/原生构建变更；维护分支不合并main。新用户追加中英文侧栏、Jungle素材和动效要求另起迭代，不覆盖本批证据。详情见docs/review/2026-11-14-demo-rehearsal/RESULTS.md。
+### 2026-11-14 19:28 CST · demo-rehearsal-v0133 correction
+
+- 补正上条：DELIVERY-CHECK实际核对11个保存音频资产，不是13个；六份工程和24链接计数正确。以原始收据为准。

@@ -2,6 +2,8 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
+**2026-11-14 演示彩排补充：** [六条英文提示词与操作稿](docs/demo/2026-11-14-demo-operations.md) · [实际验证结果](docs/review/2026-11-14-demo-rehearsal/RESULTS.md) · [手动模型入口](docs/review/2026-11-14-demo-rehearsal/MANUAL-FALLBACK.md)。ACE原样GPT操作链已过；之后语言API返回`insufficient_quota`，其余提示词待恢复额度补验，结构化模型管线与人工听感分开记录。本轮沿用0.13.3，不重新构建；以下“本次无推理”指早先重连迭代。
+
 **当前维护候选0.13.3已打开：新克隆云主机/VS Code已连接，工程Logo图标及双击旧版入口已修复，M/S/R固定标签不再省略。** 两次Release成功，首次完整CTest10/11、修正异步测试等待后workspace1/1通过，72项渲染和12项文件关联检查通过。窗口与Agent本地认证已验证；本次无模型推理或设备听感验收。入口`E:/MusicAgent&DAW/Start E-musician 0.13.3.cmd`，本地开发工作区`E:/MusicAgent&DAW/E-musician-0.13.3.code-workspace`；旧程序保留。
 
 [本轮结果](docs/review/2026-11-14-reconnect-icons/RESULTS.md) · [人工测试](docs/review/2026-11-14-reconnect-icons/MANUAL-CHECK.md) · [Agent和云端/本地模型清单](docs/review/2026-11-14-reconnect-icons/CAPABILITIES.md) · [4分钟中英分镜与素材清单](docs/demo/2026-11-12-four-minute-demo.md)。以下为历史版本记录，云端当前连接以0.13.3为准。

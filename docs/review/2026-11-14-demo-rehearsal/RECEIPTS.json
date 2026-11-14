@@ -1,0 +1,578 @@
+{
+  "cases": [
+    {
+      "case_id": "D1-ACE",
+      "passed": true,
+      "model_id": "ace-step-1.5-xl-turbo",
+      "execution": "cloud",
+      "kind": "generate",
+      "real_llm": true,
+      "physical_audio": false,
+      "listening_quality_verified": false,
+      "started_at": "2026-11-14T10:57:49.653+00:00",
+      "finished_at": "2026-11-14T11:00:23.159+00:00",
+      "checks": [
+        "Exact prompt produced requested model candidate and review without project mutation",
+        "Explicit Apply completed with expected tracks/notes/chords or Warp and unchanged project tempo",
+        "One Agent Undo and native Redo restored exact before/after musical state",
+        "Saved project reopened with identical musical state and verified local audio assets"
+      ],
+      "usage": {
+        "calls": 2,
+        "prompt_tokens": 23010,
+        "completion_tokens": 1880
+      },
+      "music_attempts": 1,
+      "project": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-ACE-4e9201887e84\\D1-ACE.emproj",
+      "project_sha256": "ac7a75d1ad002355b0997a1dc93c7e61b965e683960d4ff85bfa9aa981049c17",
+      "accepted_audio_paths": [
+        {
+          "asset_id": "f75fa7c11a604c9683f0f6d26ab10e5b",
+          "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-ACE-4e9201887e84\\D1-ACE.assets\\e567e9581f84443fb6eb52347282d9fd\\f75fa7c11a604c9683f0f6d26ab10e5b.wav",
+          "sha256": "ffe0470833ba7030d8d16492cf021305b284918991d0ae33a231b8b437f9b472"
+        }
+      ],
+      "input_files_unchanged": true,
+      "small_settings_unchanged": true,
+      "request": {
+        "prompt": "Neo-soul excerpt with warm, intimate production: Warm Rhodes electric piano, mellow clean electric guitar (light chorus/reverb), rounded electric bass, laid-back drums (soft kick, brushed/snappy snare, relaxed hi-hat), and an intimate female lead vocal. Short intro, verse, chorus, and a natural ending; keep arrangement sparse and warm so the vocal sits clearly. Aim for a smooth neo-soul groove, subtle dynamics, and melodic hooks appropriate for verse + chorus structure. Mix for vocal presence and vintage-modern warmth.",
+        "lyrics": "[Verse]\nWe found a rhythm in the quiet\nLet the city fade away\n[Chorus]\nStay until the morning light\nHold this feeling through the night",
+        "duration_seconds": 32.0,
+        "timeline_start_seconds": 0.0,
+        "execution": "cloud",
+        "model_id": "ace-step-1.5-xl-turbo"
+      },
+      "exe_sha256": "90c7a476618bccc01e581b47d46b3880422143b8382e000bb915e94108c9baa3",
+      "exact_prompt_verified": true,
+      "validation_mode": "exact-prompt-live",
+      "report_path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-ACE-4e9201887e84\\report.json",
+      "report_sha256": "dc71d010fa84186dd5fdfcd19026cc3d16ddad2b9f15260d91b5345fab3decb0",
+      "elapsed_wall_seconds": 153.506,
+      "candidate": {
+        "result_id": "5858e7af3a0d478c86a92e7d7b070327",
+        "result_hash": "81f7e48b3e9fbe4e493a008bf4c54b429ea875e91d8ec324116996b24749035b",
+        "model_id": "ace-step-1.5-xl-turbo",
+        "execution": "cloud",
+        "model": {
+          "id": "ace-step-1.5-xl-turbo",
+          "model_id": "ace-step-1.5-xl-turbo",
+          "provider": "cloud",
+          "revision": "4228da3a418e1f1a04d9799e8040b62860d26b7a8c4e80ce374a17e5418cc4bf"
+        },
+        "audio": {
+          "sha256": "ffe0470833ba7030d8d16492cf021305b284918991d0ae33a231b8b437f9b472",
+          "duration_seconds": 32.0,
+          "sample_rate": 48000.0,
+          "channels": 2.0
+        },
+        "completion": {
+          "truncated": null,
+          "reason": "unknown",
+          "timing_is_exact": false
+        },
+        "limitations": []
+      },
+      "final_job_status": "ready"
+    },
+    {
+      "case_id": "D1-SCNet",
+      "passed": true,
+      "model_id": "scnet",
+      "execution": "cloud",
+      "kind": "separate",
+      "real_llm": false,
+      "physical_audio": false,
+      "listening_quality_verified": false,
+      "started_at": "2026-11-14T11:10:40.026+00:00",
+      "finished_at": "2026-11-14T11:20:33.594+00:00",
+      "checks": [
+        "Structured direct request produced the requested real candidate and review without project mutation; no LLM used",
+        "Explicit Apply completed with expected tracks/notes/chords or Warp and unchanged project tempo",
+        "One native Undo and Redo restored exact before/after musical state",
+        "Saved project reopened with identical musical state and verified local audio assets"
+      ],
+      "usage": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0
+      },
+      "music_attempts": 1,
+      "project": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-SCNet-d1b8dc00a365\\D1-Stems.emproj",
+      "project_sha256": "469ed1ac60d9590f2c6b22a26150f60940597a6653436a0d370600a00342a281",
+      "accepted_audio_paths": [
+        {
+          "asset_id": "07cf13e7962f4f1780a2d609b97fe206",
+          "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-SCNet-d1b8dc00a365\\D1-Stems.assets\\8081363eca344bbaac060f30ae3d1731\\07cf13e7962f4f1780a2d609b97fe206.wav",
+          "sha256": "ffe0470833ba7030d8d16492cf021305b284918991d0ae33a231b8b437f9b472"
+        },
+        {
+          "asset_id": "25b4238c52c543149d24c7996e8424d2",
+          "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-SCNet-d1b8dc00a365\\D1-Stems.assets\\8081363eca344bbaac060f30ae3d1731\\25b4238c52c543149d24c7996e8424d2.wav",
+          "sha256": "08c557fdcf10e7bce14775ddab3d48201beff9f2b5a4f8acf762bc8b68f6607b"
+        },
+        {
+          "asset_id": "a04858e95d4a4c6cb46aab0afd2a3403",
+          "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-SCNet-d1b8dc00a365\\D1-Stems.assets\\8081363eca344bbaac060f30ae3d1731\\a04858e95d4a4c6cb46aab0afd2a3403.wav",
+          "sha256": "4bd0c8d78de567acb6ab8ed6c1c65c34adb8ffeeef19702a897b7021f67985a8"
+        },
+        {
+          "asset_id": "c65b1f2cb6b24677863220b1f65a74e7",
+          "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-SCNet-d1b8dc00a365\\D1-Stems.assets\\8081363eca344bbaac060f30ae3d1731\\c65b1f2cb6b24677863220b1f65a74e7.wav",
+          "sha256": "c4da2858739e38f8dfc304813c55190f153dac41c99cd83c2184ea6c8f06be79"
+        },
+        {
+          "asset_id": "7646a427e07b4a1cbec26556eef1bf2d",
+          "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-SCNet-d1b8dc00a365\\D1-Stems.assets\\8081363eca344bbaac060f30ae3d1731\\7646a427e07b4a1cbec26556eef1bf2d.wav",
+          "sha256": "3ea0efbc5af811fe89fac89a8cdde69eba99c161ccf98533ca0374eaed9fa24b"
+        }
+      ],
+      "input_files_unchanged": true,
+      "small_settings_unchanged": true,
+      "request": {
+        "clip_id": "02334caa69b446c2b8b7ca4e82444ff4",
+        "kind": "separate",
+        "start_seconds": 0.0,
+        "duration_seconds": 32.0,
+        "execution": "cloud",
+        "model_id": "scnet",
+        "parameters": {}
+      },
+      "exe_sha256": "90c7a476618bccc01e581b47d46b3880422143b8382e000bb915e94108c9baa3",
+      "exact_prompt_verified": false,
+      "validation_mode": "direct-pipeline",
+      "report_path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-SCNet-d1b8dc00a365\\report.json",
+      "report_sha256": "ed2581de2306cc0a203f627365c10314e60317dcecc6e01cd8d4b6c1a5f96260",
+      "elapsed_wall_seconds": 593.568,
+      "candidate": {
+        "result_id": "8f9fa8a53f1b4b79a12243e93ee5be55",
+        "result_hash": "1e0ba5b69223a9f1734fa8e7e15a834ff3f6c7112b3fb7fac2a878c4aca7c081",
+        "model_id": "scnet",
+        "execution": "cloud",
+        "model": {
+          "id": "scnet",
+          "model_id": "scnet",
+          "provider": "cloud",
+          "version": "a71367e0d7030faeb22c48979c9ff2d52d7753ced1ca16ebd73db7d0a6283e85"
+        },
+        "summary": {
+          "track_count": 4,
+          "note_count": 0,
+          "controller_count": 0,
+          "program_change_count": 0,
+          "chord_count": 0,
+          "beat_count": 0,
+          "annotation_count": 0
+        },
+        "total": 4,
+        "limitations": []
+      },
+      "final_job_status": "applied"
+    },
+    {
+      "case_id": "D1-YuE2",
+      "passed": true,
+      "model_id": "yue2",
+      "execution": "cloud",
+      "kind": "generate",
+      "real_llm": false,
+      "physical_audio": false,
+      "listening_quality_verified": false,
+      "started_at": "2026-11-14T11:07:56.465+00:00",
+      "finished_at": "2026-11-14T11:10:20.510+00:00",
+      "checks": [
+        "Structured direct request produced the requested real candidate and review without project mutation; no LLM used",
+        "Explicit Apply completed with expected tracks/notes/chords or Warp and unchanged project tempo",
+        "One native Undo and Redo restored exact before/after musical state",
+        "Saved project reopened with identical musical state and verified local audio assets"
+      ],
+      "usage": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0
+      },
+      "music_attempts": 1,
+      "project": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-YuE2-6653ad04ccbd\\D1-YuE2.emproj",
+      "project_sha256": "1961df7d159afe3fafd8cf655327bfc1d3dd7a6d81de27712bcac8c58f6f1572",
+      "accepted_audio_paths": [
+        {
+          "asset_id": "c6447f89e5054d9cae05ca1f58ecc280",
+          "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-YuE2-6653ad04ccbd\\D1-YuE2.assets\\a32dc16de41e429ba6d5610e1f403254\\c6447f89e5054d9cae05ca1f58ecc280.wav",
+          "sha256": "7eda02ad3ac296338f8a01eee473f3f53bbb82acb3f777af651ce284e6895fb9"
+        }
+      ],
+      "input_files_unchanged": true,
+      "small_settings_unchanged": true,
+      "request": {
+        "prompt": "Neo-soul excerpt with warm, intimate production: Warm Rhodes electric piano, mellow clean electric guitar (light chorus/reverb), rounded electric bass, laid-back drums (soft kick, brushed/snappy snare, relaxed hi-hat), and an intimate female lead vocal. Short intro, verse, chorus, and a natural ending; keep arrangement sparse and warm so the vocal sits clearly. Aim for a smooth neo-soul groove, subtle dynamics, and melodic hooks appropriate for verse + chorus structure. Mix for vocal presence and vintage-modern warmth.",
+        "lyrics": "[Verse]\nWe found a rhythm in the quiet\nLet the city fade away\n[Chorus]\nStay until the morning light\nHold this feeling through the night",
+        "duration_seconds": 32.0,
+        "timeline_start_seconds": 0.0,
+        "execution": "cloud",
+        "model_id": "yue2"
+      },
+      "exe_sha256": "90c7a476618bccc01e581b47d46b3880422143b8382e000bb915e94108c9baa3",
+      "exact_prompt_verified": false,
+      "validation_mode": "direct-pipeline",
+      "report_path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-YuE2-6653ad04ccbd\\report.json",
+      "report_sha256": "481d5879c74a72573cdb7cd600fbf128eaf1db7bef3e7709021c98dba442267c",
+      "elapsed_wall_seconds": 144.045,
+      "candidate": {
+        "result_id": "c81c397a6acb4bdcbe130c1f4921a19c",
+        "result_hash": "b6f2f7eae8b340bd5b976affb2769c6e32395c13f40201eabe9ae92536598549",
+        "model_id": "yue2",
+        "execution": "cloud",
+        "model": {
+          "id": "yue2",
+          "model_id": "yue2",
+          "provider": "cloud",
+          "revision": "7089d9f9cbf66a0234f0601d1bc1fb739ddaea6bc60a398d0c4b514773cd8a03"
+        },
+        "audio": {
+          "sha256": "7eda02ad3ac296338f8a01eee473f3f53bbb82acb3f777af651ce284e6895fb9",
+          "duration_seconds": 31.998666666666665,
+          "sample_rate": 48000.0,
+          "channels": 2.0
+        },
+        "completion": {
+          "truncated": true,
+          "reason": "token_budget",
+          "timing_is_exact": false
+        },
+        "limitations": [
+          "Duration uses semantic token limits; natural stopping, song structure and tempo adherence require listening."
+        ]
+      },
+      "final_job_status": "ready"
+    },
+    {
+      "case_id": "D1-YuE2",
+      "passed": false,
+      "model_id": "yue2",
+      "execution": "cloud",
+      "kind": "generate",
+      "real_llm": true,
+      "physical_audio": false,
+      "listening_quality_verified": false,
+      "started_at": "2026-11-14T11:02:53.179+00:00",
+      "finished_at": "2026-11-14T11:03:02.218+00:00",
+      "checks": [],
+      "error": "模型服务 额度不足或请求过于频繁，请检查平台用量后重试。",
+      "usage": {
+        "calls": 1,
+        "prompt_tokens": 0,
+        "completion_tokens": 0
+      },
+      "music_attempts": 0,
+      "input_files_unchanged": true,
+      "small_settings_unchanged": true,
+      "request": null,
+      "exe_sha256": "90c7a476618bccc01e581b47d46b3880422143b8382e000bb915e94108c9baa3",
+      "exact_prompt_verified": false,
+      "validation_mode": "exact-prompt-live",
+      "report_path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-YuE2-f6f82aee81b3\\report.json",
+      "report_sha256": "a90d95f870fbe8f00eff85155070dd230342259c916a3ceec5db11b5e7a27a7b",
+      "elapsed_wall_seconds": 9.039,
+      "candidate": {},
+      "final_job_status": null
+    },
+    {
+      "case_id": "D2-Chords",
+      "passed": true,
+      "model_id": "chordmini",
+      "execution": "cloud",
+      "kind": "chords",
+      "real_llm": false,
+      "physical_audio": false,
+      "listening_quality_verified": false,
+      "started_at": "2026-11-14T11:11:14.479+00:00",
+      "finished_at": "2026-11-14T11:11:41.357+00:00",
+      "checks": [
+        "Structured direct request produced the requested real candidate and review without project mutation; no LLM used",
+        "Explicit Apply completed with expected tracks/notes/chords or Warp and unchanged project tempo",
+        "One native Undo and Redo restored exact before/after musical state",
+        "Saved project reopened with identical musical state and verified local audio assets"
+      ],
+      "usage": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0
+      },
+      "music_attempts": 1,
+      "project": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D2-Chords-cd1141a8302f\\D2-NewLight-Chords.emproj",
+      "project_sha256": "7dbf2ee3b9ab85808cb76fdeaaf0b21895610d0da181482e5dc6889e6e16e9a1",
+      "accepted_audio_paths": [
+        {
+          "asset_id": "b1412c955a3f4cac971b96bceb8e8fc8",
+          "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D2-Chords-cd1141a8302f\\D2-NewLight-Chords.assets\\55ed0fd7c8ad4fd2b357883b2077d089\\b1412c955a3f4cac971b96bceb8e8fc8.wav",
+          "sha256": "4ce4a1e857a5a4645163896bf08c6a3e3998d766b8694c96f0901c8efc1eb33d"
+        }
+      ],
+      "input_files_unchanged": true,
+      "small_settings_unchanged": true,
+      "request": {
+        "clip_id": "73cafcb419e84d19b5997977ad742ba5",
+        "kind": "chords",
+        "start_seconds": 0.0,
+        "duration_seconds": 24.0,
+        "execution": "cloud",
+        "model_id": "chordmini",
+        "parameters": {}
+      },
+      "exe_sha256": "90c7a476618bccc01e581b47d46b3880422143b8382e000bb915e94108c9baa3",
+      "exact_prompt_verified": false,
+      "validation_mode": "direct-pipeline",
+      "report_path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D2-Chords-cd1141a8302f\\report.json",
+      "report_sha256": "e144c7e1540b73dffa6266f22ae010f1615ae66a5dcad016b6348b32e8e37d92",
+      "elapsed_wall_seconds": 26.878,
+      "candidate": {
+        "result_id": "322c0be7bf824c14bf4dace532be36f7",
+        "result_hash": "0914c96a2caa7743b17c05cf47470520614e46305d10402a033c626350df6076",
+        "model_id": "chordmini",
+        "execution": "cloud",
+        "model": {
+          "id": "chordmini",
+          "model_id": "chordmini",
+          "provider": "cloud",
+          "version": "0aee7048345b123d00f91ec271af8d10a0ddda965d94927de2a1fa0b79eadbc8"
+        },
+        "summary": {
+          "track_count": 0,
+          "note_count": 0,
+          "controller_count": 0,
+          "program_change_count": 0,
+          "chord_count": 15,
+          "beat_count": 0,
+          "annotation_count": 0
+        },
+        "total": 15,
+        "limitations": [
+          "Fixed 170-label vocabulary; arbitrary jazz extensions and inversions are unsupported."
+        ]
+      },
+      "final_job_status": "applied"
+    },
+    {
+      "case_id": "D2-Warp",
+      "passed": true,
+      "model_id": "beat-this-final0",
+      "execution": "local",
+      "kind": "beats",
+      "real_llm": false,
+      "physical_audio": false,
+      "listening_quality_verified": false,
+      "started_at": "2026-11-14T11:12:30.767+00:00",
+      "finished_at": "2026-11-14T11:13:15.004+00:00",
+      "checks": [
+        "Structured direct request produced the requested real candidate and review without project mutation; no LLM used",
+        "Explicit Apply completed with expected tracks/notes/chords or Warp and unchanged project tempo",
+        "One native Undo and Redo restored exact before/after musical state",
+        "Saved project reopened with identical musical state and verified local audio assets"
+      ],
+      "usage": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0
+      },
+      "music_attempts": 1,
+      "project": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D2-Warp-9374c1a45a26\\D2-NewLight-Aligned.emproj",
+      "project_sha256": "ceeefce09c66f20cb46c2d214df4caa14e2004e5a0ac6490894a46ade404969f",
+      "accepted_audio_paths": [
+        {
+          "asset_id": "b1412c955a3f4cac971b96bceb8e8fc8",
+          "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D2-Warp-9374c1a45a26\\D2-NewLight-Aligned.assets\\839c18c3265241a7af2bd55394c26ebf\\b1412c955a3f4cac971b96bceb8e8fc8.wav",
+          "sha256": "4ce4a1e857a5a4645163896bf08c6a3e3998d766b8694c96f0901c8efc1eb33d"
+        },
+        {
+          "asset_id": "warp-faed8cd78ab3daedef37ca5ec4732a1c0c5dd23b",
+          "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D2-Warp-9374c1a45a26\\D2-NewLight-Aligned.assets\\839c18c3265241a7af2bd55394c26ebf\\warp-faed8cd78ab3daedef37ca5ec4732a1c0c5dd23b.wav",
+          "sha256": "75be8b308d405bf002a803dd81a0b27f43d9d936359f318e831b5c2efc8456a9"
+        }
+      ],
+      "input_files_unchanged": true,
+      "small_settings_unchanged": true,
+      "chord_mapping_regions_checked": 15,
+      "warp_after": {
+        "clip_id": "73cafcb419e84d19b5997977ad742ba5",
+        "enabled": true,
+        "follow_tempo": true,
+        "mode": "preserve_pitch",
+        "source_bpm": 125.0,
+        "target_bpm": 120.0,
+        "warp_speed_ratio": 0.96,
+        "source_offset_seconds": 0.0,
+        "playback_source_offset_seconds": 0.0,
+        "timeline_start_seconds": 0.25,
+        "duration_seconds": 25.0,
+        "source_duration_seconds": 24.0,
+        "playback_duration_seconds": 25.0
+      },
+      "request": {
+        "clip_id": "73cafcb419e84d19b5997977ad742ba5",
+        "kind": "beats",
+        "start_seconds": 0.0,
+        "duration_seconds": 24.0,
+        "execution": "local",
+        "model_id": "beat-this-final0",
+        "parameters": {
+          "meter": "auto"
+        }
+      },
+      "exe_sha256": "90c7a476618bccc01e581b47d46b3880422143b8382e000bb915e94108c9baa3",
+      "exact_prompt_verified": false,
+      "validation_mode": "direct-pipeline",
+      "report_path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D2-Warp-9374c1a45a26\\report.json",
+      "report_sha256": "3f8c99368fa121b81d52c96df29dfc4f0be28f8d13137d68cfa11f18e5e075be",
+      "elapsed_wall_seconds": 44.237,
+      "candidate": {
+        "result_id": "1370e32087f24143bd45a009a6e610ed",
+        "result_hash": "9bb487881a62c59c8af4800a7e0ed504964916c4c9c400be89c8db6d379ad030",
+        "model_id": "beat-this-final0",
+        "execution": "local",
+        "model": {
+          "version": "1.1.0",
+          "weight_sha256": "8c328b45f59d8dd3dff219253ff6a8d6482be57d0133a29140e2febbf8eb8331",
+          "license_status": "MIT-code-and-published-weights; training-recording-rights-not-transferred",
+          "id": "beat-this-final0"
+        },
+        "summary": {
+          "track_count": 0,
+          "note_count": 0,
+          "controller_count": 0,
+          "program_change_count": 0,
+          "chord_count": 0,
+          "beat_count": 50,
+          "annotation_count": 0
+        },
+        "total": 50,
+        "tempo": {
+          "bpm": 124.99999999999989,
+          "first_beat_seconds": 0.24,
+          "first_downbeat_seconds": 1.68,
+          "meter_numerator": 4,
+          "meter_denominator": 4,
+          "meter_supported": true,
+          "variable_tempo": false,
+          "tempo_candidates": [
+            62.49999999999994,
+            124.99999999999989,
+            249.99999999999977
+          ],
+          "confidence_kind": "uncalibrated_beat_consistency"
+        },
+        "limitations": [
+          "Beat/downbeat predictions may be wrong; review the first downbeat and tempo before applying.",
+          "Meter is inferred from predicted downbeat spacing; only 3/4 and 4/4 are supported. Compound or changing meter requires manual correction.",
+          "Warp currently uses one fixed ratio; variable-tempo performances are not automatically straightened."
+        ]
+      },
+      "final_job_status": "applied"
+    },
+    {
+      "case_id": "D3-Piano",
+      "passed": true,
+      "model_id": "transkun",
+      "execution": "cloud",
+      "kind": "transcribe",
+      "real_llm": false,
+      "physical_audio": false,
+      "listening_quality_verified": false,
+      "started_at": "2026-11-14T11:12:30.782+00:00",
+      "finished_at": "2026-11-14T11:13:03.141+00:00",
+      "checks": [
+        "Structured direct request produced the requested real candidate and review without project mutation; no LLM used",
+        "Explicit Apply completed with expected tracks/notes/chords or Warp and unchanged project tempo",
+        "One native Undo and Redo restored exact before/after musical state",
+        "Saved project reopened with identical musical state and verified local audio assets"
+      ],
+      "usage": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0
+      },
+      "music_attempts": 1,
+      "project": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D3-Piano-570d980002b6\\D3-TeaForTwo-MIDI.emproj",
+      "project_sha256": "7b2defec0f43a66d06778bf8ed5e0e3e3a23909dab307951f02132816106374c",
+      "accepted_audio_paths": [
+        {
+          "asset_id": "34ea1c45a19b4839b3abfa34650c95c7",
+          "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D3-Piano-570d980002b6\\D3-TeaForTwo-MIDI.assets\\b6724d392d1e47e9be4ee11eda127663\\34ea1c45a19b4839b3abfa34650c95c7.wav",
+          "sha256": "cb1d929ebce7d9dcdf169dfeff6298e16b93d32c7ff174e99bb59ab6a0264968"
+        }
+      ],
+      "input_files_unchanged": true,
+      "small_settings_unchanged": true,
+      "accepted_note_count": 132,
+      "accepted_controller_count": 18,
+      "request": {
+        "clip_id": "d769d74898f8404da19590e4d769d5b4",
+        "kind": "transcribe",
+        "start_seconds": 0.0,
+        "duration_seconds": 16.0,
+        "execution": "cloud",
+        "model_id": "transkun",
+        "parameters": {}
+      },
+      "exe_sha256": "90c7a476618bccc01e581b47d46b3880422143b8382e000bb915e94108c9baa3",
+      "exact_prompt_verified": false,
+      "validation_mode": "direct-pipeline",
+      "report_path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D3-Piano-570d980002b6\\report.json",
+      "report_sha256": "bdf6ab4344c91b666fce3fd3e6c3836af0321c1f90cf7362d9e1e79ce107696b",
+      "elapsed_wall_seconds": 32.359,
+      "candidate": {
+        "result_id": "c00214d0883642c0b8fdbe484a1f32fa",
+        "result_hash": "524262c8778c10f0475e57b868d08a79cf9e497f880bdd7be505f46aa6689f79",
+        "model_id": "transkun",
+        "execution": "cloud",
+        "model": {
+          "id": "transkun",
+          "model_id": "transkun",
+          "provider": "cloud",
+          "version": "58f6445933f7af7d04cec9814c319ccbc570cce41e062e39427fa6b0c96913ab"
+        },
+        "summary": {
+          "track_count": 1,
+          "note_count": 132,
+          "controller_count": 17,
+          "program_change_count": 1,
+          "chord_count": 0,
+          "beat_count": 0,
+          "annotation_count": 0
+        },
+        "total": 132,
+        "limitations": [
+          "Candidate events were cropped to the submitted selection; original MIDI/events remain unchanged."
+        ]
+      },
+      "final_job_status": "applied"
+    }
+  ],
+  "api_diagnostic": {
+    "started_at": "2026-11-14T11:05:22.945295+00:00",
+    "purpose": "One small API admission diagnostic after HTTP 429",
+    "request_limit": 1,
+    "http_requests": 1,
+    "max_output_tokens": 64,
+    "tools_enabled": false,
+    "daw_started": false,
+    "music_tasks": 0,
+    "settings_changed": false,
+    "raw_response_saved": false,
+    "original_large_request_diagnosed": false,
+    "provider": "openai",
+    "model": "gpt-5-mini",
+    "probe_reasoning_effort": "low",
+    "network_mode": "system_loopback_proxy",
+    "http_status": 429,
+    "error_body_within_limit": true,
+    "api_error_code": "unrecognized_or_missing",
+    "api_error_type": "insufficient_quota",
+    "adapter_completed": false,
+    "adapter_error_code": "rate_limit",
+    "adapter_http_status": 429,
+    "classification": "insufficient_quota",
+    "elapsed_seconds": 2.547,
+    "finished_at": "2026-11-14T11:05:25.492281+00:00"
+  },
+  "physical_device_or_listening_verified": false,
+  "note": "A direct-pipeline pass does not verify the English prompt or GUI clicks. Failed attempts are retained."
+}

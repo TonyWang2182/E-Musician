@@ -1,0 +1,110 @@
+{
+  "passed": true,
+  "exact_prompt_live_passes": 1,
+  "direct_pipeline_passes": 5,
+  "prompt_txt_pairs_verified": 6,
+  "saved_projects_verified": 6,
+  "audio": [
+    {
+      "case_id": "D1-ACE",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-ACE-4e9201887e84\\D1-ACE.assets\\e567e9581f84443fb6eb52347282d9fd\\f75fa7c11a604c9683f0f6d26ab10e5b.wav",
+      "sample_rate": 48000,
+      "channels": 2,
+      "frames": 1536000,
+      "peak": 0.891265869140625,
+      "listening_verified": false
+    },
+    {
+      "case_id": "D1-SCNet",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-SCNet-d1b8dc00a365\\D1-Stems.assets\\8081363eca344bbaac060f30ae3d1731\\07cf13e7962f4f1780a2d609b97fe206.wav",
+      "sample_rate": 48000,
+      "channels": 2,
+      "frames": 1536000,
+      "peak": 0.891265869140625,
+      "listening_verified": false
+    },
+    {
+      "case_id": "D1-SCNet",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-SCNet-d1b8dc00a365\\D1-Stems.assets\\8081363eca344bbaac060f30ae3d1731\\25b4238c52c543149d24c7996e8424d2.wav",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 1411200,
+      "peak": 0.6179044246673584,
+      "listening_verified": false
+    },
+    {
+      "case_id": "D1-SCNet",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-SCNet-d1b8dc00a365\\D1-Stems.assets\\8081363eca344bbaac060f30ae3d1731\\a04858e95d4a4c6cb46aab0afd2a3403.wav",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 1411200,
+      "peak": 0.9103896021842957,
+      "listening_verified": false
+    },
+    {
+      "case_id": "D1-SCNet",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-SCNet-d1b8dc00a365\\D1-Stems.assets\\8081363eca344bbaac060f30ae3d1731\\c65b1f2cb6b24677863220b1f65a74e7.wav",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 1411200,
+      "peak": 0.5132842659950256,
+      "listening_verified": false
+    },
+    {
+      "case_id": "D1-SCNet",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-SCNet-d1b8dc00a365\\D1-Stems.assets\\8081363eca344bbaac060f30ae3d1731\\7646a427e07b4a1cbec26556eef1bf2d.wav",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 1411200,
+      "peak": 0.47064208984375,
+      "listening_verified": false
+    },
+    {
+      "case_id": "D1-YuE2",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-YuE2-6653ad04ccbd\\D1-YuE2.assets\\a32dc16de41e429ba6d5610e1f403254\\c6447f89e5054d9cae05ca1f58ecc280.wav",
+      "sample_rate": 48000,
+      "channels": 2,
+      "frames": 1535936,
+      "peak": 1.0,
+      "listening_verified": false
+    },
+    {
+      "case_id": "D2-Chords",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D2-Chords-cd1141a8302f\\D2-NewLight-Chords.assets\\55ed0fd7c8ad4fd2b357883b2077d089\\b1412c955a3f4cac971b96bceb8e8fc8.wav",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 1058400,
+      "peak": 1.063109040260315,
+      "listening_verified": false
+    },
+    {
+      "case_id": "D2-Warp",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D2-Warp-9374c1a45a26\\D2-NewLight-Aligned.assets\\839c18c3265241a7af2bd55394c26ebf\\b1412c955a3f4cac971b96bceb8e8fc8.wav",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 1058400,
+      "peak": 1.063109040260315,
+      "listening_verified": false
+    },
+    {
+      "case_id": "D2-Warp",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D2-Warp-9374c1a45a26\\D2-NewLight-Aligned.assets\\839c18c3265241a7af2bd55394c26ebf\\warp-faed8cd78ab3daedef37ca5ec4732a1c0c5dd23b.wav",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 1102500,
+      "peak": 1.7756415605545044,
+      "listening_verified": false
+    },
+    {
+      "case_id": "D3-Piano",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D3-Piano-570d980002b6\\D3-TeaForTwo-MIDI.assets\\b6724d392d1e47e9be4ee11eda127663\\34ea1c45a19b4839b3abfa34650c95c7.wav",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 705600,
+      "peak": 0.40198343992233276,
+      "listening_verified": false
+    }
+  ],
+  "local_links_checked": 24,
+  "scope": "Offline artifact checks; not GUI, physical playback, model accuracy or listening."
+}

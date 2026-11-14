@@ -1,0 +1,32 @@
+[
+  {
+    "id": "D1-YuE2",
+    "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\prompts\\D1-YuE2.txt",
+    "sha256": "01ce33fee10960d330d7ad92f54beb7693d91b96555a5c01dd026b2875329bc8"
+  },
+  {
+    "id": "D1-ACE",
+    "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\prompts\\D1-ACE.txt",
+    "sha256": "dcb974d86c490b2494084ceecae758302349057a2873ca3411918f9d8936cfca"
+  },
+  {
+    "id": "D1-SCNet",
+    "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\prompts\\D1-SCNet.txt",
+    "sha256": "73ede3a9beb63d2870fad130556fb7170e38b6437b5759cdde55abbd65167fa0"
+  },
+  {
+    "id": "D2-Chords",
+    "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\prompts\\D2-Chords.txt",
+    "sha256": "152610a73bfe69f0cae7f2b59d6754f457b352eb1b4c2d61c408c94328a83aab"
+  },
+  {
+    "id": "D2-Warp",
+    "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\prompts\\D2-Warp.txt",
+    "sha256": "4792767bf9f4bcf76b4378c179356ef67a5504c395e935813510145a8e04c78b"
+  },
+  {
+    "id": "D3-Piano",
+    "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\prompts\\D3-Piano.txt",
+    "sha256": "c520d59d1469829089167309860e101becda56b2cfc0424d52b279a881438de8"
+  }
+]

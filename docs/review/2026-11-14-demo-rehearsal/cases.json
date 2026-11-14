@@ -1,0 +1,78 @@
+[
+  {
+    "id": "D1-YuE2",
+    "kind": "generate",
+    "model_id": "yue2",
+    "execution": "cloud",
+    "bpm": 90,
+    "duration_seconds": 32,
+    "output_project_name": "D1-YuE2",
+    "prompt": "Use cloud YuE2 to generate one 32-second neo-soul excerpt at the current project tempo and time signature, starting at the current playhead. Warm Rhodes, mellow clean guitar, rounded bass, laid-back drums, and an intimate female lead vocal. Aim for a short intro, verse, chorus, and natural ending. Put these English lyrics in the generation lyrics field; this must not be an instrumental request:\n[Verse]\nWe found a rhythm in the quiet\nLet the city fade away\n[Chorus]\nStay until the morning light\nHold this feeling through the night\nPrepare an import proposal so I can preview the result before applying it. Generate once; do not retry.",
+    "generation_request": {
+      "prompt": "Neo-soul excerpt with warm, intimate production: Warm Rhodes electric piano, mellow clean electric guitar (light chorus/reverb), rounded electric bass, laid-back drums (soft kick, brushed/snappy snare, relaxed hi-hat), and an intimate female lead vocal. Short intro, verse, chorus, and a natural ending; keep arrangement sparse and warm so the vocal sits clearly. Aim for a smooth neo-soul groove, subtle dynamics, and melodic hooks appropriate for verse + chorus structure. Mix for vocal presence and vintage-modern warmth.",
+      "lyrics": "[Verse]\nWe found a rhythm in the quiet\nLet the city fade away\n[Chorus]\nStay until the morning light\nHold this feeling through the night",
+      "duration_seconds": 32.0,
+      "timeline_start_seconds": 0.0,
+      "execution": "cloud",
+      "model_id": "yue2"
+    }
+  },
+  {
+    "id": "D1-ACE",
+    "kind": "generate",
+    "model_id": "ace-step-1.5-xl-turbo",
+    "execution": "cloud",
+    "bpm": 90,
+    "duration_seconds": 32,
+    "output_project_name": "D1-ACE",
+    "prompt": "Use cloud ACE-Step 1.5 XL to generate one 32-second neo-soul excerpt at the current project tempo and time signature, starting at the current playhead. Warm Rhodes, mellow clean guitar, rounded bass, laid-back drums, and an intimate female lead vocal. Aim for a short intro, verse, chorus, and natural ending. Put these English lyrics in the generation lyrics field; this must not be an instrumental request:\n[Verse]\nWe found a rhythm in the quiet\nLet the city fade away\n[Chorus]\nStay until the morning light\nHold this feeling through the night\nPrepare an import proposal so I can preview the result before applying it. Generate once; do not retry."
+  },
+  {
+    "id": "D1-SCNet",
+    "kind": "separate",
+    "model_id": "scnet",
+    "execution": "cloud",
+    "bpm": 90,
+    "duration_seconds": 32,
+    "source_path": "E:/MusicAgent&DAW/demo-video/2026-11-14/rehearsal/D1-ACE-4e9201887e84/D1-ACE.assets/e567e9581f84443fb6eb52347282d9fd/f75fa7c11a604c9683f0f6d26ab10e5b.wav",
+    "source_track_name": "Chosen Neo Soul",
+    "output_project_name": "D1-Stems",
+    "prompt": "Use cloud SCNet to separate the only audio clip on the track named Chosen Neo Soul into vocals, drums, bass, and other. Keep the original audio unchanged. Prepare a four-track import proposal for review; do not apply it yet."
+  },
+  {
+    "id": "D2-Chords",
+    "kind": "chords",
+    "model_id": "chordmini",
+    "execution": "cloud",
+    "bpm": 120,
+    "duration_seconds": 24,
+    "source_path": "E:/MusicAgent&DAW/demo-video/2026-11-14/sources/new-light-60-84.wav",
+    "source_track_name": "New Light Source",
+    "output_project_name": "D2-NewLight-Chords",
+    "prompt": "Use cloud ChordMini to identify the chords in the only audio clip on the track named New Light Source. Show the detected labels and prepare a chord-track import proposal for review. Keep the source audio and project tempo unchanged."
+  },
+  {
+    "id": "D2-Warp",
+    "kind": "tempo",
+    "model_id": "beat-this-final0",
+    "execution": "local",
+    "bpm": 120,
+    "duration_seconds": 24,
+    "input_project": "E:/MusicAgent&DAW/demo-video/2026-11-14/rehearsal/D2-Chords-cd1141a8302f/D2-NewLight-Chords.emproj",
+    "source_track_name": "New Light Source",
+    "output_project_name": "D2-NewLight-Aligned",
+    "prompt": "Use local Beat This! to analyze the tempo and downbeats of the only audio clip on the track named New Light Source. Show the detected BPM and first downbeat. Prepare a plan to align the entire clip to the current project tempo, preserving pitch and retaining the opening audio. Keep the project BPM and time signature unchanged. Let me review the alignment before applying it."
+  },
+  {
+    "id": "D3-Piano",
+    "kind": "transcribe",
+    "model_id": "transkun",
+    "execution": "cloud",
+    "bpm": 120,
+    "duration_seconds": 16,
+    "source_path": "E:/MusicAgent&DAW/demo-video/2026-11-14/sources/tea-piano-20-36.wav",
+    "source_track_name": "Tea Piano Source",
+    "output_project_name": "D3-TeaForTwo-MIDI",
+    "prompt": "Use cloud TransKun to transcribe the only audio clip on the track named Tea Piano Source to MIDI. Preserve any pedal events actually returned by the model. Prepare a MIDI-track import proposal for review. Keep the source audio unchanged."
+  }
+]
