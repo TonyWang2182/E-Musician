@@ -95,6 +95,8 @@ class AgentRuntime:
         self.generation_jobs = {}
         self.generation_request = None
         self.generation_preview = {"status": "stopped"}
+        # Bounded read-only candidate projections; the native host remains authoritative.
+        self.generation_candidates = {}
 
     def _message(self, role, content, *, runtime=False):
         safe = redact(str(content))[:8000]
@@ -140,6 +142,7 @@ class AgentRuntime:
                     "capability_groups": capability_groups(self.snapshot, self.host_capabilities, self.analysis_capabilities) + [mix_capability_group(self.host_capabilities), music_generation.capability_group(self.host_capabilities, self.generation_capabilities)],
                     "analysis_jobs": copy.deepcopy(list(self.analysis_jobs.values())[-12:]),
                     "generation_jobs": copy.deepcopy(list(self.generation_jobs.values())[-12:]),
+                    "generation_choices": self._generation_choices(),
                     "generation_preview": copy.deepcopy(self.generation_preview),
                     "pause_requested":self.pause_requested, "progress":dict(self.progress),
                     "plan":plan, "messages":copy.deepcopy(self.messages), "error":self.error, "error_code":self.error_code,
@@ -212,6 +215,80 @@ class AgentRuntime:
         with self.lock:
             self.progress = {"stage":stage, "label":label, "completed":completed, "total":total}
 
+    def _remember_generation(self, candidate):
+        safe = music_generation.safe_result(candidate)
+        with self.lock:
+            self.generation_candidates.pop(safe["result_id"], None)
+            self.generation_candidates[safe["result_id"]] = safe
+            while len(self.generation_candidates) > 6:
+                self.generation_candidates.pop(next(iter(self.generation_candidates)))
+
+    def _generation_choices(self):
+        selected = (self.plan or {}).get("generation", {}).get("result_id")
+        if self.plan:
+            if identity(self.snapshot) != (self.plan["project_id"], self.plan["revision"]):
+                selected = None
+            else:
+                try:
+                    assert_scope_unchanged(self.plan["scope"], self.snapshot)
+                except ValueError:
+                    selected = None
+        choices = []
+        for candidate in self.generation_candidates.values():
+            source = candidate["source"]
+            if source.get("project_id") != self.snapshot.get("project_id"):
+                continue
+            matches = all(source.get(a) == self.snapshot.get(b) for a, b in
+                          (("bpm", "bpm"), ("meter_numerator", "numerator"), ("meter_denominator", "denominator")))
+            choices.append({"result_id": candidate["result_id"], "model_id": candidate.get("model_id") or candidate["model"].get("model_id") or candidate["model"].get("id", ""),
+                            "duration_seconds": candidate["audio"]["duration_seconds"],
+                            "applied": candidate["applied"],
+                            "available": bool(self.bridge.connected and matches and not candidate["stale"] and not candidate["applied"]),
+                            "selected": candidate["result_id"] == selected,
+                            "truncated": candidate.get("completion", {}).get("truncated")})
+        return choices
+
+    def select_generation_result(self, result_id, scope="selection", *, language="zh-CN"):
+        result_id = identifier(result_id)
+        if not isinstance(scope, str) or scope not in MODES:
+            raise ValueError("请选择当前选择、整个片段或整个工程范围。")
+        with self.lock:
+            if self.busy():
+                raise ValueError("请先等待或取消当前任务。")
+            if result_id not in self.generation_candidates:
+                raise ValueError(L("这个生成结果不在当前会话中。", "This generation result is not in this session."))
+            self.plan, self.before = None, None
+            self.last_result = ""
+            self.task_id = str(uuid.uuid4())
+            self.generation_request = None
+            self._start("planning", lambda: self._select_generation(result_id, scope, normalize_language(language)))
+        return self.state(False)
+
+    def _select_generation(self, result_id, scope, language):
+        self._progress("checking", L("正在准备选中的结果…", "Preparing the selected result…"))
+        context = self.bridge.snapshot()
+        if context.get("recording") or context.get("recording_finalizing") or context.get("counting_in"):
+            raise ValueError("请先结束录音或预备拍，再让助手编辑。")
+        frozen = freeze_scope(context, scope)
+        candidate = self.bridge.generation_result(result_id)
+        if candidate.get("result_id") != result_id:
+            raise BridgeError("生成候选身份不一致。")
+        self._remember_generation(candidate)
+        summary = "Review this generated audio before adding it to a new track." if language == "en" else "试听这段生成音频，确认后加入新轨道。"
+        plan = music_generation.compile_import(candidate, context, frozen, summary)
+        plan["id"] = str(uuid.uuid4())
+        if self.generation_preview.get("status") in {"preparing", "loading", "playing"}:
+            self._stop_generation_preview()
+        self._check_planning_context(context, frozen)
+        if self._cancelled():
+            return
+        with self.lock:
+            self.snapshot = context
+            self.before, self.plan, self.phase = copy.deepcopy(context), plan, "ready"
+            self.progress = {"stage": "ready", "label": L("结果已就绪，可以试听或应用。", "Ready to preview or apply."), "completed": 0, "total": 0}
+            self.audit.write("generation_selected", task_id=self.task_id, plan_id=plan["id"],
+                             result_id=result_id, project_id=context["project_id"], revision=context["revision"], scope=scope)
+
     def pause(self):
         with self.lock:
             if self.phase != "planning" or not self.busy():
@@ -278,6 +355,12 @@ class AgentRuntime:
             self.bridge.read_native_instrument(context,track_id)
 
     def _propose(self, prompt, scope, language="zh-CN"):
+        # A new task hides the old review. Stop its audition before hiding the
+        # only playback controls; this runs in the helper worker, not HTTP/audio.
+        with self.lock:
+            preview_active = self.generation_preview.get("status") in {"preparing", "loading", "playing"}
+        if preview_active:
+            self._stop_generation_preview()
         context = self.bridge.snapshot()
         if context.get("recording") or context.get("recording_finalizing") or context.get("counting_in"):
             raise ValueError("请先结束录音或预备拍，再让助手编辑。")
@@ -387,6 +470,7 @@ class AgentRuntime:
                 if set(args) != {"result_id", "summary"}: raise ValueError("生成导入参数无效。")
                 candidate = self.bridge.generation_result(identifier(args["result_id"]))
                 plan = music_generation.compile_import(candidate, context, frozen, args["summary"])
+                self._remember_generation(candidate)
                 plan["id"] = str(uuid.uuid4())
                 self._check_planning_context(context, frozen)
                 if self._cancelled(): return
@@ -596,6 +680,7 @@ class AgentRuntime:
                     if job["status"] == "ready":
                         candidate = self.bridge.generation_result(job.get("result_id") or job_id)
                         music_generation.authorize_result(context, frozen, candidate)
+                        self._remember_generation(candidate)
                         return {"job": job, "candidate": candidate}
                     return {"job": job, "candidate": None}
                 self.cancel_event.wait(.25)
@@ -633,6 +718,7 @@ class AgentRuntime:
         else: result_id = identifier(args["result_id"])
         candidate = self.bridge.generation_result(result_id)
         music_generation.authorize_result(context, frozen, candidate)
+        self._remember_generation(candidate)
         return candidate
 
     def _analysis_tool(self, name, args, context, frozen):
@@ -886,6 +972,7 @@ class AgentRuntime:
     def _verify_generation_import(self, plan, receipt, after):
         approved = plan["generation"]
         result = self.bridge.generation_result(approved["result_id"])
+        self._remember_generation(result)
         errors = []
         if result.get("applied") is not True or result.get("result_hash") != approved["result_hash"] or result.get("audio") != approved["audio"]:
             errors.append("宿主未确认相同生成音频已导入")

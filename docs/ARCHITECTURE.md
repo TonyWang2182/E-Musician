@@ -1,5 +1,11 @@
 # E-musician 技术架构
 
+## 0.13.4 Agent 任务审阅（2026-11-14）
+
+网页只投影 helper 的实际任务状态：用户指令→后台规划/模型/下载阶段→候选→显式应用→回读→撤销。历史对话、模型技术信息、细项和用量折叠，作用范围、可应用变化和截断提示保持可见。进度采用活动条和真实阶段，不把子下载完成度伪装成总百分比。两种语言共享状态语义，用户轨名/歌词/原始输入不自动翻译。
+
+helper 保留最近六项生成候选的只读投影；`/api/generation/select` 重新向原生宿主取回真实候选，核验工程/速度/拍号、当前范围与身份，按新修订编译可试听/应用方案。切换不发 LLM 或音乐生成请求、不直接写工程，仍沿用原生候选的只接受一次及 Apply/Undo/hash 守护。开始新任务会停止旧候选试听。429 响应只做有界允许值分类，原文不外泄、不自动重试。原生 Beats 切换时选 Local，避免隐藏 Cloud 过滤。音频线程、DSP、云端部署、工程 schema 保持本轮前的接口边界。[ADR](decisions/2026-11-14-agent-task-review.md) / [结果](review/2026-11-14-agent-demo-v0134/RESULTS.md)。
+
 ## 0.13.3 工程文件入口与克隆端点（2026-11-14）
 
 Windows文件关联 → `ProjectLaunch`解析 → 消息线程SafePointer分派 → `MainComponent::openProjectFile` → 原未保存/录音保护 → `EngineSession::execute(open_project)`异步任务。启动参数与已有实例转交使用同一路径；命令已排队和工程已装载分开验证，不在文件入口直接修改引擎。图标引用既有EXE Logo资源，按用户注册脚本备份并维护E-musician自有ProgID/应用记录，保留UserChoice/UserChoiceLatest与外部应用选择。

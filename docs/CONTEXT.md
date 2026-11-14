@@ -1,4 +1,12 @@
-# 当前工作：0.13.3 演示提示词与操作彩排（2026-11-14）
+# 当前候选：0.13.4 Agent 审阅与演示包（2026-11-14）
+
+实际工作树 E:/MusicAgent&DAW/worktrees/audio-analysis，分支 feature/agent-demo-v0134，基线768c5d6。中英Agent已收敛为指令→真实阶段活动条→结果/试听→Apply→Undo；历史对话、用量、技术路线折叠。最近六项当前工程生成候选可切换重新审阅，不重生成、不调LLM、不自动应用。选择/修订/hash守护保持；API 429明确额度分类；Cloud和弦切Beats的Local筛选修复。原生0.13.3保留，0.13.4独立Release和CTest11/11通过；具体Agent/web及真实颜色/混音证据见[RESULTS](review/2026-11-14-agent-demo-v0134/RESULTS.md)。未操作用户GUI/声卡。
+
+入口 E:/MusicAgent&DAW/Start E-musician 0.13.4.cmd；未替用户关闭当前程序，先保存关闭旧版再启动。完整[新版操作稿](demo/2026-11-14-demo-runbook-v0134.md)衔接原240秒分镜。E盘demo-video/2026-11-14内已有6个模型结果工程、CC0素材ZIP及独立Antidote参考工程、实际1080p30片头/片尾MP4与透明WebM/源包；源码和来源档案纳入本分支，大媒体不入Git。
+
+重要阻断：用户明确API仍在处理，先继续其他工作。本轮不重试GPT，也不更换语言服务。此前实测HTTP429类型insufficient_quota；ACE原样英文通过，其余模型虽已真实推理/接受/Undo/保存重开，但不能当成对应自然语言指令通过。下一步用户修复API后先单次小探针，再补验其余中英提示词及双结果同工程真实Agent彩排。音乐质量、GUI鼠标/DPI、物理输入/ASIO/录屏声音仍人工待验。Git发布以本轮PUBLISH为准，不合并main。
+
+# 历史工作：0.13.3 演示提示词与操作彩排（2026-11-14）
 
 实际工作树E:/MusicAgent&DAW/worktrees/audio-analysis，分支docs/demo-rehearsal-v0133，基线9286573。本轮仅新增验证器、演示步骤与证据，产品源码/模型部署/原生EXE未改，不重新构建、不控制用户GUI。入口和云端仍沿用下方0.13.3。
 

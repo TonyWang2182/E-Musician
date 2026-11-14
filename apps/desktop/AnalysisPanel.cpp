@@ -234,6 +234,9 @@ struct AnalysisPanel::Impl final : juce::ListBoxModel {
     }
     void chooseMode(const juce::String& nextKind) {
         if(kind!=nextKind)modelIds.clear();kind = nextKind;
+        // Beats currently has a local provider and no visible route picker.
+        // Do not inherit a hidden Cloud filter from the previous analysis tab.
+        if (kind == "beats") execution.setSelectedId(2, juce::dontSendNotification);
         separate.setToggleState(kind == "separate", juce::dontSendNotification);
         transcribe.setToggleState(kind == "transcribe", juce::dontSendNotification);
         chords.setToggleState(kind == "chords", juce::dontSendNotification);
@@ -792,6 +795,17 @@ juce::Result AnalysisPanel::runInteractionSmokeTest(juce::DynamicObject& report,
     auto& p = *impl; p.refresh();
     const auto before = p.session.snapshot();
     if (before.selectedClipId.isEmpty()) return juce::Result::fail("Analysis UI smoke requires a selected audio source.");
+    const auto realCapabilities = p.capabilities;
+    p.capabilities = object({ {"providers", juce::Array<juce::var> {
+        object({ {"kind", "chords"}, {"execution", "cloud"}, {"model_id", "synthetic-chord"}, {"available", true} }),
+        object({ {"kind", "beats"}, {"execution", "local"}, {"model_id", "synthetic-beat"}, {"available", true} })
+    }} });
+    p.execution.setSelectedId(3, juce::dontSendNotification); p.chooseMode("chords");
+    p.chooseMode("beats");
+    if (p.execution.getSelectedId() != 2 || !p.available || p.selectedProvider["model_id"].toString() != "synthetic-beat")
+        return juce::Result::fail("Cloud-to-Beats switch retained a hidden route filter.");
+    report.setProperty("cloudToLocalBeatRoute", true);
+    p.capabilities = realCapabilities; p.execution.setSelectedId(1, juce::dontSendNotification); p.modelIds.clear();
     for (const auto size : { juce::Point<int>(930, 308), juce::Point<int>(600, 260), juce::Point<int>(540, 210) }) {
         setSize(size.x, size.y); p.chooseMode("transcribe");
         if ((p.minimumNote.isVisible() && p.start.getBounds().intersects(p.minimumNote.getBounds())) || p.right.getWidth() < 300)

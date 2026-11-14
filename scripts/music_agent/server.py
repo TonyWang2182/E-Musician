@@ -152,6 +152,9 @@ class Handler(BaseHTTPRequestHandler):
                 result = runtime.plan_request(value["prompt"], value.get("scope","selection"), language=language)
             elif path == "/api/apply" and set(value) == {"plan_id"}:
                 result = runtime.apply(value["plan_id"])
+            elif path == "/api/generation/select" and set(value) == {"result_id", "scope"}:
+                language = normalize_language(self.headers.get("X-Agent-Language", "zh-CN"))
+                result = runtime.select_generation_result(value["result_id"], value["scope"], language=language)
             elif path == "/api/generation/preview" and set(value) == {"plan_id"}:
                 result = runtime.preview_generation_plan(value["plan_id"])
             elif path == "/api/generation/preview" and value == {"stop": True}:

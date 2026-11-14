@@ -18,16 +18,13 @@
   let state = null, inFlight = false, mutating = false, online = false, stopped = false, timer = null;
   let connectionError = false;
   let messageSignature = "", trackSignature = "", localNotice = "";
-  let capabilitySignature = "", analysisPreviewSignature = "";
+  let capabilitySignature = "", analysisPreviewSignature = "", generationChoiceSignature = "";
   let providerSignature = "", providers = [], settingsDirty = false, formProviderId = null;
   let shownPlanId = null, followResponse = false, submittedScope = null;
   let notePreviewSignature = "", notePreviewPlanId = null, notePreviewNotes = [], notePreviewPage = 0;
   const notePreviewPageSize = 50;
   let nativeVisible = true;
   const busyPhases = new Set(["planning", "paused", "applying"]);
-  const phaseText = {idle: t("准备就绪"), planning: t("正在生成方案"), paused: t("已暂停"), ready: t("等待你确认"), applying: t("正在应用并检查"), done: t("已完成"), error: t("需要处理"), cancelled: t("已停止")};
-  const executionStages = ["preflight", "submitting", "verifying", "done"];
-  const stageText = {preflight: t("正在检查方案"), submitting: t("正在提交修改"), verifying: t("正在核对结果"), done: t("已完成核对")};
   function text(id, value) { $(id).textContent = value == null ? "" : String(value); }
   function element(tag, value, className) {
     const node = document.createElement(tag);
@@ -35,7 +32,33 @@
     if (className) node.className = className;
     return node;
   }
-  function notice(value) { text("notice", value || ""); $("notice").hidden = !value; }
+  function notice(value, detail = "") {
+    text("notice-text", value || ""); $("notice").hidden = !value;
+    text("notice-detail", detail); $("notice-details").hidden = !detail;
+  }
+  function stalePlan(plan) {
+    const snapshot = state?.snapshot || {}, scope = plan?.scope;
+    if (!plan) return false;
+    const revision = plan.revision ?? plan.expected_revision ?? scope?.project_revision;
+    if (plan.project_id && snapshot.project_id && plan.project_id !== snapshot.project_id) return true;
+    if (Number.isInteger(revision) && Number.isInteger(snapshot.revision) && revision !== snapshot.revision) return true;
+    return scope?.mode !== "project" && Number.isInteger(scope?.selection_revision)
+      && Number.isInteger(snapshot.selection_context?.selection_revision)
+      && scope.selection_revision !== snapshot.selection_context.selection_revision;
+  }
+  function plainError() {
+    const messages = {
+      insufficient_quota: "模型账户额度不足。请检查 API 余额，再重新发送。",
+      rate_limit: "模型服务暂时拒绝请求。请检查用量或限额后再发送。",
+      rate_limit_exceeded: "请求过于频繁。请稍后重新发送。",
+      authentication: "模型密钥或权限不可用。请检查模型设置。",
+      missing_key: "尚未配置模型密钥。请打开模型设置。",
+      output_limit: "这次任务超过模型回复预算。请缩小任务后重新发送。",
+      timeout: "模型响应超时。请先确认任务状态，再重新发送。",
+      network: "模型服务连接中断。请检查连接后重新发送。",
+    };
+    return messages[state?.error_code] ? t(messages[state.error_code]) : state?.error;
+  }
   function readablePlan(plan) {
     return Array.isArray(plan?.changes) && plan.changes.length > 0
       && plan.changes.every((change) => typeof change === "string" && change.trim());
@@ -159,7 +182,7 @@
     const pills = [];
     const add = (label) => { const pill = element("span", label, "context-pill"); pill.title = label; pills.push(pill); };
     if ($("scope").value === "project") {
-      add(t("整个工程")); add(t`${tracks.length} 条轨道`);
+      add(t`${tracks.length} 条轨道`);
       text("scope-hint", t("范围已扩大到整个工程；修改仍需你确认。"));
     } else if (context?.notes_truncated) {
       const count = Number(context.note_count);
@@ -206,19 +229,11 @@
     } finally { clearTimeout(timeout); }
   }
   function busy() { return mutating || state?.busy === true || busyPhases.has(state?.phase); }
+  function stopping(working = busy()) {
+    return working && (state?.phase === "cancelled" || ["cancelled", "cancelling"].includes(state?.progress?.stage));
+  }
   function renderProgress(working) {
     const phase = state?.phase, progress = state?.progress || {}, stage = progress.stage;
-    const activeIndex = executionStages.indexOf(stage);
-    const showStages = (phase === "applying" && activeIndex >= 0)
-      || (phase === "done" && stage === "done" && Number.isInteger(progress.total) && progress.total > 0);
-    $("execution-stages").hidden = !showStages;
-    for (const item of $("execution-stages").children) {
-      const index = executionStages.indexOf(item.dataset.stage);
-      const current = showStages && index === activeIndex;
-      item.dataset.status = showStages && (stage === "done" || index < activeIndex) ? "complete" : "pending";
-      if (current) item.setAttribute("aria-current", "step"); else item.removeAttribute("aria-current");
-    }
-    if (state) text("phase", phase === "applying" && stageText[stage] ? t(stageText[stage]) : t(phaseText[phase]) || t("处理中"));
     const fallback = phase === "paused" ? t("已在步骤之间暂停。继续后再进行下一步。")
       : state?.pause_requested ? t("当前步骤结束后暂停，不会继续下一步。")
       : working ? phase === "applying" ? t("正在应用整份方案并核对结果。")
@@ -232,8 +247,31 @@
       detail = `${t(labels[generationPhase] || "正在生成音频")} · ${t("尚未加入工程")}`;
     }
     text("busy-detail", detail);
+    let label = phase === "paused" ? "已暂停" : phase === "applying" ? "正在应用修改" : "正在理解你的指令";
+    let hint = phase === "paused" ? "点击继续，完成当前任务。" : phase === "applying" ? "正在更新工程并核对结果。" : "完成后先展示结果，由你决定是否应用。";
+    if (stage === "reading") label = "正在读取工程";
+    if (stage === "checking") label = "正在准备选中的结果";
+    if (phase === "applying" && stage === "preflight") label = "正在检查方案";
+    if (phase === "applying" && stage === "verifying") label = "正在核对结果";
+    if (["generating", "analyzing"].includes(stage)) {
+      const jobs = stage === "generating" ? state.generation_jobs : state.analysis_jobs;
+      const job = jobs?.at(-1), jobStage = job?.phase || job?.status;
+      const labels = {connecting: "正在连接模型", reconnecting: "正在重新连接任务", queued: "正在等待空闲算力", preparing: "正在准备音频", uploading: "正在上传所选音频", loading: "正在加载模型", downloading: "正在接收结果", validating: "正在检查结果", postprocessing: "正在整理结果", cancelling: "正在停止任务", ready: "结果已就绪"};
+      const kinds = {separate: "正在分离音轨", transcribe: "正在转录 MIDI", chords: "正在识别和弦", beats: "正在分析节拍", score: "正在分析音乐"};
+      label = labels[jobStage] || (stage === "generating" ? "正在生成音乐" : kinds[job?.kind] || "正在分析音频");
+      hint = "原工程保持不变，结果就绪后再应用。";
+    }
+    if (state?.pause_requested && phase !== "paused") hint = "当前步骤结束后暂停，不会继续下一步。";
+    if (stopping(working)) { label = "正在停止任务"; hint = "正在确认停止状态，请稍候。"; }
+    text("phase", t(label)); text("progress-copy", t(hint));
+    $("task-indicator").hidden = !working || phase === "paused";
+    // Native progress currently describes only parts of a job. Without a
+    // whole-task denominator, an indeterminate indicator is the honest state.
+    $("task-indicator").removeAttribute("value");
+    $("task-indicator").removeAttribute("aria-valuenow");
+    $("task-indicator").setAttribute("aria-label", t(label));
     $("commit-hint").hidden = phase !== "applying";
-    $("task-progress").hidden = !working && !["ready", "error", "cancelled", "done", "paused"].includes(phase);
+    $("task-progress").hidden = !working && phase !== "paused";
     $("task-progress").dataset.busy = String(working);
     $("task-progress").dataset.paused = String(phase === "paused");
   }
@@ -242,25 +280,28 @@
     for (const button of $("capability-list").querySelectorAll("button[data-available]")) button.disabled = working || !connected || button.dataset.available !== "true";
     $("submit").disabled = working || inFlight || !connected || !state?.provider?.configured || !$("prompt").value.trim();
     $("prompt").disabled = working;
-    $("apply").disabled = working || inFlight || !connected || state?.phase !== "ready" || !state?.plan?.id || !readablePlan(state.plan);
+    $("apply").disabled = working || inFlight || !connected || state?.phase !== "ready" || !state?.plan?.id || !readablePlan(state.plan) || stalePlan(state.plan);
     $("generation-play").disabled = working || inFlight || !connected || ["preparing", "loading"].includes(state?.generation_preview?.status) || state?.phase !== "ready" || state?.plan?.execution_kind !== "generation_import";
     $("generation-stop").disabled = inFlight || !connected;
+    $("generation-stop").hidden = !["preparing", "loading", "playing"].includes(state?.generation_preview?.status);
     $("discard").disabled = working || inFlight || !online;
     $("undo").disabled = working || inFlight || !connected || !state?.can_undo;
     $("refresh").disabled = inFlight;
     $("settings-save").disabled = working || inFlight || !online || !providerReady(currentProviderEntry());
     $("scope").disabled = working;
     $("cancel-work").hidden = !["planning", "paused"].includes(state?.phase);
-    $("cancel-work").disabled = inFlight || state?.phase === "applying" || !online;
+    $("cancel-work").disabled = inFlight || state?.phase === "applying" || !online || stopping(working);
     text("cancel-work", t("停止"));
     const canPause = state?.phase === "paused" || Object.prototype.hasOwnProperty.call(state || {}, "pause_requested");
     $("pause-work").hidden = !canPause || !["planning", "paused"].includes(state?.phase);
-    $("pause-work").disabled = !canPause || inFlight || !online || !["planning", "paused"].includes(state?.phase)
+    $("pause-work").disabled = !canPause || inFlight || !online || stopping(working) || !["planning", "paused"].includes(state?.phase)
       || (state?.phase === "planning" && state?.pause_requested === true);
     text("pause-work", state?.phase === "paused" ? t("继续") : state?.pause_requested ? t("等待暂停") : t("暂停"));
     $("shutdown").disabled = working || inFlight || !online;
-    text("submit", state?.phase === "planning" ? t("生成中…") : t("发送"));
+    text("submit", state?.phase === "planning" ? t("处理中…") : t("发送"));
+    $("submit").classList.toggle("primary", state?.phase !== "ready");
     document.querySelectorAll("[data-prompt]").forEach((button) => { button.disabled = working; });
+    renderGenerationChoices();
     renderProgress(working);
   }
   function renderSnapshot(snapshot) {
@@ -290,15 +331,24 @@
     scopeContext();
   }
   function renderMessages(messages) {
-    const items = Array.isArray(messages) ? messages : [], signature = JSON.stringify(items);
+    const items = Array.isArray(messages) ? messages : [], signature = JSON.stringify([items, state?.phase, state?.can_undo]);
     if (signature === messageSignature) return;
     messageSignature = signature; $("conversation-empty").hidden = items.length > 0;
-    const list = $("messages"); list.replaceChildren();
-    items.forEach((message) => {
+    const list = $("messages"), history = $("history-messages"); list.replaceChildren(); history.replaceChildren();
+    const lastUser = items.findLastIndex((message) => message.role === "user");
+    const lastAnswer = items.findLastIndex((message) => message.role === "assistant" && message.origin !== "runtime");
+    items.forEach((message, index) => {
       const isUser = message.role === "user", article = element("article", null, `message ${isUser ? "user" : "assistant"}`);
       article.append(element("div", isUser ? t("你") : t("编曲助手"), "message-label"));
-      article.append(element("div", message.content || "", "message-body")); list.append(article);
+      const content = message.content || "", body = element("div", content, "message-body");
+      const current = index === lastUser || (index === lastAnswer && index > lastUser && state?.phase === "done" && !state?.can_undo);
+      if (current && isUser && content.length > 190) {
+        const details = element("details", null, "request-details");
+        details.append(element("summary", content.slice(0, 155).trimEnd()+"…"), body); article.append(details);
+      } else article.append(body);
+      (current ? list : history).append(article);
     });
+    $("conversation-history").hidden = !history.childElementCount;
   }
   function analysisChanges(candidate) {
     if (!candidate) return null;
@@ -316,8 +366,6 @@
       rows.push(t("选择乐器后即可播放。"));
     }
     if (candidate.kind === "score") rows.push(t("节拍与结构保留为分析标记，工程速度不变。"));
-    const model = candidate.model_id || candidate.model?.id;
-    if (model) rows.push(t`模型：${model} · ${candidate.execution === "cloud" ? t("云端") : t("本地")}`);
     return rows;
   }
   function generationChanges(candidate) {
@@ -326,9 +374,32 @@
     const duration = Number(candidate.audio?.duration_seconds || 0).toFixed(2);
     const rows = [t("新建1条音频轨，加入生成音乐"), t`起点 ${start} 秒，实际时长 ${duration} 秒。`, t("现有音乐保留；加入后可一次撤销。")];
     if (candidate.completion?.token_limit_reached || candidate.completion?.truncated === true || candidate.completion?.reason === "token_budget") rows.push(t("已到生成预算上限；结尾可能被截断，请先试听。"));
-    const model = candidate.model_id || candidate.model?.id;
-    if (model) rows.push(t`模型：${model} · ${t("云端")}`);
     return rows;
+  }
+  function renderGenerationChoices() {
+    const choices = Array.isArray(state?.generation_choices) ? state.generation_choices : [];
+    const currentPlan = state?.plan?.execution_kind === "generation_import" && ["ready", "applying"].includes(state?.phase) && !stalePlan(state.plan);
+    const selected = (choice) => choice.selected === true && currentPlan;
+    // Keep a sole completed candidate recoverable when the model failed before
+    // proposing it, or when its former review became stale.
+    $("generation-choices").hidden = !choices.length || (choices.length === 1 && selected(choices[0]));
+    const locked = busy() || inFlight || !online || !state?.control?.connected;
+    const signature = JSON.stringify([choices, locked, currentPlan, window.emusicianI18n.locale]);
+    if (generationChoiceSignature === signature) return;
+    generationChoiceSignature = signature;
+    const modelNames = {"ace-step-1.5-xl-turbo": "ACE-Step", ace_step_1_5: "ACE-Step", "ace-step-1.5": "ACE-Step", ace_step: "ACE-Step", yue2: "YuE2"};
+    $("generation-choice-list").replaceChildren(...choices.map((choice) => {
+      const isSelected = selected(choice), row = element("li", null, isSelected ? "selected" : "");
+      const description = element("div"), duration = Number(choice.duration_seconds);
+      description.append(element("strong", modelNames[choice.model_id] || choice.model_id || t("生成候选")));
+      const status = [Number.isFinite(duration) ? `${Number(duration.toFixed(2))} s` : "", choice.applied ? t("已加入工程") : choice.available === false ? t("当前不可用") : choice.truncated ? t("结尾可能截断") : ""].filter(Boolean).join(" · ");
+      description.append(element("span", status, "muted"));
+      const button = element("button", isSelected ? t("已选择") : t("选择")); button.type = "button";
+      button.disabled = locked || choice.applied || choice.available === false || isSelected || !choice.result_id;
+      button.setAttribute("aria-pressed", isSelected ? "true" : "false");
+      button.addEventListener("click", () => { if (!button.disabled) mutate("/api/generation/select", {result_id: choice.result_id, scope: $("scope").value}); });
+      row.append(description, button); return row;
+    }));
   }
   function warpChanges(plan, snapshot) {
     if (!["audio_warp", "beat_apply"].includes(plan.execution_kind)) return null;
@@ -364,6 +435,8 @@
       const scope = (frozenScope && typeof frozenScope === "object" ? frozenScope.mode : frozenScope) || submittedScope;
       text("plan-scope", scope === "project" ? t("本次范围：整个工程") : scope === "selection" ? t("本次范围：发送时的选择") : scope === "clip" ? t("本次范围：整个片段") : t("范围以提交时的选择为准"));
       const importedChanges = warpChanges(plan, state.snapshot || {}) || (plan.execution_kind === "analysis_import" ? analysisChanges(plan.analysis) : plan.execution_kind === "generation_import" ? generationChanges(plan.generation) : null);
+      $("plan-summary").hidden = !!importedChanges;
+      $("plan-stale").hidden = !stalePlan(plan);
       const steps = importedChanges ? [{label: t("核对来源、候选和工程版本")}, {label: importedChanges[0]}] : Array.isArray(plan.steps) ? plan.steps : [];
       const hasSteps = steps.length > 0 && steps.every((step) => typeof step?.label === "string" && step.label.trim());
       $("plan-sequence").hidden = !hasSteps;
@@ -383,14 +456,25 @@
     text("generation-preview-status", audition.status ? `${t(previewLabels[audition.status] || "试听状态未知")}${["failed", "unavailable"].includes(audition.status) && audition.detail ? ` · ${t(audition.detail)}` : ""}` : "");
     $("generation-play").disabled = !generated || state.busy || !connected || mutating;
     $("generation-stop").disabled = !connected || mutating;
-    $("result").hidden = !state.last_result; text("result-text", t(state.last_result || ""));
+    // A completed mutation response can arrive before the request's finally
+    // block clears `mutating`; do not hide its result until the next poll.
+    $("result").hidden = (!state.last_result && !state.can_undo) || visible || state.busy === true || busyPhases.has(state.phase);
+    text("result-text", state.can_undo && !state.error ? t("修改已加入工程。可撤销这次操作。") : t(state.last_result || ""));
+    $("undo").hidden = !state.can_undo;
     const usage = state.usage || {}, format = (value) => Number(value || 0).toLocaleString(window.emusicianI18n.locale);
     text("usage", t`${format(usage.calls)} 次请求 · 输入 ${format(usage.prompt_tokens)} / 输出 ${format(usage.completion_tokens)} tokens`);
-    renderProviders();
-    notice(localNotice || (state.error ? `${state.error}${state.error_code ? ` [${state.error_code}]` : ""}` : "") || (visible && !readablePlan(plan) ? t("方案说明不完整，请放弃并重新生成。") : "")
-      || (!state.provider?.configured ? t("先展开顶部模型设置，配置所选服务的密钥。") : "")); updateControls();
+    const candidate = plan?.generation || plan?.analysis;
+    text("technical-stage", candidate ? t`模型：${candidate.model_id || candidate.model?.id || "—"} · ${candidate.execution === "cloud" ? t("云端") : t("本地")}` : "");
+    const jobs = [...(state.generation_jobs || []), ...(state.analysis_jobs || [])].slice(-8);
+    $("technical-jobs").replaceChildren(...jobs.map((job) => element("li", [job.model_id || job.model?.id, job.phase || job.status, job.job_id || job.id].filter(Boolean).join(" · "))));
+    renderProviders(); renderGenerationChoices();
+    notice(localNotice || plainError() || (visible && !readablePlan(plan) ? t("方案说明不完整，请放弃并重新生成。") : "")
+      || (!state.provider?.configured ? t("先展开顶部模型设置，配置所选服务的密钥。") : ""),
+      state.error ? `${state.error}${state.error_code ? ` [${state.error_code}]` : ""}` : ""); updateControls();
     if (visible && plan.id !== shownPlanId) {
       shownPlanId = plan.id;
+      $("plan-details").open = false;
+      $("analysis-preview").open = false;
       requestAnimationFrame(() => $("plan").scrollIntoView({block: "start"}));
       followResponse = false;
     } else if (oldMessages !== messageSignature && (nearBottom || followResponse)) {

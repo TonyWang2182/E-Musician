@@ -28,6 +28,7 @@ let attempts=0;const checker=setInterval(()=>{
  clearInterval(checker);plan.scrollIntoView({block:'start'});
  document.body.setAttribute('data-analysis-smoke',JSON.stringify({
   visible:!plan.hidden,changes:document.getElementById('changes').textContent,
+  route:document.getElementById('technical-stage').textContent,detailsClosed:!document.getElementById('technical-details').open,
   preview:document.getElementById('analysis-preview-items').textContent,
   steps:document.getElementById('plan-steps').textContent,
   progress:document.getElementById('busy-detail').textContent,
@@ -116,10 +117,13 @@ def main():
                 assert checks["assistant"] == "方案已准备；尚未修改工程", checks
                 assert checks["progress"] == "候选已准备；确认后才导入工程", checks
             assert server.fixture["messages"][-1]["content"] == "方案已准备；尚未修改工程"
-            if kind == "generate": assert "budget" in checks["changes"] and "yue2" in checks["changes"], checks
+            # Model provenance remains available in the collapsed technical area;
+            # the default review lists musical changes only.
+            assert checks["detailsClosed"], checks
+            if kind == "generate": assert "budget" in checks["changes"] and "yue2" in checks["route"], checks
             else:
                 assert "2" in checks["changes"] and "3" in checks["changes"] and "MIDI" in checks["changes"], checks
-                assert "muscriptor" in checks["changes"] or "sheetsage2" in checks["changes"], checks
+                assert "muscriptor" in checks["route"] or "sheetsage2" in checks["route"], checks
                 if kind == "score": assert "速度不变" in checks["changes"] or "tempo stays unchanged" in checks["changes"], checks
             reports.append({"label": label, **checks}); print(label, "PASS")
         finally: server.shutdown(); server.server_close(); thread.join(2)

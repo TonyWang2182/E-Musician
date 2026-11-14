@@ -1,0 +1,77 @@
+{
+  "passed": true,
+  "started_at": "2026-11-14T11:55:07.926044+00:00",
+  "external_llm": false,
+  "music_model_called": false,
+  "physical_audio": false,
+  "exe_sha256": "c99d9b0894687f1066bc09febe9c4d6ee5afbc4e38413fac5d6620a101245d5a",
+  "reopened_projects": [
+    {
+      "case_id": "D1-ACE",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-ACE-4e9201887e84\\D1-ACE.emproj",
+      "sha256": "ac7a75d1ad002355b0997a1dc93c7e61b965e683960d4ff85bfa9aa981049c17",
+      "musical_state_equal": true,
+      "assets_unchanged": true
+    },
+    {
+      "case_id": "D1-SCNet",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-SCNet-d1b8dc00a365\\D1-Stems.emproj",
+      "sha256": "469ed1ac60d9590f2c6b22a26150f60940597a6653436a0d370600a00342a281",
+      "musical_state_equal": true,
+      "assets_unchanged": true
+    },
+    {
+      "case_id": "D1-YuE2",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D1-YuE2-6653ad04ccbd\\D1-YuE2.emproj",
+      "sha256": "1961df7d159afe3fafd8cf655327bfc1d3dd7a6d81de27712bcac8c58f6f1572",
+      "musical_state_equal": true,
+      "assets_unchanged": true
+    },
+    {
+      "case_id": "D2-Chords",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D2-Chords-cd1141a8302f\\D2-NewLight-Chords.emproj",
+      "sha256": "7dbf2ee3b9ab85808cb76fdeaaf0b21895610d0da181482e5dc6889e6e16e9a1",
+      "musical_state_equal": true,
+      "assets_unchanged": true
+    },
+    {
+      "case_id": "D2-Warp",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D2-Warp-9374c1a45a26\\D2-NewLight-Aligned.emproj",
+      "sha256": "ceeefce09c66f20cb46c2d214df4caa14e2004e5a0ac6490894a46ade404969f",
+      "musical_state_equal": true,
+      "assets_unchanged": true
+    },
+    {
+      "case_id": "D3-Piano",
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\rehearsal\\D3-Piano-570d980002b6\\D3-TeaForTwo-MIDI.emproj",
+      "sha256": "7b2defec0f43a66d06778bf8ed5e0e3e3a23909dab307951f02132816106374c",
+      "musical_state_equal": true,
+      "assets_unchanged": true
+    }
+  ],
+  "archives": [
+    {
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\jungle-materials\\jungle-materials-cc0.zip",
+      "sha256": "224b81c3e34d5ce6345f9fdef7460ac71e9b6106096900cf06f4db040cf24fbc",
+      "bytes": 5987589,
+      "members": 36
+    },
+    {
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\jungle-materials\\personal-reference\\Antidote Audio - Jungle in Ableton Project.zip",
+      "sha256": "b3238f5b27729c9afaff38135499fc6b1be72b69ee5576bcd580b3da46d75315",
+      "bytes": 152567753,
+      "members": 74
+    },
+    {
+      "path": "E:\\MusicAgent&DAW\\demo-video\\2026-11-14\\motion\\E-musician-motion-1080p30.zip",
+      "sha256": "ee1b5678083d2a19f47c0ccdb4aaaba2a95634b6134900391dbd9bbc7389013c",
+      "bytes": 4319040,
+      "members": 49
+    }
+  ],
+  "checks": [
+    "112 native/build inputs still match the successful Release record; 0.13.3 EXE preserved",
+    "40 local document links exist"
+  ],
+  "finished_at": "2026-11-14T11:55:14.130267+00:00"
+}

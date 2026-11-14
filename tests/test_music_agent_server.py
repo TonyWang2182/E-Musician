@@ -40,6 +40,9 @@ class FakeRuntime:
     def apply(self, plan_id):
         self.calls.append(("apply", plan_id))
         return {"phase": "applying"}
+    def select_generation_result(self, result_id, scope, *, language):
+        self.calls.append(("select_generation", result_id, scope, language))
+        return {"phase": "planning"}
     def pause(self):
         self.calls.append("pause")
         return {"phase":"paused"}
@@ -103,6 +106,16 @@ class ServerTests(unittest.TestCase):
     def test_bound_only_to_loopback(self):
         self.assertEqual(self.server.server_address[0], "127.0.0.1")
         self.assertTrue(self.server.launch_url.startswith(self.server.origin + "/#token="))
+
+    def test_generation_selection_requires_auth_exact_schema_and_preserves_language_scope(self):
+        path = "/api/generation/select"
+        value = {"result_id": "synthetic-result", "scope": "selection"}
+        self.assertEqual(self.request("POST", path, value, authenticated=False)[0], 403)
+        self.assertEqual(self.request("POST", path, {**value, "apply": True})[0], 400)
+        self.assertEqual(self.request("POST", path, {"result_id": "synthetic-result"})[0], 400)
+        self.assertEqual(self.runtime.calls, [])
+        self.assertEqual(self.request("POST", path, value, headers={"X-Agent-Language": "en"})[0], 200)
+        self.assertEqual(self.runtime.calls, [("select_generation", "synthetic-result", "selection", "en")])
     def test_no_unauthenticated_state(self):
         status, _, _ = self.request(authenticated=False)
         self.assertEqual(status, 403)

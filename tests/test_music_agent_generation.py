@@ -178,6 +178,16 @@ class ContractTests(unittest.TestCase):
         bridge._request = Mock(return_value={"result": {**job, "kind": "analysis.preview"}})
         with self.assertRaises(BridgeError): bridge.generation_preview_status("preview-j")
 
+    def test_changed_candidate_hash_refused_before_native_submission(self):
+        bridge = object.__new__(DawBridge)
+        ctx = context(); plan = g.compile_import(candidate(), ctx, freeze_scope(ctx), "review")
+        changed = candidate(); changed["result_hash"] = "c" * 64
+        bridge.snapshot = Mock(return_value=ctx)
+        bridge.generation_result = Mock(return_value=g.safe_result(changed))
+        bridge._request = Mock()
+        with self.assertRaises(BridgeError): bridge.apply(plan)
+        bridge._request.assert_not_called()
+
     def test_preview_start_uses_native_revision_envelope_but_stop_is_read(self):
         bridge = object.__new__(DawBridge); bridge.snapshot = Mock(return_value=context())
         bridge._request = Mock(return_value={"status": "accepted", "result": {"job_id": "preview-j"}})
@@ -257,6 +267,116 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(len(started), 1); self.assertEqual(started[0]["duration_seconds"], 20.)
         self.assertEqual(started[0]["prompt"], "Jazz piano")
         self.assertFalse(r.bridge.data["tracks"]); self.assertFalse(any(call[0] == "apply" for call in r.bridge.calls))
+
+    def test_two_cached_results_can_be_reviewed_without_regeneration_or_model_calls(self):
+        r, state = self.ready()
+        first = deepcopy(r.bridge.candidate)
+        second = deepcopy(first); second["result_id"] = "gen-second"; second["model"]["id"] = "second-fixture"
+        r._remember_generation(second)
+        results = {first["result_id"]: first, second["result_id"]: second}
+        r.bridge.generation_result = lambda rid: deepcopy(results[rid])
+        r.bridge.data["revision"] += 1
+        r.bridge.data["selection_context"]["project_revision"] += 1
+        calls = len(r.provider.requests)
+        for rid in ("gen-second", "gen-r"):
+            r.select_generation_result(rid, "project", language="en")
+            state = self.finish(r)
+            self.assertEqual(state["phase"], "ready", state)
+            self.assertEqual(state["plan"]["revision"], 5)
+            self.assertEqual(state["plan"]["generation"]["result_id"], rid)
+            self.assertEqual(sum(c["selected"] for c in state["generation_choices"]), 1)
+            self.assertIn("Review", state["plan"]["summary"])
+        self.assertEqual(len(r.provider.requests), calls)
+        self.assertEqual(sum(c[0] == "start" for c in r.bridge.calls), 1)
+        self.assertFalse(any(c[0] == "apply" for c in r.bridge.calls))
+        self.assertEqual(len(state["generation_choices"]), 2)
+        self.assertNotIn("path", str(state["generation_choices"]))
+
+    def test_selection_revalidates_candidate_and_scope_before_exposing_apply(self):
+        for failure in ("project", "tempo", "applied", "stale", "time", "recording", "identity"):
+            with self.subTest(failure=failure):
+                r, _ = self.ready()
+                if failure == "project": r.bridge.data["project_id"] = "other"
+                elif failure == "tempo": r.bridge.data["bpm"] = 99
+                elif failure == "applied": r.bridge.candidate["applied"] = True
+                elif failure == "stale": r.bridge.candidate["stale"] = True
+                elif failure == "recording": r.bridge.data["recording"] = True
+                elif failure == "identity": r.bridge.candidate["result_id"] = "other"
+                else: r.bridge.data["selection_context"]["time_range"] = {"active": True, "start_seconds": 10, "end_seconds": 12}
+                r.select_generation_result("gen-r", "selection")
+                state = self.finish(r)
+                self.assertEqual(state["phase"], "error", state)
+                self.assertIsNone(state["plan"])
+                self.assertFalse(any(c[0] == "apply" for c in r.bridge.calls))
+
+    def test_selection_unknown_busy_and_cache_limit(self):
+        r, _ = self.ready()
+        with self.assertRaises(ValueError): r.select_generation_result("unknown", "project")
+        with patch.object(r, "busy", return_value=True):
+            with self.assertRaises(ValueError): r.select_generation_result("gen-r", "project")
+        for i in range(8):
+            c = deepcopy(r.bridge.candidate); c["result_id"] = "cached-" + str(i)
+            r._remember_generation(c)
+        choices = r.state(False)["generation_choices"]
+        self.assertEqual(len(choices), 6)
+        self.assertEqual(choices[0]["result_id"], "cached-2")
+        r.bridge.data["project_id"] = "other"
+        self.assertEqual(r.state()["generation_choices"], [])
+
+    def test_applied_result_stays_consumed_other_candidate_remains_available(self):
+        r, state = self.ready()
+        c = deepcopy(r.bridge.candidate); c["result_id"] = "gen-other"; r._remember_generation(c)
+        r.apply(state["plan"]["id"])
+        state = self.finish(r)
+        self.assertEqual(state["phase"], "done", state)
+        choices = {c["result_id"]: c for c in state["generation_choices"]}
+        self.assertTrue(choices["gen-r"]["applied"])
+        self.assertFalse(choices["gen-r"]["available"])
+        self.assertTrue(choices["gen-other"]["available"])
+
+    def test_stale_plan_allows_reselecting_same_candidate_and_stops_previous_preview(self):
+        r, state = self.ready()
+        r.preview_generation_plan(state["plan"]["id"])
+        r.bridge.data["revision"] += 1
+        r.bridge.data["selection_context"]["project_revision"] += 1
+        self.assertFalse(r.state()["generation_choices"][0]["selected"])
+        r.select_generation_result("gen-r", "project", language="en")
+        state = self.finish(r)
+        self.assertEqual(state["phase"], "ready", state)
+        self.assertEqual(state["generation_preview"]["status"], "stopped")
+        self.assertEqual(r.bridge.calls[-1], ("preview", None))
+        self.assertTrue(state["generation_choices"][0]["selected"])
+        self.assertEqual(len(r.provider.requests), 2)
+
+    def test_mutation_during_candidate_read_prevents_ready(self):
+        for field in ("revision", "selection"):
+            r, _ = self.ready()
+            def changing_read(_):
+                if field == "revision":
+                    r.bridge.data["revision"] += 1
+                    r.bridge.data["selection_context"]["project_revision"] += 1
+                else:
+                    r.bridge.data["selection_context"]["selection_revision"] += 1
+                return deepcopy(r.bridge.candidate)
+            r.bridge.generation_result = changing_read
+            r.select_generation_result("gen-r", "selection")
+            state = self.finish(r)
+            self.assertEqual(state["phase"], "error", state)
+            self.assertIn(state["error_code"], {"ScopeError", "BridgeError"})
+            self.assertIsNone(state["plan"])
+            self.assertFalse(any(c[0] == "apply" for c in r.bridge.calls))
+
+    def test_new_request_stops_previous_audition_before_hiding_review(self):
+        r, state = self.ready()
+        r.preview_generation_plan(state["plan"]["id"])
+        r.provider = FakeProvider([{"message": {"role": "assistant", "content": "Ready."}, "usage": {}}])
+        r.plan_request("Explain the current project.", "project", language="en")
+        state = self.finish(r)
+        self.assertEqual(state["phase"], "done", state)
+        self.assertEqual(state["generation_preview"]["status"], "stopped")
+        self.assertEqual(r.bridge.calls[-1], ("preview", None))
+        self.assertEqual(sum(c[0] == "start" for c in r.bridge.calls), 1)
+        self.assertFalse(any(c[0] == "apply" for c in r.bridge.calls))
 
     def test_bar_request_resolves_locally_before_generation(self):
         r = self.make(tool("start_generation", {"prompt": "Guitar", "duration_bars": 8}), tool("propose_generation_import", {"result_id": "gen-r", "summary": "Review guitar"}))

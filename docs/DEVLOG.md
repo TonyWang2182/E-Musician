@@ -13013,3 +13013,372 @@ print(json.dumps({'\"'\"'passed'\"'\"':True,'\"'\"'checked_at'\"'\"':datetime.da
 ### 2026-11-14 19:28 CST · demo-rehearsal-v0133 correction
 
 - 补正上条：DELIVERY-CHECK实际核对11个保存音频资产，不是13个；六份工程和24链接计数正确。以原始收据为准。
+
+### 2026-11-14T19:25:41+08:00 · demo-rehearsal-check · failed
+
+- Config: 0.13.3/Release; no native build; exit code: 1; elapsed: 22.041s.
+- Command: `C:/Python314/python.exe scripts/demo_jungle_prepare.py indices`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `29fa50f321f0c1aeb562cff954cf12ddf0af83c4abc340de6448a5de0cbca81e`; Git HEAD: `92865737a071205afcd91b5fcef69ea9b308b079`.
+- [Record](builds/20261114T112541.721304Z-6899202a3f.json) · [Raw log](../build-logs/20261114T112541.721304Z-6899202a3f.log)
+- [Exact process output](../build-logs/20261114T112541.721304Z-6899202a3f.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T112541.721304Z-6899202a3f.log
+
+### 2026-11-14T19:28:05+08:00 · demo-rehearsal-check · failed
+
+- Config: 0.13.3/Release; no native build; exit code: 1; elapsed: 5.920s.
+- Command: `C:/Python314/python.exe scripts/demo_jungle_prepare.py reference`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `3320ecf78bd80244d345388160e6892eac31723e25378fb477a486eeeb7933d3`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T112805.665546Z-198ddd7538.json) · [Raw log](../build-logs/20261114T112805.665546Z-198ddd7538.log)
+- [Exact process output](../build-logs/20261114T112805.665546Z-198ddd7538.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T112805.665546Z-198ddd7538.log
+
+### 2026-11-14T19:31:49+08:00 · demo-rehearsal-check · succeeded
+
+- Config: 0.13.3/Release; no native build; exit code: 0; elapsed: 11.859s.
+- Command: `C:/Python314/python.exe scripts/demo_jungle_prepare.py reference`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `bb2376893c61c5dd317d6bf63e56d60e0d4d30f23a449d3d3293af1a4f294d0a`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113149.158685Z-dadc3c1fbc.json) · [Raw log](../build-logs/20261114T113149.158685Z-dadc3c1fbc.log)
+- [Exact process output](../build-logs/20261114T113149.158685Z-dadc3c1fbc.raw.log)
+
+### 2026-11-14T19:33:42+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 1.060s.
+- Command: `python -c "from pathlib import Path; import json,hashlib,zipfile,ast; from PIL import Image; p=Path('E:/MusicAgent&DAW/demo-video/2026-11-14/motion'); r=json.loads((p/'RENDER-REPORT.json').read_text()); expected={'opener-1080p30.mp4':8,'opener-6s-1080p30.mp4':6,'closer-1080p30.mp4':6,'opener-1080p30.webm':8,'closer-1080p30.webm':6}; assert r['status']=='exports-verified'; assert r['logo_sha256']==r['logo_byte_copy_sha256']=='6b94245a35170ebbcab97a1cec0a5d5bde08233f1c8bbe8f671f314fd34005a2'; assert len(r['videos'])==5; checks=[]; [checks.append(v['probe']['streams'][0]['width']==1920 and v['probe']['streams'][0]['height']==1080 and v['probe']['streams'][0]['avg_frame_rate']=='30/1' and int(v['probe']['streams'][0]['nb_read_frames'])==30*expected[Path(v['path']).name] and float(v['probe']['format']['duration'])==expected[Path(v['path']).name] and hashlib.sha256(Path(v['path']).read_bytes()).hexdigest()==v['sha256']) for v in r['videos']]; assert all(checks); assert all(Image.open(p/'stills'/(k+'-alpha-decoded-3s.png')).getchannel('A').getextrema()==(0,255) for k in ['opener','closer']); assert zipfile.ZipFile(p/'E-musician-motion-1080p30.zip').testzip() is None; ast.parse(Path('scripts/demo_motion_render.py').read_text()); assert (p/'source/demo_motion_render.py').read_bytes()==Path('scripts/demo_motion_render.py').read_bytes(); print('PASS: 5 videos; 1080p30; exact durations/frame counts/SHA256; approved logo byte copy; 2 true alpha roundtrips; ZIP CRC; editable renderer same as repo. No GUI/network/model call.')"`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `38ab93d7e13256fecd248788d33da1e7ef66a6798750f4ec080353901787103a`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113342.563732Z-331e42938c.json) · [Raw log](../build-logs/20261114T113342.563732Z-331e42938c.log)
+- [Exact process output](../build-logs/20261114T113342.563732Z-331e42938c.raw.log)
+
+### 2026-11-14T19:33:49+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 3.315s.
+- Command: `node --check scripts/music_agent/web/app.js`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `c13b2df7fe280840d324d2262192578c5971177ea93553a1cefb8e3dcea0ff7c`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113349.152564Z-13f0aba1cb.json) · [Raw log](../build-logs/20261114T113349.152564Z-13f0aba1cb.log)
+- [Exact process output](../build-logs/20261114T113349.152564Z-13f0aba1cb.raw.log)
+
+### 2026-11-14T19:34:01+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 10.513s.
+- Command: `C:/Python314/python.exe -X utf8 tests/HybridAgentWebSmoke.py`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `c13b2df7fe280840d324d2262192578c5971177ea93553a1cefb8e3dcea0ff7c`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113401.050781Z-0f9d66fd10.json) · [Raw log](../build-logs/20261114T113401.050781Z-0f9d66fd10.log)
+- [Exact process output](../build-logs/20261114T113401.050781Z-0f9d66fd10.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-14T19:34:01+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 33.365s.
+- Command: `C:/Python314/python.exe -X utf8 tests/AgentTaskFlowWebSmoke.py`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `c13b2df7fe280840d324d2262192578c5971177ea93553a1cefb8e3dcea0ff7c`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113401.011258Z-584d43a160.json) · [Raw log](../build-logs/20261114T113401.011258Z-584d43a160.log)
+- [Exact process output](../build-logs/20261114T113401.011258Z-584d43a160.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-14T19:34:52+08:00 · agent-demo-command · failed
+
+- Config: Release/0.13.4; exit code: 1; elapsed: 9.542s.
+- Command: `C:/Python314/python.exe scripts/demo_jungle_prepare.py indices`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `b5caa60dae2816e52cf42994772eff1417d8cc79468c59ceb2dabedebd5f21ca`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113452.358084Z-ca78ce60eb.json) · [Raw log](../build-logs/20261114T113452.358084Z-ca78ce60eb.log)
+- [Exact process output](../build-logs/20261114T113452.358084Z-ca78ce60eb.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T113452.358084Z-ca78ce60eb.log
+
+### 2026-11-14T19:34:10+08:00 · demo-rehearsal-check · succeeded
+
+- Config: 0.13.3/Release; no native build; exit code: 0; elapsed: 82.012s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe scripts/demo_jungle_assets.py fetch`
+- Context: Exact English demo prompts; bounded real model calls on disposable offline-device projects; no user UI control
+- Source SHA-256: `b5caa60dae2816e52cf42994772eff1417d8cc79468c59ceb2dabedebd5f21ca`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113410.482005Z-a3ab1c6309.json) · [Raw log](../build-logs/20261114T113410.482005Z-a3ab1c6309.log)
+- [Exact process output](../build-logs/20261114T113410.482005Z-a3ab1c6309.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-14T19:35:38+08:00 · agent-demo-command · failed
+
+- Config: Release/0.13.4; exit code: 1; elapsed: 5.519s.
+- Command: `C:/Python314/python.exe -X utf8 tests/AnalysisAgentWebSmoke.py`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `fc43d97dc8c625d3c8b934ef2b233a57a763cf3d41c8c4fd4c2ad688d07cf64c`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113538.433743Z-c3d2584ad7.json) · [Raw log](../build-logs/20261114T113538.433743Z-c3d2584ad7.log)
+- [Exact process output](../build-logs/20261114T113538.433743Z-c3d2584ad7.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T113538.433743Z-c3d2584ad7.log
+
+### 2026-11-14T19:35:38+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 6.458s.
+- Command: `C:/Python314/python.exe -X utf8 tests/AgentMixWebSmoke.py`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `fc43d97dc8c625d3c8b934ef2b233a57a763cf3d41c8c4fd4c2ad688d07cf64c`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113538.495545Z-71f8a7395e.json) · [Raw log](../build-logs/20261114T113538.495545Z-71f8a7395e.log)
+- [Exact process output](../build-logs/20261114T113538.495545Z-71f8a7395e.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-14T19:35:38+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 13.511s.
+- Command: `C:/Python314/python.exe -X utf8 tests/GenerationAgentWebSmoke.py`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `fc43d97dc8c625d3c8b934ef2b233a57a763cf3d41c8c4fd4c2ad688d07cf64c`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113538.450312Z-85bd5a98a2.json) · [Raw log](../build-logs/20261114T113538.450312Z-85bd5a98a2.log)
+- [Exact process output](../build-logs/20261114T113538.450312Z-85bd5a98a2.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-14T19:35:38+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 34.704s.
+- Command: `C:/Python314/python.exe -X utf8 tests/AgentTaskFlowWebSmoke.py`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `fc43d97dc8c625d3c8b934ef2b233a57a763cf3d41c8c4fd4c2ad688d07cf64c`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113538.366143Z-61cbd2f366.json) · [Raw log](../build-logs/20261114T113538.366143Z-61cbd2f366.log)
+- [Exact process output](../build-logs/20261114T113538.366143Z-61cbd2f366.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-14T19:36:01+08:00 · agent-demo-configure · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 17.306s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.13.4`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `3a583b415be031a7b1e18fa132de2b2c7b704580787f09db710942e4fe5b89d3`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113601.424518Z-31919cd5f8.json) · [Raw log](../build-logs/20261114T113601.424518Z-31919cd5f8.log)
+- [Exact process output](../build-logs/20261114T113601.424518Z-31919cd5f8.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-14T19:36:19+08:00 · agent-demo-command · failed
+
+- Config: Release/0.13.4; exit code: 2; elapsed: 0.887s.
+- Command: `E:/Codex/skills/impeccable/scripts/impeccable.cmd detect scripts/music_agent/web/index.html scripts/music_agent/web/app.js scripts/music_agent/web/style.css scripts/music_agent/web/i18n.js`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `c300326cc6c54b47c868a34c58bd7bfc3fad7e8afd5ebfb4bbde7c2be19d985c`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113619.142146Z-470b8a6d35.json) · [Raw log](../build-logs/20261114T113619.142146Z-470b8a6d35.log)
+- [Exact process output](../build-logs/20261114T113619.142146Z-470b8a6d35.raw.log)
+- Error: Command failed with code 2; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T113619.142146Z-470b8a6d35.log
+
+### 2026-11-14T19:36:19+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 13.180s.
+- Command: `C:/Python314/python.exe -X utf8 tests/AnalysisAgentWebSmoke.py`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `c300326cc6c54b47c868a34c58bd7bfc3fad7e8afd5ebfb4bbde7c2be19d985c`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113619.062003Z-5d77ce6e92.json) · [Raw log](../build-logs/20261114T113619.062003Z-5d77ce6e92.log)
+- [Exact process output](../build-logs/20261114T113619.062003Z-5d77ce6e92.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-14T19:37:17+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 2.555s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe scripts/demo_jungle_assets.py fetch`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `792ce3c1dc1f1e94d74faa40060edddd841a6326542401cde466c631769e1ec7`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113717.449427Z-17dd8a3904.json) · [Raw log](../build-logs/20261114T113717.449427Z-17dd8a3904.log)
+- [Exact process output](../build-logs/20261114T113717.449427Z-17dd8a3904.raw.log)
+
+### 2026-11-14T19:35:44+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 110.372s.
+- Command: `python -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `3a583b415be031a7b1e18fa132de2b2c7b704580787f09db710942e4fe5b89d3`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113544.493413Z-e60e5500e0.json) · [Raw log](../build-logs/20261114T113544.493413Z-e60e5500e0.log)
+- [Exact process output](../build-logs/20261114T113544.493413Z-e60e5500e0.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-14T19:36:36+08:00 · agent-demo-build · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 59.872s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `37fc9ab8e3d743466fd905559a803c1ab7fee2869d0ceab8c0d121d65b5ffc45`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113636.433801Z-a6c0ed02d5.json) · [Raw log](../build-logs/20261114T113636.433801Z-a6c0ed02d5.log)
+- [Exact process output](../build-logs/20261114T113636.433801Z-a6c0ed02d5.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-14T19:38:11+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 0.534s.
+- Command: `node --check scripts/music_agent/web/app.js`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `b62cf61ca65f6441bfafbe84cb752fe04ccb7501af17e7fce1b314d7099f253c`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113811.628365Z-3fe85dcf40.json) · [Raw log](../build-logs/20261114T113811.628365Z-3fe85dcf40.log)
+- [Exact process output](../build-logs/20261114T113811.628365Z-3fe85dcf40.raw.log)
+
+### 2026-11-14T19:38:41+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 2.132s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe scripts/demo_jungle_assets.py validate`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `1559c30be66faf5772679095fe7cb8d7b1811e65e6b75f54ca75ceda847e3bea`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113841.266234Z-bdc3babd64.json) · [Raw log](../build-logs/20261114T113841.266234Z-bdc3babd64.log)
+- [Exact process output](../build-logs/20261114T113841.266234Z-bdc3babd64.raw.log)
+
+### 2026-11-14T19:38:26+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 19.547s.
+- Command: `python -m unittest discover -s tests -p test_music_agent_generation.py -v`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `1559c30be66faf5772679095fe7cb8d7b1811e65e6b75f54ca75ceda847e3bea`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113826.903158Z-51dc28a264.json) · [Raw log](../build-logs/20261114T113826.903158Z-51dc28a264.log)
+- [Exact process output](../build-logs/20261114T113826.903158Z-51dc28a264.raw.log)
+
+### 2026-11-14T19:38:11+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 41.930s.
+- Command: `C:/Python314/python.exe -X utf8 tests/AgentTaskFlowWebSmoke.py`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `b62cf61ca65f6441bfafbe84cb752fe04ccb7501af17e7fce1b314d7099f253c`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113811.629385Z-28d8a071aa.json) · [Raw log](../build-logs/20261114T113811.629385Z-28d8a071aa.log)
+- [Exact process output](../build-logs/20261114T113811.629385Z-28d8a071aa.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-14T19:37:50+08:00 · agent-demo-test · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 108.105s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `792ce3c1dc1f1e94d74faa40060edddd841a6326542401cde466c631769e1ec7`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T113750.717106Z-47e5800e20.json) · [Raw log](../build-logs/20261114T113750.717106Z-47e5800e20.log)
+- [Exact process output](../build-logs/20261114T113750.717106Z-47e5800e20.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-14T19:40:24+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 0.944s.
+- Command: `C:/Python314/python.exe -m py_compile scripts/demo_jungle_prepare.py scripts/demo_jungle_assets.py`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `405f468c23162ece34b7290b2fbfd200238c727360894fc747f4fc309c73df13`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T114024.668341Z-0d1167f36e.json) · [Raw log](../build-logs/20261114T114024.668341Z-0d1167f36e.log)
+- [Exact process output](../build-logs/20261114T114024.668341Z-0d1167f36e.raw.log)
+
+### 2026-11-14T19:41:22+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 0.911s.
+- Command: `C:/Python314/python.exe scripts/demo_jungle_prepare.py indices`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `e16381ecf818eeea0155455216dc59c1d7f28a44919a40ea58edc5573dbeba68`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T114122.407808Z-7e881c3f49.json) · [Raw log](../build-logs/20261114T114122.407808Z-7e881c3f49.log)
+- [Exact process output](../build-logs/20261114T114122.407808Z-7e881c3f49.raw.log)
+
+### 2026-11-14T19:40:19+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 86.196s.
+- Command: `python -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `405f468c23162ece34b7290b2fbfd200238c727360894fc747f4fc309c73df13`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T114019.606641Z-f6f19d3162.json) · [Raw log](../build-logs/20261114T114019.606641Z-f6f19d3162.log)
+- [Exact process output](../build-logs/20261114T114019.606641Z-f6f19d3162.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-14T19:41:49+08:00 · agent-demo-command · failed
+
+- Config: Release/0.13.4; exit code: 1; elapsed: 17.574s.
+- Command: `python tests/DemoColourMixCheck.py --exe E:/emusician-analysis-build/bin-0.13.4/Release/E-musician.exe --version 0.13.4 --timeout 90`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `3533a7eb5f65403f2515fa2d521a257961e4bfdc693e2c11918100f93e535996`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T114149.979807Z-e3b5d8fdb5.json) · [Raw log](../build-logs/20261114T114149.979807Z-e3b5d8fdb5.log)
+- [Exact process output](../build-logs/20261114T114149.979807Z-e3b5d8fdb5.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T114149.979807Z-e3b5d8fdb5.log
+
+### 2026-11-14T19:42:36+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 16.723s.
+- Command: `python tests/DemoColourMixCheck.py --exe E:/emusician-analysis-build/bin-0.13.4/Release/E-musician.exe --version 0.13.4 --timeout 90`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `829a4bad9dba4aa2a4acad5a2e72054658cf9c5759b22ef8058739b13c252e63`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T114236.982777Z-1aaa7d0a82.json) · [Raw log](../build-logs/20261114T114236.982777Z-1aaa7d0a82.log)
+- [Exact process output](../build-logs/20261114T114236.982777Z-1aaa7d0a82.raw.log)
+
+### 2026-11-14T19:43:55+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 0.909s.
+- Command: `node --check scripts/music_agent/web/app.js`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `6d30f93aa7e2ae51c0f024551578885df026bed1aba7609ed5080826e0e158f6`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T114355.312143Z-c9b4658bda.json) · [Raw log](../build-logs/20261114T114355.312143Z-c9b4658bda.log)
+- [Exact process output](../build-logs/20261114T114355.312143Z-c9b4658bda.raw.log)
+
+### 2026-11-14T19:43:55+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 48.951s.
+- Command: `C:/Python314/python.exe -X utf8 tests/AgentTaskFlowWebSmoke.py`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `6d30f93aa7e2ae51c0f024551578885df026bed1aba7609ed5080826e0e158f6`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T114355.351010Z-74b9c6ab4a.json) · [Raw log](../build-logs/20261114T114355.351010Z-74b9c6ab4a.log)
+- [Exact process output](../build-logs/20261114T114355.351010Z-74b9c6ab4a.raw.log)
+
+### 2026-11-14T19:45:05+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 12.276s.
+- Command: `python -m unittest discover -s tests -p test_music_agent_generation.py`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `1ccb46b58abb57238b1e95ddce237969cac50242ba9055f22c4c866102ba11fb`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T114505.020472Z-6fe9be9254.json) · [Raw log](../build-logs/20261114T114505.020472Z-6fe9be9254.log)
+- [Exact process output](../build-logs/20261114T114505.020472Z-6fe9be9254.raw.log)
+
+### 2026-11-14T19:48:56+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 7.750s.
+- Command: `python docs/review/2026-11-14-agent-demo-v0134/verify_delivery.py`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `1ccb46b58abb57238b1e95ddce237969cac50242ba9055f22c4c866102ba11fb`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T114856.006432Z-5db39c77f0.json) · [Raw log](../build-logs/20261114T114856.006432Z-5db39c77f0.log)
+- [Exact process output](../build-logs/20261114T114856.006432Z-5db39c77f0.raw.log)
+
+### 2026-11-14 19:50 CST · 0.13.4 Agent demo delivery
+
+基线768c5d6，独立feature/agent-demo-v0134。中英Agent简明阶段/候选/Apply/Undo、最近六项生成选择与过期/hash/范围守护、有界API额度分类、Cloud→Beats本地筛选已实现。选择候选不调LLM/音乐模型；新任务停止旧试听。独立Release成功（可选pwsh缺失提示保留），CTest11/11；Agent380全套+最终生成42、36个网页场景、实际EN/ZH确定性四轨颜色/混音10命令及Undo/Redo/保存重开通过。新测试失败与修正见RESULTS，未删历史。
+
+六条真实模型0.13.3收据保留，新0.13.4实际重开六工程音乐状态一致，11音频资产hash不变；112原生构建输入匹配、旧EXE保持；最终3个ZIP CRC/39文档链接通过。Jungle 17WAV/7MIDI及原版Antidote参考工程分别存E盘；1080p30片头/片尾、透明版及源包已实际导出核验，媒体不进Git。入口Start E-musician 0.13.4.cmd及VS Code工作区已准备，没有关闭或操作用户GUI。
+
+API真实诊断为HTTP429/insufficient_quota；用户明确还在处理、先做其他工作，本轮不再收费调用。仅前轮ACE原样英文经真实GPT；其他英文、中文和双候选同工程Agent理解补验仍待API恢复。确定性测试不代表真实语言能力/听感；ASIO、实际录音和Jungle成曲编排待人工。完整操作稿、来源、架构ADR和证据在docs/review/2026-11-14-agent-demo-v0134及docs/demo/2026-11-14-demo-runbook-v0134.md，不合并main。
+
+### 2026-11-14T19:52:07+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 1.839s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe scripts/demo_jungle_assets.py fetch`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `b8e5e2fbad733535b00c8fa6dc57450a10c20d1bcfe46c78011d59fae51ff817`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T115207.695105Z-c0a7854fee.json) · [Raw log](../build-logs/20261114T115207.695105Z-c0a7854fee.log)
+- [Exact process output](../build-logs/20261114T115207.695105Z-c0a7854fee.raw.log)
+
+### 2026-11-14T19:53:27+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 1.784s.
+- Command: `E:/MusicAgent&DAW/analysis/runtimes/chords-py310/Scripts/python.exe scripts/demo_jungle_assets.py validate`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `7af751702f5f8e60122e8c1d13258400d01c4bb561439804d37348d2880d1776`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T115327.474575Z-fe357cec36.json) · [Raw log](../build-logs/20261114T115327.474575Z-fe357cec36.log)
+- [Exact process output](../build-logs/20261114T115327.474575Z-fe357cec36.raw.log)
+
+### 2026-11-14T19:53:30+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 14.399s.
+- Command: `C:/Python314/python.exe tests/DemoJungleImportCheck.py --exe E:/emusician-analysis-build/bin-0.13.4/Release/E-musician.exe`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `7af751702f5f8e60122e8c1d13258400d01c4bb561439804d37348d2880d1776`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T115330.061025Z-4d74c13678.json) · [Raw log](../build-logs/20261114T115330.061025Z-4d74c13678.log)
+- [Exact process output](../build-logs/20261114T115330.061025Z-4d74c13678.raw.log)
+
+### 2026-11-14T19:55:06+08:00 · agent-demo-command · succeeded
+
+- Config: Release/0.13.4; exit code: 0; elapsed: 7.277s.
+- Command: `python docs/review/2026-11-14-agent-demo-v0134/verify_delivery.py`
+- Context: Bilingual review/apply workflow, candidate selection, demo assets; actual LLM and music checks distinguished
+- Source SHA-256: `7af751702f5f8e60122e8c1d13258400d01c4bb561439804d37348d2880d1776`; Git HEAD: `768c5d64241a696ddcbee2c3287fe2ecce6eadf2`.
+- [Record](builds/20261114T115506.878939Z-6e0070fa6e.json) · [Raw log](../build-logs/20261114T115506.878939Z-6e0070fa6e.log)
+- [Exact process output](../build-logs/20261114T115506.878939Z-6e0070fa6e.raw.log)
+
+### 2026-11-14 19:56 CST · 0.13.4 Agent demo delivery final assets
+
+补充实际素材宿主检查：17WAV/7MIDI全部导入成24轨277音符，Rack8样本和Sampler根音/SHA正确，保存重开一致，源文件与受保护用户配置保持。发现当前Rack合法垫位36–51，已将可选Cowbell从GM56改51并重制/校验ZIP，新SHA224b81c3e34d5ce6345f9fdef7460ac71e9b6106096900cf06f4db040cf24fbc；首要36/38/42/46不变。模型未重跑，未控制GUI或声卡。
+
+最终交付核对20261114T115506.878939Z-6e0070fa6e通过：112构建输入匹配，旧EXE保持，六真实模型工程在0.13.4再次重开状态相同，11音频资产hash保持，三个最终ZIP完整，39本地文档链接有效。原115330素材宿主报告、此前初次artifact检查及已替换ZIP的旧/新hash都已留档。代码/日志准备同步feature/agent-demo-v0134，main保持，用户API仍待恢复。

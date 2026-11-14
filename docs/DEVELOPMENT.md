@@ -1,3 +1,14 @@
+# 0.13.4 Agent 与演示交付（2026-11-14）
+
+- [x] [计划与文件归属](review/2026-11-14-agent-demo-v0134/PLAN.md)，保留旧EXE/用户修改和0.13.3模型证据。
+- [x] 中英简明任务进度、候选结果/试听、显式Apply、Undo；真实取消状态及technical details折叠；36个隔离网页场景通过。
+- [x] 生成候选切换、不发新模型请求、重新编译当前修订、跨工程/选区/hash守护；有界API额度分类与回归。
+- [x] Cloud→Beats路由修复、独立0.13.4 Release、CTest11/11；实际EN/ZH确定性颜色/混音命令到宿主/Undo/保存重开通过。
+- [x] Jungle便携包17 WAV+7 MIDI、原版参考工程另存、来源许可和媒体校验；1080p30片头/片尾、透明版、可编辑源包。[素材](review/2026-11-14-agent-demo-v0134/JUNGLE-MATERIALS.md) / [动效](review/2026-11-14-agent-demo-v0134/MOTION.md)。
+- [x] [新版操作手册](demo/2026-11-14-demo-runbook-v0134.md)和[验证记录](review/2026-11-14-agent-demo-v0134/RESULTS.md)，不将确定性Provider当成真实LLM理解验证。
+- [ ] 用户恢复API后补验真实中英文提示词与同工程双候选Agent流程；当前insufficient_quota仍未确认解决，按用户要求不收费重试。
+- [ ] 用户验收GUI、试听/准确性、设备录音/ASIO和录屏声音；Jungle成曲编排留到素材确认后。
+
 # 0.13.3 演示彩排（2026-11-14，无新原生构建）
 
 - [x] 独立维护分支、六条原样英文提示词/纯TXT、逐步操作、32秒生成预算及真实源音频摘段；原件保持。

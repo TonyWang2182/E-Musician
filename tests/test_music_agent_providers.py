@@ -55,6 +55,28 @@ def tool_response():
     return result
 
 class ResponsesTests(unittest.TestCase):
+    def test_insufficient_quota_is_distinct_bounded_and_never_echoes_body(self):
+        from music_agent.localization import english
+        for field in ("type", "code"):
+            body = json.dumps({"error": {field: "insufficient_quota", "message": KEY}}).encode()
+            stream = io.BytesIO(body)
+            opener = Opener([HTTPError(URL, 429, KEY, {}, stream)])
+            with self.assertRaises(ProviderError) as caught:
+                OpenAIProvider(api_key=KEY, opener=opener).list_models()
+            self.assertEqual(caught.exception.code, "insufficient_quota")
+            self.assertIn("billing", english(caught.exception.args[0]))
+            self.assertNotIn(KEY, str(caught.exception))
+            self.assertTrue(stream.closed)
+            self.assertEqual(len(opener.requests), 1)
+        for body in (b'{bad', b'[]', b'{"error":"insufficient_quota"}',
+                     json.dumps({"error": {"code": "rate_limit_exceeded", "message": KEY}}).encode(),
+                     b' ' * 8193 + b'{"error":{"code":"insufficient_quota"}}'):
+            opener = Opener([HTTPError(URL, 429, KEY, {}, io.BytesIO(body))])
+            with self.assertRaises(ProviderError) as caught:
+                OpenAIProvider(api_key=KEY, opener=opener).list_models()
+            self.assertEqual(caught.exception.code, "rate_limit")
+            self.assertNotIn(KEY, str(caught.exception))
+
     def test_reasoning_output_budget_exhaustion_is_distinct_from_generic_incomplete(self):
         response={"status":"incomplete","incomplete_details":{"reason":"max_output_tokens"},"output":[]}
         opener=Opener([Response(response)])

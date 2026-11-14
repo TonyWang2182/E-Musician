@@ -9,6 +9,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, HTTPRedirectHandler, ProxyHandler, build_opener
 
 from .secrets import SecretError, load_key
+from .localization import L
 
 MAX_BODY_BYTES = 1024 * 1024
 MAX_COMPLETION_TOKENS = 4096
@@ -121,13 +122,26 @@ class KimiProvider:
         except ProviderError:
             raise
         except HTTPError as error:
-            # Never include response body/reason/headers: providers can echo input.
-            # Close without reading: deferred urllib cleanup can otherwise emit
-            # a ResourceWarning containing the raw HTTPError repr.
+            # Inspect only an exact allowlisted quota code in a bounded 429 body.
+            # Never expose/log provider messages, raw bodies, headers or reasons.
+            quota = False
             try:
-                error.close()
-            except OSError:
+                if error.code == 429:
+                    raw = error.read(8193)
+                    if len(raw) <= 8192:
+                        detail = json.loads(raw).get("error")
+                        quota = isinstance(detail, dict) and (detail.get("type") == "insufficient_quota" or detail.get("code") == "insufficient_quota")
+            except (OSError, ValueError, TypeError, AttributeError, RecursionError):
                 pass
+            finally:
+                try:
+                    error.close()
+                except OSError:
+                    pass
+            if quota:
+                raise ProviderError("insufficient_quota", L(
+                    "模型 API 额度不足。请检查平台计费和用量限制；更换同一账户的密钥通常不能解决。工程未修改。",
+                    "The model API has insufficient quota. Check billing and usage limits; replacing a key on the same account usually will not fix this. The project is unchanged."), error.code) from None
             raise self._http_error(error.code) from None
         except (TimeoutError, socket.timeout):
             raise ProviderError("timeout", "模型服务 请求超时。可稍后重试；不会自动重复收费请求。") from None
