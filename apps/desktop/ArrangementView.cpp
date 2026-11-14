@@ -173,8 +173,20 @@ private:
 
 struct ArrangementView::Impl : private juce::ScrollBar::Listener {
     struct HeaderButton final : juce::TextButton {
-        using juce::TextButton::TextButton;
+        explicit HeaderButton(const juce::String& label, bool compactAction = false)
+            : juce::TextButton(label), compactTrackAction(compactAction) {}
         std::function<void()> onContext;
+        void paintButton(juce::Graphics& g, bool over, bool down) override {
+            if (!compactTrackAction) { juce::TextButton::paintButton(g, over, down); return; }
+            // These are fixed action abbreviations, not a truncatable label.
+            // Generic dialog padding/font fitting must never turn M/S/R into
+            // identical ellipses, including when a parent theme changes.
+            getLookAndFeel().drawButtonBackground(g, *this,
+                findColour(getToggleState() ? buttonOnColourId : buttonColourId), over, down);
+            g.setColour(isEnabled() ? design::ink : design::secondary);
+            g.setFont(design::labelFont(juce::jmin(13.0f, float(getHeight()) * .5f)));
+            g.drawText(getButtonText(), getLocalBounds().reduced(2), juce::Justification::centred, false);
+        }
         void mouseDown(const juce::MouseEvent& event) override {
             contextGesture = event.mods.isPopupMenu();
             if (contextGesture) { if (onContext) onContext(); return; }
@@ -186,6 +198,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
             juce::TextButton::mouseUp(event);
         }
     private:
+        const bool compactTrackAction;
         bool contextGesture = false;
     };
     struct TrackControls final : juce::Component {
@@ -225,7 +238,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
         void resized() override {const int y=getHeight()-30;mute.setBounds(8,y,24,24);solo.setBounds(36,y,24,24);arm.setBounds(64,y,24,24);devices.setBounds(92,y,getWidth()-100,24);rename.setBounds(getWidth()-54,3,48,23);}
         deviceui::ControlLook look;
         Impl& p; juce::String id;
-        HeaderButton mute { "M" }, solo { "S" }, arm { "R" }, devices { "devices" }, rename { "rename" };
+        HeaderButton mute { "M", true }, solo { "S", true }, arm { "R", true }, devices { "devices" }, rename { "rename" };
     };
     struct Canvas final : juce::Component, juce::TooltipClient {
         explicit Canvas(Impl& view) : p(view) { setWantsKeyboardFocus(true); setTitle("Audio arrangement tracks"); }
@@ -1509,20 +1522,93 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
                 if(!header->getLocalBounds().contains(control->getBounds()))return juce::Result::fail("Compact track header control is outside its row.");
             if(header->arm.getBounds().intersects(header->devices.getBounds())||header->rename.getBounds().intersects(header->mute.getBounds()))
                 return juce::Result::fail("Track header controls overlap.");
-            for (auto* button : { &header->mute, &header->solo, &header->arm }) {
-                juce::Image glyph(juce::Image::ARGB, button->getWidth(), button->getHeight(), true);
-                { juce::Graphics text(glyph); button->getLookAndFeel().drawButtonText(text, *button, false, false); }
-                int occupiedRows = 0;
-                for (int y = 0; y < glyph.getHeight(); ++y) {
-                    bool occupied = false;
-                    for (int x = 0; x < glyph.getWidth(); ++x) occupied |= glyph.getPixelAt(x, y).getAlpha() > 48;
-                    if (occupied) ++occupiedRows;
+        }
+        // Exercise the actual HeaderButton paint path and crop away its frame.
+        // A theme-only text call does not establish the final component paint.
+        // The separate association check verifies which executable is opened.
+        struct NarrowTextLook final : design::WorkspaceLookAndFeel {
+            int genericTextCalls = 0;
+            void drawButtonText(juce::Graphics& graphics, juce::TextButton& button, bool, bool) override {
+                ++genericTextCalls;
+                graphics.setColour(design::ink); graphics.setFont(design::labelFont(13));
+                graphics.drawFittedText(button.getButtonText(), button.getLocalBounds().reduced(10, 2),
+                    juce::Justification::centred, 1);
+            }
+        } narrowTextLook;
+        auto& firstHeader = *p.headers.front();
+        juce::Image buttonAtlas(juce::Image::RGB, 840, 580, true);
+        int rasterCases = 0;
+        {
+            juce::Graphics sheet(buttonAtlas); sheet.fillAll(design::paper);
+            int themeRow = 0;
+            for (const bool narrowGenericTheme : { false, true }) {
+                int column = 0;
+                for (const float scale : { 1.0f, 1.25f, 1.5f, 2.0f }) {
+                    const int left = column++ * 210, top = themeRow * 290;
+                    sheet.setFont(design::labelFont(12)); sheet.setColour(design::ink);
+                    sheet.drawText(juce::String(int(scale * 100)) + "% / "
+                        + (narrowGenericTheme ? "narrow text theme" : "actual track theme"),
+                        left + 6, top + 4, 200, 26, juce::Justification::centredLeft);
+                    for (int state = 0; state < 3; ++state) {
+                        std::array<std::string, 3> shapes;
+                        int index = 0;
+                        const int rowTop = top + 36 + state * 82;
+                        sheet.setColour(design::secondary);
+                        sheet.drawText(state == 0 ? "Off" : state == 1 ? "On" : "Disabled",
+                            left + 6, rowTop, 190, 22, juce::Justification::centredLeft);
+                        for (auto* button : { &firstHeader.mute, &firstHeader.solo, &firstHeader.arm }) {
+                            struct Restore {
+                                Impl::HeaderButton& button; bool enabled, toggled;
+                                ~Restore() {
+                                    button.setEnabled(enabled); button.setToggleState(toggled, juce::dontSendNotification);
+                                    button.setLookAndFeel(nullptr);
+                                }
+                            } restore { *button, button->isEnabled(), button->getToggleState() };
+                            button->setLookAndFeel(narrowGenericTheme ? &narrowTextLook : nullptr);
+                            button->setEnabled(state != 2); button->setToggleState(state == 1, juce::dontSendNotification);
+                            const auto glyph = button->createComponentSnapshot(button->getLocalBounds(), true, scale);
+                            const auto interior = glyph.getBounds().reduced(juce::roundToInt(4.0f * scale));
+                            int occupiedRows = 0;
+                            for (int y = interior.getY(); y < interior.getBottom(); ++y) {
+                                bool occupied = false;
+                                for (int x = interior.getX(); x < interior.getRight(); ++x) {
+                                    const bool painted = glyph.getPixelAt(x, y).getBrightness() < .55f;
+                                    occupied |= painted; shapes[std::size_t(index)] += painted ? '1' : '0';
+                                }
+                                if (occupied) ++occupiedRows;
+                            }
+                            if (occupiedRows < int(std::ceil(5.0f * scale)))
+                                return juce::Result::fail("Actual track action label is empty or an ellipsis at "
+                                    + juce::String(int(scale * 100)) + "%: " + button->getButtonText());
+                            sheet.drawImageAt(glyph, left + 8 + index * 62, rowTop + 24);
+                            ++index; ++rasterCases;
+                        }
+                        if (shapes[0] == shapes[1] || shapes[1] == shapes[2] || shapes[0] == shapes[2])
+                            return juce::Result::fail("Actual M/S/R action labels are not distinct in a scaled component snapshot.");
+                    }
                 }
-                if (occupiedRows < 5) return juce::Result::fail("Actual track M/S/R label collapsed into ellipsis or empty text.");
+                ++themeRow;
             }
         }
+        if (narrowTextLook.genericTextCalls != 0)
+            return juce::Result::fail("Fixed track abbreviations used the generic truncating label renderer.");
+        // A normal header action still belongs to the shared text theme.
+        {
+            Impl::HeaderButton generic("devices"); generic.setLookAndFeel(&narrowTextLook); generic.setSize(90, 24); generic.setVisible(true);
+            const auto image = generic.createComponentSnapshot(generic.getLocalBounds(), true);
+            generic.setLookAndFeel(nullptr);
+            if (!image.isValid() || narrowTextLook.genericTextCalls == 0)
+                return juce::Result::fail("Non-symbol header controls stopped using their normal text renderer.");
+        }
+        report.setProperty("track_action_component_raster_cases", rasterCases);
+        report.setProperty("track_action_labels_bypass_generic_ellipsis", true);
         report.setProperty("actual_compact_track_button_glyphs_readable", true);
         if(outputDirectory!=juce::File()){
+            juce::MemoryOutputStream atlasData;
+            if (buttonAtlas.getPixelAt(0, 0) != design::paper
+                || !juce::PNGImageFormat().writeImageToStream(buttonAtlas, atlasData)
+                || !outputDirectory.getChildFile("arrangement-track-actions-dpi.png").replaceWithData(atlasData.getData(), atlasData.getDataSize()))
+                return juce::Result::fail("Could not save the committed actual track action DPI atlas.");
             const auto buttons = p.canvas.createComponentSnapshot({0,0,p.labelWidth(),juce::jmin(p.canvas.getHeight(),p.rowHeight*2)}, true, 2.0f);
             juce::MemoryOutputStream data;
             if(!juce::PNGImageFormat().writeImageToStream(buttons,data)

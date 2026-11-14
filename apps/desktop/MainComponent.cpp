@@ -16,6 +16,7 @@
 #include "UiLanguage.h"
 #include "WorkflowPanels.h"
 #include "../../tests/PopupStyleSmoke.h"
+#include "ProjectLaunch.h"
 #include "core/time/MusicalPosition.hpp"
 #include "core/time/EditGrid.hpp"
 #include <algorithm>
@@ -2896,6 +2897,20 @@ void MainComponent::openProject()
 {
     withUnsavedGuard([safe = juce::Component::SafePointer<MainComponent>(this)] {
         if (safe != nullptr) safe->chooseProject();
+    });
+}
+void MainComponent::openProjectFile(const juce::File& file)
+{
+    if (!file.hasFileExtension("emproj") || !file.existsAsFile()) {
+        showResult(juce::Result::fail("The selected .emproj project file does not exist."));
+        return;
+    }
+    withUnsavedGuard([safe = juce::Component::SafePointer<MainComponent>(this), file] {
+        if (!safe) return;
+        const auto result = safe->session.execute("open_project",
+            arguments({ { "path", file.getFullPathName() } }), safe->session.snapshot().revision);
+        if (result.wasOk()) safe->impl->waveform.invalidateSource();
+        safe->showResult(result);
     });
 }
 void MainComponent::chooseProject()

@@ -20,6 +20,7 @@ public:
     bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails&) override;
     void itemDropped(const juce::DragAndDropTarget::SourceDetails&) override;
     void requestClose(std::function<void()> onReady);
+    void openProjectFile(const juce::File&);
     juce::Result runArrangementSmokeTest(const juce::File& outputDirectory);
     bool arrangementWaveformsReady() const;
     void showAgent();

@@ -1,0 +1,17 @@
+﻿{
+    "checked_at":  "2026-11-14T09:40:12.7439745Z",
+    "pid":  7052,
+    "executable":  "E:\\emusician-analysis-build\\bin-0.13.3\\Release\\E-musician.exe",
+    "window_title":  "E-musician 0.13.3 - Audio workspace",
+    "responding":  true,
+    "agent_helpers":  [
+                          {
+                              "helper_pid":  8892,
+                              "session_exists":  true,
+                              "readiness_file_consumed":  true,
+                              "native_authenticated_connection_live":  true
+                          }
+                      ],
+    "audio_or_model_inference_tested":  false,
+    "page_pixels_inspected":  false
+}

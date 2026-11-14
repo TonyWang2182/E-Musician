@@ -1,0 +1,207 @@
+{
+  "inference_performed": false,
+  "audio_device_tested": false,
+  "executable": "E:\\emusician-analysis-build\\bin-0.13.3\\Release\\E-musician.exe",
+  "exe_sha256": "90c7a476618bccc01e581b47d46b3880422143b8382e000bb915e94108c9baa3",
+  "analysis": {
+    "protocol_version": 2,
+    "providers": [
+      {
+        "kind": "separate",
+        "available": true,
+        "model_id": "htdemucs",
+        "execution": "local",
+        "default": true,
+        "max_duration_seconds": 600,
+        "version": "4.1.0",
+        "experimental": true,
+        "device": "cuda",
+        "cpu_threads": 2,
+        "detail": "Local evaluation checkpoint; CUDA probe passed. Four stems only."
+      },
+      {
+        "kind": "transcribe",
+        "available": true,
+        "model_id": "basic-pitch",
+        "execution": "local",
+        "default": true,
+        "max_duration_seconds": 600,
+        "version": "0.4.0",
+        "experimental": true,
+        "device": "cpu",
+        "cpu_threads": 2,
+        "detail": "ONNX CPU probe passed; pitched instruments, notes only; drum classification unsupported."
+      },
+      {
+        "kind": "chords",
+        "available": true,
+        "model_id": "chroma-hmm",
+        "execution": "local",
+        "default": true,
+        "max_duration_seconds": 600,
+        "version": "1.0.0",
+        "experimental": true,
+        "device": "cpu",
+        "cpu_threads": 2,
+        "detail": "CPU baseline ready; 24 triads + N, uncalibrated similarity."
+      },
+      {
+        "kind": "beats",
+        "available": true,
+        "model_id": "beat-this-final0",
+        "execution": "local",
+        "default": true,
+        "max_duration_seconds": 600,
+        "version": "1.1.0",
+        "experimental": true,
+        "device": "cuda",
+        "cpu_threads": 2,
+        "detail": "Official final0 real CUDA forward probe passed; beat/downbeat candidates require review."
+      },
+      {
+        "available": true,
+        "default": true,
+        "detail": "SCNet XL IHF: vocals/drums/bass/other (four stems).",
+        "execution": "cloud",
+        "kind": "separate",
+        "max_duration_seconds": 600,
+        "model_id": "scnet",
+        "parameters": "fixed",
+        "quality_verified": false
+      },
+      {
+        "available": true,
+        "default": true,
+        "detail": "TransKun V2: expressive piano transcription including emitted pedal controls.",
+        "execution": "cloud",
+        "kind": "transcribe",
+        "max_duration_seconds": 600,
+        "model_id": "transkun",
+        "parameters": "fixed",
+        "quality_verified": false
+      },
+      {
+        "available": true,
+        "default": true,
+        "detail": "ChordMini BTC: fixed 170-label vocabulary; no arbitrary jazz extensions.",
+        "execution": "cloud",
+        "kind": "chords",
+        "max_duration_seconds": 600,
+        "model_id": "chordmini",
+        "parameters": "fixed",
+        "quality_verified": false
+      },
+      {
+        "available": true,
+        "default": false,
+        "detail": "MuScriptor medium: multiple instrument note tracks; exported velocity is a default, not predicted.",
+        "execution": "cloud",
+        "kind": "transcribe",
+        "max_duration_seconds": 600,
+        "model_id": "muscriptor",
+        "parameters": "fixed",
+        "quality_verified": false
+      },
+      {
+        "available": true,
+        "default": true,
+        "detail": "SheetSage2: symbolic score, notes and available structural annotations; inspect predictions.",
+        "execution": "cloud",
+        "kind": "score",
+        "max_duration_seconds": 600,
+        "model_id": "sheetsage2",
+        "parameters": "fixed",
+        "quality_verified": false
+      }
+    ],
+    "execution_modes": [
+      "auto",
+      "local",
+      "cloud"
+    ],
+    "separation_six_stems": true,
+    "separation_quality_modes": [
+      "fast",
+      "quality"
+    ],
+    "transcription_instruments": [
+      "auto",
+      "piano",
+      "bass",
+      "guitar",
+      "vocals"
+    ],
+    "chord_vocabularies": [
+      "triads",
+      "extended"
+    ],
+    "beat_meters": [
+      "auto",
+      "3/4",
+      "4/4"
+    ],
+    "beat_alignment_modes": [
+      "audio_to_project",
+      "project_to_audio"
+    ],
+    "max_duration_seconds": 600,
+    "max_parallel_jobs": 1,
+    "preview_stems": true,
+    "drum_transcription": false,
+    "cpu_threads": 2,
+    "score_kind": "uncalibrated_similarity"
+  },
+  "generation": {
+    "available": true,
+    "model_id": "ace-step-1.5-xl-turbo",
+    "default_model_id": "ace-step-1.5-xl-turbo",
+    "providers": [
+      {
+        "available": true,
+        "default": true,
+        "detail": "ACE-Step XL Turbo + 1.7B LM: musical conditioning is not exact timing verification.",
+        "execution": "cloud",
+        "kind": "generate",
+        "max_duration_seconds": 120,
+        "model_id": "ace-step-1.5-xl-turbo",
+        "parameters": "generation-conditioning",
+        "quality_verified": false
+      },
+      {
+        "available": true,
+        "default": false,
+        "detail": "YuE2: semantic token duration budget; natural stopping/truncation is reported.",
+        "execution": "cloud",
+        "kind": "generate",
+        "max_duration_seconds": 120,
+        "model_id": "yue2",
+        "parameters": "generation-conditioning",
+        "quality_verified": false
+      }
+    ],
+    "experimental": true,
+    "min_duration_seconds": 10,
+    "max_duration_seconds": 120,
+    "max_parallel_jobs": 1,
+    "detail": "Cloud models are checked when a task starts. Duration is a target; preview the actual result."
+  },
+  "checked_routes": {
+    "cloud": [
+      "ace-step-1.5-xl-turbo",
+      "chordmini",
+      "muscriptor",
+      "scnet",
+      "sheetsage2",
+      "transkun",
+      "yue2"
+    ],
+    "local": [
+      "basic-pitch",
+      "beat-this-final0",
+      "chroma-hmm",
+      "htdemucs"
+    ],
+    "six_stem_option": true
+  },
+  "passed": true
+}

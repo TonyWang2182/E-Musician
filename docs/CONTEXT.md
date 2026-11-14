@@ -1,3 +1,15 @@
+# 当前候选：0.13.3 新克隆重连、工程图标与轨头（2026-11-14，自动已验、人工待验）
+
+实际工作树仍为E:/MusicAgent&DAW/worktrees/audio-analysis，维护分支fix/reconnect-file-icons-v0133，基线912e68f。SSH别名emusician-autodl已切到用户指定bjb1/22095新克隆主机，原密钥可用，没有使用或保存本次密码。复用固定release ed7d6a920487a651c988及九环境，两个数据库、服务和同款SSH隧道通过；七云端能力已登记。VS Code独立远程窗口已连接/root/autodl-tmp/emusician，现有本地工作区保留；本轮无模型推理或上传。
+
+发现Windows工程关联仍指向旧EXE，且UserChoiceLatest引用旧应用记录；现已备份后更新属于E-musician的ProgID/应用打开路径与Logo图标，保护的用户选择保持。CLI/单实例工程打开复用未保存/录音保护与统一异步命令。M/S/R固定标签禁用省略号，72个渲染组合和截图通过。Release两次成功；首轮CTest10/11，唯一失败是新测试没有等待异步open job，修正测试后workspace针对性1/1通过；128项原生输入仅该测试改变，生产代码未再改。最终12项注册测试、Windows实际关联和源文件核对通过。详细[结果](review/2026-11-14-reconnect-icons/RESULTS.md)。
+
+新版0.13.3已打开，窗口响应、内嵌Agent认证连接通过。入口E:/MusicAgent&DAW/Start E-musician 0.13.3.cmd，EXE在E:/emusician-analysis-build/bin-0.13.3/Release；本地VS Code入口E-musician-0.13.3.code-workspace。旧0.13.2及旧E:/E-musician EXE保留，用户工程未改。下一步由用户按[人工清单](review/2026-11-14-reconnect-icons/MANUAL-CHECK.md)核对双击/图标、S/M/R、Agent与模型效果及设备播放；[功能与模型清单](review/2026-11-14-reconnect-icons/CAPABILITIES.md)明确已开放和未开放边界。不把启动/登记当成本次推理或听感验收，上一轮8项插件问题仍保留。Git状态以本轮PUBLISH记录为准，不合并main。
+
+# 演示文档补充（2026-11-12，仅文档，待彩排）
+
+按用户六段构想新增[4分钟中英分镜与拍摄清单](demo/2026-11-12-four-minute-demo.md)：31镜头、240秒，覆盖双模型生成/四轨叠加、New Light和弦/节拍/Warp、Tea for Two钢琴转录，以及自制hip-hop中的装置、插件和连续MIDI/人声录制。文档包含英文旁白与中文对照、具体操作/提示词、已有素材路径和待测清单。时间轴连续性与相对链接已检查；Tea for Two钢琴资产由现有工程清单确认，未试听。下一步按清单彩排，再录制、剪辑；本轮没有构建、模型调用、音频录制或应用变更，0.13.2的实际功能与待验状态沿用下文。
+
 # 当前候选：0.13.2 插件兼容与Agent基础混音（2026-11-08，自动已验、已打开、人工待验）
 
 实际工作树E:/MusicAgent&DAW/worktrees/audio-analysis，维护分支fix/plugin-agent-stability-v0132，基线1dd6621，0.13.1 EXE保持。已修Library列表刷新后的悬空引用和PluginPanel回调失效指针；COZY最终完整宿主路径及初轮DirectSound停止加载通过，原事故未取得同栈复现。M-Audio当前未连接，ASIO人工待验。53模块审计+最终针对性修复复测后累计45完整通过（38非零PCM/7默认静音），8未通过；两SWAM退出项已精确隔离，Ample Bass A超时、Ample SJ重开missing、四款多输出VST2拒绝仍未解决。详见[结果和逐项矩阵](review/2026-11-08-plugin-agent-stability/RESULTS.md)，不能声明所有插件兼容。

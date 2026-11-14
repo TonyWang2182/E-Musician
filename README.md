@@ -2,6 +2,10 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
+**当前维护候选0.13.3已打开：新克隆云主机/VS Code已连接，工程Logo图标及双击旧版入口已修复，M/S/R固定标签不再省略。** 两次Release成功，首次完整CTest10/11、修正异步测试等待后workspace1/1通过，72项渲染和12项文件关联检查通过。窗口与Agent本地认证已验证；本次无模型推理或设备听感验收。入口`E:/MusicAgent&DAW/Start E-musician 0.13.3.cmd`，本地开发工作区`E:/MusicAgent&DAW/E-musician-0.13.3.code-workspace`；旧程序保留。
+
+[本轮结果](docs/review/2026-11-14-reconnect-icons/RESULTS.md) · [人工测试](docs/review/2026-11-14-reconnect-icons/MANUAL-CHECK.md) · [Agent和云端/本地模型清单](docs/review/2026-11-14-reconnect-icons/CAPABILITIES.md) · [4分钟中英分镜与素材清单](docs/demo/2026-11-12-four-minute-demo.md)。以下为历史版本记录，云端当前连接以0.13.3为准。
+
 **当前维护候选0.13.2已打开：插件入口生命周期、M/S/R文字与Agent基础混音修复。** 最终Release、CTest11/11、Agent371和两项真实GPT方案通过；53个已发现模块累计45完整宿主路径通过、8项仍有问题，逐项限制见[本轮结果](docs/review/2026-11-08-plugin-agent-stability/RESULTS.md)。真实ASIO、原COZY事故和听感待人工验收，没有完整整曲自动混音能力。入口`E:/MusicAgent&DAW/Start E-musician 0.13.2.cmd`，本地VS Code打开`E:/MusicAgent&DAW/E-musician-0.13.2.code-workspace`。0.13.1原生程序、入口和工程保留。
 
 [本轮计划](docs/review/2026-11-08-plugin-agent-stability/PLAN.md) · [人工短测](docs/review/2026-11-08-plugin-agent-stability/MANUAL-CHECK.md) · [实际模型分工](docs/review/2026-11-08-plugin-agent-stability/MODEL-MAP.md) · [Agent评测与混音步骤](docs/review/2026-11-08-plugin-agent-stability/agent/README.md)。云端模型部署本轮未改，上一版本的重连与七模型验证如下。

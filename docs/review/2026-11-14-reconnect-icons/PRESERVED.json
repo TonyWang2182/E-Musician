@@ -1,0 +1,13 @@
+{
+  "base_commit": "912e68f72b6b08105cb532399f02ebbd31bf7573",
+  "executables": {
+    "E:\\emusician-analysis-build\\bin-0.13.2-final\\Release\\E-musician.exe": "06dc0946bb4ff13dc04f99388388064d034ed904035184dfc1b4fa774670b925",
+    "E:\\E-musician\\build\\bin\\Release\\E-musician.exe": "133f9139b9b56c6fc7f89613b18454bc613ba57996947fbefd868b8719773566"
+  },
+  "preexisting_doc_changes": [
+    "docs/CONTEXT.md",
+    "docs/DEVELOPMENT.md",
+    "docs/DEVLOG.md",
+    "docs/demo/2026-11-12-four-minute-demo.md"
+  ]
+}

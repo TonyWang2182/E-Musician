@@ -12599,3 +12599,270 @@ print(json.dumps({'\"'\"'passed'\"'\"':True,'\"'\"'checked_at'\"'\"':datetime.da
 - Implementation af0fb6c24072d63b37f024f731b71ff690531f60 pushed and verified on fix/plugin-agent-stability-v0132. Main remains d4ed6c898af1303918e38b6325a915befabbb575.
 - Preserved 10 unrelated user DEVLOG entries and 16 pre-existing build records outside this commit; working log history was not rewritten. Staged credentials and whitespace checks passed.
 - Release/source/Agent verification is recorded in this iteration VERIFICATION.json. This publication changes documentation only; no additional build or cloud inference was run.
+
+## 2026-11-12 — 4分钟演示分镜与录制准备（仅文档）
+
+- 用户要求英文界面、约4分钟、六段结构；新增docs/demo/2026-11-12-four-minute-demo.md，保留旧7分50秒脚本。含精确时间轴、31个镜头、逐镜英文旁白/中文对照、具体操作、复制用指令、已有素材位置、录制资产和人工检查清单。
+- 编排：开场24秒、双模型生成/四轨分离76秒、New Light和弦/节拍/Warp52秒、Tea for Two钢琴转录34秒、自制hip-hop装置/插件/实录42秒、结尾12秒。MIDI和人声分别保留9秒/10秒连续录制过程，不用成品波形替代。
+- 只读核对0.13.2/0.13.1功能记录、Agent运行器和Warp流程：两生成模型分两次请求，四轨一次导入后逐层开声，音频对齐已含固定比例Warp。从T42-2.emproj确认Separated / piano对应真实资产路径，未试听、未执行新转录。
+- 文档检查：一次性Python读取验证31镜头连续无重叠、终点240秒、英文旁白243词、单镜最高文字预算112.5词/分钟，所有相对链接存在；这不是功能/设备/音乐质量验收。CONTEXT与DEVELOPMENT同步为文档完成、彩排/拍摄待执行。
+- 无代码/架构改动，无构建、云端调用、模型下载或工程写入；用户已有DEVLOG及16项未跟踪构建记录保持。本轮没有合并或推送分支。
+- 只读交叉审稿后补明：改Beats界面字段不能更新已冻结Agent方案，修正检测值后须重新提方案；未接受候选不能当已存档音轨，历史结果手动导入与Agent接受镜头分别标识；钢琴开场原声留白调为约2秒。旁白和总时间轴不变。
+
+### 2026-11-14T17:19:21+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 11.246s.
+- Command: `C:/Python314/python.exe build/reconnect_endpoint_20261114.py`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `57f22dabee65580212ad2b9fc0e8418ed03b6bd67466bb9bec2fcaa3d908bf9a`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T091921.182823Z-a92b9b8342.json) · [Raw log](../build-logs/20261114T091921.182823Z-a92b9b8342.log)
+- [Exact process output](../build-logs/20261114T091921.182823Z-a92b9b8342.raw.log)
+
+### 2026-11-14T17:19:57+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 2.997s.
+- Command: `C:/Python314/python.exe scripts/clone_reconnect_check.py --ssh-port 22095 --start --output docs/review/2026-11-14-reconnect-icons/CLOUD.json`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `57f22dabee65580212ad2b9fc0e8418ed03b6bd67466bb9bec2fcaa3d908bf9a`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T091957.964102Z-4b3606bb07.json) · [Raw log](../build-logs/20261114T091957.964102Z-4b3606bb07.log)
+- [Exact process output](../build-logs/20261114T091957.964102Z-4b3606bb07.raw.log)
+
+### 2026-11-14T17:21:08+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 2.643s.
+- Command: `C:/Python314/python.exe scripts/cloud/register_compute.py --register`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `cec2c7cdda1e9a0281bb04446945f82705dcb0badf5b4cf2b601cedf1ebcf4e0`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T092108.678297Z-166c7af114.json) · [Raw log](../build-logs/20261114T092108.678297Z-166c7af114.log)
+- [Exact process output](../build-logs/20261114T092108.678297Z-166c7af114.raw.log)
+
+### 2026-11-14T17:21:27+08:00 · reconnect-icons-configure · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 37.027s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.13.3`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `d23114706fbce2912ce191525df4b3eb3b40463aa15714dd462ce684a35cd918`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T092127.741711Z-0675e6042f.json) · [Raw log](../build-logs/20261114T092127.741711Z-0675e6042f.log)
+- [Exact process output](../build-logs/20261114T092127.741711Z-0675e6042f.raw.log)
+
+### 2026-11-14T17:25:04+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 1.358s.
+- Command: `C:/Python314/python.exe tests/ProjectFileAssociationTests.py`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `eaff964d4123a87865eaed11f38aaabf176d1b8118705877f4d20d61ec81dc31`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T092504.390217Z-6d614e8dfe.json) · [Raw log](../build-logs/20261114T092504.390217Z-6d614e8dfe.log)
+- [Exact process output](../build-logs/20261114T092504.390217Z-6d614e8dfe.raw.log)
+
+### 2026-11-14T17:25:20+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 0.858s.
+- Command: `C:/Python314/python.exe scripts/register_project_file.py status`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `d3b5f4b3b88c23d40ead498fc70d2e94bccba08010843fb4338883d768af9f36`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T092520.997153Z-7f8eff8ef5.json) · [Raw log](../build-logs/20261114T092520.997153Z-7f8eff8ef5.log)
+- [Exact process output](../build-logs/20261114T092520.997153Z-7f8eff8ef5.raw.log)
+
+### 2026-11-14T17:24:41+08:00 · reconnect-icons-build · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 116.842s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `eaff964d4123a87865eaed11f38aaabf176d1b8118705877f4d20d61ec81dc31`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T092441.359891Z-e3a71b29ba.json) · [Raw log](../build-logs/20261114T092441.359891Z-e3a71b29ba.log)
+- [Exact process output](../build-logs/20261114T092441.359891Z-e3a71b29ba.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-14T17:27:13+08:00 · reconnect-icons-command · failed
+
+- Config: Release/0.13.3; exit code: 1; elapsed: 1.544s.
+- Command: `C:/Python314/python.exe tests/ProjectFileAssociationTests.py`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `0452ffdf0899ee082ce53cf898dbe57d2fee231284628a38417f7d39370c8fe7`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T092713.343971Z-673c79e3a1.json) · [Raw log](../build-logs/20261114T092713.343971Z-673c79e3a1.log)
+- [Exact process output](../build-logs/20261114T092713.343971Z-673c79e3a1.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T092713.343971Z-673c79e3a1.log
+
+### 2026-11-14T17:28:39+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 1.456s.
+- Command: `C:/Python314/python.exe tests/ReconnectedCapabilitiesCheck.py --exe E:/emusician-analysis-build/bin-0.13.3/Release/E-musician.exe --output docs/review/2026-11-14-reconnect-icons/DESKTOP-CAPABILITIES.json`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `d2f4ebd6f0e07bee9b43860ac21428c2610180108d9dccd6bf192f587be89a25`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T092839.384537Z-07e69dab60.json) · [Raw log](../build-logs/20261114T092839.384537Z-07e69dab60.log)
+- [Exact process output](../build-logs/20261114T092839.384537Z-07e69dab60.raw.log)
+
+### 2026-11-14T17:29:02+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 0.815s.
+- Command: `C:/Python314/python.exe build/reconnect-icons/cleanup_association_fixture.py`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `d2f4ebd6f0e07bee9b43860ac21428c2610180108d9dccd6bf192f587be89a25`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T092902.023315Z-0811b9cb27.json) · [Raw log](../build-logs/20261114T092902.023315Z-0811b9cb27.log)
+- [Exact process output](../build-logs/20261114T092902.023315Z-0811b9cb27.raw.log)
+
+### 2026-11-14T17:29:03+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 0.841s.
+- Command: `C:/Python314/python.exe tests/ProjectFileAssociationTests.py`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `d2f4ebd6f0e07bee9b43860ac21428c2610180108d9dccd6bf192f587be89a25`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T092903.269075Z-7af994fa19.json) · [Raw log](../build-logs/20261114T092903.269075Z-7af994fa19.log)
+- [Exact process output](../build-logs/20261114T092903.269075Z-7af994fa19.raw.log)
+
+### 2026-11-14T17:27:33+08:00 · reconnect-icons-test · failed
+
+- Config: Release/0.13.3; exit code: 8; elapsed: 109.887s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `0452ffdf0899ee082ce53cf898dbe57d2fee231284628a38417f7d39370c8fe7`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T092733.460766Z-bbc82c6f3e.json) · [Raw log](../build-logs/20261114T092733.460766Z-bbc82c6f3e.log)
+- [Exact process output](../build-logs/20261114T092733.460766Z-bbc82c6f3e.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 8; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T092733.460766Z-bbc82c6f3e.log
+
+### 2026-11-14T17:29:48+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 1.682s.
+- Command: `C:/Python314/python.exe tests/ReconnectedCapabilitiesCheck.py --exe E:/emusician-analysis-build/bin-0.13.3/Release/E-musician.exe --output docs/review/2026-11-14-reconnect-icons/DESKTOP-CAPABILITIES.json`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `327253d35f38a450c5fd152c104dc82a0e2dd93a42f19f3c356a9c9bc28c5d15`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T092948.425857Z-5a83e28cb0.json) · [Raw log](../build-logs/20261114T092948.425857Z-5a83e28cb0.log)
+- [Exact process output](../build-logs/20261114T092948.425857Z-5a83e28cb0.raw.log)
+
+### 2026-11-14T17:31:58+08:00 · reconnect-icons-build · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 27.730s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `631ef576beb24df99fa9a8ca3c2ef052dc9ba0863cf140f33e187bde9fd9c941`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T093158.608270Z-7b242e79f9.json) · [Raw log](../build-logs/20261114T093158.608270Z-7b242e79f9.log)
+- [Exact process output](../build-logs/20261114T093158.608270Z-7b242e79f9.raw.log)
+
+### 2026-11-14T17:32:38+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 0.565s.
+- Command: `C:/Python314/python.exe build/create_reconnect_icons_launchers.py`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `631ef576beb24df99fa9a8ca3c2ef052dc9ba0863cf140f33e187bde9fd9c941`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T093238.997170Z-07085f7835.json) · [Raw log](../build-logs/20261114T093238.997170Z-07085f7835.log)
+- [Exact process output](../build-logs/20261114T093238.997170Z-07085f7835.raw.log)
+
+### 2026-11-14T17:33:17+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 12.717s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure -R workspace.brand_colour`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `631ef576beb24df99fa9a8ca3c2ef052dc9ba0863cf140f33e187bde9fd9c941`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T093317.874276Z-277453f89c.json) · [Raw log](../build-logs/20261114T093317.874276Z-277453f89c.log)
+- [Exact process output](../build-logs/20261114T093317.874276Z-277453f89c.raw.log)
+
+### 2026-11-14T17:34:19+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 0.764s.
+- Command: `C:/Python314/python.exe scripts/register_project_file.py apply --exe E:/emusician-analysis-build/bin-0.13.3/Release/E-musician.exe --backup E:/MusicAgent&DAW/integration-backups/2026-11-14-emproj-association.json`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `631ef576beb24df99fa9a8ca3c2ef052dc9ba0863cf140f33e187bde9fd9c941`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T093419.775226Z-f38443ec6f.json) · [Raw log](../build-logs/20261114T093419.775226Z-f38443ec6f.log)
+- [Exact process output](../build-logs/20261114T093419.775226Z-f38443ec6f.raw.log)
+
+### 2026-11-14T17:37:24+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 1.927s.
+- Command: `C:/Python314/python.exe tests/ReconnectedCapabilitiesCheck.py --exe E:/emusician-analysis-build/bin-0.13.3/Release/E-musician.exe --output docs/review/2026-11-14-reconnect-icons/DESKTOP-CAPABILITIES.json`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `631ef576beb24df99fa9a8ca3c2ef052dc9ba0863cf140f33e187bde9fd9c941`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T093724.962908Z-9773306b76.json) · [Raw log](../build-logs/20261114T093724.962908Z-9773306b76.log)
+- [Exact process output](../build-logs/20261114T093724.962908Z-9773306b76.raw.log)
+
+### 2026-11-14T17:37:31+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 0.667s.
+- Command: `C:/Python314/python.exe scripts/register_project_file.py status --exe E:/emusician-analysis-build/bin-0.13.3/Release/E-musician.exe`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `631ef576beb24df99fa9a8ca3c2ef052dc9ba0863cf140f33e187bde9fd9c941`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T093731.750920Z-724dc77c8a.json) · [Raw log](../build-logs/20261114T093731.750920Z-724dc77c8a.log)
+- [Exact process output](../build-logs/20261114T093731.750920Z-724dc77c8a.raw.log)
+
+### 2026-11-14T17:38:18+08:00 · reconnect-icons-run · launched
+
+- Config: Release/0.13.3; exit code: None; elapsed: 0.442s.
+- Command: `E:/emusician-analysis-build/bin-0.13.3/Release/E-musician.exe --agent`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `631ef576beb24df99fa9a8ca3c2ef052dc9ba0863cf140f33e187bde9fd9c941`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T093818.675966Z-1b1653b981.json) · [Raw log](../build-logs/20261114T093818.675966Z-1b1653b981.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261114T093818.675966Z-1b1653b981.raw.log)
+
+### 2026-11-14T17:38:24+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.188s.
+- Command: `C:\Python314\python.exe E:\emusician-analysis-source\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `631ef576beb24df99fa9a8ca3c2ef052dc9ba0863cf140f33e187bde9fd9c941`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T093824.536546Z-db41739086.json) · [Raw log](../build-logs/20261114T093824.536546Z-db41739086.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
+### 2026-11-14T17:40:09+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 3.726s.
+- Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File docs/review/2026-11-14-reconnect-icons/check_startup.ps1`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `947993149da0535a3b827fb109f802f2cd883cabd5473a08b05499adafe8647c`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T094009.133507Z-17e8b5ca71.json) · [Raw log](../build-logs/20261114T094009.133507Z-17e8b5ca71.log)
+- [Exact process output](../build-logs/20261114T094009.133507Z-17e8b5ca71.raw.log)
+
+### 2026-11-14T17:42:12+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 1.119s.
+- Command: `C:/Python314/python.exe tests/ProjectFileAssociationTests.py`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `01dfa1f47edaac14d26593b8d974d167cc36dfb642f6f2c5db94bb0a1d9c6c36`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T094212.114655Z-8afb78256b.json) · [Raw log](../build-logs/20261114T094212.114655Z-8afb78256b.log)
+- [Exact process output](../build-logs/20261114T094212.114655Z-8afb78256b.raw.log)
+
+### 2026-11-14T17:42:24+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 0.737s.
+- Command: `C:/Python314/python.exe scripts/register_project_file.py apply --exe E:/emusician-analysis-build/bin-0.13.3/Release/E-musician.exe --backup E:/MusicAgent&DAW/integration-backups/2026-11-14-emproj-application-association.json`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `01dfa1f47edaac14d26593b8d974d167cc36dfb642f6f2c5db94bb0a1d9c6c36`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T094224.163054Z-b074de8ef0.json) · [Raw log](../build-logs/20261114T094224.163054Z-b074de8ef0.log)
+- [Exact process output](../build-logs/20261114T094224.163054Z-b074de8ef0.raw.log)
+
+### 2026-11-14T17:42:35+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 0.738s.
+- Command: `C:/Python314/python.exe docs/review/2026-11-14-reconnect-icons/verify_release.py`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `01dfa1f47edaac14d26593b8d974d167cc36dfb642f6f2c5db94bb0a1d9c6c36`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T094235.371205Z-9969290e6b.json) · [Raw log](../build-logs/20261114T094235.371205Z-9969290e6b.log)
+- [Exact process output](../build-logs/20261114T094235.371205Z-9969290e6b.raw.log)
+
+### 2026-11-14T17:42:48+08:00 · reconnect-icons-command · failed
+
+- Config: Release/0.13.3; exit code: 1; elapsed: 1.290s.
+- Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File build/reconnect-icons/extract-default-icon.ps1`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `01dfa1f47edaac14d26593b8d974d167cc36dfb642f6f2c5db94bb0a1d9c6c36`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T094248.989515Z-902c2277de.json) · [Raw log](../build-logs/20261114T094248.989515Z-902c2277de.log)
+- [Exact process output](../build-logs/20261114T094248.989515Z-902c2277de.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261114T094248.989515Z-902c2277de.log
+
+### 2026-11-14T17:43:50+08:00 · reconnect-icons-command · succeeded
+
+- Config: Release/0.13.3; exit code: 0; elapsed: 1.356s.
+- Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File build/reconnect-icons/extract-default-icon.ps1`
+- Context: Clone reconnect, document icons/open handling and compact track labels; user performs audio/model acceptance
+- Source SHA-256: `01dfa1f47edaac14d26593b8d974d167cc36dfb642f6f2c5db94bb0a1d9c6c36`; Git HEAD: `912e68f72b6b08105cb532399f02ebbd31bf7573`.
+- [Record](builds/20261114T094350.131365Z-0b6717435a.json) · [Raw log](../build-logs/20261114T094350.131365Z-0b6717435a.log)
+- [Exact process output](../build-logs/20261114T094350.131365Z-0b6717435a.raw.log)
+
+## 2026-11-14 — 0.13.3 克隆重连、工程Logo与固定轨头文字
+
+- 用户授权连接新克隆主机及VS Code/DAW，由用户自行验收音乐功能。本轮复用原密钥和克隆数据，未使用/保存新密码，没有上传模型、付费API或GPU推理。
+- 固定release/九环境/两个SQLite/服务健康与DAW同款隧道检查通过；新VS Code远程窗口连接，现有本地工作区保留。最终原生控制只读返回七云端、四本地Provider及六分轨选项。
+- .emproj仍指旧EXE，进一步定位Windows11 UserChoiceLatest选中旧应用注册。备份后修正自有ProgID/应用打开命令与Logo图标，保护选择/hash保持。补齐CLI和单实例安全打开，复用统一异步命令。12项注册检查及实际系统解析通过。
+- M/S/R固定字母禁用省略号；72个组件渲染组合、截图和完整实际工作区图像通过。两次Release成功；初轮CTest10/11，新增测试误将异步打开当同步；仅改测试等待后workspace1/1通过。128项原生输入仅测试文件变化，生产源码未再改，旧两份EXE哈希保持。
+- 注册回归中REG_NONE空值表示、首次只注册ProgID不能改变实际入口、提取图标数量断言三项失败与修正都保留。一次带&路径未引用的PowerShell命令在解析时拒绝，未进入注册脚本；正确引用后成功。
+- 新版0.13.3已打开，窗口响应、Agent helper认证连接和ready消费通过；未把启动状态视作声卡或模型效果验收。资料：[结果](review/2026-11-14-reconnect-icons/RESULTS.md)、[功能/模型清单](review/2026-11-14-reconnect-icons/CAPABILITIES.md)、[人工检查](review/2026-11-14-reconnect-icons/MANUAL-CHECK.md)。Git维护分支fix/reconnect-file-icons-v0133，不自动合并main；用户旧日志/未跟踪记录保留。

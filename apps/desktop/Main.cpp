@@ -4,6 +4,7 @@
 #include "WorkspaceLookAndFeel.h"
 #include "PluginHost.h"
 #include "ControlServer.h"
+#include "ProjectLaunch.h"
 #include <juce_gui_extra/juce_gui_extra.h>
 #include <stdexcept>
 #include <iostream>
@@ -103,7 +104,7 @@ public:
                 waitForPerformance(directory,seconds+180);return;
             }
             window = std::make_unique<Window>(*session, !smoke && !review, !smoke && !review);
-            if(args.contains("--agent"))static_cast<MainComponent*>(window->getContentComponent())->showAgent();
+            if (!smoke && !review) dispatchProjectLaunch(args);
             if (smoke) {
                 if (smokeIndex + 1 >= args.size()) { setApplicationReturnValue(2); quit(); return; }
                 if (smokeIndex + 2 >= args.size()) { setApplicationReturnValue(2); quit(); return; }
@@ -156,11 +157,33 @@ public:
         if (window) static_cast<MainComponent*>(window->getContentComponent())->requestClose([this] { quit(); });
         else quit();
     }
-    void anotherInstanceStarted(const juce::String&) override
+    void anotherInstanceStarted(const juce::String& commandLine) override
     {
-        if (window) { window->setVisible(true); window->toFront(true); }
+        if (window) {
+            window->setVisible(true); window->toFront(true);
+            dispatchProjectLaunch(juce::StringArray::fromTokens(commandLine, true));
+        }
     }
 private:
+    void dispatchProjectLaunch(const juce::StringArray& args)
+    {
+        const auto request = parseProjectLaunch(args);
+        if (request.error.isNotEmpty()) {
+            juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
+                                                  "Open project", request.error);
+            return;
+        }
+        auto* content = window ? static_cast<MainComponent*>(window->getContentComponent()) : nullptr;
+        if (!content) return;
+        if (request.showAgent) content->showAgent();
+        if (request.file != juce::File()) {
+            // Defer until native startup and the single-instance handoff have
+            // returned. The UI's normal unsaved/recording guard owns transition.
+            juce::MessageManager::callAsync([safe = juce::Component::SafePointer<MainComponent>(content), file = request.file] {
+                if (safe) safe->openProjectFile(file);
+            });
+        }
+    }
     // Application-owned: unattached popup menus and async alerts use this theme.
     // It outlives all windows, controls and plug-in teardown.
     design::WorkspaceLookAndFeel workspaceLook;

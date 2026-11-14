@@ -1,0 +1,104 @@
+{
+  "checked_at": "2026-11-14T09:42:36.058379+00:00",
+  "passed": true,
+  "executable": "E:\\emusician-analysis-build\\bin-0.13.3\\Release\\E-musician.exe",
+  "exe_sha256": "90c7a476618bccc01e581b47d46b3880422143b8382e000bb915e94108c9baa3",
+  "native_inputs_verified": 128,
+  "second_build_changed_only": [
+    "tests/MainWorkspaceSmoke.inc"
+  ],
+  "old_executables_preserved": [
+    "E:\\emusician-analysis-build\\bin-0.13.2-final\\Release\\E-musician.exe",
+    "E:\\E-musician\\build\\bin\\Release\\E-musician.exe"
+  ],
+  "launchers_verified": true,
+  "effective_association_verified": true,
+  "records": [
+    {
+      "id": "20261114T092441.359891Z-e3a71b29ba",
+      "status": "succeeded",
+      "command": [
+        "cmake",
+        "--build",
+        "E:/emusician-analysis-build",
+        "--config",
+        "Release",
+        "--parallel",
+        "1",
+        "--",
+        "/p:UseMultiToolTask=true",
+        "/p:CL_MPCount=1",
+        "/p:EnforceProcessCountAcrossBuilds=true"
+      ]
+    },
+    {
+      "id": "20261114T092733.460766Z-bbc82c6f3e",
+      "status": "failed",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "E:/emusician-analysis-build",
+        "-C",
+        "Release",
+        "--output-on-failure"
+      ]
+    },
+    {
+      "id": "20261114T093158.608270Z-7b242e79f9",
+      "status": "succeeded",
+      "command": [
+        "cmake",
+        "--build",
+        "E:/emusician-analysis-build",
+        "--config",
+        "Release",
+        "--parallel",
+        "1",
+        "--",
+        "/p:UseMultiToolTask=true",
+        "/p:CL_MPCount=1",
+        "/p:EnforceProcessCountAcrossBuilds=true"
+      ]
+    },
+    {
+      "id": "20261114T093317.874276Z-277453f89c",
+      "status": "succeeded",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "E:/emusician-analysis-build",
+        "-C",
+        "Release",
+        "--output-on-failure",
+        "-R",
+        "workspace.brand_colour"
+      ]
+    },
+    {
+      "id": "20261114T093724.962908Z-9773306b76",
+      "status": "succeeded",
+      "command": [
+        "C:/Python314/python.exe",
+        "tests/ReconnectedCapabilitiesCheck.py",
+        "--exe",
+        "E:/emusician-analysis-build/bin-0.13.3/Release/E-musician.exe",
+        "--output",
+        "docs/review/2026-11-14-reconnect-icons/DESKTOP-CAPABILITIES.json"
+      ]
+    },
+    {
+      "id": "20261114T094009.133507Z-17e8b5ca71",
+      "status": "succeeded",
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "docs/review/2026-11-14-reconnect-icons/check_startup.ps1"
+      ]
+    }
+  ],
+  "validation_scope": "Initial full CTest 10/11, then test-only wait fix and targeted workspace 1/1. No second full CTest.",
+  "cloud_inference_or_audio_tested_this_iteration": false
+}

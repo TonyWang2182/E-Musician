@@ -1,5 +1,11 @@
 # E-musician 技术架构
 
+## 0.13.3 工程文件入口与克隆端点（2026-11-14）
+
+Windows文件关联 → `ProjectLaunch`解析 → 消息线程SafePointer分派 → `MainComponent::openProjectFile` → 原未保存/录音保护 → `EngineSession::execute(open_project)`异步任务。启动参数与已有实例转交使用同一路径；命令已排队和工程已装载分开验证，不在文件入口直接修改引擎。图标引用既有EXE Logo资源，按用户注册脚本备份并维护E-musician自有ProgID/应用记录，保留UserChoice/UserChoiceLatest与外部应用选择。
+
+云端别名改到本次克隆主机22095端口，模型环境、protocol 2服务和任务数据契约未改变。VS Code单独远程窗口仅用于管理；DAW的Worker自行建立SSH隧道。七云端与四本地Provider、HTDemucs的六分轨选项由原生能力接口投影；联网可用与实际推理分别记录。M/S/R仅改变固定文字绘制，不改命令、音频回调或工程状态。见[本轮证据](review/2026-11-14-reconnect-icons/RESULTS.md)。
+
 ## 0.13.2 插件诊断与Agent混音读取边界（2026-11-08）
 
 原生插件仍在宿主进程内运行；扫描器和兼容探针在隔离子进程中逐项检查，外层Windows JobObject限制自有进程树寿命。扫描以顶层VST3 bundle为身份，递归遍历忽略包内支持DLL，避免误当VST2。元数据扫描、实例化、状态保存、离线DSP、真实设备初始化和GUI操作是不同证据；隔离扫描不等于实时插件已经沙箱化。隐藏peer探针不证明厂商原生编辑器已完成可见窗口attach。

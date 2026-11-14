@@ -1,0 +1,9 @@
+{
+  "alias": "emusician-autodl",
+  "hostname": "connect.bjb1.seetacloud.com",
+  "port": 22095,
+  "password_used_or_stored": false,
+  "authentication": "existing SSH key",
+  "backup_directory": "E:\\MusicAgent&DAW\\cloud-inference\\connection\\previous-20261114T091932Z",
+  "strict_host_key_checking": true
+}

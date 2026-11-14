@@ -47,6 +47,51 @@ juce::Result MainComponent::runWorkspaceUISmoke(const juce::File& directory)
         require(view.getLocalBounds().contains(p.titleBounds) && !p.titleBounds.intersects(p.saveButton.getBounds()), label + " project title clearance");
     };
     try {
+        {
+            const auto project = directory.getChildFile("engine/colour-and-effect.emproj");
+            const auto quotedPath = project.getFullPathName().quoted();
+            const auto explicitLaunch = parseProjectLaunch(juce::StringArray::fromTokens("--agent --open-project " + quotedPath, true));
+            require(explicitLaunch.error.isEmpty() && explicitLaunch.showAgent && explicitLaunch.file == project,
+                    "Explorer project launch preserves quoted path and Agent flag");
+            const auto positionalLaunch = parseProjectLaunch(juce::StringArray::fromTokens(quotedPath + " --agent", true));
+            require(positionalLaunch.error.isEmpty() && positionalLaunch.file == project && positionalLaunch.showAgent,
+                    "legacy positional project launch remains supported");
+            require(parseProjectLaunch({}).error.isEmpty() && parseProjectLaunch({"--agent"}).file == juce::File(),
+                    "ordinary launch without project remains supported");
+            require(parseProjectLaunch({"--open-project"}).error.isNotEmpty()
+                    && parseProjectLaunch({"--open-project", ""}).error.isNotEmpty(), "project launch rejects missing filename");
+            require(parseProjectLaunch({"one.emproj", "two.emproj"}).error.isNotEmpty()
+                    && parseProjectLaunch({"audio.wav"}).error.isNotEmpty()
+                    && parseProjectLaunch({"--unknown"}).error.isNotEmpty(), "project launch rejects ambiguous or unsupported input");
+            const auto spacedPath = directory.getChildFile("Shell & piano project.emproj");
+            require(parseProjectLaunch(juce::StringArray::fromTokens(spacedPath.getFullPathName().quoted(), true)).file == spacedPath,
+                    "project launch does not treat spaces or ampersand as shell syntax");
+            EngineSession launchSession(false);
+            MainComponent launchView(launchSession);
+            const auto originalBytes = project.loadFileAsString();
+            launchView.openProjectFile(project);
+            const auto openDeadline = juce::Time::getMillisecondCounterHiRes() + 10000.0;
+            juce::String openStatus, openError;
+            bool openJobSeen = false;
+            do {
+                for (const auto& job : launchSession.snapshot().jobs) if (job.kind == "open_project") {
+                    openJobSeen = true; openStatus = job.status; openError = job.error;
+                }
+                if (openStatus == "completed" || openStatus == "failed" || openStatus == "cancelled") break;
+                juce::MessageManager::getInstance()->runDispatchLoopUntil(10);
+            } while (juce::Time::getMillisecondCounterHiRes() < openDeadline);
+            report->setProperty("external_open_job", arguments({ {"seen", openJobSeen},
+                {"status", openStatus}, {"error", openError}, {"ui_error", launchView.impl->error} }));
+            require(openJobSeen && openStatus == "completed", "external file open job completed: " + openError + launchView.impl->error);
+            const auto loaded = launchSession.snapshot();
+            require(loaded.projectFile == project && !loaded.dirty && !loaded.tracks.empty(),
+                    "external file open reaches normal project command");
+            launchView.openProjectFile(directory.getChildFile("missing.emproj"));
+            require(launchSession.snapshot().projectId == loaded.projectId
+                    && launchSession.snapshot().revision == loaded.revision,
+                    "missing external file preserves current project");
+            require(project.loadFileAsString() == originalBytes, "external open never rewrites source project");
+        }
         const auto browserLifetime = WorkspaceBrowser::runActivationLifetimeSmoke(*report);
         require(browserLifetime.wasOk(), "library activation lifetime: " + browserLifetime.getErrorMessage());
         const auto pluginLifetime = PluginPanel::runLifetimeSmokeTest(fixture, *report);

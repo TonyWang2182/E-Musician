@@ -1,0 +1,13 @@
+{
+  "remote_directory": "/root/autodl-tmp/emusician",
+  "ssh_alias": "emusician-autodl",
+  "window_title": "emusician [SSH: emusician-autodl] - Visual Studio Code",
+  "opened_in_new_window": true,
+  "local_development_window_preserved": true,
+  "log_path": "C:\\Users\\28712\\AppData\\Roaming\\Code\\logs\\20261114T164335\\window3\\exthost\\output_logging_20261114T172114\\1-Remote - SSH.log",
+  "connection_evidence": [
+    "[17:21:51.189] Remote server is listening on port 43787",
+    "[17:21:51.219] Resolved \"ssh-remote+emusician-autodl\" to \"port 64807\""
+  ],
+  "inference_performed": false
+}
