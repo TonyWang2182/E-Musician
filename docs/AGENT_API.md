@@ -148,11 +148,11 @@ Python中可用`Client(executable, show=True)`同时显示受控工程，Agent�
 | get_clip_notes | clip_id, offset=0, limit=256（最大1000） | total, offset, notes |
 | get_plugin_catalog | offset=0, limit=64（最大256） | total, offset, plugins |
 | get_plugin_parameters | plugin_id, offset=0, limit=128（最大256） | total, offset, parameters，value 为0–1归一化值 |
-| get_recording_inputs | 无 | inputs: id/name/type/midi/enabled/monitor；仅列现有引擎输入 |
+| get_recording_inputs | 无 | inputs: id/name/type/midi/enabled/monitor/physical_active/available；音频另含engine_id/channels/stereo，id限定当前设备身份；仅列现有引擎输入 |
 | get_recording_state | 无 | recording/finalizing/error/tracks/recording_directory/monitor_scope，以及counting_in/count_in_beats_remaining/recording_start_seconds |
 | get_recording_preferences | 无 | metronome_enabled/metronome_gain_db/metronome_record_only/count_in_enabled/count_in_bars；scope为application |
 | get_clipboard_state | 无 | clipboard_id/project_id/clip_count；应用内的完整片段剪贴板，不是钢琴卷帘音符剪贴板 |
-| get_audio_devices | scan=false；true仅用于显式刷新 | drivers（含inputs/outputs/separate_inputs_and_outputs）、当前driver/device及独立input_device_name/output_device_name、实际sample_rate/buffer_size、可选rates/sizes、输入输出通道和设备报告的延迟 |
+| get_audio_devices | scan=false；true仅用于显式刷新 | drivers（含inputs/outputs/separate_inputs_and_outputs）、当前driver/device及独立input_device_name/output_device_name、实际sample_rate/buffer_size、可选rates/sizes、输入输出通道/active_input_channels/input_stereo_pairs、device_open/has_control_panel和设备报告的延迟 |
 | get_automation_targets | track_id；master表示主输出 | targets: target/plugin_id/parameter_id/name/current_normalized_value/text |
 | get_automation_points | track_id, lane_id, offset=0, limit=256（最大1000） | points、total、offset、has_more |
 | get_clip_controllers | clip_id, offset=0, limit=256（最大1000） | events、total、offset、has_more |
@@ -295,7 +295,8 @@ VST2/VST3只支持Windows x64。MIDI轨需要安装并加载可用乐器才发�
 
 | command | args及行为 |
 |---|---|
-| configure_audio_device | driver_type；device_name可同时指定输入/输出（ASIO）；或input_device_name/output_device_name；sample_rate、buffer_size、input_channels（可选0起索引数组） |
+| configure_audio_device | driver_type；device_name可同时指定输入/输出（ASIO）；或input_device_name/output_device_name；sample_rate、buffer_size、input_channels（可选0起物理通道索引数组）；input_stereo_pairs（可选相邻立体声对的起始偶数索引数组，如[0]表示In1+In2） |
+| show_audio_driver_panel | 无参数；仅当前打开且has_control_panel=true的驱动支持。停止播放和录音后调用；返回后重新获取设备实际配置，不保留旧设备对象。 |
 | set_track_input | track_id, input_device_id；空字符串清除选择，选择保存在工程中 |
 | set_track_armed | track_id, armed（布尔）；仅音频/乐器轨；运行时状态，不写入工程 |
 | set_input_monitor | `track_id`、`mode: off/on`：逐轨运行时监听。0.13.5旧 `auto` 请求兼容为off；旧 `input_device_id` 仅允许唯一轨道目标，多轨共用时须传track_id，不再广播。实际构建验证状态见CONTEXT。 |
@@ -309,6 +310,10 @@ VST2/VST3只支持Windows x64。MIDI轨需要安装并加载可用乐器才发�
 | remove_automation_lane | track_id, lane_id |
 
 设备名与输入ID必须先从读接口取得，不能靠数组位置持久引用。配置设备要求先停止播放；失败会尝试恢复原driver与AudioDeviceSetup，并报告恢复失败。读出的sample_rate/buffer_size是实际协商值，延迟字段来自驱动，不等同于回环实测。显式`scan:true`可能耗时，禁止把它放进高频UI轮询。ASIO编译后还需本机厂商驱动；当前ASIO接入方式见[DEPENDENCIES](DEPENDENCIES.md)。
+
+0.13.6设备契约：`get_audio_devices`新增`device_open`、`has_control_panel`和`input_stereo_pairs`。成功配置/关闭驱动面板的命令结果回传设备快照；`input_channels: []`明确关闭全部输入，省略此项在同设备保留原选择，在新输入设备默认启用前两路（按实际通道数裁剪）并默认单声道。立体声对必须同时启用两路。索引必须是有限整数、无重复且在设备范围内；请求与实际掩码不一致时失败并尝试回滚。
+
+`get_recording_inputs`的音频输入`id`包含驱动、输入设备名与物理通道身份，调用方必须原样使用；`engine_id`仅供诊断。`channels`、`stereo`描述路由，`physical_active`/`available`说明物理输入是否开启，`enabled`是引擎逻辑状态，两者不能混同。旧工程未限定设备的音频输入ID需要手动重选，避免另一张声卡也叫“Input 1”而误录。MIDI输入ID保持。`get_recording_state`同时报告`input_available`与`physical_active`；选择存在但关闭的输入不能Arm或监听，需先在Settings启用。
 
 `sample_rates/buffer_sizes`只描述当前打开的设备。切换driver或设备时可先省略采样率和buffer，成功后重新读取可选值。`separate_inputs_and_outputs=true`的driver应分别传入`input_device_name/output_device_name`；`device_name`可能是组合显示名，不能当作独立输入或输出名。MIDI输入在轨道选择后首次arm时由引擎自动启用，无需另开JUCE MIDI开关。
 

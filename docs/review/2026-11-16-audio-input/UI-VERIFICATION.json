@@ -1,0 +1,49 @@
+﻿{
+    "schema_version":  1,
+    "status":  "passed",
+    "scope":  "Synthetic native AudioSettingsPanel interaction tests and component captures; no physical device or user GUI operation",
+    "source_directory":  "E:\\emusician-analysis-source\\build\\smoke\\Release\\67923928dea9",
+    "test_record":  "023018ac4f",
+    "physical_audio":  false,
+    "physical_driver_panel":  false,
+    "native_dpi_acceptance":  false,
+    "checks":  {
+                   "audio_settings_draft_apply_actual_readback_and_failure":  true,
+                   "audio_settings_independent_physical_inputs_stereo_pairs_and_empty_mask":  true,
+                   "audio_settings_driver_panel_capability_guard_and_refresh":  true,
+                   "audio_settings_device_switch_clears_stale_capabilities":  true,
+                   "audio_settings_localized_narrow_many_and_empty_channel_captures":  true,
+                   "audio_settings_native_callback_close_lifetime":  true
+               },
+    "captures":  [
+                     {
+                         "file":  "screenshots/ui-audio-input-empty-en-540x560-synthetic.png",
+                         "sha256":  "a7795a09d7db07481e390cf6f2bffcd6c2359c2f3309a72dee0f5fd2bd3b5f79"
+                     },
+                     {
+                         "file":  "screenshots/ui-audio-input-empty-zh-CN-540x560-synthetic.png",
+                         "sha256":  "f8d15c4a147d798f0226634bca92d9591901d05dcca4dce5c11a55da3e11aecf"
+                     },
+                     {
+                         "file":  "screenshots/ui-audio-input-in2-en-660x590-synthetic.png",
+                         "sha256":  "07b3dbdbd58eac800f3576683907515947ce7d58c9151607a79fb1ba1d23328d"
+                     },
+                     {
+                         "file":  "screenshots/ui-audio-input-many-en-540x560-synthetic.png",
+                         "sha256":  "08a773cc7f5a9ccbee0304cb1b953b5ac2fbb99239b671fa28482a3e47a4a390"
+                     },
+                     {
+                         "file":  "screenshots/ui-audio-input-many-zh-CN-540x560-synthetic.png",
+                         "sha256":  "21f693dd2e797b699bf0358892447441df46b2f4ec2a1c11e2f6f4cfb6a15afa"
+                     },
+                     {
+                         "file":  "screenshots/ui-audio-input-new-device-en-660x590-synthetic.png",
+                         "sha256":  "c3926a2e6b9abb656c92671a79bc99851b4558028f68d7e64e40e2574d537156"
+                     },
+                     {
+                         "file":  "screenshots/ui-audio-input-rejected-en-660x590-synthetic.png",
+                         "sha256":  "16ef33e5c519df2a38e3a6b96f74ded83671bf46f35596058407d4ff53acdb70"
+                     }
+                 ],
+    "visual_review":  "All seven captures inspected. No footer or label overlap. In the narrow many-channel fixture, the third row is partially visible at the scroll viewport boundary; scrollbar remains visible."
+}

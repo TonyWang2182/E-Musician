@@ -1,0 +1,26 @@
+--- a/modules/tracktion_engine/playback/devices/tracktion_WaveInputDevice.cpp
++++ b/modules/tracktion_engine/playback/devices/tracktion_WaveInputDevice.cpp
+@@ -1140,15 +1140,19 @@
+ 
+         for (const auto& ci : wi.getChannels())
+         {
+-            if (juce::isPositiveAndBelow (ci.indexInDevice, numChannels))
+-            {
+-                auto inputIndex = channelSet.getChannelIndexForType (ci.channel);
++            const auto inputIndex = channelSet.getChannelIndexForType (ci.channel);
++
++            if (allChannels != nullptr && juce::isPositiveAndBelow (ci.indexInDevice, numChannels)
++                && allChannels[ci.indexInDevice] != nullptr)
++            {
+                 juce::FloatVectorOperations::copy (inputBuffer.getWritePointer (inputIndex),
+                                                    allChannels[ci.indexInDevice], numSamples);
+             }
+             else
+             {
+-                jassertfalse; // Is an input device getting created with more channels than the total number of device channels?
++                // An inactive, disconnected, or missing physical input must not
++                // retain the previous block or expose uninitialised buffer data.
++                juce::FloatVectorOperations::clear (inputBuffer.getWritePointer (inputIndex), numSamples);
+             }
+         }
+     }

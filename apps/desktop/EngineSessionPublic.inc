@@ -232,7 +232,7 @@ juce::Result EngineSession::execute(const juce::String& command,const juce::var&
         juce::var data;auto result=impl->describeNativeEffect(args["track_id"].toString(),args["device_id"].toString(),data);
         if(result.failed())return impl->fail(result.getErrorMessage());if(commandResult)*commandResult=data;return result;
     }
-    if(command=="start_recording"||command=="set_track_armed"||command=="set_input_monitor"||command=="configure_audio_device"||command=="set_recording_preferences"){
+    if(command=="start_recording"||command=="set_track_armed"||command=="set_input_monitor"||command=="configure_audio_device"||command=="show_audio_driver_panel"||command=="set_recording_preferences"){
         if(!args.isObject())return impl->fail("Command arguments must be an object.");
         if(command=="set_track_armed"&&(!args["track_id"].isString()||!args["armed"].isBool()))return impl->fail("Arming requires a track_id and boolean armed.");
         if(command=="set_input_monitor"&&((!args["input_device_id"].isString()&&!args["track_id"].isString())||!args["mode"].isString()))return impl->fail("Monitoring requires a track_id or input_device_id and mode.");
@@ -242,7 +242,9 @@ juce::Result EngineSession::execute(const juce::String& command,const juce::var&
             impl->finishGesture();
         }
         auto result=impl->recording.execute(command,args);if(result.failed())return impl->fail(result.getErrorMessage());
-        impl->status=command=="set_recording_preferences"?"Recording preferences updated.":command=="start_recording"?"Recording...":command=="configure_audio_device"?"Audio device ready.":"Recording input updated.";
+        impl->status=command=="set_recording_preferences"?"Recording preferences updated.":command=="start_recording"?"Recording...":command=="configure_audio_device"?"Audio device ready.":command=="show_audio_driver_panel"?"Audio driver settings refreshed.":"Recording input updated.";
+        if ((command=="configure_audio_device"||command=="show_audio_driver_panel")&&commandResult)
+            *commandResult=impl->recording.audioDevices(false);
         impl->publish("recording_state_changed",impl->recording.state());return result;
     }
     try{return impl->perform(command,args,commandResult);}catch(const std::exception& e){return impl->fail(e.what());}
@@ -348,7 +350,7 @@ juce::var EngineSession::capabilities()const
     for(const auto* name:{"begin_native_effect_gesture","update_native_effect_gesture","end_native_effect_gesture","cancel_native_effect_gesture"})commands.add(name);
     commands.add("set_track_colour");commands.add("get_native_effect");commands.add("add_native_effect");commands.add("set_native_effect");
     commands.add("get_track_clips");commands.add("get_plugin_catalog");commands.add("get_plugin_parameters");commands.add("set_plugin_parameter");commands.add("edit_notes");commands.add("get_save_diagnostics");
-    for(const auto* command:{"get_recording_state","get_recording_inputs","get_audio_devices","configure_audio_device","set_track_input","set_track_armed","set_input_monitor","start_recording","stop_recording","set_track_output","add_send","update_send","remove_send","get_automation_targets","get_automation_points","set_automation_lane","remove_automation_lane","get_clip_controllers"})commands.add(command);
+    for(const auto* command:{"get_recording_state","get_recording_inputs","get_audio_devices","configure_audio_device","show_audio_driver_panel","set_track_input","set_track_armed","set_input_monitor","start_recording","stop_recording","set_track_output","add_send","update_send","remove_send","get_automation_targets","get_automation_points","set_automation_lane","remove_automation_lane","get_clip_controllers"})commands.add(command);
     // Non-audio-thread contract consumed by Agent and release tests. Effect
     // identities come from the same list that gates actual device creation.
     const auto numeric=[](const char* name,double low,double high,bool band){return object({{"name",name},{"kind","number"},{"minimum",low},{"maximum",high},{"per_band",band}});};

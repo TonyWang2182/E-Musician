@@ -13784,3 +13784,173 @@ API真实诊断为HTTP429/insufficient_quota；用户明确还在处理、先做
 - Final Release 441bbdd301, CTest 5978acfb5f (11/11), production 0e29a8c611 (461 checks), Agent 941c78f583 (390/390), all BM c26fcd7ab7 (14/14), COZY M-Audio ASIO 9cbee19f9b (44.1kHz/512 lifecycle). Final native/helper/patch verification d3be2030a0 passed; prior failed and interrupted records are retained.
 - Preserved 0.13.4 and original projects/settings. New launcher and VS Code workspace on E:; backed up project association and switched its executable/icon to 0.13.5 (6b88b3f1b6). No paid model calls or computer-use. Physical keyboard, vendor presets and listening remain manual acceptance.
 - [Results](review/2026-11-15-bm-midi/RESULTS.md) · [Manual check](review/2026-11-15-bm-midi/MANUAL-CHECK.md) · [Verification](review/2026-11-15-bm-midi/VERIFICATION.json). Branch fix/bm-midi-isolation-v0135; publication state is recorded separately, no main merge.
+
+### 2026-11-16T13:41:34.019596+00:00 - audio-input-plan - in-progress
+
+- Branch fix/audio-input-v0136 from 6a82225. Preserve 0.13.5, user projects, pre-existing DEVLOG edits and 30 old untracked build records.
+- Read-only Settings evidence: M-Audio ASIO 44100/512 with physical input mask zero, while engine logical inputs are enabled. Existing hardware regression explicitly supplied [0,1] and missed the UI/default path.
+- Scope: explicit physical channel and mono/stereo controls, portable device identity, actual readback/rollback, native driver panel, sparse-channel routing. Independent backend/UI/audit ownership in PLAN; no new build or microphone listening acceptance yet.
+- [Plan](review/2026-11-16-audio-input/PLAN.md); all build and test attempts will use scripts/dev_audio_input.py. No paid model calls, cloud changes or computer-use.
+
+### 2026-11-16T21:45:49+08:00 · audio-input-configure · failed
+
+- Config: Release/0.13.6; exit code: 1; elapsed: 4.590s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.13.6`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `10debd6ad4117e082491b8654c9f881cc067802ed9f22027c07bb23eea2e3fa7`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T134549.459262Z-52244ca3d1.json) · [Raw log](../build-logs/20261116T134549.459262Z-52244ca3d1.log)
+- [Exact process output](../build-logs/20261116T134549.459262Z-52244ca3d1.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261116T134549.459262Z-52244ca3d1.log
+
+### 2026-11-16T21:46:05+08:00 · audio-input-command · succeeded
+
+- Config: Release/0.13.6; exit code: 0; elapsed: 0.758s.
+- Command: `python scripts/apply_engine_patches.py apply --engine-root .cache/monitor-engine`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `10debd6ad4117e082491b8654c9f881cc067802ed9f22027c07bb23eea2e3fa7`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T134605.376576Z-85bfbec236.json) · [Raw log](../build-logs/20261116T134605.376576Z-85bfbec236.log)
+- [Exact process output](../build-logs/20261116T134605.376576Z-85bfbec236.raw.log)
+
+### 2026-11-16T21:46:11+08:00 · audio-input-configure · succeeded
+
+- Config: Release/0.13.6; exit code: 0; elapsed: 25.795s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.13.6`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `10debd6ad4117e082491b8654c9f881cc067802ed9f22027c07bb23eea2e3fa7`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T134611.486633Z-6385b40f71.json) · [Raw log](../build-logs/20261116T134611.486633Z-6385b40f71.log)
+- [Exact process output](../build-logs/20261116T134611.486633Z-6385b40f71.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-16T21:49:38+08:00 · audio-input-command · succeeded
+
+- Config: Release/0.13.6; exit code: 0; elapsed: 85.965s.
+- Command: `python -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `98ae67f8535992c973c0e0b5ab7c94a8926560cd5c0ab0c6aa0441761e5cce9f`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T134938.842524Z-2795a51de1.json) · [Raw log](../build-logs/20261116T134938.842524Z-2795a51de1.log)
+- [Exact process output](../build-logs/20261116T134938.842524Z-2795a51de1.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-16T21:47:53+08:00 · audio-input-build · failed
+
+- Config: Release/0.13.6; exit code: 1; elapsed: 213.646s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `9c53718c91f56a6cbcde7fcf2b14746e9688e84ad5546cc142be1dcf4ef024ac`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T134753.517472Z-0a250cf329.json) · [Raw log](../build-logs/20261116T134753.517472Z-0a250cf329.log)
+- [Exact process output](../build-logs/20261116T134753.517472Z-0a250cf329.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261116T134753.517472Z-0a250cf329.log
+
+### 2026-11-16T13:53:57.076455+00:00 · audio-input-build-interruption-context
+
+First configure 52244ca3d1 refused unapplied new pinned patches, as designed. Recorded apply 85bfbec236 verified/applied all16; configure6385b40f71 succeeded. Build0a250cf329 was deliberately stopped by terminating only the identified owned cmake process tree after review found a cross-card live-target transition risk; recorder completed with exit1. No compiler error had been emitted. Backend now disconnects physical audio targets before a driver mutation, synchronously publishes that graph and restores only identity-matching targets. A fixture also now selects its duplex endpoint explicitly. Build4a11d8c4fd is the next frozen attempt. Agent390/390 passed in2795a51de1; later native changes do not constitute a second Agent test.
+
+### 2026-11-16T21:59:09+08:00 · audio-input-test · failed
+
+- Config: Release/0.13.6; exit code: 8; elapsed: 84.335s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure -R engine.integration_smoke|workspace.brand_colour`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `33ac41989b9ba4394296180dbe8665b9732e20fdd78dff01ab3bd224fa3fd42c`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T135909.143017Z-eb5f8c0a15.json) · [Raw log](../build-logs/20261116T135909.143017Z-eb5f8c0a15.log)
+- [Exact process output](../build-logs/20261116T135909.143017Z-eb5f8c0a15.raw.log)
+- Error: Command failed with code 8; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261116T135909.143017Z-eb5f8c0a15.log
+
+### 2026-11-16T21:53:12+08:00 · audio-input-build · succeeded
+
+- Config: Release/0.13.6; exit code: 0; elapsed: 520.369s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `33ac41989b9ba4394296180dbe8665b9732e20fdd78dff01ab3bd224fa3fd42c`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T135312.596020Z-4a11d8c4fd.json) · [Raw log](../build-logs/20261116T135312.596020Z-4a11d8c4fd.log)
+- [Exact process output](../build-logs/20261116T135312.596020Z-4a11d8c4fd.raw.log)
+
+### 2026-11-16T22:03:33+08:00 · audio-input-build · succeeded
+
+- Config: Release/0.13.6; exit code: 0; elapsed: 88.511s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `416bc618480a45b5f1a6097bd5f8dc3abfc09043ee80a93464d5bbf22e6a7ac5`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T140333.974796Z-a6d829ce0b.json) · [Raw log](../build-logs/20261116T140333.974796Z-a6d829ce0b.log)
+- [Exact process output](../build-logs/20261116T140333.974796Z-a6d829ce0b.raw.log)
+
+### 2026-11-16T22:05:09+08:00 · audio-input-test · failed
+
+- Config: Release/0.13.6; exit code: 8; elapsed: 98.144s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `416bc618480a45b5f1a6097bd5f8dc3abfc09043ee80a93464d5bbf22e6a7ac5`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T140509.115591Z-5b4346fc6f.json) · [Raw log](../build-logs/20261116T140509.115591Z-5b4346fc6f.log)
+- [Exact process output](../build-logs/20261116T140509.115591Z-5b4346fc6f.raw.log)
+- Error: Command failed with code 8; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261116T140509.115591Z-5b4346fc6f.log
+
+### 2026-11-16T22:07:41+08:00 · audio-input-build · succeeded
+
+- Config: Release/0.13.6; exit code: 0; elapsed: 66.772s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `d8b89c4771a0f54a5ea80b489d4e22440b3ce9532384f2277d869d62608d6b57`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T140741.891050Z-755f123b2d.json) · [Raw log](../build-logs/20261116T140741.891050Z-755f123b2d.log)
+- [Exact process output](../build-logs/20261116T140741.891050Z-755f123b2d.raw.log)
+
+### 2026-11-16T22:09:25+08:00 · audio-input-test · succeeded
+
+- Config: Release/0.13.6; exit code: 0; elapsed: 100.962s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `d8b89c4771a0f54a5ea80b489d4e22440b3ce9532384f2277d869d62608d6b57`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T140925.017863Z-023018ac4f.json) · [Raw log](../build-logs/20261116T140925.017863Z-023018ac4f.log)
+- [Exact process output](../build-logs/20261116T140925.017863Z-023018ac4f.raw.log)
+
+### 2026-11-16T22:11:18+08:00 · audio-input-command · failed
+
+- Config: Release/0.13.6; exit code: 1; elapsed: 5.839s.
+- Command: `python tests/AudioInputLifecycle.py --exe E:/emusician-analysis-build/bin-0.13.6/Release/E-musician.exe --out build/audio-input-live/20261116-final --device-name "M-Audio M-Track Solo and Duo ASIO" --allow-physical-capture`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `d8b89c4771a0f54a5ea80b489d4e22440b3ce9532384f2277d869d62608d6b57`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T141118.812015Z-dce955682d.json) · [Raw log](../build-logs/20261116T141118.812015Z-dce955682d.log)
+- [Exact process output](../build-logs/20261116T141118.812015Z-dce955682d.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261116T141118.812015Z-dce955682d.log
+
+### 2026-11-16T22:12:08+08:00 · audio-input-command · succeeded
+
+- Config: Release/0.13.6; exit code: 0; elapsed: 12.839s.
+- Command: `python tests/AudioInputLifecycle.py --exe E:/emusician-analysis-build/bin-0.13.6/Release/E-musician.exe --out build/audio-input-live/20261116-final-2 --device-name "M-Audio M-Track Solo and Duo ASIO" --allow-physical-capture`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `4a7722628a9701049b2127623f2a5351878704cf4b59fdf22d5f462b53528034`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T141208.624651Z-3f4d571d0c.json) · [Raw log](../build-logs/20261116T141208.624651Z-3f4d571d0c.log)
+- [Exact process output](../build-logs/20261116T141208.624651Z-3f4d571d0c.raw.log)
+
+### 2026-11-16T22:13:13+08:00 · audio-input-command · succeeded
+
+- Config: Release/0.13.6; exit code: 0; elapsed: 0.785s.
+- Command: `python scripts/register_project_file.py apply --exe E:/emusician-analysis-build/bin-0.13.6/Release/E-musician.exe --backup build-logs/audio-input-association-before.json`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `4a7722628a9701049b2127623f2a5351878704cf4b59fdf22d5f462b53528034`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T141313.621945Z-5562c299ea.json) · [Raw log](../build-logs/20261116T141313.621945Z-5562c299ea.log)
+- [Exact process output](../build-logs/20261116T141313.621945Z-5562c299ea.raw.log)
+
+### 2026-11-16T22:14:19+08:00 · audio-input-command · succeeded
+
+- Config: Release/0.13.6; exit code: 0; elapsed: 1.659s.
+- Command: `python build-logs/verify_audio_input.py`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `4a7722628a9701049b2127623f2a5351878704cf4b59fdf22d5f462b53528034`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T141419.936628Z-b279e4be86.json) · [Raw log](../build-logs/20261116T141419.936628Z-b279e4be86.log)
+- [Exact process output](../build-logs/20261116T141419.936628Z-b279e4be86.raw.log)
+
+### 2026-11-16T22:16:46+08:00 · audio-input-run · launched
+
+- Config: Release/0.13.6; exit code: None; elapsed: 0.654s.
+- Command: `E:/emusician-analysis-build/bin-0.13.6/Release/E-musician.exe --agent`
+- Context: Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate
+- Source SHA-256: `4a7722628a9701049b2127623f2a5351878704cf4b59fdf22d5f462b53528034`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T141646.621631Z-633e6a75ea.json) · [Raw log](../build-logs/20261116T141646.621631Z-633e6a75ea.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+- [Exact process output](../build-logs/20261116T141646.621631Z-633e6a75ea.raw.log)
+
+### 2026-11-16T14:17:57.471865+00:00 · audio-input-delivery · 自动已验、人工待验
+
+修复物理输入激活、mono/stereo设置、稀疏In2回调映射和缺失输入清零；加入驱动控制面板、身份限定路由、变更前断开目标及失败回滚。保留逐轨Monitor/Rec规则，旧工程音频输入需重新选择。最终Release755f123b2d、CTest023018ac4f 11/11、1004项生产断言、六种精确PCM和七张设置截图通过；Agent2795a51de1 390/390且最终47项相关输入未变。M-Audio ASIO44.1kHz/512的三段短录音、Undo/Redo、保存重开及设置字节恢复在3f4d571d0c通过，来源与听感不据底噪推断。138项原生输入核对通过，旧0.13.5哈希未变。
+
+每次失败和主动中止见[RESULTS](review/2026-11-16-audio-input/RESULTS.md)，包含未应用补丁拒绝、换卡保护补齐、合成时钟/传输API测试修正，以及物理探针对异步保存完成回执的修正；没有隐藏失败。关联备份后切到0.13.6，E盘新启动器和VS Code工作区就绪。633e6a75ea启动PID71532，读取到0.13.6标题、正确EXE路径及Responding=True；这不是听感验收。未操作用户GUI、未调用付费API/云端模型。原用户工程、DEVLOG修改和30项旧未跟踪构建记录保持。下一步按[人工清单](review/2026-11-16-audio-input/MANUAL-CHECK.md)验证麦克风人声、厂商面板、真实换卡与长录音。

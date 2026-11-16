@@ -2,7 +2,7 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
-**最新维护候选 0.13.5：** 修复插件添加时的宿主重入风险，14 款已安装 UJAM BM 通过实际按钮、原生窗口、保存重开与音频导出测试。Monitor Off/On 与 Rec 逐轨独立，修复共享键盘、持音及快速关闭监听问题。Release、CTest 11/11、Agent 390/390 与 Hosted MIDI/PCM 461 项通过；物理键盘和听感待人工验收。启动 `E:/MusicAgent&DAW/Start E-musician 0.13.5.cmd`，VS Code 打开 `E:/MusicAgent&DAW/E-musician-0.13.5.code-workspace`。旧版保留。[结果与限制](docs/review/2026-11-15-bm-midi/RESULTS.md) · [人工验收](docs/review/2026-11-15-bm-midi/MANUAL-CHECK.md)。
+**最新维护候选 0.13.6：** 修复物理输入未启用和仅In2的回调映射，Settings支持独立输入、mono/stereo与驱动控制面板；换卡后核对输入身份，旧工程音频输入需重选一次。Release、CTest11/11、Agent390项及M-Audio ASIO短录音/保存重开通过；实际人声、听感、厂商面板和其他声卡待人工验收。启动 `E:/MusicAgent&DAW/Start E-musician 0.13.6.cmd`，VS Code打开同目录`E-musician-0.13.6.code-workspace`。旧版保留。[结果与限制](docs/review/2026-11-16-audio-input/RESULTS.md) · [录音步骤](docs/review/2026-11-16-audio-input/MANUAL-CHECK.md)。
 
 以下为保留版本和历史验证记录：
 

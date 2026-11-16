@@ -78,10 +78,10 @@ class EnginePatchTests(unittest.TestCase):
         self.assertEqual(self.run_mode("verify")["status"], "verified")
         self.assertEqual(self.run_mode("apply")["status"], "verified")
 
-    def test_schema2_accepts_thirteen_and_rejects_over_sixteen_before_writes(self):
+    def test_schema2_accepts_sixteen_and_rejects_over_sixteen_before_writes(self):
         self.data["schema"] = 2
         targets = [self.target]
-        for index in range(1, 13):
+        for index in range(1, 16):
             relative = f"modules/fixture/reader-{index}.cpp"
             target = self.checkout / relative
             target.write_bytes(self.before)
@@ -93,16 +93,16 @@ class EnginePatchTests(unittest.TestCase):
             self.data["files"].append({"path": relative, "patch": name,
                 "before_sha256_lf": patcher.digest(self.before), "after_sha256_lf": patcher.digest(self.after),
                 "patch_sha256_lf": patcher.digest(patch)})
-        thirteen = list(self.data["files"])
-        self.data["files"].extend(dict(thirteen[0]) for _ in range(4))
+        sixteen = list(self.data["files"])
+        self.data["files"].append(dict(sixteen[0]))
         self.write_manifest()
         with self.assertRaisesRegex(ValueError, r"1\.\.16"):
             self.run_mode("apply")
         self.assertTrue(all(target.read_bytes() == self.before for target in targets))
-        self.data["files"] = thirteen
+        self.data["files"] = sixteen
         self.write_manifest()
         result = self.run_mode("apply")
-        self.assertEqual(len(result["files"]), 13)
+        self.assertEqual(len(result["files"]), 16)
         self.assertTrue(all(target.read_bytes() == self.after for target in targets))
         self.assertEqual(self.run_mode("verify")["status"], "verified")
 
@@ -231,8 +231,11 @@ class RecordedPatchTests(unittest.TestCase):
             "modules/tracktion_engine/playback/devices/tracktion_InputDevice.cpp",
             "modules/tracktion_engine/playback/devices/tracktion_InputDevice.h",
             "modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp",
-            "modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.cpp"})
-        self.assertEqual(len(manifest["files"]), 13)
+            "modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.cpp",
+            "modules/tracktion_engine/playback/tracktion_DeviceManager.h",
+            "modules/tracktion_engine/playback/tracktion_DeviceManager.cpp",
+            "modules/tracktion_engine/playback/devices/tracktion_WaveInputDevice.cpp"})
+        self.assertEqual(len(manifest["files"]), 16)
         for entry in manifest["files"]:
             patch = patcher.inside(manifest_file.parent, entry["patch"]).read_bytes()
             self.assertEqual(patcher.digest(patch), entry["patch_sha256_lf"])

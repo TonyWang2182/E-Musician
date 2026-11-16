@@ -94,6 +94,27 @@
       "before_sha256_lf": "ab8042c1cdbc586f01c252c1d3fec97304c08f6f13e9a0553e5ff579b3e1b2c7",
       "after_sha256_lf": "d69a04a60ca93b45cc7d4b1de5028f33da0bbd35c2b87d85bb44bdba34e645af",
       "patch_sha256_lf": "72156f308eab4b60303a392c8e6a067ca1795bdf2b42a426e9653cc97b5e4047"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/tracktion_DeviceManager.h",
+      "patch": "physical-input-callback-map-h.patch",
+      "before_sha256_lf": "9ac86376ea2828516452bd14ba34d9fa446e41c91ba9af2f71fc74c1550a800d",
+      "after_sha256_lf": "6df5bacba9e3dcf986432772d440d1716276484c537823687bf20600976e6686",
+      "patch_sha256_lf": "7de94bcc7a785370af44af6422b21287fd54d427d9ef55304ccdeb047a204df2"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/tracktion_DeviceManager.cpp",
+      "patch": "physical-input-callback-map-cpp.patch",
+      "before_sha256_lf": "75d76576fa7c4cee25985a69c07df6b66058ca6271506f5951e833adfa08a57e",
+      "after_sha256_lf": "3f1f367ae5bb8e728674e00acd8711bca9587f565165b82c71b4a54be44b1233",
+      "patch_sha256_lf": "38926720e21de62c07f09b7e7e5c84bdf6624536cd47af983c1799e87e4adb98"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/devices/tracktion_WaveInputDevice.cpp",
+      "patch": "physical-input-buffer-clear.patch",
+      "before_sha256_lf": "6dd21a1e3fe4589c4d0f72c24ae6633d6d6fa69952d3b6246fcd9afdd7e95fe6",
+      "after_sha256_lf": "bf3424aec6f6aa189d5d6f5b18bc4eb426228141c5e495f5d344701af1ea9f53",
+      "patch_sha256_lf": "dae7e3265bc7d5012fd4dd486be2879e72f3c8920287229349dd00b1659d4caf"
     }
   ]
 }

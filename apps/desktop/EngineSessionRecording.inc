@@ -48,6 +48,7 @@ struct RecordingController::State final : te::TransportControl::Listener {
     juce::File directory;
     juce::String error;
     bool activeTake = false, transactionStarted = false, adopted = false;
+    bool changingDevice = false;
     int finishingInputs = 0;
     bool metronomeEnabled=false, recordOnly=false, countEnabled=false, cancelled=false;
     std::map<juce::String, juce::String> monitorRebindAttempts;
@@ -103,8 +104,41 @@ struct RecordingController::State final : te::TransportControl::Listener {
         applyPreferences();return juce::Result::ok();
     }
 
+    juce::String audioIdentity() const {
+        auto& manager = engine.getDeviceManager().deviceManager;
+        const auto setup = manager.getAudioDeviceSetup();
+        return juce::JSON::toString(graphObject({{"driver", manager.getCurrentAudioDeviceType()}, {"input", setup.inputDeviceName}}), true);
+    }
+    juce::String publicId(te::InputDevice& input) const {
+        auto* wave = dynamic_cast<te::WaveInputDevice*>(&input);
+        if (!wave || wave->isTrackDevice()) return input.getDeviceID();
+        juce::Array<juce::var> channels;
+        auto* current = engine.getDeviceManager().deviceManager.getCurrentAudioDevice();
+        const auto names = current ? current->getInputChannelNames() : juce::StringArray();
+        for (const auto& channel : wave->getChannels())
+            channels.add(graphObject({{"index", channel.indexInDevice}, {"name", names[channel.indexInDevice]}}));
+        const auto identity = audioIdentity() + juce::JSON::toString(channels, true);
+        return "audioin_" + juce::SHA256(identity.toRawUTF8(), identity.getNumBytesAsUTF8()).toHexString();
+    }
+    bool matches(const juce::String& id, te::InputDevice& input) const {
+        if (id == publicId(input)) return true;
+        // Old projects have only TE's hash("Input 1"), which cannot identify a
+        // physical interface. Require re-selection instead of guessing a card.
+        // Hosted regression fixtures are explicitly isolated from user hardware.
+        return !input.isMidi() && engine.getDeviceManager().isHostedAudioDeviceInterfaceInUse()
+            && id == input.getDeviceID();
+    }
+    bool physicalActive(te::InputDevice& input) const {
+        auto* wave = dynamic_cast<te::WaveInputDevice*>(&input);
+        if (!wave || wave->isTrackDevice()) return true;
+        auto* current = engine.getDeviceManager().deviceManager.getCurrentAudioDevice();
+        if (!current || !current->isOpen()) return false;
+        const auto active = current->getActiveInputChannels();
+        for (const auto& channel : wave->getChannels()) if (!active[channel.indexInDevice]) return false;
+        return !wave->getChannels().empty();
+    }
     te::InputDevice* device(const juce::String& id) const {
-        for (auto* d : engine.getDeviceManager().getWaveInputDevices()) if (d->getDeviceID() == id) return d;
+        for (auto* d : engine.getDeviceManager().getWaveInputDevices()) if (matches(id, *d)) return d;
         for (const auto& d : engine.getDeviceManager().getMidiInDevices()) if (d->getDeviceID() == id) return d.get();
         return nullptr;
     }
@@ -114,13 +148,13 @@ struct RecordingController::State final : te::TransportControl::Listener {
     using MonitorModes = std::map<juce::String, te::InputDevice::MonitorMode>;
     MonitorModes monitorModes() const {
         MonitorModes modes;
-        for (auto* input : engine.getDeviceManager().getWaveInputDevices()) modes[input->getDeviceID()] = input->getMonitorMode();
+        for (auto* input : engine.getDeviceManager().getWaveInputDevices()) modes[publicId(*input)] = input->getMonitorMode();
         for (const auto& input : engine.getDeviceManager().getMidiInDevices()) modes[input->getDeviceID()] = input->getMonitorMode();
         return modes;
     }
     void restoreMonitorsOrDefaultOff(const MonitorModes& previous) {
         const auto restore = [&](te::InputDevice& input) {
-            const auto found = previous.find(input.getDeviceID());
+            const auto found = previous.find(publicId(input));
             input.setMonitorMode(found == previous.end() ? te::InputDevice::MonitorMode::off : found->second);
         };
         // Owners exist even when this Edit has no playback context/instances.
@@ -130,15 +164,16 @@ struct RecordingController::State final : te::TransportControl::Listener {
     }
     juce::String selectedInput(te::AudioTrack& track) const { return track.state.getChildWithName("EM_PRODUCTION")["inputDeviceId"].toString(); }
     te::InputDeviceInstance* instance(const juce::String& id) const {
-        if (edit) for (auto* i : edit->getAllInputDevices()) if (i->getInputDevice().getDeviceID() == id) return i;
+        if (edit) for (auto* i : edit->getAllInputDevices()) if (matches(id, i->getInputDevice())) return i;
         return nullptr;
     }
     // A device change may destroy and replace input instances. Never retain a
     // device/instance pointer across setEnabled/dispatchPendingUpdates.
     juce::Result bind(te::AudioTrack& track, bool armed) {
         const auto id = selectedInput(track); auto* input = device(id);
-        if (!input) return graphError("Selected recording input is unavailable. Select an input again.");
+        if (!input) return graphError("Selected recording input is unavailable or belongs to another audio device. Select an input again.");
         if (input->isMidi() != (track.state["emKind"].toString() == "instrument")) return graphError("Audio tracks need an audio input; MIDI tracks need a MIDI input.");
+        if (!physicalActive(*input)) return graphError("Selected audio input is disabled in Audio Settings. Enable its physical input channels before monitoring or recording.");
         if (!input->isEnabled()) { input->setEnabled(true); engine.getDeviceManager().dispatchPendingUpdates(); }
         input = device(id); if (!input || !input->isEnabled()) return graphError("Could not enable the selected recording input.");
         edit->getTransport().ensureContextAllocated();
@@ -154,11 +189,11 @@ struct RecordingController::State final : te::TransportControl::Listener {
         return juce::Result::ok();
     }
     void reconcile() {
-        if (!edit || edit->getTransport().isRecording() || edit->getTransport().isRecordingStopping()) return;
+        if (changingDevice || !edit || edit->getTransport().isRecording() || edit->getTransport().isRecordingStopping()) return;
         std::map<juce::String, bool> previousArms;
         for (auto* input : edit->getAllInputDevices()) for (auto target : input->getTargets()) {
             auto* track = dynamic_cast<te::AudioTrack*>(te::findTrackForID(*edit, target));
-            if (!track || selectedInput(*track) != input->getInputDevice().getDeviceID()) {
+            if (!track || !matches(selectedInput(*track), input->getInputDevice()) || !physicalActive(input->getInputDevice())) {
                 if (track) previousArms[track->state["emId"].toString()] |= input->isRecordingEnabled(target);
                 input->setRecordingEnabled(target, false); auto ignored = input->removeTarget(target, nullptr); juce::ignoreUnused(ignored);
             }
@@ -170,7 +205,8 @@ struct RecordingController::State final : te::TransportControl::Listener {
             if (id.isEmpty() || (!wasArmed && !wantsLive)) { monitorRebindAttempts.erase(trackId); continue; }
             auto* input = instance(id);
             if (input && input->getTargets().contains(track->itemID)) { monitorRebindAttempts.erase(trackId); continue; }
-            if (!device(id) || monitorRebindAttempts[trackId] == id) continue;
+            auto* selected = device(id);
+            if (!selected || !physicalActive(*selected) || monitorRebindAttempts[trackId] == id) continue;
             // Try once for this selection; explicit arm/monitor changes retry.
             // Avoid repeatedly restarting the graph if a driver cannot open.
             monitorRebindAttempts[trackId] = id;
@@ -207,44 +243,208 @@ struct RecordingController::State final : te::TransportControl::Listener {
         }
         finishingInputs = std::max(0, finishingInputs - 1);
     }
+    juce::BigInteger stereoPairs() const {
+        juce::BigInteger result;
+        auto& manager = engine.getDeviceManager();
+        if (auto* current = manager.deviceManager.getCurrentAudioDevice())
+            for (int i = 0; i + 1 < current->getInputChannelNames().size(); i += 2)
+                if (manager.isDeviceInChannelStereo(i)) result.setBit(i);
+        return result;
+    }
+    void applyStereoPairs(const juce::BigInteger& pairs) {
+        auto& manager = engine.getDeviceManager();
+        if (auto* current = manager.deviceManager.getCurrentAudioDevice()) {
+            const auto count = current->getInputChannelNames().size();
+            for (int i = 0; i < count; i += 2) manager.setDeviceInChannelStereo(i, pairs[i]);
+        }
+        manager.rescanWaveDeviceList();
+        manager.dispatchPendingUpdates();
+    }
+    void refreshInputs(const MonitorModes& previous) {
+        auto& manager = engine.getDeviceManager();
+        manager.rescanWaveDeviceList();
+        manager.dispatchPendingUpdates();
+        restoreMonitorsOrDefaultOff(previous);
+        monitorRebindAttempts.clear();
+        if (edit) edit->dispatchPendingUpdatesSynchronously();
+    }
+    struct AudioBinding { juce::String trackId, inputId; bool armed = false; };
+    using AudioBindings = std::vector<AudioBinding>;
+    AudioBindings suspendAudioBindings() {
+        AudioBindings bindings;
+        if (!edit) return bindings;
+        for (auto* input : edit->getAllInputDevices()) {
+            if (input->getInputDevice().isMidi() || input->getInputDevice().isTrackDevice()) continue;
+            for (auto target : input->getTargets()) {
+                if (auto* track = dynamic_cast<te::AudioTrack*>(te::findTrackForID(*edit, target)))
+                    bindings.push_back({track->state["emId"].toString(), selectedInput(*track), input->isRecordingEnabled(target)});
+                input->setRecordingEnabled(target, false);
+                auto ignored = input->removeTarget(target, nullptr); juce::ignoreUnused(ignored);
+            }
+        }
+        // Publish the disconnected graph before a native driver can start its
+        // callback or nested message loop. Name-hashed TE IDs must never route
+        // a replacement card through a previous card's live/armed targets.
+        edit->restartPlayback();
+        edit->dispatchPendingUpdatesSynchronously();
+        return bindings;
+    }
+    void restoreAudioBindings(const AudioBindings& bindings) {
+        if (!edit) return;
+        for (const auto& previous : bindings) {
+            auto* track = graphTrack(*edit, previous.trackId);
+            if (!track || selectedInput(*track) != previous.inputId) continue;
+            auto* current = device(previous.inputId);
+            if (!current || !physicalActive(*current)) continue;
+            if (previous.armed || track->state["emMonitorMode"].toString() == "on")
+                if (auto result = bind(*track, previous.armed); result.failed()) error = result.getErrorMessage();
+        }
+        edit->dispatchPendingUpdatesSynchronously();
+    }
     juce::Result configureDevice(const juce::var& args) {
         if (edit && edit->getTransport().isPlaying()) return graphError("Stop playback before changing the audio device.");
+        juce::BigInteger requestedChannels, requestedPairs;
+        if (args.hasProperty("input_channels"))
+            if (auto r = audio_config::parseIndices(args["input_channels"], "input_channels", requestedChannels); r.failed()) return r;
+        if (args.hasProperty("input_stereo_pairs"))
+            if (auto r = audio_config::parseIndices(args["input_stereo_pairs"], "input_stereo_pairs", requestedPairs, true); r.failed()) return r;
+        if ((args.hasProperty("sample_rate") && (!std::isfinite(double(args["sample_rate"])) || double(args["sample_rate"]) < 8000 || double(args["sample_rate"]) > 384000))
+            || (args.hasProperty("buffer_size") && (double(args["buffer_size"]) < 16 || double(args["buffer_size"]) > 8192)))
+            return graphError("Invalid sample rate or buffer size.");
         auto& manager = engine.getDeviceManager().deviceManager;
-        const auto beforeType = manager.getCurrentAudioDeviceType(); const auto before = manager.getAudioDeviceSetup();
+        const auto beforeType = manager.getCurrentAudioDeviceType();
+        const auto before = manager.getAudioDeviceSetup();
+        const auto beforePairs = stereoPairs();
         const auto previousMonitorModes = monitorModes();
         const auto wantedType = args.getProperty("driver_type", beforeType).toString();
-        auto rollback = [&](const juce::String& failure) {
-            manager.setCurrentAudioDeviceType(beforeType, true);
-            const auto restore = manager.setAudioDeviceSetup(before, true);
-            engine.getDeviceManager().dispatchPendingUpdates();
-            restoreMonitorsOrDefaultOff(previousMonitorModes);
-            return graphError(failure + (restore.isEmpty() ? " Previous device configuration restored." : " Restore failed: " + restore));
-        };
-        bool found = false; for (auto* type : manager.getAvailableDeviceTypes()) if (type->getTypeName() == wantedType) found = true;
-        if (!found) return graphError("Audio driver type is unavailable in this build: " + wantedType);
-        manager.setCurrentAudioDeviceType(wantedType, true);
-        auto setup = manager.getAudioDeviceSetup();
-        if (args.hasProperty("device_name")) setup.inputDeviceName = setup.outputDeviceName = args["device_name"].toString();
-        if (args.hasProperty("input_device_name")) setup.inputDeviceName = args["input_device_name"].toString();
-        if (args.hasProperty("output_device_name")) setup.outputDeviceName = args["output_device_name"].toString();
-        if (args.hasProperty("sample_rate")) setup.sampleRate = double(args["sample_rate"]);
-        if (args.hasProperty("buffer_size")) setup.bufferSize = int(args["buffer_size"]);
-        if (!std::isfinite(setup.sampleRate) || setup.sampleRate < 8000 || setup.sampleRate > 384000 || setup.bufferSize < 16 || setup.bufferSize > 8192) return rollback("Invalid sample rate or buffer size.");
-        setup.useDefaultInputChannels = true; setup.useDefaultOutputChannels = true;
-        if (args.hasProperty("input_channels")) {
-            auto* channels = args["input_channels"].getArray(); if (!channels) return rollback("input_channels must be an array.");
-            setup.inputChannels.clear(); setup.useDefaultInputChannels = false;
-            for (const auto& channel : *channels) { int index = int(channel); if (index < 0 || index > 63) return rollback("Input channel index is out of range."); setup.inputChannels.setBit(index); }
+        juce::AudioIODeviceType* wantedDriver = nullptr;
+        for (auto* type : manager.getAvailableDeviceTypes()) if (type->getTypeName() == wantedType) wantedDriver = type;
+        if (!wantedDriver) return graphError("Audio driver type is unavailable in this build: " + wantedType);
+        // Prevent a native driver's nested message loop from reconciling the
+        // Edit while its input objects are being destroyed/replaced.
+        juce::Result result = juce::Result::ok();
+        AudioBindings previousBindings;
+        {
+            const juce::ScopedValueSetter<bool> guard(changingDevice, true);
+            previousBindings = suspendAudioBindings();
+            auto rollback = [&](const juce::String& failure) {
+                manager.setCurrentAudioDeviceType(beforeType, true);
+                auto restoreSetup = before;
+                // Candidate masks update JUCE's mutable default channel counts.
+                // Restoring useDefault=true could therefore reopen a different
+                // mask even when the saved setup previously represented zero.
+                restoreSetup.useDefaultInputChannels = false;
+                restoreSetup.useDefaultOutputChannels = false;
+                auto restore = manager.setAudioDeviceSetup(restoreSetup, true);
+                if (restore.isEmpty()) {
+                    auto* restored = manager.getCurrentAudioDevice();
+                    if (!restored || !restored->isOpen() || manager.getCurrentAudioDeviceType() != beforeType
+                        || manager.getAudioDeviceSetup().inputDeviceName != before.inputDeviceName
+                        || manager.getAudioDeviceSetup().outputDeviceName != before.outputDeviceName
+                        || restored->getActiveInputChannels() != before.inputChannels
+                        || restored->getActiveOutputChannels() != before.outputChannels
+                        || std::abs(restored->getCurrentSampleRate() - before.sampleRate) > 0.01
+                        || restored->getCurrentBufferSizeSamples() != before.bufferSize)
+                        restore = "The driver did not restore the previous device configuration.";
+                }
+                applyStereoPairs(beforePairs);
+                refreshInputs(previousMonitorModes);
+                return graphError(failure + (restore.isEmpty() ? " Previous device configuration restored." : " Restore failed: " + restore));
+            };
+            result = [&]() -> juce::Result {
+                manager.setCurrentAudioDeviceType(wantedType, true);
+                auto setup = manager.getAudioDeviceSetup();
+                if (args.hasProperty("device_name")) setup.inputDeviceName = setup.outputDeviceName = args["device_name"].toString();
+                if (args.hasProperty("input_device_name")) setup.inputDeviceName = args["input_device_name"].toString();
+                if (args.hasProperty("output_device_name")) setup.outputDeviceName = args["output_device_name"].toString();
+                if (!wantedDriver->hasSeparateInputsAndOutputs() && setup.inputDeviceName.isNotEmpty()
+                    && setup.outputDeviceName.isNotEmpty() && setup.inputDeviceName != setup.outputDeviceName)
+                    return rollback("This audio driver uses one device for input and output. Set device_name or choose matching input and output device names.");
+                const bool newInput = wantedType != beforeType || setup.inputDeviceName != before.inputDeviceName;
+                const bool newOutput = wantedType != beforeType || setup.outputDeviceName != before.outputDeviceName;
+                const bool newDevice = newInput || newOutput;
+                if (newDevice) { setup.sampleRate = 0; setup.bufferSize = 0; }
+                if (args.hasProperty("sample_rate")) setup.sampleRate = double(args["sample_rate"]);
+                if (args.hasProperty("buffer_size")) setup.bufferSize = int(args["buffer_size"]);
+                // JUCE's "default" count is mutable and can stay zero after
+                // output-only startup. Always submit a deliberate physical mask.
+                setup.useDefaultInputChannels = false;
+                setup.useDefaultOutputChannels = false;
+                setup.inputChannels = args.hasProperty("input_channels") ? requestedChannels
+                    : newInput ? audio_config::defaultInputs(2) : before.inputChannels;
+                setup.outputChannels = newOutput ? audio_config::defaultInputs(2) : before.outputChannels;
+                if (setup.inputDeviceName.isEmpty()) setup.inputChannels.clear();
+                if (setup.outputDeviceName.isEmpty()) setup.outputChannels.clear();
+                auto failure = manager.setAudioDeviceSetup(setup, true);
+                if (failure.isNotEmpty()) return rollback(failure);
+                auto* opened = manager.getCurrentAudioDevice();
+                if (!opened || !opened->isOpen()) return rollback("Audio driver did not open a device.");
+                const auto count = opened->getInputChannelNames().size();
+                const auto desired = args.hasProperty("input_channels") ? requestedChannels
+                    : newInput ? audio_config::defaultInputs(setup.inputDeviceName.isEmpty() ? 0 : count) : before.inputChannels;
+                if (auto r = audio_config::validateAvailable(desired, count); r.failed()) return rollback(r.getErrorMessage());
+                if (opened->getActiveInputChannels() != desired) {
+                    // Some drivers clamp the provisional two-channel default.
+                    // Retry the exact device-bounded mask, then require readback.
+                    auto exact = manager.getAudioDeviceSetup();
+                    exact.useDefaultInputChannels = false; exact.inputChannels = desired;
+                    failure = manager.setAudioDeviceSetup(exact, true);
+                    if (failure.isNotEmpty()) return rollback(failure);
+                    opened = manager.getCurrentAudioDevice();
+                }
+                if (!opened || !opened->isOpen() || opened->getActiveInputChannels() != desired)
+                    return rollback("The audio driver did not accept the requested input channels.");
+                if (args.hasProperty("sample_rate") && std::abs(opened->getCurrentSampleRate() - double(args["sample_rate"])) > 0.01)
+                    return rollback("The audio driver did not accept the requested sample rate.");
+                if (args.hasProperty("buffer_size") && opened->getCurrentBufferSizeSamples() != int(args["buffer_size"]))
+                    return rollback("The audio driver did not accept the requested buffer size.");
+                auto pairs = args.hasProperty("input_stereo_pairs") ? requestedPairs : newInput ? juce::BigInteger() : beforePairs;
+                for (int i = pairs.findNextSetBit(0); i >= 0; i = pairs.findNextSetBit(i + 1)) {
+                    if (i + 1 < count && desired[i] && desired[i + 1]) continue;
+                    if (args.hasProperty("input_stereo_pairs")) return rollback("A stereo input pair requires both physical channels to be available and enabled.");
+                    pairs.clearBit(i); // Disabling one channel restores this pair's mono inputs.
+                }
+                applyStereoPairs(pairs);
+                refreshInputs(previousMonitorModes);
+                return juce::Result::ok();
+            }();
         }
-        auto failure = manager.setAudioDeviceSetup(setup, true); if (failure.isNotEmpty()) return rollback(failure);
-        auto* opened = manager.getCurrentAudioDevice(); if (!opened || !opened->isOpen()) return rollback("Audio driver did not open a device.");
-        if (args.hasProperty("sample_rate") && std::abs(opened->getCurrentSampleRate() - setup.sampleRate) > 0.01) return rollback("The audio driver did not accept the requested sample rate.");
-        if (args.hasProperty("buffer_size") && opened->getCurrentBufferSizeSamples() != setup.bufferSize) return rollback("The audio driver did not accept the requested buffer size.");
-        engine.getDeviceManager().dispatchPendingUpdates();
-        // Preserve user choices for surviving IDs. Newly created driver inputs
-        // must not inherit a native on/auto default and begin monitoring.
-        restoreMonitorsOrDefaultOff(previousMonitorModes);
-        reconcile(); error.clear(); return juce::Result::ok();
+        if (result.wasOk()) error.clear();
+        restoreAudioBindings(previousBindings);
+        reconcile();
+        return result;
+    }
+    juce::Result showDriverPanel() {
+        if (edit && edit->getTransport().isPlaying()) return graphError("Stop playback before opening the audio driver control panel.");
+        auto& manager = engine.getDeviceManager().deviceManager;
+        {
+            auto* current = manager.getCurrentAudioDevice();
+            if (!current || !current->isOpen()) return graphError("Open an audio device before opening its control panel.");
+            if (!current->hasControlPanel()) return graphError("This audio driver does not provide a control panel.");
+        }
+        const auto previousMonitorModes = monitorModes();
+        AudioBindings previousBindings;
+        {
+            const juce::ScopedValueSetter<bool> guard(changingDevice, true);
+            previousBindings = suspendAudioBindings();
+            // A panel can run a nested native message loop. Never retain its
+            // device pointer after the call, including for restart/readback.
+            const bool needsRestart = [&] {
+                auto* current = manager.getCurrentAudioDevice();
+                return current && current->isOpen() && current->hasControlPanel() && current->showControlPanel();
+            }();
+            if (needsRestart && manager.getCurrentAudioDevice()) {
+                manager.closeAudioDevice();
+                manager.restartLastAudioDevice();
+            }
+            refreshInputs(previousMonitorModes);
+        }
+        error.clear();
+        restoreAudioBindings(previousBindings);
+        reconcile();
+        auto* current = manager.getCurrentAudioDevice();
+        if (!current || !current->isOpen()) return graphError("The audio device is unavailable after closing its driver control panel. Reopen it in Audio Settings.");
+        return juce::Result::ok();
     }
 };
 
@@ -266,6 +466,7 @@ void RecordingController::attach(te::Edit& edit, const juce::File& directory) {
 }
 juce::Result RecordingController::execute(const juce::String& command, const juce::var& args) {
     auto& s = *data; if (!s.edit) return graphError("No project is attached to the recorder.");
+    if (s.changingDevice) return graphError("The audio driver is busy changing its device configuration.");
     if (!args.isObject()) return graphError("Recording arguments must be an object.");
     for (const auto* key : { "track_id", "input_device_id", "mode", "driver_type", "device_name", "input_device_name", "output_device_name" })
         if (args.hasProperty(key) && !args[key].isString()) return graphError(juce::String(key) + " must be a string.");
@@ -283,6 +484,7 @@ juce::Result RecordingController::execute(const juce::String& command, const juc
     if(command=="set_recording_preferences")return s.setPreferences(args);
     s.reconcile();
     if (command == "configure_audio_device") return s.configureDevice(args);
+    if (command == "show_audio_driver_panel") return s.showDriverPanel();
     if (command == "set_track_armed") {
         auto* track = graphTrack(*s.edit, args["track_id"].toString()); if (!track || track->state["emKind"].toString() == "bus") return graphError("Only audio and MIDI tracks can be armed.");
         if (!bool(args["armed"])) { for (auto* i : s.edit->getAllInputDevices()) i->setRecordingEnabled(track->itemID, false); return juce::Result::ok(); }
@@ -331,13 +533,19 @@ juce::Result RecordingController::execute(const juce::String& command, const juc
         return juce::Result::ok();
     }
     if (command == "start_recording") {
-        bool armed = false; for (auto* input : s.edit->getAllInputDevices()) for (auto id : input->getTargets()) armed |= input->isRecordingEnabled(id);
+        bool armed = false;
+        for (auto* input : s.edit->getAllInputDevices()) for (auto id : input->getTargets()) if (input->isRecordingEnabled(id)) {
+            if (!s.physicalActive(input->getInputDevice())) return graphError("An armed audio input is disabled in Audio Settings.");
+            auto* track = dynamic_cast<te::AudioTrack*>(te::findTrackForID(*s.edit, id));
+            if (!track || !s.matches(s.selectedInput(*track), input->getInputDevice())) return graphError("An armed input belongs to another audio device. Select its recording input again.");
+            armed = true;
+        }
         if (!armed) return graphError("Arm a track and choose its recording input first.");
         if (transport.looping) return graphError("Turn loop off before recording. This version records a linear take.");
         if (auto result = s.directory.createDirectory(); result.failed()) return graphError("Cannot create the recording directory: " + result.getErrorMessage());
         const auto takeName = "take-" + freshId() + "-%track%-%take%";
         for (auto* input : s.engine.getDeviceManager().getWaveInputDevices()) {
-            bool used = false; if (auto* i = s.instance(input->getDeviceID())) for (auto id : i->getTargets()) used |= i->isRecordingEnabled(id);
+            bool used = false; if (auto* i = s.instance(s.publicId(*input))) for (auto id : i->getTargets()) used |= i->isRecordingEnabled(id);
             if (used) { input->setOutputFormat("WAV"); input->setBitDepth(24); input->setMergeMode(te::WaveInputDevice::getMergeModes()[0]); input->setFilenameMask(s.directory.getChildFile(takeName).getFullPathName()); }
         }
         for (const auto& input : s.engine.getDeviceManager().getMidiInDevices()) {
@@ -355,7 +563,7 @@ juce::var RecordingController::state() const {
     if (s.edit) for (auto* track : te::getAudioTracks(*s.edit)) {
         const auto inputId = s.selectedInput(*track); auto* input = s.instance(inputId); auto* device = s.device(inputId);
         const auto overrideMode = track->state["emMonitorMode"].toString();
-        tracks.add(graphObject({ {"track_id", track->state["emId"].toString()}, {"input_device_id", inputId}, {"armed", input && input->isRecordingEnabled(track->itemID)}, {"monitor", overrideMode.isNotEmpty() ? overrideMode : "off"}, {"input_available", device != nullptr} }));
+        tracks.add(graphObject({ {"track_id", track->state["emId"].toString()}, {"input_device_id", inputId}, {"armed", input && input->isRecordingEnabled(track->itemID)}, {"monitor", overrideMode.isNotEmpty() ? overrideMode : "off"}, {"input_available", device != nullptr}, {"physical_active", device && s.physicalActive(*device)} }));
     }
     const auto remaining=s.countingIn()?juce::jlimit(0.0,double(s.countBars*s.edit->tempoSequence.getTimeSig(0)->numerator),(s.punchTime-s.position())*s.edit->tempoSequence.getTempo(0)->getBpm()/60.0*s.edit->tempoSequence.getTimeSig(0)->denominator/4.0):0.0;
     return graphObject({ {"counting_in",s.countingIn()},{"count_in_beats_remaining",remaining},{"recording_start_seconds",s.punchTime}, {"recording", s.edit && s.edit->getTransport().isRecording()}, {"finalizing", s.edit && (s.edit->getTransport().isRecordingStopping() || s.finishingInputs > 0 || (s.activeTake && !s.edit->getTransport().isRecording()))}, {"error", s.error}, {"tracks", tracks}, {"recording_directory", s.directory.getFullPathName()}, {"monitor_scope", "track"} });
@@ -366,11 +574,20 @@ juce::var RecordingController::preferences() const {
 }
 juce::var RecordingController::inputs() const {
     juce::Array<juce::var> inputs;
-    auto append = [&](te::InputDevice& d) { if (!d.isTrackDevice()) inputs.add(graphObject({ {"id", d.getDeviceID()}, {"name", d.getName()}, {"type", d.getType()}, {"midi", d.isMidi()}, {"enabled", d.isEnabled()}, {"monitor", State::monitor(d)} })); };
+    auto append = [&](te::InputDevice& d) {
+        if (d.isTrackDevice()) return;
+        juce::Array<juce::var> channels;
+        if (auto* wave = dynamic_cast<te::WaveInputDevice*>(&d))
+            for (const auto& channel : wave->getChannels()) channels.add(channel.indexInDevice);
+        inputs.add(graphObject({ {"id", data->publicId(d)}, {"engine_id", d.getDeviceID()}, {"name", d.getName()}, {"type", d.getType()},
+            {"midi", d.isMidi()}, {"enabled", d.isEnabled()}, {"monitor", State::monitor(d)}, {"physical_active", data->physicalActive(d)},
+            {"available", data->physicalActive(d)}, {"channels", channels}, {"stereo", channels.size() == 2} }));
+    };
     for (auto* input : data->engine.getDeviceManager().getWaveInputDevices()) append(*input);
     for (const auto& input : data->engine.getDeviceManager().getMidiInDevices()) append(*input);
     return graphObject({ {"inputs", inputs} });
 }
+te::InputDevice* RecordingController::inputForId(const juce::String& id) const { return data->device(id); }
 juce::var RecordingController::audioDevices(bool scan) const {
     auto& manager = data->engine.getDeviceManager().deviceManager; juce::Array<juce::var> drivers;
     for (auto* type : manager.getAvailableDeviceTypes()) {
@@ -392,10 +609,13 @@ juce::var RecordingController::audioDevices(bool scan) const {
     return graphObject({ {"drivers", drivers}, {"driver_type", manager.getCurrentAudioDeviceType()}, {"device_name", device ? device->getName() : juce::String()},
         {"input_device_name", setup.inputDeviceName}, {"output_device_name", setup.outputDeviceName},
         {"sample_rate", device ? device->getCurrentSampleRate() : 0.0}, {"buffer_size", device ? device->getCurrentBufferSizeSamples() : 0}, {"sample_rates", rates}, {"buffer_sizes", sizes},
-        {"input_channels", inputChannels}, {"output_channels", outputChannels}, {"input_latency_samples", device ? device->getInputLatencyInSamples() : 0}, {"output_latency_samples", device ? device->getOutputLatencyInSamples() : 0} });
+        {"input_channels", inputChannels}, {"output_channels", outputChannels},
+        {"active_input_channels", device ? audio_config::indices(device->getActiveInputChannels()) : juce::Array<juce::var>()},
+        {"input_stereo_pairs", audio_config::indices(data->stereoPairs())}, {"device_open", device && device->isOpen()}, {"has_control_panel", device && device->isOpen() && device->hasControlPanel()},
+        {"input_latency_samples", device ? device->getInputLatencyInSamples() : 0}, {"output_latency_samples", device ? device->getOutputLatencyInSamples() : 0} });
 }
 bool RecordingController::poll() {
-    auto& s = *data; if (!s.edit) return false; s.reconcile();
+    auto& s = *data; if (!s.edit || s.changingDevice) return false; s.reconcile();
     if (!s.activeTake || s.edit->getTransport().isRecording() || s.edit->getTransport().isRecordingStopping() || s.finishingInputs > 0) return false;
     s.activeTake = false; s.transactionStarted = false;
     const bool completed = s.adopted; s.adopted = false;

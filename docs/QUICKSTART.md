@@ -1,4 +1,8 @@
-# E-musician 0.6.0 快速上手
+# E-musician 快速上手
+
+当前0.13.6入口为`E:/MusicAgent&DAW/Start E-musician 0.13.6.cmd`。麦克风录音、输入通道及声卡控制面板请看[新版录音步骤](review/2026-11-16-audio-input/MANUAL-CHECK.md)，当前验证状态见[CONTEXT](CONTEXT.md)。下面保留0.6.0历史操作说明，按钮位置和旧EXE路径不代表最新版。
+
+## 0.6.0 历史快速上手
 
 按0.6.0 Windows实际界面标签编写，日期：2026-10-29。新版Release已通过5/5自动回归，人工操作和听感待[短测](review/2026-10-29-daily-workflow/MANUAL-CHECK.md)。完整结果见[0.6.0记录](verification/2026-10-29-v060/RESULTS.md)；0.5.2不包含本页新增控件。
 

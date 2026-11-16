@@ -22,9 +22,9 @@ void EngineSession::Impl::updateTelemetry(Snapshot& snapshot)
         }
         std::erase_if(trackMeters,[&](const auto& entry){return !liveTracks.contains(entry.first);});
         for(const auto& track:snapshot.tracks)if(track.inputDeviceId.isNotEmpty())liveInputs.insert(track.inputDeviceId);
-        for(auto* device:engine.getDeviceManager().getWaveInputDevices())if(liveInputs.contains(device->getDeviceID())){
-            enumeratedInputs.insert(device->getDeviceID());
-            auto& tap=inputMeters[device->getDeviceID()];if(!tap)tap=std::make_unique<MeterTap>();
+        for(const auto& inputId:liveInputs)if(auto* device=dynamic_cast<te::WaveInputDevice*>(recording.inputForId(inputId))){
+            enumeratedInputs.insert(inputId);
+            auto& tap=inputMeters[inputId];if(!tap)tap=std::make_unique<MeterTap>();
             tap->bind(&device->levelMeasurer);tap->sample();
         }
         std::erase_if(inputMeters,[&](const auto& entry){return !enumeratedInputs.contains(entry.first);});

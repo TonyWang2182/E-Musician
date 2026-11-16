@@ -166,11 +166,25 @@ struct SelectedTrackPanel::Impl {
     void refreshPlugin() { const auto* slot = currentPlugin(); open.setEnabled(slot && !slot->missing); bypass.setEnabled(slot); removePlugin.setEnabled(slot); up.setEnabled(slot && plugin.getSelectedId() > 1); down.setEnabled(slot && plugin.getSelectedId() < int(plugins().size())); uiButton(bypass, slot && !slot->enabled ? "enable" : "bypass"); }
     void refreshInputs() {
         inputs.clear(); input.clear(juce::dontSendNotification); const auto result = query("get_recording_inputs");
+        inputs.push_back(object({ {"id", ""}, {"name", uiText("No input", "无输入")} }));
+        input.addItem(inputs.back()["name"].toString(), 1);
         if (const auto* list = result["inputs"].getArray()) for (const auto& item : *list) {
             const auto* t = track(); if (!t || t->kind == "bus" || bool(item["midi"]) != (t->kind == "instrument")) continue;
-            inputs.push_back(item); input.addItem(item["name"].toString(), int(inputs.size()));
+            inputs.push_back(item);
+            const bool inactive = !bool(item["midi"]) && item.hasProperty("physical_active") && !bool(item["physical_active"]);
+            input.addItem(item["name"].toString() + (inactive ? uiText(" (off in Settings)", "（设置中已关闭）") : juce::String()), int(inputs.size()));
         }
-        if (const auto* t = track()) for (size_t i = 0; i < inputs.size(); ++i) if (inputs[i]["id"].toString() == t->inputDeviceId) input.setSelectedId(int(i) + 1, juce::dontSendNotification);
+        input.setTooltip(uiText("Choose the microphone input. Enable its channel in Settings first; use a mono input for one microphone.", "选择麦克风输入。请先在设置中启用对应通道；单支麦克风使用单声道输入。"));
+        if (const auto* t = track()) {
+            bool found = false;
+            for (size_t i = 0; i < inputs.size(); ++i) if (inputs[i]["id"].toString() == t->inputDeviceId) {
+                input.setSelectedId(int(i) + 1, juce::dontSendNotification); found = true;
+            }
+            if (!found && t->inputDeviceId.isNotEmpty()) {
+                input.setText(uiText("Input unavailable - select again", "输入不可用，请重新选择"), juce::dontSendNotification);
+                input.setTooltip(uiText("The saved input is not available on this audio device. Select an input from the current device.", "保存的输入不属于当前可用声卡，请重新选择当前声卡的输入。"));
+            }
+        }
         lastInputRefresh = juce::Time::getMillisecondCounter();
     }
     void refreshTargets() {

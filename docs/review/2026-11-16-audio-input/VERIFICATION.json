@@ -1,0 +1,119 @@
+{
+  "verified_at": "2026-11-16T14:14:21.576475+00:00",
+  "status": "passed",
+  "build_record": "20261116T140741.891050Z-755f123b2d",
+  "ctest_record": "20261116T140925.017863Z-023018ac4f",
+  "ctest_passed": 11,
+  "production_checks": 1004,
+  "production_scope": "Generated Hosted and fake JUCE callbacks; not physical inputs",
+  "compiled_native_inputs_verified": 138,
+  "agent_inputs_unchanged_since_390_pass": 47,
+  "agent_record": "20261116T134938.842524Z-2795a51de1",
+  "engine_patches": 16,
+  "executable_sha256": "81020b783de6540746de5a81215ea8a62cc133f4d8202a30d40add3b98940699",
+  "previous_executable_unchanged_sha256": "d7ccb64ef704d1f29a81ce893d66e86ffc379202a3af62b275c68267fdc093eb",
+  "physical_record": "20261116T141208.624651Z-3f4d571d0c",
+  "hardware_settings_restored": true,
+  "physical_configuration": {
+    "driver_type": "ASIO",
+    "device_name": "M-Audio M-Track Solo and Duo ASIO",
+    "input_device_name": "M-Audio M-Track Solo and Duo ASIO",
+    "output_device_name": "M-Audio M-Track Solo and Duo ASIO",
+    "sample_rate": 44100.0,
+    "buffer_size": 512,
+    "active_input_channels": [
+      0,
+      1
+    ],
+    "input_stereo_pairs": []
+  },
+  "machine": {
+    "cpu": "13th Gen Intel Core i7-13700H",
+    "physical_memory_bytes": 31923757056,
+    "os": "Windows 11 10.0.26200",
+    "build": "Release x64"
+  },
+  "physical_captures": [
+    {
+      "case": "two-mono-inputs",
+      "xruns_delta": 0,
+      "wav": [
+        {
+          "track": "In1 mono",
+          "channels": 1,
+          "frames": 69319,
+          "seconds": 1.571859410430839,
+          "rms": [
+            0.013508053570673972
+          ],
+          "peak": [
+            0.099273681640625
+          ],
+          "digital_silence": false
+        },
+        {
+          "track": "In2 mono",
+          "channels": 1,
+          "frames": 69319,
+          "seconds": 1.571859410430839,
+          "rms": [
+            2.6870064620872433e-05
+          ],
+          "peak": [
+            0.0001220703125
+          ],
+          "digital_silence": false
+        }
+      ]
+    },
+    {
+      "case": "in2-only",
+      "xruns_delta": 0,
+      "wav": [
+        {
+          "track": "In2 only mono",
+          "channels": 1,
+          "frames": 70343,
+          "seconds": 1.595079365079365,
+          "rms": [
+            2.649223043851568e-05
+          ],
+          "peak": [
+            0.0001220703125
+          ],
+          "digital_silence": false
+        }
+      ]
+    },
+    {
+      "case": "stereo-input-pair",
+      "xruns_delta": 0,
+      "wav": [
+        {
+          "track": "In1 + In2 stereo",
+          "channels": 2,
+          "frames": 70343,
+          "seconds": 1.595079365079365,
+          "rms": [
+            0.03483344302591151,
+            2.6415406024107284e-05
+          ],
+          "peak": [
+            0.167388916015625,
+            0.0001220703125
+          ],
+          "digital_silence": false
+        }
+      ]
+    }
+  ],
+  "hardware_capture_note": "Three short takes, approximately 1.6 seconds each, no plug-ins, Monitor Off, master -60 dB. PCM levels are not proof of microphone source identity or listening acceptance; xrun values are not a performance benchmark.",
+  "ui_check_count": 6,
+  "ui_capture_count": 7,
+  "manual_pending": [
+    "Physical microphone voice/listening",
+    "Native vendor control panel gestures",
+    "Other physical audio interface models",
+    "Real DPI and longer recording sessions"
+  ]
+}

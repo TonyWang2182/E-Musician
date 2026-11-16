@@ -1,5 +1,11 @@
 # 本地构建、使用与 VS Code 调试
 
+## 0.13.6 麦克风输入维护候选（2026-11-16）
+
+工作树 `E:/MusicAgent&DAW/worktrees/audio-analysis`；独立输出 `E:/emusician-analysis-build/bin-0.13.6/Release/E-musician.exe`。使用 `python scripts/dev_audio_input.py configure`、`build`、`test`，均写入Recorder记录。依赖缓存首次需要通过记录器执行 `python scripts/dev_audio_input.py command python scripts/apply_engine_patches.py apply --engine-root .cache/monitor-engine`；CMake只验证固定16项补丁，不自动修改依赖。旧版产物保留。
+
+构建和测试结果以[本轮计划及记录](review/2026-11-16-audio-input/PLAN.md)、[当前上下文](CONTEXT.md)为准。物理录音探针会短暂使用指定声卡，必须先关闭E-musician，显式传`--allow-physical-capture`；它恢复原用户设置并保留测试录音，不将静音或底噪视为麦克风来源与听感验收。普通CTest只使用离线合成输入。下方保留历史版本流程。
+
 ## 当前 0.10.0 工作树（2026-11-05）
 
 实际源码在 `E:/MusicAgent&DAW/worktrees/audio-analysis`，CMake 使用联接 `E:/emusician-analysis-source`，构建目录 `E:/emusician-analysis-build`。新 EXE 单独输出到 `bin-0.10.0/Release`，保留仍运行的 0.9.1 `bin/Release`。不要把历史脚本默认目录误当作当前产物。

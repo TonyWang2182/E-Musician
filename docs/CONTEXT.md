@@ -1,3 +1,11 @@
+# 当前候选：0.13.6 麦克风输入与驱动设置（2026-11-16，自动已验、人工待验）
+
+基线6a82225，分支fix/audio-input-v0136，工作树E:/MusicAgent&DAW/worktrees/audio-analysis。已修复物理输入为零但逻辑In1/In2可见的缺口；设置页可选输入及mono/stereo，Apply实际回读、失败回滚，增加厂商控制面板。换卡前断开旧音频目标，按驱动/设备/物理通道身份恢复；旧工程音频输入需重选一次。三项固定引擎补丁修复稀疏In2回调映射和缺失输入清零，MIDI独立规则保留。见[结果](review/2026-11-16-audio-input/RESULTS.md)。
+
+最终Release、CTest11/11、1004项生产断言、六种精确PCM场景、六组设置交互/七张截图通过；Agent390项通过且47项相关输入最终核对未变。M-Audio ASIO实际44.1kHz/512下三段短录音、Undo/保存重开和设置字节恢复通过；不据底噪推断麦克风来源。138项原生输入与构建/测试一致，固定补丁共16项。失败、主动中止和测试修正均留档。麦克风发声/听感、厂商面板、其他实体声卡、长录音/DPI仍按[人工清单](review/2026-11-16-audio-input/MANUAL-CHECK.md)验收。
+
+入口E:/MusicAgent&DAW/Start E-musician 0.13.6.cmd，VS Code工作区E-musician-0.13.6.code-workspace，EXE独立位于E:/emusician-analysis-build/bin-0.13.6/Release。工程关联已备份更新。0.13.5哈希、原工程、原DEVLOG修改及30项旧构建记录保留。无computer-use、付费API或云端配置更改；记录入口scripts/dev_audio_input.py。Git发布状态见本轮PUBLISH，不自动合并main。
+
 # 当前候选：0.13.5 BM 与 MIDI 隔离（2026-11-15，自动已验、人工待验）
 
 实际工作树 E:/MusicAgent&DAW/worktrees/audio-analysis，分支 fix/bm-midi-isolation-v0135，基线 bcad8f0。修复插件添加定时器被厂商嵌套消息循环重入的宿主缺陷；控制层防重入、完成回调延后、控制服务保留待处理请求，只读客户端按原截止时间有限重试 busy。14 款已安装 BM 2.2.1 通过实际 Library/Add/Open/Remove 回调、编辑器、保存重开、非零音频渲染与退出测试。此前用户崩溃的精确调用栈没有捕获，不能宣称所有厂商行为都已验证。见[结果](review/2026-11-15-bm-midi/RESULTS.md)。

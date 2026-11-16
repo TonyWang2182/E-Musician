@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ProjectStorage.h"
+#include "../../core/AudioDeviceConfiguration.h"
 #include <tracktion_engine/tracktion_engine.h>
 #include <memory>
 
@@ -24,6 +25,8 @@ public:
     juce::var preferences() const;
     // Device lists are refreshed only on explicit requests, never by the UI timer.
     juce::var inputs() const;
+    // Control-thread only; do not retain the pointer across a device change.
+    tracktion::InputDevice* inputForId(const juce::String&) const;
     juce::var audioDevices(bool scan = false) const;
     // True once after a completed take's clips/notes/assets have been adopted.
     // Caller rebuilds bindings/asset preparation before remembering one revision.

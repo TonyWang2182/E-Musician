@@ -9,6 +9,7 @@ juce::Result EngineSession::runProductionSmokeTest(const juce::File& directory)
     auto okay = [&](const juce::Result& r, const juce::String& context) { check(r.wasOk(), context + ": " + r.getErrorMessage()); };
     auto command = [&](EngineSession& target, const juce::String& name, juce::var args = object({})) { okay(target.execute(name, args, target.snapshot().revision), name); };
     try {
+#include "EngineSessionAudioInputSmoke.inc"
 #include "EngineSessionMidiIsolationSmoke.inc"
         {
             EngineSession fixture(false);

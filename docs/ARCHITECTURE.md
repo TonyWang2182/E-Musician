@@ -387,7 +387,9 @@ schema4额外保存引擎中已经存在或录到的MIDI controller事件：稳�
 
 开始录音前检查实际设备、输入绑定、预备轨道、活动文件任务和loop；本轮只做线性take，开启loop时拒绝并提示关闭。停止并不等于收尾结束：录音文件完成后接纳片段、补稳定ID/素材绑定、恢复准备源，再形成一个可撤销的take事务和新的revision。录音/finalizing期间暂时拒绝工程编辑和保存，Stop保持可调用；未录入前不创建虚假音符或完成状态。音频/MIDI/ASIO真机验收必须单列，hosted buffer测试不能代替硬件链路。
 
-设备API区分现有设备快照与显式扫描，配置涵盖driver type、设备名、采样率、buffer和活动输入通道；输出通道使用设备默认设置，`output_channels`只用于回读，尚不接受配置。失败尝试恢复原配置。ASIO依赖实际安装驱动和当前构建支持；源码存在入口不证明特定声卡低延迟或稳定性。UI使用受控表单，Apply统一调用`configure_audio_device`并回读实际结果；音频/MIDI输入在轨道I/O面板选择，再通过Arm预备录音。
+设备API区分现有设备快照与显式扫描，配置涵盖driver type、设备名、采样率、buffer、物理输入通道和相邻立体声配对；新输出设备默认前两路，同设备保留实际输出掩码，`output_channels`只用于回读，尚不接受配置。失败尝试恢复原实际配置。ASIO依赖实际安装驱动和当前构建支持；源码存在入口不证明特定声卡低延迟或稳定性。UI使用受控表单，Apply统一调用`configure_audio_device`并回读实际结果；音频/MIDI输入在轨道I/O面板选择，再通过Arm预备录音。
+
+0.13.6区分物理输入启用与Tracktion逻辑路由。`AudioDeviceConfiguration.h`验证通道数组，`RecordingController`负责配置、身份限定、立体声拓扑、失败回滚和控制面板生命周期。设备变更期间禁止重入；驱动控制面板从消息队列调用，返回后重新读取设备。公共音频输入ID包括驱动/设备/物理通道信息，旧未限定设备的输入需要重选，避免换卡时误绑定同名Input 1。MIDI身份保持。固定引擎补丁在设备启动时预建活动通道到物理槽位映射，音频回调只复用数组并将缺失输入清零，解决仅开启In2时Windows打包回调与WaveInput物理索引不一致。详见[决策](decisions/2026-11-16-physical-audio-inputs.md)与[验证记录](review/2026-11-16-audio-input/PLAN.md)。
 
 生产图仍以Edit为权威，临时DTO只用于候选校验/序列化。Audio/Instrument/Bus通过`outputTargetId`到Master或Bus，Send包含目标Bus、增益、前/后推子和enabled。验证每个目标存在、禁止自指与有向环，批次经完整校验后应用引擎输出和aux发送/返回；不把绘制连线当成音频路由已生效。本轮没有任意VST多输出/侧链矩阵。
 

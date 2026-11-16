@@ -483,74 +483,190 @@ class AudioSettingsPanel final : public juce::Component {
 public:
     using Query = std::function<juce::var(bool)>;
     using Configure = std::function<juce::Result(const juce::var&)>;
-    AudioSettingsPanel(Query readDevices, Configure configureDevice)
-        : query(std::move(readDevices)), configure(std::move(configureDevice))
+    using DriverPanel = std::function<juce::Result()>;
+    AudioSettingsPanel(Query readDevices, Configure configureDevice, DriverPanel openDriverPanel = {})
+        : query(std::move(readDevices)), configure(std::move(configureDevice)), showDriverPanel(std::move(openDriverPanel))
     {
         for (auto* box : { &driver, &output, &input, &rate, &buffer }) addAndMakeVisible(*box);
-        for (auto* label : { &driverLabel, &outputLabel, &inputLabel, &rateLabel, &bufferLabel, &actual, &hint, &status }) {
-            addAndMakeVisible(*label); label->setFont(mono(13)); label->setColour(juce::Label::textColourId, ink);
-            label->setJustificationType(juce::Justification::centredLeft);
+        for (auto* label : { &driverLabel, &outputLabel, &inputLabel, &rateLabel, &bufferLabel, &actual, &hint, &status,
+                             &channelsLabel, &channelsHint, &emptyChannels }) {
+            addAndMakeVisible(*label); label->setFont(design::labelFont(13)); label->setColour(juce::Label::textColourId, ink);
+            label->setJustificationType(juce::Justification::centredLeft); label->setMinimumHorizontalScale(1.0f);
         }
-        driverLabel.setText(uiText("Driver", "驱动"), juce::dontSendNotification); inputLabel.setText(uiText("Input", "输入"), juce::dontSendNotification);
+        driverLabel.setText(uiText("Driver", "驱动"), juce::dontSendNotification); inputLabel.setText(uiText("Input device", "输入设备"), juce::dontSendNotification);
         rateLabel.setText(uiText("Sample rate", "采样率"), juce::dontSendNotification); bufferLabel.setText(uiText("Buffer size", "缓冲区"), juce::dontSendNotification);
-        driver.setTitle("Audio driver"); output.setTitle("Audio output device"); input.setTitle("Audio input device");
-        rate.setTitle("Audio sample rate"); buffer.setTitle("Audio buffer size");
-        addAndMakeVisible(refresh); addAndMakeVisible(apply); refresh.setButtonText(uiText("refresh devices", "刷新设备")); apply.setButtonText(uiText("apply"));
+        channelsLabel.setText(uiText("Input channels", "输入通道"), juce::dontSendNotification); channelsLabel.setFont(design::labelFont(14, true));
+        driver.setTitle(uiText("Audio driver", "音频驱动")); output.setTitle(uiText("Audio output device", "音频输出设备"));
+        input.setTitle(uiText("Audio input device", "音频输入设备")); rate.setTitle(uiText("Audio sample rate", "音频采样率")); buffer.setTitle(uiText("Audio buffer size", "音频缓冲区"));
+        addAndMakeVisible(channelViewport); channelViewport.setViewedComponent(&channelContent, false);
+        channelViewport.setScrollBarsShown(true, false); channelContent.addAndMakeVisible(emptyChannels);
+        for (auto* button : { &refresh, &driverPanel, &apply }) addAndMakeVisible(*button);
+        refresh.setButtonText(uiText("Refresh devices", "刷新设备")); apply.setButtonText(uiText("apply"));
+        driverPanel.setButtonText(uiText("Driver control panel...", "驱动控制面板..."));
         driver.onChange = [this] { if (!updating) rebuildDevices(); };
         output.onChange = input.onChange = [this] { if (!updating) rebuildTiming(); };
+        rate.onChange = buffer.onChange = [this] { if (!updating) draftChanged(); };
         refresh.onClick = [this] { read(true); };
         apply.onClick = [this] { beginApply(); };
-        hint.setColour(juce::Label::textColourId, secondary);
-        actual.setColour(juce::Label::textColourId, secondary);
-        setSize(660, 470); read(true);
+        driverPanel.onClick = [this] { beginDriverPanel(); };
+        for (auto* label : { &hint, &channelsHint, &emptyChannels, &actual }) label->setColour(juce::Label::textColourId, secondary);
+        setSize(660, 590); read(true);
     }
     void resized() override
     {
-        auto y = 14;
+        auto y = 12;
         const std::pair<juce::Label*, juce::ComboBox*> rows[] {
             { &driverLabel, &driver }, { &outputLabel, &output }, { &inputLabel, &input }, { &rateLabel, &rate }, { &bufferLabel, &buffer }
         };
-        for (const auto& row : rows) { row.first->setBounds(16, y, 130, 30); row.second->setBounds(150, y, getWidth() - 166, 30); y += 42; }
-        actual.setBounds(16, 232, getWidth() - 32, 50); hint.setBounds(16, 290, getWidth() - 32, 52);
-        status.setBounds(16, 350, getWidth() - 32, 64);
-        refresh.setBounds(16, getHeight() - 42, 140, 30); apply.setBounds(getWidth() - 116, getHeight() - 42, 100, 30);
+        for (const auto& row : rows) { row.first->setBounds(16, y, 124, 30); row.second->setBounds(144, y, getWidth() - 160, 30); y += 36; }
+        hint.setBounds(16, 194, getWidth() - 32, 36); channelsLabel.setBounds(16, 236, getWidth() - 32, 24);
+        channelViewport.setBounds(16, 264, getWidth() - 32, juce::jmax(64, getHeight() - 490)); layoutChannels();
+        const int afterChannels = channelViewport.getBottom();
+        channelsHint.setBounds(16, afterChannels + 4, getWidth() - 32, 36);
+        actual.setBounds(16, afterChannels + 46, getWidth() - 32, 50); status.setBounds(16, afterChannels + 102, getWidth() - 32, 56);
+        refresh.setBounds(16, getHeight() - 44, 132, 32); driverPanel.setBounds(158, getHeight() - 44, 186, 32);
+        apply.setBounds(getWidth() - 116, getHeight() - 44, 100, 32);
     }
-    void paint(juce::Graphics& g) override { g.fillAll(paper); g.setColour(rule); g.drawHorizontalLine(224, 16.0f, float(getWidth() - 16)); }
-    static juce::Result runInteractionSmokeTest(juce::DynamicObject& report)
+    void paint(juce::Graphics& g) override
     {
+        g.fillAll(paper); g.setColour(rule); g.drawHorizontalLine(232, 16.0f, float(getWidth() - 16));
+        g.drawHorizontalLine(getHeight() - 54, 16.0f, float(getWidth() - 16));
+    }
+    static juce::Result runInteractionSmokeTest(juce::DynamicObject& report, const juce::File& outputDirectory, juce::LookAndFeel& look)
+    {
+        const auto originalLanguage = uiLanguageCode();
+        struct RestoreLanguage { juce::String code; ~RestoreLanguage() { setUiLanguage(code, false); } } restore { originalLanguage };
+        setUiLanguage("en", false);
+        const auto channel = [](int index, bool active) { return arguments({ { "index", index }, { "name", "Analogue " + juce::String(index + 1) }, { "active", active } }); };
         auto devices = arguments({ { "drivers", juce::Array<juce::var> {
             arguments({ { "driver_type", "Separate" }, { "separate_inputs_and_outputs", true }, { "inputs", juce::Array<juce::var>{ "Microphone" } }, { "outputs", juce::Array<juce::var>{ "Speakers" } } }),
-            arguments({ { "driver_type", "ASIO" }, { "separate_inputs_and_outputs", false }, { "inputs", juce::Array<juce::var>{ "Interface" } }, { "outputs", juce::Array<juce::var>{ "Interface" } } }) } },
+            arguments({ { "driver_type", "ASIO" }, { "separate_inputs_and_outputs", false }, { "inputs", juce::Array<juce::var>{ "Interface", "Other interface" } }, { "outputs", juce::Array<juce::var>{ "Interface", "Other interface" } } }) } },
             { "driver_type", "Separate" }, { "device_name", "Speakers + Microphone" }, { "input_device_name", "Microphone" }, { "output_device_name", "Speakers" },
+            { "device_open", true }, { "has_control_panel", false }, { "input_channels", juce::Array<juce::var>{ channel(0, true), channel(1, true) } },
+            { "input_stereo_pairs", juce::Array<juce::var>{} },
             { "sample_rate", 44100.0 }, { "buffer_size", 256 }, { "sample_rates", juce::Array<juce::var>{ 44100.0, 48000.0 } }, { "buffer_sizes", juce::Array<juce::var>{ 256, 512 } } });
-        int changes = 0; bool reject = false; juce::var submitted;
-        AudioSettingsPanel panel([&](bool) { return arguments({ { "status", "completed" }, { "result", devices } }); }, [&](const juce::var& args) {
+        int changes = 0, panels = 0, reads = 0; bool reject = false, failRead = false; juce::var submitted;
+        AudioSettingsPanel panel([&](bool) {
+            ++reads; return failRead ? arguments({ { "status", "failed" }, { "error", "Fixture: device query failed." } })
+                                    : arguments({ { "status", "completed" }, { "result", devices } });
+        }, [&](const juce::var& args) {
             ++changes; submitted = args;
             if (reject) return juce::Result::fail("Fixture: driver rejected the buffer. Previous device configuration restored.");
             auto* data = devices.getDynamicObject(); data->setProperty("driver_type", "ASIO"); data->setProperty("device_name", "Interface");
             data->setProperty("input_device_name", "Interface"); data->setProperty("output_device_name", "Interface"); data->setProperty("sample_rate", 48000.0); data->setProperty("buffer_size", 512);
+            data->setProperty("has_control_panel", true);
+            if (const auto* active = args["input_channels"].getArray())
+                data->setProperty("input_channels", juce::Array<juce::var>{ channel(0, active->contains(juce::var(0))), channel(1, active->contains(juce::var(1))) });
+            if (args.hasProperty("input_stereo_pairs")) data->setProperty("input_stereo_pairs", args["input_stereo_pairs"]);
             return juce::Result::ok();
-        });
-        if (panel.output.getText() != "Speakers" || panel.input.getText() != "Microphone") return juce::Result::fail("Audio settings did not read separate active input/output names.");
+        }, [&] { ++panels; devices.getDynamicObject()->setProperty("buffer_size", 256); return juce::Result::ok(); });
+        panel.setLookAndFeel(&look);
+        struct RestoreLook { AudioSettingsPanel& panel; ~RestoreLook() { panel.setLookAndFeel(nullptr); } } restoreLook { panel };
+        const auto capture = [&](AudioSettingsPanel& target, const juce::String& name) {
+            juce::MemoryOutputStream png;
+            return juce::PNGImageFormat().writeImageToStream(target.createComponentSnapshot(target.getLocalBounds(), true), png)
+                && outputDirectory.getChildFile(name).replaceWithData(png.getData(), png.getDataSize());
+        };
+        if (panel.output.getText() != "Speakers" || panel.input.getText() != "Microphone" || panel.driverPanel.isEnabled())
+            return juce::Result::fail("Audio settings did not read separate active names or exposed an unsupported panel.");
         panel.driver.setSelectedId(2, juce::dontSendNotification); panel.driver.onChange();
-        if (changes != 0 || panel.rate.isEnabled() || panel.buffer.isEnabled()) return juce::Result::fail("Selecting a different driver applied it early or exposed the previous device's timing capabilities.");
+        if (changes != 0 || panel.rate.isEnabled() || panel.buffer.isEnabled() || !panel.channelButtons.empty() || panel.driverPanel.isEnabled())
+            return juce::Result::fail("Selecting a different driver applied early or exposed stale capabilities.");
         panel.apply.onClick();
         if (!panel.applying || panel.apply.isEnabled()) return juce::Result::fail("Audio settings did not show its pending Apply state.");
         const auto wait = [&] {
             const auto end = juce::Time::getMillisecondCounterHiRes() + 1000;
-            while (panel.applying && juce::Time::getMillisecondCounterHiRes() < end) juce::MessageManager::getInstance()->runDispatchLoopUntil(1);
+            while (panel.busy() && juce::Time::getMillisecondCounterHiRes() < end) juce::MessageManager::getInstance()->runDispatchLoopUntil(1);
         };
         wait();
         if (changes != 1 || submitted["device_name"].toString() != "Interface" || submitted.hasProperty("sample_rate") || submitted.hasProperty("buffer_size")
-            || panel.rate.getText() != "48000 Hz" || panel.buffer.getText() != "512 samples")
+            || submitted.hasProperty("input_channels") || submitted.hasProperty("input_stereo_pairs") || panel.rate.getText() != "48000 Hz"
+            || panel.buffer.getText() != "512 samples" || panel.channelButtons.size() != 2 || panel.input.isEnabled() || !panel.driverPanel.isEnabled())
             return juce::Result::fail("Audio device Apply did not use defaults for the new driver and display actual readback.");
         reject = true; panel.buffer.setSelectedId(1, juce::dontSendNotification); panel.apply.onClick(); wait();
         if (changes != 2 || int(submitted["buffer_size"]) != 256 || panel.status.getText().isEmpty() || !panel.status.getText().contains("rejected")
             || panel.buffer.getText() != "512 samples" || !panel.apply.isEnabled())
             return juce::Result::fail("Rejected audio configuration did not retain visible failure and restored actual settings.");
-        report.setProperty("audio_settings_draft_apply_actual_readback_and_failure", true); return juce::Result::ok();
+        if (!capture(panel, "ui-audio-input-rejected-en-660x590-synthetic.png")) return juce::Result::fail("Could not capture audio settings failure.");
+        reject = false;
+        panel.channelButtons[0].button->setToggleState(false, juce::dontSendNotification); panel.channelButtons[0].button->onClick();
+        if (changes != 2 || panel.pairButtons[0].button->isEnabled() || panel.driverPanel.isEnabled())
+            return juce::Result::fail("Input draft applied early or allowed an invalid pair/panel transition.");
+        panel.apply.onClick(); wait();
+        if (changes != 3 || submitted["input_channels"].size() != 1 || int(submitted["input_channels"][0]) != 1
+            || submitted["input_stereo_pairs"].size() != 0 || panel.channelButtons[0].button->getToggleState() || !panel.channelButtons[1].button->getToggleState())
+            return juce::Result::fail("In 2-only selection was not submitted and read back independently.");
+        if (!capture(panel, "ui-audio-input-in2-en-660x590-synthetic.png")) return juce::Result::fail("Could not capture independent input settings.");
+        panel.channelButtons[0].button->setToggleState(true, juce::dontSendNotification); panel.channelButtons[0].button->onClick();
+        panel.pairButtons[0].button->setToggleState(true, juce::dontSendNotification); panel.pairButtons[0].button->onClick();
+        panel.apply.onClick(); wait();
+        if (changes != 4 || submitted["input_channels"].size() != 2 || submitted["input_stereo_pairs"].size() != 1 || int(submitted["input_stereo_pairs"][0]) != 0)
+            return juce::Result::fail("Explicit stereo pair was not submitted.");
+        panel.channelButtons[0].button->setToggleState(false, juce::dontSendNotification); panel.channelButtons[0].button->onClick();
+        panel.channelButtons[1].button->setToggleState(false, juce::dontSendNotification); panel.channelButtons[1].button->onClick();
+        if (panel.pairButtons[0].button->getToggleState()) return juce::Result::fail("Disabling inputs retained an invalid stereo pair.");
+        panel.apply.onClick(); wait();
+        if (changes != 5 || submitted["input_channels"].size() != 0 || submitted["input_stereo_pairs"].size() != 0)
+            return juce::Result::fail("Disabling all inputs did not submit explicit empty masks.");
+        const auto readsBeforePanel = reads; panel.driverPanel.onClick(); wait();
+        if (panels != 1 || reads <= readsBeforePanel || panel.buffer.getText() != "256 samples" || !panel.driverPanel.isEnabled())
+            return juce::Result::fail("Driver panel did not refresh actual capabilities after returning.");
+        panel.output.setSelectedId(2, juce::dontSendNotification); panel.output.onChange();
+        if (!panel.channelButtons.empty() || panel.rate.isEnabled() || panel.driverPanel.isEnabled())
+            return juce::Result::fail("Changing ASIO devices left stale capabilities.");
+        if (!capture(panel, "ui-audio-input-new-device-en-660x590-synthetic.png")) return juce::Result::fail("Could not capture pending device selection.");
+        failRead = true; panel.read(true);
+        if (panel.apply.isEnabled() || panel.driverPanel.isEnabled() || panel.rate.isEnabled()) return juce::Result::fail("Unconfirmed readback allowed stale device actions.");
+        failRead = false;
+        for (const auto* language : { "en", "zh-CN" }) {
+            setUiLanguage(language, false);
+            juce::Array<juce::var> manyChannels;
+            for (int i = 0; i < 16; ++i) manyChannels.add(arguments({ { "index", i }, { "name", "Interface physical input with a long vendor name " + juce::String(i + 1) }, { "active", i < 2 } }));
+            devices.getDynamicObject()->setProperty("input_channels", manyChannels);
+            AudioSettingsPanel localized([&](bool) { return arguments({ { "status", "completed" }, { "result", devices } }); }, [](const juce::var&) { return juce::Result::ok(); }, [] { return juce::Result::ok(); });
+            localized.setLookAndFeel(&look); localized.setSize(540, 560);
+            const bool valid = localized.channelContent.getHeight() > localized.channelViewport.getHeight()
+                && localized.channelButtons.size() == 16 && localized.pairButtons.size() == 8
+                && localized.apply.getBounds().getIntersection(localized.driverPanel.getBounds()).isEmpty()
+                && capture(localized, "ui-audio-input-many-" + juce::String(language) + "-540x560-synthetic.png");
+            localized.setLookAndFeel(nullptr);
+            if (!valid) return juce::Result::fail("Localized narrow settings lost scrolling or overlapped actions.");
+            devices.getDynamicObject()->setProperty("input_channels", juce::Array<juce::var>{}); devices.getDynamicObject()->setProperty("has_control_panel", false);
+            AudioSettingsPanel empty([&](bool) { return arguments({ { "status", "completed" }, { "result", devices } }); }, [](const juce::var&) { return juce::Result::ok(); });
+            empty.setLookAndFeel(&look); empty.setSize(540, 560);
+            const bool emptyValid = empty.emptyChannels.isVisible() && !empty.driverPanel.isEnabled()
+                && capture(empty, "ui-audio-input-empty-" + juce::String(language) + "-540x560-synthetic.png");
+            empty.setLookAndFeel(nullptr);
+            if (!emptyValid) return juce::Result::fail("Empty input capability state was not visible.");
+            devices.getDynamicObject()->setProperty("has_control_panel", true);
+        }
+        int closeCallbacks = 0;
+        std::unique_ptr<AudioSettingsPanel> closing;
+        const auto queryClosing = [&](bool) { return arguments({ { "status", "completed" }, { "result", devices } }); };
+        closing = std::make_unique<AudioSettingsPanel>(queryClosing, [&](const juce::var&) {
+            ++closeCallbacks; closing.reset(); return juce::Result::ok();
+        });
+        closing->beginApply();
+        auto closeDeadline = juce::Time::getMillisecondCounterHiRes() + 1000;
+        while (closing && juce::Time::getMillisecondCounterHiRes() < closeDeadline) juce::MessageManager::getInstance()->runDispatchLoopUntil(1);
+        if (closing || closeCallbacks != 1) return juce::Result::fail("Closing audio settings during Apply did not terminate safely.");
+        closing = std::make_unique<AudioSettingsPanel>(queryClosing, [](const juce::var&) { return juce::Result::ok(); }, [&] {
+            ++closeCallbacks; closing.reset(); return juce::Result::ok();
+        });
+        closing->beginDriverPanel();
+        closeDeadline = juce::Time::getMillisecondCounterHiRes() + 1000;
+        while (closing && juce::Time::getMillisecondCounterHiRes() < closeDeadline) juce::MessageManager::getInstance()->runDispatchLoopUntil(1);
+        if (closing || closeCallbacks != 2) return juce::Result::fail("Closing audio settings during the driver panel did not terminate safely.");
+        report.setProperty("audio_settings_draft_apply_actual_readback_and_failure", true);
+        report.setProperty("audio_settings_independent_physical_inputs_stereo_pairs_and_empty_mask", true);
+        report.setProperty("audio_settings_driver_panel_capability_guard_and_refresh", true);
+        report.setProperty("audio_settings_device_switch_clears_stale_capabilities", true);
+        report.setProperty("audio_settings_localized_narrow_many_and_empty_channel_captures", true);
+        report.setProperty("audio_settings_native_callback_close_lifetime", true);
+        return juce::Result::ok();
     }
 private:
+    struct ChannelToggle { int index; std::unique_ptr<juce::ToggleButton> button; };
     juce::var selectedDriver() const
     {
         if (const auto* list = devices["drivers"].getArray()) for (const auto& item : *list) if (item["driver_type"].toString() == driver.getText()) return item;
@@ -560,28 +676,63 @@ private:
     juce::String inputName() const { return separateDevices() && input.getSelectedId() > 1 ? input.getText() : juce::String(); }
     bool activeSelection() const
     {
-        return driver.getText() == devices["driver_type"].toString() && output.getText() == devices["output_device_name"].toString()
+        return confirmed && driver.getText() == devices["driver_type"].toString() && output.getText() == devices["output_device_name"].toString()
             && (!separateDevices() || inputName() == devices["input_device_name"].toString());
+    }
+    bool busy() const { return applying || openingPanel; }
+    bool inputSelected(int index) const
+    {
+        for (const auto& channel : channelButtons) if (channel.index == index) return channel.button->getToggleState();
+        return false;
+    }
+    void setStatus(const juce::String& text) { status.setText(text, juce::dontSendNotification); status.setTooltip(text); }
+    bool hasDraft() const
+    {
+        if (!activeSelection()) return true;
+        if (rate.getSelectedId() > 0 && rate.getSelectedId() <= int(rates.size()) && rates[size_t(rate.getSelectedId() - 1)] != double(devices["sample_rate"])) return true;
+        if (buffer.getSelectedId() > 0 && buffer.getSelectedId() <= int(buffers.size()) && buffers[size_t(buffer.getSelectedId() - 1)] != int(devices["buffer_size"])) return true;
+        if (const auto* list = devices["input_channels"].getArray()) for (const auto& channel : *list)
+            if (inputSelected(int(channel["index"])) != bool(channel["active"])) return true;
+        for (const auto& pair : pairButtons) {
+            bool wasPaired = false;
+            if (const auto* list = devices["input_stereo_pairs"].getArray()) for (const auto& index : *list) if (int(index) == pair.index) wasPaired = true;
+            if (pair.button->getToggleState() != wasPaired) return true;
+        }
+        return false;
+    }
+    void draftChanged()
+    {
+        updateEnabled();
+        setStatus(hasDraft() ? uiText("Changes are not applied. Click Apply to open the selected inputs.", "更改尚未应用。点击应用以启用所选输入。")
+                            : uiText("Active settings are shown below. Choose each track's input in Devices / I/O.", "下方显示实际设置。请在各轨道的装置／输入输出面板中选择输入。"));
     }
     bool read(bool scan)
     {
         const auto response = query(scan);
         if (response["status"].toString() != "completed" || !response["result"].isObject()) {
-            status.setText(response["error"].toString().isNotEmpty() ? response["error"].toString() : "Could not read audio devices. Refresh to try again.", juce::dontSendNotification);
-            actual.setText("Active settings could not be confirmed. Refresh to read them again.", juce::dontSendNotification); updateEnabled(); return false;
+            confirmed = false;
+            setStatus(response["error"].toString().isNotEmpty() ? response["error"].toString()
+                : uiText("Could not read audio devices. Refresh to try again.", "无法读取音频设备，请刷新后重试。"));
+            actual.setText(uiText("Active settings could not be confirmed. Refresh to read them again.", "无法确认实际设置，请刷新后重新读取。"), juce::dontSendNotification);
+            rebuildChannels(); updateEnabled(); return false;
         }
-        devices = response["result"]; updating = true; driver.clear(juce::dontSendNotification);
+        devices = response["result"]; confirmed = true; updating = true; driver.clear(juce::dontSendNotification);
         int chosen = 0;
         if (const auto* list = devices["drivers"].getArray()) for (const auto& item : *list) {
             const auto name = item["driver_type"].toString(); const int id = driver.getNumItems() + 1; driver.addItem(name, id);
             if (name == devices["driver_type"].toString()) chosen = id;
         }
         driver.setSelectedId(chosen, juce::dontSendNotification); updating = false; rebuildDevices();
+        juce::StringArray enabled;
+        if (const auto* list = devices["input_channels"].getArray()) for (const auto& channel : *list)
+            if (bool(channel["active"])) enabled.add("In " + juce::String(int(channel["index"]) + 1));
         const auto name = devices["device_name"].toString();
-        actual.setText(name.isEmpty() ? "No audio device is open." : "Active: " + name + "\n" + juce::String(double(devices["sample_rate"]), 0) + " Hz / "
-            + juce::String(int(devices["buffer_size"])) + " samples / input " + juce::String(int(devices["input_latency_samples"])) + " + output "
-            + juce::String(int(devices["output_latency_samples"])) + " latency samples", juce::dontSendNotification);
-        if (scan) status.setText(uiText("Choose devices, then Apply. MIDI inputs are selected and armed in Devices / I/O.", "选择设备后点击应用。MIDI 输入在轨道的装置／输入输出面板中设置。"), juce::dontSendNotification);
+        const auto activeText = name.isEmpty() ? uiText("No audio device is open.", "未打开音频设备。")
+            : uiText("Active: ", "实际设备：") + name + " / " + juce::String(double(devices["sample_rate"]), 0) + " Hz / "
+                + juce::String(int(devices["buffer_size"])) + uiText(" samples", " 采样") + "\n" + uiText("Active inputs: ", "已启用输入：")
+                + (enabled.isEmpty() ? uiText("None", "无") : enabled.joinIntoString(", "));
+        actual.setText(activeText, juce::dontSendNotification); actual.setTooltip(activeText);
+        if (scan) setStatus(uiText("Choose the track input in Devices / I/O, arm Rec, then start recording. Monitor is independent.", "在轨道装置／输入输出中选择输入，开启 Rec 预备后再开始录音。监听独立控制。"));
         return true;
     }
     void rebuildDevices()
@@ -593,13 +744,13 @@ private:
             if (sameDriver && name.toString() == devices["output_device_name"].toString()) outputId = id;
         }
         output.setSelectedId(outputId > 0 ? outputId : output.getNumItems() > 0 ? 1 : 0, juce::dontSendNotification);
-        output.setTextWhenNothingSelected(uiText("No output device available", "暂无输出设备")); input.clear(juce::dontSendNotification); input.addItem(separateDevices() ? uiText("None", "无") : uiText("Uses selected device", "使用当前设备"), 1);
+        output.setTextWhenNothingSelected(uiText("No output device available", "暂无输出设备")); input.clear(juce::dontSendNotification); input.addItem(separateDevices() ? uiText("None", "无") : uiText("Uses the device above", "使用上方同一设备"), 1);
         int inputId = 1;
         if (separateDevices()) if (const auto* list = selected["inputs"].getArray()) for (const auto& name : *list) {
             const int id = input.getNumItems() + 1; input.addItem(name.toString(), id);
             if (sameDriver && name.toString() == devices["input_device_name"].toString()) inputId = id;
         }
-        input.setSelectedId(inputId, juce::dontSendNotification); outputLabel.setText(separateDevices() ? uiText("Output", "输出") : uiText("Device", "设备"), juce::dontSendNotification);
+        input.setSelectedId(inputId, juce::dontSendNotification); outputLabel.setText(separateDevices() ? uiText("Output device", "输出设备") : uiText("Audio device", "音频设备"), juce::dontSendNotification);
         updating = false; rebuildTiming();
     }
     void rebuildTiming()
@@ -613,47 +764,124 @@ private:
             if (currentRate > 0 && std::find(rates.begin(), rates.end(), currentRate) == rates.end()) rates.push_back(currentRate);
             if (currentBuffer > 0 && std::find(buffers.begin(), buffers.end(), currentBuffer) == buffers.end()) buffers.push_back(currentBuffer);
             for (size_t i = 0; i < rates.size(); ++i) { rate.addItem(juce::String(rates[i], 0) + " Hz", int(i) + 1); if (rates[i] == currentRate) rate.setSelectedId(int(i) + 1, juce::dontSendNotification); }
-            for (size_t i = 0; i < buffers.size(); ++i) { buffer.addItem(juce::String(buffers[i]) + " samples", int(i) + 1); if (buffers[i] == currentBuffer) buffer.setSelectedId(int(i) + 1, juce::dontSendNotification); }
+            for (size_t i = 0; i < buffers.size(); ++i) { buffer.addItem(juce::String(buffers[i]) + uiText(" samples", " 采样"), int(i) + 1); if (buffers[i] == currentBuffer) buffer.setSelectedId(int(i) + 1, juce::dontSendNotification); }
         } else {
             rate.addItem(uiText("Device default", "设备默认值"), 1); buffer.addItem(uiText("Device default", "设备默认值"), 1); rate.setSelectedId(1, juce::dontSendNotification); buffer.setSelectedId(1, juce::dontSendNotification);
         }
-        hint.setText(active ? uiText("Choose the rate and buffer supported by the active device. New inputs start with monitoring off.", "选择设备支持的采样率与缓冲区。新输入默认关闭监听。")
-            : uiText("Apply this device first, then choose its supported sample rate and buffer. New inputs start with monitoring off.", "先应用设备，再选择它支持的采样率与缓冲区。新输入默认关闭监听。"), juce::dontSendNotification);
-        updating = false; updateEnabled();
+        hint.setText(separateDevices()
+            ? uiText("Input and output devices can be selected separately. Physical inputs are listed below.", "输入、输出可选择不同设备；物理输入通道见下方。")
+            : uiText("This driver uses one device for input and output. Select its physical inputs below.", "此驱动的输入和输出共用同一设备。请在下方选择物理输入通道。"), juce::dontSendNotification);
+        updating = false; rebuildChannels(); updateEnabled();
+        if (!active) setStatus(uiText("Apply this device first, then choose its input channels, sample rate and buffer.", "先应用此设备，再选择它的输入通道、采样率和缓冲区。"));
+    }
+    void rebuildChannels()
+    {
+        channelButtons.clear(); pairButtons.clear();
+        if (activeSelection()) if (const auto* list = devices["input_channels"].getArray()) for (const auto& channel : *list) {
+            const int index = int(channel["index"]);
+            const auto title = "In " + juce::String(index + 1) + "  " + channel["name"].toString();
+            auto button = std::make_unique<juce::ToggleButton>(title);
+            button->setTitle(title); button->setTooltip(title); button->setToggleState(bool(channel["active"]), juce::dontSendNotification);
+            button->onClick = [this] { updatePairAvailability(); draftChanged(); };
+            channelContent.addAndMakeVisible(*button); channelButtons.push_back({ index, std::move(button) });
+        }
+        for (const auto& channel : channelButtons) if (channel.index % 2 == 0
+            && std::any_of(channelButtons.begin(), channelButtons.end(), [&](const auto& other) { return other.index == channel.index + 1; })) {
+            const auto title = uiText("Stereo pair ", "立体声配对 ") + juce::String(channel.index + 1) + " + " + juce::String(channel.index + 2);
+            auto button = std::make_unique<juce::ToggleButton>(title); button->setTitle(title);
+            button->setTooltip(uiText("Off: record each input as mono. On: one stereo input. Both channels must be enabled.", "关闭：两个输入分别单声道录音。开启：合为立体声输入，须同时启用两个通道。"));
+            if (const auto* list = devices["input_stereo_pairs"].getArray()) for (const auto& index : *list)
+                if (int(index) == channel.index) button->setToggleState(true, juce::dontSendNotification);
+            button->onClick = [this] { draftChanged(); }; channelContent.addAndMakeVisible(*button);
+            pairButtons.push_back({ channel.index, std::move(button) });
+        }
+        emptyChannels.setVisible(channelButtons.empty());
+        emptyChannels.setText(!activeSelection() ? uiText("Apply the selected device to read its physical input channels.", "应用所选设备后即可读取物理输入通道。")
+            : uiText("This device has no physical input channels. Choose an input-capable device to record audio.", "此设备没有物理输入通道。请选择支持输入的设备以录制音频。"), juce::dontSendNotification);
+        channelsHint.setText(uiText("Check each input, then Apply. Leave stereo pairing off to record In 1 and In 2 separately.", "勾选各输入后点击应用。分别录制 In 1 和 In 2 时，请关闭立体声配对。"), juce::dontSendNotification);
+        channelViewport.setViewPosition(0, 0); layoutChannels(); updatePairAvailability();
+    }
+    void layoutChannels()
+    {
+        const int width = juce::jmax(1, channelViewport.getWidth() - channelViewport.getScrollBarThickness());
+        int y = 0;
+        for (auto& channel : channelButtons) {
+            channel.button->setBounds(0, y, width, 28); y += 28;
+            for (auto& pair : pairButtons) if (pair.index + 1 == channel.index) {
+                pair.button->setBounds(22, y, width - 22, 28); y += 34;
+            }
+        }
+        channelContent.setSize(width, juce::jmax(channelViewport.getHeight(), y));
+        emptyChannels.setBounds(0, 0, width, juce::jmax(60, channelViewport.getHeight()));
+    }
+    void updatePairAvailability()
+    {
+        for (auto& pair : pairButtons) {
+            const bool valid = inputSelected(pair.index) && inputSelected(pair.index + 1);
+            if (!valid) pair.button->setToggleState(false, juce::dontSendNotification);
+            pair.button->setEnabled(!busy() && activeSelection() && valid);
+        }
     }
     void updateEnabled()
     {
-        driver.setEnabled(!applying); output.setEnabled(!applying); input.setEnabled(!applying && separateDevices());
-        rate.setEnabled(!applying && activeSelection() && !rates.empty()); buffer.setEnabled(!applying && activeSelection() && !buffers.empty());
-        refresh.setEnabled(!applying); apply.setEnabled(!applying && driver.getSelectedId() > 0 && output.getSelectedId() > 0);
-        apply.setButtonText(applying ? uiText("applying...", "正在应用...") : uiText("apply"));
+        driver.setEnabled(!busy()); output.setEnabled(!busy()); input.setEnabled(!busy() && separateDevices());
+        rate.setEnabled(!busy() && activeSelection() && !rates.empty()); buffer.setEnabled(!busy() && activeSelection() && !buffers.empty());
+        for (auto& channel : channelButtons) channel.button->setEnabled(!busy() && activeSelection());
+        updatePairAvailability(); refresh.setEnabled(!busy());
+        apply.setEnabled(!busy() && confirmed && driver.getSelectedId() > 0 && output.getSelectedId() > 0);
+        driverPanel.setEnabled(!busy() && activeSelection() && bool(devices["device_open"]) && bool(devices["has_control_panel"]) && bool(showDriverPanel) && !hasDraft());
+        driverPanel.setTooltip(!activeSelection() || hasDraft() ? uiText("Apply or refresh your changes before opening the active driver's control panel.", "先应用或刷新更改，再打开当前驱动的控制面板。")
+            : !bool(devices["has_control_panel"]) ? uiText("The active driver does not provide a control panel.", "当前驱动不提供控制面板。")
+            : uiText("Open the device's own settings. Actual settings are refreshed when it closes.", "打开设备自带的设置；关闭后重新读取实际设置。"));
+        apply.setButtonText(applying ? uiText("Applying...", "正在应用...") : uiText("apply"));
     }
     void beginApply()
     {
-        if (applying || !apply.isEnabled()) return;
+        if (busy() || !apply.isEnabled()) return;
         auto args = arguments({ { "driver_type", driver.getText() } }); auto* fields = args.getDynamicObject();
         if (separateDevices()) { fields->setProperty("input_device_name", inputName()); fields->setProperty("output_device_name", output.getText()); }
         else fields->setProperty("device_name", output.getText());
         if (activeSelection()) {
             if (rate.getSelectedId() > 0 && rate.getSelectedId() <= int(rates.size())) fields->setProperty("sample_rate", rates[size_t(rate.getSelectedId() - 1)]);
             if (buffer.getSelectedId() > 0 && buffer.getSelectedId() <= int(buffers.size())) fields->setProperty("buffer_size", buffers[size_t(buffer.getSelectedId() - 1)]);
-            juce::Array<juce::var> channels;
-            if (const auto* list = devices["input_channels"].getArray()) for (const auto& channel : *list) if (bool(channel["active"])) channels.add(channel["index"]);
-            fields->setProperty("input_channels", channels);
+            juce::Array<juce::var> channels, pairs;
+            for (const auto& channel : channelButtons) if (channel.button->getToggleState()) channels.add(channel.index);
+            for (const auto& pair : pairButtons) if (pair.button->getToggleState()) pairs.add(pair.index);
+            fields->setProperty("input_channels", channels); fields->setProperty("input_stereo_pairs", pairs);
         }
-        applying = true; updateEnabled(); status.setText("Applying audio settings...", juce::dontSendNotification);
+        applying = true; updateEnabled(); setStatus(uiText("Applying audio settings...", "正在应用音频设置..."));
         juce::MessageManager::callAsync([safe = juce::Component::SafePointer<AudioSettingsPanel>(this), args] {
             if (!safe) return;
-            const auto result = safe->configure(args); safe->applying = false; const bool readback = safe->read(false); safe->updateEnabled();
-            if (result.failed() || readback) safe->status.setText(result.failed() ? result.getErrorMessage() : "Audio settings applied. Active values are shown above.", juce::dontSendNotification);
+            const auto configureDevice = safe->configure;
+            const auto result = configureDevice(args);
+            if (!safe) return;
+            safe->applying = false; const bool readback = safe->read(false); safe->updateEnabled();
+            if (result.failed() || readback) safe->setStatus(result.failed() ? result.getErrorMessage()
+                : uiText("Audio settings applied. Actual device and input channels are shown above.", "音频设置已应用，上方显示实际设备和输入通道。"));
         });
     }
-    Query query; Configure configure; juce::var devices;
+    void beginDriverPanel()
+    {
+        if (busy() || !driverPanel.isEnabled() || !showDriverPanel) return;
+        openingPanel = true; updateEnabled(); setStatus(uiText("Driver control panel is open. Close it to return to audio settings.", "驱动控制面板已打开，关闭后返回音频设置。"));
+        juce::MessageManager::callAsync([safe = juce::Component::SafePointer<AudioSettingsPanel>(this)] {
+            if (!safe) return;
+            const auto openPanel = safe->showDriverPanel;
+            const auto result = openPanel();
+            if (!safe) return;
+            safe->openingPanel = false; const bool readback = safe->read(true); safe->updateEnabled();
+            if (result.failed() || readback) safe->setStatus(result.failed() ? result.getErrorMessage()
+                : uiText("Driver settings refreshed. Actual values are shown above.", "驱动设置已刷新，上方显示实际值。"));
+        });
+    }
+    Query query; Configure configure; DriverPanel showDriverPanel; juce::var devices;
     juce::ComboBox driver, output, input, rate, buffer;
-    juce::Label driverLabel, outputLabel, inputLabel, rateLabel, bufferLabel, actual, hint, status;
-    juce::TextButton refresh { "refresh devices" }, apply { "apply" };
+    juce::Label driverLabel, outputLabel, inputLabel, rateLabel, bufferLabel, actual, hint, status, channelsLabel, channelsHint, emptyChannels;
+    juce::Component channelContent; juce::Viewport channelViewport;
+    juce::TextButton refresh, driverPanel, apply;
+    std::vector<ChannelToggle> channelButtons, pairButtons;
     std::vector<double> rates; std::vector<int> buffers;
-    bool updating = false, applying = false;
+    bool updating = false, applying = false, openingPanel = false, confirmed = false;
 };
 
 class PluginPanel final : public juce::Component, private juce::Timer {
@@ -2194,7 +2422,7 @@ juce::Result MainComponent::runArrangementSmokeTest(const juce::File& outputDire
         values.setLookAndFeel(nullptr);
         editor.setLookAndFeel(nullptr); browser.setLookAndFeel(nullptr);
     }
-    if (result.wasOk()) result = AudioSettingsPanel::runInteractionSmokeTest(*report);
+    if (result.wasOk()) result = AudioSettingsPanel::runInteractionSmokeTest(*report, outputDirectory, p.look);
     if (result.wasOk()) {
         // Exercise the real asynchronous save and continuation in an isolated
         // session, so this check never saves or changes the user's open project.
@@ -3179,7 +3407,14 @@ void MainComponent::showAudioSettings()
         [safe = juce::Component::SafePointer<MainComponent>(this)](const juce::var& args) {
             if (!safe) return juce::Result::fail("The audio workspace was closed.");
             const auto result = safe->session.execute("configure_audio_device", args, safe->session.snapshot().revision);
-            safe->showResult(result); return result;
+            if (safe) safe->showResult(result);
+            return result;
+        },
+        [safe = juce::Component::SafePointer<MainComponent>(this)] {
+            if (!safe) return juce::Result::fail(uiText("The audio workspace was closed.", "音频工作区已关闭。"));
+            const auto result = safe->session.execute("show_audio_driver_panel", arguments({}), safe->session.snapshot().revision);
+            if (safe) safe->showResult(result);
+            return result;
         });
     selector->setLookAndFeel(&impl->look);
     juce::DialogWindow::LaunchOptions options;
