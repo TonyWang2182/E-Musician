@@ -13949,6 +13949,15 @@ First configure 52244ca3d1 refused unapplied new pinned patches, as designed. Re
 - GUI process launched only; playback, interaction and performance remain unverified.
 - [Exact process output](../build-logs/20261116T141646.621631Z-633e6a75ea.raw.log)
 
+### 2026-11-16T22:16:53+08:00 · agent-embedded-launch · launched
+
+- Config: Python + native DAW; exit code: 0; elapsed: 1.472s.
+- Command: `C:\Python314\python.exe E:\emusician-analysis-source\scripts\run_agent.py --serve --embedded-session "<local session capability file>"`
+- Context: DAW-owned helper only; launch is not GUI/audio acceptance
+- Source SHA-256: `4a7722628a9701049b2127623f2a5351878704cf4b59fdf22d5f462b53528034`; Git HEAD: `6a822251bed996a927d575881b05f93a32125457`.
+- [Record](builds/20261116T141653.211437Z-9ed6035f1e.json) · [Raw log](../build-logs/20261116T141653.211437Z-9ed6035f1e.log)
+- GUI process launched only; playback, interaction and performance remain unverified.
+
 ### 2026-11-16T14:17:57.471865+00:00 · audio-input-delivery · 自动已验、人工待验
 
 修复物理输入激活、mono/stereo设置、稀疏In2回调映射和缺失输入清零；加入驱动控制面板、身份限定路由、变更前断开目标及失败回滚。保留逐轨Monitor/Rec规则，旧工程音频输入需重新选择。最终Release755f123b2d、CTest023018ac4f 11/11、1004项生产断言、六种精确PCM和七张设置截图通过；Agent2795a51de1 390/390且最终47项相关输入未变。M-Audio ASIO44.1kHz/512的三段短录音、Undo/Redo、保存重开及设置字节恢复在3f4d571d0c通过，来源与听感不据底噪推断。138项原生输入核对通过，旧0.13.5哈希未变。
