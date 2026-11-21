@@ -919,6 +919,58 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
         }
         midiOverviews = std::move(next);
     }
+    const EngineSession::RecordingPreviewSnapshot* previewForClip(const juce::String& clipId) const
+    {
+        if (clipId.isEmpty()) return nullptr;
+        for (const auto& preview : recordingPreviews) if (preview.clipId == clipId) return &preview;
+        return nullptr;
+    }
+    void updateRecordingPreviews()
+    {
+        recordingPreviews = engine.recordingPreviews();
+        // Normal file peaks own display after handoff. Release only completed
+        // takes; the recording/writer remains the sole owner of live PCM.
+        std::erase_if(recordingPreviews, [&](const auto& preview) {
+            if (preview.clipId.isEmpty() || !owner.trackWaveformReady(preview.clipId)) return false;
+            engine.releaseRecordingPreview(state.projectId, preview.id);
+            return true;
+        });
+    }
+    void paintRecording(juce::Graphics& g, const EngineSession::TrackSnapshot& track, int row)
+    {
+        for (const auto& preview : recordingPreviews) {
+            if (preview.trackId != track.id || preview.clipId.isNotEmpty() || preview.duration <= 0) continue;
+            const auto start = std::max(viewStart, preview.timelineStart);
+            const auto end = std::min(viewStart + visibleDuration(), preview.timelineStart + preview.duration);
+            if (end <= start) continue;
+            const auto left = timeX(start), right = timeX(end);
+            const auto area = juce::Rectangle<float>(left, float(row * rowHeight),
+                                                     std::max(1.0f, right - left), float(rowHeight - 1));
+            juce::Graphics::ScopedSaveState clipped(g);
+            g.reduceClipRegion(juce::Rectangle<int>(labelWidth(), row * rowHeight, plotWidth(), rowHeight - 1));
+            const juce::Colour recordInk(0xffa34242);
+            g.setColour(design::trackFill(track.colour).interpolatedWith(recordInk, 0.10f));
+            g.fillRect(area);
+            g.setColour(paper.interpolatedWith(recordInk, 0.20f));
+            g.fillRect(area.withHeight(18));
+            g.setColour(ink.withAlpha(0.88f));
+            const auto waveArea = area.toNearestInt().reduced(2).withTrimmedTop(16);
+            engine.drawRecordingPreview(state.projectId, preview.id, g, waveArea,
+                preview.sourceOffset + start - preview.timelineStart,
+                preview.sourceOffset + end - preview.timelineStart, 0.9f);
+            g.setColour(recordInk);
+            g.drawRect(area, 1.0f);
+            if (area.getWidth() > 88) {
+                auto caption = area.toNearestInt().reduced(5, 1).withHeight(16);
+                g.fillEllipse(float(caption.getX()), float(caption.getCentreY() - 3), 6.0f, 6.0f);
+                caption.removeFromLeft(12);
+                g.setColour(ink); g.setFont(design::labelFont(11));
+                g.drawFittedText(preview.finalizing ? uiText("Finishing recording...", "正在完成录音...")
+                                                   : uiText("Recording", "正在录音"),
+                                caption, juce::Justification::centredLeft, 1);
+            }
+        }
+    }
     void paintTracks(juce::Graphics& g)
     {
         g.fillAll(paper);
@@ -1002,6 +1054,10 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                     owner.drawTrackWaveform(g, waveArea, clip.id,
                         previewOffset + juce::jmax(0.0, viewStart - start),
                         previewOffset + juce::jmin(previewDuration, viewStart + visibleDuration() - start), 0.9f);
+                } else if (const auto* preview = previewForClip(clip.id)) {
+                    engine.drawRecordingPreview(state.projectId, preview->id, g, waveArea,
+                        clip.playbackSourceOffset + juce::jmax(0.0, viewStart - start),
+                        clip.playbackSourceOffset + juce::jmin(clip.duration, viewStart + visibleDuration() - start), 0.9f);
                 } else {
                     g.setFont(mono(12.0f));
                     g.drawFittedText(owner.waveformStatus(clip.id), waveArea, juce::Justification::centred, 2);
@@ -1030,6 +1086,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
             };
             for (const auto& clip : track.clips) if (clip.id != state.selectedClipId) paintClip(clip);
             for (const auto& clip : track.clips) if (clip.id == state.selectedClipId) paintClip(clip);
+            paintRecording(g, track, row);
         }
         if (!rangeSelection.isEmpty()) {
             const auto x = timeX(juce::jlimit(viewStart, viewStart + visibleDuration(), rangeSelection.getStart()));
@@ -1113,6 +1170,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
     EngineSession& engine;
     juce::AudioFormatManager formats;
     juce::AudioThumbnailCache cache { 64 };
+    std::vector<EngineSession::RecordingPreviewSnapshot> recordingPreviews;
     juce::ThreadPool pool { 1 };
     juce::ThreadPool detailPool { 1 };
     std::vector<std::weak_ptr<Peaks>> detailLru;
@@ -1225,6 +1283,7 @@ void ArrangementView::update(const EngineSession::Snapshot& next)
     }
     if (!p.selecting && p.explicitTrackSelection.isEmpty() && (primaryClipChanged || projectChanged) && next.selectedClipId.isNotEmpty()) p.selection = { next.selectedClipId };
     p.updatePeaks(sourcesChanged || p.forceSourceCheck);
+    p.updateRecordingPreviews();
     p.forceSourceCheck = false;
     if (projectChanged) { p.zoom = 1.0; p.viewStart = 0.0; p.viewport.setViewPosition(0, 0); }
     if (!projectChanged && p.zoom > 1.0 && p.projectDuration() != previousHorizon)

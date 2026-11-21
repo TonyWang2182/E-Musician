@@ -3,6 +3,7 @@
 namespace {
 juce::File generationRoot()
 {
+    if(showcase::enabled())return showcase::profile().getChildFile("generation");
     const auto path=juce::SystemStats::getEnvironmentVariable("EMUSICIAN_GENERATION_ROOT","E:/MusicAgent&DAW/cloud-inference");
     return juce::File::isAbsolutePath(path)?juce::File(path):juce::File("E:/MusicAgent&DAW/cloud-inference");
 }
@@ -87,13 +88,15 @@ juce::Result EngineSession::Impl::beginGeneration(const juce::var& args,juce::va
     const auto* signature=edit->tempoSequence.getTimeSig(0);const auto bpm=edit->tempoSequence.getTempo(0)->getBpm();
     g->source=object({{"project_id",juce::String(guard.projectId())},{"revision",juce::int64(guard.revision())},{"timeline_start",at},{"bpm",bpm},{"meter_numerator",int(signature->numerator)},{"meter_denominator",int(signature->denominator)}});
     g->parameters=object({{"prompt",prompt},{"lyrics",lyrics},{"duration_seconds",seconds},{"seed",seed},{"bpm",bpm},{"meter_numerator",int(signature->numerator)},{"meter_denominator",int(signature->denominator)}});
-    const auto script=juce::File(EMUSICIAN_SOURCE_DIR).getChildFile("scripts/cloud/run_generation.py");
+    const auto script=juce::File(EMUSICIAN_SOURCE_DIR).getChildFile(showcase::enabled()?"scripts/showcase/replay_worker.py":"scripts/cloud/run_generation.py");
     const auto root=generationRoot();
     g->job=startJob("generation.generate",[this,g,script,python,root](const auto& j){
         if(!g->directory.createDirectory()){jobStatus(j,"failed","Cannot create the local generation directory.");return;}
         auto request=g->parameters.clone();auto* dto=request.getDynamicObject();dto->setProperty("schema_version",1);dto->setProperty("job_id",g->id);dto->setProperty("kind","generate");dto->setProperty("source",g->source);dto->setProperty("generation_root",root.getFullPathName());dto->setProperty("compute_root",computeRoot().getFullPathName());dto->setProperty("model_id",g->modelId);
         if(!g->directory.getChildFile("request.json").replaceWithText(juce::JSON::toString(request))){jobStatus(j,"failed","Cannot write generation request.");return;}
-        analysis_worker::Process child;if(auto r=child.start(juce::StringArray{python,script.getFullPathName(),"--request",g->directory.getChildFile("request.json").getFullPathName()},g->directory.getChildFile("process.log"));r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}
+        juce::StringArray command{python,script.getFullPathName(),"--request",g->directory.getChildFile("request.json").getFullPathName()};
+        if(showcase::enabled())command.addArray({"--root",showcase::root().getFullPathName()});
+        analysis_worker::Process child;if(auto r=child.start(command,g->directory.getChildFile("process.log"));r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}
         const auto began=juce::Time::getMillisecondCounterHiRes();bool aborted=false;
         while(child.isRunning()){
             if(j->cancel||juce::Time::getMillisecondCounterHiRes()-began>60.0*60*1000){
@@ -147,7 +150,7 @@ juce::Result EngineSession::Impl::acceptGeneration(const juce::var& args,juce::v
         const double at=double(g->source["timeline_start"]);storage::StoredClip clip{uid(),asset.id,at,0,info.duration};track.clips.push_back(clip);
         candidate->assets.push_back(asset);candidate->tracks.push_back(track);
         auto provenance=g->parameters.clone();
-        for(const auto* key:{"truncated","conditioning","processing","warnings","limitations","completion"})if(g->result.hasProperty(key))provenance.getDynamicObject()->setProperty(key,g->result[key]);
+        for(const auto* key:{"truncated","conditioning","processing","warnings","limitations","completion","retained_result"})if(g->result.hasProperty(key))provenance.getDynamicObject()->setProperty(key,g->result[key]);
         provenance.getDynamicObject()->setProperty("actual_duration_seconds",info.duration);
         candidate->generations.push_back({g->id,asset.id,clip.id,g->result["model"]["id"].toString(),g->result["model"].getProperty("revision",g->result["model"]["version"]).toString(),g->result["audio"]["sha256"].toString(),g->resultHash,juce::JSON::toString(provenance,true),at,info.duration});candidate->schemaVersion=storage::requiredSchema(*candidate);
         if(auto r=storage::validate(*candidate);r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}

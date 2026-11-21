@@ -1,3 +1,11 @@
+# 当前交付：录音实时波形与独立展示包（2026-11-22）
+
+实际工作树 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/showcase-recording-v1`，基线 `0c41caa`。按[计划](review/2026-11-22-showcase/PLAN.md)实施两个独立输出，保留原 0.13.6、工程关联与用户工程。录音增强 Release 已构建，首轮 CTest 10/11，新增绘图检查修复后 engine.integration_smoke 1/1 通过；细节和未验实机边界见[录音记录](review/2026-11-22-showcase/RECORDING.md)。
+
+展示版使用历史真实结果的确定性离线回放，三起始工程已通过原生装载；Agent原回归390项、回放20项、六场景真实原生联测25项通过。Showcase普通CTest9/11的两项模式冲突完整保留，不当作全绿。实际GUI已完成Preview、Apply、四轨、手动和弦、Warp、132音符MIDI；见[结果](review/2026-11-22-showcase/RESULTS.md)与[GUI记录](review/2026-11-22-showcase/GUI.md)。六段无字动效、片头片尾、中英稿、240秒配音字幕与真实原生音频已交付；英文旁白/无旁白两版240秒首剪完成解码、抽帧与播放时间核对，见[交付清单](review/2026-11-22-showcase/DELIVERY.md)。真人sax录音镜头和整片听感仍待用户替换/验收。无SSH、付费API、新推理、computer-use或虚拟驱动。不要把固定等待当推理速度，或把测试PCM/静态截图当真实麦克风镜头。交付目录 `E:/MusicAgent&DAW/demo-video/showcase-v1`。
+
+入口：`E:/MusicAgent&DAW/Start E-musician Workspace.cmd`（三个拍摄工程）与 `Start E-musician Recording.cmd`（0.13.6录音增强）。下一步由用户按人工清单确认实体麦克风/长录音/听感，录制真人sax与连续操作素材替换首剪相应镜头。旧版EXE、原test drive工程与关联保持。既有DEVLOG修改及36个旧未跟踪构建摘要保留，基线清单在忽略目录 `build-logs/showcase-v1-baseline.json`。构建两个变体必须先用dev_showcase明确configure，不并行配置共用build目录。
+
 # 当前候选：0.13.6 麦克风输入与驱动设置（2026-11-16，自动已验、人工待验）
 
 基线6a82225，分支fix/audio-input-v0136，工作树E:/MusicAgent&DAW/worktrees/audio-analysis。已修复物理输入为零但逻辑In1/In2可见的缺口；设置页可选输入及mono/stereo，Apply实际回读、失败回滚，增加厂商控制面板。换卡前断开旧音频目标，按驱动/设备/物理通道身份恢复；旧工程音频输入需重选一次。三项固定引擎补丁修复稀疏In2回调映射和缺失输入清零，MIDI独立规则保留。见[结果](review/2026-11-16-audio-input/RESULTS.md)。

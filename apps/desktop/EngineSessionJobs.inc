@@ -276,7 +276,7 @@ template<class J> juce::Result writeJobMidi(const J& j,const juce::File& file,co
     return replaceExport(j,temp,original);
 }
 juce::File renderJobsRoot()
-{return juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("E-musician/render-jobs");}
+{return showcase::enabled()?showcase::profile().getChildFile("render-jobs"):juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("E-musician/render-jobs");}
 // Only this task's UUID directory is removed; user project directories are never cleaned here.
 struct OwnedRenderDirectory {
     juce::File root=renderJobsRoot(),directory;

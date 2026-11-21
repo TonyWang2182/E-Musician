@@ -438,3 +438,11 @@ Undo/Redo执行后，仅对已经离开插件链、仍由watcher临时持有的�
 构建、测试、程序启动、设备播放、人工听感和性能分别记录。B01探针记录真实回调统计、设备CPU、可见XRun、控制线程编辑耗时及内存趋势；缺少的P99.9或物理输入到绘制延迟明确标为未测，不用均值或定时器间隔替代。
 
 所有实际构建/运行按开发日志入口记录源码首尾指纹，用户工程只验证独立副本。最新证据在 [CONTEXT](CONTEXT.md)，追加历史在 [DEVLOG](DEVLOG.md)。架构沿革见 [ADR0001](decisions/0001-native-engine-boundary.md)、[ADR0002](decisions/0002-audio-project-bundle.md)、[ADR0003](decisions/0003-arrangement-overview.md)、[ADR0004](decisions/0004-audio-clips-and-schema2.md) 及本轮 [ADR0005](decisions/0005-daw-baseline-and-control.md)。
+
+## 2026-11-22：录音瞬态显示与独立拍摄包
+
+- 录音音频仍由 Tracktion 写盘；RecordingController 只持有引擎缩略图引用与 take 身份，EngineSession 提供瞬态只读快照/绘制接口。ArrangementView 在既有刷新中画可见录音轨，Stop 后交接正式 clip 峰缓存。显示层不新增音乐状态或 Undo，也不向音频回调加入 IO/界面工作。
+- `EMUSICIAN_SHOWCASE` 是独立编译边界，`ReplayMode.h` 定位 manifest 和 runtime profile。常规构建不能通过工程文件启用它；showcase 的原生设置、录音/音频/Warp/插件缓存、Agent 配置和 WebView 目录独立。
+- 展示版数据流：固定英文场景 → ReplayProvider → 原有 Agent 方案/权限/修订检查 → 本地保留结果 worker → 原生结果验证 → Preview / Apply / Undo。worker 校验历史 result/媒体 SHA 和当前音频身份，内部保留 `inference_performed=false`。没有 SSH、外部语言 API 或模型推理 fallback。
+- 包内只有三个可打开起始工程，其他测试 stage 保存在独立 captures/projects。GUI 和 Agent 仍复用原生候选及命令；Chord 分析由 Analysis 面板手动接受，Warp 仍执行真实拉伸与和弦时间映射。
+- 详见 [取舍](decisions/2026-11-22-isolated-showcase-recording-preview.md)、[录音](review/2026-11-22-showcase/RECORDING.md) 和 [本地场景](review/2026-11-22-showcase/REPLAY.md)。状态与实际证据以本轮 review 为准。

@@ -1,4 +1,5 @@
 #include "PluginHost.h"
+#include "ReplayMode.h"
 #include "NativeInstrument.h"
 #include "NativeEffects.h"
 #include <juce_cryptography/juce_cryptography.h>
@@ -57,6 +58,7 @@ bool sameModuleReference(const juce::String& format, const juce::String& logical
 }
 juce::File cacheDirectory()
 {
+    if (showcase::enabled()) return showcase::profile().getChildFile("plugins-v1");
     return juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory)
         .getChildFile("E-musician").getChildFile("plugins-v1");
 }

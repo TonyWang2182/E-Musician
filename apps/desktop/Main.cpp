@@ -5,6 +5,8 @@
 #include "PluginHost.h"
 #include "ControlServer.h"
 #include "ProjectLaunch.h"
+#include "ReplayMode.h"
+#include "UiLanguage.h"
 #include <juce_gui_extra/juce_gui_extra.h>
 #include <stdexcept>
 #include <iostream>
@@ -12,7 +14,7 @@
 namespace emusician {
 class Application final : public juce::JUCEApplication {
 public:
-    const juce::String getApplicationName() override { return "E-musician"; }
+    const juce::String getApplicationName() override { return showcase::enabled()?"E-musician Showcase":"E-musician"; }
     const juce::String getApplicationVersion() override { return EMUSICIAN_APPLICATION_VERSION; }
     bool moreThanOneInstanceAllowed() override
     {
@@ -25,6 +27,7 @@ public:
     void initialise(const juce::String& commandLine) override
     {
         juce::LookAndFeel::setDefaultLookAndFeel(&workspaceLook);
+        if(showcase::enabled())setUiLanguage("en",false);
         auto args = juce::StringArray::fromTokens(commandLine, true);
         for(auto& argument:args)argument=argument.unquoted();
         if(args.size()==1&&args.contains("--control-output-probe-child")){
@@ -119,7 +122,13 @@ public:
                 waitForPerformance(directory,seconds+180);return;
             }
             window = std::make_unique<Window>(*session, !smoke && !review, !smoke && !review);
-            if (!smoke && !review) dispatchProjectLaunch(args);
+            if (!smoke && !review) {
+                if(showcase::enabled()&&args.isEmpty()){
+                    const auto entries=showcase::projects();
+                    if(entries.isArray()&&entries.size()==3)args.add(showcase::projectFile(entries[0]).getFullPathName());
+                }
+                dispatchProjectLaunch(args);
+            }
             if (smoke) {
                 if (smokeIndex + 1 >= args.size()) { setApplicationReturnValue(2); quit(); return; }
                 if (smokeIndex + 2 >= args.size()) { setApplicationReturnValue(2); quit(); return; }
@@ -348,7 +357,7 @@ private:
     class Window final : public juce::DocumentWindow {
     public:
         Window(EngineSession& session, bool visible, bool showStartup=false)
-            : DocumentWindow("E-musician " EMUSICIAN_APPLICATION_VERSION " - Audio workspace", juce::Colours::white, allButtons)
+            : DocumentWindow(showcase::enabled()?"E-musician - Audio Workspace":"E-musician " EMUSICIAN_APPLICATION_VERSION " - Audio workspace", juce::Colours::white, allButtons)
         {
             setUsingNativeTitleBar(true);
             setIcon(brand::logo());

@@ -3,6 +3,24 @@ EngineSession::EngineSession(bool enable):impl(std::make_unique<Impl>(enable&&!o
 EngineSession::~EngineSession()=default;
 bool EngineSession::isSupportedAudioFile(const juce::File& f){return f.hasFileExtension("wav;mp3");}
 
+std::vector<EngineSession::RecordingPreviewSnapshot> EngineSession::recordingPreviews() const {
+    requireControlThread();
+    if (impl->controlOperationActive) return {};
+    return impl->recording.previews();
+}
+bool EngineSession::drawRecordingPreview(const juce::String& projectId, const juce::String& id,
+                                         juce::Graphics& graphics, juce::Rectangle<int> area,
+                                         double start, double end, float zoom) const {
+    requireControlThread();
+    if (projectId != juce::String(impl->guard.projectId()) || impl->controlOperationActive) return false;
+    return impl->recording.drawPreview(id, graphics, area, start, end, zoom);
+}
+void EngineSession::releaseRecordingPreview(const juce::String& projectId, const juce::String& id) {
+    requireControlThread();
+    if (projectId == juce::String(impl->guard.projectId()) && !impl->controlOperationActive)
+        impl->recording.releasePreview(id);
+}
+
 bool EngineSession::nativeEffectSpectrum(const juce::String& projectId,const juce::String& trackId,
                                         const juce::String& deviceId,std::array<float,2048>& samples,std::uint64_t& sequence)const
 {
@@ -343,6 +361,9 @@ juce::var EngineSession::capabilities()const
     // Selection revision is independent from musical project revision.
     juce::Array<juce::var> commands;
     commands.add("get_selection_context");
+#if defined(EMUSICIAN_SHOWCASE) && EMUSICIAN_SHOWCASE
+    commands.add("showcase_select_clip");
+#endif
     for(const auto* name:{"get_generation_jobs","get_generation_capabilities","start_generation","get_generation_job","cancel_generation_job","get_generation_result","preview_generation_result","stop_generation_preview","accept_generation_result"})commands.add(name);
     for(const auto* name:{"get_analysis_capabilities","start_analysis","get_analysis_job","cancel_analysis_job","get_analysis_result","get_analysis_annotations","accept_analysis_result","apply_beat_analysis","get_chord_regions","edit_chord_region","preview_analysis_stem","stop_analysis_preview","get_analysis_preview_status","get_audio_warp","set_audio_warp"})commands.add(name);
     for(const auto* name:{"get_capabilities","get_snapshot","get_project_state","get_jobs","get_job","get_events","get_clip_notes","create_track","rename_track","reorder_track","remove_track","set_track_gain","set_track_pan","set_track_muted","set_track_solo","set_master_gain","set_loop","set_loop_range","set_tempo","set_time_signature","move_clip","move_clips","trim_clip","split_clip","duplicate_clips","delete_clips","set_clip_fades","create_midi_clip","write_notes","batch","undo","redo","import_audio","import_midi","save_project","open_project","export_wav","export_midi","scan_plugins","cancel_job","add_plugin","remove_plugin","move_plugin","set_plugin_enabled","open_plugin","new_project","play","pause","stop","seek"})commands.add(name);
@@ -417,6 +438,28 @@ juce::var EngineSession::executeRequest(const juce::var& envelope)
     }
     if(isGenerationRead(command)){juce::var data;const auto result=impl->generationCommand(command,args,data);return reply(result.wasOk()?"completed":"failed",data,result.getErrorMessage());}
     if(command=="get_selection_context")return reply("completed",selectionContext());
+#if defined(EMUSICIAN_SHOWCASE) && EMUSICIAN_SHOWCASE
+    // A filming/test helper for real UI selection, never a musical edit. This
+    // command is absent from regular builds and from the Agent's tool schema.
+    if(command=="showcase_select_clip") {
+        const auto* fields=args.getDynamicObject();
+        const auto id=args.getProperty("clip_id",juce::var());
+        if(fields==nullptr||fields->getProperties().size()!=1||!id.isString()
+            ||impl->findClip(id.toString())==nullptr)
+            return reply("invalid",{},"Choose an existing clip in the current project.");
+        if(impl->recordingBusy())return reply("busy",{},"Wait for recording to finish.");
+        if(envelope.hasProperty("project_id")&&textArg(envelope,"project_id")!=juce::String(impl->guard.projectId()))
+            return reply("conflict",{},"The selected project changed.");
+        selectClip(id.toString());
+        // GUI polling normally publishes this disposable selection projection.
+        // Headless clients have no ArrangementView, so publish the same real
+        // object identity through the canonical validator after selectClip.
+        setSelectionContext(object({{"project_id",juce::String(impl->guard.projectId())},
+            {"active_clip_id",id},{"clip_ids",juce::var(juce::Array<juce::var>{id})},
+            {"focus","arrangement"}}));
+        return reply("completed",selectionContext());
+    }
+#endif
     if(command=="get_project_state"||command=="get_snapshot")return reply("completed",snapshotJson());
     if(command=="get_save_diagnostics"){
         // Explicit troubleshooting only: never hash full musical content in

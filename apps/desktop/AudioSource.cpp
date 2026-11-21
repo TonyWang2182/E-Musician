@@ -1,4 +1,5 @@
 #include "AudioSource.h"
+#include "ReplayMode.h"
 #include <juce_cryptography/juce_cryptography.h>
 #include <array>
 #include <cmath>
@@ -233,7 +234,7 @@ Result prepareSource(const File& file, PreparedSource& result, const IOOptions& 
 
     // Only MP3 decoding needs a PCM cache. An explicit root must never be
     // resolved against the working directory or silently fall back to C:.
-    const auto configuredRoot=juce::SystemStats::getEnvironmentVariable("EMUSICIAN_AUDIO_CACHE_ROOT",{});
+    const auto configuredRoot=showcase::enabled()?showcase::profile().getChildFile("audio-cache").getFullPathName():juce::SystemStats::getEnvironmentVariable("EMUSICIAN_AUDIO_CACHE_ROOT",{});
     if(configuredRoot.isNotEmpty()&&!File::isAbsolutePath(configuredRoot))return Result::fail("EMUSICIAN_AUDIO_CACHE_ROOT must be an absolute directory path.");
     const auto cacheRoot=configuredRoot.isEmpty()?File::getSpecialLocation(File::userApplicationDataDirectory).getChildFile("E-musician/cache"):File(configuredRoot);
     const auto cacheDirectory=cacheRoot.getChildFile("audio-v1");

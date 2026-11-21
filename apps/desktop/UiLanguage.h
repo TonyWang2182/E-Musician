@@ -1,19 +1,21 @@
 #pragma once
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <atomic>
+#include "ReplayMode.h"
 
 namespace emusician {
 // UI-thread preference only. Never call from an audio callback. Project content,
 // device identifiers, plugin names and command/API keys are not translated.
 namespace ui_language_detail {
 inline juce::File preferenceFile() {
+    if (showcase::enabled()) return showcase::profile().getChildFile("ui-language.txt");
     return juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory)
         .getChildFile("E-musician").getChildFile("ui-language.txt");
 }
 struct State {
     std::atomic<bool> chinese { false };
     std::atomic<unsigned> revision { 1 };
-    State() { chinese.store(preferenceFile().loadFileAsString().trim() == "zh-CN"); }
+    State() { chinese.store(!showcase::enabled() && preferenceFile().loadFileAsString().trim() == "zh-CN"); }
 };
 inline State& state() { static State value; return value; }
 }
@@ -31,6 +33,7 @@ inline juce::Result saveFollowPlayheadPreference(bool enabled) {
     return juce::Result::ok();
 }
 inline juce::Result setUiLanguage(const juce::String& code, bool persist = true) {
+    if (showcase::enabled() && code != "en") return juce::Result::fail("This workspace uses English.");
     if (code != "en" && code != "zh-CN") return juce::Result::fail("Unsupported interface language.");
     if (persist) {
         const auto file = ui_language_detail::preferenceFile();

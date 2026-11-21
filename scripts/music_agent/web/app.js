@@ -468,6 +468,18 @@
     const jobs = [...(state.generation_jobs || []), ...(state.analysis_jobs || [])].slice(-8);
     $("technical-jobs").replaceChildren(...jobs.map((job) => element("li", [job.model_id || job.model?.id, job.phase || job.status, job.job_id || job.id].filter(Boolean).join(" · "))));
     renderProviders(); renderGenerationChoices();
+    const presentation = state.presentation === true || state.provider?.presentation === true;
+    document.body.classList.toggle("presentation-workspace", presentation);
+    if (presentation) {
+      text("apply", "Apply changes");
+      if (generated) {
+        const names = {yue2: "YuE2", "ace-step-1.5-xl-turbo": "ACE-Step"};
+        const id = generated.model_id || generated.model?.id || "";
+        text("generation-preview-info", `${names[id] || id} · ${Number(generated.audio?.duration_seconds || 0).toFixed(2)} s`);
+      }
+      $("settings").hidden = true;
+      $("settings-toggle").setAttribute("aria-expanded", "false");
+    }
     notice(localNotice || plainError() || (visible && !readablePlan(plan) ? t("方案说明不完整，请放弃并重新生成。") : "")
       || (!state.provider?.configured ? t("先展开顶部模型设置，配置所选服务的密钥。") : ""),
       state.error ? `${state.error}${state.error_code ? ` [${state.error_code}]` : ""}` : ""); updateControls();

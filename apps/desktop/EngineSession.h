@@ -93,6 +93,15 @@ public:
         juce::String id, label, analysisId, sourceName;
         double startSeconds = 0.0, endSeconds = 0.0;
     };
+    // Message-thread-only recording presentation. No thumbnail/engine ownership
+    // escapes the session, and these previews are never stored in the project.
+    struct RecordingPreviewSnapshot {
+        juce::String id, trackId, clipId;
+        double timelineStart = 0.0, duration = 0.0, sourceOffset = 0.0;
+        double availableDuration = 0.0;
+        int channels = 0;
+        bool finalizing = false;
+    };
     struct Snapshot {
         bool metronomeEnabled = false, metronomeRecordOnly = false, countInEnabled = false, countingIn = false;
         int countInBars = 1;
@@ -134,6 +143,11 @@ public:
     explicit EngineSession(bool initialiseAudioDevice = true);
     ~EngineSession();
     Snapshot snapshot() const;
+    std::vector<RecordingPreviewSnapshot> recordingPreviews() const;
+    bool drawRecordingPreview(const juce::String& projectId, const juce::String& previewId,
+                              juce::Graphics&, juce::Rectangle<int>, double sourceStart,
+                              double sourceEnd, float verticalZoom) const;
+    void releaseRecordingPreview(const juce::String& projectId, const juce::String& previewId);
     // Transient read-only UI data: matching published sample only, never a mutation.
     std::shared_ptr<const native::SampleData> nativeSampleForDisplay(
         const juce::String& projectId, std::uint64_t revision, const juce::String& trackId,

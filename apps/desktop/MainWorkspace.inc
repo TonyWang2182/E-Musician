@@ -115,8 +115,33 @@ void MainComponent::paint(juce::Graphics& g)
 
 void MainComponent::showFileMenu()
 {
-    juce::PopupMenu menu;menu.addItem(1,uiText("New project","新建工程")+"\tCtrl+N",impl->newButton.isEnabled());menu.addItem(2,uiText("Open project…","打开工程…")+"\tCtrl+O",impl->openButton.isEnabled());menu.addSeparator();menu.addItem(3,uiText("Save","保存")+"\tCtrl+S",impl->saveButton.isEnabled());menu.addItem(4,uiText("Save as…","另存为…")+"\tCtrl+Shift+S",impl->saveAsButton.isEnabled());menu.addSeparator();menu.addItem(5,uiText("Export…","导出…"),impl->exportMenu.isEnabled());
-    menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&impl->fileMenu),[safe=juce::Component::SafePointer<MainComponent>(this)](int id){if(!safe)return;if(id==1)safe->newProject();if(id==2)safe->openProject();if(id==3)safe->saveProject(false);if(id==4)safe->saveProject(true);if(id==5)safe->showExportMenu();});
+    juce::PopupMenu menu;
+    menu.addItem(1,uiText("New project","新建工程")+"\tCtrl+N",impl->newButton.isEnabled());
+    menu.addItem(2,uiText("Open project…","打开工程…")+"\tCtrl+O",impl->openButton.isEnabled());
+    juce::Array<juce::File> projectFiles;
+    if (showcase::enabled()) {
+        juce::PopupMenu projects;
+        const auto catalog = showcase::projects();
+        if (const auto* list = catalog.getArray()) for (const auto& project : *list) {
+            if (projectFiles.size() >= 3) break;
+            const auto title = project["title"].toString();
+            const auto file = showcase::projectFile(project);
+            if (title.isEmpty() || file == juce::File()) continue;
+            projects.addItem(100 + projectFiles.size(), title, file.existsAsFile());
+            projectFiles.add(file);
+        }
+        if (!projectFiles.isEmpty()) menu.addSubMenu(uiText("Projects","工程"), projects, impl->openButton.isEnabled());
+    }
+    menu.addSeparator();
+    menu.addItem(3,uiText("Save","保存")+"\tCtrl+S",impl->saveButton.isEnabled());
+    menu.addItem(4,uiText("Save as…","另存为…")+"\tCtrl+Shift+S",impl->saveAsButton.isEnabled());
+    menu.addSeparator();menu.addItem(5,uiText("Export…","导出…"),impl->exportMenu.isEnabled());
+    menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&impl->fileMenu),
+        [safe=juce::Component::SafePointer<MainComponent>(this), projectFiles](int id) {
+            if (!safe) return;
+            if (id >= 100 && id < 100 + projectFiles.size()) { safe->openProjectFile(projectFiles[id - 100]); return; }
+            if(id==1)safe->newProject();if(id==2)safe->openProject();if(id==3)safe->saveProject(false);if(id==4)safe->saveProject(true);if(id==5)safe->showExportMenu();
+        });
 }
 
 void MainComponent::chooseTrackColour(const juce::String& trackId)

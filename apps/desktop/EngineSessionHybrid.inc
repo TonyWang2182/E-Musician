@@ -1,11 +1,13 @@
 // Included after the bounded JSON helpers. No network or model calls occur here.
 juce::File computeRoot()
 {
+    if(showcase::enabled())return showcase::profile().getChildFile("compute");
     const auto path=juce::SystemStats::getEnvironmentVariable("EMUSICIAN_COMPUTE_ROOT","E:/MusicAgent&DAW/cloud-inference");
     return juce::File::isAbsolutePath(path)?juce::File(path):juce::File("E:/MusicAgent&DAW/cloud-inference");
 }
 juce::var computeRegistry()
 {
+    if(showcase::enabled())return showcase::registry();
     juce::var value;if(analysisJson(computeRoot().getChildFile("compute-registry.json"),value,256*1024).failed())return {};
     return value;
 }

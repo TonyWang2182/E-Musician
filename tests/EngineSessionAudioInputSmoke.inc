@@ -3,7 +3,7 @@
 {
     struct FakeAudioState {
         bool dropRight = false, panelAvailable = true;
-        int panelCalls = 0;
+        int panelCalls = 0, inputLatency = 0, outputLatency = 0;
         std::function<void()> panelAction;
         std::function<void()> deviceOpening;
     } fakeState;
@@ -46,8 +46,8 @@
         int getCurrentBitDepth() override { return 24; }
         juce::BigInteger getActiveInputChannels() const override { return inputs; }
         juce::BigInteger getActiveOutputChannels() const override { return outputs; }
-        int getInputLatencyInSamples() override { return 0; }
-        int getOutputLatencyInSamples() override { return 0; }
+        int getInputLatencyInSamples() override { return state.inputLatency; }
+        int getOutputLatencyInSamples() override { return state.outputLatency; }
         bool hasControlPanel() const override { return state.panelAvailable; }
         bool showControlPanel() override { ++state.panelCalls; if (state.panelAction) state.panelAction(); return false; }
         // Null and oversized blocks exercise the production dependency's
@@ -164,15 +164,83 @@
         juce::StringArray previousClips;
         for (auto* clip : te::getAudioTracks(*fixture.impl->edit).getLast()->getClips()) previousClips.add(clip->state["emId"].toString());
         command(fixture, "start_recording");
+        const auto recordingRevision = fixture.snapshot().revision;
         check(configure(object({{"input_channels", array({0, 1})}})).failed(), "physical input changes are blocked during a take");
         check(fixture.execute("show_audio_driver_panel", object({}), fixture.snapshot().revision).failed(), "native panel is blocked during a take");
-        for (int block = 0; block < 64; ++block) opened().pump(nullInput, samples, fullSlots);
+        for (int block = 0; block < 32; ++block) opened().pump(nullInput, samples, fullSlots);
+        std::vector<RecordingPreviewSnapshot> live;
+        for (int wait = 0; wait < 1000; ++wait) {
+            live = fixture.recordingPreviews();
+            if (live.size() == 1 && live.front().availableDuration > 0.05) break;
+            juce::Thread::sleep(1); // Allow the real recorder writer to publish peaks.
+        }
+        check(live.size() == 1 && live.front().trackId == trackId && live.front().clipId.isEmpty(),
+              "in-progress audio exposes one transient preview on the armed target, before creating a clip");
+        const auto firstPreview = live.front();
+        check(firstPreview.channels == int(expected.size()) && firstPreview.duration > 0.05
+              && firstPreview.availableDuration > 0.05 && firstPreview.availableDuration <= firstPreview.duration,
+              "live preview has real mono/stereo channels and clips peak coverage to the audio-clock range");
+        check(fixture.snapshot().tracks.back().monitorMode == "off" && fixture.snapshot().revision == recordingRevision,
+              "live waveforms work with monitor off and do not create musical revisions");
+        const auto projectId = fixture.snapshot().projectId;
+        juce::Image image(juce::Image::RGB, 256, 96, true);
+        { juce::Graphics graphics(image); graphics.fillAll(juce::Colours::white); graphics.setColour(juce::Colours::black);
+          check(fixture.drawRecordingPreview(projectId, firstPreview.id, graphics, image.getBounds(), 0,
+                                             firstPreview.duration, 0.9f), "live waveform draws from writer-published memory");
+          check(!fixture.drawRecordingPreview("wrong-project", firstPreview.id, graphics, image.getBounds(), 0,
+                                              firstPreview.duration, 0.9f), "a different project cannot draw a retained recording preview");
+          check(!fixture.drawRecordingPreview(projectId, "stale-take", graphics, image.getBounds(), 0,
+                                              firstPreview.duration, 0.9f), "a stale take ID is not substituted with the latest input"); }
+        int darkPixels = 0;
+        for (int y = 0; y < image.getHeight(); ++y) for (int x = 0; x < image.getWidth(); ++x)
+            if (image.getPixelAt(x, y).getBrightness() < 0.98f) ++darkPixels;
+        { juce::FileOutputStream stream(directory.getChildFile("fixture-audio-input-live-preview-" + juce::String(captureReports.size()) + ".png"));
+          juce::PNGImageFormat().writeImageToStream(image, stream); }
+        check(darkPixels > 8, "recording presentation paints actual peak/zero-line pixels before Stop: case "
+              + juce::String(captureReports.size()) + ", pixels " + juce::String(darkPixels));
+        for (int ch = 0; ch < int(expected.size()); ++ch) {
+            const float channelHeight = float(image.getHeight()) / float(expected.size());
+            const int expectedY = juce::roundToInt((float(ch) + 0.5f) * channelHeight - expected[size_t(ch)] * channelHeight * 0.45f);
+            bool expectedPeakPainted = false;
+            for (int y = std::max(0, expectedY - 3); y <= std::min(image.getHeight() - 1, expectedY + 3); ++y)
+                expectedPeakPainted = expectedPeakPainted || image.getPixelAt(image.getWidth() / 2, y).getBrightness() < 0.98f;
+            check(expectedPeakPainted, "live waveform pixels preserve each channel's signed amplitude, including silence");
+        }
+        // Inspect the same native peak store as the UI, not a separately
+        // synthesised waveform. Zero/negative/positive channels are distinct.
+        te::RecordingThumbnailManager::Thumbnail::Ptr nativeThumb;
+        auto* targetTrack = te::getAudioTracks(*fixture.impl->edit).getLast();
+        for (auto* instance : fixture.impl->edit->getAllInputDevices()) {
+            const auto file = instance->getRecordingFile(targetTrack->itemID);
+            if (file != juce::File()) nativeThumb = fixture.impl->engine.getRecordingThumbnailManager().getThumbnailFor(file);
+        }
+        check(nativeThumb != nullptr, "real writer thumbnail exists during capture");
+        for (int ch = 0; ch < int(expected.size()); ++ch) {
+            float low = 0, high = 0;
+            nativeThumb->thumb->getApproximateMinMax(firstPreview.availableDuration * 0.4,
+                                                    firstPreview.availableDuration * 0.8, ch, low, high);
+            check(std::abs(low - expected[size_t(ch)]) < 0.025f && std::abs(high - expected[size_t(ch)]) < 0.025f,
+                  "writer peak samples match the selected physical channel, including silence");
+        }
+        nativeThumb = nullptr;
+        for (int block = 32; block < 64; ++block) opened().pump(nullInput, samples, fullSlots);
+        const auto laterPreview = fixture.recordingPreviews();
+        check(laterPreview.size() == 1 && laterPreview.front().id == firstPreview.id
+              && laterPreview.front().duration > firstPreview.duration,
+              "the same take preview extends as the audio clock advances");
         command(fixture, "stop_recording");
         fixture.impl->finishRecording();
-            auto* track = te::getAudioTracks(*fixture.impl->edit).getLast();
+        auto* track = te::getAudioTracks(*fixture.impl->edit).getLast();
         te::WaveAudioClip* clip = nullptr;
         for (auto* candidate : track->getClips()) if (!previousClips.contains(candidate->state["emId"].toString())) clip = dynamic_cast<te::WaveAudioClip*>(candidate);
         check(clip != nullptr, "fake callback creates a real recorded audio clip");
+        const auto finishedPreview = fixture.recordingPreviews();
+        check(finishedPreview.size() == 1 && finishedPreview.front().id == firstPreview.id
+              && finishedPreview.front().clipId == clip->state["emId"].toString()
+              && !finishedPreview.front().finalizing,
+              "stopping hands the live waveform to the actual recorded clip until normal peaks are ready");
+        check(std::abs(finishedPreview.front().duration - clip->getPosition().time.getLength().inSeconds()) < 1.0e-9,
+              "completed preview uses exact adopted clip duration rather than quantised thumbnail length");
         juce::WavAudioFormat format;
         std::unique_ptr<juce::AudioFormatReader> reader(format.createReaderFor(clip->getOriginalFile().createInputStream().release(), true));
         check(reader && reader->numChannels == expected.size() && reader->lengthInSamples > 1024, "captured WAV has the requested mono/stereo layout and actual sample data");
@@ -190,6 +258,10 @@
         check(directory.getChildFile("audio-input-capture-report.json").replaceWithText(juce::JSON::toString(captureReports, true)), "write physical channel capture diagnostics before PCM assertions");
         for (int ch = 0; ch < pcm.getNumChannels(); ++ch)
             check(std::abs(double(means[ch]) - expected[size_t(ch)]) < 0.001, "recorded channel contains its physical source, including sparse and missing input cases");
+        fixture.releaseRecordingPreview("wrong-project", firstPreview.id);
+        check(fixture.recordingPreviews().size() == 1, "another project cannot release the active project's completed preview");
+        fixture.releaseRecordingPreview(projectId, firstPreview.id);
+        check(fixture.recordingPreviews().empty(), "regular peak-cache handoff releases the completed preview on the message thread");
     };
     capture(input({1}), false, 256, {-0.625f});
     capture(input({1}), false, 256, {-0.625f}, true);
@@ -201,6 +273,37 @@
     okay(configure(object({{"input_stereo_pairs", array({0})}})), "make a real stereo input pair");
     check(input({0}).isVoid() && bool(input({0, 1})["stereo"]), "pairing exposes a stereo input instead of separate mono inputs");
     capture(input({0, 1}), false, 256, {0.25f, -0.625f});
+    {
+        const auto clipCount = fixture.snapshot().tracks.back().clips.size();
+        command(fixture, "set_recording_preferences", object({{"count_in_enabled", true}, {"count_in_bars", 1}}));
+        fixture.seek(5.0); opened().pump(); opened().pump();
+        command(fixture, "start_recording");
+        for (int i = 0; i < 16; ++i) opened().pump();
+        check(fixture.snapshot().countingIn && fixture.recordingPreviews().empty(),
+              "count-in audio is not presented as already recorded waveform data");
+        command(fixture, "stop_recording"); fixture.impl->finishRecording();
+        check(fixture.recordingPreviews().empty() && fixture.snapshot().tracks.back().clips.size() == clipCount,
+              "cancelling during count-in leaves neither a live preview nor a recorded clip");
+        command(fixture, "set_recording_preferences", object({{"count_in_enabled", false}}));
+        fakeState.inputLatency = 256; fakeState.outputLatency = 512;
+        okay(configure(object({{"buffer_size", 128}})), "restart fake device with declared input/output latency");
+        fixture.seek(5.0); opened().pump(); opened().pump();
+        command(fixture, "start_recording");
+        for (int i = 0; i < 48; ++i) opened().pump();
+        const auto live = fixture.recordingPreviews();
+        check(live.size() == 1 && std::abs(live.front().timelineStart - 5.0) < 1.0e-6,
+              "nonzero punch-in maps source sample zero once, without adding device latency to UI coordinates");
+        command(fixture, "stop_recording"); fixture.impl->finishRecording();
+        check(fixture.recordingPreviews().size() == 1, "completed nonzero-origin take retains its handoff preview");
+        command(fixture, "undo");
+        check(fixture.recordingPreviews().empty() && fixture.snapshot().tracks.back().clips.size() == clipCount,
+              "undo removes the whole take and invalidates its retained waveform preview");
+        command(fixture, "redo");
+        check(fixture.recordingPreviews().empty() && fixture.snapshot().tracks.back().clips.size() == clipCount + 1,
+              "redo restores the recorded clip through normal peaks without resurrecting stale live state");
+        fakeState.inputLatency = fakeState.outputLatency = 0;
+        okay(configure(object({{"buffer_size", 256}})), "restore zero-latency fixture for remaining device tests");
+    }
     okay(configure(object({{"input_channels", array({1})}})), "disable one side of a stereo pair");
     check(input({0, 1}).isVoid() && input({0})["id"].toString() == monoId, "partial activation returns to stable mono input identities");
     select(input({1})); okay(arm(), "arm original interface before switching");

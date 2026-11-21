@@ -1,4 +1,5 @@
 #include "AudioWarp.h"
+#include "ReplayMode.h"
 #include <signalsmith-stretch/signalsmith-stretch.h>
 #include <juce_cryptography/juce_cryptography.h>
 #include <cmath>
@@ -49,7 +50,7 @@ juce::Result renderWarp(const PreparedSource& original,double speed,WarpRender& 
         return Result::fail("Warp output is empty or exceeds the 4 GiB WAV limit.");
     const auto keyText=sourceHash+":"+juce::String(speed,17)+":"+warpRendererVersion;
     const auto key=juce::SHA256(keyText.toRawUTF8(),keyText.getNumBytesAsUTF8()).toHexString();
-    const auto root=juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("E-musician/cache/warp-v1");
+    const auto root=showcase::enabled()?showcase::profile().getChildFile("warp-v1"):juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("E-musician/cache/warp-v1");
     if(root.isSymbolicLink())return Result::fail("Warp cache must not be linked.");
     if(auto r=root.createDirectory();r.failed())return r;
     const auto file=root.getChildFile(key+".wav"), receipt=root.getChildFile(key+".json");

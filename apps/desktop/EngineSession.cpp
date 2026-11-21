@@ -1,4 +1,5 @@
 #include "EngineSession.h"
+#include "ReplayMode.h"
 #include "ProjectStorage.h"
 #include "AudioSource.h"
 #include "AudioWarp.h"
@@ -74,7 +75,22 @@ struct TransientPropertyStorage final : te::PropertyStorage {
     const juce::File directory;
     juce::PropertiesFile properties;
 };
+struct ShowcasePropertyStorage final : te::PropertyStorage {
+    ShowcasePropertyStorage() : te::PropertyStorage("E-musician-showcase-v1"),
+        directory(showcase::profile()), properties(directory.getChildFile("engine.settings"), options()) {}
+    static juce::PropertiesFile::Options options() {
+        juce::PropertiesFile::Options value;
+        value.millisecondsBeforeSaving = 1500;
+        return value;
+    }
+    juce::PropertiesFile& getPropertiesFile() override { return properties; }
+    juce::File getAppPrefsFolder() override { directory.createDirectory(); return directory; }
+    juce::File getAppCacheFolder() override { const auto cache = directory.getChildFile("cache"); cache.createDirectory(); return cache; }
+    const juce::File directory;
+    juce::PropertiesFile properties;
+};
 std::unique_ptr<te::PropertyStorage> sessionProperties(bool interactive) {
+    if (interactive && showcase::enabled()) return std::make_unique<ShowcasePropertyStorage>();
     if (interactive) return std::make_unique<te::PropertyStorage>("E-musician");
     return std::make_unique<TransientPropertyStorage>();
 }
@@ -350,7 +366,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         for(auto& j:jobs)j->commit={};jobs.clear();pluginHost.cancelScan();plugins::PluginHost::closeAllEditors(*edit);
         edit->getTransport().stop(false,false);trackMeters.clear();inputMeters.clear();masterMeter.bind(nullptr);recording.detach();pluginHost.detachEdit(*edit);edit->state.removeListener(this);noteViews.clear();transactionControl.reset();bindings.clear();edit.reset();
     }
-    juce::File recordingDirectory()const{return juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("E-musician/recordings").getChildFile(guard.projectId());}
+    juce::File recordingDirectory()const{return (showcase::enabled()?showcase::profile().getChildFile("recordings"):juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("E-musician/recordings")).getChildFile(guard.projectId());}
     bool recordingBusy()const{return edit->getTransport().isRecording()||edit->getTransport().isRecordingStopping()||bool(recording.state()["finalizing"]);}
     void finishRecording(){
         if(!recording.poll())return;

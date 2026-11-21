@@ -3,6 +3,7 @@
 namespace {
 juce::File analysisRoot()
 {
+    if(showcase::enabled())return showcase::profile().getChildFile("analysis");
     auto path=juce::SystemStats::getEnvironmentVariable("EMUSICIAN_ANALYSIS_ROOT","E:/MusicAgent&DAW/analysis");
     return juce::File::isAbsolutePath(path)?juce::File(path):juce::File("E:/MusicAgent&DAW/analysis");
 }
@@ -73,6 +74,9 @@ juce::var chordJson(const storage::StoredChordRegion& c)
 
 juce::var EngineSession::Impl::analysisCapabilities()
 {
+    if(showcase::enabled())return object({{"protocol_version",2},{"providers",juce::var(showcase::providers())},
+        {"execution_modes",juce::var(juce::StringArray{"auto","local","cloud"})},{"max_duration_seconds",600},{"max_parallel_jobs",1},
+        {"preview_stems",true},{"drum_transcription",false},{"beat_meters",juce::var(juce::StringArray{"auto","3/4","4/4"})}});
     juce::var registry;const auto root=analysisRoot();const auto read=analysisJson(root.getChildFile("registry.json"),registry,128*1024);
     juce::Array<juce::var> providers;
     for(const auto* name:{"separate","transcribe","chords","beats"}){
@@ -130,7 +134,8 @@ juce::Result EngineSession::Impl::beginAnalysis(const juce::var& args,juce::var&
     if(length>double(selected.getProperty("max_duration_seconds",600)))return fail("The selected range exceeds this model's duration limit.");
     const bool cloud=selected["execution"].toString()=="cloud";
     juce::var registry=cloud?computeRegistry():juce::var();
-    if(!cloud&&analysisJson(analysisRoot().getChildFile("registry.json"),registry,128*1024).failed())return fail("Install the local analysis runtimes first.");
+    if(showcase::enabled())registry=showcase::registry();
+    else if(!cloud&&analysisJson(analysisRoot().getChildFile("registry.json"),registry,128*1024).failed())return fail("Install the local analysis runtimes first.");
     auto params=args.getProperty("parameters",object({}));if(!params.isObject()||juce::JSON::toString(params).getNumBytesAsUTF8()>4096)return fail("Invalid analysis parameters.");
     params=params.clone();
     if(kind=="separate"&&textArg(args,"preset")=="htdemucs_6s"){
@@ -141,7 +146,7 @@ juce::Result EngineSession::Impl::beginAnalysis(const juce::var& args,juce::var&
     if(kind=="separate"&&((params.hasProperty("stems")&&!params["stems"].isInt())||(stemCount!=4&&stemCount!=6)))return fail("Choose four or six separated tracks.");
     if(cloud){if(kind=="separate"&&stemCount!=4)return fail("This cloud separation model produces four tracks.");
         for(const auto& property:params.getDynamicObject()->getProperties())if(property.name.toString()!="stems"||kind!="separate")return fail("Cloud models use their fixed settings. Remove local-only analysis options.");}
-    auto provider=cloud?registry:registry["providers"].getProperty(kind=="separate"&&stemCount==6?juce::String("separate_6s"):kind,{});const auto python=provider["python_executable"].toString();
+    auto provider=cloud||showcase::enabled()?registry:registry["providers"].getProperty(kind=="separate"&&stemCount==6?juce::String("separate_6s"):kind,{});const auto python=provider["python_executable"].toString();
     if(!bool(provider["available"])||!juce::File::isAbsolutePath(python)||!juce::File(python).existsAsFile())return fail("This analysis runtime is not ready.");
     if(analyses.size()>=32){auto old=std::find_if(analyses.begin(),analyses.end(),[](const auto& a){return a.second->job&&!a.second->job->worker.joinable()&&(!a.second->acceptJob||!a.second->acceptJob->worker.joinable());});if(old==analyses.end())return fail("Analysis result history is full.");analyses.erase(old);}
     auto a=std::make_shared<AnalysisEntry>();a->id=uid();a->kind=kind;a->execution=cloud?"cloud":"local";a->modelId=selected["model_id"].toString();a->original=a->boundOriginal=clip->source;a->sourceFile=clip->info.playbackFile;a->parameters=params.clone();
@@ -154,7 +159,7 @@ juce::Result EngineSession::Impl::beginAnalysis(const juce::var& args,juce::var&
     if(!cloud&&kind=="transcribe"&&(role=="drums"||(role=="other"&&!explicitPitched)))return fail("Choose a pitched instrument for mixed audio. Drum transcription is not supported.");
     a->source=object({{"project_id",juce::String(guard.projectId())},{"clip_id",clip->id},{"asset_id",clip->assetId},{"track_id",track->id},{"clip_timeline_start",p.time.getStart().inSeconds()},{"clip_source_offset",p.offset.inSeconds()},{"clip_duration",p.time.getLength().inSeconds()},
         {"bpm",edit->tempoSequence.getTempo(0)->getBpm()},{"range_start_seconds",start},{"duration_seconds",length},{"timeline_start",p.time.getStart().inSeconds()+start},{"sample_rate",clip->info.rate},{"input_role",role},{"warp_speed_ratio",warpState["items"][0]["warp_speed_ratio"]}});
-    const auto script=juce::File(EMUSICIAN_SOURCE_DIR).getChildFile(cloud?"scripts/cloud/run_analysis.py":"scripts/audio_analysis/run.py");const auto preset=textArg(args,"preset");
+    const auto script=juce::File(EMUSICIAN_SOURCE_DIR).getChildFile(showcase::enabled()?"scripts/showcase/replay_worker.py":cloud?"scripts/cloud/run_analysis.py":"scripts/audio_analysis/run.py");const auto preset=textArg(args,"preset");
     const auto resourcePolicy=cloud?analysis_worker::Policy{analysis_worker::gib/2}:analysis_worker::Policy::forKind(kind);
     a->job=startJob("analysis."+kind,[this,a,script,python,preset,length,sourceWarped,expectedOriginalHash,resourcePolicy](const auto& j){
         const auto cancelled=[j]{return j->cancel.load();};JobFingerprint before,after;
@@ -179,6 +184,7 @@ juce::Result EngineSession::Impl::beginAnalysis(const juce::var& args,juce::var&
         a->directory.getChildFile("worker-launch.json").replaceWithText(juce::JSON::toString(launchRecord));
         if(auto r=resourcePolicy.admit(beforeLaunch);r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}
         analysis_worker::Process process;juce::StringArray command{python,"-u","-X","faulthandler",script.getFullPathName(),"--request",a->directory.getChildFile("request.json").getFullPathName()};
+        if(showcase::enabled())command.addArray({"--root",showcase::root().getFullPathName()});
         if(auto r=process.start(command,a->directory.getChildFile("process.log"));r.failed()){jobStatus(j,"failed",r.getErrorMessage());return;}
         const auto began=juce::Time::getMillisecondCounterHiRes();bool terminated=false;analysis_worker::CriticalPressure pressure;
         while(process.isRunning()){
@@ -245,7 +251,9 @@ juce::Result EngineSession::Impl::acceptAnalysis(const juce::var& args,juce::var
         if(auto r=fingerprint(a->directory.getChildFile("result.json"),actual,cancelled);r.failed()||actual.hash!=a->resultHash){jobStatus(j,cancelled()?"cancelled":"failed","The immutable analysis result changed on disk.");return;}
         std::map<juce::String,AudioInfo> preparedOutputs;juce::Array<juce::var> trackIds,clipIds,chordIds;
         const double start=double(source["timeline_start"]),length=double(source["duration_seconds"]);
-        storage::StoredAnalysis provenance{a->id,a->kind,result["model"]["id"].toString(),result["model"]["version"].toString(),source["clip_id"].toString(),source["asset_id"].toString(),a->originalHash,a->resultHash,juce::JSON::toString(a->parameters,true),start,length};
+        auto provenanceParameters=a->parameters.clone();
+        if(showcase::enabled()&&result["retained_result"].isObject())provenanceParameters.getDynamicObject()->setProperty("retained_result",result["retained_result"]);
+        storage::StoredAnalysis provenance{a->id,a->kind,result["model"]["id"].toString(),result["model"]["version"].toString(),source["clip_id"].toString(),source["asset_id"].toString(),a->originalHash,a->resultHash,juce::JSON::toString(provenanceParameters,true),start,length};
         auto annotations=candidateAnnotations(result);juce::Array<juce::var> midiMetadata;
         candidate->analyses.push_back(provenance);
         if(a->kind=="separate"){

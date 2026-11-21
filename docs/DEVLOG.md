@@ -13963,3 +13963,854 @@ First configure 52244ca3d1 refused unapplied new pinned patches, as designed. Re
 修复物理输入激活、mono/stereo设置、稀疏In2回调映射和缺失输入清零；加入驱动控制面板、身份限定路由、变更前断开目标及失败回滚。保留逐轨Monitor/Rec规则，旧工程音频输入需重新选择。最终Release755f123b2d、CTest023018ac4f 11/11、1004项生产断言、六种精确PCM和七张设置截图通过；Agent2795a51de1 390/390且最终47项相关输入未变。M-Audio ASIO44.1kHz/512的三段短录音、Undo/Redo、保存重开及设置字节恢复在3f4d571d0c通过，来源与听感不据底噪推断。138项原生输入核对通过，旧0.13.5哈希未变。
 
 每次失败和主动中止见[RESULTS](review/2026-11-16-audio-input/RESULTS.md)，包含未应用补丁拒绝、换卡保护补齐、合成时钟/传输API测试修正，以及物理探针对异步保存完成回执的修正；没有隐藏失败。关联备份后切到0.13.6，E盘新启动器和VS Code工作区就绪。633e6a75ea启动PID71532，读取到0.13.6标题、正确EXE路径及Responding=True；这不是听感验收。未操作用户GUI、未调用付费API/云端模型。原用户工程、DEVLOG修改和30项旧未跟踪构建记录保持。下一步按[人工清单](review/2026-11-16-audio-input/MANUAL-CHECK.md)验证麦克风人声、厂商面板、真实换卡与长录音。
+
+## 2026-11-22 ? Showcase / recording display implementation started
+
+Branch feature/showcase-recording-v1, baseline 0c41caa. Plan and ownership: docs/review/2026-11-22-showcase/PLAN.md. Three parallel owners; root builds/integration. Existing user DEVLOG edits, build receipts, 0.13.6 binary and original test drive retained. No inference, SSH, driver installation or microphone recording authorized for this stage. Implementation is in progress, not verified.
+
+### 2026-11-22T00:10:45+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 1.865s.
+- Command: `python scripts/showcase_bundle.py`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `0a3d5e0b6bf8405d0dedbb55fe628d042560bce9162da85e9449bb73229c7819`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T161045.635633Z-2b500fce4a.json) · [Raw log](../build-logs/20261121T161045.635633Z-2b500fce4a.log)
+- [Exact process output](../build-logs/20261121T161045.635633Z-2b500fce4a.raw.log)
+
+### 2026-11-22T00:13:26+08:00 · showcase-recording-command · failed
+
+- Config: Release/recording; exit code: 1; elapsed: 1.697s.
+- Command: `python tests/ShowcaseBundleSmoke.py --exe E:/emusician-analysis-build/bin-0.13.6/Release/E-musician.exe --root E:/MusicAgent&DAW/demo-video/showcase-v1/workspace --report build-logs/showcase-bundle-smoke.json`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `8da5e3a1fb732db83e7f1c63de7a39b8ff19d45218e487f125e6a89d85c9b549`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T161326.213447Z-59155509f2.json) · [Raw log](../build-logs/20261121T161326.213447Z-59155509f2.log)
+- [Exact process output](../build-logs/20261121T161326.213447Z-59155509f2.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261121T161326.213447Z-59155509f2.log
+
+### 2026-11-22T00:17:50+08:00 · showcase-recording-command · succeeded
+
+- Config: Release/recording; exit code: 0; elapsed: 1.508s.
+- Command: `python scripts/showcase_bundle.py --reset-projects`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `f3a14680607b87a3c379780356b647317d3236bfb311bfda28f0a1907b4c3f0d`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T161750.800556Z-ad98282ef6.json) · [Raw log](../build-logs/20261121T161750.800556Z-ad98282ef6.log)
+- [Exact process output](../build-logs/20261121T161750.800556Z-ad98282ef6.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T00:18:08+08:00 · showcase-recording-command · failed
+
+- Config: Release/recording; exit code: 1; elapsed: 1.802s.
+- Command: `python tests/ShowcaseBundleSmoke.py --exe E:/emusician-analysis-build/bin-0.13.6/Release/E-musician.exe --root E:/MusicAgent&DAW/demo-video/showcase-v1/workspace --report build-logs/showcase-bundle-smoke.json`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `14c5b6ac50997595e702242d75b72b8eb4df38adf2bb61315a4c707bc639eadd`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T161808.983581Z-aeb34d3c4e.json) · [Raw log](../build-logs/20261121T161808.983581Z-aeb34d3c4e.log)
+- [Exact process output](../build-logs/20261121T161808.983581Z-aeb34d3c4e.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261121T161808.983581Z-aeb34d3c4e.log
+
+### 2026-11-22T00:18:20+08:00 · showcase-recording-command · succeeded
+
+- Config: Release/recording; exit code: 0; elapsed: 1.095s.
+- Command: `python scripts/showcase_bundle.py --reset-projects`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `1c5f6fd09e2656285ce99f7389ebbaa50981ab410abd2f383a3cd4ef8e15dc6e`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T161820.590023Z-31f21fbe63.json) · [Raw log](../build-logs/20261121T161820.590023Z-31f21fbe63.log)
+- [Exact process output](../build-logs/20261121T161820.590023Z-31f21fbe63.raw.log)
+
+### 2026-11-22T00:18:32+08:00 · showcase-recording-command · succeeded
+
+- Config: Release/recording; exit code: 0; elapsed: 2.066s.
+- Command: `python tests/ShowcaseBundleSmoke.py --exe E:/emusician-analysis-build/bin-0.13.6/Release/E-musician.exe --root E:/MusicAgent&DAW/demo-video/showcase-v1/workspace --report build-logs/showcase-bundle-smoke.json`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `1c5f6fd09e2656285ce99f7389ebbaa50981ab410abd2f383a3cd4ef8e15dc6e`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T161832.747302Z-a3d1d08631.json) · [Raw log](../build-logs/20261121T161832.747302Z-a3d1d08631.log)
+- [Exact process output](../build-logs/20261121T161832.747302Z-a3d1d08631.raw.log)
+
+### 2026-11-22T00:18:32+08:00 · showcase-recording-configure · succeeded
+
+- Config: Release/recording; exit code: 0; elapsed: 29.424s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.13.6-recording -DEMUSICIAN_SHOWCASE=OFF -DEMUSICIAN_SHOWCASE_ROOT=E:/MusicAgent&DAW/demo-video/showcase-v1/workspace`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `1c5f6fd09e2656285ce99f7389ebbaa50981ab410abd2f383a3cd4ef8e15dc6e`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T161832.761180Z-12156ed850.json) · [Raw log](../build-logs/20261121T161832.761180Z-12156ed850.log)
+- [Exact process output](../build-logs/20261121T161832.761180Z-12156ed850.raw.log)
+
+### 2026-11-22T00:23:28+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 4.813s.
+- Command: `python -m unittest discover -s tests -p test_showcase_replay.py -v`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `708ed375e3fb0dd3f83dca2c07447c88cec15530b8e5a3687180c7157936f584`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T162328.772443Z-257c5866c0.json) · [Raw log](../build-logs/20261121T162328.772443Z-257c5866c0.log)
+- [Exact process output](../build-logs/20261121T162328.772443Z-257c5866c0.raw.log)
+
+### 2026-11-22T00:24:20+08:00 · showcase-recording-command · succeeded
+
+- Config: Release/recording; exit code: 0; elapsed: 103.330s.
+- Command: `python -m unittest discover -s tests -p test_music_agent*.py`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `e88657fe860101ad281ca1be0a8a3e51c53a77829080651d9d05f4e1fb3a06ca`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T162420.624061Z-a9c8e3dee8.json) · [Raw log](../build-logs/20261121T162420.624061Z-a9c8e3dee8.log)
+- [Exact process output](../build-logs/20261121T162420.624061Z-a9c8e3dee8.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T00:29:30+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 3.236s.
+- Command: `python -m unittest discover -s tests -p test_showcase_replay.py -v`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `615f96da0610d3ea9fac375c515402ddbe084a3eafa7f363254ca0bd1ce54e3d`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T162930.847058Z-b57aa4a51f.json) · [Raw log](../build-logs/20261121T162930.847058Z-b57aa4a51f.log)
+- [Exact process output](../build-logs/20261121T162930.847058Z-b57aa4a51f.raw.log)
+
+### 2026-11-22T00:20:22+08:00 · showcase-recording-build · succeeded
+
+- Config: Release/recording; exit code: 0; elapsed: 1010.840s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `62f9bf99ca1edb1ada7da66372dd40cb853f87ddf6f4a953c0a60f8fa34a8a49`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T162022.985701Z-5b573405bd.json) · [Raw log](../build-logs/20261121T162022.985701Z-5b573405bd.log)
+- [Exact process output](../build-logs/20261121T162022.985701Z-5b573405bd.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T00:37:57+08:00 · showcase-showcase-command · failed
+
+- Config: Release/showcase; exit code: 1; elapsed: 9.040s.
+- Command: `python scripts/showcase_audio.py --mode all`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `2620565b7d2603caf555710c2d0d8515b7d79d2b668a2862a88c8cc6d3810557`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T163757.792831Z-1f78322f00.json) · [Raw log](../build-logs/20261121T163757.792831Z-1f78322f00.log)
+- [Exact process output](../build-logs/20261121T163757.792831Z-1f78322f00.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261121T163757.792831Z-1f78322f00.log
+
+### 2026-11-22T00:37:40+08:00 · showcase-recording-test · failed
+
+- Config: Release/recording; exit code: 8; elapsed: 100.969s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `f814f341841c231a60df9c83bed45de2c7b94cfa491578055d4f12527cc17f63`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T163740.245968Z-edb5d9b574.json) · [Raw log](../build-logs/20261121T163740.245968Z-edb5d9b574.log)
+- [Exact process output](../build-logs/20261121T163740.245968Z-edb5d9b574.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 8; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261121T163740.245968Z-edb5d9b574.log
+
+### 2026-11-22T00:39:31+08:00 · showcase-showcase-command · failed
+
+- Config: Release/showcase; exit code: 1; elapsed: 41.081s.
+- Command: `python scripts/showcase_audio.py --mode all`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `df5bb6fb7e50593fa705ed2122e5485536165c53acb5bdde25a7a7c191f53a43`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T163931.927370Z-b487bfe6a2.json) · [Raw log](../build-logs/20261121T163931.927370Z-b487bfe6a2.log)
+- [Exact process output](../build-logs/20261121T163931.927370Z-b487bfe6a2.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261121T163931.927370Z-b487bfe6a2.log
+
+### 2026-11-22T00:42:34+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 52.056s.
+- Command: `python scripts/showcase_audio.py --mode d3 --realtime`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `b6586972436b928bacc0f9716dc71c129d4acf96c3b858d28ad0280ca763be67`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T164234.208316Z-df7921c457.json) · [Raw log](../build-logs/20261121T164234.208316Z-df7921c457.log)
+- [Exact process output](../build-logs/20261121T164234.208316Z-df7921c457.raw.log)
+
+### 2026-11-22T00:43:41+08:00 · showcase-recording-build · succeeded
+
+- Config: Release/recording; exit code: 0; elapsed: 115.906s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `b6586972436b928bacc0f9716dc71c129d4acf96c3b858d28ad0280ca763be67`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T164341.518251Z-96b93ebf88.json) · [Raw log](../build-logs/20261121T164341.518251Z-96b93ebf88.log)
+- [Exact process output](../build-logs/20261121T164341.518251Z-96b93ebf88.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T00:45:48+08:00 · showcase-recording-test · succeeded
+
+- Config: Release/recording; exit code: 0; elapsed: 88.178s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure -R engine.integration_smoke`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `fa196756e5cbd51614e67c9b5dc2301e8fe9f33f1dd606150eb137ce6e679149`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T164548.843388Z-e95679d452.json) · [Raw log](../build-logs/20261121T164548.843388Z-e95679d452.log)
+- [Exact process output](../build-logs/20261121T164548.843388Z-e95679d452.raw.log)
+
+### 2026-11-22T00:50:52+08:00 · showcase-showcase-configure · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 16.158s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-showcase-v1 -DEMUSICIAN_SHOWCASE=ON -DEMUSICIAN_SHOWCASE_ROOT=E:/MusicAgent&DAW/demo-video/showcase-v1/workspace`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `fa196756e5cbd51614e67c9b5dc2301e8fe9f33f1dd606150eb137ce6e679149`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T165052.325606Z-0695814c22.json) · [Raw log](../build-logs/20261121T165052.325606Z-0695814c22.log)
+- [Exact process output](../build-logs/20261121T165052.325606Z-0695814c22.raw.log)
+
+### 2026-11-22T00:54:26+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 1.637s.
+- Command: `python tests/ShowcaseReplayIntegration.py --help`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `8eadcea4bbb1ff3993224d8dbfc79090a6c3698d2e83c756e492f55fac95653f`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T165426.316176Z-5b10d5f111.json) · [Raw log](../build-logs/20261121T165426.316176Z-5b10d5f111.log)
+- [Exact process output](../build-logs/20261121T165426.316176Z-5b10d5f111.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T00:55:53+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 1.011s.
+- Command: `python -m py_compile scripts/showcase_gui_session.py scripts/showcase_capture.py tests/ShowcaseReplayIntegration.py`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `3ccee706cb2844a87a70a7c9f35635f6f59ff905c5916ea64e4d3febcc20d085`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T165553.408702Z-a5ac488a60.json) · [Raw log](../build-logs/20261121T165553.408702Z-a5ac488a60.log)
+- [Exact process output](../build-logs/20261121T165553.408702Z-a5ac488a60.raw.log)
+
+### 2026-11-22T00:51:36+08:00 · showcase-showcase-build · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 474.957s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `fa196756e5cbd51614e67c9b5dc2301e8fe9f33f1dd606150eb137ce6e679149`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T165136.439665Z-58b46b830f.json) · [Raw log](../build-logs/20261121T165136.439665Z-58b46b830f.log)
+- [Exact process output](../build-logs/20261121T165136.439665Z-58b46b830f.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T00:59:46+08:00 · showcase-showcase-command · failed
+
+- Config: Release/showcase; exit code: 1; elapsed: 46.779s.
+- Command: `python tests/ShowcaseReplayIntegration.py --exe E:/emusician-analysis-build/bin-showcase-v1/Release/E-musician.exe --root E:/MusicAgent&DAW/demo-video/showcase-v1/workspace`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `30e6493c976560b3f4439ee99f71e3ad2bda3c5ad0a6f106a2257d2b38caa435`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T165946.221191Z-1b065f03eb.json) · [Raw log](../build-logs/20261121T165946.221191Z-1b065f03eb.log)
+- [Exact process output](../build-logs/20261121T165946.221191Z-1b065f03eb.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261121T165946.221191Z-1b065f03eb.log
+
+### 2026-11-22T01:01:03+08:00 · showcase-showcase-test · failed
+
+- Config: Release/showcase; exit code: 8; elapsed: 20.208s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `afb745efc75f7d5f0116708726432525d551d61f418c855f6d1b985ef39fee3a`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T170103.543116Z-9cf1432c97.json) · [Raw log](../build-logs/20261121T170103.543116Z-9cf1432c97.log)
+- [Exact process output](../build-logs/20261121T170103.543116Z-9cf1432c97.raw.log)
+- Error: Command failed with code 8; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261121T170103.543116Z-9cf1432c97.log
+
+### 2026-11-22T01:02:03+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 1.821s.
+- Command: `python build/showcase-wrong-source-probe.py`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `afb745efc75f7d5f0116708726432525d551d61f418c855f6d1b985ef39fee3a`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T170203.416707Z-dc00f3ae6f.json) · [Raw log](../build-logs/20261121T170203.416707Z-dc00f3ae6f.log)
+- [Exact process output](../build-logs/20261121T170203.416707Z-dc00f3ae6f.raw.log)
+
+### 2026-11-22T01:02:33+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 37.371s.
+- Command: `python scripts/showcase_gui_session.py --exe E:/emusician-analysis-build/bin-showcase-v1/Release/E-musician.exe --project "E:/MusicAgent&DAW/demo-video/showcase-v1/captures/projects/clean-starts/New ideas.emproj" --output E:/MusicAgent&DAW/demo-video/showcase-v1/captures/workflow --port 9229`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `afb745efc75f7d5f0116708726432525d551d61f418c855f6d1b985ef39fee3a`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T170233.074451Z-0f09497861.json) · [Raw log](../build-logs/20261121T170233.074451Z-0f09497861.log)
+- [Exact process output](../build-logs/20261121T170233.074451Z-0f09497861.raw.log)
+
+### 2026-11-22T01:03:33+08:00 · showcase-showcase-build · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 86.569s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `828775c3ef9e5877e8170235b41479a9f21e91b814f515ee8df5c7ffb5097dec`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T170333.261855Z-cf0a17321e.json) · [Raw log](../build-logs/20261121T170333.261855Z-cf0a17321e.log)
+- [Exact process output](../build-logs/20261121T170333.261855Z-cf0a17321e.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T01:05:32+08:00 · showcase-showcase-command · failed
+
+- Config: Release/showcase; exit code: 1; elapsed: 8.966s.
+- Command: `python scripts/showcase_gui_session.py --exe E:/emusician-analysis-build/bin-showcase-v1/Release/E-musician.exe --project "E:/MusicAgent&DAW/demo-video/showcase-v1/captures/projects/clean-starts/New ideas.emproj" --output E:/MusicAgent&DAW/demo-video/showcase-v1/captures/workflow-v2 --port 9229 --device-output`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `1d273e680884169c5a4805a7a8377f01df2ab1f2b55b7fb73ea11c4bf51aba2d`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T170532.777741Z-825e1fb9b5.json) · [Raw log](../build-logs/20261121T170532.777741Z-825e1fb9b5.log)
+- [Exact process output](../build-logs/20261121T170532.777741Z-825e1fb9b5.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261121T170532.777741Z-825e1fb9b5.log
+
+### 2026-11-22T01:05:31+08:00 · showcase-showcase-command · failed
+
+- Config: Release/showcase; exit code: 1; elapsed: 97.523s.
+- Command: `python tests/ShowcaseReplayIntegration.py --exe E:/emusician-analysis-build/bin-showcase-v1/Release/E-musician.exe --root E:/MusicAgent&DAW/demo-video/showcase-v1/workspace`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `1d273e680884169c5a4805a7a8377f01df2ab1f2b55b7fb73ea11c4bf51aba2d`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T170531.305230Z-6740266850.json) · [Raw log](../build-logs/20261121T170531.305230Z-6740266850.log)
+- [Exact process output](../build-logs/20261121T170531.305230Z-6740266850.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261121T170531.305230Z-6740266850.log
+
+### 2026-11-22T01:08:15+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 6.231s.
+- Command: `python scripts/showcase_audio.py --mode d2`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `4c8209d8505cb09c6cbb20b60c56c3b332ff1a0fef994ad698144719015ef248`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T170815.469731Z-7aef65928b.json) · [Raw log](../build-logs/20261121T170815.469731Z-7aef65928b.log)
+- [Exact process output](../build-logs/20261121T170815.469731Z-7aef65928b.raw.log)
+
+### 2026-11-22T01:08:58+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 97.555s.
+- Command: `python tests/ShowcaseReplayIntegration.py --exe E:/emusician-analysis-build/bin-showcase-v1/Release/E-musician.exe --root E:/MusicAgent&DAW/demo-video/showcase-v1/workspace`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `1587fbbc174c122d6c05b2d8fcb835a0665e0922aec20472f88cc8f848097a2d`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T170858.606654Z-e144f68a98.json) · [Raw log](../build-logs/20261121T170858.606654Z-e144f68a98.log)
+- [Exact process output](../build-logs/20261121T170858.606654Z-e144f68a98.raw.log)
+
+### 2026-11-22T01:06:36+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 341.632s.
+- Command: `python scripts/showcase_gui_session.py --exe E:/emusician-analysis-build/bin-showcase-v1/Release/E-musician.exe --project "E:/MusicAgent&DAW/demo-video/showcase-v1/captures/projects/clean-starts/New ideas.emproj" --output E:/MusicAgent&DAW/demo-video/showcase-v1/captures/workflow-v2 --port 9229 --device-output`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `4c8209d8505cb09c6cbb20b60c56c3b332ff1a0fef994ad698144719015ef248`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T170636.791736Z-71dfb1d46c.json) · [Raw log](../build-logs/20261121T170636.791736Z-71dfb1d46c.log)
+- [Exact process output](../build-logs/20261121T170636.791736Z-71dfb1d46c.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T01:24:32+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 0.654s.
+- Command: `node --check scripts/music_agent/web/app.js`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `01e5bef8dfb229b89a72db42165c324a95d5c735538f1327a3f8a5d74ad9c88a`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T172432.637708Z-49595721dd.json) · [Raw log](../build-logs/20261121T172432.637708Z-49595721dd.log)
+- [Exact process output](../build-logs/20261121T172432.637708Z-49595721dd.raw.log)
+
+### 2026-11-22T01:24:44+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 52.833s.
+- Command: `python tests/AgentTaskFlowWebSmoke.py`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `01e5bef8dfb229b89a72db42165c324a95d5c735538f1327a3f8a5d74ad9c88a`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T172444.155223Z-3cfe9c1fda.json) · [Raw log](../build-logs/20261121T172444.155223Z-3cfe9c1fda.log)
+- [Exact process output](../build-logs/20261121T172444.155223Z-3cfe9c1fda.raw.log)
+
+### 2026-11-22T01:26:54+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 6.680s.
+- Command: `python scripts/showcase_capture.py --pid 1284 --output E:/MusicAgent&DAW/demo-video/showcase-v1/captures/native-actions --recipe E:/MusicAgent&DAW/demo-video/showcase-v1/captures/recipes/open-chords.json`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `01e5bef8dfb229b89a72db42165c324a95d5c735538f1327a3f8a5d74ad9c88a`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T172654.395962Z-2a96144086.json) · [Raw log](../build-logs/20261121T172654.395962Z-2a96144086.log)
+- [Exact process output](../build-logs/20261121T172654.395962Z-2a96144086.raw.log)
+
+### 2026-11-22T01:27:42+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 1.284s.
+- Command: `python scripts/showcase_capture.py --pid 1284 --output E:/MusicAgent&DAW/demo-video/showcase-v1/captures/native-actions --recipe E:/MusicAgent&DAW/demo-video/showcase-v1/captures/recipes/choose-analysis-menu.json`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `01e5bef8dfb229b89a72db42165c324a95d5c735538f1327a3f8a5d74ad9c88a`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T172742.380419Z-3997385bab.json) · [Raw log](../build-logs/20261121T172742.380419Z-3997385bab.log)
+- [Exact process output](../build-logs/20261121T172742.380419Z-3997385bab.raw.log)
+
+### 2026-11-22T01:28:15+08:00 · showcase-showcase-command · failed
+
+- Config: Release/showcase; exit code: 1; elapsed: 3.668s.
+- Command: `powershell -NoProfile -NonInteractive -File build/showcase-temp/select-chords-menu.ps1`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `01e5bef8dfb229b89a72db42165c324a95d5c735538f1327a3f8a5d74ad9c88a`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T172815.521314Z-824f099d27.json) · [Raw log](../build-logs/20261121T172815.521314Z-824f099d27.log)
+- [Exact process output](../build-logs/20261121T172815.521314Z-824f099d27.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261121T172815.521314Z-824f099d27.log
+
+### 2026-11-22T01:29:06+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 4.096s.
+- Command: `python scripts/showcase_capture.py --pid 1284 --output E:/MusicAgent&DAW/demo-video/showcase-v1/captures/native-actions --recipe E:/MusicAgent&DAW/demo-video/showcase-v1/captures/recipes/chord-result-combo.json`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `e5d4d170927c510924ed69aa8f08e8854a443b11e955c8a3c850470486fc1be6`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T172906.296978Z-377c883606.json) · [Raw log](../build-logs/20261121T172906.296978Z-377c883606.log)
+- [Exact process output](../build-logs/20261121T172906.296978Z-377c883606.raw.log)
+
+### 2026-11-22T01:29:20+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 0.787s.
+- Command: `python -m py_compile scripts/dev_showcase.py scripts/dev_audio_input.py scripts/showcase_capture.py scripts/showcase_gui_session.py scripts/showcase_assemble.py scripts/showcase_bundle.py`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `e5d4d170927c510924ed69aa8f08e8854a443b11e955c8a3c850470486fc1be6`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T172920.874099Z-bfc34aff9b.json) · [Raw log](../build-logs/20261121T172920.874099Z-bfc34aff9b.log)
+- [Exact process output](../build-logs/20261121T172920.874099Z-bfc34aff9b.raw.log)
+
+### 2026-11-22T01:13:31+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 991.748s.
+- Command: `python scripts/showcase_gui_session.py --exe E:/emusician-analysis-build/bin-showcase-v1/Release/E-musician.exe --project "E:/MusicAgent&DAW/demo-video/showcase-v1/captures/projects/clean-starts/New ideas.emproj" --output E:/MusicAgent&DAW/demo-video/showcase-v1/captures/workflow-final --port 9229 --device-output`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `8ba2537555cc18229318719bebc564436bc00402862b8a2f2dc0c7eeaa1f5011`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T171331.727299Z-d387978a89.json) · [Raw log](../build-logs/20261121T171331.727299Z-d387978a89.log)
+- [Exact process output](../build-logs/20261121T171331.727299Z-d387978a89.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T01:31:17+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 6.414s.
+- Command: `python scripts/showcase_capture.py --pid 28628 --output E:/MusicAgent&DAW/demo-video/showcase-v1/captures/native-actions-d2 --recipe E:/MusicAgent&DAW/demo-video/showcase-v1/captures/recipes/chord-result-clean.json`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `e5d4d170927c510924ed69aa8f08e8854a443b11e955c8a3c850470486fc1be6`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T173117.986422Z-ff6329ebc9.json) · [Raw log](../build-logs/20261121T173117.986422Z-ff6329ebc9.log)
+- [Exact process output](../build-logs/20261121T173117.986422Z-ff6329ebc9.raw.log)
+
+### 2026-11-22T01:34:55+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 1.102s.
+- Command: `python tests/test_showcase_build_guards.py`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `023930e3219382c011af245696f5016d6dedd3cb5ea872eddb3ff73099197657`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T173455.301983Z-c798fac5d3.json) · [Raw log](../build-logs/20261121T173455.301983Z-c798fac5d3.log)
+- [Exact process output](../build-logs/20261121T173455.301983Z-c798fac5d3.raw.log)
+
+### 2026-11-22T01:30:06+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 313.924s.
+- Command: `python scripts/showcase_gui_session.py --exe E:/emusician-analysis-build/bin-showcase-v1/Release/E-musician.exe --project "E:/MusicAgent&DAW/demo-video/showcase-v1/captures/projects/clean-starts/New Light.emproj" --output E:/MusicAgent&DAW/demo-video/showcase-v1/captures/workflow-d2 --port 9229 --device-output`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `e5d4d170927c510924ed69aa8f08e8854a443b11e955c8a3c850470486fc1be6`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T173006.695521Z-56d6c0b0d2.json) · [Raw log](../build-logs/20261121T173006.695521Z-56d6c0b0d2.log)
+- [Exact process output](../build-logs/20261121T173006.695521Z-56d6c0b0d2.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T01:39:55+08:00 · showcase-showcase-command · succeeded
+
+- Config: Release/showcase; exit code: 0; elapsed: 0.956s.
+- Command: `python build/showcase-temp/delivery-audit.py`
+- Context: Offline showcase and live recording display; inference and physical listening are separate evidence
+- Source SHA-256: `288a71b2fca97793a63af710308c2fbe78f23ce3712b64d9c9d540720b4ff88e`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T173955.472435Z-1764eefd12.json) · [Raw log](../build-logs/20261121T173955.472435Z-1764eefd12.log)
+- [Exact process output](../build-logs/20261121T173955.472435Z-1764eefd12.raw.log)
+
+### 2026-11-22T00:15:20+08:00 · showcase-motion-render · succeeded
+
+- Config: 1080p30; exit code: 0; elapsed: 917.693s.
+- Command: `C:\Python314\python.exe scripts/showcase_motion.py --mode render --out E:/MusicAgent&DAW/demo-video/showcase-v1 --ffmpeg E:/SUMIN/ABC_Ocean/_tools/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe --ffprobe "E:/Users/28712/AppData/Local/Programs/Audio Jam/lib/win32/ffprobe.exe"`
+- Context: Six original loop backgrounds, unchanged logo intro/outro, alpha overlays and abstract sax insert; no network
+- Source SHA-256: `36e84c57cf94e92416b5394a1db2d9260da185c5b59be63b72399a63c2a2248b`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T161520.632291Z-f82936bdc4.json) · [Raw log](../build-logs/20261121T161520.632291Z-f82936bdc4.log)
+- [Exact process output](../build-logs/20261121T161520.632291Z-f82936bdc4.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T00:15:39+08:00 · showcase-docs · succeeded
+
+- Config: local-offline; exit code: 0; elapsed: 1.364s.
+- Command: `C:\Python314\python.exe scripts/showcase_motion.py --out E:/MusicAgent&DAW/demo-video/showcase-v1 --ffmpeg E:/SUMIN/ABC_Ocean/_tools/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe --ffprobe "E:/Users/28712/AppData/Local/Programs/Audio Jam/lib/win32/ffprobe.exe" --mode docs`
+- Context: Synchronized English/Chinese 240-second script and Microsoft Zira local voice
+- Source SHA-256: `36e84c57cf94e92416b5394a1db2d9260da185c5b59be63b72399a63c2a2248b`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T161539.588980Z-66403c221a.json) · [Raw log](../build-logs/20261121T161539.588980Z-66403c221a.log)
+- [Exact process output](../build-logs/20261121T161539.588980Z-66403c221a.raw.log)
+
+### 2026-11-22T00:15:41+08:00 · showcase-tts · succeeded
+
+- Config: local-offline; exit code: 0; elapsed: 11.100s.
+- Command: `C:\Python314\python.exe scripts/showcase_motion.py --out E:/MusicAgent&DAW/demo-video/showcase-v1 --ffmpeg E:/SUMIN/ABC_Ocean/_tools/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe --ffprobe "E:/Users/28712/AppData/Local/Programs/Audio Jam/lib/win32/ffprobe.exe" --mode tts`
+- Context: Synchronized English/Chinese 240-second script and Microsoft Zira local voice
+- Source SHA-256: `36e84c57cf94e92416b5394a1db2d9260da185c5b59be63b72399a63c2a2248b`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T161541.388391Z-b4f6fbbcd7.json) · [Raw log](../build-logs/20261121T161541.388391Z-b4f6fbbcd7.log)
+- [Exact process output](../build-logs/20261121T161541.388391Z-b4f6fbbcd7.raw.log)
+
+### 2026-11-22T00:17:18+08:00 · showcase-art-preview · succeeded
+
+- Config: 1080p; exit code: 0; elapsed: 2.966s.
+- Command: `C:\Python314\python.exe -c "import sys;sys.path.insert(0,'scripts');from showcase_motion import *;m=Motion(resolve_logo());p=Path(r'E:/MusicAgent&DAW/demo-video/showcase-v1/motion/stills');m.render('opener',3).save(p/'preview-opener.png');m.render('closer',3).save(p/'preview-closer.png');m.render('sax-abstract',3).save(p/'preview-sax.png');print('Three art previews rendered')"`
+- Context: Inspect intro, outro and abstract sax compositing before full render completes
+- Source SHA-256: `e6fe04a28ebdab80469dbb1ece1945fe91b9654363a31542485d11fd59c32c5b`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T161718.374077Z-55df200c3f.json) · [Raw log](../build-logs/20261121T161718.374077Z-55df200c3f.log)
+- [Exact process output](../build-logs/20261121T161718.374077Z-55df200c3f.raw.log)
+
+### 2026-11-22T00:25:09+08:00 · showcase-edit-template · succeeded
+
+- Config: 240s; exit code: 0; elapsed: 1.101s.
+- Command: `C:\Python314\python.exe scripts/showcase_assemble.py --template E:/MusicAgent&DAW/demo-video/showcase-v1/scripts/shot-map-template.json --kit E:/MusicAgent&DAW/demo-video/showcase-v1`
+- Context: Create replaceable real-capture shot map with measured narration windows and explicit missing media
+- Source SHA-256: `5a1487ea9229697393f3884ccba5b112882fc1a246568fe7b542c2291a57ce1c`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T162509.856607Z-68d35be8a7.json) · [Raw log](../build-logs/20261121T162509.856607Z-68d35be8a7.log)
+- [Exact process output](../build-logs/20261121T162509.856607Z-68d35be8a7.raw.log)
+
+### 2026-11-22T00:26:21+08:00 · showcase-assembly-preflight · succeeded
+
+- Config: local-offline; exit code: 0; elapsed: 12.560s.
+- Command: `C:\Python314\python.exe -c "import sys,json,copy,argparse
+from pathlib import Path
+sys.path.insert(0,'scripts')
+from showcase_assemble import assemble
+base=Path(r'E:/MusicAgent&DAW/demo-video/showcase-v1');temp=Path('build-logs/showcase-assembly-fixtures');temp.mkdir(exist_ok=True)
+m=json.loads((base/'scripts/shot-map-template.json').read_text())
+poster=base/'motion/stills/preview-opener.png'
+for row in m['shots']:
+ row['media']=str(poster);row['kind']='image';row['background_intro']=None
+args=argparse.Namespace(map=temp/'map.json',output=temp/'artwork-fixture-only.mp4',ffmpeg=Path(r'E:/SUMIN/ABC_Ocean/_tools/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe'),ffprobe=Path(r'E:/Users/28712/AppData/Local/Programs/Audio Jam/lib/win32/ffprobe.exe'),allow_voice_only=True,check_only=True,overwrite=False)
+def check(data, expected=None):
+ args.map.write_text(json.dumps(data),encoding='utf-8')
+ try:assemble(args)
+ except (ValueError,AssertionError,FileNotFoundError) as err:
+  if expected is None:raise
+  print('EXPECTED REFUSAL:',expected,str(err)[:100]);return
+ if expected:raise AssertionError('did not refuse '+expected)
+check(m)
+bad=copy.deepcopy(m);bad['shots'][2]['media']=None;check(bad,'missing media')
+bad=copy.deepcopy(m);bad['shots'][2]['crop']=[0,0,99999,1080];check(bad,'outside source crop')
+bad=copy.deepcopy(m);bad['shots'][2]['start']=19;check(bad,'timeline gap')
+print('PASS: local artwork fixture and 3 meaningful refusal paths; no product footage fabricated or final film rendered')
+"`
+- Context: Check missing-media refusal, bounded crop, ordered 240-second map, and local-source acceptance using explicit artwork-only fixtures
+- Source SHA-256: `dd21c2fe81f427651ee7d2673bd2f1d5f395548e4e64d3fb59ae5565926ed0b9`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T162621.862406Z-249aaec3f9.json) · [Raw log](../build-logs/20261121T162621.862406Z-249aaec3f9.log)
+- [Exact process output](../build-logs/20261121T162621.862406Z-249aaec3f9.raw.log)
+
+### 2026-11-22T00:29:42+08:00 · showcase-docs-final · succeeded
+
+- Config: 240s; exit code: 0; elapsed: 1.276s.
+- Command: `C:\Python314\python.exe scripts/showcase_motion.py --mode docs --out E:/MusicAgent&DAW/demo-video/showcase-v1 --ffmpeg E:/SUMIN/ABC_Ocean/_tools/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe --ffprobe "E:/Users/28712/AppData/Local/Programs/Audio Jam/lib/win32/ffprobe.exe"`
+- Context: Finalize English-only script copy, Chinese counterpart, six exact prompts and editable assembly sources
+- Source SHA-256: `615f96da0610d3ea9fac375c515402ddbe084a3eafa7f363254ca0bd1ce54e3d`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T162942.733323Z-b4fdbd24ed.json) · [Raw log](../build-logs/20261121T162942.733323Z-b4fdbd24ed.log)
+- [Exact process output](../build-logs/20261121T162942.733323Z-b4fdbd24ed.raw.log)
+
+### 2026-11-22T00:29:44+08:00 · showcase-docs-final · succeeded
+
+- Config: 240s; exit code: 0; elapsed: 1.303s.
+- Command: `C:\Python314\python.exe scripts/showcase_assemble.py --template E:/MusicAgent&DAW/demo-video/showcase-v1/scripts/shot-map-template.json --kit E:/MusicAgent&DAW/demo-video/showcase-v1`
+- Context: Finalize English-only script copy, Chinese counterpart, six exact prompts and editable assembly sources
+- Source SHA-256: `615f96da0610d3ea9fac375c515402ddbe084a3eafa7f363254ca0bd1ce54e3d`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T162944.397507Z-c289f45749.json) · [Raw log](../build-logs/20261121T162944.397507Z-c289f45749.log)
+- [Exact process output](../build-logs/20261121T162944.397507Z-c289f45749.raw.log)
+
+### 2026-11-22T00:30:49+08:00 · showcase-caption-refinement · succeeded
+
+- Config: 240s; exit code: 0; elapsed: 1.031s.
+- Command: `C:\Python314\python.exe scripts/showcase_motion.py --mode captions --out E:/MusicAgent&DAW/demo-video/showcase-v1 --ffmpeg E:/SUMIN/ABC_Ocean/_tools/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe --ffprobe "E:/Users/28712/AppData/Local/Programs/Audio Jam/lib/win32/ffprobe.exe"`
+- Context: Balance subtitle cues to avoid sub-second orphan words; preserve measured voice segment windows
+- Source SHA-256: `f9cfb32a93f19549291120eeb9478a1b84b595d21dd0aabca42d853843d9f5b8`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T163049.844698Z-adc453d542.json) · [Raw log](../build-logs/20261121T163049.844698Z-adc453d542.log)
+- [Exact process output](../build-logs/20261121T163049.844698Z-adc453d542.raw.log)
+
+### 2026-11-22T00:32:15+08:00 · showcase-final-docs · succeeded
+
+- Config: 1080p30-240s; exit code: 0; elapsed: 1.159s.
+- Command: `C:\Python314\python.exe scripts/showcase_motion.py --out E:/MusicAgent&DAW/demo-video/showcase-v1 --ffmpeg E:/SUMIN/ABC_Ocean/_tools/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe --ffprobe "E:/Users/28712/AppData/Local/Programs/Audio Jam/lib/win32/ffprobe.exe" --mode docs`
+- Context: Finalize aligned scripts/captions; refine connected abstract sax contour; decode all motion and validate timing, alpha, loop seams and audio gaps
+- Source SHA-256: `1a7e88f58b9452128c67618d20f9a1ad4e45b3a0db97992607b743fcc652ff31`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T163215.152536Z-3c993d47c9.json) · [Raw log](../build-logs/20261121T163215.152536Z-3c993d47c9.log)
+- [Exact process output](../build-logs/20261121T163215.152536Z-3c993d47c9.raw.log)
+
+### 2026-11-22T00:32:16+08:00 · showcase-final-captions · succeeded
+
+- Config: 1080p30-240s; exit code: 0; elapsed: 0.921s.
+- Command: `C:\Python314\python.exe scripts/showcase_motion.py --out E:/MusicAgent&DAW/demo-video/showcase-v1 --ffmpeg E:/SUMIN/ABC_Ocean/_tools/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe --ffprobe "E:/Users/28712/AppData/Local/Programs/Audio Jam/lib/win32/ffprobe.exe" --mode captions`
+- Context: Finalize aligned scripts/captions; refine connected abstract sax contour; decode all motion and validate timing, alpha, loop seams and audio gaps
+- Source SHA-256: `1a7e88f58b9452128c67618d20f9a1ad4e45b3a0db97992607b743fcc652ff31`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T163216.707170Z-dbfaa379fb.json) · [Raw log](../build-logs/20261121T163216.707170Z-dbfaa379fb.log)
+- [Exact process output](../build-logs/20261121T163216.707170Z-dbfaa379fb.raw.log)
+
+### 2026-11-22T00:32:18+08:00 · showcase-final-render · succeeded
+
+- Config: 1080p30-240s; exit code: 0; elapsed: 98.449s.
+- Command: `C:\Python314\python.exe scripts/showcase_motion.py --out E:/MusicAgent&DAW/demo-video/showcase-v1 --ffmpeg E:/SUMIN/ABC_Ocean/_tools/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe --ffprobe "E:/Users/28712/AppData/Local/Programs/Audio Jam/lib/win32/ffprobe.exe" --mode render --only sax-abstract`
+- Context: Finalize aligned scripts/captions; refine connected abstract sax contour; decode all motion and validate timing, alpha, loop seams and audio gaps
+- Source SHA-256: `1a7e88f58b9452128c67618d20f9a1ad4e45b3a0db97992607b743fcc652ff31`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T163218.107147Z-2df6469f36.json) · [Raw log](../build-logs/20261121T163218.107147Z-2df6469f36.log)
+- [Exact process output](../build-logs/20261121T163218.107147Z-2df6469f36.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T00:33:57+08:00 · showcase-final-verify · succeeded
+
+- Config: 1080p30-240s; exit code: 0; elapsed: 32.857s.
+- Command: `C:\Python314\python.exe scripts/showcase_motion.py --out E:/MusicAgent&DAW/demo-video/showcase-v1 --ffmpeg E:/SUMIN/ABC_Ocean/_tools/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe --ffprobe "E:/Users/28712/AppData/Local/Programs/Audio Jam/lib/win32/ffprobe.exe" --mode verify`
+- Context: Finalize aligned scripts/captions; refine connected abstract sax contour; decode all motion and validate timing, alpha, loop seams and audio gaps
+- Source SHA-256: `cb5267993100010181dc7c4ee57977e892279b54ac6ec2a96601435cb783b78b`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T163357.092450Z-f509c8a973.json) · [Raw log](../build-logs/20261121T163357.092450Z-f509c8a973.log)
+- [Exact process output](../build-logs/20261121T163357.092450Z-f509c8a973.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T00:36:36+08:00 · showcase-source-sync · succeeded
+
+- Config: delivery; exit code: 0; elapsed: 1.020s.
+- Command: `C:\Python314\python.exe -c "import shutil,hashlib,ast
+from pathlib import Path
+out=Path(r'E:/MusicAgent&DAW/demo-video/showcase-v1')
+for name in ['showcase_motion.py','showcase_assemble.py']:
+ src=Path('scripts')/name;ast.parse(src.read_text(encoding='utf-8'));dst=out/'motion/source'/name;shutil.copyfile(src,dst);assert hashlib.sha256(src.read_bytes()).digest()==hashlib.sha256(dst.read_bytes()).digest()
+shutil.copyfile('docs/demo/2026-11-22-showcase-editing.md',out/'scripts/ASSEMBLY.md')
+print('Two Python sources parse and match delivery copies; editing guide synced')
+"`
+- Context: Sync final editable renderer/assembler and editing guide; verify Python syntax and copied source hashes without touching shared DEVLOG
+- Source SHA-256: `f814f341841c231a60df9c83bed45de2c7b94cfa491578055d4f12527cc17f63`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T163636.188970Z-dbd90dfc91.json) · [Raw log](../build-logs/20261121T163636.188970Z-dbd90dfc91.log)
+- [Exact process output](../build-logs/20261121T163636.188970Z-dbd90dfc91.raw.log)
+
+### 2026-11-22T00:56:06+08:00 · showcase-firstcut-composites · succeeded
+
+- Config: 1080p30; exit code: 0; elapsed: 12.271s.
+- Command: `C:\Python314\python.exe scripts/showcase_firstcut.py --mode render`
+- Context: Render actual stopped DAW crops and original abstract sax; recording remains pending. Central DEVLOG deferred to root.
+- Source SHA-256: `2704c23792669c8ec04414accca40f26c4d47202bab0cf97c2247a3f42cff969`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T165606.850544Z-a4c9527908.json) · [Raw log](../build-logs/20261121T165606.850544Z-a4c9527908.log)
+- [Exact process output](../build-logs/20261121T165606.850544Z-a4c9527908.raw.log)
+
+### 2026-11-22T00:57:25+08:00 · showcase-firstcut-composites-refine · succeeded
+
+- Config: 1080p30; exit code: 0; elapsed: 12.558s.
+- Command: `C:\Python314\python.exe scripts/showcase_firstcut.py --mode render`
+- Context: Preserve complete abstract sax bell and exclude partial native label in crop. Central DEVLOG deferred to root.
+- Source SHA-256: `4207a6cf8c4cb57fdb644c9d27fd371d8cbb9dba74218c0bac8c38381efdb6c4`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T165725.625047Z-504268817b.json) · [Raw log](../build-logs/20261121T165725.625047Z-504268817b.log)
+- [Exact process output](../build-logs/20261121T165725.625047Z-504268817b.raw.log)
+
+### 2026-11-22T00:57:38+08:00 · showcase-firstcut-composites-refine · succeeded
+
+- Config: 1080p30; exit code: 0; elapsed: 1.523s.
+- Command: `C:\Python314\python.exe scripts/showcase_firstcut.py --mode draft`
+- Context: Preserve complete abstract sax bell and exclude partial native label in crop. Central DEVLOG deferred to root.
+- Source SHA-256: `4207a6cf8c4cb57fdb644c9d27fd371d8cbb9dba74218c0bac8c38381efdb6c4`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T165738.984423Z-6e586f891d.json) · [Raw log](../build-logs/20261121T165738.984423Z-6e586f891d.log)
+- [Exact process output](../build-logs/20261121T165738.984423Z-6e586f891d.raw.log)
+
+### 2026-11-22T00:58:30+08:00 · showcase-firstcut-validation · succeeded
+
+- Config: local offline editorial; exit code: 0; elapsed: 5.527s.
+- Command: `C:\Python314\python.exe build-logs\verify-showcase-firstcut.py`
+- Context: Validate envelope render, invalid values, accepted source hashes/ranges, missing media refusal, and source sync. Central DEVLOG deferred.
+- Source SHA-256: `30e6493c976560b3f4439ee99f71e3ad2bda3c5ad0a6f106a2257d2b38caa435`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T165830.899334Z-47789c25d2.json) · [Raw log](../build-logs/20261121T165830.899334Z-47789c25d2.log)
+- [Exact process output](../build-logs/20261121T165830.899334Z-47789c25d2.raw.log)
+
+### 2026-11-22T01:03:56+08:00 · showcase-d402-real-vst-insert · succeeded
+
+- Config: 1080p30 8sec; exit code: 0; elapsed: 5.137s.
+- Command: `C:\Python314\python.exe scripts/showcase_firstcut.py --mode vst`
+- Context: Replace final3sec with actual EP Keyscape Rhodes editor; retain both piano rolls, no native state mutation. Central DEVLOG deferred.
+- Source SHA-256: `d64075c7a27cd27b266bc259fa28c11efd9e544d28bce811a2fd3cdd9a13cc0d`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T170356.405439Z-1bb9839d76.json) · [Raw log](../build-logs/20261121T170356.405439Z-1bb9839d76.log)
+- [Exact process output](../build-logs/20261121T170356.405439Z-1bb9839d76.raw.log)
+
+### 2026-11-22T01:04:02+08:00 · showcase-d402-real-vst-insert · succeeded
+
+- Config: 1080p30 8sec; exit code: 0; elapsed: 1.106s.
+- Command: `C:\Python314\python.exe scripts/showcase_firstcut.py --mode draft`
+- Context: Replace final3sec with actual EP Keyscape Rhodes editor; retain both piano rolls, no native state mutation. Central DEVLOG deferred.
+- Source SHA-256: `d64075c7a27cd27b266bc259fa28c11efd9e544d28bce811a2fd3cdd9a13cc0d`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T170402.007055Z-7bff315977.json) · [Raw log](../build-logs/20261121T170402.007055Z-7bff315977.log)
+- [Exact process output](../build-logs/20261121T170402.007055Z-7bff315977.raw.log)
+
+### 2026-11-22T01:16:43+08:00 · showcase-warp-audio-handoff · succeeded
+
+- Config: actual DAW export; exit code: 0; elapsed: 1.462s.
+- Command: `C:\Python314\python.exe scripts/showcase_firstcut.py --mode draft`
+- Context: Bind passed D2 Warp export at source0.25 to film135..142; first3D pictures still pending; no new inference. Central DEVLOG deferred.
+- Source SHA-256: `933583d56df23a00a17fb8a944d027efbbab34cba2f64b42b046c3aabd385b7c`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T171643.685043Z-2428c98e40.json) · [Raw log](../build-logs/20261121T171643.685043Z-2428c98e40.log)
+- [Exact process output](../build-logs/20261121T171643.685043Z-2428c98e40.raw.log)
+
+### 2026-11-22T01:17:17+08:00 · showcase-no-narration-companion-validation · succeeded
+
+- Config: offline fixture 240s7200frames; exit code: 0; elapsed: 3.898s.
+- Command: `C:\Python314\python.exe build-logs\verify-showcase-no-narration.py`
+- Context: Test stream reuse, true voice omission, un-ducked actual MIDI audio at preserved timeline, no captions, decode and packet hash; actual final film stays parent owned. Central DEVLOG deferred.
+- Source SHA-256: `933583d56df23a00a17fb8a944d027efbbab34cba2f64b42b046c3aabd385b7c`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T171717.699374Z-20790e64a0.json) · [Raw log](../build-logs/20261121T171717.699374Z-20790e64a0.log)
+- [Exact process output](../build-logs/20261121T171717.699374Z-20790e64a0.raw.log)
+
+### 2026-11-22T01:25:33+08:00 · showcase-entry-documentation · succeeded
+
+- Config: local paths and CLI; exit code: 0; elapsed: 1.246s.
+- Command: `C:\Python314\python.exe build-logs\verify-showcase-entry-doc.py`
+- Context: Chinese START-HERE and two local launchers; inspect reset help only, no reset or GUI operation. Central DEVLOG deferred.
+- Source SHA-256: `01e5bef8dfb229b89a72db42165c324a95d5c735538f1327a3f8a5d74ad9c88a`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T172533.420066Z-9dc76cd0c8.json) · [Raw log](../build-logs/20261121T172533.420066Z-9dc76cd0c8.log)
+- [Exact process output](../build-logs/20261121T172533.420066Z-9dc76cd0c8.raw.log)
+
+### 2026-11-22T01:33:25+08:00 · showcase-finalcut-partial-montages · succeeded
+
+- Config: 1080p30 actual native captures; exit code: 0; elapsed: 25.657s.
+- Command: `C:\Python314\python.exe scripts/showcase_finalcut.py`
+- Context: Prepare D1, accepted D2 chord states and product preview; no full assembly until remaining capture acceptance. Central DEVLOG deferred.
+- Source SHA-256: `ec82cf43969930c2d4ac0267197061c251c62b7a5c51ca94cd6628561f5d5730`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T173325.503934Z-3909453d17.json) · [Raw log](../build-logs/20261121T173325.503934Z-3909453d17.log)
+- [Exact process output](../build-logs/20261121T173325.503934Z-3909453d17.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T01:35:11+08:00 · showcase-partial-finalmap-review · succeeded
+
+- Config: actual native UI montage; exit code: 0; elapsed: 2.505s.
+- Command: `C:\Python314\python.exe -c "from pathlib import Path
+import json,sys,ast
+sys.path.insert(0,str(Path('scripts').resolve()))
+from showcase_assemble import probe
+from showcase_firstcut import FFPROBE,KIT
+m=json.loads((KIT/'scripts/shot-map-final-2026-11-22.json').read_text())
+assert m['pending_shots']==['W01','W02','W03','T01','T02','T03']
+for shot in m['shots']:
+ if not shot['media']:continue
+ p=Path(shot['media']);assert p.is_file()
+ if shot['kind']=='video':
+  d=probe(FFPROBE,p);assert float(d['format']['duration'])+.02>=shot['end']-shot['start']
+for f in ('scripts/showcase_assemble.py','scripts/showcase_finalcut.py','scripts/showcase_motion.py'):ast.parse(Path(f).read_text(encoding='utf-8'))
+assert next(a for a in m['audio'] if a['label']=='yue preview')['source_in']==0
+assert not m['missing_audio']
+print('Partial final map accepted; six picture slots remain pending; D1 actual video source ranges valid; documentation Latest analyses refresh explained.')
+"`
+- Context: Check accepted D1/D2 source ranges, preserved incomplete final map, and refreshed Latest analyses instructions. No full film yet. Central DEVLOG deferred.
+- Source SHA-256: `023930e3219382c011af245696f5016d6dedd3cb5ea872eddb3ff73099197657`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T173511.292587Z-9693744535.json) · [Raw log](../build-logs/20261121T173511.292587Z-9693744535.log)
+- [Exact process output](../build-logs/20261121T173511.292587Z-9693744535.raw.log)
+
+### 2026-11-22T01:37:10+08:00 · showcase-finalcut-complete-map · succeeded
+
+- Config: 1080p30 accepted native captures; exit code: 0; elapsed: 14.257s.
+- Command: `C:\Python314\python.exe scripts/showcase_finalcut.py`
+- Context: All 31 slots map to accepted native captures/original motion. Chord-stale panel excluded; Warp audio+video sourcezero; no physical recording claim. Central DEVLOG deferred.
+- Source SHA-256: `97c2ec878bd2e263a57333240b1d9cd2743ae8d85d2f89c73b2580661b1e01f8`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T173710.810004Z-a47818762f.json) · [Raw log](../build-logs/20261121T173710.810004Z-a47818762f.log)
+- [Exact process output](../build-logs/20261121T173710.810004Z-a47818762f.raw.log)
+
+### 2026-11-22T01:37:25+08:00 · showcase-finalcut-complete-map · succeeded
+
+- Config: 1080p30 accepted native captures; exit code: 0; elapsed: 5.469s.
+- Command: `C:\Python314\python.exe scripts/showcase_assemble.py --map E:\MusicAgent&DAW\demo-video\showcase-v1\scripts\shot-map-final-2026-11-22.json --output E:\MusicAgent&DAW\demo-video\showcase-v1\exports\E-musician-Showcase-240s-English.mp4 --no-narration-output E:\MusicAgent&DAW\demo-video\showcase-v1\exports\E-musician-Showcase-240s-Music-Only.mp4 --ffmpeg E:\SUMIN\ABC_Ocean\_tools\imageio_ffmpeg\binaries\ffmpeg-win-x86_64-v7.1.exe --ffprobe "E:\Users\28712\AppData\Local\Programs\Audio Jam\lib\win32\ffprobe.exe" --check-only`
+- Context: All 31 slots map to accepted native captures/original motion. Chord-stale panel excluded; Warp audio+video sourcezero; no physical recording claim. Central DEVLOG deferred.
+- Source SHA-256: `97c2ec878bd2e263a57333240b1d9cd2743ae8d85d2f89c73b2580661b1e01f8`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T173725.481457Z-74fe43ad2d.json) · [Raw log](../build-logs/20261121T173725.481457Z-74fe43ad2d.log)
+- [Exact process output](../build-logs/20261121T173725.481457Z-74fe43ad2d.raw.log)
+
+### 2026-11-22T01:37:52+08:00 · showcase-final-film-assembly · succeeded
+
+- Config: 1920x1080 30fps 240s English and music-only; exit code: 0; elapsed: 100.254s.
+- Command: `C:\Python314\python.exe scripts/showcase_assemble.py --map E:\MusicAgent&DAW\demo-video\showcase-v1\scripts\shot-map-final-2026-11-22.json --output E:\MusicAgent&DAW\demo-video\showcase-v1\exports\E-musician-Showcase-240s-English.mp4 --no-narration-output E:\MusicAgent&DAW\demo-video\showcase-v1\exports\E-musician-Showcase-240s-Music-Only.mp4 --ffmpeg E:\SUMIN\ABC_Ocean\_tools\imageio_ffmpeg\binaries\ffmpeg-win-x86_64-v7.1.exe --ffprobe "E:\Users\28712\AppData\Local\Programs\Audio Jam\lib\win32\ffprobe.exe"`
+- Context: Assemble accepted actual captures, original motion and authentic audio exports; preserve fixed-result provenance and pending real sax-recording insert. Central DEVLOG deferred.
+- Source SHA-256: `97c2ec878bd2e263a57333240b1d9cd2743ae8d85d2f89c73b2580661b1e01f8`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T173752.167981Z-29efaee32f.json) · [Raw log](../build-logs/20261121T173752.167981Z-29efaee32f.log)
+- [Exact process output](../build-logs/20261121T173752.167981Z-29efaee32f.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T01:40:03+08:00 · showcase-final-film-QA · succeeded
+
+- Config: two 1080p30 240s films; exit code: 0; elapsed: 39.970s.
+- Command: `C:\Python314\python.exe scripts/showcase_final_qa.py`
+- Context: Decode both completed films, validate frame/time structure and audio intervals, measure peaks/loudness, extract final-picture contact sheet. Central DEVLOG deferred.
+- Source SHA-256: `288a71b2fca97793a63af710308c2fbe78f23ce3712b64d9c9d540720b4ff88e`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T174003.006561Z-6d1d54ce63.json) · [Raw log](../build-logs/20261121T174003.006561Z-6d1d54ce63.log)
+- [Exact process output](../build-logs/20261121T174003.006561Z-6d1d54ce63.raw.log)
+
+### 2026-11-22T01:44:18+08:00 · showcase-final-editorial-cleanup · succeeded
+
+- Config: 1080p30-240s; exit code: 0; elapsed: 6.195s.
+- Command: `C:\Python314\python.exe scripts/showcase_finalcut.py`
+- Context: Crop unrelated previous replies and internal capture header; full reassembly and technical QA. Central DEVLOG deferred.
+- Source SHA-256: `d72c21a53ca894219faea10ed242d43ee7202fa3b5e828eb7f2013824672b721`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T174418.715047Z-4df67de345.json) · [Raw log](../build-logs/20261121T174418.715047Z-4df67de345.log)
+- [Exact process output](../build-logs/20261121T174418.715047Z-4df67de345.raw.log)
+
+### 2026-11-22T01:44:25+08:00 · showcase-final-editorial-cleanup · succeeded
+
+- Config: 1080p30-240s; exit code: 0; elapsed: 106.129s.
+- Command: `C:\Python314\python.exe scripts/showcase_assemble.py --map E:\MusicAgent&DAW\demo-video\showcase-v1\scripts\shot-map-final-2026-11-22.json --output E:\MusicAgent&DAW\demo-video\showcase-v1\exports\E-musician-Showcase-240s-English.mp4 --no-narration-output E:\MusicAgent&DAW\demo-video\showcase-v1\exports\E-musician-Showcase-240s-Music-Only.mp4 --ffmpeg E:\SUMIN\ABC_Ocean\_tools\imageio_ffmpeg\binaries\ffmpeg-win-x86_64-v7.1.exe --ffprobe "E:\Users\28712\AppData\Local\Programs\Audio Jam\lib\win32\ffprobe.exe" --overwrite`
+- Context: Crop unrelated previous replies and internal capture header; full reassembly and technical QA. Central DEVLOG deferred.
+- Source SHA-256: `d72c21a53ca894219faea10ed242d43ee7202fa3b5e828eb7f2013824672b721`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T174425.336707Z-49a243688a.json) · [Raw log](../build-logs/20261121T174425.336707Z-49a243688a.log)
+- [Exact process output](../build-logs/20261121T174425.336707Z-49a243688a.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T01:46:11+08:00 · showcase-final-editorial-cleanup · succeeded
+
+- Config: 1080p30-240s; exit code: 0; elapsed: 46.150s.
+- Command: `C:\Python314\python.exe scripts/showcase_final_qa.py`
+- Context: Crop unrelated previous replies and internal capture header; full reassembly and technical QA. Central DEVLOG deferred.
+- Source SHA-256: `e38183086762d4d6315af436507889188b24a956f2c3eacb7007667556368bd9`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T174611.879950Z-ef93267365.json) · [Raw log](../build-logs/20261121T174611.879950Z-ef93267365.log)
+- [Exact process output](../build-logs/20261121T174611.879950Z-ef93267365.raw.log)
+
+### 2026-11-22T01:48:01+08:00 · showcase-film-delivery · succeeded
+
+- Config: 240s-1080p30; exit code: 0; elapsed: 2.476s.
+- Command: `C:\Python314\python.exe scripts/showcase_delivery.py --visual-reviewed`
+- Context: Write final delivery links, sampled visual review, editable sources and document validation after final cropped film inspection. Central DEVLOG deferred.
+- Source SHA-256: `e38183086762d4d6315af436507889188b24a956f2c3eacb7007667556368bd9`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T174801.125468Z-b125f2fc12.json) · [Raw log](../build-logs/20261121T174801.125468Z-b125f2fc12.log)
+- [Exact process output](../build-logs/20261121T174801.125468Z-b125f2fc12.raw.log)
+
+## 2026-11-22 - Final source and original-asset review
+
+Read-only review found no blocking ordinary-mode leakage or new model/SSH fallback in the isolated build. The compile switch defaults OFF; ReplayProvider is selected before production credentials are loaded; no online fallback is constructed. Python loopback restriction is not an operating-system network sandbox. Recording display uses writer-published in-memory peaks on the message thread; physical microphone and listening acceptance remain separate. Original 0.13.6 EXE and test drive project hashes, exactly three pristine showcase starting projects, manifest, and the dedicated-test EXE match the delivery audit (1764eefd12). Twenty-two EN/ZH web flows and four build-mode guard tests passed. No additional native build or physical-device test was performed for this final read-only review.
+
+The question-mark separator in the earlier implementation-start heading is a text-encoding artifact; its historical entry is preserved unchanged. Deferred media Recorder entries are appended after their execution rather than rewritten into earlier chronology; each retains actual start/end time and its original receipt.
+
+### 2026-11-22T01:49:57+08:00 · showcase-playhead-frame-audit · succeeded
+
+- Config: native-capture-15fps; exit code: 0; elapsed: 4.528s.
+- Command: `C:\Python314\python.exe -c "
+import sys
+from pathlib import Path
+sys.path.insert(0,'scripts')
+from showcase_firstcut import KIT,FFMPEG
+from showcase_assemble import execute,write,digest
+out=KIT/'exports/qa/sync';out.mkdir(exist_ok=True);records=[]
+for id,relative in [('C01','captures/workflow-final/24-new-light-play.mp4'),('W03','captures/workflow-d2/09-warp-play.mp4'),('G03','captures/workflow-final/03-yue-preview.mp4')]:
+ for second in [0,1,2,3]:
+  execute([FFMPEG,'-y','-v','error','-ss',second,'-i',KIT/relative,'-frames:v','1',out/f'{id}-{second}s.png'],out/f'{id}-{second}s.log',records)
+write(out/'EXTRACTION.json',{'records':records})
+"`
+- Context: Extract actual first/near-first frames for visual timing audit; no GUI and no pixel fabrication. Central DEVLOG deferred.
+- Source SHA-256: `e38183086762d4d6315af436507889188b24a956f2c3eacb7007667556368bd9`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T174957.804556Z-a8740cb0c6.json) · [Raw log](../build-logs/20261121T174957.804556Z-a8740cb0c6.log)
+- [Exact process output](../build-logs/20261121T174957.804556Z-a8740cb0c6.raw.log)
+
+### 2026-11-22T01:55:24+08:00 · showcase-native-timing-repair · failed
+
+- Config: 240s-1080p30; exit code: 1; elapsed: 3.136s.
+- Command: `C:\Python314\python.exe scripts/showcase_sync.py`
+- Context: Restore recorded frame wall times and initial source offsets; reuse unchanged picture segments, normal-speed audio; final QA. Central DEVLOG deferred.
+- Source SHA-256: `7641c81ac3747b8deed2d12e9caac51b1079040da826105b3f16950c24bf7fbf`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T175524.197375Z-d144329d98.json) · [Raw log](../build-logs/20261121T175524.197375Z-d144329d98.log)
+- [Exact process output](../build-logs/20261121T175524.197375Z-d144329d98.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261121T175524.197375Z-d144329d98.log
+
+### 2026-11-22T01:55:56+08:00 · showcase-native-timing-repair · succeeded
+
+- Config: 240s-1080p30; exit code: 0; elapsed: 7.629s.
+- Command: `C:\Python314\python.exe scripts/showcase_sync.py`
+- Context: Limit frame-time expression to actual scene duration after ffmpeg nesting-limit failure; restore native timestamps and validate final films. Central DEVLOG deferred.
+- Source SHA-256: `5a992e64dd43a5bf318b31ffe407e2634d10a9f92264ae9bd7158b3e5638cd0e`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T175556.250464Z-b1be0e1cb8.json) · [Raw log](../build-logs/20261121T175556.250464Z-b1be0e1cb8.log)
+- [Exact process output](../build-logs/20261121T175556.250464Z-b1be0e1cb8.raw.log)
+
+### 2026-11-22T01:56:04+08:00 · showcase-native-timing-repair · succeeded
+
+- Config: 240s-1080p30; exit code: 0; elapsed: 1.553s.
+- Command: `C:\Python314\python.exe scripts/showcase_finalcut.py`
+- Context: Limit frame-time expression to actual scene duration after ffmpeg nesting-limit failure; restore native timestamps and validate final films. Central DEVLOG deferred.
+- Source SHA-256: `5a992e64dd43a5bf318b31ffe407e2634d10a9f92264ae9bd7158b3e5638cd0e`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T175604.568549Z-721b19594d.json) · [Raw log](../build-logs/20261121T175604.568549Z-721b19594d.log)
+- [Exact process output](../build-logs/20261121T175604.568549Z-721b19594d.raw.log)
+
+### 2026-11-22T01:56:06+08:00 · showcase-native-timing-repair · succeeded
+
+- Config: 240s-1080p30; exit code: 0; elapsed: 80.043s.
+- Command: `C:\Python314\python.exe scripts/showcase_assemble.py --map E:\MusicAgent&DAW\demo-video\showcase-v1\scripts\shot-map-final-2026-11-22.json --output E:\MusicAgent&DAW\demo-video\showcase-v1\exports\E-musician-Showcase-240s-English.mp4 --no-narration-output E:\MusicAgent&DAW\demo-video\showcase-v1\exports\E-musician-Showcase-240s-Music-Only.mp4 --ffmpeg E:\SUMIN\ABC_Ocean\_tools\imageio_ffmpeg\binaries\ffmpeg-win-x86_64-v7.1.exe --ffprobe "E:\Users\28712\AppData\Local\Programs\Audio Jam\lib\win32\ffprobe.exe" --overwrite --reuse-unchanged-segments --previous-map E:\MusicAgent&DAW\demo-video\showcase-v1\exports\qa\revisions\pre-native-timing-map.json`
+- Context: Limit frame-time expression to actual scene duration after ffmpeg nesting-limit failure; restore native timestamps and validate final films. Central DEVLOG deferred.
+- Source SHA-256: `5a992e64dd43a5bf318b31ffe407e2634d10a9f92264ae9bd7158b3e5638cd0e`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T175606.849356Z-07ccdf5351.json) · [Raw log](../build-logs/20261121T175606.849356Z-07ccdf5351.log)
+- [Exact process output](../build-logs/20261121T175606.849356Z-07ccdf5351.raw.log)
+- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.
+
+### 2026-11-22T01:57:27+08:00 · showcase-native-timing-repair · succeeded
+
+- Config: 240s-1080p30; exit code: 0; elapsed: 44.786s.
+- Command: `C:\Python314\python.exe scripts/showcase_final_qa.py`
+- Context: Limit frame-time expression to actual scene duration after ffmpeg nesting-limit failure; restore native timestamps and validate final films. Central DEVLOG deferred.
+- Source SHA-256: `61001d56a39a13f630255190b5097a45ee0a723493b12fadf2436ab36e7f6ce4`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T175727.251278Z-510ee913d7.json) · [Raw log](../build-logs/20261121T175727.251278Z-510ee913d7.log)
+- [Exact process output](../build-logs/20261121T175727.251278Z-510ee913d7.raw.log)
+
+### 2026-11-22T01:58:49+08:00 · showcase-final-timing-delivery · succeeded
+
+- Config: 240s-1080p30; exit code: 0; elapsed: 1.773s.
+- Command: `C:\Python314\python.exe scripts/showcase_delivery.py --visual-reviewed`
+- Context: Refresh final hashes/docs after native timestamp repair; observed encoded C01/W03 midpoint offset 40ms/60ms. Central DEVLOG deferred.
+- Source SHA-256: `28cca5bc894a62ba09b6e93387c4f87c38df6aea2617981df4e40478715a8760`; Git HEAD: `0c41caaee976aa5cf4018e6c83697c7cf282ae4b`.
+- [Record](builds/20261121T175849.387187Z-f1fb9f3ad2.json) · [Raw log](../build-logs/20261121T175849.387187Z-f1fb9f3ad2.log)
+- [Exact process output](../build-logs/20261121T175849.387187Z-f1fb9f3ad2.raw.log)
+
+## 2026-11-22 - Recording and showcase delivery completed
+
+Delivered separate recording-waveform and offline showcase EXEs, six text-free motion backgrounds, logo opener/closer, 240-second English/Chinese scripts, local narration/subtitles, and two complete 1080p30 first-cut films. Real GUI Preview/Apply/analysis workflows, 25 native integration checks, 390 existing Agent tests, 20 replay tests, 22 EN/ZH web flows and 4 build guards have evidence. Recording first full CTest was 10/11; after the new waveform assertion fix engine passed 1/1 with 1180 production checks. Showcase ordinary CTest remains 9/11 with two documented mode conflicts. Failures are retained.
+
+Final films pass full decoding, 240-second/7200-frame checks and non-silent audition/no-full-scale-clipping checks. C01/W03 use actual frame timing/playhead evidence for retiming; music is not time-stretched. D4 uses a continuous 60-second current-project export. No new model inference, SSH/API, virtual driver or fabricated microphone take. The user must replace the 03:01-03:10 sax insert with actual recording/performance and verify physical microphone/long-take/hearing behavior.
+
+Original 0.13.6, original test drive and file associations are preserved. Source/docs/test/build summaries are selected for the feature branch; prior DEVLOG changes and 36 pre-existing receipts remain outside this commit. Large media and private user assets stay in the E-drive delivery folder. See review/2026-11-22-showcase/DELIVERY.md and PUBLISH.md; main is not merged.

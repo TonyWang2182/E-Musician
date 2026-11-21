@@ -22,7 +22,11 @@ ROOT = Path(__file__).resolve().parent.parent
 
 def embedded_session(path, provider):
     from music_agent.embedded import load_session, SocketClient
-    recorder=Recorder("agent-embedded-launch","Python + native DAW","DAW-owned helper only; launch is not GUI/audio acceptance")
+    if getattr(provider, "is_replay", False):
+        from music_agent.replay_provider import LocalLaunchRecorder
+        recorder=LocalLaunchRecorder(provider.package.root)
+    else:
+        recorder=Recorder("agent-embedded-launch","Python + native DAW","DAW-owned helper only; launch is not GUI/audio acceptance")
     started=time.perf_counter()
     record, record_path, log_path=recorder.new_record([sys.executable,__file__,"--serve","--embedded-session","<local session capability file>"],"launch")
     stage="load_session"
@@ -97,8 +101,18 @@ def main():
     parser.add_argument("--configure-key",action="store_true")
     parser.add_argument("--serve",action="store_true",help=argparse.SUPPRESS)
     parser.add_argument("--embedded-session",type=Path,help=argparse.SUPPRESS)
+    parser.add_argument("--showcase-root",type=Path,help=argparse.SUPPRESS)
     parser.add_argument("--check-provider",action="store_true")
     args=parser.parse_args()
+    if args.showcase_root:
+        if not args.embedded_session or any((args.configure_key, args.check_provider, args.provider, args.model, args.base_url, args.exe)):
+            parser.error("The local workspace helper requires its native session.")
+        from music_agent.replay_provider import ReplayProvider, install_loopback_guard
+        provider=ReplayProvider(args.showcase_root)
+        if not args.embedded_session.resolve().is_relative_to((provider.package.root / "runtime" / "agent" / "sessions").resolve()):
+            parser.error("The session must belong to the isolated workspace.")
+        install_loopback_guard()
+        return embedded_session(args.embedded_session,provider)
     config=load_config()
     selected=args.provider or config["active_provider"]
     preference=config["providers"][selected]

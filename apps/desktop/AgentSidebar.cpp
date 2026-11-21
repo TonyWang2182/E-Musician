@@ -1,4 +1,5 @@
 #include "AgentSidebar.h"
+#include "ReplayMode.h"
 #include "UiLanguage.h"
 #include "UiDesign.h"
 #include <array>
@@ -112,7 +113,7 @@ private:
         if (!listener.createListener(0, "127.0.0.1") || !nonBlocking(listener)) {
             setStatus("Unable to start local Agent connection."); return;
         }
-        const auto root = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory)
+        const auto root = showcase::enabled()?showcase::profile().getChildFile("agent/sessions"):juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory)
             .getChildFile("E-musician").getChildFile("agent").getChildFile("sessions");
         if (root.createDirectory().failed()) { setStatus("Unable to create local Agent session."); return; }
         const auto id = juce::Uuid().toString().removeCharacters("-");
@@ -127,8 +128,9 @@ private:
         const auto packaged = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
             .getSiblingFile("agent-runtime").getChildFile("run_agent.py");
         if (packaged.existsAsFile()) script = packaged;
-        const bool started = !threadShouldExit() && python.existsAsFile() && script.existsAsFile()
-            && child.start(juce::StringArray{python.getFullPathName(), script.getFullPathName(), "--serve", "--embedded-session", input.getFullPathName()}, 0);
+        juce::StringArray command{python.getFullPathName(), script.getFullPathName(), "--serve", "--embedded-session", input.getFullPathName()};
+        if(showcase::enabled()){command.add("--showcase-root");command.add(showcase::root().getFullPathName());}
+        const bool started = !threadShouldExit() && python.existsAsFile() && script.existsAsFile() && child.start(command, 0);
         if (!started) { input.deleteFile(); setStatus("Agent could not start. Check the Python runtime and retry."); return; }
         std::unique_ptr<juce::StreamingSocket> client;
         juce::MemoryBlock pendingBytes;
@@ -215,7 +217,7 @@ public:
       : WebBrowserComponent(Options().withBackend(Options::Backend::webview2)
           .withKeepPageLoadedWhenBrowserIsHidden().withNativeIntegrationEnabled()
           .withWinWebView2Options(Options::WinWebView2().withUserDataFolder(
-              juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("E-musician/agent/webview")))
+              showcase::enabled()?showcase::profile().getChildFile("agent/webview"):juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("E-musician/agent/webview")))
           .withEventListener("agentClose", [close](const juce::var&) { if (close) close(); })
           .withEventListener("agentFocus", [focus](const juce::var& event) {
               // This is only a focus hint, never text or a music mutation.

@@ -1,4 +1,5 @@
 #include "MainComponent.h"
+#include "ReplayMode.h"
 #include "ArrangementView.h"
 #include "PianoRoll.h"
 #include "AgentSidebar.h"

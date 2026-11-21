@@ -34,6 +34,8 @@ add_executable(emusician_effects_benchmark tests/NativeEffectsBenchmark.cpp core
 target_include_directories(emusician_effects_benchmark PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
 option(EMUSICIAN_BUILD_DESKTOP "Build the JUCE/Tracktion desktop application" ON)
+option(EMUSICIAN_SHOWCASE "Build an isolated offline presentation executable" OFF)
+set(EMUSICIAN_SHOWCASE_ROOT "E:/MusicAgent&DAW/demo-video/showcase-v1/workspace" CACHE PATH "Offline presentation package root")
 option(EMUSICIAN_BUILD_UPSTREAM_DEMO "Also make the upstream DemoRunner target available" OFF)
 if(EMUSICIAN_BUILD_DESKTOP)
     set(ENGINE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/.cache/monitor-engine")
@@ -136,6 +138,8 @@ if(EMUSICIAN_BUILD_DESKTOP)
         "${CMAKE_CURRENT_SOURCE_DIR}/_deps/signalsmith-stretch/include"
         "${CMAKE_CURRENT_SOURCE_DIR}/_deps/signalsmith-linear/include")
     target_compile_definitions(EMusician PRIVATE
+        EMUSICIAN_SHOWCASE=$<BOOL:${EMUSICIAN_SHOWCASE}>
+        EMUSICIAN_SHOWCASE_ROOT="${EMUSICIAN_SHOWCASE_ROOT}"
         EMUSICIAN_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
         EMUSICIAN_AGENT_PYTHON="${Python3_EXECUTABLE}"
         JUCE_USE_WIN_WEBVIEW2=1 JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING=1 JUCE_WEB_BROWSER=1 JUCE_USE_CURL=0 JUCE_USE_MP3AUDIOFORMAT=1

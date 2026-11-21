@@ -21,9 +21,10 @@ def main():
         'Physical input activation, portable device configuration and driver-panel lifecycle; listening is separate')
     if args.action == 'configure':
         record.execute(['cmake', '--preset', 'windows-msvc', '-S', 'E:/emusician-analysis-source',
-            '-B', BUILD, '-DEMUSICIAN_RUNTIME_OUTPUT_ROOT=' + OUTPUT])
+            '-B', BUILD, '-DEMUSICIAN_RUNTIME_OUTPUT_ROOT=' + OUTPUT, '-DEMUSICIAN_SHOWCASE=OFF'])
     elif args.action == 'build':
-        if 'EMUSICIAN_RUNTIME_OUTPUT_ROOT:PATH=' + OUTPUT not in (Path(BUILD) / 'CMakeCache.txt').read_text(encoding='utf-8'):
+        cache = (Path(BUILD) / 'CMakeCache.txt').read_text(encoding='utf-8')
+        if 'EMUSICIAN_RUNTIME_OUTPUT_ROOT:PATH=' + OUTPUT not in cache.splitlines() or 'EMUSICIAN_SHOWCASE:BOOL=OFF' not in cache.splitlines():
             record.preflight_failure('Configure isolated 0.13.6 output before building.')
             return 2
         record.execute(['cmake', '--build', BUILD, '--config', 'Release', '--parallel', '1', '--',

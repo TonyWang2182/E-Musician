@@ -20,7 +20,7 @@ from .analysis import (ANALYSIS_TOOLS, KINDS, TERMINAL, authorize_start, authori
                        compile_import, capability_groups, identifier, safe_job, authorize_chord_read, compile_chord_edit, authorize_cancel, import_track_count)
 from .tempo import TEMPO_TOOLS, authorize_clips, compile_warp, compile_beats, verify_tempo_plan
 from . import generation as music_generation
-from .localization import L, english, authored, response_instruction, normalize_language
+from .localization import L, english, authored, response_instruction, normalize_language, public_response
 from .mixing import MIX_TOOL, MIX_INSTRUCTION, read_mix_context, capability_group as mix_capability_group
 
 READ_TOOL = {"type":"function","function":{"name":"read_clip_notes",
@@ -61,12 +61,20 @@ class PlanningRoundLimit(ValueError):
 class AgentRuntime:
     def __init__(self, bridge, provider=None, audit=None):
         self.bridge = bridge
-        self.preferences = load_config()
-        config = active_config(self.preferences)
-        self.provider = provider or create_provider(config["provider"], config["model"], config["base_url"],
-            **({"reasoning_effort":config["reasoning_effort"]} if config["provider"] == "openai" else {}))
-        self.provider_choices = list_providers(self.preferences)
-        self.audit = audit or Audit()
+        self.presentation = getattr(provider, "is_replay", False) is True
+        if self.presentation:
+            # This explicit injected adapter never loads production credentials,
+            # model preferences, or network clients. Project data stays native.
+            self.preferences, self.provider_choices = {}, []
+            self.provider = provider
+            self.audit = audit or Audit(provider.audit_path)
+        else:
+            self.preferences = load_config()
+            config = active_config(self.preferences)
+            self.provider = provider or create_provider(config["provider"], config["model"], config["base_url"],
+                **({"reasoning_effort":config["reasoning_effort"]} if config["provider"] == "openai" else {}))
+            self.provider_choices = list_providers(self.preferences)
+            self.audit = audit or Audit()
         self.lock = threading.RLock()
         self.worker = None
         self.cancel_event = threading.Event()
@@ -138,8 +146,8 @@ class AgentRuntime:
                            and self.snapshot.get("can_undo") and not self.busy())
             public = copy.deepcopy(self.snapshot)
             public.pop("clip_notes", None)
-            return {"phase":self.phase, "busy":self.busy(), "snapshot":public,
-                    "capability_groups": capability_groups(self.snapshot, self.host_capabilities, self.analysis_capabilities) + [mix_capability_group(self.host_capabilities), music_generation.capability_group(self.host_capabilities, self.generation_capabilities)],
+            response = {"phase":self.phase, "busy":self.busy(), "snapshot":public, "presentation":self.presentation,
+                    "capability_groups": self.provider.capability_groups(self.snapshot.get("project_id")) if self.presentation else capability_groups(self.snapshot, self.host_capabilities, self.analysis_capabilities) + [mix_capability_group(self.host_capabilities), music_generation.capability_group(self.host_capabilities, self.generation_capabilities)],
                     "analysis_jobs": copy.deepcopy(list(self.analysis_jobs.values())[-12:]),
                     "generation_jobs": copy.deepcopy(list(self.generation_jobs.values())[-12:]),
                     "generation_choices": self._generation_choices(),
@@ -151,12 +159,20 @@ class AgentRuntime:
                         "round":self.model_round, "max_rounds":MAX_MODEL_ROUNDS,
                         "timeout_seconds":getattr(self.provider,"timeout",45)},
                     "provider":{"id":getattr(self.provider,"provider_id","kimi"),
-                                "configured":has_key(provider=getattr(self.provider,"provider_id","kimi")), "model":self.provider.model,
+                                "configured":self.presentation or has_key(provider=getattr(self.provider,"provider_id","kimi")), "model":self.provider.model,
                                 "base_url":self.provider.base_url,"capabilities":getattr(self.provider,"capabilities",{}),
                                 **({"reasoning_effort":self.provider.reasoning_effort} if hasattr(self.provider,"reasoning_effort") else {})},
                     "providers":copy.deepcopy(self.provider_choices),
                     "usage":dict(self.usage), "can_undo":undo_ok, "last_result":self.last_result,
                     "control":{"connected":self.bridge.connected,"embedded":getattr(self.bridge,"embedded",False)}}
+            if self.presentation:
+                response=public_response(response,"en")
+                if self.phase=="ready":response["progress"]["label"]="Ready to review and apply."
+                if self.phase in {"planning","applying"}:response["progress"]["label"]="Preparing..." if self.phase=="planning" else "Applying changes..."
+                if self.phase=="cancelled":
+                    response["last_result"]="Cancelled. No changes were applied."
+                    response["progress"]["label"]=response["last_result"]
+            return response
 
     def _start(self, phase, target):
         if self.busy():
@@ -169,6 +185,7 @@ class AgentRuntime:
         self.resume_event.set()
         self.progress = {"stage":phase, "label":"正在规划" if phase=="planning" else "正在检查",
                          "completed":0, "total":0}
+        if self.presentation: self.progress = {"stage":phase,"label":"Preparing...","completed":0,"total":0}
         self.cancel_event = threading.Event()
         self.worker = threading.Thread(target=self._guard, args=(target,), daemon=True)
         self.worker.start()
@@ -207,11 +224,13 @@ class AgentRuntime:
             self.generation_request = None
             self.task_id = str(uuid.uuid4())
             self._message("user", prompt.strip())
-            task_language = normalize_language(language)
+            task_language = "en" if self.presentation else normalize_language(language)
             self._start("planning", lambda:self._propose(redact(prompt.strip()),scope,task_language))
         return self.state(False)
 
     def _progress(self, stage, label, completed=0, total=0):
+        if self.presentation and stage not in {"done", "ready", "error", "cancelled"}:
+            label = "Preparing..."
         with self.lock:
             self.progress = {"stage":stage, "label":label, "completed":completed, "total":total}
 
@@ -406,7 +425,7 @@ class AgentRuntime:
                     if self.pause_requested or self.cancel_event.is_set():
                         continue
                     # This is the dispatch boundary; later pause waits for this response.
-                    self.usage["calls"] += 1
+                    if not self.presentation: self.usage["calls"] += 1
                     break
             tools = [READ_TOOL, READ_EFFECT_TOOL, READ_INSTRUMENT_TOOL, MIX_TOOL, PLAN_TOOL]
             if hasattr(self.bridge, "analysis_result"):
@@ -1101,6 +1120,8 @@ class AgentRuntime:
             self.audit.write("undo_finished", project_id=after["project_id"], revision=after["revision"], status="completed")
 
     def settings(self, values):
+        if self.presentation:
+            raise ValueError("Connection settings are unavailable in this workspace.")
         if not isinstance(values, dict) or set(values) - {"provider","model","base_url","api_key","reasoning_effort"}:
             raise ValueError("设置字段无效。")
         with self.lock:
