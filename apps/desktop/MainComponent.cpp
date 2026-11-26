@@ -972,6 +972,13 @@ public:
         openNativeDevice=[&](const juce::String&){++openedNative;};chain.selectRow(0);open.onClick();openNativeDevice=originalOpenNative;
         if(openedNative!=1)return juce::Result::fail("Native chain item did not open the workspace device panel.");
         output.setProperty("plugin_chain_routes_native_to_workspace",true);
+        const auto priorState=state;
+        for(const bool finishing:{false,true}){
+            state.recording=!finishing;state.recordingFinalizing=finishing;refreshButtons();
+            if(!isEnabled()||!chain.isEnabled()||!open.isEnabled()||remove.isEnabled()||bypass.isEnabled()||up.isEnabled()||down.isEnabled())
+                return juce::Result::fail("Recording must keep plugin selection/Open active and graph controls locked.");
+        }
+        state=priorState;refreshButtons();output.setProperty("plugin_browser_recording_open_without_graph_edits",true);
         filtered.clear(); EngineSession::PluginDescriptorSnapshot missing;
         missing.id = "nonexistent-smoke-catalog-id"; missing.name = "Missing smoke plugin";
         filtered.push_back(missing); catalog.updateContent(); catalog.selectRow(0);
@@ -1170,13 +1177,14 @@ private:
     }
     void refreshButtons()
     {
-        add.setEnabled(!adding && catalog.getSelectedRow() >= 0 && catalog.getSelectedRow() < int(filtered.size()));
+        const bool canChangeGraph = !state.recording && !state.recordingFinalizing;
+        add.setEnabled(canChangeGraph && !adding && catalog.getSelectedRow() >= 0 && catalog.getSelectedRow() < int(filtered.size()));
         bool instrumentTrack = false;
         for (const auto& track : state.tracks) if (track.id == targetId() && track.kind == "instrument") instrumentTrack = true;
         native.setEnabled(instrumentTrack && bool(openNativeDevice));
         const int row = chain.getSelectedRow(); const bool chosen = row >= 0 && row < int(slots.size());
-        remove.setEnabled(chosen); bypass.setEnabled(chosen); open.setEnabled(chosen && !slots[std::size_t(row)].missing);
-        up.setEnabled(chosen && row > 0); down.setEnabled(chosen && row + 1 < int(slots.size()));
+        remove.setEnabled(canChangeGraph && chosen); bypass.setEnabled(canChangeGraph && chosen); open.setEnabled(chosen && !slots[std::size_t(row)].missing);
+        up.setEnabled(canChangeGraph && chosen && row > 0); down.setEnabled(canChangeGraph && chosen && row + 1 < int(slots.size()));
         bypass.setButtonText(chosen && !slots[std::size_t(row)].enabled ? uiText("enable", "启用") : uiText("bypass"));
     }
     void timerCallback() override
@@ -1186,14 +1194,16 @@ private:
         const bool tracksChanged = next.revision != state.revision || next.projectId != state.projectId || next.tracks.size() != state.tracks.size();
         const bool catalogChanged = next.pluginCatalog.size() != state.pluginCatalog.size() || next.pluginScanning != state.pluginScanning;
         const auto oldTarget = targetId(); const bool first = target.getNumItems() == 0; state = std::move(next);
-        setEnabled(!state.recording && !state.recordingFinalizing);
+        // Browsing the installed catalog and opening an existing editor do not
+        // alter the recording graph. Only topology/lifecycle controls are locked.
         if (tracksChanged || first) {
             target.clear(juce::dontSendNotification); target.addItem(uiText("Master output", "主轨输出"), 1); int chosen = 1;
             for (std::size_t i = 0; i < state.tracks.size(); ++i) { target.addItem(state.tracks[i].name, int(i) + 2); if (state.tracks[i].id == (first ? state.selectedTrackId : oldTarget)) chosen = int(i) + 2; }
             target.setSelectedId(chosen, juce::dontSendNotification); updateSlots();
         }
         if (catalogChanged || first) filter();
-        scan.setEnabled(!state.pluginScanning); directory.setEnabled(!state.pluginScanning);
+        refreshButtons();
+        scan.setEnabled(!state.pluginScanning && !state.recording && !state.recordingFinalizing); directory.setEnabled(scan.isEnabled());
         if (state.pluginScanning) status.setText("Scanning in a separate process. You can continue editing the project.", juce::dontSendNotification);
         else if (status.getText().isEmpty() || catalogChanged) status.setText(juce::String(int(state.pluginCatalog.size())) + " plugins. Select an instrument for a MIDI track, or add effects to a track / master.\nPlugin binaries and sample libraries stay in their installed locations.", juce::dontSendNotification);
     }
@@ -1919,6 +1929,8 @@ void MainComponent::refreshSnapshot()
     if (p.settingsDialog) if (auto* panel = dynamic_cast<WorkspaceSettingsPanel*>(p.settingsDialog->getContentComponent()))
         panel->update(p.state.deviceName, p.state.sampleRate, p.state.bufferSize, p.follow.getToggleState(), recordingBusy);
     const bool busy = p.chooser != nullptr || p.saveDialog != nullptr || p.confirming || bool(p.pendingAfterSave) || p.saveContinuationPending || recordingBusy;
+    const bool viewBusy = p.chooser != nullptr || p.saveDialog != nullptr || p.confirming || bool(p.pendingAfterSave) || p.saveContinuationPending;
+    const bool scalarBusy = viewBusy || p.state.recordingFinalizing;
     p.play.setEnabled(playable && p.state.deviceAvailable && !recordingBusy);
     p.stop.setEnabled(playable || recordingBusy);
     p.record.setEnabled(p.state.deviceAvailable && !p.state.recordingFinalizing && p.audioDialog == nullptr && p.chooser == nullptr && p.saveDialog == nullptr && !p.confirming && p.pendingSaveJob.isEmpty() && !p.savePreparing && !p.saveContinuationPending);
@@ -1937,15 +1949,15 @@ void MainComponent::refreshSnapshot()
     p.meterReset.setTooltip("Master L "+juce::String(p.state.masterPeakLeftDb,1)+" dB / R "+juce::String(p.state.masterPeakRightDb,1)+" dB. Click to reset peak overload indicators.");
     if(p.gridMode.getSelectedId()==2)p.arrangement.setGridBeats(p.state.numerator*4.0/p.state.denominator);
     p.settings.setEnabled(true); // Language is a view preference and never reconfigures audio.
-    if (p.pianoRoll) p.pianoRoll->setEnabled(!busy);
+    if (p.pianoRoll) { p.pianoRoll->setEnabled(!viewBusy); p.pianoRoll->setEditingBlocked(recordingBusy); }
     p.loop.setEnabled(playable && !busy);
     p.play.setToggleState(p.state.playing, juce::dontSendNotification);
     p.loop.setToggleState(p.state.looping, juce::dontSendNotification);
-    p.gain.setEnabled(!busy);
+    p.gain.setEnabled(!scalarBusy);
     if (!p.gain.isMouseButtonDown()) p.gain.setValue(p.state.gainDb, juce::dontSendNotification);
     const auto* selected = p.selectedTrack();
-    p.trackGain.setEnabled(selected != nullptr && !busy);
-    p.trackPan.setEnabled(selected != nullptr && !busy);
+    p.trackGain.setEnabled(selected != nullptr && !scalarBusy);
+    p.trackPan.setEnabled(selected != nullptr && !scalarBusy);
     p.clipProperties.setEnabled(p.selectedClip() != nullptr && !busy);
     if (selected && !p.trackPan.isMouseButtonDown()) p.trackPan.setValue(selected->pan, juce::dontSendNotification);
     p.tempo.setButtonText(juce::String(p.state.bpm, std::fmod(p.state.bpm, 1.0) == 0 ? 0 : 1) + " BPM");
@@ -1964,12 +1976,12 @@ void MainComponent::refreshSnapshot()
             p.pianoRoll->setPlayhead(p.state.position, p.state.playing);
         } else p.pianoRoll->setClip(p.state.projectId, {}, {}, p.state.revision, 0, 4, p.state.bpm, {});
     }
-    p.mute.setEnabled(selected != nullptr && !busy);
-    p.solo.setEnabled(selected != nullptr && !busy);
+    p.mute.setEnabled(selected != nullptr && !scalarBusy);
+    p.solo.setEnabled(selected != nullptr && !scalarBusy);
     p.remove.setEnabled(selected != nullptr && !busy);
-    p.trackList.setEnabled(!busy);
-    p.arrangement.setEnabled(!busy);
-    p.waveform.setEnabled(!busy);
+    p.trackList.setEnabled(!viewBusy);
+    p.arrangement.setEnabled(!viewBusy);
+    p.waveform.setEnabled(!viewBusy);
     const auto* clip = p.selectedClip();
     p.clipStart.setEnabled(clip != nullptr && !busy);
     p.setClipStart.setEnabled(clip != nullptr && !busy && p.startInputDirty);
@@ -1988,6 +2000,7 @@ void MainComponent::refreshSnapshot()
     for (auto* button : { &p.newButton, &p.openButton, &p.importButton,
                          &p.editMenu, &p.exportMenu, &p.plugins, &p.tempo })
         button->setEnabled(!busy);
+    p.plugins.setEnabled(!viewBusy);
     const bool saving = p.savePreparing || p.pendingSaveJob.isNotEmpty();
     p.newButton.setEnabled(!busy && !p.state.nativePending);
     p.openButton.setEnabled(!busy && !p.state.nativePending);
@@ -2688,7 +2701,7 @@ void MainComponent::showAnalysisDock(const juce::String& chordId)
 void MainComponent::renameTrack(const juce::String& trackId)
 {
     const auto current = session.snapshot();
-    if (current.recording || current.recordingFinalizing) return;
+    if (current.recordingFinalizing) return;
     const auto found = std::find_if(current.tracks.begin(), current.tracks.end(), [&](const auto& track) { return track.id == trackId; });
     if (found == current.tracks.end()) return;
     const auto expected = current.revision; const auto project = current.projectId;
@@ -2739,6 +2752,7 @@ void MainComponent::showArrangementMenu(const juce::String& kind, const juce::St
 {
     const auto state = session.snapshot();
     const bool editable = !state.recording && !state.recordingFinalizing && !state.nativePending;
+    const bool scalarEditable = !state.recordingFinalizing && !state.nativePending;
     const EngineSession::TrackSnapshot* track = nullptr;
     const EngineSession::ClipSnapshot* clip = nullptr;
     for (const auto& t : state.tracks) {
@@ -2750,10 +2764,10 @@ void MainComponent::showArrangementMenu(const juce::String& kind, const juce::St
     juce::PopupMenu menu;
     if (kind == "track" && track) {
         menu.addSectionHeader(track->name);
-        if (editable) menu.addItem(1, uiText("Rename track...", "重命名轨道...") + "\tF2");
-        if (editable) menu.addItem(7, uiText("Track colour...", "轨道颜色..."));
-        menu.addItem(2, uiText("Mute", "静音"), editable, track->muted);
-        menu.addItem(3, uiText("Solo", "独奏"), editable, track->solo);
+        if (scalarEditable) menu.addItem(1, uiText("Rename track...", "重命名轨道...") + "\tF2");
+        if (scalarEditable) menu.addItem(7, uiText("Track colour...", "轨道颜色..."));
+        menu.addItem(2, uiText("Mute", "静音"), scalarEditable, track->muted);
+        menu.addItem(3, uiText("Solo", "独奏"), scalarEditable, track->solo);
         if (track->kind != "bus") menu.addItem(4, uiText("Arm recording", "准备录音"), editable, track->armed);
         menu.addItem(5, uiText("Devices and I/O", "装置与输入输出"));
         if (editable) { menu.addSeparator(); menu.addItem(6, uiText("Delete track", "删除轨道")); }
@@ -2863,6 +2877,23 @@ void MainComponent::showExportMenu()
     menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&impl->fileMenu), [safe = juce::Component::SafePointer<MainComponent>(this)](int id) {
         if (safe && id > 0) safe->chooseExport(id >= 4, id == 2 || id == 5, id == 3);
     });
+}
+juce::Result MainComponent::runRecordingInteractionSmoke(juce::DynamicObject& report, const juce::String& trackId, const juce::String& effectId)
+{
+    refreshSnapshot(); auto& p = *impl;
+    if (!p.state.recording || p.state.recordingFinalizing)
+        return juce::Result::fail("Recording UI smoke requires an active offline take.");
+    if (!p.arrangement.isEnabled() || !p.trackList.isEnabled() || !p.plugins.isEnabled()
+        || !p.gain.isEnabled() || !p.trackGain.isEnabled() || !p.mute.isEnabled()
+        || p.saveButton.isEnabled() || p.undoButton.isEnabled() || p.newButton.isEnabled())
+        return juce::Result::fail("Recording workspace mixes navigation/scalar controls with lifecycle locks.");
+    p.plugins.onClick();
+    if (!p.trackPanel.isEnabled()) return juce::Result::fail("Recording disabled the selected-track device panel.");
+    showNativeEffect(trackId, effectId);
+    if (!p.dockEffect || !p.dockEffect->isVisible() || !p.deviceChain.isVisible())
+        return juce::Result::fail("An existing native effect did not open during recording.");
+    report.setProperty("recording_workspace_browse_and_native_editor", true);
+    return juce::Result::ok();
 }
 void MainComponent::showPlugins(const juce::String& trackId)
 {
@@ -3441,10 +3472,6 @@ bool MainComponent::keyPressed(const juce::KeyPress& key)
         && (key.getKeyCode() == 's' || key.getKeyCode() == 'S')) {
         saveProject(key.getModifiers().isShiftDown()); return true;
     }
-    if (impl->state.recording || impl->state.recordingFinalizing) {
-        if (key.getKeyCode() == juce::KeyPress::spaceKey && impl->state.recording) execute("stop_recording", arguments({}));
-        return true;
-    }
     if (key == juce::KeyPress::escapeKey && impl->arrangement.cancelClipDrag()) return true;
     for (auto* focus = juce::Component::getCurrentlyFocusedComponent(); focus != nullptr; focus = focus->getParentComponent())
         if (dynamic_cast<juce::TextEditor*>(focus) != nullptr) return false;
@@ -3453,6 +3480,19 @@ bool MainComponent::keyPressed(const juce::KeyPress& key)
         && (key.getKeyCode() == 'E' || key.getKeyCode() == 'e')
         && impl->dock == Impl::Dock::midi && impl->pianoRoll) {
         impl->expandEditor.onClick(); return true;
+    }
+    if (impl->state.recording || impl->state.recordingFinalizing) {
+        if (key.getKeyCode() == juce::KeyPress::spaceKey && !modifiers.isAnyModifierKeyDown()) {
+            if (impl->state.recording) execute("stop_recording", arguments({}));
+            return true;
+        }
+        if (modifiers.isCtrlDown() && key.getKeyCode() == '4') {
+            if (impl->pianoRoll && impl->pianoRoll->hasKeyboardFocus(true)) return false;
+            impl->snap.setToggleState(!impl->snap.getToggleState(),juce::dontSendNotification);impl->snap.onClick();return true;
+        }
+        // Local controls retain typing, selection and navigation. Project edits
+        // remain guarded in the engine, without swallowing every keyboard event.
+        return false;
     }
     if (modifiers.isCommandDown() || modifiers.isCtrlDown()) {
         if (impl->chooser != nullptr || impl->confirming || impl->pendingAfterSave) return false;

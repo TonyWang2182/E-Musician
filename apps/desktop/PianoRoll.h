@@ -28,6 +28,9 @@ public:
                              double startBeats, double lengthBeats, double bpm);
     void setPlayhead(double projectSeconds, bool playing);
     void setTimeSignature(int numerator, int denominator);
+    // Recording/finalization keeps navigation and selection available, but
+    // cancels previews and prevents note edits or transport relocation.
+    void setEditingBlocked(bool blocked);
     // Read-only visual projection of the owning track; never changes notes.
     void setTrackColour(const juce::String& colour);
     juce::String clipId() const;

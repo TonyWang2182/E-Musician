@@ -1,6 +1,12 @@
+# 当前交付：录音增强 V2（2026-11-27，自动已验、实机待验）
+
+实际工作树 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `fix/recording-ruler-interaction-v2`，基线 `000bda0`。小节标签按统一时间锚点和规则间距显示；录音期间可选择/缩放/浏览、打开已挂 VST/原生装置，允许经过审计的混音和原生效果参数。录音输入、图结构、片段写入及历史仍受保护，finalizing 单独限制写入。新入口 `E:/MusicAgent&DAW/Start E-musician Recording v2.cmd`，先保存关闭旧程序；旧两个 EXE 和旧入口 SHA 保持不变。
+
+Release 已构建。首轮 CTest 10/11；修正两处测试夹具缺陷（C++20临时快照生命周期、绘图提交前编码PNG）后相关综合测试通过，生产1268项、54组标尺布局及非空像素、并发PCM/Stop/Undo检查通过。完整尝试和失败原因见[结果](review/2026-11-27-recording-interaction/RESULTS.md)，最终构建与测试440个输入指纹一致。自动覆盖不等于实体设备、厂商GUI或听感验收。下一步按[人工清单](review/2026-11-27-recording-interaction/MANUAL-CHECK.md)检查M-Audio/常用插件与长录音。未用SSH/API/computer-use，未合并main。无新增网络或模型工作进入音频回调。
+
 # 当前素材：sax_player 录音增长展示（2026-11-27）
 
-已交付36秒完整界面与轨道特写无声MP4；原波形逐步显露、与录屏播放头对齐。明确为用户要求的后期展示动画，不是实时录音证据；原录屏音轨全零。[素材记录](review/2026-11-27-sax-material/RESULTS.md)含来源、完整解码、视觉复核及0.5像素最大对齐误差。文件位于 `E:/MusicAgent&DAW/demo-video/sax-recording-2026-11-27`。下一步执行用户新增的录音增强版标尺与录音期间装置交互改进，软件尚未在这轮修改。
+已交付36秒完整界面与轨道特写无声MP4；原波形逐步显露、与录屏播放头对齐。明确为用户要求的后期展示动画，不是实时录音证据；原录屏音轨全零。[素材记录](review/2026-11-27-sax-material/RESULTS.md)含来源、完整解码、视觉复核及0.5像素最大对齐误差。文件位于 `E:/MusicAgent&DAW/demo-video/sax-recording-2026-11-27`。后续录音增强版改进已完成自动验证，状态见本页顶部；媒体动画与软件验收证据分别保存。
 
 # 当前交付：申请视频脚本与带字过场（2026-11-27）
 

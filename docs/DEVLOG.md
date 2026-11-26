@@ -14925,3 +14925,110 @@ Prepared a scoped post-production asset plan from the supplied playback screen r
 ## 2026-11-27 - Sax visualization delivered
 
 Two silent36-second MP4s use supplied playback waveform pixels with a progressive recording-style display. Initial render tooltip-border residue was corrected in a second recorded render. Full decode, dimensions,1080frames and monotonic frontier passed; maximum measured playhead error0.5source pixels. Root and independent sampled visual review passed. Original video/project/audio unchanged. Explicitly illustrative post-production, not real microphone capture or evidence of DAW behavior. Next requested work is actual recording-enhanced ruler/device interaction fixes.
+
+## 2026-11-27 - Recording ruler and interaction v2 started
+
+After completing the requested media, began isolated software fixes. Ruler labels were clamped away from ticks and then greedily skipped; recording status was also disabling whole panels and rejecting read/editor commands. Assigned separate sourceownership and sharedbuild coordination. Plan/evidence in review/2026-11-27-recording-interaction. Preserve old binaries and userprojects; physicaldevice acceptance remains distinct.
+
+### 2026-11-27T05:15:12+08:00 · showcase-recording-v2-configure · succeeded
+
+- Config: Release/recording-v2; exit code: 0; elapsed: 125.344s.
+- Command: `cmake --preset windows-msvc -S E:/emusician-analysis-source -B E:/emusician-analysis-build -DEMUSICIAN_RUNTIME_OUTPUT_ROOT=E:/emusician-analysis-build/bin-0.13.6-recording-v2 -DEMUSICIAN_SHOWCASE=OFF -DEMUSICIAN_SHOWCASE_ROOT=E:/MusicAgent&DAW/demo-video/showcase-v1/workspace`
+- Context: Recording ruler and existing-device interaction revision; physical listening is separate evidence
+- Source SHA-256: `12c728a8cb0786f757d0eb1d2d5b8ed73caabf1ec47c86bae762d0624f7d515f`; Git HEAD: `000bda049690c314c7959f5d6b80cf26c42f1779`.
+- [Record](builds/20261126T211512.904886Z-ff05fcd0bc.json) · [Raw log](../build-logs/20261126T211512.904886Z-ff05fcd0bc.log)
+- [Exact process output](../build-logs/20261126T211512.904886Z-ff05fcd0bc.raw.log)
+
+### 2026-11-27T05:17:27+08:00 · showcase-recording-v2-build · failed
+
+- Config: Release/recording-v2; exit code: 1; elapsed: 775.143s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 1 -- /p:UseMultiToolTask=true /p:CL_MPCount=1 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Recording ruler and existing-device interaction revision; physical listening is separate evidence
+- Source SHA-256: `12c728a8cb0786f757d0eb1d2d5b8ed73caabf1ec47c86bae762d0624f7d515f`; Git HEAD: `000bda049690c314c7959f5d6b80cf26c42f1779`.
+- [Record](builds/20261126T211727.502599Z-3a59d599bd.json) · [Raw log](../build-logs/20261126T211727.502599Z-3a59d599bd.log)
+- [Exact process output](../build-logs/20261126T211727.502599Z-3a59d599bd.raw.log)
+- Error: Command failed with code 1; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261126T211727.502599Z-3a59d599bd.log
+
+### 2026-11-27 Recording V2 build interruption and review follow-up
+
+- First build record `20261126T211727.502599Z-3a59d599bd` returned code 1 because the owned CMake/MSBuild process tree was explicitly stopped before linking, not because of a compiler diagnostic. Keep the original failed receipt and raw output unchanged.
+- Reason: incorporate independent review improvements before acceptance (sequenced PCM, exact capture gates, separate active mixer/effect Stop tests), and resume with two bounded compile jobs; available physical memory was approximately 12 GiB. The next recorded command is the authoritative build attempt.
+- Apply a small Arrangement header permission consistency patch: rename usable during capture; mute/solo/name unavailable during finalization; recording Arm remains protected.
+
+### 2026-11-27T05:31:01+08:00 · showcase-recording-v2-build · succeeded
+
+- Config: Release/recording-v2; exit code: 0; elapsed: 1602.241s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Recording ruler and existing-device interaction revision; physical listening is separate evidence
+- Source SHA-256: `df7a85ea45a16f578e61f298242ff0246012380b32485558f0f19ae33473752e`; Git HEAD: `000bda049690c314c7959f5d6b80cf26c42f1779`.
+- [Record](builds/20261126T213101.217942Z-a9903d01e0.json) · [Raw log](../build-logs/20261126T213101.217942Z-a9903d01e0.log)
+- [Exact process output](../build-logs/20261126T213101.217942Z-a9903d01e0.raw.log)
+
+### 2026-11-27T05:57:51+08:00 · showcase-recording-v2-test · failed
+
+- Config: Release/recording-v2; exit code: 8; elapsed: 209.869s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure`
+- Context: Recording ruler and existing-device interaction revision; physical listening is separate evidence
+- Source SHA-256: `df7a85ea45a16f578e61f298242ff0246012380b32485558f0f19ae33473752e`; Git HEAD: `000bda049690c314c7959f5d6b80cf26c42f1779`.
+- [Record](builds/20261126T215751.525341Z-4029eb0108.json) · [Raw log](../build-logs/20261126T215751.525341Z-4029eb0108.log)
+- [Exact process output](../build-logs/20261126T215751.525341Z-4029eb0108.raw.log)
+- Error: Command failed with code 8; see E:\MusicAgent&DAW\worktrees\audio-analysis\build-logs\20261126T215751.525341Z-4029eb0108.log
+
+### 2026-11-27 Recording V2 first CTest failure diagnosis
+
+- First complete CTest record `20261126T215751.525341Z-4029eb0108`: 10/11 passed; new engine capture case failed at expected clip count.
+- Source review found two test helpers iterating `fixture.snapshot().tracks.back().clips`: the C++20 temporary Snapshot was destroyed before iteration through the reference returned by back(). Retain a named Snapshot in both helpers. This is a test lifetime defect; no capture/PCM assertions were weakened and no speculative polling delay was added.
+- The failed test's real PCM24 stereo WAV was independently checked against the sequence: 3072 frames, 48 kHz, zero mismatches in both channels. Detailed inspection is in ignored `build-logs/recording-v2-failed-take-inspection.json`.
+- Add adoption diagnostics (expected/actual count, IDs, recorder state and Stop counters), then incrementally rebuild and rerun the relevant native suite. Runtime/UI/performance acceptance remains pending.
+
+### 2026-11-27T06:04:26+08:00 · showcase-recording-v2-build · succeeded
+
+- Config: Release/recording-v2; exit code: 0; elapsed: 241.673s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Recording ruler and existing-device interaction revision; physical listening is separate evidence
+- Source SHA-256: `cdbe294f9b1780571d87f7adcc6bc77d034b10b77a2f1552aacab9769d2a139f`; Git HEAD: `000bda049690c314c7959f5d6b80cf26c42f1779`.
+- [Record](builds/20261126T220426.442191Z-541238ab32.json) · [Raw log](../build-logs/20261126T220426.442191Z-541238ab32.log)
+- [Exact process output](../build-logs/20261126T220426.442191Z-541238ab32.raw.log)
+
+### 2026-11-27T06:08:38+08:00 · showcase-recording-v2-test · succeeded
+
+- Config: Release/recording-v2; exit code: 0; elapsed: 206.692s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure -R engine.integration_smoke`
+- Context: Recording ruler and existing-device interaction revision; physical listening is separate evidence
+- Source SHA-256: `cdbe294f9b1780571d87f7adcc6bc77d034b10b77a2f1552aacab9769d2a139f`; Git HEAD: `000bda049690c314c7959f5d6b80cf26c42f1779`.
+- [Record](builds/20261126T220838.328508Z-084433fbd3.json) · [Raw log](../build-logs/20261126T220838.328508Z-084433fbd3.log)
+- [Exact process output](../build-logs/20261126T220838.328508Z-084433fbd3.raw.log)
+
+
+### 2026-11-27 Recording V2 screenshot fixture correction
+
+- Targeted integration `20261126T220838.328508Z-084433fbd3` passed, including 1268 production checks, 54 ruler layouts and concurrent recording/control checks.
+- Manual evidence review then found three new Arrangement ruler PNGs were opaque black. The test encoded the image while its Graphics context was still alive; Windows native rendering had not submitted its drawing. The ordinary workspace image and piano image were correct. This is not accepted as visual evidence.
+- Only the Arrangement screenshot fixture changes: end the Graphics scope before pixel inspection and encoding, and require both paper background and visible label pixels for all 54 layouts. Production drawing logic is unchanged. Rebuild and rerun integration before visual acceptance.
+
+### 2026-11-27T06:15:50+08:00 · showcase-recording-v2-build · succeeded
+
+- Config: Release/recording-v2; exit code: 0; elapsed: 92.494s.
+- Command: `cmake --build E:/emusician-analysis-build --config Release --parallel 2 -- /p:UseMultiToolTask=true /p:CL_MPCount=2 /p:EnforceProcessCountAcrossBuilds=true`
+- Context: Recording ruler and existing-device interaction revision; physical listening is separate evidence
+- Source SHA-256: `ee846c91d36c7985f53abbcae0f995db027c0042be61d85035c8ed846b7b5a16`; Git HEAD: `000bda049690c314c7959f5d6b80cf26c42f1779`.
+- [Record](builds/20261126T221550.116842Z-35f6e68369.json) · [Raw log](../build-logs/20261126T221550.116842Z-35f6e68369.log)
+- [Exact process output](../build-logs/20261126T221550.116842Z-35f6e68369.raw.log)
+
+### 2026-11-27T06:17:41+08:00 · showcase-recording-v2-test · succeeded
+
+- Config: Release/recording-v2; exit code: 0; elapsed: 182.825s.
+- Command: `ctest --test-dir E:/emusician-analysis-build -C Release --output-on-failure -R engine.integration_smoke`
+- Context: Recording ruler and existing-device interaction revision; physical listening is separate evidence
+- Source SHA-256: `ee846c91d36c7985f53abbcae0f995db027c0042be61d85035c8ed846b7b5a16`; Git HEAD: `000bda049690c314c7959f5d6b80cf26c42f1779`.
+- [Record](builds/20261126T221741.062225Z-e4fb920826.json) · [Raw log](../build-logs/20261126T221741.062225Z-e4fb920826.log)
+- [Exact process output](../build-logs/20261126T221741.062225Z-e4fb920826.raw.log)
+
+
+### 2026-11-27 Recording V2 automatic acceptance and isolated delivery
+
+- Final Release `20261126T221550.116842Z-35f6e68369` and targeted native integration `20261126T221741.062225Z-e4fb920826` passed with identical 440-file fingerprints. Production1268, ruler geometry/pixels54, concurrent PCM and Stop/Undo gates pass. First full CTest10/11 plus subsequent passing corrected engine suite constitute cumulative coverage; failed receipts remain intact.
+- Added `Start E-musician Recording v2.cmd`; original0.13.6 and previous recording EXEs plus old launcher match baseline SHA. No associations, user projects, cloud/API or application settings changed by delivery. No interactive DAW launched.
+- Documentation/ADR/manual checklist and final evidence updated. Physical M-Audio, VST editor behavior, long-recording and listening remain pending. Existing DEVLOG edits and39 prior untracked receipts preserved; only this iteration will be committed.
+
+- Final visual review opened all four ruler images: 1/3/5 bar cadence, aligned both/seconds rows and far-position piano labels are visible and regular. Original blank fixture images are not used as acceptance evidence. New launcher is ready; prior launcher is deliberately unchanged so users retain an immediate fallback.

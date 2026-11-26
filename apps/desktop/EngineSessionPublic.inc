@@ -159,11 +159,11 @@ juce::Result EngineSession::execute(const juce::String& command,const juce::var&
                 if(impl->effectGesture&&impl->effectGesture->revision!=impl->guard.revision())impl->cancelEffectGesture();
                 return r;
             }
-            if(impl->recordingBusy())return impl->fail("Finish recording before adjusting an effect.");
+            if(impl->recordingFinalizing()){impl->cancelEffectGesture();return impl->fail("Wait for the recorded take to finish before adjusting an effect.");}
         }
         return impl->handleEffectGesture(command,args,commandResult);
     }
-    const bool keepEffectPreview=command.startsWith("get_")||command=="play"||command=="pause"||command=="stop"||command=="seek"||command=="reset_meters";
+    const bool keepEffectPreview=command.startsWith("get_")||command=="open_plugin"||command=="play"||command=="pause"||command=="stop"||command=="seek"||command=="reset_meters";
     if(impl->effectGesture&&!keepEffectPreview)impl->cancelEffectGesture();
     if(isGenerationCommand(command)){
         if(!args.isObject())return impl->fail("Generation arguments must be an object.");
@@ -238,18 +238,33 @@ juce::Result EngineSession::execute(const juce::String& command,const juce::var&
         }
         if(commandResult)*commandResult=description;return juce::Result::ok();
     }
-    if(command=="stop_recording")return impl->recording.execute(command,args);
+    if(command=="stop_recording"){
+        // Close a live mixer gesture before the recorder starts its complete-take
+        // Undo transaction. Repeated Stop while finalising must not split it.
+        if(impl->edit->getTransport().isRecording())impl->finishGesture();
+        return impl->recording.execute(command,args);
+    }
     if(command=="reset_meters"){impl->resetMeters();return juce::Result::ok();}
     if(impl->nativePending&&(command=="save_project"||command=="open_project"||command=="export_wav"))
         return impl->fail("Wait for the native instrument edit to finish before saving, opening, or exporting.");
-    if(impl->recordingBusy()&&command!="cancel_job")return impl->fail("Stop recording and wait for the take to finish before editing.");
-    if(command!="cancel_job"&&command!="scan_plugins"&&command!="open_plugin")if(auto r=impl->preflight(expected);r.failed())return r;
-    if(command=="add_native_instrument"||command=="set_native_sample"||command=="set_native_pad"||command=="set_native_sampler")
-        return impl->beginNative(command,args);
     if(command=="get_native_effect") {
+        if(!args.isObject()||!args["track_id"].isString()||!args["device_id"].isString())return impl->fail("An effect track and device ID are required.");
         juce::var data;auto result=impl->describeNativeEffect(args["track_id"].toString(),args["device_id"].toString(),data);
         if(result.failed())return impl->fail(result.getErrorMessage());if(commandResult)*commandResult=data;return result;
     }
+    // Capture owns its input bindings and graph, not the whole workspace. These
+    // operations only touch existing scalar controls or open an existing editor.
+    // Finalisation adopts clips into one Undo transaction, so no musical edits
+    // are admitted until that transaction is complete.
+    const bool recordingRead=command=="open_plugin"||command=="cancel_job";
+    const bool recordingScalar=command=="set_track_gain"||command=="set_track_pan"
+        ||command=="set_track_muted"||command=="set_track_solo"||command=="set_master_gain"
+        ||command=="set_track_colour"||command=="rename_track"||command=="set_native_effect";
+    if(impl->recordingBusy()&&!recordingRead&&(!recordingScalar||impl->recordingFinalizing()))
+        return impl->fail("Finish the recorded take before changing clips, routing, devices, or project history.");
+    if(command!="cancel_job"&&command!="scan_plugins"&&command!="open_plugin")if(auto r=impl->preflight(expected);r.failed())return r;
+    if(command=="add_native_instrument"||command=="set_native_sample"||command=="set_native_pad"||command=="set_native_sampler")
+        return impl->beginNative(command,args);
     if(command=="start_recording"||command=="set_track_armed"||command=="set_input_monitor"||command=="configure_audio_device"||command=="show_audio_driver_panel"||command=="set_recording_preferences"){
         if(!args.isObject())return impl->fail("Command arguments must be an object.");
         if(command=="set_track_armed"&&(!args["track_id"].isString()||!args["armed"].isBool()))return impl->fail("Arming requires a track_id and boolean armed.");
@@ -337,8 +352,8 @@ juce::Result EngineSession::setTrackSolo(const juce::String& id,bool v,std::uint
 juce::Result EngineSession::removeTrack(const juce::String& id,std::uint64_t rev){return execute("remove_track",object({{"track_id",id}}),rev);}
 juce::Result EngineSession::undo(std::uint64_t rev){return execute("undo",object({}),rev);}
 juce::Result EngineSession::redo(std::uint64_t rev){return execute("redo",object({}),rev);}
-void EngineSession::beginEditGesture(){requireControlThread();if(impl->controlOperationActive)return;impl->cancelEffectGesture();impl->finishGesture();impl->edit->getUndoManager().beginNewTransaction("Adjust gain");impl->gesture=true;}
-void EngineSession::endEditGesture(){requireControlThread();if(impl->controlOperationActive)return;impl->finishGesture();}
+void EngineSession::beginEditGesture(){requireControlThread();if(impl->controlOperationActive||impl->recordingFinalizing())return;impl->cancelEffectGesture();impl->finishGesture();impl->edit->getUndoManager().beginNewTransaction("Adjust gain");impl->gesture=true;}
+void EngineSession::endEditGesture(){requireControlThread();if(impl->controlOperationActive||impl->recordingFinalizing())return;impl->finishGesture();}
 void EngineSession::togglePlay(){
     requireControlThread();if(impl->controlOperationActive)return;
     ++impl->analysisPreviewGeneration;if(impl->analysisPreview)impl->analysisPreview->stop();
@@ -347,7 +362,7 @@ void EngineSession::togglePlay(){
     requireControlThread();if(impl->duration<=0&&!impl->edit->clickTrackEnabled.get())return;auto& t=impl->edit->getTransport();if(t.isPlaying()){t.stop(false,false);impl->status="Paused.";return;}
     if(!snapshot().deviceAvailable){impl->status="Choose an output in audio settings.";return;}t.play(false);impl->status="Playing.";
 }
-void EngineSession::stop(){requireControlThread();if(impl->controlOperationActive)return;const juce::ScopedValueSetter<bool> busy(impl->controlOperationActive,true);++impl->analysisPreviewGeneration;if(impl->analysisPreview)impl->analysisPreview->stop();const bool recording=impl->recordingBusy();if(recording)impl->recording.execute("stop_recording",object({}));else impl->edit->getTransport().stop(false,false);if(!recording)impl->edit->getTransport().setPosition(te::TimePosition::fromSeconds(0));impl->finishRecording();impl->status=impl->recordingBusy()?"Finishing recording...":"Stopped.";}
+void EngineSession::stop(){requireControlThread();if(impl->controlOperationActive)return;const juce::ScopedValueSetter<bool> busy(impl->controlOperationActive,true);++impl->analysisPreviewGeneration;if(impl->analysisPreview)impl->analysisPreview->stop();const bool recording=impl->recordingBusy();if(recording){impl->cancelEffectGesture();if(impl->edit->getTransport().isRecording())impl->finishGesture();impl->recording.execute("stop_recording",object({}));}else impl->edit->getTransport().stop(false,false);if(!recording)impl->edit->getTransport().setPosition(te::TimePosition::fromSeconds(0));impl->finishRecording();impl->status=impl->recordingBusy()?"Finishing recording...":"Stopped.";}
 void EngineSession::seek(double seconds){requireControlThread();if(impl->controlOperationActive)return;const juce::ScopedValueSetter<bool> busy(impl->controlOperationActive,true);if(impl->recordingBusy())return;if(std::isfinite(seconds))impl->edit->getTransport().setPosition(te::TimePosition::fromSeconds(juce::jlimit(0.0,storage::maximumTimelineSeconds,seconds)));}
 void EngineSession::setLoop(bool enabled){execute("set_loop",object({{"enabled",enabled}}),impl->guard.revision());}
 void EngineSession::setGain(float db){execute("set_master_gain",object({{"gain_db",std::isfinite(db)?stableGain(db):db}}),impl->guard.revision());}

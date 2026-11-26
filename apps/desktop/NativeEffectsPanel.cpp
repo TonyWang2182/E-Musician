@@ -135,12 +135,14 @@ struct NativeEffectsPanel::Impl {
         const bool exists = trackId == "master" || std::any_of(snapshot.tracks.begin(), snapshot.tracks.end(), [&](const auto& t) { return t.id == trackId; });
         if (!exists) { valid = false; setError("Track no longer exists."); refreshControls(); return; }
         targetName=trackId=="master"?juce::String("Master"):juce::String();for(const auto& track:snapshot.tracks)if(track.id==trackId)targetName=track.name;
+        graphLocked = snapshot.recording || snapshot.recordingFinalizing || snapshot.nativePending;
+        if (dragging && snapshot.recordingFinalizing) cancelGesture();
         if (dragging) return;
         const auto updateEnabledSlot = [&](const auto& slots) { for (const auto& slot : slots) if (slot.id == deviceId) deviceEnabled = slot.enabled; };
         if (trackId == "master") updateEnabledSlot(snapshot.masterPlugins);
         else for (const auto& track : snapshot.tracks) if (track.id == trackId) updateEnabledSlot(track.plugins);
         uiButton(bypass, deviceEnabled ? "on" : "bypassed");
-        valid = !snapshot.recording && !snapshot.recordingFinalizing && !snapshot.nativePending;
+        valid = !snapshot.recordingFinalizing && !snapshot.nativePending;
         if (deviceId.isEmpty()) { revision = snapshot.revision; state = juce::var(); refreshControls(); return; }
         if (snapshot.revision == revision && state.isObject()) { refreshEnabled(); return; }
         juce::var value; auto result = session.execute("get_native_effect", object({ {"track_id",trackId}, {"device_id",deviceId} }), snapshot.revision, &value);
@@ -171,10 +173,10 @@ struct NativeEffectsPanel::Impl {
         if (result.failed()) setError(result.getErrorMessage());return result.wasOk();
     }
     void refreshEnabled() {
-        addEq.setEnabled(valid); addComp.setEnabled(valid); addDelay.setEnabled(valid); addReverb.setEnabled(valid); addFilter.setEnabled(valid); filterMode.setEnabled(valid);filterLfo.setEnabled(valid);bandOn.setEnabled(valid);
+        addEq.setEnabled(valid&&!graphLocked); addComp.setEnabled(valid&&!graphLocked); addDelay.setEnabled(valid&&!graphLocked); addReverb.setEnabled(valid&&!graphLocked); addFilter.setEnabled(valid&&!graphLocked); filterMode.setEnabled(valid);filterLfo.setEnabled(valid);bandOn.setEnabled(valid);
         for (auto& button : bands) button.setEnabled(valid && !dragging); for (auto& slider : sliders) slider.setEnabled(valid);
         compareAButton.setEnabled(valid&&!dragging);compareBButton.setEnabled(valid&&!dragging);copyCompare.setEnabled(valid&&!dragging);
-        bypass.setEnabled(valid && !dragging); reset.setEnabled(valid && !dragging); shape.setEnabled(valid && !dragging);
+        bypass.setEnabled(valid && !graphLocked && !dragging); reset.setEnabled(valid && !dragging); shape.setEnabled(valid && !dragging);
         if (const auto* list = state["bands"].getArray()) if (selectedBand < list->size()) sliders[1].setEnabled(valid && Graph::gainShape(list->getReference(selectedBand)));
     }
     void refreshControls() {
@@ -245,7 +247,7 @@ struct NativeEffectsPanel::Impl {
     NativeEffectsPanel& owner; EngineSession& session; juce::String trackId, deviceId, projectId, gestureProject,gestureId,targetName,compareDevice;
     std::function<void(const juce::Result&)> report; juce::var state,compareA,compareB; std::uint64_t revision = 0, gestureRevision = 0; double sampleRate = 0;
     bool comparisonB=false,gestureFailed=false,ignoreUntilRelease=false;
-    bool valid = false, updating = false, dragging = false, gestureChanged = false, deviceEnabled = true; int selectedBand = 0,activeKnob=-1;
+    bool valid = false, graphLocked = false, updating = false, dragging = false, gestureChanged = false, deviceEnabled = true; int selectedBand = 0,activeKnob=-1;
     unsigned languageRevision = 0;
     juce::Label title, status, meter; juce::TextButton addEq {"add EQ Eight"}, addComp {"add Compressor"}, addDelay {"add Stereo Delay"}, addReverb {"add Reverb"}, addFilter {"add Auto Filter"}, filterMode {"low pass"}, filterLfo {"LFO off"}, bandOn {"band on"};
     std::uint64_t meterSequence = 0; int staleMeterPolls = 0;

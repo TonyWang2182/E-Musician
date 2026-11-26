@@ -248,7 +248,10 @@ struct NativeDevicePanel::Impl {
         attack.setEnabled(valid && installed); release.setEnabled(valid && installed && !oneShot()); playbackMode.setEnabled(valid && installed);
         envelope.setEnabled(valid && installed); envelope.setVisible(installed); attack.setVisible(installed); release.setVisible(installed); playbackMode.setVisible(installed);
         root.setEnabled(valid && type == "sampler"); start.setEnabled(valid && type == "sampler"); end.setEnabled(valid && type == "sampler"); apply.setEnabled(valid && type == "sampler");
-        for (auto& pad : pads) pad.setEnabled(valid && type == "drum_rack");
+        // Pad selection only changes the view; sample replacement and DSP-bank
+        // edits stay locked while capture owns the current instrument graph.
+        const bool canInspect = targetExists(session.snapshot());
+        for (auto& pad : pads) pad.setEnabled(canInspect && type == "drum_rack");
         waveform.setRange(data.hasProperty("start") ? double(data["start"]) : 0.0,
                           data.hasProperty("end") ? double(data["end"]) : 1.0,
                           valid && type == "sampler" && currentPad()["sample_sha256"].toString().isNotEmpty());

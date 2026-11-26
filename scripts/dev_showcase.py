@@ -5,7 +5,9 @@ from pathlib import Path
 from dev import Recorder, configure_console_output
 
 BUILD = 'E:/emusician-analysis-build'
-OUTPUTS = {'recording': BUILD + '/bin-0.13.6-recording', 'showcase': BUILD + '/bin-showcase-v1'}
+OUTPUTS = {'recording': BUILD + '/bin-0.13.6-recording',
+           'recording-v2': BUILD + '/bin-0.13.6-recording-v2',
+           'showcase': BUILD + '/bin-showcase-v1'}
 
 def main():
     configure_console_output()
@@ -19,7 +21,10 @@ def main():
     os.environ['TEMP'] = os.environ['TMP'] = str(temporary)
     output = OUTPUTS[args.variant]
     recorder = Recorder('showcase-' + args.variant + '-' + args.action,
-        'Release/' + args.variant, 'Offline showcase and live recording display; inference and physical listening are separate evidence')
+        'Release/' + args.variant,
+        ('Recording ruler and existing-device interaction revision; physical listening is separate evidence'
+         if args.variant == 'recording-v2' else
+         'Offline showcase and live recording display; inference and physical listening are separate evidence'))
     if args.action == 'configure':
         recorder.execute(['cmake', '--preset', 'windows-msvc', '-S', 'E:/emusician-analysis-source',
             '-B', BUILD, '-DEMUSICIAN_RUNTIME_OUTPUT_ROOT=' + output,

@@ -98,9 +98,9 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
         velocity.setRange(1, 127, 1); velocity.setValue(90, juce::dontSendNotification);
         velocity.setSliderStyle(juce::Slider::LinearHorizontal); velocity.setTextBoxStyle(juce::Slider::TextBoxRight, false, 48, 26);
         velocity.setName("Note velocity"); velocity.setTooltip("Velocity of selected notes. One drag is one edit.");
-        velocity.onDragStart = [this] { velocityGesture = true; beforeVelocity = notes; gestureRevision = revision; };
+        velocity.onDragStart = [this] { if (editingBlocked) return; velocityGesture = true; beforeVelocity = notes; gestureRevision = revision; };
         velocity.onValueChange = [this] {
-            if (updating) return;
+            if (updating || editingBlocked) return;
             if (velocityGesture) { for (auto& n : notes) if (selected.count(n.id)) n.velocity = int(velocity.getValue()); grid.repaint(); }
             else modify([](Note& n, Impl& p) { n.velocity = int(p.velocity.getValue()); });
         };
@@ -271,9 +271,10 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
             if (owner.onSelectionChange) owner.onSelectionChange();
         }
         const bool usable = clipId.isNotEmpty(); const bool chosen = usable && !selected.empty();
-        for (auto* b : { &copy, &cut, &erase, &duplicate, &quantize, &down, &up }) b->setEnabled(chosen);
-        paste.setEnabled(usable && clipboardProject == projectId && !clipboard.empty()); draw.setEnabled(usable);
-        velocity.setEnabled(chosen); drums.setEnabled(usable); edit.setEnabled(usable);
+        copy.setEnabled(chosen);
+        for (auto* b : { &cut, &erase, &duplicate, &quantize, &down, &up }) b->setEnabled(chosen && !editingBlocked);
+        paste.setEnabled(usable && !editingBlocked && clipboardProject == projectId && !clipboard.empty()); draw.setEnabled(usable && !editingBlocked);
+        velocity.setEnabled(chosen && !editingBlocked); drums.setEnabled(usable); edit.setEnabled(usable);
         if (chosen && !velocityGesture) for (const auto& n : notes) if (selected.count(n.id)) {
             updating = true; velocity.setValue(n.velocity, juce::dontSendNotification); updating = false; break;
         }
@@ -291,25 +292,26 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
         }
         for (int i = 0; i < 16; ++i) {
             steps[std::size_t(i)]->setToggleState(active[std::size_t(i)], juce::dontSendNotification);
-            steps[std::size_t(i)]->setEnabled(clipId.isNotEmpty() && block + i * 0.25 + 0.125 <= length);
+            steps[std::size_t(i)]->setEnabled(!editingBlocked && clipId.isNotEmpty() && block + i * 0.25 + 0.125 <= length);
         }
     }
     void submit(std::uint64_t expected)
     {
+        if (editingBlocked) return;
         editError.clear();
         rebuildNoteIndex(); refreshButtons(); layout();
         if (owner.onWriteNotes && clipId.isNotEmpty()) owner.onWriteNotes(clipId, notes, expected);
     }
     template<typename F> void modify(F fn)
     {
-        if (selected.empty() || clipId.isEmpty()) return;
+        if (editingBlocked || selected.empty() || clipId.isEmpty()) return;
         for (auto& n : notes) if (selected.count(n.id)) { fn(n, *this); n.lengthBeats = juce::jlimit(juce::jmin(time::minimumEditGridBeats, n.lengthBeats), length, n.lengthBeats); n.startBeats = juce::jlimit(0.0, length - n.lengthBeats, n.startBeats); }
         submit(revision);
     }
     void transpose(int delta) { modify([delta](Note& n, Impl&) { n.pitch = juce::jlimit(0, 127, n.pitch + delta); }); }
     void deleteSelected()
     {
-        if (selected.empty()) return;
+        if (editingBlocked || selected.empty()) return;
         std::erase_if(notes, [this](const auto& n) { return selected.count(n.id) != 0; }); selected.clear(); submit(revision);
     }
     void reject(const juce::String& message)
@@ -326,7 +328,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     }
     bool copySelected(bool remove)
     {
-        if (selected.empty() || clipId.isEmpty()) return false;
+        if ((editingBlocked && remove) || selected.empty() || clipId.isEmpty()) return false;
         std::vector<Note> content; double first = length;
         for (const auto& n : notes) if (selected.count(n.id)) {
             if (!validNote(n) || n.startBeats + n.lengthBeats > length + 1.0e-9) { reject("Cannot copy an invalid note. Correct its timing first."); return false; }
@@ -340,7 +342,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     }
     void pasteNotes()
     {
-        if (clipId.isEmpty() || clipboard.empty() || clipboardProject != projectId) return;
+        if (editingBlocked || clipId.isEmpty() || clipboard.empty() || clipboardProject != projectId) return;
         if (clipboard.size() > 100000 - juce::jmin<std::size_t>(100000, notes.size())) { reject("Paste would exceed 100,000 notes in this clip."); return; }
         const auto start = snapped(insertionPoint());
         std::vector<Note> copies; copies.reserve(clipboard.size()); std::set<juce::String> ids; double last = start;
@@ -359,7 +361,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     }
     void duplicateSelected()
     {
-        if (selected.empty()) return;
+        if (editingBlocked || selected.empty()) return;
         double first = length, last = 0;
         for (const auto& n : notes) if (selected.count(n.id)) { first = juce::jmin(first, n.startBeats); last = juce::jmax(last, n.startBeats + n.lengthBeats); }
         const auto delta = last - first; std::vector<Note> copies; std::set<juce::String> ids;
@@ -373,7 +375,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     }
     void insert(juce::Point<float> point, bool bypass = false)
     {
-        if (clipId.isEmpty() || !plot().contains(point)) return;
+        if (editingBlocked || clipId.isEmpty() || !plot().contains(point)) return;
         if (hitNote(point) != notes.size()) return;
         const auto start = atBeat(point.x, bypass); const auto len = juce::jmin(gridBeats, length - start);
         if (!std::isfinite(len) || len <= 0 || start + len <= start) return;
@@ -384,7 +386,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     }
     void toggleStep(int step)
     {
-        if (clipId.isEmpty()) return;
+        if (editingBlocked || clipId.isEmpty()) return;
         const double beat = juce::jmax(0, drumBar.getText().getIntValue() - 1) * 4.0 + step * 0.25;
         if (beat + 0.125 > length) return;
         const int pitch = drumPitch.getSelectedId();
@@ -397,22 +399,27 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     {
         if (grid.isShowing()) grid.grabKeyboardFocus();
         drag = {}; if (clipId.isEmpty()) return;
-        if (e.position.y < plot().getY() && e.position.x >= plot().getX()) { markInsertion(atBeat(e.position.x, e.mods.isAltDown())); if (owner.onSeek) owner.onSeek((clipStart + insertionPoint()) * 60.0 / bpm); return; }
+        if (e.position.y < plot().getY() && e.position.x >= plot().getX()) { if (!editingBlocked) { markInsertion(atBeat(e.position.x, e.mods.isAltDown())); if (owner.onSeek) owner.onSeek((clipStart + insertionPoint()) * 60.0 / bpm); } return; }
         const auto hit = hitNote(e.position);
         if (hit != notes.size()) {
             const auto& n = notes[hit]; const auto rectangle = noteRectangle(hit);
             if (e.mods.isShiftDown() || e.mods.isCtrlDown()) { if (selected.count(n.id)) selected.erase(n.id); else selected.insert(n.id); }
             else if (!selected.count(n.id)) selected = { n.id };
-            if (!selected.count(n.id)) { refreshButtons(); grid.repaint(); return; }
+            if (!selected.count(n.id) || editingBlocked) { refreshButtons(); grid.repaint(); return; }
             const bool endVisible = n.startBeats + n.lengthBeats <= firstBeat + visibleBeats();
             drag.mode = endVisible && e.position.x >= rectangle.getRight() - juce::jmin(6.0f, rectangle.getWidth() * 0.35f) ? Drag::resize : Drag::move;
             drag.anchor = e.position; drag.revision = revision; drag.before = notes; drag.activeId = n.id; prepareDrag();
             refreshButtons(); grid.repaint(); return;
         }
         if (e.position.y >= plot().getBottom() && e.position.x >= plot().getX()) {
+            if (editingBlocked) return;
             for (const auto& v : visible) if (std::abs(e.position.x - v.second.getX()) < 6) { selected = { notes[v.first].id }; drag.mode = Drag::velocity; drag.anchor = e.position; drag.revision = revision; drag.before = notes; prepareDrag(); refreshButtons(); return; }
         }
         if (plot().contains(e.position)) {
+            if (editingBlocked) {
+                if (!e.mods.isShiftDown() && !e.mods.isCtrlDown()) selected.clear();
+                refreshButtons(); grid.repaint(); return;
+            }
             markInsertion(atBeat(e.position.x, e.mods.isAltDown()));
             if (draw.getToggleState() && !e.mods.isShiftDown() && !e.mods.isCtrlDown()) { insert(e.position, e.mods.isAltDown()); return; }
             if (!e.mods.isShiftDown() && !e.mods.isCtrlDown()) selected.clear();
@@ -434,7 +441,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     }
     void dragTo(const juce::MouseEvent& e)
     {
-        if (drag.mode == Drag::none) return;
+        if (editingBlocked || drag.mode == Drag::none) return;
         drag.changed = drag.changed || e.getDistanceFromDragStart() >= 3;
         if (!drag.changed) return;
         if (drag.mode == Drag::box) {
@@ -456,11 +463,28 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     }
     void end(const juce::MouseEvent&)
     {
+        if (editingBlocked) return;
         const auto mode = drag.mode; const auto changed = drag.changed; const auto expected = drag.revision;
         if (changed && mode == Drag::box) completeBoxSelection();
         drag = {};
         if (changed && mode != Drag::none && mode != Drag::box) submit(expected);
         else { refreshButtons(); grid.repaint(); }
+    }
+    time::MusicalRulerGrid musicalRuler() const
+    {
+        double spacing = 72.0;
+        auto ruler = time::musicalRulerStep(visibleBeats(), plot().getWidth(), timeSignatureNumerator, timeSignatureDenominator, spacing);
+        for (int pass = 0; pass < 3; ++pass) {
+            auto widest = juce::String(time::musicalRulerLabel(std::min(length, firstBeat + visibleBeats()),
+                timeSignatureNumerator, timeSignatureDenominator, 0));
+            if (ruler.labelTier >= 1) widest += "." + juce::String(std::max(1, timeSignatureNumerator));
+            if (ruler.labelTier >= 2) widest += ".4";
+            spacing = std::max(spacing, std::ceil(double(juce::GlyphArrangement::getStringWidth(mono(11), widest))) + 10.0);
+            const auto next = time::musicalRulerStep(visibleBeats(), plot().getWidth(), timeSignatureNumerator, timeSignatureDenominator, spacing);
+            if (next.stepBeats == ruler.stepBeats && next.labelTier == ruler.labelTier) break;
+            ruler = next;
+        }
+        return ruler;
     }
     void paintGrid(juce::Graphics& g)
     {
@@ -493,19 +517,19 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
             for (int i = 0; i < count; ++i) { const auto xx = x((first + i) * step); timeLine(xx, opacity); g.drawVerticalLine(juce::roundToInt(xx), float(rulerHeight() - 4), float(rulerHeight())); }
         };
         gridLines(gridBeats, 0.35f); gridLines(beatUnit, 0.65f); gridLines(barBeats, 1.0f);
-        const auto ruler = time::musicalRulerStep(visibleBeats(), area.getWidth(), timeSignatureNumerator, timeSignatureDenominator);
+        const auto ruler = musicalRuler();
         const double firstLabel = std::ceil(firstBeat / ruler.stepBeats - 1.0e-8);
         const double lastLabel = std::floor(juce::jmin(length, firstBeat + visibleBeats()) / ruler.stepBeats + 1.0e-8);
         g.setColour(quiet); g.setFont(mono(11));
-        lastPaintedLabels.clear(); float labelRight = area.getX() - 4;
+        lastPaintedLabels.clear(); lastPaintedLabelBeats.clear();
         for (double i = firstLabel; i <= lastLabel; ++i) {
             const double beat = i * ruler.stepBeats;
             const auto label = juce::String(time::musicalRulerLabel(beat, timeSignatureNumerator, timeSignatureDenominator, ruler.labelTier));
             const float left = float(juce::roundToInt(x(beat)) + 4);
             const int width = int(std::ceil(juce::GlyphArrangement::getStringWidth(g.getCurrentFont(), label))) + 2;
-            if (left < labelRight + 4 || left + width > area.getRight()) continue;
+            if (left < area.getX() || left + width > area.getRight()) continue;
             g.drawText(label, int(left), 1, width, rulerHeight() - 3, juce::Justification::centredLeft);
-            labelRight = left + float(width); lastPaintedLabels.push_back({ left, labelRight });
+            lastPaintedLabels.push_back({ left, left + float(width) }); lastPaintedLabelBeats.push_back(beat);
         }
         if (densePreview) {
             // Visible even in the minimum dock where the lower help row is hidden.
@@ -558,6 +582,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     std::size_t indexBuilds = 0, queriedIndexNodes = 0;
     int lastPaintedTimeLines = 0;
     std::vector<std::pair<float, float>> lastPaintedLabels;
+    std::vector<double> lastPaintedLabelBeats;
     bool densePreview = false;
     std::set<juce::String> selected;
     std::set<juce::String> reportedSelection;
@@ -569,7 +594,7 @@ struct PianoRoll::Impl : private juce::ScrollBar::Listener {
     double clipStart = 0, length = 4, bpm = 120, firstBeat = 0, pixelsPerBeat = 80, gridBeats = 0.25, playheadBeat = 0, barBeats = 4, beatUnit = 1, insertionBeat = 0;
     float rowHeight = 18;
     int topPitch = 84, timeSignatureNumerator = 4, timeSignatureDenominator = 4;
-    bool updating = false, velocityGesture = false, playing = false, insertionExplicit = false;
+    bool updating = false, velocityGesture = false, playing = false, insertionExplicit = false, editingBlocked = false;
     struct Drag { enum Mode { none, move, resize, box, velocity } mode = none; juce::Point<float> anchor; juce::Rectangle<float> selectionBox; std::vector<Note> before; std::vector<std::size_t> indices; double minStart = 0, maxEnd = 0, leastResize = 0, mostResize = 0, activeEdge = 0; int minPitch = 0, maxPitch = 127; std::set<juce::String> selectionBefore; std::uint64_t revision = 0; juce::String activeId; bool changed = false; } drag;
 };
 
@@ -592,6 +617,20 @@ void PianoRoll::setTrackColour(const juce::String& colour)
     if (impl->trackColour == colour) return;
     impl->trackColour = colour;
     impl->grid.repaint();
+}
+void PianoRoll::setEditingBlocked(bool blocked)
+{
+    auto& p = *impl;
+    if (p.editingBlocked == blocked) return;
+    p.editingBlocked = blocked;
+    bool restored = false;
+    if (blocked) {
+        if (!p.drag.before.empty()) { p.notes = p.drag.before; restored = true; }
+        if (p.velocityGesture) { p.notes = p.beforeVelocity; restored = true; }
+        p.drag = {}; p.velocityGesture = false;
+    }
+    if (restored) p.rebuildNoteIndex();
+    p.refreshButtons(); p.layout();
 }
 void PianoRoll::setClip(const juce::String& projectId, const juce::String& clipId, const juce::String& name,
                        std::uint64_t revision, double startBeats, double lengthBeats, double bpm,
@@ -710,7 +749,7 @@ bool PianoRoll::keyPressed(const juce::KeyPress& key)
         if (code == '4') { p.snapEnabled.setToggleState(!p.snapEnabled.getToggleState(), juce::sendNotificationSync); return true; }
         return onProjectKey ? onProjectKey(key) : false;
     }
-    if (!mods.isAnyModifierKeyDown() && (code == 'b' || code == 'B')) { p.draw.setToggleState(!p.draw.getToggleState(), juce::sendNotificationSync); return true; }
+    if (!mods.isAnyModifierKeyDown() && (code == 'b' || code == 'B')) { if (!p.editingBlocked) p.draw.setToggleState(!p.draw.getToggleState(), juce::sendNotificationSync); return true; }
     if (code == juce::KeyPress::deleteKey || code == juce::KeyPress::backspaceKey) { p.deleteSelected(); return true; }
     if (code == juce::KeyPress::upKey || code == juce::KeyPress::downKey) { p.transpose((code == juce::KeyPress::upKey ? 1 : -1) * (mods.isShiftDown() ? 12 : 1)); return true; }
     return false;
@@ -734,7 +773,7 @@ juce::Result PianoRoll::runInteractionSmokeTest(juce::DynamicObject& report, con
             juce::ModifierKeys(juce::ModifierKeys::leftButtonModifier), 1, 0, 0, 0, 0,
             &p.grid, &p.grid, now, start, now, 1, dragged);
     };
-    const auto fail = [&](const char* message) { onWriteNotes = {}; onEditError = {}; onProjectKey = {}; return juce::Result::fail(message); };
+    const auto fail = [&](const char* message) { onWriteNotes = {}; onEditError = {}; onProjectKey = {}; onSeek = {}; return juce::Result::fail(message); };
     p.selected.insert("test-note");
     const auto* projection = p.notes.data();
     ++acceptedRevision;
@@ -780,6 +819,45 @@ juce::Result PianoRoll::runInteractionSmokeTest(juce::DynamicObject& report, con
     if (commits != 1 || p.notes.front().pitch != accepted.front().pitch || p.notes.front().startBeats != accepted.front().startBeats)
         return fail("A changed project revision failed to cancel an unchanged-note local preview.");
     report.setProperty("midi_external_revision_cancels_preview", true);
+
+    // Recording/finalization is a read-only editing state, not a disabled
+    // component: note selection and zoom remain usable without any writes.
+    {
+        const auto savedZoom = p.pixelsPerBeat;
+        const auto savedSeek = onSeek;
+        int seeks = 0; onSeek = [&](double) { ++seeks; };
+        const auto point = p.visible.front().second.getCentre();
+        p.grid.mouseDown(event(point, point, false));
+        p.grid.mouseDrag(event(point + juce::Point<float>(40, 18), point, true));
+        setEditingBlocked(true);
+        if (p.notes.front().startBeats != accepted.front().startBeats || p.notes.front().pitch != accepted.front().pitch
+            || p.drag.mode != Impl::Drag::none)
+            return fail("Entering recording did not restore an in-flight MIDI preview.");
+        p.selected.clear(); p.refreshButtons();
+        const auto select = p.visible.front().second.getCentre();
+        p.grid.mouseDown(event(select, select, false));
+        p.grid.mouseDrag(event(select + juce::Point<float>(80, -18), select, true));
+        p.grid.mouseUp(event(select + juce::Point<float>(80, -18), select, true));
+        if (p.selected.size() != 1 || !p.copy.isEnabled() || p.cut.isEnabled() || p.velocity.isEnabled())
+            return fail("Recording disabled MIDI selection or left destructive controls enabled.");
+        const auto empty = juce::Point<float>(p.x(5.0), p.y(65) + p.rowHeight * 0.5f);
+        p.grid.mouseDoubleClick(event(empty, empty, false));
+        p.transpose(1); p.deleteSelected(); p.duplicateSelected(); p.toggleStep(0);
+        p.copySelected(false); p.copySelected(true); p.pasteNotes(); p.quantize.onClick();
+        p.velocity.onDragStart(); p.velocity.setValue(20, juce::sendNotificationSync); p.velocity.onDragEnd();
+        const auto rulerPoint = juce::Point<float>(p.plot().getCentreX(), 4.0f);
+        p.grid.mouseDown(event(rulerPoint, rulerPoint, false));
+        const auto revisionBefore = p.revision;
+        p.setZoom(savedZoom * 1.25);
+        if (p.pixelsPerBeat == savedZoom || p.revision != revisionBefore || seeks != 0 || commits != 1
+            || p.notes.size() != accepted.size() || p.notes.front().startBeats != accepted.front().startBeats
+            || p.notes.front().lengthBeats != accepted.front().lengthBeats || p.notes.front().pitch != accepted.front().pitch
+            || p.notes.front().velocity != accepted.front().velocity)
+            return fail("Recording-safe MIDI navigation submitted an edit/seek or failed to zoom.");
+        setEditingBlocked(false); p.setZoom(savedZoom); onSeek = savedSeek;
+        report.setProperty("midi_recording_selection_zoom_without_edits_or_seek", true);
+        report.setProperty("midi_recording_cancels_inflight_preview", true);
+    }
 
     const auto resizeStart = p.visible.front().second.getTopRight() + juce::Point<float>(-2, 6);
     const auto resizeEnd = resizeStart + juce::Point<float>(float(p.pixelsPerBeat * 0.25), 0);
@@ -1055,8 +1133,22 @@ juce::Result PianoRoll::runInteractionSmokeTest(juce::DynamicObject& report, con
         for (std::size_t i = 1; i < q.lastPaintedLabels.size(); ++i)
             if (q.lastPaintedLabels[i].first < q.lastPaintedLabels[i - 1].second + 4) return fail("Long piano bar numbers overlap at far positions.");
         if (!writeImage(farRuler, "piano-far-ruler.png")) return fail("Could not write far-time piano ruler evidence.");
+        for (const double scale : {12.0, 80.0, 400.0}) for (const double firstBeat : {0.0, 99999900.375}) {
+            q.firstBeat = firstBeat; q.setZoom(scale, q.plot().getX()); renderGrid();
+            const auto ruler = q.musicalRuler();
+            if (q.lastPaintedLabels.empty() || q.lastPaintedLabels.size() != q.lastPaintedLabelBeats.size())
+                return fail("Piano ruler lost label geometry at a normal or far viewport.");
+            for (std::size_t i = 0; i < q.lastPaintedLabels.size(); ++i) {
+                if (q.lastPaintedLabels[i].first != float(juce::roundToInt(q.x(q.lastPaintedLabelBeats[i])) + 4))
+                    return fail("Piano label is not aligned with its own beat tick.");
+                if (i > 0 && (q.lastPaintedLabels[i].first < q.lastPaintedLabels[i - 1].second + 4
+                    || std::abs(q.lastPaintedLabelBeats[i] - q.lastPaintedLabelBeats[i - 1] - ruler.stepBeats) > 1e-7))
+                    return fail("Piano ruler has overlapping labels or irregular interior skips.");
+            }
+        }
         report.setProperty("midi_snap_grid_solid_dashed_pixels", true);
         report.setProperty("midi_ruler_three_tiers_far_labels_no_overlap", true);
+        report.setProperty("midi_ruler_uniform_stride_and_tick_anchors", true);
 
         std::vector<Note> crowded; crowded.reserve(100000);
         for (int i = 0; i < 100000; ++i) crowded.push_back({ juce::String(i), 60, double(i) * 2, 0.25, 90, 1 });

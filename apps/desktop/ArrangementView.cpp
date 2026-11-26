@@ -24,6 +24,19 @@ juce::String timeText(double seconds)
     return juce::String(tenths / 600).paddedLeft('0', 2) + ":"
         + juce::String((tenths / 10) % 60).paddedLeft('0', 2) + "." + juce::String(tenths % 10);
 }
+int rulerTextWidth(const juce::String& text)
+{
+    return int(std::ceil(juce::GlyphArrangement::getStringWidth(mono(11.0f), text))) + 2;
+}
+juce::String secondsRulerText(double seconds, double step)
+{
+    const int digits = juce::jlimit(1, 6, static_cast<int>(std::ceil(-std::log10(step) - 0.000001)));
+    const auto scale = static_cast<juce::int64>(std::pow(10, digits));
+    const auto units = static_cast<juce::int64>(std::llround(juce::jmax(0.0, seconds) * static_cast<double>(scale)));
+    return juce::String(units / (scale * 60)).paddedLeft('0', 2) + ":"
+        + juce::String((units / scale) % 60).paddedLeft('0', 2) + "."
+        + juce::String(units % scale).paddedLeft('0', digits);
+}
 constexpr int detailFrames = 65536, detailWindowLimit = 16;
 struct WaveformDetail {
     juce::int64 firstSample = 0;
@@ -276,11 +289,11 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
             seeking = false;
             const int index = static_cast<int>(e.position.y) / p.rowHeight;
             if (index < 0 || index >= static_cast<int>(p.state.tracks.size())) {
-                seeking = e.position.x >= p.labelWidth();
+                seeking = !p.editingBlocked() && e.position.x >= p.labelWidth();
                 if (seeking) p.seekAt(e.position.x);
                 return;
             }
-            p.engine.endEditGesture();
+            if (!p.editingBlocked()) p.engine.endEditGesture();
             if (const auto* clip = p.hitClip(static_cast<std::size_t>(index), e.position)) {
                 const auto picked = *clip;
                 if (e.mods.isCtrlDown() || e.mods.isCommandDown() || e.mods.isShiftDown()) {
@@ -291,7 +304,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                 p.engine.selectClip(picked.id);
                 p.notifyState();
                 p.selecting = false;
-                if (!p.selection.contains(picked.id)) return;
+                if (!p.selection.contains(picked.id) || p.editingBlocked()) return;
                 p.drag.id = picked.id;
                 p.drag.projectId = p.state.projectId;
                 p.drag.revision = p.state.revision;
@@ -340,12 +353,13 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
                 return;
             }
             else if (!e.mods.isCtrlDown() && !e.mods.isCommandDown()) p.selection.clear();
-            seeking = e.position.x >= p.labelWidth();
+            seeking = !p.editingBlocked() && e.position.x >= p.labelWidth();
             if (seeking) p.seekAt(e.position.x); else p.notifyState();
         }
         void mouseDrag(const juce::MouseEvent& e) override
         {
             if (!isEnabled()) return;
+            if (p.editingBlocked()) { seeking = false; p.cancelDrag(); return; }
             if (p.drag.id.isNotEmpty()) {
                 if (std::abs(e.position.x - p.drag.downX) >= 4.0f || std::abs(e.position.y - p.drag.downY) >= 8.0f) p.drag.moved = true;
                 if (p.drag.moved) {
@@ -383,6 +397,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
         }
         void mouseUp(const juce::MouseEvent&) override {
             seeking = false;
+            if (p.editingBlocked()) { p.cancelDrag(); return; }
             if (p.marquee) {
                 p.marquee = false;
                 p.selecting = true;
@@ -499,14 +514,14 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
     }
     void requestRename(const juce::String& id)
     {
-        if (id.isEmpty() || state.recording || state.recordingFinalizing) return;
+        if (id.isEmpty() || state.recordingFinalizing) return;
         engine.selectTrack(id); explicitTrackSelection = id; selection.clear(); notifyState();
         if (owner.onRenameTrack) owner.onRenameTrack(id);
     }
     void showTrackMenu(const juce::String& id, juce::Component* target)
     {
         juce::PopupMenu menu;
-        menu.addItem(1, uiText("Rename track...", "重命名轨道...") + "\tF2", !state.recording && !state.recordingFinalizing);
+        menu.addItem(1, uiText("Rename track...", "重命名轨道...") + "\tF2", !state.recordingFinalizing);
         menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(target).withMousePosition(),
             [safe = juce::Component::SafePointer<ArrangementView>(&owner), id](int choice) {
                 if (safe && choice == 1) safe->impl->requestRename(id);
@@ -681,6 +696,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
             if (clipArea(row, *it).contains(point)) return &*it;
         return nullptr;
     }
+    bool editingBlocked() const { return state.recording || state.recordingFinalizing; }
     bool cancelDrag()
     {
         if (drag.id.isEmpty() && !marquee && rulerDrag == 0) return false;
@@ -691,6 +707,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
     }
     void commitDrag()
     {
+        if (editingBlocked()) { cancelDrag(); return; }
         if (drag.id.isEmpty()) return;
         const auto pending = drag;
         drag = {};
@@ -741,6 +758,7 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
     }
     void seekAt(float x)
     {
+        if (editingBlocked()) return;
         const double seconds = viewStart + (x - labelWidth()) * visibleDuration() / plotWidth();
         engine.seek(juce::jlimit(0.0, projectDuration(), seconds));
         notifyState();
@@ -787,26 +805,45 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
     void scrollBarMoved(juce::ScrollBar*, double start) override { followSuspended = true; viewStart = start; syncScroll(); }
     time::MusicalRulerGrid musicalRuler() const
     {
-        return time::musicalRulerStep(visibleDuration() * state.bpm / 60.0, plotWidth(), state.numerator, state.denominator);
+        const double visibleBeats = visibleDuration() * state.bpm / 60.0;
+        const double endBeat = (viewStart + visibleDuration()) * state.bpm / 60.0;
+        double spacing = 72.0;
+        auto ruler = time::musicalRulerStep(visibleBeats, plotWidth(), state.numerator, state.denominator, spacing);
+        // Use the longest possible label in this viewport before enumerating
+        // ticks. Never drop individual interior bars to resolve collisions.
+        for (int pass = 0; pass < 3; ++pass) {
+            auto widest = juce::String(time::musicalRulerLabel(endBeat, state.numerator, state.denominator, 0));
+            if (ruler.labelTier >= 1) widest += "." + juce::String(std::max(1, state.numerator));
+            if (ruler.labelTier >= 2) widest += ".4";
+            int width = rulerTextWidth(widest);
+            if (rulerMode == 2) width = std::max(width, rulerTextWidth(timeText(viewStart + visibleDuration())));
+            spacing = std::max(spacing, double(width + 8));
+            const auto next = time::musicalRulerStep(visibleBeats, plotWidth(), state.numerator, state.denominator, spacing);
+            if (next.stepBeats == ruler.stepBeats && next.labelTier == ruler.labelTier) break;
+            ruler = next;
+        }
+        return ruler;
     }
     double tickStep() const
     {
         if (bars) return musicalRuler().stepBeats * 60.0 / state.bpm;
-        const auto target = visibleDuration() / juce::jmax(1.0, plotWidth() / 100.0);
-        const auto power = std::pow(10.0, std::floor(std::log10(target)));
-        const auto normal = target / power;
-        return juce::jmax(0.000001, (normal <= 1.0 ? 1.0 : normal <= 2.0 ? 2.0 : normal <= 5.0 ? 5.0 : 10.0) * power);
+        double spacing = 100.0, step = 0.000001;
+        for (int pass = 0; pass < 3; ++pass) {
+            const auto target = visibleDuration() * spacing / juce::jmax(1, plotWidth());
+            const auto power = std::pow(10.0, std::floor(std::log10(target)));
+            const auto normal = target / power;
+            step = juce::jmax(0.000001, (normal <= 1.0 ? 1.0 : normal <= 2.0 ? 2.0 : normal <= 5.0 ? 5.0 : 10.0) * power);
+            const auto required = double(rulerTextWidth(secondsRulerText(viewStart + visibleDuration(), step)) + 8);
+            if (required <= spacing) break;
+            spacing = required;
+        }
+        return step;
     }
     juce::String tickText(double seconds) const
     {
         if (bars) return juce::String(time::musicalRulerLabel(seconds * state.bpm / 60.0,
             state.numerator, state.denominator, musicalRuler().labelTier));
-        const int digits = juce::jlimit(1, 6, static_cast<int>(std::ceil(-std::log10(tickStep()) - 0.000001)));
-        const auto scale = static_cast<juce::int64>(std::pow(10, digits));
-        const auto units = static_cast<juce::int64>(std::llround(juce::jmax(0.0, seconds) * static_cast<double>(scale)));
-        return juce::String(units / (scale * 60)).paddedLeft('0', 2) + ":"
-            + juce::String((units / scale) % 60).paddedLeft('0', 2) + "."
-            + juce::String(units % scale).paddedLeft('0', digits);
+        return secondsRulerText(seconds, tickStep());
     }
     template<class Callback> void eachTick(Callback callback) const
     {
@@ -1207,6 +1244,8 @@ struct ArrangementView::Impl : private juce::ScrollBar::Listener {
     double gridBeats = 0.25;
     bool bars = false;
     int rulerMode = 1;
+    struct RulerLabel { double seconds; float tick; int left, right; juce::String text; };
+    std::vector<RulerLabel> lastPaintedRulerLabels;
     bool snapEnabled = true, adaptiveGrid = false, follow = false, followSuspended = false;
     bool marquee = false;
     juce::Point<float> marqueeOrigin;
@@ -1251,6 +1290,7 @@ void ArrangementView::update(const EngineSession::Snapshot& next)
         }
     if (projectChanged || (p.drag.id.isNotEmpty() && next.selectedClipId != p.drag.id)) p.cancelDrag();
     p.state = next;
+    if (p.editingBlocked()) { p.cancelDrag(); p.canvas.seeking = false; }
     if (contentChanged) p.updateChords(projectChanged);
     if (projectChanged) p.extendedTimelineEnd = 0;
     if (next.position > p.projectDuration()) {
@@ -1267,9 +1307,11 @@ void ArrangementView::update(const EngineSession::Snapshot& next)
         p.headers[i]->mute.setToggleState(next.tracks[i].muted, juce::dontSendNotification);
         p.headers[i]->solo.setToggleState(next.tracks[i].solo, juce::dontSendNotification);
         p.headers[i]->arm.setToggleState(next.tracks[i].armed, juce::dontSendNotification);
+        p.headers[i]->mute.setEnabled(!next.recordingFinalizing);
+        p.headers[i]->solo.setEnabled(!next.recordingFinalizing);
         p.headers[i]->arm.setEnabled(next.tracks[i].kind != "bus" && !next.recording && !next.recordingFinalizing);
         p.headers[i]->rename.setVisible(next.tracks[i].id == next.selectedTrackId);
-        p.headers[i]->rename.setEnabled(!next.recording && !next.recordingFinalizing);
+        p.headers[i]->rename.setEnabled(!next.recordingFinalizing);
         p.headers[i]->rename.setButtonText(uiText("rename"));
         p.headers[i]->devices.setButtonText(uiText("devices"));
     }
@@ -1359,6 +1401,7 @@ juce::Range<double> ArrangementView::selectedTimeRange() const
 juce::Range<double> ArrangementView::explicitSelectedTimeRange() const { return impl->rangeSelection; }
 juce::Result ArrangementView::loopSelection()
 {
+    if (impl->editingBlocked()) return juce::Result::fail("Loop editing is unavailable while recording or finalizing a take.");
     const auto range = selectedTimeRange();
     if (range.isEmpty()) return juce::Result::fail("Select clips or Shift-drag a time range in the ruler first.");
     auto* values = new juce::DynamicObject; values->setProperty("start_seconds", range.getStart()); values->setProperty("end_seconds", range.getEnd());
@@ -1409,15 +1452,22 @@ void ArrangementView::paint(juce::Graphics& g)
         g.setColour(level == 2 ? secondary : rule);
         g.drawLine(x, level == 2 ? 35.0f : level == 1 ? 41.0f : 47.0f, x, float(rulerHeight));
     });
-    int previousLabelRight = p.labelWidth() - 8;
+    p.lastPaintedRulerLabels.clear();
+    const auto ruler = p.musicalRuler();
+    const auto step = p.tickStep();
     p.eachTick([&](double seconds, float x) {
         g.setColour(secondary); g.setFont(mono(11.0f));
-        const auto width = p.bars ? 86 : 112;
-        const auto left = juce::jlimit(p.labelWidth(), p.canvas.getWidth() - width, juce::roundToInt(x) - width / 2);
-        if (left >= previousLabelRight + 8) {
-            g.drawText(p.tickText(seconds), left, 0, width, 24, juce::Justification::centred);
-            if (p.rulerMode == 2) g.drawText(timeText(seconds), left, 20, width, 17, juce::Justification::centred);
-            previousLabelRight = left + width;
+        const auto label = p.bars ? juce::String(time::musicalRulerLabel(seconds * p.state.bpm / 60.0,
+            p.state.numerator, p.state.denominator, ruler.labelTier)) : secondsRulerText(seconds, step);
+        const auto second = p.rulerMode == 2 ? timeText(seconds) : juce::String();
+        const auto width = std::max(rulerTextWidth(label), second.isEmpty() ? 0 : rulerTextWidth(second));
+        const auto left = juce::roundToInt(x) + 4;
+        // Labels share the exact tick origin used by clips, grids and playhead.
+        // An incomplete trailing label is omitted, never pushed off its tick.
+        if (left >= p.labelWidth() && left + width <= p.labelWidth() + p.plotWidth()) {
+            g.drawText(label, left, 0, width, 24, juce::Justification::centredLeft);
+            if (second.isNotEmpty()) g.drawText(second, left, 20, width, 17, juce::Justification::centredLeft);
+            p.lastPaintedRulerLabels.push_back({ seconds, x, left, left + width, label });
         }
         g.setColour(rule); g.drawLine(x, 38.0f, x, static_cast<float>(rulerHeight));
     });
@@ -1445,6 +1495,7 @@ void ArrangementView::mouseDown(const juce::MouseEvent& e)
 {
     if (!isEnabled() || e.position.x < impl->labelWidth()) return;
     if (isShowing()) grabKeyboardFocus();
+    if (impl->editingBlocked()) return;
     if (e.mods.isPopupMenu()) {
         if (onContextMenu) onContextMenu("ruler", {}, impl->snapTime(impl->timeAt(e.position.x), e.mods.isAltDown()));
         return;
@@ -1463,7 +1514,7 @@ void ArrangementView::mouseDown(const juce::MouseEvent& e)
 }
 void ArrangementView::mouseDrag(const juce::MouseEvent& e)
 {
-    auto& p = *impl; if (p.rulerDrag == 0) return;
+    auto& p = *impl; if (p.editingBlocked()) { p.cancelDrag(); return; } if (p.rulerDrag == 0) return;
     const double at = p.snapTime(p.timeAt(e.position.x), e.mods.isAltDown());
     if (p.rulerDrag == 1) p.seekAt(e.position.x);
     else if (p.rulerDrag == 2) {
@@ -1482,6 +1533,7 @@ void ArrangementView::mouseDrag(const juce::MouseEvent& e)
 void ArrangementView::mouseUp(const juce::MouseEvent&)
 {
     auto& p = *impl; const auto mode = p.rulerDrag; p.rulerDrag = 0;
+    if (p.editingBlocked()) { repaint(); return; }
     if (mode >= 3 && (p.loopPreviewStart != p.loopBeforeStart || p.loopPreviewEnd != p.loopBeforeEnd)) {
         auto* args = new juce::DynamicObject; args->setProperty("start_seconds", p.loopPreviewStart); args->setProperty("end_seconds", p.loopPreviewEnd);
         auto result = p.engine.execute("set_loop_range", juce::var(args), p.rulerRevision);
@@ -1502,6 +1554,8 @@ bool ArrangementView::keyPressed(const juce::KeyPress& key)
     }
     if (key.getModifiers().isAnyModifierKeyDown()) return false;
     const auto& state = impl->state;
+    if (impl->editingBlocked() && (key == juce::KeyPress::homeKey || key == juce::KeyPress::endKey
+        || key == juce::KeyPress::leftKey || key == juce::KeyPress::rightKey)) return true;
     if (key == juce::KeyPress::homeKey) impl->engine.seek(0.0);
     else if (key == juce::KeyPress::endKey) impl->engine.seek(state.duration);
     else if (key == juce::KeyPress::leftKey) impl->engine.seek(juce::jmax(0.0, state.position - impl->effectiveGrid() * 60.0 / state.bpm));
@@ -1558,6 +1612,57 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
     }
     setCompactRows(false);
     report.setProperty("clips_fill_standard_and_compact_track_lanes", true);
+    {
+        // Inject the recording projection into a separate view so this check
+        // exercises widget guards without starting hardware capture.
+        const auto before = p.engine.snapshot();
+        ArrangementView locked(p.engine); locked.setSize(1189, 440);
+        locked.onUserStateChange = [] {};
+        int opened = 0; locked.onOpenMidiClip = [&](const juce::String&) { ++opened; };
+        auto& q = *locked.impl;
+        const auto mouse = [&](juce::Component& component, juce::Point<float> point, bool dragged = false) {
+            const auto now = juce::Time::getCurrentTime();
+            return juce::MouseEvent(juce::Desktop::getInstance().getMainMouseSource(), point,
+                juce::ModifierKeys(juce::ModifierKeys::leftButtonModifier), 1, 0, 0, 0, 0,
+                &component, &component, now, point, now, 1, dragged);
+        };
+        for (const bool finalizing : {false, true}) {
+            auto projected = before; projected.recording = !finalizing; projected.recordingFinalizing = finalizing;
+            projected.tracks.front().clips.front().kind = "midi";
+            locked.update(projected); locked.fitToProject();
+            const auto clip = projected.tracks.front().clips.front();
+            const auto point = q.clipArea(0, clip).getCentre();
+            q.canvas.mouseDown(mouse(q.canvas, point));
+            q.canvas.mouseDrag(mouse(q.canvas, point + juce::Point<float>(60, 88), true));
+            q.canvas.mouseUp(mouse(q.canvas, point));
+            q.canvas.mouseDoubleClick(mouse(q.canvas, point));
+            if (!q.selection.contains(clip.id) || q.drag.id.isNotEmpty() || q.marquee)
+                return juce::Result::fail("Recording blocked clip selection or allowed a clip edit preview.");
+            const auto head = juce::Point<float>(20, float(q.rowHeight + 12));
+            q.canvas.mouseDown(mouse(q.canvas, head));
+            if (p.engine.snapshot().selectedTrackId != projected.tracks[1].id)
+                return juce::Result::fail("Recording prevented track focus from changing.");
+            const auto blank = juce::Point<float>(float(q.labelWidth() + q.plotWidth() - 1), float(q.canvas.getHeight() - 1));
+            q.canvas.mouseDown(mouse(q.canvas, blank));
+            q.canvas.mouseDrag(mouse(q.canvas, blank - juce::Point<float>(80, 40), true));
+            q.canvas.mouseUp(mouse(q.canvas, blank));
+            const auto rulerPoint = juce::Point<float>(float(q.labelWidth() + 150), 46);
+            locked.mouseDown(mouse(locked, rulerPoint)); locked.mouseDrag(mouse(locked, rulerPoint + juce::Point<float>(60, 0), true));
+            locked.mouseUp(mouse(locked, rulerPoint)); locked.keyPressed(juce::KeyPress(juce::KeyPress::endKey));
+            if (locked.loopSelection().wasOk() || q.rulerDrag != 0 || q.marquee || q.canvas.seeking)
+                return juce::Result::fail("Recording allowed a loop/seek/marquee editing gesture.");
+            const auto zoom = locked.zoomFactor(); locked.zoomIn(); locked.revealPosition(before.duration * 0.5);
+            const auto after = p.engine.snapshot();
+            if (locked.zoomFactor() <= zoom || after.revision != before.revision || after.position != before.position
+                || after.loopStart != before.loopStart || after.loopEnd != before.loopEnd || after.looping != before.looping)
+                return juce::Result::fail("Recording navigation changed musical/transport state or did not zoom.");
+        }
+        if (opened != 2) return juce::Result::fail("Recording did not allow the selected MIDI editor to open.");
+        if (before.selectedClipId.isNotEmpty()) p.engine.selectClip(before.selectedClipId);
+        else if (before.selectedTrackId.isNotEmpty()) p.engine.selectTrack(before.selectedTrackId);
+        update(p.engine.snapshot());
+        report.setProperty("recording_and_finalizing_arrangement_navigation_without_edits", true);
+    }
     {
         const auto selected=selectedClipIds();const auto before=p.engine.snapshot();
         const auto scroll=p.viewport.getViewPosition();
@@ -1910,6 +2015,69 @@ juce::Result ArrangementView::runSmokeTest(juce::DynamicObject& report, const ju
     const bool threeEightTicks = p.tickText(0.8125) == "2.1.2";
     if (!sixEightTicks || !threeEightTicks) return juce::Result::fail("Three-tier ruler ignored the meter denominator.");
     report.setProperty("ruler_three_zoom_tiers_and_meter", true);
+
+    // Exercise the actual painter: the old clamped, centred first box shifted
+    // bar 1 off its tick and produced 1,5,7... at a two-bar cadence.
+    {
+        const auto rulerBounds = getBounds();
+        p.state.numerator = 4; p.state.denominator = 4;
+        int checkedLayouts = 0;
+        for (const int width : {1189, 1469, 2109}) {
+            setSize(width, getHeight());
+            for (const int mode : {0, 1, 2}) for (const double span : {32.0, 1.0})
+                for (const double start : {0.0, 12.25, 172700.125}) {
+                    setRulerMode(mode);
+                    p.setZoom(p.projectDuration() / span, 0.0); p.viewStart = start; p.syncScroll();
+                    juce::Image image(juce::Image::RGB, getWidth(), rulerHeight, true);
+                    {
+                        // Native image contexts may defer their writes until
+                        // Graphics is destroyed. Flush before inspecting or
+                        // encoding the painted image, not at loop-scope exit.
+                        juce::Graphics graphics(image); paint(graphics);
+                    }
+                    const auto& labels = p.lastPaintedRulerLabels;
+                    const auto step = p.tickStep();
+                    if (labels.size() < 2) return juce::Result::fail("Visible ruler lost its regular labels.");
+                    {
+                        const juce::Image::BitmapData pixels(image, juce::Image::BitmapData::readOnly);
+                        if (pixels.getPixelColour(0, 0) != paper)
+                            return juce::Result::fail("Ruler fixture background was not painted before image capture.");
+                        int textPixels = 0;
+                        const auto& firstLabel = labels.front();
+                        for (int y = 2; y < 22; ++y) for (int x = firstLabel.left; x < firstLabel.right; ++x)
+                            if (pixels.getPixelColour(x, y) != paper) ++textPixels;
+                        if (textPixels < 8)
+                            return juce::Result::fail("Ruler fixture has geometry but no rendered label pixels.");
+                    }
+                    const auto first = std::ceil(p.viewStart / step - 1e-7) * step;
+                    if (std::abs(labels.front().seconds - first) > step * 1e-5)
+                        return juce::Result::fail("Ruler first label is not anchored to the global tick sequence.");
+                    for (std::size_t i = 0; i < labels.size(); ++i) {
+                        const auto& label = labels[i];
+                        if (label.left != juce::roundToInt(p.timeX(label.seconds)) + 4
+                            || label.left < p.labelWidth() || label.right > p.labelWidth() + p.plotWidth())
+                            return juce::Result::fail("Ruler label moved off its own tick or escaped the visible plot.");
+                        if (i > 0 && (label.left < labels[i - 1].right + 4
+                            || std::abs(label.seconds - labels[i - 1].seconds - step) > step * 1e-5))
+                            return juce::Result::fail("Ruler collision handling skipped an interior tick or overlapped labels.");
+                    }
+                    if (width == 1189 && mode == 0 && span == 32.0 && start == 0.0
+                        && (labels[0].text != "1" || labels[1].text != "3" || labels[2].text != "5"))
+                        return juce::Result::fail("Two-bar ruler did not display 1,3,5 at their corresponding bar lines.");
+                    if (width == 1189 && span == 32.0 && start == 0.0 && outputDirectory.isDirectory()) {
+                        const auto name = mode == 0 ? "arrangement-ruler-bars.png" : mode == 1 ? "arrangement-ruler-seconds.png" : "arrangement-ruler-both.png";
+                        auto stream = outputDirectory.getChildFile(name).createOutputStream();
+                        if (!stream || !juce::PNGImageFormat().writeImageToStream(image, *stream))
+                            return juce::Result::fail("Could not save ruler alignment evidence.");
+                    }
+                    ++checkedLayouts;
+                }
+        }
+        setBounds(rulerBounds); setRulerMode(0);
+        report.setProperty("ruler_regular_anchored_layout_cases", checkedLayouts);
+        report.setProperty("ruler_nonempty_painted_image_cases", checkedLayouts);
+        report.setProperty("ruler_two_bar_sequence_1_3_5", true);
+    }
 
     // Real 48-hour coordinates, including the fastest supported tempo. Work is
     // bounded by screen width, never project length divided by the fixed grid.

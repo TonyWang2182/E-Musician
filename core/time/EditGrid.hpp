@@ -26,16 +26,18 @@ inline double beatsPerBar(int numerator, int denominator)
 struct MusicalRulerGrid { double stepBeats; int labelTier; };
 // Ruler labels and edit-grid strokes have independent density. Labels stop at
 // quarters of a meter beat; deeper zoom adds strokes, never a fourth name level.
-inline MusicalRulerGrid musicalRulerStep(double visibleQuarterBeats, double pixels, int numerator, int denominator)
+inline MusicalRulerGrid musicalRulerStep(double visibleQuarterBeats, double pixels, int numerator, int denominator,
+                                        double minimumLabelSpacingPixels = 72.0)
 {
     const double beat = 4.0 / std::max(1, denominator);
     const double bar = beatsPerBar(numerator, denominator);
     if (!std::isfinite(visibleQuarterBeats) || !std::isfinite(pixels)) return { bar, 0 };
-    const double wanted = std::max(0.0, visibleQuarterBeats) * 72.0 / std::max(1.0, pixels);
+    const double spacing = std::isfinite(minimumLabelSpacingPixels) ? std::max(1.0, minimumLabelSpacingPixels) : 72.0;
+    const double wanted = std::max(0.0, visibleQuarterBeats) * spacing / std::max(1.0, pixels);
     if (wanted <= beat * 0.25) return { beat * 0.25, 2 };
     if (wanted <= beat * 0.5) return { beat * 0.5, 2 };
     if (wanted <= beat) return { beat, 1 };
-    return { bar * std::pow(2.0, std::ceil(std::log2(std::max(1.0, wanted / bar)))), 0 };
+    return { bar * std::pow(2.0, std::ceil(std::log2(std::max(1.0, wanted / bar)) - 1.0e-10)), 0 };
 }
 inline std::string musicalRulerLabel(double quarterBeat, int numerator, int denominator, int tier)
 {

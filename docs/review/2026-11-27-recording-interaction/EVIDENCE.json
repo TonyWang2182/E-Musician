@@ -1,0 +1,60 @@
+{
+  "date": "2026-11-26T22:20:53.871839+00:00",
+  "build_receipt": "20261126T221550.116842Z-35f6e68369",
+  "test_receipt": "20261126T221741.062225Z-e4fb920826",
+  "source_fingerprint": "ee846c91d36c7985f53abbcae0f995db027c0042be61d85035c8ed846b7b5a16",
+  "source_file_count": 440,
+  "source_inputs_equal_build_test": true,
+  "changed_from_first_full_tested_build": [
+    "apps/desktop/ArrangementView.cpp",
+    "tests/EngineSessionAudioInputSmoke.inc"
+  ],
+  "change_scope": "Test-only C++20 Snapshot lifetime and deferred Graphics screenshot flush fixes after full CTest.",
+  "exe": "E:\\emusician-analysis-build\\bin-0.13.6-recording-v2\\Release\\E-musician.exe",
+  "exe_sha256": "772d1a3ddc30c0b8f1b231f9270750301fe6b5c47aca0d44d4a8daf1de0da372",
+  "launcher": "E:\\MusicAgent&DAW\\Start E-musician Recording v2.cmd",
+  "protected": {
+    "E:\\emusician-analysis-build\\bin-0.13.6-recording\\Release\\E-musician.exe": {
+      "sha256": "2eb6bd99dd37f8aed032c83ae07cdf82b9ebcb78a59f698df202d1ba7038adf1",
+      "unchanged": true
+    },
+    "E:\\emusician-analysis-build\\bin-0.13.6\\Release\\E-musician.exe": {
+      "sha256": "81020b783de6540746de5a81215ea8a62cc133f4d8202a30d40add3b98940699",
+      "unchanged": true
+    },
+    "E:\\MusicAgent&DAW\\Start E-musician Recording.cmd": {
+      "sha256": "0ea84aeb64988edd39edfec5f551a5ff306a80e4bf91d09ec95491cc5330fe1f",
+      "unchanged": true
+    }
+  },
+  "native_report_directory": "E:\\emusician-analysis-source\\build\\smoke\\Release\\ed24727d7a11",
+  "production": {
+    "ok": true,
+    "checks": 1268,
+    "input_source": "generated hosted buffers; no physical inputs",
+    "sample_rate": 48000,
+    "block_size": 256,
+    "workspace": "E:\\emusician-analysis-source\\build\\smoke\\Release\\ed24727d7a11\\production-355f59fe0c87450a80bc46077a2b99e2"
+  },
+  "recording_capture": {
+    "recording_workspace_browse_and_native_editor": true,
+    "recording_concurrent_ui_capture_blocks": 33,
+    "recording_blocks_completed_before_stop": 14,
+    "recording_blocks_completed_when_stop_returned": 33,
+    "recording_concurrent_ui_capture_samples": 3840,
+    "recording_sequence_checked_from_source_frame": 0,
+    "recording_concurrent_ui_capture_sample_rate": 48000,
+    "recording_concurrent_ui_capture_buffer_size": 256,
+    "recording_native_gesture_stop_undo_isolation": true,
+    "recording_mixer_gesture_stop_undo_isolation": true
+  },
+  "ruler_nonempty_painted_image_cases": 54,
+  "screenshots": {
+    "arrangement-ruler-bars.png": "af8c97f61bc272eb22208b40543b24018053f162c59345cda093466a2a670784",
+    "arrangement-ruler-both.png": "6d8834382d6edb408d14a1de4fb8d923f02145d4c1afb0be3502a2461f552173",
+    "arrangement-ruler-seconds.png": "b8c9b4b9955b868208aa8a5e92987cc3b3ee8bc1cc240ce4f70ec826888ea00f",
+    "piano-far-ruler.png": "4d815c1a736c7521118cdac245157950c7fad49011cd3501b385b10beda4a44e"
+  },
+  "physical_audio_and_vendor_gui_verified_this_iteration": false,
+  "original_workspace_dirty_entries_preserved": 40
+}

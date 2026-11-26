@@ -2,6 +2,8 @@
 
 Windows 原生 DAW，使用 C++20、JUCE 和 Tracktion Engine。音频编辑、MIDI 编曲、插件宿主、工程保存和导出共用一套工程与控制接口；可选的编曲 Agent 通过同一接口提出并执行经确认的编辑。
 
+**2026-11-27 录音增强 V2：** 标尺标签对齐并按规则缩放；录音时可选轨、缩放及打开已挂载的 VST/原生装置。新入口 `E:/MusicAgent&DAW/Start E-musician Recording v2.cmd`；保存关闭旧程序后打开，原0.13.6及旧录音版保留。Release、修正测试夹具后的综合录音/界面验证通过；输入/图结构等变更继续受保护，实体声卡、长录音与厂商窗口待人工验收。[结果与构建记录](docs/review/2026-11-27-recording-interaction/RESULTS.md) · [人工检查](docs/review/2026-11-27-recording-interaction/MANUAL-CHECK.md)。
+
 **2026-11-22 独立交付：** 0.13.6录音增强版新增录音进行中的真实波形，入口 `E:/MusicAgent&DAW/Start E-musician Recording.cmd`；原0.13.6保留。另有固定历史结果的离线三工程拍摄版，入口 `E:/MusicAgent&DAW/Start E-musician Workspace.cmd`，不调用API/SSH，不代表新模型推理。六场景25项联测与实际GUI验证通过；实体麦克风/长录音/听感待验。[本轮结果](docs/review/2026-11-22-showcase/RESULTS.md) · [人工验收](docs/review/2026-11-22-showcase/MANUAL-CHECK.md) · [英文分镜](docs/demo/2026-11-22-showcase-script-en.md) · [中文对照](docs/demo/2026-11-22-showcase-script-zh.md)。影片、背景、配音和三个工程位于 `E:/MusicAgent&DAW/demo-video/showcase-v1`，从其中 `START-HERE.md` 开始。
 
 **最新维护候选 0.13.6：** 修复物理输入未启用和仅In2的回调映射，Settings支持独立输入、mono/stereo与驱动控制面板；换卡后核对输入身份，旧工程音频输入需重选一次。Release、CTest11/11、Agent390项及M-Audio ASIO短录音/保存重开通过；实际人声、听感、厂商面板和其他声卡待人工验收。启动 `E:/MusicAgent&DAW/Start E-musician 0.13.6.cmd`，VS Code打开同目录`E-musician-0.13.6.code-workspace`。旧版保留。[结果与限制](docs/review/2026-11-16-audio-input/RESULTS.md) · [录音步骤](docs/review/2026-11-16-audio-input/MANUAL-CHECK.md)。

@@ -1,4 +1,5 @@
 #include "EngineSession.h"
+#include "MainComponent.h" // Isolated recording UI regression harness.
 #include "ReplayMode.h"
 #include "ProjectStorage.h"
 #include "AudioSource.h"
@@ -368,6 +369,7 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     }
     juce::File recordingDirectory()const{return (showcase::enabled()?showcase::profile().getChildFile("recordings"):juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("E-musician/recordings")).getChildFile(guard.projectId());}
     bool recordingBusy()const{return edit->getTransport().isRecording()||edit->getTransport().isRecordingStopping()||bool(recording.state()["finalizing"]);}
+    bool recordingFinalizing()const{return edit->getTransport().isRecordingStopping()||bool(recording.state()["finalizing"]);}
     void finishRecording(){
         if(!recording.poll())return;
         juce::String preparationError;

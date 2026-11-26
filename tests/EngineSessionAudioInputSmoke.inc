@@ -52,10 +52,17 @@
         bool showControlPanel() override { ++state.panelCalls; if (state.panelAction) state.panelAction(); return false; }
         // Null and oversized blocks exercise the production dependency's
         // defensive callback mapping, not a separate application-side mapper.
-        void pump(bool nullInput = false, int samples = 256, bool fullSlots = false) {
+        // Exact binary PCM values with different channel periods expose dropped,
+        // duplicated and reordered frames. Default pumps keep earlier DC fixtures.
+        static float sequenceSample(int channel, juce::int64 frame) {
+            const juce::int64 modulus = channel == 0 ? 1048573 : 1048559;
+            const auto code = (frame * (channel == 0 ? 97 : 193) + 17) % modulus + 1;
+            return float(channel == 0 ? code : -code) / 2097152.0f;
+        }
+        void pump(bool nullInput = false, int samples = 256, bool fullSlots = false, juce::int64 sequenceStart = -1) {
             juce::AudioBuffer<float> physical(inputCount, samples), output(2, samples);
             for (int ch = 0; ch < inputCount; ++ch)
-                for (int i = 0; i < samples; ++i) physical.setSample(ch, i, ch == 1 ? -0.625f : 0.25f);
+                for (int i = 0; i < samples; ++i) physical.setSample(ch, i, sequenceStart >= 0 ? sequenceSample(ch, sequenceStart + i) : (ch == 1 ? -0.625f : 0.25f));
             std::vector<const float*> packed;
             for (int i = 0; i < inputCount; ++i)
                 if (inputs[i] || fullSlots) packed.push_back(nullInput || !inputs[i] ? nullptr : physical.getReadPointer(i));
@@ -303,6 +310,151 @@
               "redo restores the recorded clip through normal peaks without resurrecting stale live state");
         fakeState.inputLatency = fakeState.outputLatency = 0;
         okay(configure(object({{"buffer_size", 256}})), "restore zero-latency fixture for remaining device tests");
+    }
+    {
+        // A real callback/writer runs independently of UI work, including Stop.
+        // This is an offline fixture, not an ASIO or third-party vendor test.
+        select(input({0, 1})); okay(arm(), "arm concurrent interaction capture");
+        juce::var added;
+        okay(fixture.execute("add_native_effect", object({{"track_id",trackId},{"type","compressor"}}), fixture.snapshot().revision, &added), "prepare existing recording effect");
+        const auto effectId=added["device_id"].toString();
+        const auto effectArgs=object({{"track_id",trackId},{"device_id",effectId}});
+        const auto effectState=[&] { juce::var result;okay(fixture.execute("get_native_effect",effectArgs,fixture.snapshot().revision,&result),"read effect while recording");return result["state"]; };
+        const auto updateEffect=[&](const juce::String& token,double gain){auto state=effectState().clone();state.getDynamicObject()->setProperty("makeup_db",gain);return fixture.execute("update_native_effect_gesture",object({{"gesture_id",token},{"state",state}}),fixture.snapshot().revision);};
+        const auto beginEffect=[&]{juce::var result;okay(fixture.execute("begin_native_effect_gesture",effectArgs,fixture.snapshot().revision,&result),"begin effect while recording");return result["gesture_id"].toString();};
+        const juce::String captureGate="Finish the recorded take before changing clips, routing, devices, or project history.";
+        const auto expectCaptureGate=[&](const juce::String& name,const juce::var& args){
+            const auto result=fixture.execute(name,args,fixture.snapshot().revision);
+            check(result.failed()&&result.getErrorMessage()==captureGate,"capture admission gate rejects "+name+": "+result.getErrorMessage());
+        };
+        const auto newClipIds=[&]{
+            // back() returns a reference: retain the owning snapshot for the
+            // entire range-for (C++20 does not extend its lifetime through back).
+            const auto snapshot=fixture.snapshot();juce::StringArray ids;
+            for(const auto& clip:snapshot.tracks.back().clips)ids.add(clip.id);return ids;
+        };
+        const auto capturedClip=[&](const juce::StringArray& oldIds){
+            const auto snapshot=fixture.snapshot();te::WaveAudioClip* found=nullptr;
+            for(const auto& candidate:snapshot.tracks.back().clips)if(!oldIds.contains(candidate.id)){
+                check(found==nullptr,"exactly one new recording clip is adopted");
+                found=dynamic_cast<te::WaveAudioClip*>(fixture.impl->findClip(candidate.id)->clip.get());
+            }
+            check(found!=nullptr,"capture resolves the new clip by stable identity");return found;
+        };
+        auto* const originalEdit=fixture.impl->edit.get();auto* const originalTrack=fixture.impl->find(trackId)->track;
+        auto* const originalEffect=fixture.impl->livePlugin(*originalEdit,effectId);
+        fixture.selectTrack(trackId);fixture.seek(0);opened().pump();opened().pump();
+        const auto previousClipIds=newClipIds();const int previousClipCount=previousClipIds.size();
+        juce::DynamicObject recordingReport;
+        MainComponent view(fixture);view.setSize(1440,900);
+        command(fixture,"start_recording");
+        auto& device=opened();std::atomic<int> blocks{0};std::atomic<bool> producerExpired{false};
+        const auto pumpSequence=[&]{const auto n=blocks.load();device.pump(false,256,false,juce::int64(n)*256);blocks.fetch_add(1);};
+        // Count and encode startup blocks too; no uncounted DC padding can hide a
+        // missing callback. Zero-latency, non-punch input starts at source frame 0.
+        pumpSequence();pumpSequence();
+        int beforeStop=0,afterStop=0;
+        juce::String stopToken;
+        {
+            std::jthread producer([&](std::stop_token stop){
+                const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(60);
+                while(!stop.stop_requested()){
+                    if(std::chrono::steady_clock::now()>=deadline){producerExpired=true;break;}
+                    pumpSequence();std::this_thread::sleep_for(std::chrono::milliseconds(2));
+                }
+            });
+            okay(view.runRecordingInteractionSmoke(recordingReport,trackId,effectId),"recording UI navigation and editor");
+            fixture.selectTrack(trackId);
+            const auto openResult=fixture.execute("open_plugin",object({{"track_id",trackId},{"plugin_id","missing-editor-fixture"}}),fixture.snapshot().revision);
+            check(openResult.failed()&&openResult.getErrorMessage()=="Plugin does not belong to the specified track.","existing-editor command reaches ownership validation during capture rather than a global recording lock");
+            command(fixture,"set_track_gain",object({{"track_id",trackId},{"gain_db",-3.0}}));
+            command(fixture,"set_track_pan",object({{"track_id",trackId},{"pan",0.2}}));
+            command(fixture,"set_track_muted",object({{"track_id",trackId},{"muted",true}}));
+            command(fixture,"set_track_muted",object({{"track_id",trackId},{"muted",false}}));
+            command(fixture,"set_track_solo",object({{"track_id",trackId},{"solo",true}}));
+            command(fixture,"set_track_solo",object({{"track_id",trackId},{"solo",false}}));
+            command(fixture,"set_track_colour",object({{"track_id",trackId},{"colour","#628577"}}));
+            command(fixture,"rename_track",object({{"track_id",trackId},{"name","Capture stays live"}}));
+            const auto token=beginEffect();okay(updateEffect(token,3.0),"atomic effect preview during capture");
+            command(fixture,"end_native_effect_gesture",object({{"gesture_id",token}}));
+            check(double(effectState()["makeup_db"])==3.0,"recording effect edit commits through the common command pipeline");
+            expectCaptureGate("remove_track",object({{"track_id",trackId}}));
+            expectCaptureGate("add_native_effect",object({{"track_id",trackId},{"type","compressor"}}));
+            expectCaptureGate("set_track_output",object({{"track_id",trackId},{"output_track_id","master"}}));
+            expectCaptureGate("undo",object({}));
+            expectCaptureGate("set_loop",object({{"enabled",false}}));
+            expectCaptureGate("set_plugin_parameter",object({{"track_id",trackId},{"plugin_id",effectId},{"parameter_index",0},{"value",0.5}}));
+            check(fixture.impl->edit.get()==originalEdit&&fixture.impl->find(trackId)->track==originalTrack&&fixture.impl->livePlugin(*originalEdit,effectId)==originalEffect,
+                  "recording interactions retain Edit, track and processing instance");
+            const int beforePause=blocks.load();juce::Thread::sleep(40);
+            check(blocks.load()>beforePause,"callback producer advances while message thread is deliberately paused");
+            check(fixture.snapshot().recording,"concurrent capture survives browsing and scalar changes");
+            stopToken=beginEffect();okay(updateEffect(stopToken,9.0),"prepare active effect draft at Stop");
+            check(bool(fixture.impl->effectGesture)&&!fixture.impl->gesture,"effect draft is genuinely active immediately before Stop");
+            beforeStop=blocks.load();command(fixture,"stop_recording");afterStop=blocks.load();
+            // Stop detaches recorder contexts under their lock while callbacks
+            // continue. Only callbacks admitted before detachment belong to WAV.
+            producer.request_stop();producer.join();
+        }
+        check(!producerExpired,"concurrent producer remains alive until explicit Stop, within a 60-second watchdog");
+        check(!fixture.impl->effectGesture&&!fixture.impl->gesture,"Stop cancels the live effect draft before take adoption");
+        check(fixture.snapshot().recordingFinalizing,"take adoption remains a mutation barrier before poll");
+        check(double(effectState()["makeup_db"])==3.0,"read-only effect state remains available during finalisation");
+        expectCaptureGate("set_track_gain",object({{"track_id",trackId},{"gain_db",-5.0}}));
+        const auto lateRelease=fixture.execute("end_native_effect_gesture",object({{"gesture_id",stopToken}}),fixture.snapshot().revision);
+        check(lateRelease.failed()&&lateRelease.getErrorMessage()=="Wait for the recorded take to finish before adjusting an effect.","late effect release is rejected by finalisation gate");
+        fixture.endEditGesture();fixture.impl->finishRecording();
+        const auto adoptedSnapshot=fixture.snapshot();
+        const auto actualClipCount=adoptedSnapshot.tracks.back().clips.size();
+        const auto adoptionDiagnostics=object({{"previous_clip_count",previousClipCount},{"expected_clip_count",previousClipCount+1},
+            {"actual_clip_count",int(actualClipCount)},{"target_track_id",trackId},{"snapshot_track_id",adoptedSnapshot.tracks.back().id},
+            {"recording_state",recorder.state()},{"completed_blocks_before_stop",beforeStop},{"completed_blocks_at_stop_return",afterStop}});
+        check(directory.getChildFile("recording-interaction-adoption.json").replaceWithText(juce::JSON::toString(adoptionDiagnostics,true)),"write take adoption diagnostics");
+        check(actualClipCount==size_t(previousClipCount+1),"one complete take adopted after concurrent UI work: "+juce::JSON::toString(adoptionDiagnostics,true));
+        auto* clip=capturedClip(previousClipIds);
+        juce::WavAudioFormat format;std::unique_ptr<juce::AudioFormatReader> reader(format.createReaderFor(clip->getOriginalFile().createInputStream().release(),true));
+        check(reader&&reader->numChannels==2&&reader->bitsPerSample==24,"concurrent capture uses the expected stereo PCM24 WAV");
+        // The lower bound includes every completed callback before Stop. One
+        // in-flight block may finish after Stop returns; subsequent callbacks
+        // are intentionally discarded. Assert that the complete source prefix,
+        // including both startup blocks and the legal Stop tail, is exact.
+        check(reader->lengthInSamples>=juce::int64(beforeStop)*256
+              &&reader->lengthInSamples<=juce::int64(afterStop+1)*256
+              &&reader->lengthInSamples%256==0,"captured sample count lies within the measured concurrent Stop boundary");
+        juce::AudioBuffer<float> pcm(2,int(reader->lengthInSamples));check(reader->read(&pcm,0,pcm.getNumSamples(),0,true,true),"read concurrently captured WAV");
+        for(int ch=0;ch<2;++ch)for(int sample=0;sample<pcm.getNumSamples();++sample)
+            if(std::abs(pcm.getSample(ch,sample)-FakeAudioDevice::sequenceSample(ch,sample))>0.00000015f)
+                throw std::runtime_error(("Concurrent capture sequence mismatch: channel "+juce::String(ch)+", frame "+juce::String(sample)).toStdString());
+        command(fixture,"undo");check(fixture.snapshot().tracks.back().clips.size()==size_t(previousClipCount)&&double(effectState()["makeup_db"])==3.0,"one Undo removes only the entire take and keeps the earlier committed effect edit");
+        command(fixture,"redo");check(fixture.snapshot().tracks.back().clips.size()==size_t(previousClipCount+1),"Redo restores the complete concurrent take");
+        recordingReport.setProperty("recording_concurrent_ui_capture_blocks",blocks.load());
+        recordingReport.setProperty("recording_blocks_completed_before_stop",beforeStop);
+        recordingReport.setProperty("recording_blocks_completed_when_stop_returned",afterStop);
+        recordingReport.setProperty("recording_concurrent_ui_capture_samples",juce::int64(reader->lengthInSamples));
+        recordingReport.setProperty("recording_sequence_checked_from_source_frame",0);
+        recordingReport.setProperty("recording_concurrent_ui_capture_sample_rate",48000);
+        recordingReport.setProperty("recording_concurrent_ui_capture_buffer_size",256);
+        recordingReport.setProperty("recording_native_gesture_stop_undo_isolation",true);
+
+        // Separate take: a live mixer gesture must still be active at Stop.
+        // Starting a native gesture here would close it and invalidate the test.
+        fixture.seek(0);opened().pump();opened().pump();
+        const auto mixerOldIds=newClipIds();const auto previousGain=fixture.snapshot().tracks.back().gainDb;
+        command(fixture,"start_recording");
+        for(int block=0;block<16;++block)opened().pump(false,256,false,juce::int64(block)*256);
+        fixture.beginEditGesture();command(fixture,"set_track_gain",object({{"track_id",trackId},{"gain_db",-4.0}}));
+        check(fixture.impl->gesture&&!fixture.impl->effectGesture,"mixer gesture is genuinely active immediately before Stop");
+        command(fixture,"stop_recording");
+        check(!fixture.impl->gesture&&fixture.snapshot().recordingFinalizing,"Stop closes mixer gesture before the take finalisation transaction");
+        fixture.endEditGesture();fixture.impl->finishRecording();
+        check(fixture.snapshot().tracks.back().clips.size()==size_t(mixerOldIds.size()+1),"mixer Stop adopts one complete take");
+        command(fixture,"undo");
+        check(fixture.snapshot().tracks.back().clips.size()==size_t(mixerOldIds.size())&&std::abs(fixture.snapshot().tracks.back().gainDb+4.0)<0.0001,"first Undo removes mixer take while retaining its earlier gain edit");
+        command(fixture,"undo");check(std::abs(fixture.snapshot().tracks.back().gainDb-previousGain)<0.0001,"second Undo independently restores the pre-gesture mixer gain");
+        command(fixture,"redo");command(fixture,"redo");
+        check(fixture.snapshot().tracks.back().clips.size()==size_t(mixerOldIds.size()+1)&&std::abs(fixture.snapshot().tracks.back().gainDb+4.0)<0.0001,"independent Redo restores mixer edit then whole take");
+        recordingReport.setProperty("recording_mixer_gesture_stop_undo_isolation",true);
+        check(directory.getChildFile("recording-interaction-capture.json").replaceWithText(juce::JSON::toString(juce::var(recordingReport.clone().release()),true)),"write concurrent recording interaction evidence");
     }
     okay(configure(object({{"input_channels", array({1})}})), "disable one side of a stereo pair");
     check(input({0, 1}).isVoid() && input({0})["id"].toString() == monoId, "partial activation returns to stable mono input identities");

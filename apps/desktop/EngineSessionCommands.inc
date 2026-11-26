@@ -316,7 +316,7 @@ juce::Result EngineSession::Impl::perform(const juce::String& command,const juce
         status=command=="cut_clips"?"Clips cut. Paste at the playhead; Undo restores the cut.":"Clips copied. Select a destination track and paste at the playhead.";
         return juce::Result::ok();
     }
-    if(gesture&&command!="batch"&&command!="set_track_gain"&&command!="set_master_gain"&&command!="set_track_pan")finishGesture();
+    if(gesture&&command!="open_plugin"&&command!="batch"&&command!="set_track_gain"&&command!="set_master_gain"&&command!="set_track_pan")finishGesture();
     if(command=="set_plugin_parameter")return setPluginParameter(args);
     if(command=="set_native_effect")return setNativeEffect(args);
     if(command=="set_audio_warp")return beginAudioWarp(args,commandResult);

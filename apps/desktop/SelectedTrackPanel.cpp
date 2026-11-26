@@ -142,6 +142,7 @@ struct SelectedTrackPanel::Impl {
     }
     const EngineSession::TrackSnapshot* track() const { for (const auto& t : state.tracks) if (t.id == state.selectedTrackId) return &t; return nullptr; }
     juce::String ownerId() const { return masterView ? "master" : state.selectedTrackId; }
+    bool canChangeGraph() const { return !state.recording && !state.recordingFinalizing; }
     const std::vector<EngineSession::PluginSlotSnapshot>& plugins() const { if (masterView) return state.masterPlugins; if (const auto* t = track()) return t->plugins; return emptyPlugins; }
     const EngineSession::PluginSlotSnapshot* currentPlugin() const { const int i = plugin.getSelectedId() - 1; return i >= 0 && i < int(plugins().size()) ? &plugins()[size_t(i)] : nullptr; }
     const EngineSession::SendSnapshot* currentSend() const { if (const auto* t = track()) { const int i = send.getSelectedId() - 1; if (i >= 0 && i < int(t->sends.size())) return &t->sends[size_t(i)]; } return nullptr; }
@@ -163,7 +164,7 @@ struct SelectedTrackPanel::Impl {
     }
     void pluginCommand(const juce::String& command) { if (const auto* slot = currentPlugin()) run(command, object({ {"track_id", ownerId()}, {"plugin_id", slot->id} })); }
     void movePlugin(int direction) { if (const auto* slot = currentPlugin()) { const int index = plugin.getSelectedId() - 1 + direction; if (index >= 0 && index < int(plugins().size())) run("move_plugin", object({ {"track_id", ownerId()}, {"plugin_id", slot->id}, {"index", index} })); } }
-    void refreshPlugin() { const auto* slot = currentPlugin(); open.setEnabled(slot && !slot->missing); bypass.setEnabled(slot); removePlugin.setEnabled(slot); up.setEnabled(slot && plugin.getSelectedId() > 1); down.setEnabled(slot && plugin.getSelectedId() < int(plugins().size())); uiButton(bypass, slot && !slot->enabled ? "enable" : "bypass"); }
+    void refreshPlugin() { const auto* slot = currentPlugin(); const bool edit = canChangeGraph(); open.setEnabled(slot && !slot->missing); bypass.setEnabled(edit && slot); removePlugin.setEnabled(edit && slot); up.setEnabled(edit && slot && plugin.getSelectedId() > 1); down.setEnabled(edit && slot && plugin.getSelectedId() < int(plugins().size())); uiButton(bypass, slot && !slot->enabled ? "enable" : "bypass"); }
     void refreshInputs() {
         inputs.clear(); input.clear(juce::dontSendNotification); const auto result = query("get_recording_inputs");
         inputs.push_back(object({ {"id", ""}, {"name", uiText("No input", "无输入")} }));
@@ -197,7 +198,7 @@ struct SelectedTrackPanel::Impl {
         target.setSelectedId(targets.empty() ? 0 : selection, juce::dontSendNotification); refreshLane();
     }
     void refreshLane() {
-        const auto* lane = currentLane(); laneEnabled.setEnabled(lane != nullptr); deleteLane.setEnabled(lane != nullptr);
+        const auto* lane = currentLane(); laneEnabled.setEnabled(canChangeGraph() && lane != nullptr); deleteLane.setEnabled(canChangeGraph() && lane != nullptr); curve.setEnabled(canChangeGraph());
         uiButton(laneEnabled, lane && !lane->enabled ? "enable lane" : "bypass lane");
         const auto t = currentTarget(); hint.setText(t.isObject() ? "Current: " + t["text"].toString() + " / double-click: add; drag: move; Alt-drag: curve; Delete: remove." : "Choose a track with an available automation parameter.", juce::dontSendNotification); curve.repaint();
     }
@@ -211,7 +212,7 @@ struct SelectedTrackPanel::Impl {
     }
     void refreshSend() {
         const auto* s = currentSend(); updating = true; sendGain.setValue(s ? s->gainDb : -12, juce::dontSendNotification); updating = false;
-        for (auto* c : std::initializer_list<juce::Component*>{ &sendGain, &pre, &sendEnabled, &removeSend }) c->setEnabled(s != nullptr);
+        for (auto* c : std::initializer_list<juce::Component*>{ &sendGain, &pre, &sendEnabled, &removeSend }) c->setEnabled(canChangeGraph() && s != nullptr);
         uiButton(pre, s && s->preFader ? "pre-fader" : "post-fader"); uiButton(sendEnabled, s && !s->enabled ? "enable send" : "bypass send");
     }
     void rebuild() {
@@ -257,11 +258,12 @@ void SelectedTrackPanel::update(const EngineSession::Snapshot& state) {
     auto& p = *impl; const bool changed = state.projectId != p.state.projectId || state.revision != p.state.revision || state.selectedTrackId != p.state.selectedTrackId;
     bool recordingChanged = state.recording != p.state.recording || state.recordingFinalizing != p.state.recordingFinalizing;
     const auto* previous = p.track(); const auto armed = previous && previous->armed; const auto monitor = previous ? previous->monitorMode : juce::String();
-    if (changed) p.curve.cancel(); p.state = state;
+    if (changed || recordingChanged) p.curve.cancel(); p.state = state;
     const auto* current = p.track(); recordingChanged = recordingChanged || armed != (current && current->armed) || monitor != (current ? current->monitorMode : juce::String());
     if (changed || recordingChanged) p.rebuild();
     if (isVisible() && p.page == 1 && !p.input.isPopupActive() && juce::Time::getMillisecondCounter() - p.lastInputRefresh > 2000) p.refreshInputs();
-    setEnabled(!state.recording && !state.recordingFinalizing);
+    // Keep pages, plugin selection and existing editors available during capture.
+    // Lock only controls that change routing, recording targets or graph topology.
 }
 void SelectedTrackPanel::resized() {
     if (!impl) return; refreshUiButtons(*this); auto& p = *impl;
@@ -278,8 +280,9 @@ void SelectedTrackPanel::resized() {
     p.sendTarget.setBounds(split, 58, 210, 28); p.addSend.setBounds(split + 216, 58, 98, 28);
     p.send.setBounds(split, 98, 210, 28); p.removeSend.setBounds(split + 216, 98, 110, 28);
     p.sendGain.setBounds(split, 139, 210, 28); p.pre.setBounds(split, 179, 102, 28); p.sendEnabled.setBounds(split + 108, 179, 112, 28);
-    p.addSend.setEnabled(!p.sendDestinations.isEmpty()); p.input.setEnabled(p.track() && p.track()->kind != "bus"); p.arm.setEnabled(p.track() && p.track()->kind != "bus" && !p.track()->inputDeviceId.isEmpty());
-    p.monitor.setEnabled(p.track() && !p.track()->inputDeviceId.isEmpty()); p.output.setEnabled(p.track() != nullptr);
+    p.addSend.setEnabled(p.canChangeGraph() && !p.sendDestinations.isEmpty()); p.input.setEnabled(p.canChangeGraph() && p.track() && p.track()->kind != "bus"); p.arm.setEnabled(p.canChangeGraph() && p.track() && p.track()->kind != "bus" && !p.track()->inputDeviceId.isEmpty());
+    p.monitor.setEnabled(p.canChangeGraph() && p.track() && !p.track()->inputDeviceId.isEmpty()); p.output.setEnabled(p.canChangeGraph() && p.track() != nullptr);
+    p.refreshPlugin(); p.refreshSend(); p.refreshLane();
     p.target.setBounds(12, 42, juce::jmin(300, getWidth() - 280), 28); p.laneEnabled.setBounds(p.target.getRight() + 8, 42, 110, 28); p.deleteLane.setBounds(p.laneEnabled.getRight() + 8, 42, 110, 28);
     p.hint.setBounds(12, getHeight() - 24, getWidth() - 24, 22); p.curve.setBounds(6, 76, getWidth() - 12, juce::jmax(78, getHeight() - 102));
 }
@@ -322,6 +325,15 @@ juce::Result SelectedTrackPanel::runInteractionSmokeTest(juce::DynamicObject& re
     const bool masterOpen = effectTrack == "master" && effectDevice == effect.id;
     effectTrack.clear(); effectDevice = "not-empty"; p.nativeFx.onClick();
     const bool masterAdd = effectTrack == "master" && effectDevice.isEmpty(); onOpenNativeEffect = oldEffect;
+    const auto synthetic = p.state;
+    for (const bool finishing : {false, true}) {
+        auto recordingState = synthetic; recordingState.recording = !finishing; recordingState.recordingFinalizing = finishing;
+        update(recordingState); resized();
+        if (!isEnabled() || !p.devices.isEnabled() || !p.plugin.isEnabled() || !p.open.isEnabled()
+            || p.removePlugin.isEnabled() || p.up.isEnabled() || p.bypass.isEnabled() || p.curve.isEnabled())
+            return juce::Result::fail("Recording disabled device browsing or left graph mutations enabled.");
+    }
+    report.setProperty("recording_device_browse_without_graph_edits", true);
     onOpenNative = oldOpen; p.masterView = oldMaster; update(oldState);
     if (opened != nativeTrack.id) return juce::Result::fail("Native instrument did not open in its track dock.");
     if (!masterOpen || !masterAdd) return juce::Result::fail("Master native effects did not route to the master target.");

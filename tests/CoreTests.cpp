@@ -229,6 +229,22 @@ int main()
     checks.expect(musicalRulerStep(12,1000,4,4).labelTier==1,"medium zoom labels meter beats");
     checks.expect(musicalRulerStep(2,1000,4,4).labelTier==2,"close zoom labels beat quarters");
     checks.expect(musicalRulerStep(0.001,1000,4,4).labelTier==2,"deep zoom never adds a fourth label tier");
+    checks.near(musicalRulerStep(64,1000,4,4).stepBeats,8.0,"64-beat overview labels every second bar");
+    for (const auto meter : {std::pair{4,4},std::pair{3,4},std::pair{6,8}}) {
+        const auto bar = beatsPerBar(meter.first,meter.second);
+        for (int power = 0; power <= 8; ++power) {
+            const double expected = bar * std::ldexp(1.0,power);
+            const double visible = expected * 0.9 * 1000.0 / 72.0;
+            const auto ruler = musicalRulerStep(visible,1000,meter.first,meter.second);
+            checks.near(ruler.stepBeats,expected,"ruler uses uniform power-of-two bar strides in each meter");
+            checks.expect(ruler.labelTier==0,"distant zoom does not add beat suffixes");
+            const auto denser = musicalRulerStep(visible,2000,meter.first,meter.second);
+            checks.expect(denser.stepBeats<=ruler.stepBeats,"zooming in never coarsens the ruler");
+        }
+    }
+    checks.near(musicalRulerStep(64,1000,4,4,140).stepBeats,16.0,"long labels increase the whole ruler stride instead of skipping individual bars");
+    checks.near(musicalRulerStep(4.0*1000/72,1000,4,4).stepBeats,4.0,"exact bar-density threshold keeps the current stride");
+    checks.near(musicalRulerStep(4.0*1000/72+1e-6,1000,4,4).stepBeats,8.0,"crossing a density threshold doubles the stride");
     checks.expect(musicalRulerLabel(0,4,4,0)=="1" && musicalRulerLabel(0,4,4,1)=="1.1" && musicalRulerLabel(0,4,4,2)=="1.1.1","ruler uses three one-based dot tiers");
     checks.expect(musicalRulerLabel(3.75,4,4,2)=="1.4.4" && musicalRulerLabel(4,4,4,2)=="2.1.1","ruler carries bars without fourth-level labels");
     checks.expect(musicalRulerLabel(2.875,6,8,2)=="1.6.4" && musicalRulerLabel(3,6,8,2)=="2.1.1","compound meter subdivisions follow denominator beat");
