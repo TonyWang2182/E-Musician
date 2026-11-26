@@ -14890,3 +14890,38 @@ User requested Part 10 only. Preserve title, four-second duration and silver bac
 ## 2026-11-27 - Part 10 v2 completed
 
 Replaced the card stack with a stable-title waveform-to-seven-MIDI-bars transition. Kept the four-second duration and original silver background/type/copy. Root plus independent sampled visual review passed; title resolves by 1.16s, morph settles by 2.28s. Full-video verification and ZIP/member checks passed; the other seven movies are hash-identical. Current clip and archive replaced after preserving v1 in local revisions/part10-v1. Script and all DAW assets remain unchanged. Source, records and current hashes are maintained in the application-film review folder.
+
+## 2026-11-27 - Sax recording visualization started
+
+Prepared a scoped post-production asset plan from the supplied playback screen recording. Full original waveform already exists and AAC samples are zero, as documented by source inspection. User was informed that the requested growth is a visualization. Two silent video crops planned; source/app/project unchanged. Root implements; reference-motion agent provides read-only evidence/review.
+
+### 2026-11-27T04:59:38+08:00 · sax-material-render · succeeded
+
+- Config: 30fps/36s/silent/post-production; exit code: 0; elapsed: 85.815s.
+- Command: `C:\Python314\python.exe E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\sax_recording_material.py --mode render`
+- Context: User-requested recording visualization from original playback pixels; no DAW operation or live-input claim.
+- Source SHA-256: `fdcdc49f2548d117b553b2cbf2aa2175efd6b9f3029a9116f2b67a485d188a7b`; Git HEAD: `1980ddab8a8c1b929b5fdb4af6111b32608905cc`.
+- [Record](builds/20261126T205938.101232Z-863d6686a5.json) · [Raw log](../build-logs/20261126T205938.101232Z-863d6686a5.log)
+- [Exact process output](../build-logs/20261126T205938.101232Z-863d6686a5.raw.log)
+
+### 2026-11-27T05:01:28+08:00 · sax-material-render · succeeded
+
+- Config: 30fps/36s/silent/post-production; exit code: 0; elapsed: 133.391s.
+- Command: `C:\Python314\python.exe E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\sax_recording_material.py --mode render`
+- Context: User-requested recording visualization from original playback pixels; no DAW operation or live-input claim.
+- Source SHA-256: `f163f3975f76f2b5cc4640eaf0e98a74fc660dc1bf0937296c06d721784b498c`; Git HEAD: `1980ddab8a8c1b929b5fdb4af6111b32608905cc`.
+- [Record](builds/20261126T210128.057528Z-233dfa35ff.json) · [Raw log](../build-logs/20261126T210128.057528Z-233dfa35ff.log)
+- [Exact process output](../build-logs/20261126T210128.057528Z-233dfa35ff.raw.log)
+
+### 2026-11-27T05:03:58+08:00 · sax-material-verify · succeeded
+
+- Config: 30fps/36s/silent/post-production; exit code: 0; elapsed: 4.319s.
+- Command: `C:\Python314\python.exe E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\sax_recording_material.py --mode verify`
+- Context: User-requested recording visualization from original playback pixels; no DAW operation or live-input claim.
+- Source SHA-256: `f163f3975f76f2b5cc4640eaf0e98a74fc660dc1bf0937296c06d721784b498c`; Git HEAD: `1980ddab8a8c1b929b5fdb4af6111b32608905cc`.
+- [Record](builds/20261126T210358.722659Z-1b8a0e1fef.json) · [Raw log](../build-logs/20261126T210358.722659Z-1b8a0e1fef.log)
+- [Exact process output](../build-logs/20261126T210358.722659Z-1b8a0e1fef.raw.log)
+
+## 2026-11-27 - Sax visualization delivered
+
+Two silent36-second MP4s use supplied playback waveform pixels with a progressive recording-style display. Initial render tooltip-border residue was corrected in a second recorded render. Full decode, dimensions,1080frames and monotonic frontier passed; maximum measured playhead error0.5source pixels. Root and independent sampled visual review passed. Original video/project/audio unchanged. Explicitly illustrative post-production, not real microphone capture or evidence of DAW behavior. Next requested work is actual recording-enhanced ruler/device interaction fixes.

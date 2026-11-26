@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "files": 2,
+  "seconds_each": 36,
+  "frames_each": 1080,
+  "full_decode": true,
+  "silence_intentional": true,
+  "monotonic_frontier": true,
+  "max_playhead_alignment_error_px": 0.5,
+  "source_project_and_audio_unchanged": true
+}

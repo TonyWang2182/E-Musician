@@ -1,0 +1,45 @@
+{
+  "source": "F:/屏幕录制/屏幕录制 2026-11-27 034145.mp4",
+  "source_sha256": "0ad2d2166b05cd94010f1bc09c252774ac3b21b7fdd6b45f84b539119c00ccb8",
+  "source_unchanged": true,
+  "duration_seconds": 51.266633,
+  "video": {"width": 2556, "height": 1488, "fps": 30, "frames": 1538, "codec": "h264"},
+  "audio": {"codec": "aac", "sample_rate": 48000, "channels": 2, "decoded_frames": 2460672, "peak": 0.0, "rms": 0.0, "nonzero_samples": 0, "conclusion": "The file has an audio stream but its entire decoded audio is zero. It contains no captured DAW sound."},
+  "observed_state": "Armed playback of an existing completed sax_player clip; no evidence of a live recording take in the sampled frames.",
+  "observations": [
+    "The complete stereo sax waveform is present at video 0.0s and retains its full endpoint throughout sampled frames.",
+    "The sax_player R button is teal/armed, but the global record control remains a dark circle on a light background and the status reads Playing after transport starts.",
+    "Playhead advances from project zero, rather than a new clip growing from the sax onset. The input meter's activity alone does not establish the source or a recorded microphone take.",
+    "The cursor hovers near Play and causes a tooltip across the top toolbar for much of the video. Cropping the sax row avoids this tooltip and the unrelated Agent sidebar."
+  ],
+  "time_mapping": {
+    "project_bpm": 160,
+    "meter": "4/4",
+    "ticks_per_beat": 960,
+    "video_sample_seconds": 15.0,
+    "observed_transport": "9:3:698",
+    "calculated_project_seconds": 13.02265625,
+    "calculated_playback_start_video_seconds": 1.97734375,
+    "second_observation": {"video_seconds": 3.0, "transport": "1:3:725", "calculated_project_seconds": 1.033203125, "start_video_seconds": 1.966796875},
+    "sax_project_start_seconds_from_saved_project": 13.03125,
+    "estimated_sax_onset_video_seconds": 15.00859375,
+    "precision": "Mapping is based on sampled UI readouts, so allow a few video frames of display/sampling delay. It is not audio-derived because the audio track is silent."
+  },
+  "pixel_regions_at_original_resolution": {
+    "sax_track_row_xyxy": [12, 1268, 1948, 1401],
+    "sax_clip_xyxy": [597, 1269, 1483, 1400],
+    "sax_wave_content_xyxy": [600, 1297, 1480, 1396],
+    "clip_title_band_y": [1269, 1296],
+    "stereo_waveform_centers_y": [1320, 1370],
+    "track_arm_button_xywh": [108, 1356, 36, 35],
+    "agent_sidebar_left_x": 1978,
+    "note": "Coordinates are from the inspected 15.0s source frame; do not apply them to scaled previews without conversion."
+  },
+  "recommended_segment": {
+    "short_insert": {"source_in": 15.0, "duration": 9.0},
+    "full_sax_span": {"source_in": 15.0086, "source_out_approx": 49.9503, "duration_approx": 34.9417},
+    "use": "For a close-up, use the sax row with original UI proportions. Any newly animated waveform growth is an illustrative post-production reconstruction based on the saved sax audio, not recorded evidence of new DAW input.",
+    "sound": "Use an explicitly selected original sax source or project export; do not claim the silent recording captured the original output. Match the supplied saved source offset separately."
+  },
+  "evidence": ["probe.json", "inspection-receipt.json", "contact-sheet.png", "audio-stats.json", "audio-volume.txt", "sax-row-at-15s.png", "sax-clip-at-15s.png"]
+}
