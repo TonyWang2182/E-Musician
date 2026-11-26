@@ -14818,3 +14818,40 @@ Original 0.13.6, original test drive and file associations are preserved. Source
 ## 2026-11-22 - Feature branch publication
 
 Implementation commit 80e795e738b2631289e532a83e2a65203f9085eb was pushed successfully to origin/feature/showcase-recording-v1 (exit 0). No main merge, tag or GitHub Release. The staged audit selected 149 files with zero detected secret-pattern hits and preserved prior unstaged DEVLOG edits plus 36 old untracked receipts. Final film hashes are in DELIVERY.md; exact source/documentation refs and remote verification are also recorded in the local delivery RELEASE.json. This publication update changes documentation only and does not imply a new native build or physical microphone test.
+
+## 2026-11-27 - Application script and title-motion revision started
+
+User requested a fresh natural spoken script for an application, with every transition counted as a Part, and text animations based on five supplied local videos. Preserving existing films and DAW builds. Scope: fourteen-Part 240-second bilingual script, six four-second title transitions and matching opener/closer on existing original backgrounds. Reference review, copy and title rendering delegated with separate file ownership. Baseline and prior modifications saved in build-logs/application-film-20261127-baseline.json. Plan: review/2026-11-27-application-film/PLAN.md.
+
+### 2026-11-27T01:16:22+08:00 · application-film-package · succeeded
+
+- Config: 240s-script; 8x1080p30-titles; exit code: 0; elapsed: 1.141s.
+- Command: `C:\Python314\python.exe E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\application_film_delivery.py`
+- Context: Validate timeline, bilingual structure, title mapping, unchanged inputs and ZIP CRC; package new title videos only.
+- Source SHA-256: `0328c7ff3770db47eac515405d075717a2ce5dd51075b656e80b7c63f4cdcc25`; Git HEAD: `95b74ae9912d93cee88968d47baed2e1564fdb73`.
+- [Record](builds/20261126T171622.663273Z-b9bfbc535e.json) · [Raw log](../build-logs/20261126T171622.663273Z-b9bfbc535e.log)
+- [Exact process output](../build-logs/20261126T171622.663273Z-b9bfbc535e.raw.log)
+
+### 2026-11-27T01:10:56+08:00 · application-title-motion-render · succeeded
+
+- Config: 1920x1080/30fps/silent; exit code: 0; elapsed: 143.091s.
+- Command: `C:\Python314\python.exe E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\application_title_motion.py --mode render`
+- Context: New title overlays on retained backgrounds, exact original logo, five supplied text-motion references; deferred DEVLOG for root consolidation.
+- Source SHA-256: `6908e77b67b190f57080d5082c44839f71f2d519121cee7397db5b019ad73ee8`; Git HEAD: `95b74ae9912d93cee88968d47baed2e1564fdb73`.
+- [Record](builds/20261126T171056.340279Z-b421a3bec7.json) · [Raw log](../build-logs/20261126T171056.340279Z-b421a3bec7.log)
+- [Exact process output](../build-logs/20261126T171056.340279Z-b421a3bec7.raw.log)
+
+### 2026-11-27T01:14:29+08:00 · application-title-motion-verify · succeeded
+
+- Config: 1920x1080/30fps/silent; exit code: 0; elapsed: 3.194s.
+- Command: `C:\Python314\python.exe E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\application_title_motion.py --mode verify`
+- Context: New title overlays on retained backgrounds, exact original logo, five supplied text-motion references; deferred DEVLOG for root consolidation.
+- Source SHA-256: `6908e77b67b190f57080d5082c44839f71f2d519121cee7397db5b019ad73ee8`; Git HEAD: `95b74ae9912d93cee88968d47baed2e1564fdb73`.
+- [Record](builds/20261126T171429.284295Z-c9e5d0af2f.json) · [Raw log](../build-logs/20261126T171429.284295Z-c9e5d0af2f.log)
+- [Exact process output](../build-logs/20261126T171429.284295Z-c9e5d0af2f.raw.log)
+
+## 2026-11-27 - Application script and title-motion delivery
+
+Rewrote the script for an application/portfolio in a natural first-person voice, preserving the requested operations. Fourteen Parts total 240 seconds with corresponding Chinese and separate transitions; independent review passed. Eight new silent 1080p30 H.264 title movies (six 4-second transitions, 14-second opener and closer) reuse the original backgrounds and approved logo. Motion follows five supplied references through typewriter/caret, selective focus and one card-stack transition. All eight complete decodes, duration/frame-count checks, sampled visual review and package CRC/member SHA checks passed. The script verifier counts 320 spoken English words with alphanumeric product names; the earlier informal 318-word estimate used a different tokenization and was not a timing result.
+
+Delivery: E:/MusicAgent&DAW/demo-video/application-script-2026-11-27/SCRIPT.md and Title-transitions.zip. Reference videos, existing backgrounds/logo, previous films, DAW builds and user projects are preserved. No new full film, narration, inference, API/SSH, native build, GUI or device test. Real sax recording and subsequent editing remain the user's next step. Deferred parallel renderer records above retain their actual command timestamps. Existing unstaged history and 38 old receipts remain outside this selective commit. See review/2026-11-27-application-film/RESULTS.md.

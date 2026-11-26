@@ -1,0 +1,166 @@
+{
+  "checked_at": "2026-11-26T17:16:23.770464+00:00",
+  "status": "passed",
+  "script_sha256": "1fcb228907b6437b69336b8a28e75c7dfd1d587e0ead992085b6c3cc9cc60c30",
+  "script_seconds": 240,
+  "script_parts": 14,
+  "spoken_english_words": 320,
+  "timing": [
+    {
+      "part": 1,
+      "start": 0,
+      "end": 14,
+      "seconds": 14,
+      "spoken_words": 33
+    },
+    {
+      "part": 2,
+      "start": 14,
+      "end": 18,
+      "seconds": 4,
+      "spoken_words": 0
+    },
+    {
+      "part": 3,
+      "start": 18,
+      "end": 60,
+      "seconds": 42,
+      "spoken_words": 57
+    },
+    {
+      "part": 4,
+      "start": 60,
+      "end": 64,
+      "seconds": 4,
+      "spoken_words": 0
+    },
+    {
+      "part": 5,
+      "start": 64,
+      "end": 88,
+      "seconds": 24,
+      "spoken_words": 29
+    },
+    {
+      "part": 6,
+      "start": 88,
+      "end": 92,
+      "seconds": 4,
+      "spoken_words": 0
+    },
+    {
+      "part": 7,
+      "start": 92,
+      "end": 115,
+      "seconds": 23,
+      "spoken_words": 36
+    },
+    {
+      "part": 8,
+      "start": 115,
+      "end": 119,
+      "seconds": 4,
+      "spoken_words": 0
+    },
+    {
+      "part": 9,
+      "start": 119,
+      "end": 136,
+      "seconds": 17,
+      "spoken_words": 23
+    },
+    {
+      "part": 10,
+      "start": 136,
+      "end": 140,
+      "seconds": 4,
+      "spoken_words": 0
+    },
+    {
+      "part": 11,
+      "start": 140,
+      "end": 162,
+      "seconds": 22,
+      "spoken_words": 29
+    },
+    {
+      "part": 12,
+      "start": 162,
+      "end": 166,
+      "seconds": 4,
+      "spoken_words": 0
+    },
+    {
+      "part": 13,
+      "start": 166,
+      "end": 226,
+      "seconds": 60,
+      "spoken_words": 83
+    },
+    {
+      "part": 14,
+      "start": 226,
+      "end": 240,
+      "seconds": 14,
+      "spoken_words": 30
+    }
+  ],
+  "original_references_unchanged": true,
+  "original_backgrounds_and_logo_unchanged": true,
+  "archive": "Title-transitions.zip",
+  "archive_bytes": 19577285,
+  "archive_sha256": "90fa92c01478eaa9a736015a1f0b515304ddc98779ee074c2cd571903512dfcf",
+  "archive_entries": 8,
+  "archive_crc_passed": true,
+  "assets": [
+    {
+      "part": 1,
+      "file": "part-01-opening-1080p30.mp4",
+      "seconds": 14,
+      "sha256": "b298ad87639ef2fc0f099107ed9cc1635a835fab73da23483e6225744ade13ba"
+    },
+    {
+      "part": 2,
+      "file": "part-02-generation-1080p30.mp4",
+      "seconds": 4,
+      "sha256": "86c8c3e616964810361ed01bed50ad20ca4ea20ce836b1879666415e423adfcc"
+    },
+    {
+      "part": 4,
+      "file": "part-04-separation-1080p30.mp4",
+      "seconds": 4,
+      "sha256": "3cdf6c44d75cd555ebb5b489008391e62ec9725ed086328dcc720ab94edc3f11"
+    },
+    {
+      "part": 6,
+      "file": "part-06-harmony-1080p30.mp4",
+      "seconds": 4,
+      "sha256": "3d98aa69ca62a89bd5f2d6b32f6568baf8e8ef2e0ee3788d79c68478022e190c"
+    },
+    {
+      "part": 8,
+      "file": "part-08-pulse-1080p30.mp4",
+      "seconds": 4,
+      "sha256": "511cc9a6cb3156ea49452203623c7802faf7ba6028e3e055c82203c1da5589f4"
+    },
+    {
+      "part": 10,
+      "file": "part-10-transcription-1080p30.mp4",
+      "seconds": 4,
+      "sha256": "fc8502eee8bd62e08976cde91cf37d7ca4850eae6cf25024c8e2214460749c76"
+    },
+    {
+      "part": 12,
+      "file": "part-12-workspace-1080p30.mp4",
+      "seconds": 4,
+      "sha256": "5bd91a2a31231b2e57aca8161e05f196c2fcb93f36eaa0e7ae922e368f3f0834"
+    },
+    {
+      "part": 14,
+      "file": "part-14-closing-1080p30.mp4",
+      "seconds": 14,
+      "sha256": "75f7642908ad07a9c936f1e1c6a51746cc496c04640e97a54922f4a8ea8e9ae8"
+    }
+  ],
+  "boundary": "Script and motion assets only. No new finished film, narration, DAW build, inference, GUI or device test."
+}

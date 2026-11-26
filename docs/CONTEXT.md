@@ -1,3 +1,9 @@
+# 当前交付：申请视频脚本与带字过场（2026-11-27）
+
+实际工作树 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `docs/application-film-20261127`，基线 `95b74ae`。本轮按用户最新要求，只重写申请用途的自然第一人称[中英脚本](demo/2026-11-27-application-script.md)，并给原过场背景加入参考五段视频的文字动效。十四个 Part 连续共240秒，六过场单独计时，操作顺序保持；完成独立复核、八个MP4完整解码/帧数/时长验证和逐个抽帧视觉检查，ZIP CRC与源文件SHA通过。[结果/边界](review/2026-11-27-application-film/RESULTS.md)及[计划](review/2026-11-27-application-film/PLAN.md)。
+
+交付目录 `E:/MusicAgent&DAW/demo-video/application-script-2026-11-27`：`SCRIPT.md`、`Title-transitions.zip`。ZIP含六段4秒过场与14秒片头/片尾，1080p30无声。保留原视频、原背景、Logo、DAW构建与用户工程，没有重做整片或配音。接下来由用户录制操作与真人萨克斯镜头、添加声音并剪辑；原录音增强版的实机验收边界仍见下文。不把本轮媒体验证作为新推理、录音或DAW测试证据。
+
 # 当前交付：录音实时波形与独立展示包（2026-11-22）
 
 实际工作树 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `feature/showcase-recording-v1`，基线 `0c41caa`。按[计划](review/2026-11-22-showcase/PLAN.md)实施两个独立输出，保留原 0.13.6、工程关联与用户工程。录音增强 Release 已构建，首轮 CTest 10/11，新增绘图检查修复后 engine.integration_smoke 1/1 通过；细节和未验实机边界见[录音记录](review/2026-11-22-showcase/RECORDING.md)。

@@ -1,0 +1,57 @@
+{
+  "task": "Typography and transition reference review for application film",
+  "review_date": "2026-11-27",
+  "method": "FFprobe metadata, 12 evenly spaced actual frames per clip, full-resolution inspection, constrained high-contrast text-pixel measurement. Original files are read only.",
+  "timing_precision": "Stage times are approximate to sampled frame spacing; font identity and exact easing functions cannot be proven from raster video.",
+  "references": [
+    {
+      "id": 1,
+      "video_duration_seconds": 2.766667,
+      "typography": "Regular sans-serif, dark ink, centered three-line phrase, tight line spacing. Final text ink box x499 y411 to x1421 y663 at 1920x1080.",
+      "motion": "Typewriter reveal with a thin vertical caret. Partial text remains centered and wraps to the next line as the phrase grows. First sample is black; background and partial first word visible at 0.25s; full phrase by about 2.5s. No bounce or decorative stroke.",
+      "background": "Pale silver/blue frosted pillars, small corner radius, slow optical shimmer.",
+      "transfer": "Use the typewriter/caret for the short opening question or transition sentence, then preserve a readable hold. Do not copy the reference's product claim."
+    },
+    {
+      "id": 2,
+      "video_duration_seconds": 2.1,
+      "typography": "Large white regular sans-serif, single centered line; final ink box x445 y488 to x1472 y627, 53.5% frame width.",
+      "motion": "Phrase resolves from strong blur to readable text through a selective moving focus region. Middle letters remain defocused around 0.95s; final phrase is sharp later. The phrase does not bounce or travel across the frame.",
+      "background": "Near-black with cyan/teal soft vertical glows and grain.",
+      "transfer": "For dark chapters use stable center-aligned text with a narrow progressive blur/focus sweep lasting about 1.1-1.3s, followed by a still readable hold."
+    },
+    {
+      "id": 3,
+      "video_duration_seconds": 5.1,
+      "typography": "Dark regular sans-serif on light cyan/silver, one centered clause at a time. First clause's final ink box x284 y509 to x1634 y585, 70.3% frame width.",
+      "motion": "Three sequential clauses replace one another. Each enters with a selective left-to-right blur resolving into sharp letters; observed changeovers near 2.1s and 3.65s. Clauses remain around the same center instead of entering from screen edges.",
+      "background": "Broad horizontal cyan/white fluid bands with restrained drift and soft optical glow.",
+      "transfer": "Use two short related clauses in longer opener/closer; for a four-second chapter use one clause with blur resolution and a long hold."
+    },
+    {
+      "id": 4,
+      "video_duration_seconds": 5.4,
+      "typography": "White regular sans-serif, centered two-line text; first phrase ink box x496 y452 to x1409 y623. The second phrase is smaller because its card is farther away during transition.",
+      "motion": "First statement deblurs quickly and holds until roughly 2s. Around 2.1-3.3s the entire background/text card tilts and recedes through multiple horizontally stacked perspective echoes. A new teal card rises to the front with a second statement; view is largely settled by about 3.9s. This is a whole-card transition, not a text-only slide.",
+      "background": "Dark gray frosted pillars transitioning to dark teal pillars, with black negative space exposed by the stacked cards.",
+      "transfer": "Reserve one whole-card stack transition for changing from analysis to hands-on production. Keep text short, preserve legible time before and after, and do not add camera bounce."
+    },
+    {
+      "id": 5,
+      "video_duration_seconds": 13.0,
+      "typography": "White centered sentence, then brand line and short tagline. First phrase ink box x158 y492 to x1764 y608 (83.6% width). Final logo lockup is much smaller on black, with a tiny secondary line beneath.",
+      "motion": "Opening background only, first phrase resolves by approximately 1.2s and holds through 2.4s. Brand phrase follows near 3.5-4.7s. Short tagline is typewritten with caret near 5.9s and holds around 7-8.3s. Cut to black logo animation near 9s; symbol resolves before the wordmark, then the subtitle appears around 10.5-11.8s.",
+      "background": "Cyan/white fluid bands for statements, then clean black for final brand mark.",
+      "transfer": "Use existing E-musician logo unchanged. Resolve name and repository address in a calm closing lockup with enough final hold to read. Reference supplies the staging pattern only; do not use its logo, tagline, or video pixels in delivered assets."
+    }
+  ],
+  "shared_design": {
+    "alignment": "Central alignment and stable optical center near y540 at 1080p; two/three-line blocks stay compact.",
+    "type": "Regular/light sans-serif, no bold headline styling, minimal tracking, generous surrounding negative space. Exact font unknown.",
+    "color": "Dark ink for pale backgrounds, near-white for dark teal backgrounds; no drop-shadow badge treatment.",
+    "motion": "Blur-to-focus, typewriter plus caret, or whole-card depth movement. Long text should not be flashed too quickly. Generic alpha fade alone does not match these references.",
+    "suggested_four_second_chapter": "0.00-0.15s background; 0.15-1.25s focus/type reveal; 1.25-3.65s clear hold; final 0.35s optional blur/cut. Suggested timing is an adaptation, not a measured property of every reference."
+  },
+  "evidence": ["extraction-receipt.json", "typography-measurements.json", "ref-01-contact.png", "ref-02-contact.png", "ref-03-contact.png", "ref-04-contact.png", "ref-05-contact.png"],
+  "reuse_boundary": "Reference frames remain internal analysis evidence. Render final text on the project's existing original backgrounds; no reference pixels, logos, or audio are incorporated."
+}
