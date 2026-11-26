@@ -1,5 +1,7 @@
 # 当前交付：申请视频脚本与带字过场（2026-11-27）
 
+Part 10 已按新要求重做：固定标题下方的声波变为七个 MIDI 音符，4秒1080p30；独立视觉复核、完整解码和打包检查通过，其余7段视频SHA不变。直接交付 `part-10-transcription-v2-1080p30.mp4`，总ZIP同步更新；旧片段保留于 `revisions/part10-v1`。见[最新修订记录](review/2026-11-27-application-film/RESULTS.md)。
+
 实际工作树 `E:/MusicAgent&DAW/worktrees/audio-analysis`，分支 `docs/application-film-20261127`，基线 `95b74ae`。本轮按用户最新要求，只重写申请用途的自然第一人称[中英脚本](demo/2026-11-27-application-script.md)，并给原过场背景加入参考五段视频的文字动效。十四个 Part 连续共240秒，六过场单独计时，操作顺序保持；完成独立复核、八个MP4完整解码/帧数/时长验证和逐个抽帧视觉检查，ZIP CRC与源文件SHA通过。[结果/边界](review/2026-11-27-application-film/RESULTS.md)及[计划](review/2026-11-27-application-film/PLAN.md)。
 
 交付目录 `E:/MusicAgent&DAW/demo-video/application-script-2026-11-27`：`SCRIPT.md`、`Title-transitions.zip`。ZIP含六段4秒过场与14秒片头/片尾，1080p30无声。保留原视频、原背景、Logo、DAW构建与用户工程，没有重做整片或配音。接下来由用户录制操作与真人萨克斯镜头、添加声音并剪辑；原录音增强版的实机验收边界仍见下文。不把本轮媒体验证作为新推理、录音或DAW测试证据。

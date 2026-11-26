@@ -1,7 +1,7 @@
 """Application-film title cards over the retained, unmodified background movies.
 
-The five supplied references inform typewriter, selective focus and one card-stack
-transition. No reference video pixels are incorporated. No DAW, model or network.
+The five supplied references inform typewriter and selective focus. Part 10 uses
+a sound-to-notes graphic. No reference pixels are incorporated. No DAW or network.
 """
 from __future__ import annotations
 import argparse
@@ -34,7 +34,7 @@ SPECS = [
     dict(id='part-04-separation', seconds=4, part=4, background='chapter-02-separation', style='focus', colour='light', title='Hear the parts.', lines=['Hear the parts.']),
     dict(id='part-06-harmony', seconds=4, part=6, background='chapter-03-harmony', style='phrase', colour='dark', title='Follow the harmony.', lines=['Follow the', 'harmony.']),
     dict(id='part-08-pulse', seconds=4, part=8, background='chapter-04-timing', style='focus', colour='dark', title='Find the pulse.', lines=['Find the pulse.']),
-    dict(id='part-10-transcription', seconds=4, part=10, background='chapter-05-transcription', style='stack', colour='dark', title='From sound to notes.', lines=['From sound', 'to notes.']),
+    dict(id='part-10-transcription', seconds=4, part=10, background='chapter-05-transcription', style='sound-to-notes', colour='dark', title='From sound to notes.', lines=['From sound', 'to notes.']),
     dict(id='part-12-workspace', seconds=4, part=12, background='chapter-06-workspace', style='focus', colour='light', title='Make it your own.', lines=['Make it', 'your own.']),
     dict(id='part-14-closing', seconds=14, part=14, background='chapter-03-harmony', style='closing', colour='dark', title='E-musician', subtitle='Explore the project.', url=URL),
 ]
@@ -155,42 +155,40 @@ class TitleMotion:
         layer.alpha_composite(focus_reveal(second, t, .65, .8))
         return layer
 
-    def stack(self, background, t):
-        before = background.copy().convert('RGBA')
-        from_text = text_layer(['From sound'], colour=self.colour)
-        before.alpha_composite(focus_reveal(from_text, t, .04, .55))
-        after = background.copy().convert('RGBA')
-        after.alpha_composite(self.title)
-        if t < .82:
-            return before
-        if t >= 1.8:
-            return after
-        k = (t - .82) / .98
-        p = 1 - (1-k)**3
-        # A single stack transition adapts reference4's receding horizontal cards.
-        canvas = Image.new('RGBA', (W, H), (8, 22, 26, 255))
-        for i in range(5, -1, -1):
-            scale = 1 - .045 * i - .22 * p
-            width = max(1, round(W * scale))
-            height = max(1, round(H * (1 - .88 * p) * (1 - .09 * i)))
-            card = before.resize((width, height), Image.Resampling.BICUBIC)
-            mask = Image.new('L', (width, height))
-            ImageDraw.Draw(mask).rounded_rectangle((0, 0, width-1, height-1), radius=round(22 * p), fill=255)
-            card.putalpha(mask)
-            canvas.alpha_composite(card, ((W-width)//2, round(390 * p + i * 26 * p)))
-        front = max(0., min(1., (k - .15) / .85))
-        front = 1 - (1-front)**3
-        width = round(W * (.88 + .12 * front))
-        height = round(H * (.66 + .34 * front))
-        card = after.resize((width, height), Image.Resampling.BICUBIC)
-        canvas.alpha_composite(card, ((W-width)//2, round(H * (1-front))))
-        return canvas
+    def sound_to_notes(self, t):
+        # Illustrative title artwork, not model output or a DAW capture.
+        layer = Image.new('RGBA', (W, H))
+        title = text_layer(self.s['lines'], colour=self.colour, centre=(960, 430))
+        layer.alpha_composite(focus_reveal(title, t, .08, 1.08))
+        graphic = Image.new('RGBA', (W, H))
+        d = ImageDraw.Draw(graphic)
+        alpha = round(220 * ease(t, .25, .45))
+        lengths = [116, 88, 144, 104, 96, 160, 132]  # total width 840px
+        offsets = [24, 0, -36, -12, 36, 12, -24]
+        left = 540
+        for i, (length, offset) in enumerate(zip(lengths, offsets)):
+            k = max(0., min(1., (t - 1.0 - .06 * i) / .92))
+            p = k * k * (3 - 2 * k)
+            upper, lower = [], []
+            for j in range(length + 1):
+                u = j / length
+                # A deterministic organic envelope settles into a rectangular note.
+                envelope = math.sin(math.pi * u) ** .65
+                carrier = .22 + .78 * abs(math.sin(49 * u + .7 * i) * math.cos(19 * u + .2 * i))
+                amplitude = (4 + (38 + i % 3 * 8) * envelope * carrier) * (1 - p) + 5 * p
+                x = left + 7 * p + u * (length - 14 * p)
+                centre = 750 + offset * p
+                upper.append((x, centre - amplitude))
+                lower.append((x, centre + amplitude))
+            d.polygon(upper + lower[::-1], fill=(30, 74, 80, alpha))
+            left += length
+        layer.alpha_composite(graphic)
+        return layer
 
     def render(self, background, t):
         style = self.s['style']
-        if style == 'stack':
-            return self.stack(background, t).convert('RGB')
-        if style == 'typewriter': overlay = self.typewriter(t)
+        if style == 'sound-to-notes': overlay = self.sound_to_notes(t)
+        elif style == 'typewriter': overlay = self.typewriter(t)
         elif style in ('opening', 'closing'): overlay = self.brand(t, style == 'closing')
         elif style == 'phrase': overlay = self.phrase(t)
         else: overlay = focus_reveal(self.title, t)

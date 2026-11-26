@@ -14855,3 +14855,38 @@ User requested a fresh natural spoken script for an application, with every tran
 Rewrote the script for an application/portfolio in a natural first-person voice, preserving the requested operations. Fourteen Parts total 240 seconds with corresponding Chinese and separate transitions; independent review passed. Eight new silent 1080p30 H.264 title movies (six 4-second transitions, 14-second opener and closer) reuse the original backgrounds and approved logo. Motion follows five supplied references through typewriter/caret, selective focus and one card-stack transition. All eight complete decodes, duration/frame-count checks, sampled visual review and package CRC/member SHA checks passed. The script verifier counts 320 spoken English words with alphanumeric product names; the earlier informal 318-word estimate used a different tokenization and was not a timing result.
 
 Delivery: E:/MusicAgent&DAW/demo-video/application-script-2026-11-27/SCRIPT.md and Title-transitions.zip. Reference videos, existing backgrounds/logo, previous films, DAW builds and user projects are preserved. No new full film, narration, inference, API/SSH, native build, GUI or device test. Real sax recording and subsequent editing remain the user's next step. Deferred parallel renderer records above retain their actual command timestamps. Existing unstaged history and 38 old receipts remain outside this selective commit. See review/2026-11-27-application-film/RESULTS.md.
+
+## 2026-11-27 - Part 10 transition revision started
+
+User requested Part 10 only. Preserve title, four-second duration and silver background; replace whole-card stack with a restrained waveform-to-MIDI transformation below stable title text. Backup prior clip, archive and receipts. Root owns renderer/media/docs; title-motion agent performs read-only independent review. No DAW/script changes.
+
+### 2026-11-27T01:34:17+08:00 · application-film-package · succeeded
+
+- Config: 240s-script; 8x1080p30-titles; exit code: 0; elapsed: 0.857s.
+- Command: `C:\Python314\python.exe E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\application_film_delivery.py`
+- Context: Validate timeline, bilingual structure, title mapping, unchanged inputs and ZIP CRC; package new title videos only.
+- Source SHA-256: `baf8025cefc827d88b88c2f0f3f798694e01dc9db9583971106cd1ca2cde6259`; Git HEAD: `10d1afdeca3d2909d4482b4b72dc554d14318fb1`.
+- [Record](builds/20261126T173417.643793Z-1b260a1898.json) · [Raw log](../build-logs/20261126T173417.643793Z-1b260a1898.log)
+- [Exact process output](../build-logs/20261126T173417.643793Z-1b260a1898.raw.log)
+
+### 2026-11-27T01:33:13+08:00 · application-title-motion-render · succeeded
+
+- Config: 1920x1080/30fps/silent; exit code: 0; elapsed: 11.157s.
+- Command: `C:\Python314\python.exe E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\application_title_motion.py --only part-10-transcription --overwrite`
+- Context: New title overlays on retained backgrounds, exact original logo, five supplied text-motion references; deferred DEVLOG for root consolidation.
+- Source SHA-256: `baf8025cefc827d88b88c2f0f3f798694e01dc9db9583971106cd1ca2cde6259`; Git HEAD: `10d1afdeca3d2909d4482b4b72dc554d14318fb1`.
+- [Record](builds/20261126T173313.435853Z-9a8d73a36d.json) · [Raw log](../build-logs/20261126T173313.435853Z-9a8d73a36d.log)
+- [Exact process output](../build-logs/20261126T173313.435853Z-9a8d73a36d.raw.log)
+
+### 2026-11-27T01:34:09+08:00 · application-title-motion-verify · succeeded
+
+- Config: 1920x1080/30fps/silent; exit code: 0; elapsed: 3.209s.
+- Command: `C:\Python314\python.exe E:\MusicAgent&DAW\worktrees\audio-analysis\scripts\application_title_motion.py --mode verify`
+- Context: New title overlays on retained backgrounds, exact original logo, five supplied text-motion references; deferred DEVLOG for root consolidation.
+- Source SHA-256: `baf8025cefc827d88b88c2f0f3f798694e01dc9db9583971106cd1ca2cde6259`; Git HEAD: `10d1afdeca3d2909d4482b4b72dc554d14318fb1`.
+- [Record](builds/20261126T173409.277042Z-f4affab137.json) · [Raw log](../build-logs/20261126T173409.277042Z-f4affab137.log)
+- [Exact process output](../build-logs/20261126T173409.277042Z-f4affab137.raw.log)
+
+## 2026-11-27 - Part 10 v2 completed
+
+Replaced the card stack with a stable-title waveform-to-seven-MIDI-bars transition. Kept the four-second duration and original silver background/type/copy. Root plus independent sampled visual review passed; title resolves by 1.16s, morph settles by 2.28s. Full-video verification and ZIP/member checks passed; the other seven movies are hash-identical. Current clip and archive replaced after preserving v1 in local revisions/part10-v1. Script and all DAW assets remain unchanged. Source, records and current hashes are maintained in the application-film review folder.

@@ -1,4 +1,14 @@
-# Application script and title-motion delivery — 2026-11-27
+# Part 10 revision — 2026-11-27
+
+User requested a new Part 10 transition. The new 4-second/120-frame silent 1080p30 H.264 movie keeps the original silver background, exact title and type palette. A compact waveform preserves horizontal time positions while becoming seven rectangular MIDI notes beneath fixed text. Title resolves by 1.16 seconds; morph settles by 2.28 seconds, then holds. This is illustrative motion artwork, not a captured or inferred DAW result.
+
+Root and independent visual review passed for layout, intermediate morph and settled hold. All eight videos passed full decoding and stream/frame-count validation; unchanged siblings were checked against the revision baseline (7/7 identical SHA256). Script remains unchanged at 240 seconds. Package CRC/member SHA passed. Previous Part 10, ZIP and receipts are retained at `revisions/part10-v1` within the delivery directory.
+
+Current direct clip: `E:/MusicAgent&DAW/demo-video/application-script-2026-11-27/part-10-transcription-v2-1080p30.mp4`; SHA256 `03e7f55dd4ce037f4e590f5ae69570a1feb523e9bfee5480af6cd92d95279769`. The canonical motion file and `Title-transitions.zip` are updated. Current ZIP SHA256 `00ecf3e79748a7eb23e522ad9b2463539ed8851ab41e4beb3572a0f797233e90`; 19,511,771 bytes. Use [current delivery hashes](DELIVERY.json) and [revision receipt](PART10-V2.json), not the initial hashes below.
+
+Recorded commands: [render](../../builds/20261126T173313.435853Z-9a8d73a36d.json), [verify](../../builds/20261126T173409.277042Z-f4affab137.json), [package](../../builds/20261126T173417.643793Z-1b260a1898.json). All succeeded. No other movie, script, original background, logo, DAW or user project changed.
+
+# Initial delivery — superseded for Part 10 and ZIP hashes below
 
 ## Implemented and verified
 

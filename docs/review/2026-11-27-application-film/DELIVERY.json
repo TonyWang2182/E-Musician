@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-26T17:16:23.770464+00:00",
+  "checked_at": "2026-11-26T17:34:18.460034+00:00",
   "status": "passed",
   "script_sha256": "1fcb228907b6437b69336b8a28e75c7dfd1d587e0ead992085b6c3cc9cc60c30",
   "script_seconds": 240,
@@ -108,8 +108,8 @@
   "original_references_unchanged": true,
   "original_backgrounds_and_logo_unchanged": true,
   "archive": "Title-transitions.zip",
-  "archive_bytes": 19577285,
-  "archive_sha256": "90fa92c01478eaa9a736015a1f0b515304ddc98779ee074c2cd571903512dfcf",
+  "archive_bytes": 19511771,
+  "archive_sha256": "00ecf3e79748a7eb23e522ad9b2463539ed8851ab41e4beb3572a0f797233e90",
   "archive_entries": 8,
   "archive_crc_passed": true,
   "assets": [
@@ -147,7 +147,7 @@
       "part": 10,
       "file": "part-10-transcription-1080p30.mp4",
       "seconds": 4,
-      "sha256": "fc8502eee8bd62e08976cde91cf37d7ca4850eae6cf25024c8e2214460749c76"
+      "sha256": "03e7f55dd4ce037f4e590f5ae69570a1feb523e9bfee5480af6cd92d95279769"
     },
     {
       "part": 12,

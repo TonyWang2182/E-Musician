@@ -1,0 +1,22 @@
+{
+  "revision": "Part 10 v2",
+  "date": "2026-11-27",
+  "file": "part-10-transcription-1080p30.mp4",
+  "sha256": "03e7f55dd4ce037f4e590f5ae69570a1feb523e9bfee5480af6cd92d95279769",
+  "duration_seconds": 4,
+  "frames": 120,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "fps": 30,
+  "silent": true,
+  "unchanged_other_movies": 7,
+  "visual_review": "Root and independent sampled-frame review passed",
+  "previous_version": "revisions/part10-v1",
+  "records": [
+    "20261126T173313.435853Z-9a8d73a36d",
+    "20261126T173409.277042Z-f4affab137",
+    "20261126T173417.643793Z-1b260a1898"
+  ]
+}

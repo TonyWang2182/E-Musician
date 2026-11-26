@@ -22,3 +22,7 @@ Fourteen Parts total exactly 240 seconds: 14/4/42/4/24/4/23/4/17/4/22/4/60/14. D
 All eight silent videos must decode, have correct 1080p30 frame counts/durations, readable full text and uncut safe margins. Inspect representative entrance/hold/exit frames and preserve input hashes. Six transitions are four seconds each; brand clips are fourteen seconds. Editable source and asset mapping accompany the rendered files. No new full film or narration recording, no DAW/SSH/model/API operation, no Jianying or computer-use. Outputs: `E:/MusicAgent&DAW/demo-video/application-script-2026-11-27`.
 
 Each renderer/validation attempt has a Recorder command, start/end time and raw log; deferred parallel records are appended to DEVLOG by root. User-facing script contains no project-management or test-report sections.
+
+## Part 10 revision
+
+Focal motion: the same horizontal sound regions contract into seven MIDI bars beneath the stable title. Keep full-frame silver background, existing ink/Arial and 4-second budget. Finish title by 1.2 seconds and morph by 2.7 seconds for a readable hold. CPU offline renderer only, 120 frames; no realtime app/UI work. Preserve other seven output hashes and previous version in local revisions/part10-v1. Independently inspect entrance, mid-morph and hold; decode and validate frame count; refresh package after acceptance.
