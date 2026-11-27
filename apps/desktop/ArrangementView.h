@@ -12,6 +12,11 @@ public:
     void update(const EngineSession::Snapshot&);
     void invalidateSources();
     void fitToProject();
+    // Coordinates are local to this ArrangementView. Empty for rulers,
+    // scrollbars or blank space; no selection/transport mutation.
+    juce::String trackAtPosition(juce::Point<int>) const;
+    void revealPosition(double seconds); // Scroll only; preserves selection.
+    juce::Range<double> visibleTimeRange() const;
     void zoomIn();
     void zoomOut();
     double zoomFactor() const;
@@ -19,27 +24,47 @@ public:
     bool isDropActive() const;
     bool cancelClipDrag();
     juce::StringArray selectedClipIds() const;
+    juce::String explicitSelectedTrackId() const;
     void setGrid(double beats, bool bars);
+    void setRulerMode(int mode); // 0: bars/beats, 1: minutes/seconds, 2: both
+    void setGridBeats(double beats);
+    void setSnapEnabled(bool enabled);
+    void setAdaptiveGrid(bool enabled);
+    void setFollowPlayhead(bool enabled);
+    bool isFollowSuspended() const;
+    bool isFollowEnabled() const;
+    juce::Range<double> selectedTimeRange() const;
+    juce::Range<double> explicitSelectedTimeRange() const;
+    void selectClipIds(const juce::StringArray&);
+    juce::Result loopSelection();
     void setCompactRows(bool);
     bool waveformsReady() const;
     bool trackWaveformReady(const juce::String&) const;
     juce::String waveformStatus(const juce::String&) const;
     void drawTrackWaveform(juce::Graphics&, juce::Rectangle<int>, const juce::String&,
                            double start, double end, float verticalZoom);
-    juce::Result runSmokeTest(juce::DynamicObject& report);
+    juce::Result runSmokeTest(juce::DynamicObject& report, const juce::File& outputDirectory = {});
     void paint(juce::Graphics&) override;
     void resized() override;
     void mouseDown(const juce::MouseEvent&) override;
     void mouseDrag(const juce::MouseEvent&) override;
+    void mouseUp(const juce::MouseEvent&) override;
     void mouseWheelMove(const juce::MouseEvent&, const juce::MouseWheelDetails&) override;
     bool keyPressed(const juce::KeyPress&) override;
     void focusGained(FocusChangeType) override;
     void focusLost(FocusChangeType) override;
     void focusOfChildComponentChanged(FocusChangeType) override;
     std::function<void()> onUserStateChange;
+    std::function<void()> onFocus;
+    std::function<void(const juce::String&)> onTrackFocus;
     std::function<void(const juce::Result&)> onEditResult;
     std::function<void(const juce::String&)> onOpenMidiClip;
     std::function<void(const juce::String&)> onOpenTrackDevices;
+    std::function<void(const juce::String&)> onRenameTrack;
+    std::function<void(const juce::String&)> onOpenChordRegion;
+    // Right-click targets are captured without moving the playback position.
+    // kind: track / clip / blank / ruler; id is a stable track or clip ID.
+    std::function<void(const juce::String& kind, const juce::String& id, double seconds)> onContextMenu;
 private:
     struct Impl;
     std::unique_ptr<Impl> impl;

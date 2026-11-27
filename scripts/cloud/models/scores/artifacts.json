@@ -1,0 +1,509 @@
+{
+  "schema_version": 1,
+  "models": {
+    "sheetsage2": {
+      "repo": "m-a-p/SheetSage2",
+      "revision": "b83c3d79a6d98bcffaf8f9ed112c90aa887887bc",
+      "gated": false,
+      "files": [
+        {
+          "path": "LICENSE",
+          "bytes": 20000,
+          "git_blob": "ce18e5ba29e6ad24f24b0bfaa4a682a6cf824ff6",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/LICENSE"
+        },
+        {
+          "path": "README.md",
+          "bytes": 17655,
+          "git_blob": "7a64836bbddb830014089603dd2d374106841fe9",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/README.md"
+        },
+        {
+          "path": "THIRD_PARTY_NOTICES.md",
+          "bytes": 589,
+          "git_blob": "d7f9bf8726ca519dc86a42f5464d47fa91354bb4",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/THIRD_PARTY_NOTICES.md"
+        },
+        {
+          "path": "__init__.py",
+          "bytes": 39,
+          "git_blob": "534c8db9ea190d93c0fd41b7b683cd516988b7c3",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/__init__.py"
+        },
+        {
+          "path": "audio_sheetsage2.py",
+          "bytes": 4289,
+          "git_blob": "264af19012fc986101c17ff002bb6ba5310f14ea",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/audio_sheetsage2.py"
+        },
+        {
+          "path": "benchmark_results.json",
+          "bytes": 13616,
+          "git_blob": "54894722469eaa5937e1bc0b1122033bde8c9b58",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/benchmark_results.json"
+        },
+        {
+          "path": "chord_spelling_sheetsage2.py",
+          "bytes": 9330,
+          "git_blob": "a14a268805080b63c8586fbf767c72e05c1f0bd1",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/chord_spelling_sheetsage2.py"
+        },
+        {
+          "path": "config.json",
+          "bytes": 2060,
+          "git_blob": "e8eb3dc877ce5dcac60b3570e343634e0afbc44e",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/config.json"
+        },
+        {
+          "path": "configuration_mert2.py",
+          "bytes": 3860,
+          "git_blob": "f07208f8a08b8743d47026956c622eaa062d6963",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/configuration_mert2.py"
+        },
+        {
+          "path": "configuration_sheetsage2.py",
+          "bytes": 4119,
+          "git_blob": "48b1954971c6d853a2fc641c0c69a4398f5b0ac8",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/configuration_sheetsage2.py"
+        },
+        {
+          "path": "durations_sheetsage2.py",
+          "bytes": 296,
+          "git_blob": "2ad9c7eabb63733502ebd8cddd94f139b61100fd",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/durations_sheetsage2.py"
+        },
+        {
+          "path": "exports_sheetsage2.py",
+          "bytes": 10405,
+          "git_blob": "4bdfaa1f918bb426642d972fecc6f7f4a68d5401",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/exports_sheetsage2.py"
+        },
+        {
+          "path": "generation_sheetsage2.py",
+          "bytes": 24722,
+          "git_blob": "da4ee0cd59f4122a1309dec7d8f58e2213de2af5",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/generation_sheetsage2.py"
+        },
+        {
+          "path": "infer.py",
+          "bytes": 4253,
+          "git_blob": "0dc1570f28f13263d660df0b018933fbde8de93c",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/infer.py"
+        },
+        {
+          "path": "io_sheetsage2.py",
+          "bytes": 1830,
+          "git_blob": "0e27cc72233ce5b029a01c6d2a5f45ed5f159be6",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/io_sheetsage2.py"
+        },
+        {
+          "path": "labels_sheetsage2.py",
+          "bytes": 978,
+          "git_blob": "879999de3642e95c6f703d7fbe85167cca5c19fa",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/labels_sheetsage2.py"
+        },
+        {
+          "path": "midi_sheetsage2.py",
+          "bytes": 4230,
+          "git_blob": "7cc393644c4165b16e93c2cbe9cf5109ef6907ab",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/midi_sheetsage2.py"
+        },
+        {
+          "path": "model.safetensors",
+          "bytes": 228738564,
+          "git_blob": "244dc81ec5faa905271e523d26e85089571ab28f",
+          "sha256": "b235f68091a5f5b644000f2b5acb57d1e70432aca2b34ab1b9cf27236e1f4274",
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/model.safetensors"
+        },
+        {
+          "path": "modeling_mert2.py",
+          "bytes": 17081,
+          "git_blob": "0369f732d561917d8d1a4d252f802ad4e23f3d4c",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/modeling_mert2.py"
+        },
+        {
+          "path": "modeling_sheetsage2.py",
+          "bytes": 24664,
+          "git_blob": "374e822c18f79f05eec08c2f72bd91f55811d30c",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/modeling_sheetsage2.py"
+        },
+        {
+          "path": "notation_sheetsage2.py",
+          "bytes": 55775,
+          "git_blob": "a4a6da099b05e7ff956e913a6ab366d96e23f1ce",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/notation_sheetsage2.py"
+        },
+        {
+          "path": "pipeline_sheetsage2.py",
+          "bytes": 15022,
+          "git_blob": "bdeb9da32ae4a97b8ddcc66ec9a134c3ab4a9d1c",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/pipeline_sheetsage2.py"
+        },
+        {
+          "path": "processing_sheetsage2.py",
+          "bytes": 5408,
+          "git_blob": "e5dfaa3813484b333bf4d93351627294bb5dc2b6",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/processing_sheetsage2.py"
+        },
+        {
+          "path": "processor_config.json",
+          "bytes": 277,
+          "git_blob": "8dbba2cc459657bf4f17e1c684bd41c636e4e24f",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/processor_config.json"
+        },
+        {
+          "path": "render.py",
+          "bytes": 1927,
+          "git_blob": "a0c6b690e180ef57b5b5f73b475f981adb513b84",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/render.py"
+        },
+        {
+          "path": "rendering_sheetsage2.py",
+          "bytes": 15862,
+          "git_blob": "ae3ea8b3cbb62a5b03dce17c336b7c7e46d8332b",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/rendering_sheetsage2.py"
+        },
+        {
+          "path": "requirements-render.txt",
+          "bytes": 58,
+          "git_blob": "62924031791cb03af9f3dc115d216f8a64a07dc1",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/requirements-render.txt"
+        },
+        {
+          "path": "requirements.txt",
+          "bytes": 190,
+          "git_blob": "641a1f9495a5be42a9afe699c89deec5e0508e47",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/requirements.txt"
+        },
+        {
+          "path": "schema_sheetsage2.py",
+          "bytes": 3893,
+          "git_blob": "a8b21fcd28098af1bee0894f6de4f81ab32ec007",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/schema_sheetsage2.py"
+        },
+        {
+          "path": "setup_render.py",
+          "bytes": 1540,
+          "git_blob": "fc0d2cd683a94fd1e434f2ece1277a88f66156bf",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/setup_render.py"
+        },
+        {
+          "path": "tensors_sheetsage2.py",
+          "bytes": 4645,
+          "git_blob": "aff5b3dff79c21fd26e7674cf7421d65aad764c4",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/tensors_sheetsage2.py"
+        },
+        {
+          "path": "tokenization_sheetsage2.py",
+          "bytes": 30043,
+          "git_blob": "65c3d2cc13163b69794b6a1c46aa6934aeced47f",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/SheetSage2/resolve/b83c3d79a6d98bcffaf8f9ed112c90aa887887bc/tokenization_sheetsage2.py"
+        }
+      ]
+    },
+    "mert2": {
+      "repo": "m-a-p/MERT-v2-FullSong",
+      "revision": "d8ba1c745e733b3908ce6ad16ebeb17ac7600a42",
+      "gated": false,
+      "files": [
+        {
+          "path": "LICENSE",
+          "bytes": 20000,
+          "git_blob": "ce18e5ba29e6ad24f24b0bfaa4a682a6cf824ff6",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/MERT-v2-FullSong/resolve/d8ba1c745e733b3908ce6ad16ebeb17ac7600a42/LICENSE"
+        },
+        {
+          "path": "README.md",
+          "bytes": 10419,
+          "git_blob": "063f1a1110355e04e0b3921a0c1e95c9bd7b9a34",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/MERT-v2-FullSong/resolve/d8ba1c745e733b3908ce6ad16ebeb17ac7600a42/README.md"
+        },
+        {
+          "path": "THIRD_PARTY_NOTICES.md",
+          "bytes": 541,
+          "git_blob": "b330a93214b6516f4721fa91521332383484a1f0",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/MERT-v2-FullSong/resolve/d8ba1c745e733b3908ce6ad16ebeb17ac7600a42/THIRD_PARTY_NOTICES.md"
+        },
+        {
+          "path": "config.json",
+          "bytes": 882,
+          "git_blob": "e6adbdaf587c162a7d1e03a252372f90ce0efe8f",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/MERT-v2-FullSong/resolve/d8ba1c745e733b3908ce6ad16ebeb17ac7600a42/config.json"
+        },
+        {
+          "path": "configuration_mert2.py",
+          "bytes": 3860,
+          "git_blob": "f07208f8a08b8743d47026956c622eaa062d6963",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/MERT-v2-FullSong/resolve/d8ba1c745e733b3908ce6ad16ebeb17ac7600a42/configuration_mert2.py"
+        },
+        {
+          "path": "marble_results.json",
+          "bytes": 8997,
+          "git_blob": "8b7519c12ab259ef6dc0ac067e610a3b431528aa",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/MERT-v2-FullSong/resolve/d8ba1c745e733b3908ce6ad16ebeb17ac7600a42/marble_results.json"
+        },
+        {
+          "path": "model.safetensors",
+          "bytes": 2529812848,
+          "git_blob": "4e3d1b39d19efcb24c39bfc426c952da1a45fbb1",
+          "sha256": "e6dd2ab187d6dd62b6521cd7d8f932e237acf0c5757745a7232082e28391350d",
+          "url": "https://huggingface.co/m-a-p/MERT-v2-FullSong/resolve/d8ba1c745e733b3908ce6ad16ebeb17ac7600a42/model.safetensors"
+        },
+        {
+          "path": "modeling_mert2.py",
+          "bytes": 17081,
+          "git_blob": "0369f732d561917d8d1a4d252f802ad4e23f3d4c",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/MERT-v2-FullSong/resolve/d8ba1c745e733b3908ce6ad16ebeb17ac7600a42/modeling_mert2.py"
+        },
+        {
+          "path": "preprocessor_config.json",
+          "bytes": 215,
+          "git_blob": "54daaeee6f791c77a0057800b1ec1da60190cfb6",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/MERT-v2-FullSong/resolve/d8ba1c745e733b3908ce6ad16ebeb17ac7600a42/preprocessor_config.json"
+        },
+        {
+          "path": "weights_manifest.json",
+          "bytes": 241,
+          "git_blob": "1b7d41ec8430dea4fa6f29e4c146a7cb99f12895",
+          "sha256": null,
+          "url": "https://huggingface.co/m-a-p/MERT-v2-FullSong/resolve/d8ba1c745e733b3908ce6ad16ebeb17ac7600a42/weights_manifest.json"
+        }
+      ]
+    },
+    "muscriptor": {
+      "repo": "muscriptor/muscriptor",
+      "revision": "8a1ef88672cc23c26619adaff37ec48d82c0b906",
+      "files": [
+        {
+          "path": "LICENSE",
+          "bytes": 1072,
+          "git_blob": "32d9000511cd327a501c6527338cb9c7f57f9a2e",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/LICENSE"
+        },
+        {
+          "path": "README.md",
+          "bytes": 8164,
+          "git_blob": "eb6cd7cba6495096ebe71ab7728de38f3357603d",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/README.md"
+        },
+        {
+          "path": "muscriptor/__init__.py",
+          "bytes": 292,
+          "git_blob": "3b2cf05cf370b0d31a94d68049df39b6ee507ef5",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/__init__.py"
+        },
+        {
+          "path": "muscriptor/__main__.py",
+          "bytes": 41,
+          "git_blob": "eb4731764abf631133e3f00c2a0c24b7d4da32dd",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/__main__.py"
+        },
+        {
+          "path": "muscriptor/accelerator.py",
+          "bytes": 2278,
+          "git_blob": "9553a5011f6ad1374afa9e249659c2e96c6d1d67",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/accelerator.py"
+        },
+        {
+          "path": "muscriptor/events.py",
+          "bytes": 10958,
+          "git_blob": "8700a66b1ab80cf62a5964dd7e7c284f22ab8243",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/events.py"
+        },
+        {
+          "path": "muscriptor/main.py",
+          "bytes": 20119,
+          "git_blob": "5f3237eca784c052a65ddf4febb024decd990b4e",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/main.py"
+        },
+        {
+          "path": "muscriptor/models/__init__.py",
+          "bytes": 0,
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/models/__init__.py"
+        },
+        {
+          "path": "muscriptor/models/lm.py",
+          "bytes": 20242,
+          "git_blob": "7ece36255786fa087a37f56919f256cbefb38058",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/models/lm.py"
+        },
+        {
+          "path": "muscriptor/modules/__init__.py",
+          "bytes": 0,
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/modules/__init__.py"
+        },
+        {
+          "path": "muscriptor/modules/conditioners.py",
+          "bytes": 10693,
+          "git_blob": "8efb5c3d294a9e418e07ea239bd86bbf6cebc71a",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/modules/conditioners.py"
+        },
+        {
+          "path": "muscriptor/modules/mel_spectrogram.py",
+          "bytes": 3299,
+          "git_blob": "c230d16cdebac4624772fc40436b383baa7dd399",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/modules/mel_spectrogram.py"
+        },
+        {
+          "path": "muscriptor/modules/streaming.py",
+          "bytes": 2548,
+          "git_blob": "d17c65e55bb87a6a98dad2c842a63640ef19473f",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/modules/streaming.py"
+        },
+        {
+          "path": "muscriptor/modules/transformer.py",
+          "bytes": 7853,
+          "git_blob": "c119422b8a78f64c7e9c087dfc86362e31912a41",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/modules/transformer.py"
+        },
+        {
+          "path": "muscriptor/server.py",
+          "bytes": 27170,
+          "git_blob": "fc7dba612b07f9dfbb8262d1688a581f8093e5fa",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/server.py"
+        },
+        {
+          "path": "muscriptor/soundfonts.py",
+          "bytes": 982,
+          "git_blob": "1921d78f954d198ae910dca8f44adaf0d65b615c",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/soundfonts.py"
+        },
+        {
+          "path": "muscriptor/tokenizer/__init__.py",
+          "bytes": 102,
+          "git_blob": "4dd3c760a304b745f277a5ee17b04911203271fe",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/tokenizer/__init__.py"
+        },
+        {
+          "path": "muscriptor/tokenizer/mt3.py",
+          "bytes": 10569,
+          "git_blob": "c056a483e652759cefd96d393ebe9171a65d2793",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/tokenizer/mt3.py"
+        },
+        {
+          "path": "muscriptor/tokenizer/notes.py",
+          "bytes": 14551,
+          "git_blob": "77061b68e6df0d1a8d517616ba5dc40eb3e1313f",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/tokenizer/notes.py"
+        },
+        {
+          "path": "muscriptor/transcription_model.py",
+          "bytes": 32737,
+          "git_blob": "1ac031e95a0cefeae9cee750a1920e45c2592035",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/transcription_model.py"
+        },
+        {
+          "path": "muscriptor/utils/__init__.py",
+          "bytes": 0,
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/utils/__init__.py"
+        },
+        {
+          "path": "muscriptor/utils/audio.py",
+          "bytes": 3818,
+          "git_blob": "18037ebef8df6134d9b2cffcdcefbf7f209a8539",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/utils/audio.py"
+        },
+        {
+          "path": "muscriptor/utils/auralization.py",
+          "bytes": 6299,
+          "git_blob": "72a99b77b760905bff6db8fc9533fc4d8d06fade",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/utils/auralization.py"
+        },
+        {
+          "path": "muscriptor/utils/beats.py",
+          "bytes": 16436,
+          "git_blob": "02359cc8d4dda65e17200cdfda2c612c6f61cb03",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/utils/beats.py"
+        },
+        {
+          "path": "muscriptor/utils/download.py",
+          "bytes": 4646,
+          "git_blob": "1b1150dbb0f98c78731adcff8a990c0b68a17156",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/utils/download.py"
+        },
+        {
+          "path": "muscriptor/utils/midi.py",
+          "bytes": 19159,
+          "git_blob": "3504218fc8ee5d849eb944be7e21967d641ab760",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/utils/midi.py"
+        },
+        {
+          "path": "muscriptor/utils/resample.py",
+          "bytes": 8039,
+          "git_blob": "f42f64ebbd2e13d7cbe689b498a5a482c66ee7f6",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/utils/resample.py"
+        },
+        {
+          "path": "muscriptor/utils/sampling.py",
+          "bytes": 3380,
+          "git_blob": "a86b8bd2f0a53ca50223d2aada9983ee7a86d480",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/utils/sampling.py"
+        },
+        {
+          "path": "muscriptor/utils/sheets.py",
+          "bytes": 17546,
+          "git_blob": "4aa0925677ad3a2507e2dd2e98eb4eb18495fc82",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/muscriptor/utils/sheets.py"
+        },
+        {
+          "path": "pyproject.toml",
+          "bytes": 2633,
+          "git_blob": "e5e144441a2971326ac83601da7ddb15305d858d",
+          "url": "https://raw.githubusercontent.com/muscriptor/muscriptor/8a1ef88672cc23c26619adaff37ec48d82c0b906/pyproject.toml"
+        }
+      ],
+      "medium": {
+        "repo": "MuScriptor/muscriptor-medium",
+        "revision": "f32236969308476e01fd3aae67357de5feb05a2d",
+        "path": "model.safetensors",
+        "bytes": 1228144472,
+        "sha256": "ac80adbdf85d87231735fd948af7013441c0afced316c4e9067fd5d8a7fb97ec",
+        "gated": "auto"
+      }
+    }
+  },
+  "minimum_free_bytes": 50000000000,
+  "weights_on_E": false
+}

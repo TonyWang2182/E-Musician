@@ -1,4 +1,5 @@
 #include "ProjectStorage.h"
+#include "NativeEffects.h"
 
 #include <juce_cryptography/juce_cryptography.h>
 #include <cmath>
@@ -10,6 +11,18 @@
 #include <set>
 
 namespace emusician::storage {
+juce::Result canonicalTrackColour(const juce::var& value, juce::String& result)
+{
+    if (!value.isString()) return juce::Result::fail("Track colour must be a string.");
+    const auto text = value.toString();
+    if (text.isNotEmpty() && (text.length() != 7 || text[0] != '#'
+        || !text.substring(1).containsOnly("0123456789abcdefABCDEF")))
+        return juce::Result::fail("Track colour must be #RRGGBB or an empty string to reset.");
+    result = text.toUpperCase();
+    return juce::Result::ok();
+}
+#include "ProjectStorageWarp.inc"
+#include "ProjectStorageHybrid.inc"
 namespace {
 using juce::File;
 using juce::Result;
@@ -157,6 +170,57 @@ Result checkJsonTokens(const juce::MemoryBlock& bytes)
     return finished ? Result::ok() : Result::fail("The project JSON is incomplete.");
 }
 
+Result nativeAssetIds(const StoredPlugin& plugin, std::vector<String>& result)
+{
+    result.clear();
+    if (plugin.format != "E-musician") return Result::ok();
+    if (plugin.role == "effect") {
+        if (plugin.state.getSize() == 0 || plugin.state.getSize() > maximumNativeDeviceStateBytes)
+            return Result::fail("Native effect state is empty or exceeds 16 KiB.");
+        if (auto status = checkJsonTokens(plugin.state); status.failed()) return status;
+        native_effects::Settings settings; return native_effects::decode(plugin, settings);
+    }
+    const bool sampler = plugin.identifier == "native.sampler";
+    const bool rack = plugin.identifier == "native.drum_rack";
+    if ((!sampler && !rack) || plugin.role != "instrument")
+        return Result::fail("A native instrument has an unsupported identity or role.");
+    if (plugin.state.getSize() == 0 || plugin.state.getSize() > maximumNativeDeviceStateBytes)
+        return Result::fail("Native instrument state is empty or exceeds 16 KiB.");
+    if (auto status = checkJsonTokens(plugin.state); status.failed())
+        return Result::fail("Invalid native instrument state: " + status.getErrorMessage());
+    var parsed;
+    const auto json = String::fromUTF8(static_cast<const char*>(plugin.state.getData()), static_cast<int>(plugin.state.getSize()));
+    if (auto status = juce::JSON::parse(json, parsed); status.failed())
+        return Result::fail("Cannot parse native instrument state: " + status.getErrorMessage());
+    const auto version = parsed.getProperty("version", {}), type = parsed.getProperty("type", {});
+    const auto root = parsed.getProperty("root_note", {}), start = parsed.getProperty("start", {}), end = parsed.getProperty("end", {});
+    const auto pads = parsed.getProperty("pads", {});
+    if (!parsed.isObject() || !integral(version) || (juce::int64(version) != 1 && juce::int64(version) != 2) || !type.isString()
+        || type.toString() != (sampler ? "sampler" : "drum_rack")
+        || !integral(root) || juce::int64(root) < 0 || juce::int64(root) > 127
+        || !number(start) || !number(end) || !std::isfinite(double(start)) || !std::isfinite(double(end))
+        || double(start) < 0 || double(end) > 1 || double(start) >= double(end)
+        || !pads.isArray() || pads.size() != (sampler ? 1 : 16))
+        return Result::fail("Native instrument state has an invalid version, type, range or pad count.");
+    std::vector<String> candidate;
+    for (const auto& pad : *pads.getArray()) {
+        const auto id = pad.getProperty("asset_id", {}), gain = pad.getProperty("gain_db", {}), muted = pad.getProperty("muted", {});
+        if (!pad.isObject() || !id.isString() || !number(gain) || !validGain(double(gain)) || !muted.isBool()
+            || (id.toString().isNotEmpty() && !validIdentifier(id.toString())))
+            return Result::fail("A native instrument pad has invalid asset ID, gain or mute state.");
+        for (const auto* field : {"attack_ms", "release_ms"}) if (pad.hasProperty(field)) {
+            const auto value = pad[field]; const bool attack = juce::String(field) == "attack_ms";
+            if (!number(value) || !std::isfinite(double(value)) || double(value) < (attack ? .1 : 1.0) || double(value) > (attack ? 2000.0 : 5000.0))
+                return Result::fail("A native instrument envelope is outside its supported range.");
+        }
+        if (pad.hasProperty("one_shot") && !pad["one_shot"].isBool())
+            return Result::fail("A native instrument playback mode must be boolean.");
+        if (id.toString().isNotEmpty()) candidate.push_back(id.toString());
+    }
+    result = std::move(candidate);
+    return Result::ok();
+}
+
 Result readBytes(const File& file, juce::MemoryBlock& bytes)
 {
     if (!file.existsAsFile() || file.getSize() <= 0 || file.getSize() > maximumManifestBytes)
@@ -179,10 +243,14 @@ Result readJson(const File& file, juce::MemoryBlock& bytes, var& parsed)
     return Result::ok();
 }
 
+
+#include "ProjectStorageAnalysis.inc"
+
 Result validateProject(const StoredProject& project, bool allowLegacy, bool verifySources)
 {
-    if (project.schemaVersion != 4 && !(allowLegacy && project.schemaVersion >= 1 && project.schemaVersion <= 3))
-        return Result::fail("Saving requires a fully resolved schema 4 project.");
+    if (project.schemaVersion != 4 && project.schemaVersion != 5 && project.schemaVersion != 6 && project.schemaVersion != 7 && project.schemaVersion != 8 && !(allowLegacy && project.schemaVersion >= 1 && project.schemaVersion <= 3))
+        return Result::fail("Saving requires a fully resolved schema 4 through 8 project.");
+    if (auto result=validateAnalysis(project);result.failed())return result;
     if (!validIdentifier(project.projectId)) return Result::fail("The project ID is missing or invalid.");
     if (project.revision > static_cast<std::uint64_t>(std::numeric_limits<juce::int64>::max()))
         return Result::fail("The project revision exceeds the supported integer range.");
@@ -207,7 +275,7 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
             const auto& plugin = plugins[index];
             if (!validIdentifier(plugin.id) || !pluginIds.insert(plugin.id.toLowerCase()).second)
                 return Result::fail("Plugin instance IDs must be valid and unique.");
-            if ((plugin.format != "VST" && plugin.format != "VST3")
+            if ((plugin.format != "VST" && plugin.format != "VST3" && plugin.format != "E-musician")
                 || plugin.identifier.isEmpty() || plugin.identifier.length() > 4096
                 || plugin.name.length() > 512 || plugin.manufacturer.length() > 512 || plugin.version.length() > 128)
                 return Result::fail("A plugin contains an unsupported format or invalid identity.");
@@ -222,6 +290,9 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
                 || plugin.state.getSize() > maximumTotalPluginStateBytes - pluginStateBytes)
                 return Result::fail("Plugin state exceeds the 64 MiB per-instance or 256 MiB project limit.");
             pluginStateBytes += plugin.state.getSize();
+            std::vector<String> nativeRefs;
+            if (auto status = nativeAssetIds(plugin, nativeRefs); status.failed()) return status;
+            referencedAssets.insert(nativeRefs.begin(), nativeRefs.end());
         }
         return Result::ok();
     };
@@ -240,6 +311,9 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
         if (!validIdentifier(track.id) || !trackIds.insert(track.id.toLowerCase()).second)
             return Result::fail("Track IDs must be valid and unique.");
         if (track.name.length() > 512) return Result::fail("Track names must be no longer than 512 characters.");
+        String colour;
+        if (canonicalTrackColour(track.colour, colour).failed() || colour != track.colour)
+            return Result::fail("Track colour must be canonical #RRGGBB or empty.");
         if (!validGain(track.gainDb)) return Result::fail("Track gain must be between -60 and +6 dB: " + track.name);
         if (!validPan(track.pan)) return Result::fail("Track pan must be between -1 and 1.");
         if (track.kind != "audio" && track.kind != "instrument" && track.kind != "bus") return Result::fail("Unsupported track kind.");
@@ -251,6 +325,20 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
         for (const auto& clip : track.clips) {
             if (!validIdentifier(clip.id) || !clipIds.insert(clip.id.toLowerCase()).second)
                 return Result::fail("Clip IDs must be valid and unique across all tracks.");
+            if(clip.analysisRole.isNotEmpty()&&(project.schemaVersion<5||clip.kind!="audio"||(clip.analysisRole!="vocals"&&clip.analysisRole!="drums"&&clip.analysisRole!="bass"&&clip.analysisRole!="other"&&clip.analysisRole!="piano"&&clip.analysisRole!="guitar")))return Result::fail("Invalid clip analysis role.");
+            if(clip.midiChannel<0||clip.midiChannel>16||(clip.midiChannel!=0&&(project.schemaVersion<8||clip.kind!="midi")))return Result::fail("Invalid explicit MIDI clip channel.");
+            const auto& warp=clip.warp;
+            if(warp.enabled){
+                if(project.schemaVersion<6||clip.kind!="audio"||warp.mode!="preserve_pitch"
+                   ||!std::isfinite(warp.sourceBpm)||warp.sourceBpm<20||warp.sourceBpm>300
+                   ||!std::isfinite(warp.targetBpm)||warp.targetBpm<20||warp.targetBpm>300
+                   ||!validIdentifier(warp.renderAssetId)||!assetIds.contains(warp.renderAssetId)
+                   ||warp.sourceHash.length()!=64||!warp.sourceHash.containsOnly("0123456789abcdef")
+                   ||warp.renderHash.length()!=64||!warp.renderHash.containsOnly("0123456789abcdef")
+                   ||(warp.followTempo&&std::abs(warp.targetBpm-project.bpm)>1e-9))return Result::fail("Invalid or unresolved audio Warp.");
+                referencedAssets.insert(warp.renderAssetId);
+            }else if(warp.followTempo||warp.renderAssetId.isNotEmpty()||warp.sourceHash.isNotEmpty()||warp.renderHash.isNotEmpty())
+                return Result::fail("Disabled Warp must not refer to a rendered asset.");
             if (clip.kind == "audio") {
                 if (track.kind != "audio" || !clip.notes.empty() || !clip.controllers.empty()) return Result::fail("Audio clips belong on audio tracks and cannot contain MIDI events.");
                 if (!validIdentifier(clip.assetId) || assetIds.count(clip.assetId) == 0)
@@ -260,9 +348,9 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
                 if (!validTime(clip.timelineStart) || !validTime(clip.sourceOffset) || !validTime(clip.duration)
                     || (!legacyDuration && clip.duration <= 0.0)
                     || clip.timelineStart + clip.duration > maximumTimelineSeconds
-                    || clip.sourceOffset + clip.duration > maximumTimelineSeconds
+                    || clip.sourceOffset + clip.duration * warp.speedRatio() > maximumTimelineSeconds
                     || (!legacyDuration && (!(clip.timelineStart + clip.duration > clip.timelineStart)
-                        || !(clip.sourceOffset + clip.duration > clip.sourceOffset))))
+                        || !(clip.sourceOffset + clip.duration * warp.speedRatio() > clip.sourceOffset))))
                     return Result::fail("Clip positions and source ranges must be finite, non-negative, and within 48 hours: " + clip.id);
                 if (!validTime(clip.fadeIn) || !validTime(clip.fadeOut) || clip.fadeIn + clip.fadeOut > clip.duration + 1.0e-9)
                     return Result::fail("Audio fades must be non-negative and fit within the clip.");
@@ -281,7 +369,7 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
                 for (const auto& note : clip.notes) {
                     if (!validIdentifier(note.id) || !noteIds.insert(note.id.toLowerCase()).second)
                         return Result::fail("Note IDs must be valid and unique across the project.");
-                    if (note.channel != clip.notes.front().channel)
+                    if (note.channel != clip.notes.front().channel || (clip.midiChannel>0&&note.channel!=clip.midiChannel))
                         return Result::fail("All notes in one MIDI clip must use the same MIDI channel.");
                     if (note.pitch < 0 || note.pitch > 127 || note.velocity < 1 || note.velocity > 127
                         || note.channel < 1 || note.channel > 16 || !std::isfinite(note.startBeats)
@@ -297,6 +385,8 @@ Result validateProject(const StoredProject& project, bool allowLegacy, bool veri
             } else return Result::fail("Unsupported clip kind.");
         }
     }
+    for (const auto& id : referencedAssets)
+        if (!assetIds.contains(id)) return Result::fail("A native instrument references an unknown audio asset: " + id);
     if (referencedAssets.size() != project.assets.size())
         return Result::fail("Unreferenced audio assets are not supported by this project version.");
     std::map<String, const StoredTrack*> graphTracks;
@@ -433,6 +523,9 @@ Result readTrackMetadata(const juce::DynamicObject& object, StoredTrack& stored)
         || !number(gain) || !validGain(static_cast<double>(gain)) || !muted.isBool() || !solo.isBool())
         return Result::fail("A track contains missing or invalid fields.");
     stored.id = id.toString(); stored.name = name.toString();
+    if (object.hasProperty("colour")) {
+        if (auto result = canonicalTrackColour(object.getProperty("colour"), stored.colour); result.failed()) return result;
+    }
     stored.gainDb = static_cast<float>(static_cast<double>(gain));
     stored.muted = static_cast<bool>(muted); stored.solo = static_cast<bool>(solo);
     return Result::ok();
@@ -492,6 +585,49 @@ struct ReusedAsset {
             && file.getSize() == size && file.getLastModificationTime() == modified;
     }
 };
+
+// JUCE's SHA256 consumes 64-byte chunks. Buffer file reads and poll the
+// existing cancellation callback at bounded byte intervals, on the file worker.
+struct CheckedHashInput final : juce::InputStream {
+    juce::BufferedInputStream input;
+    const IOOptions& options;
+    juce::int64 consumed = 0, nextCheck = 0;
+    bool stopped = false;
+    CheckedHashInput(juce::InputStream& stream, const IOOptions& opts) : input(stream, 65536), options(opts) {}
+    juce::int64 getTotalLength() override { return input.getTotalLength(); }
+    juce::int64 getPosition() override { return input.getPosition(); }
+    bool setPosition(juce::int64 position) override { return input.setPosition(position); }
+    bool isExhausted() override { return stopped || input.isExhausted(); }
+    int read(void* destination, int bytes) override {
+        if (consumed >= nextCheck) {
+            nextCheck = consumed + 65536;
+            if (cancelled(options)) { stopped = true; return 0; }
+        }
+        const int amount = input.read(destination, bytes);
+        consumed += amount;
+        return amount;
+    }
+};
+
+Result verifyExpectedAsset(const File& file, const String& expected, const IOOptions& options)
+{
+    if (cancelled(options)) return cancellation();
+    const auto size = file.getSize();
+    const auto timestamp = file.getLastModificationTime();
+    if (size <= 0 || file.isSymbolicLink() || file.getParentDirectory().isSymbolicLink())
+        return Result::fail("A native sample archive is missing or linked.");
+    auto input = file.createInputStream();
+    if (!input || input->getTotalLength() != size) return Result::fail("Could not open native sample archive for verification.");
+    CheckedHashInput stream(*input, options);
+    const auto actual = juce::SHA256(stream, size).toHexString();
+    if (stream.stopped || cancelled(options)) return cancellation();
+    if (stream.consumed != size || input->getStatus().failed() || file.getSize() != size
+        || file.getLastModificationTime() != timestamp || file.isSymbolicLink() || file.getParentDirectory().isSymbolicLink())
+        return Result::fail("A native sample archive changed during verification.");
+    if (actual != expected.toLowerCase())
+        return Result::fail("A native sample changed since it was loaded. Reload the sample before saving.");
+    return Result::ok();
+}
 // The comparison is bounded and cancellable on the file worker. A Save As to
 // another bundle never sees these candidates, so it remains self-contained.
 Result canReuseAudio(const File& source, const File& archived, const IOOptions& options, bool& same)
@@ -701,7 +837,7 @@ Result parsePlugins(const var& values, const File& manifest, std::vector<StoredP
         plugin.uniqueId = static_cast<int>(uid); plugin.deprecatedUniqueId = static_cast<int>(oldUid);
         plugin.name = name.toString(); plugin.manufacturer = manufacturer.toString(); plugin.version = version.toString();
         plugin.enabled = static_cast<bool>(enabled); plugin.role = role.toString();
-        if ((plugin.format != "VST" && plugin.format != "VST3") || plugin.identifier.isEmpty()
+        if ((plugin.format != "VST" && plugin.format != "VST3" && plugin.format != "E-musician") || plugin.identifier.isEmpty()
             || plugin.identifier.length() > 4096 || plugin.name.length() > 512 || plugin.manufacturer.length() > 512
             || plugin.version.length() > 128 || (plugin.role != "instrument" && plugin.role != "effect"))
             return Result::fail("A plugin slot has an unsupported identity or role.");
@@ -738,10 +874,17 @@ Result serializePlugins(const std::vector<StoredPlugin>& plugins, const File& ro
 }
 } // namespace
 
+Result nativePluginAssetIds(const StoredPlugin& plugin, std::vector<String>& result)
+{
+    return nativeAssetIds(plugin, result);
+}
+
 Result validate(const StoredProject& project)
 {
     return validateProject(project, false, false);
 }
+
+bool isLegacyChordLabel(const juce::String& label) { return validChordLabel(label); }
 
 Result save(const File& target, const StoredProject& project, StoredProject& archived, const IOOptions& options)
 {
@@ -749,6 +892,18 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
     progress(options, 0.0, "Validating project");
     if (auto result = validateLocation(target); result.failed()) return result;
     if (auto result = validateProject(project, false, true); result.failed()) return result;
+    auto expectedAssetHashes=options.expectedAssetHashes;
+    for(const auto& track:project.tracks)for(const auto& clip:track.clips)if(clip.warp.enabled){
+        for(const auto& [id,hash]:std::initializer_list<std::pair<String,String>>{{clip.assetId,clip.warp.sourceHash},{clip.warp.renderAssetId,clip.warp.renderHash}}){
+            if(auto prior=expectedAssetHashes.find(id);prior!=expectedAssetHashes.end()&&prior->second!=hash)return Result::fail("Warp media hashes disagree.");
+            expectedAssetHashes[id]=hash;
+        }
+    }
+    for (const auto& [id, hash] : options.expectedAssetHashes) {
+        if (!validIdentifier(id) || hash.length() != 64 || !hash.containsOnly("0123456789abcdefABCDEF")
+            || std::none_of(project.assets.begin(), project.assets.end(), [&](const auto& asset) { return asset.id == id; }))
+            return Result::fail("Invalid or unknown expected native sample hash.");
+    }
 
     const bool hadTarget = target.existsAsFile();
     int legacySchema = 0;
@@ -759,9 +914,9 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
             return Result::fail("Cannot safely inspect the existing project before replacement: " + result.getErrorMessage());
         const auto* object = previous.getDynamicObject();
         const auto schema = object != nullptr ? object->getProperty("schema") : var();
-        if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 4)
+        if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 8)
             return Result::fail("Cannot replace an existing project with an unsupported schema.");
-        if (static_cast<int>(schema) < 4) legacySchema = static_cast<int>(schema);
+        if (static_cast<int>(schema) < project.schemaVersion) legacySchema = static_cast<int>(schema);
     }
 
     if (cancelled(options)) return cancellation();
@@ -822,6 +977,7 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
         if (cancelled(options)) return cancellation();
         auto object = std::make_unique<juce::DynamicObject>();
         object->setProperty("id", track.id); object->setProperty("name", track.name); object->setProperty("kind", track.kind);
+        object->setProperty("colour", track.colour);
         object->setProperty("gain_db", static_cast<double>(track.gainDb));
         object->setProperty("pan", static_cast<double>(track.pan));
         object->setProperty("muted", track.muted); object->setProperty("solo", track.solo);
@@ -841,7 +997,10 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
             if (cancelled(options)) return cancellation();
             auto item = std::make_unique<juce::DynamicObject>();
             item->setProperty("id", clip.id); item->setProperty("kind", clip.kind);
+            if(candidate.schemaVersion>=5)item->setProperty("analysis_role",clip.analysisRole);
+            if(candidate.schemaVersion>=8)item->setProperty("midi_channel",clip.midiChannel);
             if (clip.kind == "audio") {
+                if(candidate.schemaVersion>=6)item->setProperty("warp",audioWarpToVar(clip.warp));
                 item->setProperty("asset_id", clip.assetId); item->setProperty("source_offset", clip.sourceOffset);
                 item->setProperty("fade_in", clip.fadeIn); item->setProperty("fade_out", clip.fadeOut);
             } else {
@@ -880,7 +1039,14 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
     juce::Array<var> masterPlugins;
     if (auto result = serializePlugins(candidate.masterPlugins, root, cleanup, transfer, masterPlugins); result.failed()) return result;
     auto object = std::make_unique<juce::DynamicObject>();
-    object->setProperty("schema", 4);
+    if(candidate.schemaVersion>=7){juce::Array<var> records;
+        for(const auto& g:candidate.generations){auto* record=new juce::DynamicObject();
+            for(const auto& [key,value]:std::initializer_list<std::pair<juce::Identifier,juce::var>>{{"id",g.id},{"asset_id",g.assetId},{"clip_id",g.clipId},{"model_id",g.modelId},{"model_revision",g.modelRevision},{"audio_sha256",g.audioSha256},{"result_sha256",g.resultSha256},{"parameters_json",g.parametersJson},{"start_seconds",g.startSeconds},{"duration_seconds",g.durationSeconds}})record->setProperty(key,value);
+            records.add(record);
+        }object->setProperty("generations",records);
+    }
+    object->setProperty("schema", candidate.schemaVersion);
+    if(candidate.schemaVersion>=5){object->setProperty("analyses",serializeAnalyses(candidate));object->setProperty("chord_regions",serializeChords(candidate));}
     object->setProperty("project_id", candidate.projectId);
     object->setProperty("revision", static_cast<juce::int64>(candidate.revision));
     object->setProperty("master_gain_db", static_cast<double>(candidate.masterGainDb));
@@ -924,6 +1090,12 @@ Result save(const File& target, const StoredProject& project, StoredProject& arc
         return Result::fail("Another file appeared at the project path while saving.");
     }
     if (cancelled(options)) return cancellation();
+    for (const auto& asset : candidate.assets) {
+        const auto expected = expectedAssetHashes.find(asset.id);
+        if (expected != expectedAssetHashes.end())
+            if (auto result = verifyExpectedAsset(asset.source, expected->second, options); result.failed()) return result;
+    }
+    if (cancelled(options)) return cancellation();
     if (!temporary.overwriteTargetFileWithTemporary())
         return Result::fail("Could not replace the project file. The previous saved project is unchanged.");
 
@@ -949,8 +1121,8 @@ Result load(const File& manifest, StoredProject& project, const IOOptions& optio
     const auto id = object->getProperty("project_id"), revision = object->getProperty("revision");
     const auto master = object->getProperty("master_gain_db"), looping = object->getProperty("looping");
     const auto tracks = object->getProperty("tracks");
-    if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 4)
-        return Result::fail("This project schema is not supported. Expected schema 1, 2, 3 or 4.");
+    if (!integral(schema) || static_cast<juce::int64>(schema) < 1 || static_cast<juce::int64>(schema) > 8)
+        return Result::fail("This project schema is not supported. Expected schema 1 through 8.");
     if (!id.isString() || !validIdentifier(id.toString()) || !integral(revision)
         || static_cast<juce::int64>(revision) < 0 || !number(master) || !validGain(static_cast<double>(master))
         || !looping.isBool() || !tracks.isArray())
@@ -1011,7 +1183,7 @@ Result load(const File& manifest, StoredProject& project, const IOOptions& optio
             stored.kind = kind.toString(); stored.pan = static_cast<float>(static_cast<double>(pan));
             if (auto result = parsePlugins(track->getProperty("plugins"), manifest, stored.plugins, pluginCount, stateBytes, pluginIds, options); result.failed()) return result;
         }
-        if (candidate.schemaVersion == 4) {
+        if (candidate.schemaVersion >= 4) {
             if (auto result = parseRouting(*track, stored, sendCount); result.failed()) return result;
             if (auto result = parseAutomation(track->getProperty("automation"), stored.automation, laneCount, pointCount, options); result.failed()) return result;
         }
@@ -1040,6 +1212,8 @@ Result load(const File& manifest, StoredProject& project, const IOOptions& optio
                 if (!clipId.isString() || !number(start) || !number(duration))
                     return Result::fail("A clip contains missing or invalid position fields.");
                 StoredClip value;
+                if(candidate.schemaVersion>=5){const auto role=clip->getProperty("analysis_role");if(!role.isString())return Result::fail("Missing clip analysis role.");value.analysisRole=role.toString();}
+                if(candidate.schemaVersion>=8){const auto channel=clip->getProperty("midi_channel");if(!int32Value(channel))return Result::fail("Missing MIDI clip channel.");value.midiChannel=int(channel);}
                 value.id = clipId.toString(); value.timelineStart = static_cast<double>(start); value.duration = static_cast<double>(duration);
                 if (candidate.schemaVersion >= 3) {
                     const auto kind = clip->getProperty("kind");
@@ -1050,6 +1224,7 @@ Result load(const File& manifest, StoredProject& project, const IOOptions& optio
                     const auto assetId = clip->getProperty("asset_id"), offset = clip->getProperty("source_offset");
                     if (!assetId.isString() || !number(offset)) return Result::fail("An audio clip is missing its source fields.");
                     value.assetId = assetId.toString(); value.sourceOffset = static_cast<double>(offset);
+                    if(candidate.schemaVersion>=6)if(auto r=audioWarpFromVar(clip->getProperty("warp"),value.warp);r.failed())return r;
                     if (candidate.schemaVersion >= 3) {
                         const auto fadeIn = clip->getProperty("fade_in"), fadeOut = clip->getProperty("fade_out");
                         if (!number(fadeIn) || !number(fadeOut)) return Result::fail("An audio clip is missing its fade fields.");
@@ -1082,7 +1257,7 @@ Result load(const File& manifest, StoredProject& project, const IOOptions& optio
                         value.notes.push_back({ noteId.toString(), static_cast<int>(pitch), static_cast<double>(noteStart),
                             static_cast<double>(noteLength), static_cast<int>(velocity), static_cast<int>(channel) });
                     }
-                    if (candidate.schemaVersion == 4)
+                    if (candidate.schemaVersion >= 4)
                         if (auto result = parseControllers(clip->getProperty("controllers"), value, controllerCount, options); result.failed()) return result;
                 } else return Result::fail("Unsupported clip kind.");
                 stored.clips.push_back(std::move(value));
@@ -1093,8 +1268,9 @@ Result load(const File& manifest, StoredProject& project, const IOOptions& optio
     }
     if (candidate.schemaVersion >= 3)
         if (auto result = parsePlugins(object->getProperty("master_plugins"), manifest, candidate.masterPlugins, pluginCount, stateBytes, pluginIds, options); result.failed()) return result;
-    if (candidate.schemaVersion == 4)
+    if (candidate.schemaVersion >= 4)
         if (auto result = parseAutomation(object->getProperty("master_automation"), candidate.masterAutomation, laneCount, pointCount, options); result.failed()) return result;
+    if(candidate.schemaVersion>=5)if(auto result=parseAnalysis(parsed,candidate);result.failed())return result;
     if (auto result = validateProject(candidate, true, true); result.failed()) return result;
     if (cancelled(options)) return cancellation();
     project = std::move(candidate);

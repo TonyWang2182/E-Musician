@@ -31,6 +31,90 @@
       "before_sha256_lf": "d2a30d8ed9fcd14585605856bb18d319a80e1f842a1f246c23c3acfc81d54036",
       "after_sha256_lf": "1371d21f50d07bfb24198b694b922d4bf115eb6060dcd80955d940460068cad3",
       "patch_sha256_lf": "5726605bd003fd92ac9a3a3d2c4c7b7c01dd567ecca26a4397069d654ccdcbc9"
+    },
+    {
+      "path": "modules/tracktion_engine/model/edit/tracktion_Edit.h",
+      "patch": "recording-Edit-h.patch",
+      "before_sha256_lf": "279159b9a57aa1251e62c704f172b0f45e1f99845c5a7136d4481fd943034e73",
+      "after_sha256_lf": "636236695e6493b722124396f35a83b5f06662c06cd2cee11525a2ad1e9c704a",
+      "patch_sha256_lf": "00c522571bb92702ae47b3603128f15b54165aa3a3cce6ee8c7d451c348702b5"
+    },
+    {
+      "path": "modules/tracktion_engine/model/edit/tracktion_Edit.cpp",
+      "patch": "recording-Edit-cpp.patch",
+      "before_sha256_lf": "4329875765f86f2b4000ed0019ab393d915f69c8672e68614698fdd3b033718a",
+      "after_sha256_lf": "8e9b038a12e79e069f7d9edacf9ad9e8ccc6661ca0a07d74a220ebbc2188099a",
+      "patch_sha256_lf": "505cf9a23c772784d2a860397ef966a388d4959d724be1133a9b123e3e7f9e59"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_ClickNode.cpp",
+      "patch": "recording-ClickNode-cpp.patch",
+      "before_sha256_lf": "290f36125fc4b94b8a07c207d8f1e354a5ef5f197e784bdefc46d0ba639a2731",
+      "after_sha256_lf": "9e5451d13a6e189b906156349bde1754e76790f30978d346fa46bd581d4ed630",
+      "patch_sha256_lf": "707dd3aa4f9fe2c5538444f1d886d31d3d2e657bf294153f702cb116d8d8834f"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/tracktion_TransportControl.cpp",
+      "patch": "recording-TransportControl-cpp.patch",
+      "before_sha256_lf": "2ca55395cc3905b37abdaefb28b52c3a92084cc6d446d185ace307fec15b90d6",
+      "after_sha256_lf": "311010048630f17ca504f705d7924caf33f98a3a0db727525c30e2e1a4300f46",
+      "patch_sha256_lf": "aac015d3f654ca5d457fda59a4464c13a60132fca9c7bd3c898c6d4da2662958"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/devices/tracktion_MidiInputDevice.cpp",
+      "patch": "recording-midi-controller-boundary.patch",
+      "before_sha256_lf": "90b39337fadc3b942d90f632a64b1aa4806635e86daf945daf88df432d652b3c",
+      "after_sha256_lf": "a8288c012f0a17ad919fa74a57ee668fae50476a819254c4c7430f4c80c78bff",
+      "patch_sha256_lf": "9aac4049ed6afc9f9666e4b2d167cd891542de067b76b4d24b51d5666c9c9d0f"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/devices/tracktion_InputDevice.cpp",
+      "patch": "per-track-monitor.patch",
+      "before_sha256_lf": "15da708f2755f149ef0175c7149ba81ded3d99a53092767d87f47efab3d972d4",
+      "after_sha256_lf": "9f60718e3cccbb5ec351e7365ce7c5ca6cd3acf150e36e2d5e1cd223f47c7097",
+      "patch_sha256_lf": "0f51b88c324d3b5d8e9a58c7c43fde8d306e618216e9d3e35aa16832511b1fe2"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/devices/tracktion_InputDevice.h",
+      "patch": "per-track-midi-release.patch",
+      "before_sha256_lf": "363c8e8b54f8e069c0f20bf66d01a8b4be677359aefeb0f0d161bae7973c432b",
+      "after_sha256_lf": "31312dbbbc5f0e7604e4d14a42d75b088c8b59cfd7705c33c90fb783afd80960",
+      "patch_sha256_lf": "6d2b7fe3c17b73c3be22091f678380e25c2ef8c29ddd0338dbda900072986703"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp",
+      "patch": "empty-instrument-midi-injection.patch",
+      "before_sha256_lf": "4a55f6be2a8fc38d10d2529fa4ba6a4663d8b818b55b128e87340d7b9337ce5c",
+      "after_sha256_lf": "68b30572334da59307de5188cbd85c340a3a73fee4654b066327747756d638fb",
+      "patch_sha256_lf": "68b7f593c6864f6b022470a7d2c0f89b70a38a180c6edae5616dfe1333090980"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.cpp",
+      "patch": "stable-empty-midi-injection-id.patch",
+      "before_sha256_lf": "ab8042c1cdbc586f01c252c1d3fec97304c08f6f13e9a0553e5ff579b3e1b2c7",
+      "after_sha256_lf": "d69a04a60ca93b45cc7d4b1de5028f33da0bbd35c2b87d85bb44bdba34e645af",
+      "patch_sha256_lf": "72156f308eab4b60303a392c8e6a067ca1795bdf2b42a426e9653cc97b5e4047"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/tracktion_DeviceManager.h",
+      "patch": "physical-input-callback-map-h.patch",
+      "before_sha256_lf": "9ac86376ea2828516452bd14ba34d9fa446e41c91ba9af2f71fc74c1550a800d",
+      "after_sha256_lf": "6df5bacba9e3dcf986432772d440d1716276484c537823687bf20600976e6686",
+      "patch_sha256_lf": "7de94bcc7a785370af44af6422b21287fd54d427d9ef55304ccdeb047a204df2"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/tracktion_DeviceManager.cpp",
+      "patch": "physical-input-callback-map-cpp.patch",
+      "before_sha256_lf": "75d76576fa7c4cee25985a69c07df6b66058ca6271506f5951e833adfa08a57e",
+      "after_sha256_lf": "3f1f367ae5bb8e728674e00acd8711bca9587f565165b82c71b4a54be44b1233",
+      "patch_sha256_lf": "38926720e21de62c07f09b7e7e5c84bdf6624536cd47af983c1799e87e4adb98"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/devices/tracktion_WaveInputDevice.cpp",
+      "patch": "physical-input-buffer-clear.patch",
+      "before_sha256_lf": "6dd21a1e3fe4589c4d0f72c24ae6633d6d6fa69952d3b6246fcd9afdd7e95fe6",
+      "after_sha256_lf": "bf3424aec6f6aa189d5d6f5b18bc4eb426228141c5e495f5d344701af1ea9f53",
+      "patch_sha256_lf": "dae7e3265bc7d5012fd4dd486be2879e72f3c8920287229349dd00b1659d4caf"
     }
   ]
 }

@@ -55,7 +55,17 @@ template<class J> juce::Result prepareJobAssets(const J& j,const storage::Stored
     for(size_t i=0;i<state.assets.size();++i){const auto& a=state.assets[i];audio::PreparedSource source;
         auto r=audio::prepareSource(a.source,source,jobAudioIO(j,base+scale*double(i)/state.assets.size(),scale/state.assets.size()));
         if(r.failed())return r;out[a.source.getFullPathName()]={source.duration,source.sampleRate,source.channels,source.format,source.playbackFile};
-    }return juce::Result::ok();
+    }
+    for(const auto& track:state.tracks)for(const auto& clip:track.clips)if(clip.warp.enabled){
+        const auto original=std::find_if(state.assets.begin(),state.assets.end(),[&](const auto& a){return a.id==clip.assetId;});
+        const auto rendered=std::find_if(state.assets.begin(),state.assets.end(),[&](const auto& a){return a.id==clip.warp.renderAssetId;});
+        if(original==state.assets.end()||rendered==state.assets.end())return juce::Result::fail("Warp media reference is missing.");
+        JobFingerprint sourceHash,renderHash;const auto cancel=[j]{return j->cancel.load();};
+        if(auto r=fingerprint(original->source,sourceHash,cancel);r.failed())return r;
+        if(auto r=fingerprint(out.at(rendered->source.getFullPathName()).playbackFile,renderHash,cancel);r.failed())return r;
+        if(sourceHash.hash!=clip.warp.sourceHash||renderHash.hash!=clip.warp.renderHash)return juce::Result::fail("Warp source or rendered audio no longer matches the project.");
+    }
+    return juce::Result::ok();
 }
 // MIDI is a musical import, retaining beat positions at the current project BPM.
 // Unsupported performance events must be rejected unless notes_only is explicit.
@@ -145,7 +155,7 @@ template<class J> juce::Result readJobMidi(const J& j,const juce::File& file,boo
             storage::StoredTrack track;track.id=uid();track.kind="instrument";track.name=name+" / ch "+juce::String(channel);
             storage::StoredClip clip;clip.id=uid();clip.kind="midi";clip.notes=std::move(notes);double end=0;
             for(const auto& n:clip.notes)end=juce::jmax(end,n.startBeats+n.lengthBeats);
-            clip.lengthBeats=std::ceil(end*960.0)/960.0;clip.duration=time::beatsToSeconds(clip.lengthBeats,state.bpm);track.clips.push_back(std::move(clip));state.tracks.push_back(std::move(track));
+            clip.lengthBeats=end;clip.duration=time::beatsToSeconds(clip.lengthBeats,state.bpm);track.clips.push_back(std::move(clip));state.tracks.push_back(std::move(track));
         }jobProgress(j,double(ti+1)/juce::jmax(1,midi.getNumTracks()));
     }
     if(!sawNotes)return juce::Result::fail("The MIDI file contains no notes.");
@@ -156,9 +166,59 @@ template<class J> juce::Result readJobMidi(const J& j,const juce::File& file,boo
     }
     syncMidiSeconds(state);return storage::validate(state);
 }
+// JUCE 8's writer converts absolute event timestamps to signed int. The
+// 1/16384 whole-note grid needs 4096 PPQN, whose 48-hour range exceeds int.
+// Keep absolute ticks wide and split only long SMF deltas with inert text events.
+inline constexpr int midiExportPpqn = 4096;
+template<class J> juce::Result writeMidiWideTicks(const J& job, juce::OutputStream& output, const juce::MidiFile& midi)
+{
+    constexpr std::uint64_t maximumDelta = 0x0fffffff;
+    const auto maximumTick = static_cast<std::uint64_t>(storage::maximumTimelineSeconds * storage::maximumBpm / 60.0 * midiExportPpqn);
+    const auto variable = [](juce::OutputStream& stream, std::uint32_t value) {
+        unsigned char bytes[4]; int count = 0;
+        bytes[count++] = static_cast<unsigned char>(value & 127);
+        while ((value >>= 7) != 0) bytes[count++] = static_cast<unsigned char>((value & 127) | 128);
+        while (count > 0) if (!stream.writeByte(static_cast<char>(bytes[--count]))) return false;
+        return true;
+    };
+    if (!output.writeIntBigEndian(0x4d546864) || !output.writeIntBigEndian(6)
+        || !output.writeShortBigEndian(1) || !output.writeShortBigEndian(static_cast<short>(midi.getNumTracks()))
+        || !output.writeShortBigEndian(midiExportPpqn)) return juce::Result::fail("Could not write MIDI header.");
+    for (int track = 0; track < midi.getNumTracks(); ++track) {
+        juce::MemoryOutputStream bytes; std::uint64_t previous = 0;
+        const auto* sequence = midi.getTrack(track);
+        for (int index = 0; index < sequence->getNumEvents(); ++index) {
+            if (job->cancel.load()) return juce::Result::fail("Cancelled.");
+            const auto& message = sequence->getEventPointer(index)->message;
+            const double time = message.getTimeStamp();
+            if (!std::isfinite(time) || time < 0 || time > double(maximumTick))
+                return juce::Result::fail("A MIDI event exceeds the supported timeline.");
+            const auto tick = static_cast<std::uint64_t>(std::llround(time));
+            if (tick < previous) return juce::Result::fail("MIDI events are not ordered.");
+            while (tick - previous > maximumDelta) {
+                if (!variable(bytes, static_cast<std::uint32_t>(maximumDelta))
+                    || !bytes.writeByte(static_cast<char>(0xff)) || !bytes.writeByte(1) || !bytes.writeByte(0))
+                    return juce::Result::fail("Could not write MIDI gap.");
+                previous += maximumDelta;
+            }
+            if (!variable(bytes, static_cast<std::uint32_t>(tick - previous))
+                || !bytes.write(message.getRawData(), static_cast<size_t>(message.getRawDataSize())))
+                return juce::Result::fail("Could not write MIDI event.");
+            previous = tick;
+        }
+        const unsigned char end[] = { 0, 0xff, 0x2f, 0 };
+        if (!bytes.write(end, sizeof(end)) || bytes.getDataSize() > static_cast<size_t>(std::numeric_limits<int>::max())
+            || !output.writeIntBigEndian(0x4d54726b) || !output.writeIntBigEndian(static_cast<int>(bytes.getDataSize()))
+            || !output.write(bytes.getData(), bytes.getDataSize())) return juce::Result::fail("Could not write MIDI track.");
+    }
+    return juce::Result::ok();
+}
+
 template<class J> juce::Result writeJobMidi(const J& j,const juce::File& file,const storage::StoredProject& state,const std::vector<juce::String>& selected)
 {
-    constexpr int ppqn=960;juce::MidiFile midi;midi.setTicksPerQuarterNote(ppqn);
+    if(!std::isfinite(state.bpm)||state.bpm<storage::minimumBpm||state.bpm>storage::maximumBpm)return juce::Result::fail("MIDI tempo is outside the supported range.");
+    constexpr int ppqn=midiExportPpqn;const double maximumTicks=storage::maximumTimelineSeconds*state.bpm/60.0*ppqn;
+    const auto lastTick=static_cast<std::int64_t>(std::floor(maximumTicks));juce::MidiFile midi;midi.setTicksPerQuarterNote(ppqn);
     juce::MidiMessageSequence meta;auto tempo=juce::MidiMessage::tempoMetaEvent(int(std::llround(60000000.0/state.bpm)));meta.addEvent(tempo);
     meta.addEvent(juce::MidiMessage::timeSignatureMetaEvent(state.numerator,state.denominator));midi.addTrack(meta);
     std::set<juce::String> ids(selected.begin(),selected.end());double origin=0;
@@ -173,24 +233,26 @@ template<class J> juce::Result writeJobMidi(const J& j,const juce::File& file,co
           for(const auto& n:c.notes){
             if(j->cancel.load())return juce::Result::fail("Cancelled.");
             if(!std::isfinite(n.startBeats)||!std::isfinite(n.lengthBeats)||n.startBeats<0||n.lengthBeats<=0)
-                return juce::Result::fail("A note cannot be represented safely at 960 PPQN.");
+                return juce::Result::fail("A note cannot be represented safely at 4096 PPQN.");
             const auto beginTicks=(c.startBeats+n.startBeats-origin)*ppqn, endTicks=(c.startBeats+n.startBeats+n.lengthBeats-origin)*ppqn;
             if(!std::isfinite(beginTicks)||!std::isfinite(endTicks)||beginTicks<0||endTicks<beginTicks
-                ||beginTicks>=std::numeric_limits<int>::max()||endTicks>std::numeric_limits<int>::max())
-                return juce::Result::fail("A note cannot be represented safely at 960 PPQN.");
+                ||beginTicks>=maximumTicks||endTicks>maximumTicks)
+                return juce::Result::fail("A note cannot be represented safely at 4096 PPQN.");
             auto begin=std::llround(beginTicks), end=std::llround(endTicks);
-            if(end<begin||begin>=std::numeric_limits<int>::max())return juce::Result::fail("A note cannot be represented safely at 960 PPQN.");
-            // A valid positive duration can quantise to the same tick at both edges.
-            // Preserve the event with a one-tick note-off instead of rejecting export.
-            end=std::max(end,begin+1);
+            if(end<begin)return juce::Result::fail("A note cannot be represented safely at 4096 PPQN.");
+            // Positive sub-tick notes survive as one tick. At the project horizon,
+            // move that tick inward rather than creating an unimportable note-off.
+            begin=std::min(begin,static_cast<long long>(lastTick-1));
+            end=std::min(std::max(end,begin+1),static_cast<long long>(lastTick));
             auto on=juce::MidiMessage::noteOn(n.channel,n.pitch,juce::uint8(n.velocity));on.setTimeStamp(double(begin));events.push_back(on);
             auto off=juce::MidiMessage::noteOff(n.channel,n.pitch);off.setTimeStamp(double(end));events.push_back(off);hasNotes=true;
           }
           for(const auto& e:c.controllers){
             if(j->cancel.load())return juce::Result::fail("Cancelled.");
-            const auto tick=std::llround((c.startBeats+e.beats-origin)*ppqn);
-            if(tick<0||tick>std::numeric_limits<int>::max())return juce::Result::fail("A controller cannot be represented safely at 960 PPQN.");
-            const int channel=c.notes.empty()?1:c.notes.front().channel;juce::MidiMessage message;
+            const double rawTick=(c.startBeats+e.beats-origin)*ppqn;
+            if(!std::isfinite(rawTick)||rawTick<0||rawTick>maximumTicks)return juce::Result::fail("A controller cannot be represented safely at 4096 PPQN.");
+            const auto tick=std::min(std::llround(rawTick),static_cast<long long>(lastTick));
+            const int channel=c.midiChannel>0?c.midiChannel:c.notes.empty()?1:c.notes.front().channel;juce::MidiMessage message;
             if(e.type>=0&&e.type<=127)message=juce::MidiMessage::controllerEvent(channel,e.type,e.value>>7);
             else if(e.type==0x1001)message=juce::MidiMessage::programChange(channel,e.value>>7);
             else if(e.type==0x1004)message=juce::MidiMessage::aftertouchChange(channel,e.metadata,e.value>>7);
@@ -202,19 +264,19 @@ template<class J> juce::Result writeJobMidi(const J& j,const juce::File& file,co
         }
         if(!events.empty()){
             std::stable_sort(events.begin(),events.end(),[](const auto& a,const auto& b){return a.getTimeStamp()!=b.getTimeStamp()?a.getTimeStamp()<b.getTimeStamp():a.isNoteOff()&&!b.isNoteOff();});
-            juce::MidiMessageSequence sequence;sequence.addEvent(juce::MidiMessage::textMetaEvent(3,track.name));double previous=0;
-            for(const auto& event:events){if(event.getTimeStamp()-previous>0x0fffffff)return juce::Result::fail("A MIDI event gap exceeds the SMF delta-time limit.");previous=event.getTimeStamp();sequence.addEvent(event);}midi.addTrack(sequence);
+            juce::MidiMessageSequence sequence;sequence.addEvent(juce::MidiMessage::textMetaEvent(3,track.name));
+            for(const auto& event:events)sequence.addEvent(event);midi.addTrack(sequence);
         }jobProgress(j,0.8*double(ti+1)/juce::jmax(size_t(1),state.tracks.size()));
     }
     if(!hasNotes)return juce::Result::fail("There are no MIDI notes to export.");
     JobFingerprint original;if(auto r=fingerprint(file,original,[j]{return j->cancel.load();});r.failed())return r;
     if(!file.getParentDirectory().isDirectory())return juce::Result::fail("The output directory does not exist.");
     juce::TemporaryFile temp(file);auto output=temp.getFile().createOutputStream();if(!output)return juce::Result::fail("Cannot create MIDI output.");
-    if(!midi.writeTo(*output,1))return juce::Result::fail("Could not write MIDI.");output->flush();auto error=output->getStatus();output.reset();if(error.failed())return error;
+    if(auto r=writeMidiWideTicks(j,*output,midi);r.failed())return r;output->flush();auto error=output->getStatus();output.reset();if(error.failed())return error;
     return replaceExport(j,temp,original);
 }
 juce::File renderJobsRoot()
-{return juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("E-musician/render-jobs");}
+{return showcase::enabled()?showcase::profile().getChildFile("render-jobs"):juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("E-musician/render-jobs");}
 // Only this task's UUID directory is removed; user project directories are never cleaned here.
 struct OwnedRenderDirectory {
     juce::File root=renderJobsRoot(),directory;
@@ -242,14 +304,15 @@ void trimRenderInputs(storage::StoredProject& state,double end)
         }
     }state.looping=false;state.loopStart=0;state.loopEnd=0;pruneAssets(state);
 }
-template<class J> juce::Result renderJob(const J& j,const juce::File& target,storage::StoredProject state,double start,double end,double rate,int bits,double tail,bool realtime)
+template<class J> juce::Result renderJob(const J& j,const juce::File& target,storage::StoredProject state,double start,double end,double rate,int bits,double tail,bool realtime,std::map<juce::String,juce::String> expectedHashes)
 {
     if(!target.getParentDirectory().isDirectory())return juce::Result::fail("The output directory does not exist.");
     JobFingerprint original;if(auto r=fingerprint(target,original,[j]{return j->cancel.load();});r.failed())return r;
     OwnedRenderDirectory owned(j->id);if(auto r=owned.directory.createDirectory();r.failed())return r;
     const auto manifest=owned.directory.getChildFile("snapshot.emproj"),specFile=owned.directory.getChildFile("spec.json"),report=owned.directory.getChildFile("report.json");
     trimRenderInputs(state,end);storage::StoredProject archived;
-    if(auto r=storage::save(manifest,state,archived,jobIO(j,0,0.2));r.failed())return r;
+    auto options=jobIO(j,0,0.2);options.expectedAssetHashes=std::move(expectedHashes);
+    if(auto r=storage::save(manifest,state,archived,options);r.failed())return r;
     auto staging=target.getSiblingFile(".emusician-render-"+j->id+".wav");
     if(staging.exists())return juce::Result::fail("The render staging path already exists.");juce::TemporaryFile output(target,staging);
     auto spec=object({{"id",j->id},{"snapshot",manifest.getFullPathName()},{"output",staging.getFullPathName()},{"start",start},{"end",end},{"sample_rate",rate},{"bit_depth",bits},{"tail",tail},{"realtime",realtime}});
@@ -271,21 +334,36 @@ template<class J> juce::Result renderJob(const J& j,const juce::File& target,sto
 
 std::shared_ptr<EngineSession::Impl::Job> EngineSession::Impl::startJob(const juce::String& kind,std::function<void(const std::shared_ptr<Job>&)> work)
 {
-    requireControlThread();for(const auto& j:jobs)if(j->worker.joinable()){fail("A file task is running or awaiting its commit. Wait for it or cancel it first.");return {};}
-    while(jobs.size()>=64)jobs.erase(jobs.begin());
+    requireControlThread();if(hasBlockingFileTask()){fail("A file task is running or awaiting its commit. Wait for it or cancel it first.");return {};}
+    while(jobs.size()>=64){
+        const auto retired=std::find_if(jobs.begin(),jobs.end(),[](const auto& j){return !j->worker.joinable();});
+        if(retired==jobs.end()){fail("Task history is busy. Wait for a task to finish.");return {};}
+        jobs.erase(retired);
+    }
     auto job=std::make_shared<Job>();job->kind=kind;job->projectId=guard.projectId();job->revision=guard.revision();jobs.push_back(job);
     publish("job_changed",object({{"job_id",job->id},{"status","queued"},{"kind",kind}}));status=kind.replaceCharacter('_',' ')+" queued.";
-    job->worker=std::thread([job,work=std::move(work)]{
-        jobStatus(job,"running",{},0);
-        try{if(job->cancel.load())jobStatus(job,"cancelled");else work(job);}
-        catch(const std::exception& e){jobStatus(job,"failed",e.what());}catch(...){jobStatus(job,"failed","Unexpected file task failure.");}
-        job->done.store(true,std::memory_order_release);
-    });return job;
+    try{
+        job->worker=std::thread([job,work=std::move(work)]()mutable{
+            jobStatus(job,"running",{},0);
+            try{if(job->cancel.load())jobStatus(job,"cancelled");else work(job);}
+            catch(const std::exception& e){jobStatus(job,"failed",e.what());}catch(...){jobStatus(job,"failed","Unexpected file task failure.");}
+            // Release worker-owned buffers/process handles before advertising
+            // completion; the UI must not join while their destructors wait.
+            work={};job->done.store(true,std::memory_order_release);
+        });
+    }catch(const std::exception& e){
+        jobStatus(job,"failed","Cannot create background worker: "+juce::String(e.what()));job->done=true;
+        fail(job->error);return {};
+    }return job;
 }
 
 void EngineSession::Impl::timerCallback()
 {
-    if(shuttingDown)return;
+    if(shuttingDown||controlOperationActive)return;
+    const juce::ScopedValueSetter<bool> busy(controlOperationActive,true);
+    auto completions=std::move(deferredNativeCompletions);
+    deferredNativeCompletions.clear();
+    for(auto& completion:completions)completeNative(std::move(completion));
     finishRecording();
     auto changed=pluginHost.takeChangedPluginIds();juce::Array<juce::var> ids;
     for(const auto& id:changed)if(livePlugin(*edit,id))ids.add(id);
@@ -293,11 +371,12 @@ void EngineSession::Impl::timerCallback()
         pluginDirty=true;advanceRevision();cachedRevision=std::numeric_limits<std::uint64_t>::max();
         publish("plugin_changed",object({{"plugin_ids",ids}}));
     }
-    auto& transport=edit->getTransport();if(transport.isPlaying()&&!transport.isRecording()&&!transport.isRecordingStopping()&&!transport.looping.get()&&transport.getPosition().inSeconds()>=duration){transport.stop(false,false);transport.setPosition(te::TimePosition::fromSeconds(duration));}
+    auto& transport=edit->getTransport();if(transport.isPlaying()&&!transport.isRecording()&&!transport.isRecordingStopping()&&!transport.looping.get()&&!(edit->clickTrackEnabled.get()&&!edit->clickTrackRecordingOnly.get())&&transport.getPosition().inSeconds()>=duration){transport.stop(false,false);transport.setPosition(te::TimePosition::fromSeconds(duration));}
     for(auto& job:jobs)if(job->preparation&&!job->done.load(std::memory_order_acquire)){
         auto step=job->preparation;step(); // Keep the callable alive if it clears itself.
     }
     reapFinishedJobs(true);
+    reconcileNative();
 }
 
 void EngineSession::Impl::reapFinishedJobs(bool applyCommits)
@@ -316,7 +395,7 @@ void EngineSession::Impl::reapFinishedJobs(bool applyCommits)
         // The thread may still be destroying its work callable before exit.
         job->worker.join();std::function<void()> commit;juce::String state;
         {std::lock_guard lock(job->mutex);state=job->status;commit=std::move(job->commit);}
-        const bool writesProject=job->kind=="import_audio"||job->kind=="import_midi"||job->kind=="open_project";
+        const bool writesProject=job->kind=="import_audio"||job->kind=="import_midi"||job->kind=="open_project"||job->kind=="set_audio_warp";
         if(commit){
             if(writesProject&&(job->projectId!=juce::String(guard.projectId())||job->revision!=guard.revision()))jobStatus(job,"conflict","The project changed while this task was running. Its result was not applied.");
             else if(writesProject&&job->cancel.load())jobStatus(job,"cancelled");
@@ -339,10 +418,12 @@ juce::Result EngineSession::Impl::beginSave(const juce::File& file)
     struct Capture {
         struct Slot {juce::String track,id;std::uint64_t generation=0;const te::Plugin* instance=nullptr;};
         storage::StoredProject state;std::vector<Slot> slots;size_t next=0;
+        std::map<juce::String,juce::String> expectedHashes;
         juce::String failure,failureStatus="failed";
     };
     auto captured=std::make_shared<Capture>();
     const auto began=juce::Time::getMillisecondCounterHiRes();captured->state=capture();
+    if(auto r=nativeAssetHashes(captured->state,captured->expectedHashes);r.failed())return fail(r.getErrorMessage());
     auto add=[&](auto& list,const juce::String& track,juce::ValueTree owner){for(auto& p:list){
         auto* live=loadedPlugin(*edit,p.id);
         if(!live)p.state=readSlot(owner.getChildWithName("EM_PLUGINS").getChildWithProperty("id",p.id)).state;
@@ -357,7 +438,8 @@ juce::Result EngineSession::Impl::beginSave(const juce::File& file)
         if(job->cancel.load()){jobStatus(job,"cancelled",{},0);return;}
         if(captured->failure.isNotEmpty()){jobStatus(job,captured->failureStatus,captured->failure);return;}
         storage::StoredProject archived;
-        if(auto result=storage::save(file,captured->state,archived,jobIO(job,0.1,0.9));result.failed()){jobFailure(job,result);return;}
+        auto options=jobIO(job,0.1,0.9);options.expectedAssetHashes=captured->expectedHashes;
+        if(auto result=storage::save(file,captured->state,archived,options);result.failed()){jobFailure(job,result);return;}
         const auto key=contentKey(captured->state); // Hash/serialization are not message-thread work.
         std::lock_guard lock(job->mutex);job->phase="committing";job->detail="Confirming saved project";
         job->commit=[this,job,file,captured,key,archived=std::move(archived)]{
@@ -372,12 +454,33 @@ juce::Result EngineSession::Impl::beginSave(const juce::File& file)
                 for(const auto& original:captured->state.assets){
                     auto next=std::find_if(archived.assets.begin(),archived.assets.end(),[&](const auto& a){return a.id==original.id;});
                     if(next==archived.assets.end())continue;
+                    // Save preserves asset identity/content while rebinding its
+                    // canonical path. Keep in-flight/ready candidates valid;
+                    // never mutate the immutable paths read by their workers.
+                    for(auto& [id,analysis]:analyses)
+                        if(analysis->source["project_id"].toString()==job->projectId
+                           &&analysis->source["asset_id"].toString()==original.id
+                           &&analysis->boundOriginal==original.source)
+                            analysis->boundOriginal=next->source;
                     for(auto& track:bindings)for(auto& clip:track.clips)
                         if(clip.assetId==original.id&&clip.source==original.source){
                             clip.source=next->source;clip.clip->state.setProperty(emSource,next->source.getFullPathName(),nullptr);
+                            prepared[next->source.getFullPathName()]=clip.originalInfo;
+                        }
+                    for(auto& track:bindings)for(auto& clip:track.clips){
+                        const auto warp=clip.clip->state["emAudioWarp"];
+                        if(bool(warp["enabled"])&&warp["render_asset_id"].toString()==original.id
+                           &&clip.clip->state["emWarpRenderSource"].toString()==original.source.getFullPathName()){
+                            clip.clip->state.setProperty("emWarpRenderSource",next->source.getFullPathName(),nullptr);
                             prepared[next->source.getFullPathName()]=clip.info;
                         }
+                    }
+                    auto assets=metadata(*edit).getChildWithName("EM_NATIVE_ASSETS");
+                    if(auto item=assets.getChildWithProperty("id",original.id);item.isValid()
+                       &&item["source"].toString()==original.source.getFullPathName())
+                        item.setProperty("source",next->source.getFullPathName(),nullptr);
                 }
+                nativeLastScan=std::numeric_limits<std::uint64_t>::max();
                 cachedRevision=std::numeric_limits<std::uint64_t>::max();
             }
             jobStatus(job,"completed",{},1);
@@ -437,6 +540,8 @@ juce::Result EngineSession::Impl::performJob(const juce::String& command,const j
     if(!args.isObject())return fail("Command arguments must be an object.");
     if(command=="cancel_job"){
         const auto id=textArg(args,"job_id");if(id=="plugin-scan"){pluginHost.cancelScan();return juce::Result::ok();}
+        if(nativePending&&id=="native-"+juce::String(juce::int64(nativePending->token)))
+            return fail("The current sample decode cannot yet be cancelled; wait for it to finish.");
         for(auto& j:jobs)if(j->id==id){j->cancel=true;return juce::Result::ok();}return fail("Task not found.");
     }
     if(command=="scan_plugins"){
@@ -452,7 +557,7 @@ juce::Result EngineSession::Impl::performJob(const juce::String& command,const j
     // A worker can publish failure between timer ticks. Permit immediate retry
     // without running the timer's recording/plugin/transport side effects.
     reapFinishedJobs(false);
-    for(const auto& j:jobs)if(j->worker.joinable())return fail("A file task is running or awaiting its commit. Wait for it or cancel it first.");
+    if(hasBlockingFileTask())return fail("A file task is running or awaiting its commit. Wait for it or cancel it first.");
     if(command=="import_audio"){
         auto value=args.getProperty("paths",{});auto* paths=value.getArray();auto state=capture();
         if(!paths||paths->isEmpty()||state.tracks.size()+size_t(paths->size())>storage::maximumTracks)return fail("Choose audio files within the 64-track limit.");
@@ -507,11 +612,17 @@ juce::Result EngineSession::Impl::performJob(const juce::String& command,const j
         double start=number(args,"start_seconds",0),end=number(args,"end_seconds",duration),rate=number(args,"sample_rate",48000),bits=number(args,"bit_depth",24),tail=number(args,"tail_seconds",2);auto realtime=args.getProperty("realtime",false);
         if(!std::isfinite(start)||!std::isfinite(end)||!std::isfinite(tail)||start<0||end<=start||end>storage::maximumTimelineSeconds-tail||tail<0||tail>60)return fail("Invalid export range or tail (0 to 60 seconds).");
         if((rate!=44100&&rate!=48000&&rate!=88200&&rate!=96000)||(bits!=16&&bits!=24&&bits!=32)||!realtime.isBool())return fail("Use 44.1/48/88.2/96 kHz, 16/24/32 bit, and a boolean realtime option.");
-        auto state=capture();auto check=[&](const auto& ps){for(const auto& p:ps)if(p.enabled&&!loadedPlugin(*edit,p.id))return false;return true;};
+        auto state=capture();auto check=[&](const auto& ps){for(const auto& p:ps)if(p.enabled){
+            if(p.format=="E-musician"&&p.role=="effect") {
+                if(!dynamic_cast<native_effects::Effect*>(livePlugin(*edit,p.id)))return false;
+            }else if(p.format=="E-musician"){
+                auto it=nativeRuntime.find(p.id);if(!dynamic_cast<native::Instrument*>(livePlugin(*edit,p.id))||it==nativeRuntime.end()||it->second.status!="ready")return false;
+            }else if(!loadedPlugin(*edit,p.id))return false;}return true;};
         if(!check(state.masterPlugins))return fail("Restore or disable the missing master plugin before rendering.");
         for(const auto& t:state.tracks)if(!t.muted&&!check(t.plugins))return fail("Restore or disable missing plugins before rendering.");
         if(auto r=capturePluginStates(state);r.failed())return fail(r.getErrorMessage());
-        auto j=startJob(command,[file,state=std::move(state),start,end,rate,bits,tail,realtime=bool(realtime)](const auto& job){auto r=renderJob(job,file,state,start,end,rate,int(bits),tail,realtime);if(r.failed())jobFailure(job,r);else jobStatus(job,"completed",{},1);});return j?juce::Result::ok():juce::Result::fail(status);
+        std::map<juce::String,juce::String> hashes;if(auto r=nativeAssetHashes(state,hashes);r.failed())return fail(r.getErrorMessage());
+        auto j=startJob(command,[file,state=std::move(state),start,end,rate,bits,tail,realtime=bool(realtime),hashes=std::move(hashes)](const auto& job){auto r=renderJob(job,file,state,start,end,rate,int(bits),tail,realtime,hashes);if(r.failed())jobFailure(job,r);else jobStatus(job,"completed",{},1);});return j?juce::Result::ok():juce::Result::fail(status);
     }
     return fail("Unknown file task.");
 }
@@ -534,7 +645,19 @@ int EngineSession::runRenderWorker(const juce::StringArray& arguments)
         if(auto r=storage::load(sourceFile,state);r.failed())return failed(r.getErrorMessage());
         std::unique_ptr<te::Edit> next;std::vector<Impl::Binding> bindings;if(auto r=p.build(state,next,bindings);r.failed())return failed(r.getErrorMessage());
         p.adopt(std::move(next),std::move(bindings),{});
-        auto check=[&](const auto& ps){for(const auto& plugin:ps)if(plugin.enabled&&!p.loadedPlugin(*p.edit,plugin.id))return false;return true;};
+        auto check=[&](const auto& ps){for(const auto& plugin:ps)if(plugin.enabled){
+            if(plugin.format=="E-musician"&&plugin.role=="effect") {
+                if(!dynamic_cast<native_effects::Effect*>(p.livePlugin(*p.edit,plugin.id)))return false;
+            }else if(plugin.format=="E-musician"){
+                auto* instrument=dynamic_cast<native::Instrument*>(p.livePlugin(*p.edit,plugin.id));if(!instrument)return false;
+                native::NativeLoadQueue::Request request;
+                if(auto r=nativeRequestFor(plugin,state.assets,state.projectId,state.revision,++p.nativeGeneration,request);r.failed())return false;
+                auto data=juce::JSON::parse(request.stateJson);std::unique_ptr<native::PreparedBank> bank;
+                // This process is an isolated render worker; no audio graph is
+                // running yet, and no user GUI or realtime callback is blocked.
+                if(auto r=native::prepareBank(data,request.assets,request.generation,bank);r.failed())return false;
+                instrument->publish(std::move(bank));
+            }else if(!p.loadedPlugin(*p.edit,plugin.id))return false;}return true;};
         if(!check(state.masterPlugins))return failed("A master plugin could not be restored in the render worker.");
         for(const auto& track:state.tracks)if(!track.muted&&!check(track.plugins))return failed("A track plugin could not be restored in the render worker.");
         juce::WavAudioFormat format;te::Renderer::Parameters params(*p.edit);params.destFile=output;params.audioFormat=&format;params.sampleRateForAudio=rate;params.bitDepth=int(bits);params.blockSizeForAudio=512;

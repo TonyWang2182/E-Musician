@@ -1,77 +1,12 @@
-# E-musician 开发计划
+# Development status
 
-版本：1.5。日期：2026-10-27（Asia/Shanghai）。项目：E:/E-musician。
+Version 0.13.7 includes the recording waveform and ruler updates, an English
+interface, portable helper discovery, and user-owned API/SSH configuration.
+Build, offline integration and package checks are recorded in [Validation](VALIDATION.md).
 
-当前目标是0.5：修复用户实际保存/卡顿问题并简化操作，补上录音、ASIO、曲线和可用路由。V501–V508已实现，最终候选的[Release检查](builds/20261027T014338.621504Z-71806cf8f6.json)与[Debug检查](builds/20261027T014517.945704Z-e8baa314a1.json)均5/5通过；三轨原生保存及新进程回读、播放中保存、指定插件/硬件矩阵、10万音符JSONL短测和16轨无插件30分钟长跑通过。V509指定范围已交付并同步GitHub main，B01仍缺回调P99.9与输入到绘制测量。Ctrl+S瞬时原生注入尚未确认，实体键盘和听感未验；最新状态见[CONTEXT](CONTEXT.md)和[本轮验证记录](verification/2026-10-27-v05/RESULTS.md)。
+The public Windows package uses VST3 and ASIO. Local model environments and a
+Linux compute server are optional installations described in [Configuration](CONFIGURATION.md).
 
-## 已完成修复：0.5.2录音MIDI保存
-
-0.5.1已获用户确认：MIDI编写/播放、Keyscape、实体键盘及Arm/Monitor正常。录音本身正常，但保存和MIDI导出拒绝无效音符时间。用户已救回测试工程并关闭；0.5.2在录音收尾保留事件并规范短音/尾部，补短音SMF导出、详细错误及延迟录音Undo回归。最终Release5/5、生产146项自动检查通过。实现、失败与验收证据见[0.5.2记录](verification/2026-10-27-v052/RESULTS.md)。保持用户操作GUI、开发者构建/debug的协作方式，不重复无关插件矩阵和长跑；用户已确认新版实际录音、直接保存、MIDI导出与重开回放全部正常，该故障场景完成验收。后续按用户需求安排新的范围，避免重复本轮人工测试。
-
-## 已完成的实施前复盘
-
-入口：[工程复盘](review/2026-10-27-v05/REVIEW.md)；分项：[保存](review/2026-10-27-v05/SAVE-AUDIT.md)、[界面](review/2026-10-27-v05/UI-AUDIT.md)、[音频架构](review/2026-10-27-v05/AUDIO-ARCHITECTURE.md)。旧计划完整保留在[0.4历史计划](history/DEVELOPMENT-v09.md)，其中旧范围不再限制本轮用户新增需求。
-
-当前保留C++20/JUCE8.0.6/固定Tracktion、单个活动Edit、GUI/Agent共用命令、稳定ID及非破坏音频编辑。默认120 BPM/4拍；不做和弦工具、乐句模板或内置音色。原生插件运行期仍在宿主进程，隔离扫描不等于全部插件运行期隔离。
-
-## 本轮任务和验收
-
-| 编号 | 工作 | 必须满足的验收 | 状态 |
-|---|---|---|---|
-| V501 | 保存事务与反馈 | Save先受理/显示阶段；重复点击不盖住结果；SaveAs以确认时状态提交；保存期间的新编辑仍dirty；旧文件保护 | 已实现；双配置保存生命周期通过；原生Save As/Save、Serum原生编辑后dirty清除及最终候选新进程回读通过；连续Ctrl+S仅组件注入已验 |
-| V502 | 增量素材/插件归档 | 未变媒体不反复复制；只写新增/变化数据；保存重开真实3轨Serum；每阶段耗时、写入/复用字节可查；取消不删除复用内容 | 已实现；双配置存储103项、原生三轨保存及最终候选播放中8次保存/媒体复用/迟到编辑/重开通过；长时负载归V509 |
-| V503 | 主工作台简化 | 单轨头＋时间轴，双击MIDI底部编辑，音符首次可见，就近插件/输入/arm/monitor，保存状态清楚；两窗口尺寸与原生流程验证 | 已实现；双配置滚动、最小窗口保留两轨、设备/自动化组件通过；原生紧凑三轨、音符拖动/Undo已验；不推断全部OS组合键/DPI通过 |
-| V504 | ASIO与设备 | 固定官方SDK/哈希；保留WASAPI；实际I/O/采样率/缓冲/延迟回读，失败回滚，录音中禁切设备 | 已实现；双配置受控设置组件通过；M-Audio ASIO48000Hz/256原生Apply/实际回读、短音频输入录制和播放保存通过，设备范围按报告列明 |
-| V505 | 音频与MIDI录音 | 输入/arm/共享monitor/record/stop；引擎录制路径、稳定ID/素材/事件；一次Undo，保存重开和导出完整 | 已实现；双配置生产124项覆盖合成音频/MIDI输入、踏板、整次Undo/Redo与schema4；另有实际ASIO短录音通过，实体MIDI键盘与听感未验 |
-| V506 | 自动化曲线 | 轨道/主输出/插件目标、点编辑和启停；实际render变化；基值与瞬时值分离；Undo/保存/重开 | 已实现；双配置曲线渲染/Undo/持久化与面板操作通过；Serum通知32项、原生MasterVol变化保存及四款指定插件矩阵通过 |
-| V507 | 路由 | bus/return、轨输出、pre/post发送；稳定目标ID、整图cycle拒绝；删除/Undo、保存重开与渲染一致 | 已实现；Debug/Release原生bus/send输出图、环路拒绝、渲染能量及schema4往返通过；任意插件多输出/侧链不在此范围 |
-| V508 | schema4与Agent | 旧1/2/3只读迁移＋精确备份；新字段验证；录音/I-O/曲线/路由命令、分页、版本和事件与UI一致 | 已实现；双配置存储/DAW协议/输出隔离通过，接口文档已对齐；JSONL任务另有专项通过记录，测试来源分别保留 |
-| V509 | 综合性能与交付 | 双配置自动回归；用户三轨保存GUI闭环；播放并发保存、录音结束耗时、内存/xrun/实际缓冲；真实插件和硬件结果分列 | 指定范围交付完成：双配置、三轨保存、指定插件/硬件矩阵、10万音符及16轨无插件30分钟长跑通过，用户文件末次哈希未变；GitHub已同步；B01未完整验收，Ctrl+S注入/实体键盘/听感限制保留 |
-
-### 当前验证基线
-
-最终候选源码指纹为`34eb7d59f81aac2e98ca90500e8dcce3bb3ce0c23a5c0f6b6fce59d2188c4676`，Debug/Release检查期间首尾一致。[当前双配置摘要](verification/2026-10-27-v05/34eb7d59-dual-config-summary.json)固定两个latest.json，原产物目录为`build/smoke/Release/15fb2ff96804`和`build/smoke/Debug/e1382d1549d2`。两配置均含工程202、片段317、存储103、生产124项及工作台组件通过结果；DAW断言数分别为Release801、Debug766。Release EXE SHA256为`1a72c25210e296898167db1e33f57f4cbee0b21fa8c358e636917ee8f23024dd`。五组CTest是日志、补丁契约、核心契约、引擎集成和控制输出隔离，不是五款插件或五种设备。
-
-34eb7d59相对6414b6c8仅变更`tests/AgentJobsSmoke.py`和`tests/EngineSessionDawSmoke.inc`，生产应用源码未变；摘要记录了文件指纹对比。新精选报告和合成截图使用34eb7d59前缀，[6414b6c8摘要](verification/2026-10-27-v05/6414b6c8-dual-config-summary.json)、[a5da803c摘要](verification/2026-10-27-v05/final-dual-config-summary.json)与[此前Release摘要](verification/2026-10-27-v05/release-check-192926-summary.json)保留，旧产物不覆盖，也不改称本次新运行。
-
-最终候选的[播放中保存](builds/20261027T014649.523033Z-3deefd0d0b.json)为两轨音频＋Serum默认音色、实际M-Audio ASIO48000Hz/256，8次保存耗时93.36–170.83 ms，驱动xrun增量0；受理后的编辑保留dirty，下一次保存后重开一致。[原生GUI记录](verification/2026-10-27-v05/native-ui-summary.json)另覆盖Save As/Save、Serum MasterVol变化、播放中保存、音符拖动/Undo与ASIO表单；该次6414b6c8原生保存的工程由[最终候选新进程回读](builds/20261027T014644.979910Z-11672c5c45.json)，[报告](verification/2026-10-27-v05/34eb7d59-native-reopen.json)确认三轨、原生参数和clean状态一致。原生瞬时Ctrl+S注入未产生保存任务，原因未实证；鼠标保存已验，不宣称全部OS快捷键通过。
-
-同一应用实现的[四款插件矩阵](verification/2026-10-27-v05/6414b6c8-plugin-matrix.json)为Serum VST3、Ample Bass P VST2、Auto-Key 2 VST3、BM-DOPE VST3，覆盖扫描、参数/Undo、状态恢复、重开和非零渲染；[Serum通知32项](verification/2026-10-27-v05/6414b6c8-plugin-notification.json)、[M-Audio ASIO48000Hz/256短输入录音](verification/2026-10-27-v05/6414b6c8-hardware.json)和[JSONL任务专项](verification/2026-10-27-v05/0f5a27e6-agent-jobs.json)分别保留原来源。硬件短录音约2.009秒、收尾约71.50 ms，xrun增量0；不覆盖实体MIDI演奏和人工听感。
-
-6414b6c8的[100000音符测试](builds/20261026T195406.132690Z-21b502a8a0.json)在停止播放、无插件的JSONL往返中，单音符修改P95为26.42 ms；不代表GUI绘制延迟或音频回调时延。
-
-最终候选[16轨长跑](builds/20261027T014700.122339Z-5599e4a30c.json)已通过，[报告](verification/2026-10-27-v05/34eb7d59-performance-30min.json)为Release隐藏窗口、16份独立合成立体声WAV、无第三方插件、M-Audio ASIO实际48000Hz/256。预热120.09秒，正式测量1800.012秒；337504次回调平均0.49296 ms、最大1.7551 ms，xrun增量0。357次控制线程声像编辑P95 1.9308 ms、最大6.1123 ms；消息定时器延后P95 2.7411 ms、最大155.95 ms。私有内存226430976→227106816字节，增加675840字节。上述统计不包含物理鼠标到画面延迟或VST负载，不把定时器统计当作GUI响应保证。
-
-报告保留`b01_acceptance_complete=false`：逐回调P99.9分布及物理GUI输入到绘制时延未测。指定长跑通过不等于B01全部目标通过，也不证明所有工程、插件或音色达到相同性能。[最终完整性记录](verification/2026-10-27-v05/34eb7d59-final-integrity.json)确认源码/EXE未变，33个用户文件共410250775字节全部SHA256不变。GitHub main已同步；源码交付提交及后续文档记录见[CONTEXT](CONTEXT.md)。
-
-保留已定位的失败记录：局部滚动高度被全窗layout覆盖、生产fixture的Clip/Edit释放顺序、失败保存已呈终态但worker尚未回收导致立即重试被拒。修复后原滚动、保存合并、dirty/回调和文件保护断言继续保留，未靠放宽阈值或增加等待时间取得通过。
-
-后续播放并发保存测试发现插件描述符在prepareToPlay后变化，导致内容摘要误判未保存；当前以规范扫描身份持久化。10万音符测试还发现小编辑复制整个音符快照的开销，已改为共享音符视图及写时复制。这两项修复不改变UI设计，当前目标测试与双配置回归均通过；原失败日志保留。
-
-最终源码还隔离了离线/测试Session的设备偏好，生产模块增加相应回归，避免合成录音测试改写真实硬件设置。这项隔离已随双配置通过；真实M-Audio或MIDI键盘验证仍按各自实际输入单列，不从离线隔离测试推断硬件兼容性。
-
-## 数据管线
-
-输入音频/MP3准备/录制文件 → 稳定asset ID及prepared播放源 → 单一Edit与片段/曲线/路由 → 保存代次冻结DTO及必要插件状态 → worker增量归档与原子清单 → 主线程确认所保存代次。图形显示只读快照和缓存；Agent、UI与录音完成提交不另建可写音乐状态。
-
-VST3原生getState遵守固定SDK的UI线程约束，使用先反馈、分批捕获、变更代次和度量；不能以任意线程调用换取表面流畅。序列化、媒体哈希/复制、文件事务在worker。实时音频回调不做应用JSON/文件/模型控制。固定引擎录音队列与stop-drain的已有锁/分配边界在报告中明确，不未经测量宣称严格无锁或零分配。
-
-录音结束后的Clip认领与最终提交是明确阶段；未命名工程的录音数据有应用管理目录，不能因为关闭工具窗或清理测试目录丢掉用户take。监听与录制预备分别控制；共享输入的引擎监听语义需要在UI明确，不能假装所有控件天然逐轨独立。
-
-设备设置使用受控的原生下拉框，打开与刷新走`get_audio_devices`，Apply只走`configure_audio_device`。更换设备先使用其默认配置，回读实际支持的rate/buffer后再调整，避免把旧驱动能力当作新驱动能力；失败显示具体错误和回滚后的实际配置。对话框不直接修改AudioDeviceManager，录音/收尾保护与新输入默认监听off由同一后端执行。
-
-## 参考与取舍
-
-采用Cubase lower-zone、GarageBand主轨道工作区/轨头、Live的I/O、arm与自动化分层组织；保留用户白底等宽视觉。借鉴操作方式，不推断其闭源内部实现。官方资料、固定源码差异和链接在三份审计报告中。
-
-普通Save保持工程完整且复用已有归档；另存为处理新目标所需素材，不通过不保存音频来获得虚假的提速。旧归档不自动GC，用户本轮33文件保持原样。性能报告必须说明输入、插件、音色、设备与测试路径；单纯API保存成功不能覆盖GUI未响应。
-
-## 交付边界与后续
-
-本轮路由以bus/return/send/output为明确可验收范围。任意VST多输出、侧链、外部硬件insert、反馈回路、复杂take/comping、TempoMap、音频拉伸、32位桥接、真正插件实时沙箱、模型Agent、分轨/转录、跨平台发布另行排期。自动化曲线编辑/播放不冒充Touch/Latch/Write录制模式；未做的模式不显示可用按钮。
-
-硬件基于用户确认的M-Audio及SL GRAND，但设备枚举、ASIO打开、真实输入录制、回放听感是不同证据。合成输入回归不替代物理麦克风/键盘演奏；未测部分明确保留。B01原目标包括16轨长跑、零可测欠载、48k/目标256采样及响应分位数；不支持的配置和未采集的P99.9/物理输入延迟不得用其他统计冒充。
-
-## 工程管理
-
-CONTEXT记录当前阶段、归属和阻点；DEVLOG追加每次构建/测试与迭代；docs/builds保存执行及源码前后指纹；ARCHITECTURE在行为集成后更新；重要取舍新增ADR。全部构建/运行使用dev.py或Recorder，运行期间源码冻结。保留失败证据，不修改历史日志。用户已授权GitHub上传：先保留原暂存区索引，再审查发布清单并进行可追溯提交，不上传用户工程、音乐和本机二进制。用户原工程只读，测试使用独立副本。
+Next validation work is hardware recording with different interfaces, installed
+plugin editors, listening, and model inference on a newly provisioned server.
+Keep those results separate from the completed offline checks.

@@ -30,7 +30,11 @@ juce::Result EngineSession::runOfflineSmokeTest(const juce::File& directory)
     if (importFile(directory.getChildFile("missing.wav"), imported.revision).wasOk() || snapshot().source != input)
         return juce::Result::fail("Invalid import replaced source");
     seek(999.0);
-    if (std::abs(snapshot().position - 2.0) > 0.001) return juce::Result::fail("Seek clamp failed");
+    if (std::abs(snapshot().position - 999.0) > 0.001) return juce::Result::fail("Future arrangement seek was clamped to content");
+    seek(-1.0);
+    if (snapshot().position != 0.0) return juce::Result::fail("Negative seek clamp failed");
+    seek(49.0 * 3600.0);
+    if (std::abs(snapshot().position - 48.0 * 3600.0) > 0.001) return juce::Result::fail("48-hour seek guard failed");
     stop();
     if (snapshot().position != 0.0) return juce::Result::fail("Stop did not reset position");
     setLoop(true);

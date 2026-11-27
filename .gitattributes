@@ -4,12 +4,12 @@
 *.hpp text eol=lf
 *.inc text eol=lf
 *.py text eol=lf
+*.sh text eol=lf
 *.cmake text eol=lf
 CMakeLists.txt text eol=lf
 *.json text eol=lf
 *.md text eol=lf
 *.txt text eol=lf
-# Unified-diff context contains significant leading/trailing spaces.
 *.patch text eol=lf -whitespace
 *.wav binary
 *.mp3 binary
@@ -17,9 +17,7 @@ CMakeLists.txt text eol=lf
 *.jpg binary
 .gitignore text eol=lf
 .gitattributes text eol=lf
-# Evidence hashes refer to original captured bytes, including line endings.
-docs/builds/*.json -text whitespace=cr-at-eol,-blank-at-eof
-docs/verification/**/*.json -text whitespace=cr-at-eol,-blank-at-eof
-docs/verification/**/*.py.txt -text whitespace=cr-at-eol,-blank-at-eof
-# Preserve the exact third-party licence bytes included in source fingerprints.
+# Preserve upstream license and pinned model-manifest bytes.
+docs/licenses/** -text -whitespace
 tests/fixtures/tool-licenses/* -text -whitespace
+scripts/cloud/models/scores/artifacts.json -text whitespace=cr-at-eol,-blank-at-eof

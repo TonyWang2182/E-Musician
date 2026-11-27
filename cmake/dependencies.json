@@ -12,9 +12,8 @@
     "resolution": "Tracktion's pinned modules/juce submodule"
   },
   "vst2_interface": {
-    "repository": "https://github.com/juce-framework/JUCE.git",
-    "commit": "a54535bc317b5c005a8cda5c22a9c8d4c6e0c67e",
-    "resolution": "scripts/bootstrap_vst2.py verifies three historical interface blobs into ignored _deps/vst2_sdk; this does not replace JUCE 8.0.6"
+    "enabled_by_default": false,
+    "resolution": "Optional user-supplied licensed SDK through EMUSICIAN_ENABLE_VST2 and EMUSICIAN_VST2_SDK; no automatic download or redistribution"
   },
   "asio_interface": {
     "version": "2.3.4",

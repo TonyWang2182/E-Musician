@@ -1,0 +1,20 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
+@@ -1444,6 +1444,17 @@
+ 
+     auto liveInputNode = createLiveInputsNode (at, playHeadState, params);
+ 
++    // E-musician must be able to release live keys even before the first clip
++    // exists. Keep the injection listener on a stable silent path across input
++    // monitoring graph changes, rather than losing queued target note-offs.
++    if (! node && ! params.forRendering && at.state.getProperty ("emKind").toString() == "instrument")
++        for (auto plugin : at.pluginList)
++            if (plugin->isSynth())
++            {
++                node = makeNode<SilentNode> (2);
++                break;
++            }
++
+     if (node && ! at.getListeners().isEmpty())
+         node = makeNode<LiveMidiOutputNode> (at, std::move (node));
+ 

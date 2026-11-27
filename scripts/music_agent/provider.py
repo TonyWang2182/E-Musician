@@ -1,0 +1,252 @@
+"""Bounded, synchronous Moonshot client. Call from the Agent worker, never audio/UI."""
+from __future__ import annotations
+
+import json
+import math
+import re
+import socket
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, HTTPRedirectHandler, ProxyHandler, build_opener
+
+from .secrets import SecretError, load_key
+from .localization import L
+
+MAX_BODY_BYTES = 1024 * 1024
+MAX_COMPLETION_TOKENS = 4096
+ALLOWED_BASE_URLS = {"https://api.moonshot.cn/v1", "https://api.moonshot.ai/v1"}
+
+
+class ProviderError(RuntimeError):
+    def __init__(self, code: str, message: str, status: int | None = None):
+        self.code = code
+        self.status = status
+        super().__init__(message)
+
+
+class _NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise ProviderError("redirect", "The provider returned a redirect. The connection was stopped to protect the key.", code)
+
+
+def _invalid() -> ProviderError:
+    return ProviderError("invalid_response", "The model returned invalid or incomplete data. The project was not modified.")
+
+
+def _finite(value: str):
+    raise ValueError("Non-finite JSON number")
+
+
+def _number(value: str) -> float:
+    number = float(value)
+    if not math.isfinite(number):
+        raise ValueError("Non-finite JSON number")
+    return number
+
+
+def _duplicates(pairs: list[tuple[str, object]]) -> dict:
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("Duplicate JSON key")
+        result[key] = value
+    return result
+
+
+class KimiProvider:
+    provider_id = "kimi"
+    label = "Kimi"
+    allowed_base_urls = ALLOWED_BASE_URLS
+
+    @property
+    def capabilities(self):
+        return {"text": True, "tools": self.supports_tools(self.model), "streaming": False,
+                "image_input": False, "audio_input": False, "audio_output": False}
+
+    @staticmethod
+    def supports_tools(model):
+        return isinstance(model, str) and model.startswith(("kimi-", "moonshot-v1-"))
+
+    def __init__(self, model: str = "kimi-k2.6", base_url: str = "https://api.moonshot.cn/v1",
+                 timeout: float = 45, *, api_key: str | None = None, opener=None):
+        if not isinstance(base_url, str) or base_url.rstrip("/") not in self.allowed_base_urls:
+            raise ProviderError("configuration", "Only official HTTPS API URLs for the selected provider are allowed.")
+        if not isinstance(model, str) or not re.fullmatch(r"[A-Za-z0-9_.:-]{1,128}", model):
+            raise ProviderError("configuration", "Invalid model name.")
+        if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or not 1 <= timeout <= 120:
+            raise ProviderError("configuration", "The model request timeout must be 1 to 120 seconds.")
+        self.model = model
+        self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
+        self._api_key = api_key
+        self.network_mode = "injected" if opener is not None else "direct"
+        self._opener = opener if opener is not None else self._default_opener()
+
+    def _default_opener(self):
+        # Kimi stays direct. Adapters may explicitly permit a bounded local proxy;
+        # no arbitrary environment proxy is inherited here.
+        return build_opener(ProxyHandler({}), _NoRedirect())
+
+    def _request(self, path: str, payload: dict | None = None) -> dict:
+        try:
+            key = self._api_key if self._api_key is not None else load_key(provider=self.provider_id)
+        except SecretError:
+            raise ProviderError("missing_key", "The provider key is not configured or cannot be decrypted. Configure it again.") from None
+        if not isinstance(key, str) or not re.fullmatch(r"[A-Za-z0-9_.-]{12,4096}", key):
+            raise ProviderError("missing_key", "Invalid provider API key format. Configure it again.")
+        try:
+            body = None if payload is None else json.dumps(payload, ensure_ascii=False,
+                        allow_nan=False, separators=(",", ":")).encode("utf-8")
+        except (ValueError, TypeError, RecursionError):
+            raise ProviderError("invalid_request", "The request contains invalid data.") from None
+        if body is not None and len(body) > MAX_BODY_BYTES:
+            raise ProviderError("request_too_large", "The project context is too large. Select a smaller scope.")
+        request = Request(self.base_url + path, data=body, headers={
+            "Authorization": "Bearer " + key, "Content-Type": "application/json",
+            "Accept": "application/json", "User-Agent": "E-musician-agent/0.1",
+        }, method="GET" if body is None else "POST")
+        try:
+            with self._opener.open(request, timeout=self.timeout) as response:
+                # Also defend injected/nonstandard openers that follow redirects.
+                if response.geturl() != request.full_url:
+                    raise ProviderError("redirect", "The model connection URL changed. The connection was stopped.")
+                if response.status != 200:
+                    raise self._http_error(response.status)
+                raw = response.read(MAX_BODY_BYTES + 1)
+            if len(raw) > MAX_BODY_BYTES:
+                raise ProviderError("response_too_large", "The model response exceeded the size limit. Processing stopped.")
+            result = json.loads(raw.decode("utf-8"), parse_constant=_finite, parse_float=_number,
+                                object_pairs_hook=_duplicates)
+            if not isinstance(result, dict):
+                raise _invalid()
+            return result
+        except ProviderError:
+            raise
+        except HTTPError as error:
+            # Inspect only an exact allowlisted quota code in a bounded 429 body.
+            # Never expose/log provider messages, raw bodies, headers or reasons.
+            quota = False
+            try:
+                if error.code == 429:
+                    raw = error.read(8193)
+                    if len(raw) <= 8192:
+                        detail = json.loads(raw).get("error")
+                        quota = isinstance(detail, dict) and (detail.get("type") == "insufficient_quota" or detail.get("code") == "insufficient_quota")
+            except (OSError, ValueError, TypeError, AttributeError, RecursionError):
+                pass
+            finally:
+                try:
+                    error.close()
+                except OSError:
+                    pass
+            if quota:
+                raise ProviderError("insufficient_quota", "The model API has insufficient quota. Check billing and usage limits; replacing a key on the same account usually will not fix this. The project is unchanged.", error.code) from None
+            raise self._http_error(error.code) from None
+        except (TimeoutError, socket.timeout):
+            raise ProviderError("timeout", "The provider request timed out. Retry later; paid requests are not retried automatically.") from None
+        except (URLError, OSError):
+            raise ProviderError("network", f"Unable to connect to {self.label}. Check the network and retry.") from None
+        except (UnicodeError, ValueError, TypeError, RecursionError):
+            raise _invalid() from None
+
+    @staticmethod
+    def _http_error(status: int) -> ProviderError:
+        if status in (301, 302, 303, 307, 308):
+            return ProviderError("redirect", "The provider returned a redirect. The connection was stopped.", status)
+        if status in (401, 403):
+            return ProviderError("authentication", "The provider rejected the key or access permissions. Check local configuration.", status)
+        if status == 429:
+            return ProviderError("rate_limit", "The provider quota was exceeded or requests are too frequent. Check account usage before retrying.", status)
+        if status == 400:
+            return ProviderError("bad_request", "The provider rejected the request. Check the model name and supported parameters.", status)
+        if status == 404:
+            return ProviderError("model_not_found", "The provider model or endpoint is unavailable. Check the model name.", status)
+        return ProviderError("http_error", "The provider is temporarily unavailable. Retry later.", status)
+
+    def list_models(self) -> list[str]:
+        data = self._request("/models").get("data")
+        if not isinstance(data, list) or len(data) > 512:
+            raise _invalid()
+        models = []
+        for item in data:
+            if not isinstance(item, dict) or not isinstance(item.get("id"), str) or not re.fullmatch(r"[A-Za-z0-9_.:-]{1,128}", item["id"]):
+                raise _invalid()
+            if item["id"] not in models:
+                models.append(item["id"])
+        return models
+
+    def complete(self, messages: list[dict], tools: list[dict] | None = None) -> dict:
+        if tools and not self.capabilities["tools"]:
+            raise ProviderError("unsupported_capability", "This model is outside the supported tool-calling model families.")
+        if not isinstance(messages, list) or not 1 <= len(messages) <= 64:
+            raise ProviderError("invalid_request", "Message count is out of range.")
+        if any(not isinstance(message, dict) or message.get("role") not in {"system", "user", "assistant", "tool"} for message in messages):
+            raise ProviderError("invalid_request", "Invalid message format.")
+        if any("_provider_state" in message for message in messages):
+            raise ProviderError("provider_mismatch", "Tool context belongs to another provider. Start a new task.")
+        payload = {"model": self.model, "messages": messages,
+                   "max_tokens": MAX_COMPLETION_TOKENS, "stream": False}
+        if self.model in {"kimi-k2.5", "kimi-k2.6"}:
+            payload["thinking"] = {"type": "disabled"}
+        elif self.model.startswith("kimi-k3"):
+            payload["reasoning_effort"] = "low"
+        if tools is not None:
+            if not isinstance(tools, list) or not 1 <= len(tools) <= 32:
+                raise ProviderError("invalid_request", "Tool count is out of range.")
+            payload["tools"] = tools
+            payload["tool_choice"] = "auto"
+        result = self._request("/chat/completions", payload)
+        choices = result.get("choices")
+        if not isinstance(choices, list) or len(choices) != 1 or not isinstance(choices[0], dict):
+            raise _invalid()
+        choice = choices[0]
+        if choice.get("finish_reason") not in {"stop", "tool_calls"}:
+            raise ProviderError("incomplete", "Model output did not finish. Request a smaller task. The project was not modified.")
+        source = choice.get("message")
+        if not isinstance(source, dict) or source.get("role") != "assistant":
+            raise _invalid()
+        content = source.get("content")
+        if content is not None and not isinstance(content, str):
+            raise _invalid()
+        message = {"role": "assistant", "content": content}
+        if "reasoning_content" in source:
+            reasoning = source["reasoning_content"]
+            if reasoning is not None and not isinstance(reasoning, str):
+                raise _invalid()
+            message["reasoning_content"] = reasoning
+        calls = source.get("tool_calls")
+        if calls is not None:
+            if not isinstance(calls, list) or not 1 <= len(calls) <= 8:
+                raise _invalid()
+            normalized = []
+            seen = set()
+            for call in calls:
+                if not isinstance(call, dict) or call.get("type") != "function":
+                    raise _invalid()
+                call_id = call.get("id")
+                function = call.get("function")
+                if not isinstance(call_id, str) or not 1 <= len(call_id) <= 256 or call_id in seen or not isinstance(function, dict):
+                    raise _invalid()
+                name, arguments = function.get("name"), function.get("arguments")
+                if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", name) or not isinstance(arguments, str):
+                    raise _invalid()
+                seen.add(call_id)
+                normalized.append({"id": call_id, "type": "function", "function": {"name": name, "arguments": arguments}})
+            message["tool_calls"] = normalized
+        if choice["finish_reason"] == "tool_calls" and not calls:
+            raise _invalid()
+        if not calls and not content:
+            raise _invalid()
+        usage = result.get("usage") or {}
+        if not isinstance(usage, dict):
+            raise _invalid()
+        counters = {}
+        for field in ("prompt_tokens", "completion_tokens", "total_tokens"):
+            value = usage.get(field)
+            if value is not None:
+                if type(value) is not int or not 0 <= value <= 1_000_000_000:
+                    raise _invalid()
+                counters[field] = value
+        returned_model = result.get("model", self.model)
+        if not isinstance(returned_model, str) or len(returned_model) > 128:
+            raise _invalid()
+        return {"message": message, "usage": counters, "model": returned_model}

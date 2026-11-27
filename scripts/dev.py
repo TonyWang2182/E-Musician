@@ -51,7 +51,7 @@ def source_fingerprint() -> dict:
     """Hash source inputs without hashing mutable documentation/build output."""
     candidates: set[Path] = set()
     errors: list[str] = []
-    for name in ("apps", "core", "tests", "scripts", "cmake"):
+    for name in ("apps", "core", "tests", "scripts", "cmake", "assets"):
         directory = ROOT / name
         if directory.is_dir():
             candidates.update(
@@ -59,7 +59,7 @@ def source_fingerprint() -> dict:
                 if path.is_file() and "__pycache__" not in path.parts
                 and path.suffix.lower() not in (".pyc", ".pyo")
             )
-    for name in ("CMakeLists.txt", "CMakePresets.json"):
+    for name in ("CMakeLists.txt", "CMakePresets.json", "Start-Agent.cmd"):
         path = ROOT / name
         if path.is_file():
             candidates.add(path)
@@ -123,6 +123,36 @@ def command_text(arguments: list[str]) -> str:
     return subprocess.list2cmdline(arguments) if os.name == "nt" else shlex.join(arguments)
 
 
+def public_command(arguments: list[str]) -> str:
+    """Describe a command without publishing developer-specific absolute paths."""
+    portable = []
+    for index, argument in enumerate(arguments):
+        if index and arguments[index - 1] in ("-c", "-Command"):
+            portable.append("<inline-code>")
+            continue
+        prefix, separator, value = argument.partition("=")
+        candidate = value if separator else argument
+        path = Path(candidate)
+        if path.is_absolute():
+            if path.resolve() == Path(sys.executable).resolve():
+                candidate = "python"
+            elif path.resolve().is_relative_to(ROOT.resolve()):
+                relative = path.resolve().relative_to(ROOT.resolve()).as_posix()
+                candidate = "<repo>" if relative == "." else "<repo>/" + relative
+            else:
+                candidate = "<external-path>/" + path.name
+        portable.append(prefix + separator + candidate if separator else candidate)
+    return command_text(portable)
+
+
+def public_note(value: str) -> str:
+    # Full notes are retained in the ignored JSON receipt. Public summaries
+    # never need arbitrary absolute path arguments or private source aliases.
+    value = " ".join(value.splitlines())
+    value = value.replace(str(ROOT), "<repo>").replace(ROOT.as_posix(), "<repo>")
+    return re.sub(r"[A-Za-z]:[\\/][^\s`]+", "<external-path>", value)
+
+
 def decode_output(value: bytes) -> str:
     """Prefer UTF-8, then the OS code page; exact bytes remain in the raw log."""
     try:
@@ -159,11 +189,15 @@ class Recorder:
         self.config = config
         self.note = note
         self.session_id = uuid.uuid4().hex
+        # Runtime packages can be installed in a read-only directory. Build
+        # receipts remain beside source; packaged helper receipts are per-user.
+        self.evidence_root = (Path(os.environ.get("LOCALAPPDATA", Path.home())) / "E-musician" / "runtime-logs"
+                              if (ROOT / "package.json").is_file() else ROOT)
 
     def new_record(self, arguments: list[str], kind: str = "command") -> tuple[dict, Path, Path]:
         record_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ") + "-" + uuid.uuid4().hex[:10]
-        record_path = ROOT / "docs" / "builds" / f"{record_id}.json"
-        log_path = ROOT / "build-logs" / f"{record_id}.log"
+        record_path = self.evidence_root / "docs" / "builds" / f"{record_id}.json"
+        log_path = self.evidence_root / "build-logs" / f"{record_id}.log"
         log_path.parent.mkdir(parents=True, exist_ok=True)
         record = {
             "schema_version": 2,
@@ -185,7 +219,7 @@ class Recorder:
             "python": sys.version,
             "git_head": source_git_head(),
             "source_fingerprint": source_fingerprint(),
-            "log": log_path.relative_to(ROOT).as_posix(),
+            "log": log_path.relative_to(self.evidence_root).as_posix(),
             "runtime_verified": False,
         }
         # A durable running record exists before launching any external command.
@@ -193,28 +227,26 @@ class Recorder:
         return record, record_path, log_path
 
     def append_devlog(self, record: dict, record_path: Path, log_path: Path) -> None:
-        devlog = ROOT / "docs" / "DEVLOG.md"
+        devlog = self.evidence_root / "docs" / "DEVLOG.md"
         devlog.parent.mkdir(parents=True, exist_ok=True)
         display_time = datetime.fromisoformat(record["started_at"]).astimezone(DISPLAY_ZONE).isoformat(timespec="seconds")
-        note = " ".join(self.note.splitlines()) or "No additional note."
+        note = public_note(self.note) or "No additional note."
         entry = (
             f"\n### {display_time} · {self.action} · {record['status']}\n\n"
             f"- Config: {self.config}; exit code: {record['exit_code']}; "
             f"elapsed: {record['elapsed_seconds']:.3f}s.\n"
-            f"- Command: `{record['command_display'].replace('`', chr(39))}`\n"
+            f"- Command: `{public_command(record['command']).replace('`', chr(39))}`\n"
             f"- Context: {note}\n"
             f"- Source SHA-256: `{record['source_fingerprint']['digest']}`; "
             f"Git HEAD: `{record['git_head'] or 'unavailable'}`.\n"
-            f"- [Record](builds/{record_path.name}) · [Raw log](../build-logs/{log_path.name})\n"
+            f"- Local receipt: `{record_path.stem}`; exact commands and raw logs are excluded from the repository.\n"
         )
         if record["status"] == "launched":
             entry += "- GUI process launched only; playback, interaction and performance remain unverified.\n"
-        if record.get("raw_log"):
-            entry += f"- [Exact process output](../{record['raw_log']})\n"
         if record.get("source_changed_during_command"):
             entry += "- Source files changed while this command ran; inspect both fingerprints before treating this as a reproducible build.\n"
         if record.get("error"):
-            entry += "- Error: " + " ".join(str(record["error"]).splitlines()) + "\n"
+            entry += "- Error details are preserved in the local receipt and raw log.\n"
         with devlog.open("a", encoding="utf-8", newline="\n") as stream:
             if devlog.stat().st_size == 0:
                 stream.write("# Development command log\n\nGenerated by scripts/dev.py. Timestamps use Asia/Shanghai (UTC+08:00).\n")
@@ -241,7 +273,7 @@ class Recorder:
         started = time.perf_counter()
         record, record_path, log_path = self.new_record(arguments)
         raw_path = log_path.with_suffix(".raw.log")
-        record["raw_log"] = raw_path.relative_to(ROOT).as_posix()
+        record["raw_log"] = raw_path.relative_to(self.evidence_root).as_posix()
         # A local override keeps MSVC diagnostics readable without changing the
         # user's environment. Other tools may still emit their OS code page.
         environment = os.environ.copy()
@@ -256,7 +288,7 @@ class Recorder:
         interrupted = False
 
         print(f"\n> {record['command_display']}", flush=True)
-        print(f"  Record: {record_path.relative_to(ROOT)}", flush=True)
+        print(f"  Record: {record_path}", flush=True)
         try:
             with log_path.open("a", encoding="utf-8", newline="") as log, raw_path.open("wb") as raw:
                 def emit(value: str | bytes) -> None:
@@ -385,7 +417,7 @@ def verify_head(recorder: Recorder, path: Path, expected: str) -> None:
         )
 
 
-def bootstrap(recorder: Recorder) -> None:
+def bootstrap(recorder: Recorder, verify_only: bool = False) -> None:
     manifest = ROOT / "cmake" / "dependencies.json"
     try:
         data = json.loads(manifest.read_text(encoding="utf-8-sig"))
@@ -395,7 +427,18 @@ def bootstrap(recorder: Recorder) -> None:
         raise ValueError("cmake/dependencies.json must contain a JSON object")
     repository, commit = dependency_spec(data, "tracktion")
     juce_repository, juce_commit = dependency_spec(data, "juce")
-    checkout = ROOT / "_deps" / "tracktion_engine"
+    # The engine is patched in an owned checkout, never the shared _deps tree.
+    checkout = ROOT / ".cache" / "monitor-engine"
+    if verify_only:
+        verify_head(recorder, checkout, commit)
+        verify_head(recorder, checkout / "modules" / "juce", juce_commit)
+        for name in ("bootstrap_asio.py", "bootstrap_stretch.py"):
+            recorder.execute([sys.executable, str(ROOT / "scripts" / name), "--verify-only"])
+        if os.name == "nt":
+            recorder.execute([sys.executable, str(ROOT / "scripts/bootstrap_webview2.py"), "--worker", "--verify-only"])
+        recorder.execute([sys.executable, str(ROOT / "scripts/apply_engine_patches.py"), "verify", "--engine-root", str(checkout)])
+        print("Existing pinned dependencies verified without dependency writes or downloads.", flush=True)
+        return
     checkout.parent.mkdir(parents=True, exist_ok=True)
 
     if checkout.exists() and not checkout.is_dir():
@@ -426,25 +469,35 @@ def bootstrap(recorder: Recorder) -> None:
     recorder.execute(["git", "-C", str(checkout), "submodule", "update", "--init", "--depth", "1",
                       "modules/juce"])
     verify_head(recorder, checkout / "modules" / "juce", juce_commit)
-    recorder.execute([sys.executable, str(ROOT / "scripts" / "bootstrap_vst2.py")])
     recorder.execute([sys.executable, str(ROOT / "scripts" / "bootstrap_asio.py")])
-    recorder.execute([sys.executable, str(ROOT / "scripts" / "apply_engine_patches.py"), "apply"])
-    print("Pinned Tracktion, JUCE and VST2 interface dependencies verified. No application build has run.", flush=True)
+    recorder.execute([sys.executable, str(ROOT / "scripts" / "bootstrap_stretch.py")])
+    if os.name == "nt":
+        recorder.execute([sys.executable, str(ROOT / "scripts" / "bootstrap_webview2.py"), "--worker"])
+    recorder.execute([sys.executable, str(ROOT / "scripts" / "apply_engine_patches.py"), "apply", "--engine-root", str(checkout)])
+    print("Pinned native dependencies verified. VST2 is disabled by default and requires a user-supplied SDK.", flush=True)
 
 
-def configure(recorder: Recorder) -> None:
-    recorder.execute(["cmake", "--preset", "windows-msvc"])
+def build_directory(preset: str, override: str | None = None) -> Path:
+    if override:
+        return Path(override).resolve()
+    return ROOT / "build" / {"windows-msvc": "", "windows-vs2022": "vs2022", "windows-vs2026": "vs2026"}[preset]
 
 
-def build(recorder: Recorder, target: str | None) -> None:
-    arguments = ["cmake", "--build", "--preset", f"windows-{recorder.config.lower()}", "--parallel", "2"]
+def configure(recorder: Recorder, preset: str = "windows-msvc", directory: Path | None = None,
+              source: Path | None = None) -> None:
+    recorder.execute(["cmake", "--preset", preset, "-S", str(source or ROOT), "-B", str(directory or build_directory(preset))])
+
+
+def build(recorder: Recorder, target: str | None, directory: Path | None = None) -> None:
+    arguments = ["cmake", "--build", str(directory or ROOT / "build"), "--config", recorder.config, "--parallel", "2"]
     if target:
         arguments.extend(["--target", target])
     recorder.execute(arguments)
 
 
-def test(recorder: Recorder) -> None:
-    recorder.execute(["ctest", "--preset", f"windows-{recorder.config.lower()}", "--output-on-failure"])
+def test(recorder: Recorder, directory: Path | None = None) -> None:
+    recorder.execute(["ctest", "--test-dir", str(directory or ROOT / "build"), "-C", recorder.config,
+                      "--output-on-failure", "--no-tests=error"])
 
 
 def main() -> int:
@@ -453,26 +506,40 @@ def main() -> int:
     parser.add_argument("action", choices=("bootstrap", "configure", "build", "test", "check", "run"))
     parser.add_argument("--config", choices=("Debug", "Release"), default="Debug")
     parser.add_argument("--target", help="Optional CMake target for build/check")
+    parser.add_argument("--preset", choices=("windows-msvc", "windows-vs2022", "windows-vs2026"), default="windows-msvc")
+    parser.add_argument("--build-dir", help="Optional build directory; use the same value for configure, build, test and run")
+    parser.add_argument("--source-dir", help="Optional short directory junction to this source tree for Windows builds")
+    parser.add_argument("--verify-only", action="store_true", help="bootstrap: verify existing dependencies without modifying or downloading them")
     parser.add_argument("--note", default="", help="Context saved with every external command")
     arguments = parser.parse_args()
     if arguments.target and arguments.action not in ("build", "check"):
         parser.error("--target is only valid for build/check")
+    if arguments.verify_only and arguments.action != "bootstrap":
+        parser.error("--verify-only is only valid for bootstrap")
     recorder = Recorder(arguments.action, arguments.config, arguments.note)
+    directory = build_directory(arguments.preset, arguments.build_dir)
+    source = Path(arguments.source_dir).absolute() if arguments.source_dir else ROOT
     try:
+        if source.resolve() != ROOT.resolve():
+            raise ValueError("--source-dir must refer to this source tree, optionally through a directory junction.")
+        if arguments.action in ("configure", "build", "test", "check"):
+            temporary = directory / "temp"
+            temporary.mkdir(parents=True, exist_ok=True)
+            os.environ["TEMP"] = os.environ["TMP"] = str(temporary)
         if arguments.action == "bootstrap":
-            bootstrap(recorder)
+            bootstrap(recorder, arguments.verify_only)
         elif arguments.action == "configure":
-            configure(recorder)
+            configure(recorder, arguments.preset, directory, source)
         elif arguments.action == "build":
-            build(recorder, arguments.target)
+            build(recorder, arguments.target, directory)
         elif arguments.action == "test":
-            test(recorder)
+            test(recorder, directory)
         elif arguments.action == "check":
-            configure(recorder)
-            build(recorder, arguments.target)
-            test(recorder)
+            configure(recorder, arguments.preset, directory, source)
+            build(recorder, arguments.target, directory)
+            test(recorder, directory)
         elif arguments.action == "run":
-            executable = ROOT / "build" / "bin" / arguments.config / "E-musician.exe"
+            executable = directory / "bin" / arguments.config / "E-musician.exe"
             if not executable.is_file():
                 raise ValueError(f"Executable not found: {executable}. Build the {arguments.config} configuration first.")
             recorder.execute([str(executable)], launch_only=True)

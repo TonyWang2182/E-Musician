@@ -1,9 +1,0 @@
-{
-  "status": "passed",
-  "scope": "Read-only saved-project load and native arrangement captures; no save or playback",
-  "tracks": 2,
-  "duration_seconds": 402.370612244897984,
-  "waveforms_complete": true,
-  "dirty": false,
-  "playing": false
-}

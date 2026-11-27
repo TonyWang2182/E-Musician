@@ -1,0 +1,145 @@
+--- a/modules/tracktion_engine/playback/devices/tracktion_MidiInputDevice.cpp
++++ b/modules/tracktion_engine/playback/devices/tracktion_MidiInputDevice.cpp
+@@ -1036,9 +1036,19 @@
+             juce::ScopedLock sl (activeNotesLock);
+ 
+             if (message.isNoteOn())
++            {
+                 activeNotes.startNote (message.getChannel(), message.getNoteNumber());
++                activeNoteSources[message.getChannel() - 1][message.getNoteNumber()] = sourceID;
++            }
+             else if (message.isNoteOff())
+                 activeNotes.clearNote (message.getChannel(), message.getNoteNumber());
++            if (message.isController())
++                for (int p = 0; p < 3; ++p)
++                    if (message.getControllerNumber() == pedalControllers[p])
++                    {
++                        activePedals[message.getChannel() - 1][p] = message.getControllerValue() >= 64;
++                        pedalSources[message.getChannel() - 1][p] = sourceID;
++                    }
+         }
+ 
+         const bool recording = isRecording();
+@@ -1316,6 +1326,40 @@
+             }
+             else
+             {
++                // Restore persistent controller state at the punch-in boundary.
++                // Channel-mode actions (all-notes-off etc.) must never be replayed.
++                std::map<std::pair<int, int>, juce::MidiMessage> initialControllers;
++                const auto controllerKey = [] (const juce::MidiMessage& message) -> int
++                {
++                    if (message.isController())
++                    {
++                        const auto cc = message.getControllerNumber();
++                        // Independent persistent controls only. Do not synthesize bank,
++                        // RPN/NRPN/data-entry sequences, increments or note actions.
++                        if (cc == 1 || cc == 2 || cc == 4 || cc == 7 || cc == 8 || cc == 10 || cc == 11
++                            || (cc >= 64 && cc <= 79) || (cc >= 91 && cc <= 95))
++                            return cc;
++                    }
++                    if (message.isPitchWheel()) return 120;
++                    if (message.isChannelPressure()) return 121;
++                    return -1;
++                };
++                for (int i = 0; i < recorded.getNumEvents(); ++i)
++                {
++                    const auto& message = recorded.getEventPointer(i)->message;
++                    const auto at = message.getTimeStamp();
++                    if (at > startPos.inSeconds()) break;
++                    const auto controller = controllerKey (message);
++                    if (controller < 0) continue;
++                    const auto key = std::make_pair (message.getChannel(), controller);
++                    if (at < startPos.inSeconds()) initialControllers.insert_or_assign (key, message);
++                    else initialControllers.erase (key); // Keep an explicit boundary event authoritative.
++                }
++                for (auto& [key, message] : initialControllers)
++                {
++                    message.setTimeStamp (0.0);
++                    mpeMessagesToAddAtStartPos.add (message);
++                }
+                 for (int i = recorded.getNumEvents(); --i >= 0;)
+                 {
+                     auto& m = *recorded.getEventPointer (i);
+@@ -1500,8 +1544,12 @@
+     juce::Array<Consumer*> consumers;
+     double lastEditTime = -1.0;
+     double pausedTime = 0;
+-    MPESourceID midiSourceID = createUniqueMPESourceID();
+     ActiveNoteList activeNotes;
++    // Fixed-capacity state: the MIDI callback never allocates for cleanup.
++    std::array<std::array<MPESourceID, 128>, 16> activeNoteSources {};
++    std::array<std::array<MPESourceID, 3>, 16> pedalSources {};
++    std::array<std::array<bool, 3>, 16> activePedals {};
++    static constexpr int pedalControllers[3] = { 64, 66, 69 };
+     std::unique_ptr<RecordStopper> recordStopper;
+ 
+     void addConsumer (Consumer* c) override      { juce::ScopedLock sl (consumerLock); consumers.addIfNotAlreadyThere (c); }
+@@ -1510,29 +1558,52 @@
+     void valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c, int index) override
+     {
+         if (p == state && c.hasType (IDs::INPUTDEVICEDESTINATION))
+-            injectNoteOffsToTrack();
++            releaseLiveMidiForTarget (EditItemID::fromVar (c[IDs::targetID]));
+ 
+         InputDeviceInstance::valueTreeChildRemoved (p, c, index);
+     }
+ 
+-    void injectNoteOffsToTrack()
+-    {
++    void releaseLiveMidiForTarget (EditItemID targetID) override
++    {
++        TRACKTION_ASSERT_MESSAGE_THREAD
++        auto* track = findAudioTrackForID (edit, targetID);
++        // Off destinations have not heard this input. In particular, removing
++        // one must not send physical-key note-offs into its sequence playback.
++        if (track == nullptr)
++            return;
++        // A removed Destination may already be absent from the cached list when
++        // this listener runs. Do not query isLivePlayEnabled (which needs it).
++        const auto mode = track->state.getProperty ("emMonitorMode").toString();
++        if (track->state.hasProperty ("emKind") ? mode != "on" : owner.getMonitorMode() == InputDevice::MonitorMode::off)
++            return;
++
+         ActiveNoteList notes;
+-
+-        // The lock isn't great here but it's mostly uncontended and when it is, it's between the MIDI and message threads
+-        // The lock time is also constant so low-risk
++        decltype (activeNoteSources) noteSources;
++        decltype (pedalSources) sources;
++        decltype (activePedals) pedals;
+         {
+             const juce::ScopedLock sl (activeNotesLock);
+             notes = activeNotes;
+-        }
+-
+-        for (auto t : getTargetTracks (*this))
+-        {
+-            notes.iterate ([&] (auto channel, auto noteNumber)
+-                           {
+-                               t->injectLiveMidiMessage (juce::MidiMessage::noteOff (channel, noteNumber), midiSourceID);
+-                           });
+-        }
++            noteSources = activeNoteSources;
++            sources = pedalSources;
++            pedals = activePedals;
++        }
++
++        // Physical MIDI nodes apply channelToUse; hosted nodes retain channels.
++        const auto forcedChannel = HostedAudioDeviceInterface::isHostedMidiInputDevice (getMidiInput())
++            ? 0 : getMidiInput().getChannelToUse().getChannelNumber();
++        const auto outputChannel = [forcedChannel] (int ch) { return forcedChannel > 0 ? forcedChannel : ch; };
++        notes.iterate ([&] (int channel, int noteNumber)
++        {
++            track->injectLiveMidiMessage (juce::MidiMessage::noteOff (outputChannel (channel), noteNumber),
++                                         noteSources[channel - 1][noteNumber]);
++        });
++        for (int ch = 0; ch < 16; ++ch)
++            for (int p = 0; p < 3; ++p)
++                if (pedals[ch][p])
++                    track->injectLiveMidiMessage (juce::MidiMessage::controllerEvent (outputChannel (ch + 1), pedalControllers[p], 0), sources[ch][p]);
++        // Do not clear the physical input state: another track may still be On.
++        // No device-wide AllNotesOff / plugin reset: sequence voices keep playing.
+     }
+ 
+     MidiRecordingContext* getContextForID (EditItemID targetID) const

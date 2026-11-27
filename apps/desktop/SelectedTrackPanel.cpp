@@ -1,4 +1,5 @@
 #include "SelectedTrackPanel.h"
+#include "UiLanguage.h"
 #include <algorithm>
 #include <cmath>
 
@@ -35,7 +36,7 @@ struct SelectedTrackPanel::Impl {
             g.drawText("0 s", int(a.getX()), int(a.getBottom()) + 2, 60, 18, juce::Justification::centredLeft);
             g.drawText(juce::String(span(), 1) + " s", int(a.getRight()) - 75, int(a.getBottom()) + 2, 75, 18, juce::Justification::centredRight);
             const auto& values = points();
-            if (values.empty()) g.drawFittedText(p.currentTarget().isObject() ? "Double-click to add automation points" : "Choose an available parameter", a.toNearestInt(), juce::Justification::centred, 2);
+            if (values.empty()) g.drawFittedText(uiText(p.currentTarget().isObject() ? "Double-click to add automation points" : "Choose an available parameter"), a.toNearestInt(), juce::Justification::centred, 2);
             juce::Path path;
             if (!values.empty()) path.startNewSubPath(position(values.front()));
             for (size_t i = 1; i < values.size(); ++i) {
@@ -96,26 +97,35 @@ struct SelectedTrackPanel::Impl {
         juce::String selected, project, track; std::uint64_t revision = 0; bool dragging = false, changed = false; float anchorY = 0, originalCurve = 0;
     };
     Impl(SelectedTrackPanel& component, EngineSession& engine) : owner(component), session(engine), curve(*this) {
-        for (auto* c : std::initializer_list<juce::Component*>{ &devices, &io, &automation, &plugin, &open, &bypass, &removePlugin, &up, &down, &browse,
+        for (auto* c : std::initializer_list<juce::Component*>{ &devices, &io, &automation, &plugin, &open, &bypass, &removePlugin, &up, &down, &browse, &nativeFx,
                 &input, &arm, &monitor, &output, &send, &sendTarget, &sendGain, &pre, &sendEnabled, &addSend, &removeSend,
                 &target, &laneEnabled, &deleteLane, &master, &curve, &hint }) owner.addAndMakeVisible(c);
+        for (auto* button : { &devices, &io, &automation, &open, &bypass, &removePlugin, &up, &down, &browse, &nativeFx, &arm, &pre, &sendEnabled, &addSend, &removeSend, &laneEnabled, &deleteLane, &master }) uiButton(*button, button->getButtonText());
         devices.onClick = [this] { page = 0; owner.resized(); owner.repaint(); };
         io.onClick = [this] { page = 1; refreshInputs(); owner.resized(); owner.repaint(); };
         automation.onClick = [this] { page = 2; refreshTargets(); owner.resized(); owner.repaint(); };
         for (auto* button : { &devices, &io, &automation }) button->getProperties().set("flat", true);
         master.setTooltip("Show master devices and automation"); master.onClick = [this] { masterView = !masterView; rebuild(); };
         plugin.onChange = [this] { refreshPlugin(); };
-        open.onClick = [this] { pluginCommand("open_plugin"); };
+        open.onClick = [this] {
+            if (const auto* slot = currentPlugin()) {
+                if (slot->format == "E-musician") {
+                    if (!masterView && slot->isInstrument && owner.onOpenNative) owner.onOpenNative(ownerId());
+                    else if (!slot->isInstrument && owner.onOpenNativeEffect) owner.onOpenNativeEffect(ownerId(), slot->id);
+                } else pluginCommand("open_plugin");
+            }
+        };
         removePlugin.onClick = [this] { pluginCommand("remove_plugin"); };
         bypass.onClick = [this] { if (const auto* slot = currentPlugin()) run("set_plugin_enabled", object({ {"track_id", ownerId()}, {"plugin_id", slot->id}, {"enabled", !slot->enabled} })); };
         up.onClick = [this] { movePlugin(-1); }; down.onClick = [this] { movePlugin(1); };
         browse.onClick = [this] { if (owner.onBrowsePlugins) owner.onBrowsePlugins(ownerId()); };
-        input.setTextWhenNothingSelected("Choose recording input");
+        nativeFx.onClick = [this] { if (owner.onOpenNativeEffect) owner.onOpenNativeEffect(ownerId(), {}); };
+        input.setTextWhenNothingSelected(uiText("Choose recording input"));
         input.onChange = [this] { if (!updating) { const int i = input.getSelectedId() - 1; if (i >= 0 && i < int(inputs.size())) run("set_track_input", object({ {"track_id", ownerId()}, {"input_device_id", inputs[size_t(i)]["id"]} })); } };
         arm.onClick = [this] { if (const auto* t = track()) run("set_track_armed", object({ {"track_id", t->id}, {"armed", !t->armed} })); };
-        monitor.addItem("monitor off", 1); monitor.addItem("monitor auto", 2); monitor.addItem("monitor on", 3);
-        monitor.setTooltip("Monitoring is shared by every track using this input device.");
-        monitor.onChange = [this] { if (!updating) if (const auto* t = track()) run("set_input_monitor", object({ {"input_device_id", t->inputDeviceId}, {"mode", monitor.getSelectedId() == 3 ? "on" : monitor.getSelectedId() == 2 ? "auto" : "off"} })); };
+        uiComboItem(monitor, 1, "monitor off"); uiComboItem(monitor, 3, "monitor on");
+        monitor.setTooltip("Monitoring applies to this track only.");
+        monitor.onChange = [this] { if (!updating) if (const auto* t = track()) run("set_input_monitor", object({ {"track_id", t->id}, {"mode", monitor.getSelectedId() == 3 ? "on" : "off"} })); };
         output.onChange = [this] { if (!updating && output.getSelectedId() > 0) run("set_track_output", object({ {"track_id", ownerId()}, {"target_track_id", destinations[output.getSelectedId() - 1]} })); };
         send.onChange = [this] { refreshSend(); };
         sendGain.setRange(-60, 6, 0.1); sendGain.setSliderStyle(juce::Slider::LinearHorizontal); sendGain.setTextBoxStyle(juce::Slider::TextBoxRight, false, 64, 28); sendGain.setTextValueSuffix(" dB");
@@ -132,6 +142,7 @@ struct SelectedTrackPanel::Impl {
     }
     const EngineSession::TrackSnapshot* track() const { for (const auto& t : state.tracks) if (t.id == state.selectedTrackId) return &t; return nullptr; }
     juce::String ownerId() const { return masterView ? "master" : state.selectedTrackId; }
+    bool canChangeGraph() const { return !state.recording && !state.recordingFinalizing; }
     const std::vector<EngineSession::PluginSlotSnapshot>& plugins() const { if (masterView) return state.masterPlugins; if (const auto* t = track()) return t->plugins; return emptyPlugins; }
     const EngineSession::PluginSlotSnapshot* currentPlugin() const { const int i = plugin.getSelectedId() - 1; return i >= 0 && i < int(plugins().size()) ? &plugins()[size_t(i)] : nullptr; }
     const EngineSession::SendSnapshot* currentSend() const { if (const auto* t = track()) { const int i = send.getSelectedId() - 1; if (i >= 0 && i < int(t->sends.size())) return &t->sends[size_t(i)]; } return nullptr; }
@@ -153,14 +164,28 @@ struct SelectedTrackPanel::Impl {
     }
     void pluginCommand(const juce::String& command) { if (const auto* slot = currentPlugin()) run(command, object({ {"track_id", ownerId()}, {"plugin_id", slot->id} })); }
     void movePlugin(int direction) { if (const auto* slot = currentPlugin()) { const int index = plugin.getSelectedId() - 1 + direction; if (index >= 0 && index < int(plugins().size())) run("move_plugin", object({ {"track_id", ownerId()}, {"plugin_id", slot->id}, {"index", index} })); } }
-    void refreshPlugin() { const auto* slot = currentPlugin(); open.setEnabled(slot && !slot->missing); bypass.setEnabled(slot); removePlugin.setEnabled(slot); up.setEnabled(slot && plugin.getSelectedId() > 1); down.setEnabled(slot && plugin.getSelectedId() < int(plugins().size())); bypass.setButtonText(slot && !slot->enabled ? "enable" : "bypass"); }
+    void refreshPlugin() { const auto* slot = currentPlugin(); const bool edit = canChangeGraph(); open.setEnabled(slot && !slot->missing); bypass.setEnabled(edit && slot); removePlugin.setEnabled(edit && slot); up.setEnabled(edit && slot && plugin.getSelectedId() > 1); down.setEnabled(edit && slot && plugin.getSelectedId() < int(plugins().size())); uiButton(bypass, slot && !slot->enabled ? "enable" : "bypass"); }
     void refreshInputs() {
         inputs.clear(); input.clear(juce::dontSendNotification); const auto result = query("get_recording_inputs");
+        inputs.push_back(object({ {"id", ""}, {"name", uiText("No input")} }));
+        input.addItem(inputs.back()["name"].toString(), 1);
         if (const auto* list = result["inputs"].getArray()) for (const auto& item : *list) {
             const auto* t = track(); if (!t || t->kind == "bus" || bool(item["midi"]) != (t->kind == "instrument")) continue;
-            inputs.push_back(item); input.addItem(item["name"].toString(), int(inputs.size()));
+            inputs.push_back(item);
+            const bool inactive = !bool(item["midi"]) && item.hasProperty("physical_active") && !bool(item["physical_active"]);
+            input.addItem(item["name"].toString() + (inactive ? uiText(" (off in Settings)") : juce::String()), int(inputs.size()));
         }
-        if (const auto* t = track()) for (size_t i = 0; i < inputs.size(); ++i) if (inputs[i]["id"].toString() == t->inputDeviceId) input.setSelectedId(int(i) + 1, juce::dontSendNotification);
+        input.setTooltip(uiText("Choose the microphone input. Enable its channel in Settings first; use a mono input for one microphone."));
+        if (const auto* t = track()) {
+            bool found = false;
+            for (size_t i = 0; i < inputs.size(); ++i) if (inputs[i]["id"].toString() == t->inputDeviceId) {
+                input.setSelectedId(int(i) + 1, juce::dontSendNotification); found = true;
+            }
+            if (!found && t->inputDeviceId.isNotEmpty()) {
+                input.setText(uiText("Input unavailable - select again"), juce::dontSendNotification);
+                input.setTooltip(uiText("The saved input is not available on this audio device. Select an input from the current device."));
+            }
+        }
         lastInputRefresh = juce::Time::getMillisecondCounter();
     }
     void refreshTargets() {
@@ -173,8 +198,8 @@ struct SelectedTrackPanel::Impl {
         target.setSelectedId(targets.empty() ? 0 : selection, juce::dontSendNotification); refreshLane();
     }
     void refreshLane() {
-        const auto* lane = currentLane(); laneEnabled.setEnabled(lane != nullptr); deleteLane.setEnabled(lane != nullptr);
-        laneEnabled.setButtonText(lane && !lane->enabled ? "enable lane" : "bypass lane");
+        const auto* lane = currentLane(); laneEnabled.setEnabled(canChangeGraph() && lane != nullptr); deleteLane.setEnabled(canChangeGraph() && lane != nullptr); curve.setEnabled(canChangeGraph());
+        uiButton(laneEnabled, lane && !lane->enabled ? "enable lane" : "bypass lane");
         const auto t = currentTarget(); hint.setText(t.isObject() ? "Current: " + t["text"].toString() + " / double-click: add; drag: move; Alt-drag: curve; Delete: remove." : "Choose a track with an available automation parameter.", juce::dontSendNotification); curve.repaint();
     }
     void writeCurve(const std::vector<EngineSession::AutomationPointSnapshot>& values, std::uint64_t revision, bool enabled = true) {
@@ -187,8 +212,8 @@ struct SelectedTrackPanel::Impl {
     }
     void refreshSend() {
         const auto* s = currentSend(); updating = true; sendGain.setValue(s ? s->gainDb : -12, juce::dontSendNotification); updating = false;
-        for (auto* c : std::initializer_list<juce::Component*>{ &sendGain, &pre, &sendEnabled, &removeSend }) c->setEnabled(s != nullptr);
-        pre.setButtonText(s && s->preFader ? "pre-fader" : "post-fader"); sendEnabled.setButtonText(s && !s->enabled ? "enable send" : "bypass send");
+        for (auto* c : std::initializer_list<juce::Component*>{ &sendGain, &pre, &sendEnabled, &removeSend }) c->setEnabled(canChangeGraph() && s != nullptr);
+        uiButton(pre, s && s->preFader ? "pre-fader" : "post-fader"); uiButton(sendEnabled, s && !s->enabled ? "enable send" : "bypass send");
     }
     void rebuild() {
         updating = true;
@@ -202,8 +227,8 @@ struct SelectedTrackPanel::Impl {
         send.clear(juce::dontSendNotification);
         if (const auto* t = track()) {
             output.setSelectedId(destinations.indexOf(t->outputTargetId) + 1, juce::dontSendNotification);
-            monitor.setSelectedId(t->monitorMode == "on" ? 3 : t->monitorMode == "auto" ? 2 : 1, juce::dontSendNotification);
-            arm.setButtonText(t->armed ? "armed" : "arm record"); arm.setToggleState(t->armed, juce::dontSendNotification);
+            monitor.setSelectedId(t->monitorMode == "on" ? 3 : 1, juce::dontSendNotification);
+            uiButton(arm, t->armed ? "armed" : "arm record"); arm.setToggleState(t->armed, juce::dontSendNotification);
             for (size_t i = 0; i < t->sends.size(); ++i) { juce::String name = t->sends[i].targetTrackId; for (const auto& b : state.tracks) if (b.id == name) name = b.name; send.addItem(juce::String(int(i) + 1) + ". " + name, int(i) + 1); }
             send.setSelectedId(t->sends.empty() ? 0 : juce::jlimit(1, int(t->sends.size()), oldSend), juce::dontSendNotification);
         }
@@ -216,7 +241,7 @@ struct SelectedTrackPanel::Impl {
     juce::uint32 lastInputRefresh = 0;
     juce::TextButton devices { "devices" }, io { "I/O + sends" }, automation { "automation" }, master { "master" };
     juce::ComboBox plugin, input, monitor, output, send, sendTarget, target;
-    juce::TextButton open { "open" }, bypass { "bypass" }, removePlugin { "remove" }, up { "up" }, down { "down" }, browse { "add plug-in..." };
+    juce::TextButton open { "open" }, bypass { "bypass" }, removePlugin { "remove" }, up { "up" }, down { "down" }, browse { "add plug-in..." }, nativeFx { "built-in effects..." };
     juce::TextButton arm { "arm record" }, pre { "post-fader" }, sendEnabled { "bypass send" }, addSend { "add send" }, removeSend { "remove send" };
     juce::Slider sendGain;
     juce::TextButton laneEnabled { "bypass lane" }, deleteLane { "delete lane" };
@@ -228,44 +253,48 @@ struct SelectedTrackPanel::Impl {
 SelectedTrackPanel::SelectedTrackPanel(EngineSession& engine) : impl(std::make_unique<Impl>(*this, engine)) {}
 SelectedTrackPanel::~SelectedTrackPanel() = default;
 void SelectedTrackPanel::showDevices() { impl->page = 0; impl->masterView = false; impl->rebuild(); }
+bool SelectedTrackPanel::isMasterView() const { return impl->masterView; }
 void SelectedTrackPanel::update(const EngineSession::Snapshot& state) {
     auto& p = *impl; const bool changed = state.projectId != p.state.projectId || state.revision != p.state.revision || state.selectedTrackId != p.state.selectedTrackId;
     bool recordingChanged = state.recording != p.state.recording || state.recordingFinalizing != p.state.recordingFinalizing;
     const auto* previous = p.track(); const auto armed = previous && previous->armed; const auto monitor = previous ? previous->monitorMode : juce::String();
-    if (changed) p.curve.cancel(); p.state = state;
+    if (changed || recordingChanged) p.curve.cancel(); p.state = state;
     const auto* current = p.track(); recordingChanged = recordingChanged || armed != (current && current->armed) || monitor != (current ? current->monitorMode : juce::String());
     if (changed || recordingChanged) p.rebuild();
     if (isVisible() && p.page == 1 && !p.input.isPopupActive() && juce::Time::getMillisecondCounter() - p.lastInputRefresh > 2000) p.refreshInputs();
-    setEnabled(!state.recording && !state.recordingFinalizing);
+    // Keep pages, plugin selection and existing editors available during capture.
+    // Lock only controls that change routing, recording targets or graph topology.
 }
 void SelectedTrackPanel::resized() {
-    if (!impl) return; auto& p = *impl;
+    if (!impl) return; refreshUiButtons(*this); auto& p = *impl;
     p.devices.setBounds(8, 4, 94, 28); p.io.setBounds(108, 4, 118, 28); p.automation.setBounds(232, 4, 120, 28); p.master.setBounds(getWidth() - 88, 4, 80, 28);
-    for (auto* c : std::initializer_list<juce::Component*>{ &p.plugin, &p.open, &p.bypass, &p.removePlugin, &p.up, &p.down, &p.browse }) c->setVisible(p.page == 0);
+    for (auto* c : std::initializer_list<juce::Component*>{ &p.plugin, &p.open, &p.bypass, &p.removePlugin, &p.up, &p.down, &p.browse, &p.nativeFx }) c->setVisible(p.page == 0);
     for (auto* c : std::initializer_list<juce::Component*>{ &p.input, &p.arm, &p.monitor, &p.output, &p.send, &p.sendTarget, &p.sendGain, &p.pre, &p.sendEnabled, &p.addSend, &p.removeSend }) c->setVisible(p.page == 1 && !p.masterView);
     for (auto* c : std::initializer_list<juce::Component*>{ &p.target, &p.laneEnabled, &p.deleteLane, &p.curve, &p.hint }) c->setVisible(p.page == 2);
     p.plugin.setBounds(12, 66, 270, 30); p.open.setBounds(294, 66, 76, 30); p.bypass.setBounds(376, 66, 84, 30); p.removePlugin.setBounds(466, 66, 84, 30);
     p.up.setBounds(12, 108, 60, 28); p.down.setBounds(78, 108, 60, 28); p.browse.setBounds(154, 108, 128, 28);
+    p.nativeFx.setBounds(290, 108, 150, 28); p.nativeFx.setEnabled(p.masterView || p.track() != nullptr);
     const int split = juce::jmax(310, getWidth() / 2);
     p.input.setBounds(12, 58, 212, 28); p.arm.setBounds(230, 58, 98, 28); p.monitor.setBounds(12, 98, 212, 28);
     p.output.setBounds(12, 157, 270, 28);
     p.sendTarget.setBounds(split, 58, 210, 28); p.addSend.setBounds(split + 216, 58, 98, 28);
     p.send.setBounds(split, 98, 210, 28); p.removeSend.setBounds(split + 216, 98, 110, 28);
     p.sendGain.setBounds(split, 139, 210, 28); p.pre.setBounds(split, 179, 102, 28); p.sendEnabled.setBounds(split + 108, 179, 112, 28);
-    p.addSend.setEnabled(!p.sendDestinations.isEmpty()); p.input.setEnabled(p.track() && p.track()->kind != "bus"); p.arm.setEnabled(p.track() && p.track()->kind != "bus" && !p.track()->inputDeviceId.isEmpty());
-    p.monitor.setEnabled(p.track() && !p.track()->inputDeviceId.isEmpty()); p.output.setEnabled(p.track() != nullptr);
+    p.addSend.setEnabled(p.canChangeGraph() && !p.sendDestinations.isEmpty()); p.input.setEnabled(p.canChangeGraph() && p.track() && p.track()->kind != "bus"); p.arm.setEnabled(p.canChangeGraph() && p.track() && p.track()->kind != "bus" && !p.track()->inputDeviceId.isEmpty());
+    p.monitor.setEnabled(p.canChangeGraph() && p.track() && !p.track()->inputDeviceId.isEmpty()); p.output.setEnabled(p.canChangeGraph() && p.track() != nullptr);
+    p.refreshPlugin(); p.refreshSend(); p.refreshLane();
     p.target.setBounds(12, 42, juce::jmin(300, getWidth() - 280), 28); p.laneEnabled.setBounds(p.target.getRight() + 8, 42, 110, 28); p.deleteLane.setBounds(p.laneEnabled.getRight() + 8, 42, 110, 28);
     p.hint.setBounds(12, getHeight() - 24, getWidth() - 24, 22); p.curve.setBounds(6, 76, getWidth() - 12, juce::jmax(78, getHeight() - 102));
 }
 void SelectedTrackPanel::paint(juce::Graphics& g) {
     auto& p = *impl; g.fillAll(paper); g.setColour(rule); g.drawHorizontalLine(35, 8, float(getWidth() - 8)); g.setColour(quiet); g.setFont(font(12));
-    if (p.page == 0) g.drawText(p.masterView ? "Master signal chain" : "Selected track signal chain", 12, 39, getWidth() - 24, 22, juce::Justification::centredLeft);
+    if (p.page == 0) g.drawText(uiText(p.masterView ? "Master signal chain" : "Selected track signal chain"), 12, 39, getWidth() - 24, 22, juce::Justification::centredLeft);
     if (p.page == 1) {
-        if (p.masterView) { g.drawFittedText("Choose a track to configure recording inputs, output and sends.", getLocalBounds().reduced(12).withTrimmedTop(40), juce::Justification::centred, 2); return; }
+        if (p.masterView) { g.drawFittedText(uiText("Choose a track to configure recording inputs, output and sends."), getLocalBounds().reduced(12).withTrimmedTop(40), juce::Justification::centred, 2); return; }
         const int split = juce::jmax(310, getWidth() / 2);
-        g.drawText("recording input", 12, 36, 240, 22, juce::Justification::centredLeft); g.drawText("send to bus", split, 36, 240, 22, juce::Justification::centredLeft);
-        g.drawText("track output", 12, 133, 240, 22, juce::Justification::centredLeft);
-        g.drawText("Monitoring applies to the shared input device.", 12, getHeight() - 24, getWidth() - 24, 22, juce::Justification::centredLeft);
+        g.drawText(uiText("recording input"), 12, 36, 240, 22, juce::Justification::centredLeft); g.drawText(uiText("send to bus"), split, 36, 240, 22, juce::Justification::centredLeft);
+        g.drawText(uiText("track output"), 12, 133, 240, 22, juce::Justification::centredLeft);
+        g.drawText(uiText("Monitoring applies to this track only."), 12, getHeight() - 24, getWidth() - 24, 22, juce::Justification::centredLeft);
     }
 }
 juce::Result SelectedTrackPanel::runInteractionSmokeTest(juce::DynamicObject& report) {
@@ -279,6 +308,35 @@ juce::Result SelectedTrackPanel::runInteractionSmokeTest(juce::DynamicObject& re
     p.curve.selected = lane->points->front().id; p.curve.keyPressed(juce::KeyPress(juce::KeyPress::deleteKey));
     lane = p.currentLane(); if (!lane || !lane->points || lane->points->size() != 1) return juce::Result::fail("Deleting an automation point did not commit.");
     p.deleteLane.onClick(); if (p.currentLane()) return juce::Result::fail("Automation panel could not delete its lane.");
-    report.setProperty("automation_panel_command_and_delete", true); return juce::Result::ok();
+    report.setProperty("automation_panel_command_and_delete", true);
+    // The native instrument uses the main-window device dock, not a VST editor.
+    const auto oldState = p.state; const auto oldMaster = p.masterView; const auto oldOpen = onOpenNative;
+    EngineSession::TrackSnapshot nativeTrack; nativeTrack.id = "synthetic-native-track"; nativeTrack.kind = "instrument";
+    EngineSession::PluginSlotSnapshot slot; slot.id = "synthetic-native"; slot.name = "Sampler"; slot.format = "E-musician"; slot.isInstrument = true;
+    nativeTrack.plugins.push_back(slot); p.state.tracks.clear(); p.state.tracks.push_back(nativeTrack);
+    p.state.selectedTrackId = nativeTrack.id; p.masterView = false;
+    p.plugin.clear(juce::dontSendNotification); p.plugin.addItem("Sampler", 1); p.plugin.setSelectedId(1, juce::dontSendNotification);
+    juce::String opened; onOpenNative = [&](const auto& id) { opened = id; }; p.open.onClick();
+    const auto oldEffect = onOpenNativeEffect; juce::String effectTrack, effectDevice;
+    onOpenNativeEffect = [&](const auto& track, const auto& device) { effectTrack = track; effectDevice = device; };
+    EngineSession::PluginSlotSnapshot effect; effect.id = "master-effect"; effect.name = "EQ Eight"; effect.format = "E-musician";
+    p.state.masterPlugins = {effect}; p.masterView = true; p.plugin.clear(juce::dontSendNotification);
+    p.plugin.addItem("EQ Eight", 1); p.plugin.setSelectedId(1, juce::dontSendNotification); p.open.onClick();
+    const bool masterOpen = effectTrack == "master" && effectDevice == effect.id;
+    effectTrack.clear(); effectDevice = "not-empty"; p.nativeFx.onClick();
+    const bool masterAdd = effectTrack == "master" && effectDevice.isEmpty(); onOpenNativeEffect = oldEffect;
+    const auto synthetic = p.state;
+    for (const bool finishing : {false, true}) {
+        auto recordingState = synthetic; recordingState.recording = !finishing; recordingState.recordingFinalizing = finishing;
+        update(recordingState); resized();
+        if (!isEnabled() || !p.devices.isEnabled() || !p.plugin.isEnabled() || !p.open.isEnabled()
+            || p.removePlugin.isEnabled() || p.up.isEnabled() || p.bypass.isEnabled() || p.curve.isEnabled())
+            return juce::Result::fail("Recording disabled device browsing or left graph mutations enabled.");
+    }
+    report.setProperty("recording_device_browse_without_graph_edits", true);
+    onOpenNative = oldOpen; p.masterView = oldMaster; update(oldState);
+    if (opened != nativeTrack.id) return juce::Result::fail("Native instrument did not open in its track dock.");
+    if (!masterOpen || !masterAdd) return juce::Result::fail("Master native effects did not route to the master target.");
+    report.setProperty("selected_track_native_open", true); report.setProperty("master_native_effect_routing", true); return juce::Result::ok();
 }
 }

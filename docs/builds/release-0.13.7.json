@@ -1,0 +1,152 @@
+{
+  "version": "0.13.7",
+  "date": "2026-11-28",
+  "platform": "Windows x64 10.0.26300",
+  "toolchain": {
+    "cmake": "4.2.3",
+    "msvc": "19.50",
+    "windows_sdk": "10.0.26100",
+    "python": "3.14"
+  },
+  "dependencies": {
+    "tracktion_engine": {
+      "version": "3.2.0",
+      "commit": "b0c7dd090a56b27fe01bb394617891906eb34daf"
+    },
+    "juce": {
+      "version": "8.0.6",
+      "commit": "19edd538429c93d277bf95b55aaa7e3eb545f951"
+    }
+  },
+  "source_input_sha256": "3748fca456ade208ec9b088c8c07f45cfffd4c90225f5e84dd6115194e4a5f27",
+  "executable_sha256": "e05dfdd428b0777357462215d1a8327926a677443231e549407f0c2902e11314",
+  "build_attempts": [
+    {
+      "receipt": "20261127T201845.047432Z-721bec4937",
+      "command": "cmake --preset windows-vs2026 -S <repo> -B <external-path>/emusician-public-build",
+      "configuration": "Release",
+      "start_utc": "2026-11-27T20:18:45.047+00:00",
+      "end_utc": "2026-11-27T20:20:59.209+00:00",
+      "result": "succeeded",
+      "source_changed_during_command": true,
+      "local_log": "build-logs/20261127T201845.047432Z-721bec4937.log"
+    },
+    {
+      "receipt": "20261127T202059.790298Z-5144e208f1",
+      "command": "cmake --build <external-path>/emusician-public-build --config Release --parallel 2",
+      "configuration": "Release",
+      "start_utc": "2026-11-27T20:20:59.790+00:00",
+      "end_utc": "2026-11-27T20:27:12.253+00:00",
+      "result": "failed",
+      "source_changed_during_command": true,
+      "local_log": "build-logs/20261127T202059.790298Z-5144e208f1.log"
+    },
+    {
+      "receipt": "20261127T202822.263370Z-66b19a2e1b",
+      "command": "cmake --preset windows-vs2026 -S <repo> -B <external-path>/emusician-public-build",
+      "configuration": "Release",
+      "start_utc": "2026-11-27T20:28:22.263+00:00",
+      "end_utc": "2026-11-27T20:29:05.311+00:00",
+      "result": "succeeded",
+      "source_changed_during_command": false,
+      "local_log": "build-logs/20261127T202822.263370Z-66b19a2e1b.log"
+    },
+    {
+      "receipt": "20261127T202905.707706Z-7b1ad7cb39",
+      "command": "cmake --build <external-path>/emusician-public-build --config Release --parallel 2",
+      "configuration": "Release",
+      "start_utc": "2026-11-27T20:29:05.708+00:00",
+      "end_utc": "2026-11-27T20:30:45.946+00:00",
+      "result": "succeeded",
+      "source_changed_during_command": false,
+      "local_log": "build-logs/20261127T202905.707706Z-7b1ad7cb39.log"
+    },
+    {
+      "receipt": "20261127T203450.513951Z-ce27dc97d1",
+      "command": "cmake --build <external-path>/emusician-public-build --config Release --parallel 2",
+      "configuration": "Release",
+      "start_utc": "2026-11-27T20:34:50.514+00:00",
+      "end_utc": "2026-11-27T20:35:04.612+00:00",
+      "result": "succeeded",
+      "source_changed_during_command": false,
+      "local_log": "build-logs/20261127T203450.513951Z-ce27dc97d1.log"
+    }
+  ],
+  "validation": {
+    "ctest": {
+      "passed": 12,
+      "receipt": "20261127T203553.748420Z-1c4cb3cbc3"
+    },
+    "recording_engine": {
+      "checks": 1268,
+      "input": "generated hosted buffers",
+      "sample_rate": 48000,
+      "block_size": 256
+    },
+    "agent_unit": {
+      "passed": 394,
+      "local_receipt": "english-agent-tests-release-final.json"
+    },
+    "native_agent": {
+      "passed": 18,
+      "receipts": [
+        "20261127T203631.185057Z-b340dc0864",
+        "20261127T203810.238302Z-501bd1ac0c"
+      ],
+      "protected_files_unchanged": 305
+    },
+    "web": {
+      "passed": 34,
+      "suites": [
+        "AnalysisAgentWebSmoke",
+        "GenerationAgentWebSmoke",
+        "HybridAgentWebSmoke",
+        "AgentTaskFlowWebSmoke"
+      ]
+    },
+    "cloud_protocol": {
+      "run": 60,
+      "skipped": 2,
+      "receipt": "20261127T201743.613721Z-f5865d3d9d"
+    },
+    "runtime_configuration": {
+      "passed": 6
+    },
+    "relocated_native_package": {
+      "passed": 24,
+      "receipt": "20261127T203645.750898Z-5abc7438b6"
+    },
+    "relocated_helper": {
+      "passes": 2,
+      "project_modules_from_package": 26,
+      "provider_calls": 0,
+      "receipt": "20261127T203158.302028Z-5ca9f9259f"
+    }
+  },
+  "resolved_checks": [
+    {
+      "receipt": "20261127T202059.790298Z-5144e208f1",
+      "finding": "Missing UI helper functions restored before successful rebuild."
+    },
+    {
+      "receipt": "20261127T203330.646669Z-e38e049d3f",
+      "finding": "Test assertion updated for English selection-conflict wording."
+    },
+    {
+      "receipt": "20261127T203322.276588Z-f22fbb34ad",
+      "finding": "Native app passed; package harness corrected to inspect nested launch receipts."
+    },
+    {
+      "receipt": "20261127T203636.434519Z-2fe080258e",
+      "finding": "Protected-file guard failed during concurrent checks; cause not established. Sequential rerun passed with 305 unchanged files."
+    }
+  ],
+  "not_retested": [
+    "physical audio devices",
+    "installed third-party plugin editors",
+    "paid model APIs",
+    "GPU model inference",
+    "listening quality"
+  ],
+  "evidence_storage": "Full command receipts and raw logs are retained locally; this file is the public release summary."
+}

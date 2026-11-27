@@ -93,7 +93,7 @@ sys.exit(7)
         result = subprocess.run([sys.executable, "-c", child, scripts],
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                 env=environment, check=True)
-        self.assertEqual(result.stdout.decode("utf-8"), "适用于 MSBuild\n")
+        self.assertEqual(result.stdout.decode("utf-8"), "\u9002\u7528\u4e8e MSBuild\n")
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@
 #include <juce_core/juce_core.h>
 #include <cstdint>
 #include <functional>
+#include <map>
 #include <vector>
 
 namespace emusician::storage {
@@ -51,6 +52,15 @@ struct StoredControllerEvent {
     int type = 0, value = 0, metadata = 0;
 };
 
+struct StoredAudioWarp {
+    bool enabled = false, followTempo = false;
+    double sourceBpm = 120.0, targetBpm = 120.0;
+    juce::String mode = "preserve_pitch", renderAssetId, sourceHash, renderHash;
+    double speedRatio() const { return enabled ? targetBpm / sourceBpm : 1.0; }
+};
+juce::var audioWarpToVar(const StoredAudioWarp&);
+juce::Result audioWarpFromVar(const juce::var&, StoredAudioWarp&);
+
 struct StoredClip {
     juce::String id, assetId;
     double timelineStart = 0.0, sourceOffset = 0.0, duration = 0.0;
@@ -59,6 +69,9 @@ struct StoredClip {
     double fadeIn = 0.0, fadeOut = 0.0;
     std::vector<StoredNote> notes;
     std::vector<StoredControllerEvent> controllers;
+    juce::String analysisRole;
+    StoredAudioWarp warp;
+    int midiChannel = 0; // 0 preserves legacy note-derived channel; 1..16 is explicit.
 };
 
 struct StoredTrack {
@@ -72,6 +85,24 @@ struct StoredTrack {
     juce::String inputDeviceId, outputTargetId = "master";
     std::vector<StoredSend> sends;
     std::vector<StoredAutomationLane> automation;
+    juce::String colour; // Empty = automatic; otherwise canonical #RRGGBB.
+};
+
+// Accepted, editable chord labels; seconds are independent of the beat ruler.
+struct StoredChordRegion {
+    juce::String id, label, analysisId;
+    double startSeconds = 0, endSeconds = 0, score = 0;
+    bool uncertain = false;
+};
+struct StoredAnalysis {
+    juce::String id, kind, modelId, modelVersion, sourceClipId, sourceAssetId;
+    juce::String sourceSha256, resultSha256, parametersJson = "{}";
+    double startSeconds = 0, durationSeconds = 0;
+    juce::String annotationsJson = "{}"; // Accepted beat/section and MIDI instrument metadata only.
+};
+struct StoredGeneration {
+    juce::String id, assetId, clipId, modelId, modelRevision, audioSha256, resultSha256, parametersJson = "{}";
+    double startSeconds = 0, durationSeconds = 0;
 };
 
 struct StoredProject {
@@ -89,6 +120,9 @@ struct StoredProject {
     double loopStart = 0.0, loopEnd = 0.0;
     std::vector<StoredPlugin> masterPlugins;
     std::vector<StoredAutomationLane> masterAutomation;
+    std::vector<StoredChordRegion> chordRegions;
+    std::vector<StoredAnalysis> analyses;
+    std::vector<StoredGeneration> generations;
 };
 
 inline constexpr std::size_t maximumTracks = 64;
@@ -102,11 +136,19 @@ inline constexpr std::size_t maximumAutomationLanesPerTrack = 256;
 inline constexpr std::size_t maximumAutomationLanes = 4096;
 inline constexpr std::size_t maximumAutomationPoints = 100000;
 inline constexpr std::size_t maximumControllerEvents = 100000;
+inline constexpr std::size_t maximumChordRegions = 10000;
+inline constexpr std::size_t maximumAnalyses = 512;
 inline constexpr double minimumBpm = 20.0, maximumBpm = 300.0;
 inline constexpr double maximumTimelineSeconds = 172800.0; // Tracktion Edit's 48-hour bound.
 inline constexpr juce::int64 maximumManifestBytes = 16 * 1024 * 1024;
 inline constexpr std::size_t maximumPluginStateBytes = 64 * 1024 * 1024;
 inline constexpr std::size_t maximumTotalPluginStateBytes = 256 * 1024 * 1024;
+inline constexpr std::size_t maximumNativeDeviceStateBytes = 16 * 1024;
+
+// Validates the complete native instrument state, returning its (possibly
+// repeated) nonempty sample asset IDs. For non-native plugins returns empty.
+// The returned IDs must still be resolved against the same project snapshot.
+juce::Result nativePluginAssetIds(const StoredPlugin&, std::vector<juce::String>&);
 
 // Called only on the caller's file-work thread; callbacks must not mutate Edit.
 // Cancellation before the atomic manifest switch leaves the old saved project.
@@ -114,15 +156,24 @@ struct IOOptions {
     std::function<bool()> cancelled;
     std::function<void(double fraction, const juce::String& stage)> progress;
     std::function<void(juce::int64 written, juce::int64 reused)> transferred;
+    // Optional decoded-sample snapshot hashes, keyed by project asset ID.
+    // Save verifies the actual bundled destination before manifest replacement;
+    // callers must supply every native sample that needs consistency checking.
+    std::map<juce::String, juce::String> expectedAssetHashes;
 };
 
 // Pure DTO validation: no file reads, existence checks, or plugin instantiation.
 juce::Result validate(const StoredProject&);
+juce::Result canonicalTrackColour(const juce::var&, juce::String&);
+int requiredSchema(const StoredProject&);
+bool isSupportedChordLabel(const juce::String&);
+bool isLegacyChordLabel(const juce::String&);
+juce::Result validateAnalysisAnnotations(const juce::var&, double durationSeconds);
 
 // Reuses verified unchanged audio in this bundle, copies changed/new audio into
 // a fresh generation, then atomically replaces the schema 4 manifest.
 // Plugin state is stored in separate hashed binaries in that generation.
-// Replacing schema 1/2/3 first preserves its exact bytes in a unique sibling
+// Upgrading an existing schema first preserves its exact bytes in a unique sibling
 // <original filename>.schemaN-<UUID>.bak; restore it to the original .emproj name.
 // Older generations are retained. Outputs change only on success.
 juce::Result save(const juce::File& target, const StoredProject&, StoredProject& archived, const IOOptions& = {});

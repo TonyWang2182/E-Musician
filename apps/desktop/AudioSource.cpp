@@ -1,4 +1,5 @@
 #include "AudioSource.h"
+#include "ReplayMode.h"
 #include <juce_cryptography/juce_cryptography.h>
 #include <array>
 #include <cmath>
@@ -231,13 +232,17 @@ Result prepareSource(const File& file, PreparedSource& result, const IOOptions& 
         return Result::ok();
     }
 
+    // Only MP3 decoding needs a PCM cache. An explicit root must never be
+    // resolved against the working directory or silently fall back to C:.
+    const auto configuredRoot=showcase::enabled()?showcase::profile().getChildFile("audio-cache").getFullPathName():juce::SystemStats::getEnvironmentVariable("EMUSICIAN_AUDIO_CACHE_ROOT",{});
+    if(configuredRoot.isNotEmpty()&&!File::isAbsolutePath(configuredRoot))return Result::fail("EMUSICIAN_AUDIO_CACHE_ROOT must be an absolute directory path.");
+    const auto cacheRoot=configuredRoot.isEmpty()?File::getSpecialLocation(File::userApplicationDataDirectory).getChildFile("E-musician/cache"):File(configuredRoot);
+    const auto cacheDirectory=cacheRoot.getChildFile("audio-v1");
+    if(cacheRoot.isSymbolicLink()||cacheDirectory.isSymbolicLink())return Result::fail("The audio cache cannot be a linked folder.");
     String hash;
     if (auto r = hashFile(file, hash, options, 0.0, 0.15); r.failed()) return r;
     MP3Layout layout;
     if (auto r = scanMP3(file, layout, options); r.failed()) return r;
-    const auto cacheDirectory = File::getSpecialLocation(File::userApplicationDataDirectory)
-        .getChildFile("E-musician/cache/audio-v1");
-    if (cacheDirectory.isSymbolicLink()) return Result::fail("The audio cache cannot be a linked folder.");
     if (auto r = cacheDirectory.createDirectory(); r.failed()) return Result::fail("Cannot create audio cache: " + r.getErrorMessage());
     const auto cache = cacheDirectory.getChildFile(hash + ".wav");
     if (cache.isSymbolicLink() || cache.isDirectory()) return Result::fail("The audio cache entry is not a regular file.");

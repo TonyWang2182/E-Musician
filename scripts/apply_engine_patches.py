@@ -131,8 +131,8 @@ def run(mode: str, checkout: Path, manifest_file: Path) -> dict:
     entries = manifest.get("files")
     # Schema 1 retains its original single-source boundary. Schema 2 explicitly
     # adds a bounded list with complete preflight before any checkout write.
-    if not isinstance(entries, list) or not entries or len(entries) > (1 if schema == 1 else 8):
-        raise ValueError("Patch manifest requires one source for schema 1 or 1..8 sources for schema 2")
+    if not isinstance(entries, list) or not entries or len(entries) > (1 if schema == 1 else 16):
+        raise ValueError("Patch manifest requires one source for schema 1 or 1..16 sources for schema 2")
     plan = []
     source_names, patch_names = set(), set()
     for entry in entries:
@@ -206,7 +206,7 @@ def main() -> int:
     root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=("apply", "verify"))
-    parser.add_argument("--engine-root", type=Path, default=root / "_deps" / "tracktion_engine")
+    parser.add_argument("--engine-root", type=Path, default=root / ".cache" / "monitor-engine")
     parser.add_argument("--manifest", type=Path, default=root / "cmake" / "patches" / "tracktion" / "manifest.json")
     args = parser.parse_args()
     try:

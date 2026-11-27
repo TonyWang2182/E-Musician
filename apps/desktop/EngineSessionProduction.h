@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ProjectStorage.h"
+#include "EngineSession.h"
+#include "../../core/AudioDeviceConfiguration.h"
 #include <tracktion_engine/tracktion_engine.h>
 #include <memory>
 
@@ -21,9 +23,16 @@ public:
     void detach();
     juce::Result execute(const juce::String&, const juce::var&);
     juce::var state() const;
+    juce::var preferences() const;
     // Device lists are refreshed only on explicit requests, never by the UI timer.
     juce::var inputs() const;
+    // Control-thread only; do not retain the pointer across a device change.
+    tracktion::InputDevice* inputForId(const juce::String&) const;
     juce::var audioDevices(bool scan = false) const;
+    std::vector<EngineSession::RecordingPreviewSnapshot> previews();
+    bool drawPreview(const juce::String&, juce::Graphics&, juce::Rectangle<int>,
+                     double sourceStart, double sourceEnd, float verticalZoom) const;
+    void releasePreview(const juce::String&);
     // True once after a completed take's clips/notes/assets have been adopted.
     // Caller rebuilds bindings/asset preparation before remembering one revision.
     bool poll();

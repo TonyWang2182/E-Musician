@@ -89,6 +89,111 @@ juce::Result runStorageV3Tests(const juce::File& directory)
         check(reopened.masterPlugins[0].state.isEmpty() && reopened.masterPlugins[0].format == "VST",
               "empty VST2 master state retained");
 
+        // Native instruments store only stable sample IDs. Audio clip, sampler
+        // and several drum pads may all reference the same bundled audio.
+        {
+            auto nativeState = state;
+            auto& native = nativeState.tracks[1].plugins[0];
+            native.format = "E-musician"; native.identifier = "native.sampler";
+            native.name = "Sampler"; native.role = "instrument";
+            const auto setState = [](storage::StoredPlugin& plugin, const juce::String& json) {
+                plugin.state.replaceAll(json.toRawUTF8(), json.getNumBytesAsUTF8());
+            };
+            const juce::String samplerJson = R"({"version":1,"type":"sampler","root_note":60,"start":0.0,"end":1.0,"pads":[{"asset_id":"asset_a","gain_db":0.0,"muted":false}]})";
+            setState(native, samplerJson);
+            const auto samplerBytes = native.state;
+            {
+                auto envelopeProject=nativeState;
+                const auto withEnvelope=samplerJson.replace("\"muted\":false", "\"muted\":false,\"attack_ms\":100,\"release_ms\":400,\"one_shot\":true");
+                setState(envelopeProject.tracks[1].plugins[0],withEnvelope);
+                okay(storage::validate(envelopeProject),"optional sample envelope fields are valid");
+                for(const auto& invalid:{withEnvelope.replace("\"attack_ms\":100","\"attack_ms\":0"),withEnvelope.replace("\"release_ms\":400","\"release_ms\":5001"),withEnvelope.replace("\"one_shot\":true","\"one_shot\":1")}) {
+                    setState(envelopeProject.tracks[1].plugins[0],invalid);
+                    check(storage::validate(envelopeProject).failed(),"invalid sample envelope/mode rejected by archive validation");
+                }
+            }
+            const auto extraSource = workspace.getChildFile("native-extra.wav");
+            check(extraSource.replaceWithData(original.getData(), original.getSize()), "write second native sample");
+            nativeState.assets.push_back({"native_extra", extraSource});
+            storage::StoredTrack drum; drum.id = "drum_track"; drum.name = "Drums"; drum.kind = "instrument";
+            storage::StoredPlugin rack; rack.id = "native_rack"; rack.format = "E-musician";
+            rack.identifier = "native.drum_rack"; rack.name = "Drum Rack"; rack.role = "instrument";
+            juce::String pads;
+            for (int i = 0; i < 16; ++i) {
+                if (i) pads += ",";
+                const auto id = i == 0 || i == 1 ? "asset_a" : i == 2 ? "native_extra" : "";
+                pads += "{\"asset_id\":\"" + juce::String(id) + "\",\"gain_db\":-3.0,\"muted\":false}";
+            }
+            setState(rack, "{\"version\":1,\"type\":\"drum_rack\",\"root_note\":60,\"start\":0.0,\"end\":1.0,\"pads\":[" + pads + "]}");
+            drum.plugins.push_back(rack); nativeState.tracks.push_back(drum);
+            okay(storage::validate(nativeState), "native sample references share audio clip asset and support repeated pad IDs");
+            std::vector<juce::String> refs;
+            okay(storage::nativePluginAssetIds(rack, refs), "extract verified native references");
+            check(refs.size() == 3 && refs[0] == "asset_a" && refs[1] == "asset_a" && refs[2] == "native_extra", "native reference extraction preserves pad order and repeats");
+            const auto nativeTarget = workspace.getChildFile("native-project.emproj");
+            storage::StoredProject nativeArchived, nativeLoaded, nativeCopy;
+            okay(storage::save(nativeTarget, nativeState, nativeArchived), "save native sampler and rack sample assets");
+            check(nativeArchived.assets.size() == 2 && nativeArchived.assets[1].source != extraSource
+                  && nativeArchived.assets[1].source.existsAsFile(), "sample-only asset archived into bundle");
+            okay(storage::load(nativeTarget, nativeLoaded), "reopen native instrument state and samples");
+            check(nativeLoaded.tracks[1].plugins[0].state == samplerBytes
+                  && nativeLoaded.tracks.back().plugins[0].state == rack.state, "native states round trip without embedding absolute paths");
+            const auto nativeCopyTarget = workspace.getChildFile("native-save-as.emproj");
+            okay(storage::save(nativeCopyTarget, nativeLoaded, nativeCopy), "save as relocates native sample assets");
+            check(nativeCopy.assets.size() == 2 && nativeCopy.assets[1].source != nativeLoaded.assets[1].source
+                  && nativeCopy.assets[1].source.existsAsFile(), "save as provides independent native sample copy");
+            storage::IOOptions verifiedSave;
+            const auto originalHash = juce::SHA256(original).toHexString();
+            verifiedSave.expectedAssetHashes = {{"asset_a", originalHash}, {"native_extra", originalHash}};
+            storage::StoredProject verifiedArchive;
+            okay(storage::save(nativeTarget, nativeState, verifiedArchive, verifiedSave), "matching decoded sample hashes allow save");
+            juce::MemoryBlock verifiedManifest;
+            check(nativeTarget.loadFileAsData(verifiedManifest), "capture verified native manifest");
+            auto changedExtra = original; static_cast<unsigned char*>(changedExtra.getData())[13] ^= 1;
+            check(extraSource.replaceWithData(changedExtra.getData(), changedExtra.getSize()), "modify native source after decode");
+            storage::StoredProject unchangedOutput; unchangedOutput.projectId = "unchanged";
+            check(storage::save(nativeTarget, nativeState, unchangedOutput, verifiedSave).failed()
+                  && unchangedOutput.projectId == "unchanged", "hash mismatch rejects copied sample before commit");
+            juce::MemoryBlock afterMismatch;
+            check(nativeTarget.loadFileAsData(afterMismatch) && afterMismatch == verifiedManifest, "hash mismatch preserves old project manifest");
+            check(extraSource.replaceWithData(original.getData(), original.getSize()), "restore native source");
+            auto unknownHash = verifiedSave; unknownHash.expectedAssetHashes["unknown_asset"] = originalHash;
+            check(storage::save(nativeTarget, nativeState, unchangedOutput, unknownHash).failed(), "unknown expected asset hash rejected");
+            auto invalidHash = verifiedSave; invalidHash.expectedAssetHashes["native_extra"] = "invalid";
+            check(storage::save(nativeTarget, nativeState, unchangedOutput, invalidHash).failed(), "invalid expected hash rejected");
+            // Change a reused archive after the reuse decision, while restoring
+            // size and mtime. Only the destination content hash detects this.
+            const auto reusedSample = verifiedArchive.assets[1].source;
+            const auto reusedTimestamp = reusedSample.getLastModificationTime();
+            bool archiveTampered = false, archiveWrite = false;
+            auto tamper = verifiedSave;
+            tamper.progress = [&](double, const juce::String& stage) {
+                if (!archiveTampered && stage == "Writing project manifest") {
+                    archiveTampered = true;
+                    archiveWrite = reusedSample.replaceWithData(changedExtra.getData(), changedExtra.getSize());
+                    archiveWrite = reusedSample.setLastModificationTime(reusedTimestamp) && archiveWrite;
+                }
+            };
+            const auto archiveMismatch = storage::save(nativeTarget, nativeState, unchangedOutput, tamper);
+            check(reusedSample.replaceWithData(original.getData(), original.getSize()), "restore tampered owned sample archive");
+            check(archiveTampered && archiveWrite && archiveMismatch.failed()
+                  && archiveMismatch.getErrorMessage().contains("changed since it was loaded"),
+                  "hash mismatch detects changed reused archive even with restored metadata");
+            juce::MemoryBlock afterArchiveMismatch;
+            check(nativeTarget.loadFileAsData(afterArchiveMismatch) && afterArchiveMismatch == verifiedManifest,
+                  "changed reused archive does not replace old manifest");
+            auto missing = nativeState; missing.assets.pop_back();
+            check(storage::validate(missing).failed(), "unknown native asset reference rejects project");
+            auto badState = nativeState; setState(badState.tracks[1].plugins[0], samplerJson.replace("asset_a", "../bad"));
+            check(storage::validate(badState).failed(), "native asset IDs cannot contain path traversal");
+            setState(badState.tracks[1].plugins[0], samplerJson.replace("\"end\":1.0", "\"end\":0.0"));
+            check(storage::validate(badState).failed(), "native invalid excerpt rejects project");
+            setState(badState.tracks[1].plugins[0], samplerJson.replace("\"version\":1", "\"version\":3"));
+            check(storage::validate(badState).failed(), "unknown native state version is rejected");
+            setState(badState.tracks[1].plugins[0], samplerJson.replace("\"version\":1", "\"version\":1,\"version\":1"));
+            check(storage::validate(badState).failed(), "duplicate native state JSON keys are rejected");
+        }
+
         juce::MemoryBlock manifestBytes;
         check(target.loadFileAsData(manifestBytes), "capture canonical manifest bytes");
         const auto parsed = juce::JSON::parse(manifestBytes.toString());

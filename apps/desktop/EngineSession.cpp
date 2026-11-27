@@ -1,10 +1,21 @@
 #include "EngineSession.h"
+#include "RuntimePaths.h"
+#include "MainComponent.h" // Isolated recording UI regression harness.
+#include "ReplayMode.h"
 #include "ProjectStorage.h"
 #include "AudioSource.h"
+#include "AudioWarp.h"
+#include "AudioTimeMap.h"
 #include "PluginHost.h"
+#include "NativeInstrument.h"
+#include "NativeEffects.h"
+#include "NativeLoadQueue.h"
+#include "AnalysisPreview.h"
+#include "AnalysisWorkerProcess.h"
 #include "EngineSessionProduction.h"
 #include "core/commands/RevisionGuard.hpp"
 #include "core/time/Time.hpp"
+#include "core/time/EditGrid.hpp"
 #include <tracktion_engine/tracktion_engine.h>
 #include <juce_cryptography/juce_cryptography.h>
 #include <algorithm>
@@ -22,6 +33,8 @@
 #include <set>
 #include <stdexcept>
 #include <thread>
+#include <typeinfo>
+#include <unordered_set>
 #if JUCE_WINDOWS
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -37,6 +50,13 @@
 namespace emusician {
 namespace te = tracktion;
 namespace {
+bool offlineTestMode = false;
+struct SelectionNoteIdHash {
+    size_t operator()(const juce::String& id) const noexcept {
+        return static_cast<size_t>(id.hashCode64());
+    }
+};
+using SelectionNoteIdSet=std::unordered_set<juce::String,SelectionNoteIdHash>;
 // Offline renders and hosted-input tests must never replace the user's device
 // configuration when their Engine flushes settings during destruction.
 struct TransientPropertyStorage final : te::PropertyStorage {
@@ -57,13 +77,29 @@ struct TransientPropertyStorage final : te::PropertyStorage {
     const juce::File directory;
     juce::PropertiesFile properties;
 };
+struct ShowcasePropertyStorage final : te::PropertyStorage {
+    ShowcasePropertyStorage() : te::PropertyStorage("E-musician-showcase-v1"),
+        directory(showcase::profile()), properties(directory.getChildFile("engine.settings"), options()) {}
+    static juce::PropertiesFile::Options options() {
+        juce::PropertiesFile::Options value;
+        value.millisecondsBeforeSaving = 1500;
+        return value;
+    }
+    juce::PropertiesFile& getPropertiesFile() override { return properties; }
+    juce::File getAppPrefsFolder() override { directory.createDirectory(); return directory; }
+    juce::File getAppCacheFolder() override { const auto cache = directory.getChildFile("cache"); cache.createDirectory(); return cache; }
+    const juce::File directory;
+    juce::PropertiesFile properties;
+};
 std::unique_ptr<te::PropertyStorage> sessionProperties(bool interactive) {
+    if (interactive && showcase::enabled()) return std::make_unique<ShowcasePropertyStorage>();
     if (interactive) return std::make_unique<te::PropertyStorage>("E-musician");
     return std::make_unique<TransientPropertyStorage>();
 }
 struct OutputOnlyBehaviour : te::EngineBehaviour {
     explicit OutputOnlyBehaviour(bool enable=true):enabled(enable){}
     bool enabled;
+    bool lengthOfOneBeatDependsOnTimeSignature() override { return false; }
     bool shouldOpenAudioInputByDefault() override { return false; }
     bool autoInitialiseDeviceManager() override { return enabled; }
     te::EditLimits getEditLimits() override {
@@ -112,25 +148,32 @@ juce::String contentKey(const storage::StoredProject& s,const std::function<juce
     // Computed at edit/save boundaries, never during the transport poll.
     juce::MemoryOutputStream o;
     auto time=[&](double v){o.writeInt64(juce::int64(std::llround(v*1.0e9)));};
-    auto plugin=[&](const auto& p){o.writeString(p.id);o.writeString(p.format);o.writeString(p.identifier);o.writeInt(p.uniqueId);o.writeBool(p.enabled);o.writeString(p.role);};
+    auto plugin=[&](const auto& p){o.writeString(p.id);o.writeString(p.format);o.writeString(p.identifier);o.writeInt(p.uniqueId);o.writeBool(p.enabled);o.writeString(p.role);
+        // Native device state is small and authoritative. Third-party state
+        // continues using its existing generation/cache path.
+        if(p.format=="E-musician"){o.writeInt64(juce::int64(p.state.getSize()));o.write(p.state.getData(),p.state.getSize());}};
     auto lanes=[&](const auto& list){for(const auto& lane:list){o.writeString(lane.id);o.writeString(lane.target);o.writeString(lane.pluginId);o.writeString(lane.parameterId);o.writeBool(lane.enabled);for(const auto& point:lane.points){o.writeString(point.id);time(point.timeSeconds);o.writeFloat(point.value);o.writeFloat(point.curve);}}};
     o.writeString(s.projectId);o.writeInt(int(std::round(s.masterGainDb*1000)));o.writeBool(s.looping);
     time(s.bpm);o.writeInt(s.numerator);o.writeInt(s.denominator);time(s.loopStart);time(s.loopEnd);
     for(const auto& p:s.masterPlugins)plugin(p);
     lanes(s.masterAutomation);
     for(const auto& t:s.tracks){
-        o.writeString(t.id);o.writeString(t.name);o.writeString(t.kind);o.writeInt(int(std::round(t.gainDb*1000)));o.writeInt(int(std::round(t.pan*100000)));
+        o.writeString(t.id);o.writeString(t.name);o.writeString(t.kind);o.writeString(t.colour);o.writeInt(int(std::round(t.gainDb*1000)));o.writeInt(int(std::round(t.pan*100000)));
         o.writeBool(t.muted);o.writeBool(t.solo);for(const auto& p:t.plugins)plugin(p);
         o.writeString(t.inputDeviceId);o.writeString(t.outputTargetId);lanes(t.automation);
         for(const auto& send:t.sends){o.writeString(send.id);o.writeString(send.targetTrackId);o.writeFloat(send.gainDb);o.writeBool(send.preFader);o.writeBool(send.enabled);}
-        for(const auto& c:t.clips){o.writeString(c.id);o.writeString(c.kind);o.writeString(c.assetId);time(c.timelineStart);time(c.sourceOffset);time(c.duration);time(c.fadeIn);time(c.fadeOut);
+        for(const auto& c:t.clips){o.writeString(c.id);o.writeString(c.kind);o.writeString(c.assetId);o.writeString(c.analysisRole);o.writeInt(c.midiChannel);time(c.timelineStart);time(c.sourceOffset);time(c.duration);time(c.fadeIn);time(c.fadeOut);o.writeString(juce::JSON::toString(storage::audioWarpToVar(c.warp),true));
             if(c.kind=="midi"){time(c.startBeats);time(c.lengthBeats);o.writeString(noteKey?noteKey(c.id):noteContentKey(c.notes));for(const auto& event:c.controllers){o.writeString(event.id);time(event.beats);o.writeInt(event.type);o.writeInt(event.value);o.writeInt(event.metadata);}}
         }
-    }return sessionSha256(o.getData(),o.getDataSize());
+    }
+    for(const auto& a:s.analyses){o.writeString(a.id);o.writeString(a.kind);o.writeString(a.modelId);o.writeString(a.modelVersion);o.writeString(a.sourceClipId);o.writeString(a.sourceAssetId);o.writeString(a.sourceSha256);o.writeString(a.resultSha256);o.writeString(a.parametersJson);o.writeString(a.annotationsJson);time(a.startSeconds);time(a.durationSeconds);}
+    for(const auto& g:s.generations){o.writeString(g.id);o.writeString(g.assetId);o.writeString(g.clipId);o.writeString(g.modelId);o.writeString(g.modelRevision);o.writeString(g.audioSha256);o.writeString(g.resultSha256);o.writeString(g.parametersJson);time(g.startSeconds);time(g.durationSeconds);}
+    for(const auto& c:s.chordRegions){o.writeString(c.id);o.writeString(c.label);o.writeString(c.analysisId);time(c.startSeconds);time(c.endSeconds);time(c.score);o.writeBool(c.uncertain);}
+    return sessionSha256(o.getData(),o.getDataSize());
 }
 struct AudioInfo{double duration=0,rate=0;int channels=0;juce::String format;juce::File playbackFile;};
 juce::Result inspectAudio(const juce::File& f,AudioInfo& info){audio::PreparedSource p;auto r=audio::prepareSource(f,p);if(r.wasOk())info={p.duration,p.sampleRate,p.channels,p.format,p.playbackFile};return r;}
-const juce::Identifier emId("emId"),emKind("emKind"),emAsset("emAsset"),emSource("emSource"),emChannel("emChannel");
+const juce::Identifier emId("emId"),emKind("emKind"),emColour("emColour"),emAsset("emAsset"),emSource("emSource"),emChannel("emChannel");
 juce::ValueTree slotTree(const storage::StoredPlugin& p)
 {
     juce::ValueTree v("EM_PLUGIN");
@@ -145,7 +188,7 @@ storage::StoredPlugin readSlot(const juce::ValueTree& v,bool includeState=true)
 }
 
 struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listener {
-    struct ClipBinding{juce::String id,assetId;juce::File source;AudioInfo info;te::Clip::Ptr clip;};
+    struct ClipBinding{juce::String id,assetId;juce::File source;AudioInfo info;te::Clip::Ptr clip;AudioInfo originalInfo;};
     struct Binding{juce::String id;te::AudioTrack* track=nullptr;std::vector<ClipBinding> clips;};
     struct Job{
         juce::String id=uid(),kind,status="queued",error,projectId;std::uint64_t revision=0;double progress=-1;
@@ -153,15 +196,77 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         double captureMs=0,maxPluginCaptureMs=0;
         juce::int64 bytesWritten=0,bytesReused=0;
         int pluginsCaptured=0;
+        juce::var result;
         std::atomic<bool> cancel{false},done{false};std::mutex mutex;std::thread worker;std::function<void()> commit;
         std::function<void()> preparation;
         std::condition_variable preparationReady;
         std::atomic<bool> prepared{false};
         ~Job(){cancel=true;if(worker.joinable())worker.join();}
     };
+    struct AnalysisEntry {
+        juce::String id, kind, originalHash, resultHash, execution="local", modelId;
+        juce::File original, sourceFile, directory;
+        juce::File boundOriginal; // Control-thread-only canonical path after a verified Save copy.
+        juce::var source, parameters, result, receipt, summary;
+        std::shared_ptr<Job> job;
+        std::shared_ptr<Job> acceptJob;
+        bool applied=false;
+    };
+    struct GenerationEntry {
+        juce::String id,resultHash,modelId;juce::File directory;juce::var source,parameters,result,receipt;
+        std::shared_ptr<Job> job,acceptJob;bool applied=false;
+    };
+    std::map<juce::String,std::shared_ptr<GenerationEntry>> generations;
+    juce::var generationCapabilities();
+    juce::var generationJobs()const;
+    bool generationSourceMatches(const GenerationEntry&)const;
+    juce::Result generationCommand(const juce::String&,const juce::var&,juce::var&);
+    juce::Result beginGeneration(const juce::var&,juce::var&);
+    juce::Result acceptGeneration(const juce::var&,juce::var&);
+    std::map<juce::String,std::shared_ptr<AnalysisEntry>> analyses;
+    std::unique_ptr<AnalysisPreview> analysisPreview;
+    std::uint64_t analysisPreviewGeneration=0;
+    juce::var analysisCapabilities();
+    juce::var analysisJobs()const;
+    juce::Result analysisCommand(const juce::String&,const juce::var&,juce::var&);
+    bool analysisSourceMatches(const AnalysisEntry&)const;
+    juce::Result beginAnalysis(const juce::var&,juce::var&);
+    juce::Result acceptAnalysis(const juce::var&,juce::var&);
     te::Engine engine;
     plugins::PluginHost pluginHost{engine};commands::RevisionGuard guard{uid().toStdString()};
     production::RecordingController recording{engine};
+    struct MeterTap {
+        juce::WeakReference<te::LevelMeasurer> source;
+        te::LevelMeasurer::Client client;
+        float left = -100, right = -100;
+        bool overloaded = false;
+        ~MeterTap() { bind(nullptr); }
+        void bind(te::LevelMeasurer* next) {
+            if(source.get()==next)return;
+            if(auto* old=source.get())old->removeClient(client);
+            source=next;client.reset();left=right=-100;overloaded=false;
+            if(next)next->addClient(client);
+        }
+        void sample() {
+            if(!source){left=right=-100;return;}
+            const auto n=client.getNumChannelsUsed();
+            const auto l=n>0?client.getAndClearAudioLevel(0).dB:-100.0f;
+            const auto r=n>1?client.getAndClearAudioLevel(1).dB:l;
+            left=std::max(l,left-1.5f);right=std::max(r,right-1.5f);
+            overloaded|=l>=-0.01f||r>=-0.01f;
+        }
+        void reset() { client.reset();left=right=-100;overloaded=false; }
+    };
+    std::map<juce::String,std::unique_ptr<MeterTap>> trackMeters,inputMeters;
+    MeterTap masterMeter;
+    double metersReadAt=-1000,memoryReadAt=-1000;
+    juce::int64 workingSetBytes=0,privateBytes=0;
+    void updateTelemetry(Snapshot&);
+    void resetMeters();
+    struct ClipboardEntry {juce::String trackId,trackKind;int row=0;storage::StoredClip clip;};
+    struct ClipClipboard {juce::String projectId,id;double originSeconds=0,originBpm=120;int firstRow=0;std::vector<ClipboardEntry> clips;std::vector<storage::StoredAsset> assets;};
+    ClipClipboard clipClipboard;
+    juce::StringArray lastPastedClipIds;
     std::unique_ptr<te::Edit> edit=te::createEmptyEdit(engine,{});
     std::unique_ptr<te::Edit::UndoTransactionInhibitor> transactionControl;
     std::vector<Binding> bindings;std::map<juce::String,AudioInfo> prepared;
@@ -177,7 +282,24 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     };
     mutable std::map<juce::String,NoteView> noteViews;
     juce::String selected,selectedClip,status="Import audio or create a MIDI track.",savedKey,currentKey;juce::File projectFile;
+    juce::var selectionState;
+    juce::String selectionSignature;
+    std::uint64_t selectionRevision=0,selectionMusicRevision=std::numeric_limits<std::uint64_t>::max();
+    std::shared_ptr<const std::vector<NoteSnapshot>> selectionNoteSource;
+    SelectionNoteIdSet selectionNoteIndex;
+    void refreshSelectionContext(const juce::var* proposed=nullptr);
     double duration=0;bool gesture=false,shuttingDown=false,pluginDirty=false;
+    struct EffectGesture {
+        juce::String id,projectId,trackId,deviceId;
+        std::uint64_t revision=0;
+        storage::StoredPlugin proposed;
+    };
+    std::optional<EffectGesture> effectGesture;
+    juce::Result effectTarget(const juce::String&,const juce::String&,juce::ValueTree&,native_effects::Effect*&);
+    juce::Result prepareEffectState(const juce::var&,storage::StoredPlugin&,juce::ValueTree&,native_effects::Effect*&);
+    juce::Result setNativeEffect(const juce::var&);
+    juce::Result handleEffectGesture(const juce::String&,const juce::var&,juce::var*);
+    void cancelEffectGesture();
     std::uint64_t cachedRevision=std::numeric_limits<std::uint64_t>::max(),eventSequence=0;Snapshot cached;
     std::vector<std::shared_ptr<Job>> jobs;juce::Array<juce::var> events;
     std::shared_ptr<bool> alive=std::make_shared<bool>(true);
@@ -185,24 +307,70 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     std::vector<PluginDescriptorSnapshot> catalogCache;
     double catalogReadAt=-100000.0;
     bool catalogWasScanning=false;
+    // Message-thread reentrancy, not an audio-thread lock. Vendor code may pump
+    // nested UI messages while loading, saving or creating an editor.
+    bool controlOperationActive=false;
+    std::vector<native::NativeLoadQueue::Completion> deferredNativeCompletions;
+    struct NativeRuntime {
+        juce::String signature, status="queued", error;
+        std::uint64_t token=0, generation=0;
+    };
+    struct NativePending {
+        std::shared_ptr<storage::StoredProject> candidate;
+        juce::String projectId, trackId, deviceId, operation, signature;
+        std::uint64_t revision=0, token=0, generation=0;
+    };
+    std::unique_ptr<native::NativeLoadQueue> nativeQueue;
+    std::map<juce::String,NativeRuntime> nativeRuntime;
+    std::map<juce::String,juce::String> nativeTrackErrors;
+    std::unique_ptr<NativePending> nativePending;
+    std::vector<JobSnapshot> nativeJobHistory;
+    std::uint64_t nativeGeneration=0;
+    std::uint64_t nativeLastScan=std::numeric_limits<std::uint64_t>::max();
+    double nativeRetireAt=0;
+    juce::String nativeQueueProject;
+    void reconcileNative();
+    void completeNative(native::NativeLoadQueue::Completion);
+    juce::Result beginNative(const juce::String&,const juce::var&);
+    void finishNativeJob(std::uint64_t,const juce::String&,const juce::String& = {});
+    juce::Result nativeAssetHashes(const storage::StoredProject&,std::map<juce::String,juce::String>&) const;
+    juce::String nativeSignature(const storage::StoredPlugin&,const std::map<juce::String,juce::File>&) const;
     struct Reply{juce::String digest;juce::var value;};std::map<juce::String,Reply> replies;
 
     explicit Impl(bool enable=true):engine(sessionProperties(enable),plugins::createUIBehaviour(),std::make_unique<OutputOnlyBehaviour>(enable)){
         if(!edit)throw std::runtime_error("Unable to create audio session");
+        nativeQueue=std::make_unique<native::NativeLoadQueue>([this](native::NativeLoadQueue::Completion result){
+            if(controlOperationActive){deferredNativeCompletions.push_back(std::move(result));return;}
+            const juce::ScopedValueSetter<bool> busy(controlOperationActive,true);
+            completeNative(std::move(result));
+        });
         edit->tempoSequence.getTempo(0)->set(te::BeatPosition::fromBeats(0),120,0,false);edit->getMasterVolumePlugin()->setVolumeDb(-6);
         transactionControl=std::make_unique<te::Edit::UndoTransactionInhibitor>(*edit);
         edit->state.addListener(this);
         recording.attach(*edit,recordingDirectory());
-        edit->getUndoManager().setMaxNumberOfStoredUnits(1000000,64);edit->getUndoManager().clearUndoHistory();savedKey=currentKey=calculateCurrentKey();startTimerHz(30);
+        // AudioTrack::initialise lazily asks for SCENES. Create this native
+        // session container before user history begins; its later root sort
+        // must not become part of the first user-created track transaction.
+        edit->getSceneList();
+        savedKey=currentKey=calculateCurrentKey();
+        // Host metadata is not a track and belongs before Tracktion's special
+        // tracks. Establish that canonical initial order outside user history:
+        // otherwise the next asynchronous TrackList sort gets recorded in the
+        // first edit, and Undo restores an unsorted root that clears Redo when
+        // TrackList sorts it again on the next message turn.
+        te::TrackList::sortTracksByType(edit->state,nullptr);
+        edit->getUndoManager().setMaxNumberOfStoredUnits(1000000,64);edit->getUndoManager().clearUndoHistory();startTimerHz(30);
     }
     ~Impl() override{
         *alive=false;shuttingDown=true;stopTimer();for(auto& j:jobs)j->cancel=true;
+        analysisPreview.reset();nativeQueue.reset();nativePending.reset();nativeRuntime.clear();
         for(auto& j:jobs)if(j->worker.joinable())j->worker.join();
         for(auto& j:jobs)j->commit={};jobs.clear();pluginHost.cancelScan();plugins::PluginHost::closeAllEditors(*edit);
-        edit->getTransport().stop(false,false);recording.detach();pluginHost.detachEdit(*edit);edit->state.removeListener(this);noteViews.clear();transactionControl.reset();bindings.clear();edit.reset();
+        edit->getTransport().stop(false,false);trackMeters.clear();inputMeters.clear();masterMeter.bind(nullptr);recording.detach();pluginHost.detachEdit(*edit);edit->state.removeListener(this);noteViews.clear();transactionControl.reset();bindings.clear();edit.reset();
     }
-    juce::File recordingDirectory()const{return juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("E-musician/recordings").getChildFile(guard.projectId());}
+    juce::File recordingDirectory()const{return (showcase::enabled()?showcase::profile().getChildFile("recordings"):juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("E-musician/recordings")).getChildFile(guard.projectId());}
     bool recordingBusy()const{return edit->getTransport().isRecording()||edit->getTransport().isRecordingStopping()||bool(recording.state()["finalizing"]);}
+    bool recordingFinalizing()const{return edit->getTransport().isRecordingStopping()||bool(recording.state()["finalizing"]);}
     void finishRecording(){
         if(!recording.poll())return;
         juce::String preparationError;
@@ -226,7 +394,21 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         return plugin&&plugin->getAudioPluginInstance()?plugin:nullptr;
     }
     std::vector<storage::StoredPlugin> captureSlots(juce::ValueTree owner)const{
-        std::vector<storage::StoredPlugin> out;for(auto v:owner.getChildWithName("EM_PLUGINS")){auto p=readSlot(v,false);if(auto* live=loadedPlugin(*edit,p.id))plugins::PluginHost::capture(*live,p,false);out.push_back(std::move(p));}return out;
+        std::vector<storage::StoredPlugin> out;for(auto v:owner.getChildWithName("EM_PLUGINS")){auto p=readSlot(v,v["format"].toString()=="E-musician");if(auto* live=loadedPlugin(*edit,p.id))plugins::PluginHost::capture(*live,p,false);out.push_back(std::move(p));}return out;
+    }
+    juce::Result describeNativeEffect(const juce::String& trackId,const juce::String& deviceId,juce::var& data){
+        juce::ValueTree owner;
+        if(trackId=="master")owner=metadata(*edit);
+        else if(auto* binding=find(trackId))owner=binding->track->state;
+        else return juce::Result::fail("Track not found.");
+        storage::StoredProject state;
+        storage::StoredTrack track;track.id=trackId;
+        for(const auto& slot:owner.getChildWithName("EM_PLUGINS"))if(slot["id"].toString()==deviceId){
+            if(trackId=="master")state.masterPlugins.push_back(readSlot(slot));else track.plugins.push_back(readSlot(slot));
+            break;
+        }
+        if(trackId!="master")state.tracks.push_back(std::move(track));
+        return native_effects::describe(state,trackId,deviceId,data);
     }
     const NoteView& noteView(const juce::String& id,te::MidiClip& midi)const{
         auto& sequence=midi.getSequence();const int channel=midi.getMidiChannel().getChannelNumber();
@@ -273,14 +455,37 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
         storage::StoredProject s;s.projectId=guard.projectId();s.revision=guard.revision();s.masterGainDb=stableGain(edit->getMasterVolumePlugin()->getVolumeDb());s.looping=edit->getTransport().looping.get();
         s.bpm=edit->tempoSequence.getTempo(0)->getBpm();auto* sig=edit->tempoSequence.getTimeSig(0);s.numerator=sig->numerator;s.denominator=sig->denominator;
         auto m=metadata(*edit);s.loopStart=double(m.getProperty("loopStart",0.0));s.loopEnd=double(m.getProperty("loopEnd",0.0));s.masterPlugins=captureSlots(m);
-        for(const auto& b:bindings){storage::StoredTrack t;t.id=b.id;t.name=b.track->getName();t.kind=b.track->state.getProperty(emKind,"audio").toString();t.gainDb=stableGain(b.track->getVolumePlugin()->getVolumeDb());t.pan=b.track->getVolumePlugin()->getPan();t.muted=b.track->isMuted(false);t.solo=b.track->isSolo(false);t.plugins=captureSlots(b.track->state);
-            for(const auto& c:b.clips){storage::StoredClip a;a.id=c.id;a.assetId=c.assetId;auto pos=c.clip->getPosition();a.timelineStart=pos.time.getStart().inSeconds();a.sourceOffset=pos.offset.inSeconds();a.duration=pos.time.getLength().inSeconds();
-                if(auto* midi=dynamic_cast<te::MidiClip*>(c.clip.get())){a.kind="midi";a.startBeats=time::secondsToBeats(a.timelineStart,s.bpm);a.lengthBeats=time::secondsToBeats(a.duration,s.bpm);
+        for(const auto& b:bindings){storage::StoredTrack t;t.id=b.id;t.name=b.track->getName();t.kind=b.track->state.getProperty(emKind,"audio").toString();t.colour=b.track->state.getProperty(emColour,juce::String()).toString();t.gainDb=stableGain(b.track->getVolumePlugin()->getVolumeDb());t.pan=b.track->getVolumePlugin()->getPan();t.muted=b.track->isMuted(false);t.solo=b.track->isSolo(false);t.plugins=captureSlots(b.track->state);
+            for(const auto& c:b.clips){storage::StoredClip a;a.id=c.id;a.assetId=c.assetId;a.analysisRole=c.clip->state["emAnalysisRole"].toString();auto pos=c.clip->getPosition();a.timelineStart=pos.time.getStart().inSeconds();a.sourceOffset=pos.offset.inSeconds();a.duration=pos.time.getLength().inSeconds();
+                if(auto* midi=dynamic_cast<te::MidiClip*>(c.clip.get())){a.kind="midi";a.midiChannel=int(c.clip->state.getProperty("emMidiChannel",0))>0?midi->getMidiChannel().getChannelNumber():0;a.startBeats=time::secondsToBeats(a.timelineStart,s.bpm);a.lengthBeats=time::secondsToBeats(a.duration,s.bpm);
                     if(includeNotes){const auto& notes=*noteView(c.id,*midi).notes;a.notes.reserve(notes.size());for(const auto& n:notes)a.notes.push_back({n.id,n.pitch,n.startBeats,n.lengthBeats,n.velocity,n.channel});}
-                }else if(auto* audio=dynamic_cast<te::WaveAudioClip*>(c.clip.get())){a.fadeIn=audio->getFadeIn().inSeconds();a.fadeOut=audio->getFadeOut().inSeconds();if(std::none_of(s.assets.begin(),s.assets.end(),[&](const auto& x){return x.id==c.assetId;}))s.assets.push_back({c.assetId,c.source});}
+                }else if(auto* audio=dynamic_cast<te::WaveAudioClip*>(c.clip.get())){
+                    const auto warp=c.clip->state.getProperty("emAudioWarp",{});
+                    if(!warp.isVoid())storage::audioWarpFromVar(warp,a.warp);
+                    a.sourceOffset*=a.warp.speedRatio();
+                    a.fadeIn=audio->getFadeIn().inSeconds();a.fadeOut=audio->getFadeOut().inSeconds();
+                    if(std::none_of(s.assets.begin(),s.assets.end(),[&](const auto& x){return x.id==c.assetId;}))s.assets.push_back({c.assetId,c.source});
+                    if(a.warp.enabled&&std::none_of(s.assets.begin(),s.assets.end(),[&](const auto& x){return x.id==a.warp.renderAssetId;}))
+                        s.assets.push_back({a.warp.renderAssetId,juce::File(c.clip->state["emWarpRenderSource"].toString())});
+                }
                 t.clips.push_back(std::move(a));
             }s.tracks.push_back(std::move(t));
-        }production::captureGraph(*edit,s,includeControllers);return s;
+        }
+        // Native pads refer to the same asset IDs used by the saved project.
+        // Only referenced IDs enter a snapshot; stale metadata is not an asset.
+        std::set<juce::String> nativeIds;bool nativeStateInvalid=false;
+        const auto collectNative=[&](const auto& plugins){for(const auto& plugin:plugins)if(plugin.format=="E-musician"){
+            std::vector<juce::String> ids;if(storage::nativePluginAssetIds(plugin,ids).wasOk())nativeIds.insert(ids.begin(),ids.end());else nativeStateInvalid=true;}};
+        collectNative(s.masterPlugins);for(const auto& track:s.tracks)collectNative(track.plugins);
+        auto nativeAssets=m.getChildWithName("EM_NATIVE_ASSETS");
+        for(const auto& asset:nativeAssets){const auto id=asset["id"].toString();
+            if((nativeStateInvalid||nativeIds.contains(id))&&std::none_of(s.assets.begin(),s.assets.end(),[&](const auto& a){return a.id==id;}))
+                s.assets.push_back({id,juce::File(asset["source"].toString())});}
+        for(const auto& a:m.getChildWithName("EM_ANALYSES"))s.analyses.push_back({a["id"].toString(),a["kind"].toString(),a["model_id"].toString(),a["model_version"].toString(),a["source_clip_id"].toString(),a["source_asset_id"].toString(),a["source_sha256"].toString(),a["result_sha256"].toString(),a["parameters_json"].toString(),double(a["start_seconds"]),double(a["duration_seconds"]),a.getProperty("annotations_json","{}").toString()});
+        for(const auto& c:m.getChildWithName("EM_CHORDS"))s.chordRegions.push_back({c["id"].toString(),c["label"].toString(),c["analysis_id"].toString(),double(c["start_seconds"]),double(c["end_seconds"]),double(c["score"]),bool(c["uncertain"])});
+        for(const auto& g:m.getChildWithName("EM_GENERATIONS"))s.generations.push_back({g["id"].toString(),g["asset_id"].toString(),g["clip_id"].toString(),g["model_id"].toString(),g["model_revision"].toString(),g["audio_sha256"].toString(),g["result_sha256"].toString(),g["parameters_json"].toString(),double(g["start_seconds"]),double(g["duration_seconds"])});
+        s.schemaVersion=storage::requiredSchema(s);
+        production::captureGraph(*edit,s,includeControllers);return s;
     }
     juce::Result capturePluginStates(storage::StoredProject& s){
         auto flush=[&](auto& list,juce::ValueTree owner){for(auto& p:list){
@@ -296,20 +501,23 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     juce::Result fail(const juce::String& m){status=m;return juce::Result::fail(m);}
     juce::Result preflight(std::uint64_t expected){if(expected!=guard.revision())return fail("The project changed. Refresh and try again.");if(guard.revision()>=std::uint64_t(std::numeric_limits<juce::int64>::max())-1)return fail("Project revision limit reached.");return juce::Result::ok();}
     void publish(const juce::String& type,juce::var data={}){events.add(object({{"sequence",juce::int64(++eventSequence)},{"type",type},{"project_id",juce::String(guard.projectId())},{"revision",juce::int64(guard.revision())},{"data",data}}));if(events.size()>1024)events.removeRange(0,events.size()-1024);}
-    void advanceRevision(){guard=commands::RevisionGuard(guard.projectId(),guard.revision()+1);}
+    void advanceRevision(){cancelEffectGesture();guard=commands::RevisionGuard(guard.projectId(),guard.revision()+1);}
     void recordEdit(bool closeTransaction=true){advanceRevision();currentKey=calculateCurrentKey();cachedRevision=std::numeric_limits<std::uint64_t>::max();publish("project_changed");if(closeTransaction&&!gesture)edit->getUndoManager().beginNewTransaction();}
     Binding* find(const juce::String& id){auto i=std::find_if(bindings.begin(),bindings.end(),[&](const auto& t){return t.id==id;});return i==bindings.end()?nullptr:&*i;}
     ClipBinding* findClip(const juce::String& id,Binding** parent=nullptr){for(auto& t:bindings)for(auto& c:t.clips)if(c.id==id){if(parent)*parent=&t;return &c;}return nullptr;}
-    void choose(const juce::String& tid,const juce::String& cid={}){auto* t=find(tid);if(!t&&!bindings.empty())t=&bindings.front();selected=t?t->id:juce::String();selectedClip={};if(t&&!t->clips.empty()){auto i=std::find_if(t->clips.begin(),t->clips.end(),[&](const auto& c){return c.id==cid;});selectedClip=i==t->clips.end()?t->clips.front().id:i->id;}}
+    void choose(const juce::String& tid,const juce::String& cid={}){if(effectGesture&&tid!=selected)cancelEffectGesture();auto* t=find(tid);if(!t&&!bindings.empty())t=&bindings.front();selected=t?t->id:juce::String();selectedClip={};if(t&&!t->clips.empty()){auto i=std::find_if(t->clips.begin(),t->clips.end(),[&](const auto& c){return c.id==cid;});selectedClip=i==t->clips.end()?t->clips.front().id:i->id;}}
     void rebuild(te::Edit& target,std::vector<Binding>& out){
         out.clear();for(auto* t:te::getAudioTracks(target)){auto id=t->state[emId].toString();if(id.isEmpty())continue;Binding b{id,t,{}};
-            for(auto* clip:t->getClips()){auto cid=clip->state[emId].toString();if(cid.isEmpty())continue;const auto source=clip->state[emSource].toString();AudioInfo info;if(auto i=prepared.find(source);i!=prepared.end())info=i->second;b.clips.push_back({cid,clip->state[emAsset].toString(),source.isEmpty()?juce::File():juce::File(source),info,clip});}out.push_back(std::move(b));}
+            for(auto* clip:t->getClips()){auto cid=clip->state[emId].toString();if(cid.isEmpty())continue;const auto source=clip->state[emSource].toString();AudioInfo info,original;
+                if(auto i=prepared.find(source);i!=prepared.end())info=original=i->second;
+                const auto rendered=clip->state["emWarpRenderSource"].toString();if(rendered.isNotEmpty())if(auto i=prepared.find(rendered);i!=prepared.end())info=i->second;
+                b.clips.push_back({cid,clip->state[emAsset].toString(),source.isEmpty()?juce::File():juce::File(source),info,clip,original});}out.push_back(std::move(b));}
         if(&target==edit.get())std::erase_if(noteViews,[&](const auto& entry){for(const auto& b:out)for(const auto& c:b.clips)if(c.id==entry.first)return false;return true;});
     }
     void refreshRange(){
         duration=0;for(const auto& t:bindings)for(const auto& c:t.clips)duration=juce::jmax(duration,c.clip->getPosition().time.getEnd().inSeconds());
         auto m=metadata(*edit);double a=double(m.getProperty("loopStart",0.0)),b=double(m.getProperty("loopEnd",0.0));if(b<=a){a=0;b=duration;}
-        auto& tr=edit->getTransport();tr.setLoopRange({te::TimePosition::fromSeconds(a),te::TimePosition::fromSeconds(b)});if(b-a<0.010)tr.looping=false;if(tr.getPosition().inSeconds()>juce::jmax(duration,b))tr.setPosition(te::TimePosition::fromSeconds(duration));
+        auto& tr=edit->getTransport();tr.setLoopRange({te::TimePosition::fromSeconds(a),te::TimePosition::fromSeconds(b)});if(b-a<0.010)tr.looping=false;
     }
     void remember(const juce::String& name){if(!gesture)edit->getUndoManager().beginNewTransaction(name);}
     void finishGesture(){gesture=false;edit->getUndoManager().beginNewTransaction();}
@@ -323,19 +531,33 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
     juce::Result applyTo(te::Edit&,storage::StoredProject,std::vector<Binding>&,bool loading);
     juce::Result build(const storage::StoredProject& s,std::unique_ptr<te::Edit>& candidate,std::vector<Binding>& next){
         if(s.tracks.size()>storage::maximumTracks||s.assets.size()>storage::maximumAssets)return fail("Project object limit exceeded.");size_t n=0;for(const auto& t:s.tracks)n+=t.clips.size();if(n>storage::maximumClips)return fail("Clip limit exceeded.");
-        if(auto r=prepare(s);r.failed())return r;candidate=te::createEmptyEdit(engine,{});if(!candidate)return fail("Could not create project.");auto r=applyTo(*candidate,s,next,true);if(r.wasOk())candidate->getUndoManager().clearUndoHistory();return r;
+        if(auto r=prepare(s);r.failed())return r;candidate=te::createEmptyEdit(engine,{});if(!candidate)return fail("Could not create project.");candidate->getSceneList();auto r=applyTo(*candidate,s,next,true);if(r.wasOk()){te::TrackList::sortTracksByType(candidate->state,nullptr);candidate->getUndoManager().clearUndoHistory();}return r;
     }
     void adopt(std::unique_ptr<te::Edit> next,std::vector<Binding> bs,const juce::String& tid,const juce::String& cid={}){
-        plugins::PluginHost::closeAllEditors(*edit);edit->getTransport().stop(false,false);recording.detach();pluginHost.detachEdit(*edit);edit->state.removeListener(this);noteViews.clear();transactionControl.reset();bindings.clear();edit=std::move(next);bindings=std::move(bs);transactionControl=std::make_unique<te::Edit::UndoTransactionInhibitor>(*edit);edit->state.addListener(this);recording.attach(*edit,recordingDirectory());
-        edit->getUndoManager().setMaxNumberOfStoredUnits(1000000,64);refreshRange();choose(tid,cid);gesture=false;watchedPlugins.clear();refreshPluginWatches();currentKey=calculateCurrentKey();cachedRevision=std::numeric_limits<std::uint64_t>::max();
+        cancelEffectGesture();
+        ++analysisPreviewGeneration;if(analysisPreview)analysisPreview->stop();
+        for(const auto& j:jobs)if(j->kind.startsWith("analysis.")||j->kind.startsWith("generation."))j->cancel=true;
+        if(nativeQueue&&nativeQueueProject.isNotEmpty())nativeQueue->cancelProject(nativeQueueProject);
+        nativeQueueProject.clear();nativeRuntime.clear();nativeTrackErrors.clear();nativePending.reset();nativeLastScan=std::numeric_limits<std::uint64_t>::max();
+        plugins::PluginHost::closeAllEditors(*edit);edit->getTransport().stop(false,false);trackMeters.clear();inputMeters.clear();masterMeter.bind(nullptr);recording.detach();pluginHost.detachEdit(*edit);edit->state.removeListener(this);noteViews.clear();transactionControl.reset();bindings.clear();edit=std::move(next);clipClipboard={};lastPastedClipIds.clear();bindings=std::move(bs);transactionControl=std::make_unique<te::Edit::UndoTransactionInhibitor>(*edit);edit->state.addListener(this);recording.attach(*edit,recordingDirectory());
+        edit->getUndoManager().setMaxNumberOfStoredUnits(1000000,64);refreshRange();choose(tid,cid);gesture=false;watchedPlugins.clear();refreshPluginWatches();currentKey=calculateCurrentKey();te::TrackList::sortTracksByType(edit->state,nullptr);cachedRevision=std::numeric_limits<std::uint64_t>::max();
     }
     void timerCallback() override;
     void reapFinishedJobs(bool applyCommits);
+    bool hasBlockingFileTask()const{
+        for(const auto& job:jobs)if(job->worker.joinable()&&((!job->kind.startsWith("analysis.")&&!job->kind.startsWith("generation."))||job->kind=="analysis.accept"||job->kind=="generation.accept"))return true;
+        return false;
+    }
     std::shared_ptr<Job> startJob(const juce::String&,std::function<void(const std::shared_ptr<Job>&)>);
-    juce::Result mutate(storage::StoredProject&,const juce::String&,const juce::var&,juce::String& selectedAfter);
-    juce::Result perform(const juce::String&,const juce::var&);
+    juce::Result mutate(storage::StoredProject&,const juce::String&,const juce::var&,juce::String& selectedAfter,juce::var* batchResult=nullptr);
+    juce::Result perform(const juce::String&,const juce::var&,juce::var* commandResult=nullptr);
     juce::Result performJob(const juce::String&,const juce::var&);
     juce::Result beginSave(const juce::File&);
+    using WarpFileValidation=std::function<juce::Result(const std::function<bool()>&)>;
+    juce::Result getAudioWarp(const juce::var&,juce::var&);
+    juce::Result beginAudioWarp(const juce::var&,juce::var* = nullptr,WarpFileValidation = {},
+        std::shared_ptr<const storage::StoredAnalysis> = {},std::function<void(const juce::var&)> = {});
+    juce::Result beginWarpCandidate(storage::StoredProject,juce::String,juce::var,juce::var*,WarpFileValidation = {},std::function<void(const juce::var&)> = {});
     juce::Result setPluginParameter(const juce::var&);
     juce::var getPluginParameters(const juce::var&)const;
 };
@@ -344,13 +566,26 @@ struct EngineSession::Impl : private juce::Timer,private juce::ValueTree::Listen
 #include "EngineSessionRecording.inc"
 #include "EngineSessionParameters.inc"
 #include "EngineSessionModel.inc"
+#include "EngineSessionEffectGestures.inc"
+#include "EngineSessionNative.inc"
 #include "EngineSessionCommands.inc"
 #include "EngineSessionJobs.inc"
+#include "EngineSessionWarp.inc"
+#include "EngineSessionAnalysis.inc"
+#include "EngineSessionGeneration.inc"
+#include "EngineSessionTelemetry.inc"
+#include "EngineSessionSelection.inc"
 #include "EngineSessionPublic.inc"
+#include "../../tests/EngineSessionWarpSmoke.inc"
+#include "../../tests/EngineSessionBatchRefsSmoke.inc"
+#include "../../tests/EngineSessionGenerationSmoke.inc"
+#include "../../tests/AnalysisWorkerProcessSmoke.inc"
+#include "../../tests/EngineSessionWorkspaceSmoke.inc"
 #include "../../tests/EngineSessionSmoke.inc"
 #include "../../tests/EngineSessionProjectSmoke.inc"
 #include "../../tests/EngineSessionClipSmoke.inc"
 #include "../../tests/EngineSessionDawSmoke.inc"
+#include "../../tests/NativeLoadQueueTests.inc"
 #include "../../tests/EngineSessionProductionSmoke.inc"
 #include "../../tests/EngineSessionPluginNotificationSmoke.inc"
 }

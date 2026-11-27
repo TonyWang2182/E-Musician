@@ -5,7 +5,8 @@
 #include <functional>
 
 namespace emusician {
-class MainComponent final : public juce::Component, public juce::FileDragAndDropTarget, private juce::Timer, private juce::KeyListener {
+class MainComponent final : public juce::Component, public juce::FileDragAndDropTarget,
+    public juce::DragAndDropContainer, public juce::DragAndDropTarget, private juce::Timer, private juce::KeyListener {
 public:
     explicit MainComponent(EngineSession&);
     ~MainComponent() override;
@@ -16,15 +17,25 @@ public:
     void fileDragEnter(const juce::StringArray&, int, int) override;
     void fileDragExit(const juce::StringArray&) override;
     void filesDropped(const juce::StringArray&, int, int) override;
+    bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails&) override;
+    void itemDropped(const juce::DragAndDropTarget::SourceDetails&) override;
     void requestClose(std::function<void()> onReady);
+    void openProjectFile(const juce::File&);
     juce::Result runArrangementSmokeTest(const juce::File& outputDirectory);
     bool arrangementWaveformsReady() const;
+    void showAgent();
+    juce::Result runAgentSidebarSmokeTest(const juce::File&);
+    juce::Result runWorkspaceUISmoke(const juce::File&);
+    juce::Result runRecordingInteractionSmoke(juce::DynamicObject&, const juce::String& trackId, const juce::String& effectId);
+    juce::Result runInstalledPluginUISmoke(const juce::String& catalogId, const juce::File&);
 private:
     struct Impl;
     EngineSession& session;
     std::unique_ptr<Impl> impl;
     void timerCallback() override;
     void refreshSnapshot();
+    void synchronizeAgentSelection();
+    void toggleAgent();
     bool commitClipStart();
     void resetClipStartInput();
     void chooseSource();
@@ -39,12 +50,27 @@ private:
     void showResult(const juce::Result&);
     bool keyPressed(const juce::KeyPress& key, juce::Component*) override { return keyPressed(key); }
     void showAudioSettings();
+    void showSettings();
+    void showFileMenu();
+    void activateLibrary(const juce::String& kind, const juce::String& id, const juce::String& target = {});
+    void chooseTrackColour(const juce::String& trackId);
+    void setFollowPlayhead(bool enabled, bool persist = true);
+    void showArrangementMenu(const juce::String& kind, const juce::String& id, double seconds);
+    juce::Result setInterfaceLanguage(const juce::String&, bool persist = true);
+    void refreshInterfaceLanguage();
+    void renameTrack(const juce::String& trackId);
+    void showGenerationDock();
+    void showAnalysisDock(const juce::String& chordId = {});
     void showEditMenu();
     void showAddMenu();
     void showExportMenu();
     void showPlugins(const juce::String& trackId = {});
+    void showNativeDevice(const juce::String& trackId);
+    void showNativeEffect(const juce::String& trackId, const juce::String& deviceId = {});
     void showPianoRoll();
     void showProjectTiming();
+    void showMetronomeOptions();
+    void clipClipboardAction(const juce::String&);
     void showClipProperties();
     void chooseMidi();
     void chooseExport(bool midi, bool selectedOnly, bool realtime);

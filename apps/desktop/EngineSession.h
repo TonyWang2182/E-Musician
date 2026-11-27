@@ -1,10 +1,12 @@
 #pragma once
 #include <juce_audio_utils/juce_audio_utils.h>
 #include <cstdint>
+#include <array>
 #include <memory>
 #include <vector>
 
 namespace emusician {
+namespace native { struct SampleData; }
 // UI/control-thread facade. No UI code owns or mutates a Tracktion Edit.
 class EngineSession final {
 public:
@@ -17,6 +19,7 @@ public:
     struct PluginSlotSnapshot {
         juce::String id, name, format;
         bool enabled = true, missing = false, isInstrument = false;
+        juce::String identifier;
     };
     struct PluginDescriptorSnapshot {
         juce::String id, name, manufacturer, format;
@@ -44,6 +47,7 @@ public:
         double captureMs = 0.0, maxPluginCaptureMs = 0.0;
         juce::int64 bytesWritten = 0, bytesReused = 0;
         int pluginsCaptured = 0;
+        juce::var result;
     };
     struct ClipSnapshot {
         juce::String id, assetId;
@@ -56,8 +60,16 @@ public:
         double startBeats = 0.0, lengthBeats = 4.0, fadeIn = 0.0, fadeOut = 0.0;
         std::shared_ptr<const std::vector<NoteSnapshot>> notes;
         int controllerCount = 0;
+        juce::String analysisRole;
+        bool warpEnabled = false, warpFollowTempo = false;
+        double warpSourceBpm = 120.0, warpTargetBpm = 120.0, warpSpeedRatio = 1.0;
+        double playbackSourceOffset = 0.0, playbackSourceDuration = 0.0;
+        juce::String warpMode = "preserve_pitch";
+        juce::File originalWaveformSource;
     };
     struct TrackSnapshot {
+        float peakLeftDb = -100.0f, peakRightDb = -100.0f, inputPeakDb = -100.0f;
+        bool overloaded = false;
         juce::String id, name, format;
         juce::File source;
         // Read-only prepared playback source; MP3 points at the validated PCM cache.
@@ -75,8 +87,29 @@ public:
         juce::String monitorMode = "off";
         std::vector<SendSnapshot> sends;
         std::vector<AutomationLaneSnapshot> automation;
+        juce::String colour; // Empty = automatic; otherwise canonical #RRGGBB.
+    };
+    struct ChordRegionSnapshot {
+        juce::String id, label, analysisId, sourceName;
+        double startSeconds = 0.0, endSeconds = 0.0;
+    };
+    // Message-thread-only recording presentation. No thumbnail/engine ownership
+    // escapes the session, and these previews are never stored in the project.
+    struct RecordingPreviewSnapshot {
+        juce::String id, trackId, clipId;
+        double timelineStart = 0.0, duration = 0.0, sourceOffset = 0.0;
+        double availableDuration = 0.0;
+        int channels = 0;
+        bool finalizing = false;
     };
     struct Snapshot {
+        bool metronomeEnabled = false, metronomeRecordOnly = false, countInEnabled = false, countingIn = false;
+        int countInBars = 1;
+        float metronomeGainDb = -12.0f;
+        double countInBeatsRemaining = 0;
+        juce::int64 memoryWorkingSetBytes = 0, memoryPrivateBytes = 0;
+        float masterPeakLeftDb = -100.0f, masterPeakRightDb = -100.0f;
+        bool masterOverloaded = false;
         juce::File source;
         double duration = 0.0, position = 0.0, sampleRate = 0.0;
         juce::File waveformSource;
@@ -84,12 +117,15 @@ public:
         int channels = 0, bufferSize = 0;
         float gainDb = -6.0f;
         bool playing = false, looping = false, deviceAvailable = false;
-        bool dirty = false, canUndo = false, canRedo = false;
+        bool dirty = false, canUndo = false, canRedo = false, nativePending = false;
         juce::String deviceName, status, projectId, selectedTrackId, projectName, sourceFormat;
         juce::String selectedClipId;
         juce::String undoDescription, redoDescription;
         juce::File projectFile;
         std::vector<TrackSnapshot> tracks;
+        // Immutable projection rebuilt only when the authoritative edit revision changes.
+        // Chord annotations never become audio/MIDI tracks or a second writable model.
+        std::shared_ptr<const std::vector<ChordRegionSnapshot>> chordRegions;
         std::uint64_t revision = 0;
         double bpm = 120.0, loopStart = 0.0, loopEnd = 0.0, cpuUsage = 0.0;
         int numerator = 4, denominator = 4, xruns = 0;
@@ -102,15 +138,39 @@ public:
         juce::String recordingError;
         juce::var recordingState;
     };
+    // Process-local test isolation, set before constructing any test sessions.
+    static void setOfflineTestMode(bool);
     explicit EngineSession(bool initialiseAudioDevice = true);
     ~EngineSession();
     Snapshot snapshot() const;
+    std::vector<RecordingPreviewSnapshot> recordingPreviews() const;
+    bool drawRecordingPreview(const juce::String& projectId, const juce::String& previewId,
+                              juce::Graphics&, juce::Rectangle<int>, double sourceStart,
+                              double sourceEnd, float verticalZoom) const;
+    void releaseRecordingPreview(const juce::String& projectId, const juce::String& previewId);
+    // Transient read-only UI data: matching published sample only, never a mutation.
+    std::shared_ptr<const native::SampleData> nativeSampleForDisplay(
+        const juce::String& projectId, std::uint64_t revision, const juce::String& trackId,
+        const juce::String& deviceId, int pad, const juce::String& expectedHash) const;
+    // Transient wet-path compressor meter; no project revision or Undo changes.
+    bool nativeCompressorMeter(const juce::String& projectId, const juce::String& trackId,
+                               const juce::String& deviceId, float& reductionDb, std::uint64_t& sequence) const;
+    bool nativeEffectSpectrum(const juce::String& projectId, const juce::String& trackId,
+                              const juce::String& deviceId, std::array<float, 2048>&, std::uint64_t& sequence) const;
     // GUI and local Agent requests share this dispatcher; all editing is serialized
     // on the message thread. Transport reads never change the project revision.
-    juce::Result execute(const juce::String& command, const juce::var& args, std::uint64_t expectedRevision);
+    juce::Result execute(const juce::String& command, const juce::var& args, std::uint64_t expectedRevision,
+                         juce::var* commandResult = nullptr);
     juce::var executeRequest(const juce::var& envelope);
     juce::var capabilities() const;
     juce::var snapshotJson() const;
+    // Message-thread UI projection only; never changes music revision/dirty/Undo.
+    void setSelectionContext(const juce::var& context);
+    juce::var selectionContext() const;
+    juce::Result runSelectionContextSmokeTest(juce::DynamicObject& report);
+    juce::Result runBatchRefsSmokeTest(juce::DynamicObject& report);
+    juce::Result runGenerationEngineSmokeTest(juce::DynamicObject& report, const juce::File& outputDirectory);
+    juce::Result runWorkspaceEngineSmokeTest(juce::DynamicObject& report, const juce::File& outputDirectory);
     juce::var eventsSince(std::uint64_t sequence) const;
     bool hasActiveJobs() const;
     void cancelAllJobs();
@@ -138,9 +198,11 @@ public:
     void setLoop(bool enabled);
     void setGain(float decibels);
     juce::AudioDeviceManager& deviceManager();
+    bool isControlBusy() const;
     juce::Result runOfflineSmokeTest(const juce::File& outputDirectory);
     juce::Result runProjectSmokeTest(const juce::File& outputDirectory, const juce::File& fixtureDirectory);
     juce::Result runClipSmokeTest(const juce::File& outputDirectory);
+    juce::Result runAudioWarpSmokeTest(const juce::File& outputDirectory, const std::vector<juce::File>& audioFixtures);
     juce::Result runDawSmokeTest(const juce::File& outputDirectory, const juce::File& fixtureDirectory);
     juce::Result runProductionSmokeTest(const juce::File& outputDirectory);
     juce::Result runPluginNotificationSmoke(const juce::File& outputDirectory, const juce::String& catalogId);

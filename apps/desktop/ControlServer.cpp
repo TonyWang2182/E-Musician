@@ -430,6 +430,10 @@ struct ControlServer::Impl final : private juce::AsyncUpdater, private juce::Tim
     void handleAsyncUpdate() override
     {
         if (stopping || quitNotified) return;
+        // A vendor can pump this dispatcher while a project operation owns
+        // the Edit. Leave frames queued; the regular timer resumes dispatch
+        // after that operation returns, without exposing a half-built state.
+        if (session.isControlBusy()) return;
         for (int count = 0; count < 8 && !outputFailed; ++count) {
             Frame frame;
             {

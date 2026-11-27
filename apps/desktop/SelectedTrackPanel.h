@@ -11,10 +11,13 @@ public:
     ~SelectedTrackPanel() override;
     void update(const EngineSession::Snapshot&);
     void showDevices();
+    bool isMasterView() const;
     void resized() override;
     void paint(juce::Graphics&) override;
     std::function<void(const juce::Result&)> onResult;
     std::function<void(const juce::String&)> onBrowsePlugins;
+    std::function<void(const juce::String&)> onOpenNative;
+    std::function<void(const juce::String&, const juce::String&)> onOpenNativeEffect;
     juce::Result runInteractionSmokeTest(juce::DynamicObject&);
 private:
     struct Impl;

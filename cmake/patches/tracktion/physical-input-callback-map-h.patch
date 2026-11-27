@@ -1,0 +1,13 @@
+--- a/modules/tracktion_engine/playback/tracktion_DeviceManager.h
++++ b/modules/tracktion_engine/playback/tracktion_DeviceManager.h
+@@ -270,6 +270,10 @@
+     std::unique_ptr<juce::AudioProcessor> globalOutputAudioProcessor;
+     juce::HeapBlock<const float*> inputChannelsScratch;
+     juce::HeapBlock<float*> outputChannelsScratch;
++    // Prepared while callbacks are suspended; never resized by the audio thread.
++    std::vector<int> inputDeviceChannelToCallback;
++    std::vector<const float*> physicalInputChannels;
++    int numActiveInputChannels = 0;
+ 
+     mutable std::shared_mutex midiInputsMutex;
+ 

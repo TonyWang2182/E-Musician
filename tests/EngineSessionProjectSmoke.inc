@@ -2,6 +2,18 @@
 juce::Result EngineSession::runProjectSmokeTest(const juce::File& directory, const juce::File& fixtureDirectory)
 {
     requireControlThread();
+    struct ScopedAudioCache {
+        juce::String previous=juce::SystemStats::getEnvironmentVariable("EMUSICIAN_AUDIO_CACHE_ROOT",{});
+        explicit ScopedAudioCache(const juce::String& value){set(value);}
+        ~ScopedAudioCache(){set(previous);}
+        static void set(const juce::String& value){
+#if JUCE_WINDOWS
+            _putenv_s("EMUSICIAN_AUDIO_CACHE_ROOT",value.toRawUTF8());
+#else
+            if(value.isEmpty())unsetenv("EMUSICIAN_AUDIO_CACHE_ROOT");else setenv("EMUSICIAN_AUDIO_CACHE_ROOT",value.toRawUTF8(),1);
+#endif
+        }
+    } scopedCache(directory.getChildFile("owned-audio-cache").getFullPathName());
     int checks = 0;
     const auto check = [&](bool condition, const juce::String& message) {
         if (!condition) throw std::runtime_error(("Project smoke: " + message).toStdString());
@@ -16,11 +28,15 @@ juce::Result EngineSession::runProjectSmokeTest(const juce::File& directory, con
         check(!ownedSources.exists(), "source fixture directory must be fresh");
         okay(ownedSources.createDirectory(), "create source fixture directory");
         const auto wav = ownedSources.getChildFile("source.wav");
-        const auto cbr = ownedSources.getChildFile(juce::String::fromUTF8("测试 CBR.MP3"));
+        const auto cbr = ownedSources.getChildFile(juce::String::fromUTF8("\xe6\xb5\x8b\xe8\xaf\x95 CBR.MP3"));
         const auto vbr = ownedSources.getChildFile("mono VBR.mp3");
         check(directory.getChildFile("generated-tone.wav").copyFileTo(wav), "copy owned WAV");
         check(fixtureDirectory.getChildFile("stereo-cbr-48000.mp3").copyFileTo(cbr), "copy CBR fixture to Unicode/uppercase path");
         check(fixtureDirectory.getChildFile("mono-vbr-44100.mp3").copyFileTo(vbr), "copy VBR fixture");
+        ScopedAudioCache::set("relative-cache-is-invalid");audio::PreparedSource rejectedCache;
+        const auto invalidCacheRoot=audio::prepareSource(cbr,rejectedCache);
+        check(invalidCacheRoot.failed()&&invalidCacheRoot.getErrorMessage().contains("absolute")&&rejectedCache.playbackFile==juce::File(),"relative audio-cache root is rejected without fallback");
+        ScopedAudioCache::set(directory.getChildFile("owned-audio-cache").getFullPathName());
 
         // This performs a real Tracktion render, not a reader-only or synthetic output check.
         const auto render = [&](EngineSession& target, const juce::String& name) {
@@ -78,6 +94,7 @@ juce::Result EngineSession::runProjectSmokeTest(const juce::File& directory, con
                   && state.tracks[0].waveformSource != source
                   && state.tracks[0].waveformSource.hasFileExtension("wav")
                   && state.tracks[0].waveformSource.existsAsFile(), "per-track MP3 waveform uses prepared PCM");
+            check(state.waveformSource.isAChildOf(directory.getChildFile("owned-audio-cache/audio-v1")),"MP3 cache honors absolute root override");
             check(state.channels == (index == 0 ? 2 : 1)
                   && state.sourceSampleRate == (index == 0 ? 48000 : 44100), "MP3 decoded channels/sample rate");
             check(std::abs(state.sourceDuration - 2.0) < 0.12, "MP3 duration with codec padding tolerance: "

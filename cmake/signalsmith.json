@@ -1,0 +1,47 @@
+{
+    "schema":  1,
+    "renderer":  "signalsmith-1.3.2-88061fd4-linear-0.6.6-v1",
+    "libraries":  [
+                      {
+                          "url":  "https://github.com/Signalsmith-Audio/signalsmith-stretch.git",
+                          "name":  "Signalsmith Stretch",
+                          "directory":  "_deps/signalsmith-stretch",
+                          "commit":  "88061fd4eda56a2353c5d65c74aa3f4ccf76f9da",
+                          "files":  {
+                                        "include/signalsmith-stretch/signalsmith-stretch.h":  "869facc1853189bec91fb54960da2f59333284963d6b52a242d55a399d305e4d",
+                                        "LICENSE.txt":  "16bf62d475af149d96a24853e77c9e0d939259a9d55b23b41da7f9939db85085",
+                                        "signalsmith-stretch.h":  "45a0b93b1e00257014d48e7ae494ec4e604f56b4ee15189a355cd9794653a37d"
+                                    },
+                          "license":  "MIT"
+                      },
+                      {
+                          "url":  "https://github.com/Signalsmith-Audio/linear.git",
+                          "name":  "Signalsmith Linear",
+                          "directory":  "_deps/signalsmith-linear",
+                          "commit":  "7bb1c8f36794d6980080ce817c91f8da8fe56a66",
+                          "files":  {
+                                        "approx.h":  "bc3e6dfb911ac50fb5841784b5633751fc14ae9b0f881a88b427c60c7a628cf1",
+                                        "fft.h":  "af0df3ff84c6f69ec00f09e0e53634b7ccacd3198a4acb2b482cb7d93854d207",
+                                        "include/signalsmith-linear/approx.h":  "eac208cc0e94556dde10e1d9bb0d53d8df9453aa8d2157421073f0497649ec3b",
+                                        "include/signalsmith-linear/fft.h":  "30e4054a9df4f1f31318ffefb43b52d69378788a344fb09c8995a36d5bc28148",
+                                        "include/signalsmith-linear/linear.h":  "38560f893be3ecbd18e6ce45b17dc7c3f3d3e4e6ed2890572b4aba385e36c03d",
+                                        "include/signalsmith-linear/stft.h":  "db40c535f6554daf2f0a12540730dc22bce71c5007210e515f463a0cbd1a16b7",
+                                        "LICENSE.txt":  "a91f5703b0f5fa22e8c14a8bd854559a7c512bbe58656ea8bdcd4964e923ab2f",
+                                        "linear.h":  "88b95d8cc319acbbde75efcda65c981cae187e5ff09eb75f2eee2b379d899056",
+                                        "platform/approx-cmsisdsp.h":  "190d7487b4afc4353e8b5205bb78be0eab48fb180c11647d56beb57ddeab4994",
+                                        "platform/basic-fill-warnings.h":  "5f21ba12381d360dc166d034723dfbd43f5676dc4b2131f99a633fc9ab9935b2",
+                                        "platform/fft-accelerate.h":  "bbd6b46002acf8eedaf35aad07e2a15c18dd23cd8ff91d7afb0a72bb65c6dae6",
+                                        "platform/fft-cmsisdsp.h":  "3f5325069321b29529d6d5b52964f0d409acad2f46bd87b06897f4ba038430c7",
+                                        "platform/fft-ipp.h":  "1a97d8b6e5a3f102ee82c9bca05eee3947b57686665ef9e04541fa549ca01998",
+                                        "platform/fft-linear.h":  "151fc3f0be8f698ed7d3c529f397c0a04ccf3d96e9abc12d12157873805ee183",
+                                        "platform/fft-pffft.h":  "5d8672af99a0501d6cb5847f577011832ac37d76e3e79835961d9ce22bdb2e43",
+                                        "platform/fft-pffft-double.h":  "d76907bfb3b9e316355cb32a9d64ac88e79bb22c8c80fbf3dad1eec1cfc87628",
+                                        "platform/linear-accelerate.h":  "8a6c881b7dcd58e23c352fa69441a57243730e7a7da0d7400f339e601af04faf",
+                                        "platform/linear-cmsisdsp.h":  "2139c77e8c983c9338d653fd418fa6d34a15cd81b86c5714bed6949590691184",
+                                        "platform/linear-xsimd.h":  "c950c7abae024a6f2755f2cd050bce31fe9a5b098db9fa2c4828120b382d7db1",
+                                        "stft.h":  "c186bb805ba931c16b8da98eb1ccf66afa28117c18d3a31223948013ad88d0c8"
+                                    },
+                          "license":  "MIT"
+                      }
+                  ]
+}

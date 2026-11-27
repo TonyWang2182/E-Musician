@@ -1,10 +1,98 @@
 {
   "version": "2.0.0",
   "tasks": [
-    {"label": "E-musician: configure", "type": "process", "command": "python", "args": ["scripts/dev.py", "configure"], "options": {"cwd": "${workspaceFolder}"}, "problemMatcher": []},
-    {"label": "E-musician: build Debug", "type": "process", "command": "python", "args": ["scripts/dev.py", "build", "--config", "Debug"], "dependsOn": "E-musician: configure", "options": {"cwd": "${workspaceFolder}"}, "group": {"kind": "build", "isDefault": true}, "problemMatcher": "$msCompile"},
-    {"label": "E-musician: test Debug", "type": "process", "command": "python", "args": ["scripts/dev.py", "test", "--config", "Debug"], "dependsOn": "E-musician: build Debug", "options": {"cwd": "${workspaceFolder}"}, "group": "test", "problemMatcher": []},
-    {"label": "E-musician: check Release", "type": "process", "command": "python", "args": ["scripts/dev.py", "check", "--config", "Release"], "options": {"cwd": "${workspaceFolder}"}, "problemMatcher": "$msCompile"},
-    {"label": "E-musician: dependencies", "type": "process", "command": "python", "args": ["scripts/dev.py", "bootstrap"], "options": {"cwd": "${workspaceFolder}"}, "problemMatcher": []}
+    {
+      "label": "E-musician: configure",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "scripts/dev.py",
+        "configure"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "E-musician: build Debug",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "scripts/dev.py",
+        "build",
+        "--config",
+        "Debug"
+      ],
+      "dependsOn": "E-musician: configure",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "E-musician: test Debug",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "scripts/dev.py",
+        "test",
+        "--config",
+        "Debug"
+      ],
+      "dependsOn": "E-musician: build Debug",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "E-musician: check Release",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "scripts/dev.py",
+        "check",
+        "--config",
+        "Release"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "E-musician: dependencies",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "scripts/dev.py",
+        "bootstrap"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "E-musician: run Release",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "scripts/dev.py",
+        "run",
+        "--config",
+        "Release"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
   ]
 }

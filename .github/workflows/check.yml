@@ -1,0 +1,29 @@
+name: Source checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Public source checks
+        run: python scripts/check_public_tree.py
+      - name: Configure DSP and command contracts
+        run: cmake -S . -B build -DEMUSICIAN_BUILD_DESKTOP=OFF
+      - name: Build
+        run: cmake --build build --config Release --parallel 2
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Assistant unit tests
+        run: python -m unittest discover -s tests -p "test_music_agent*.py"

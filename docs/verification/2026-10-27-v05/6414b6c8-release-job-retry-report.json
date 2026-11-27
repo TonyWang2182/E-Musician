@@ -1,7 +1,0 @@
-{
-  "schema_version": 1,
-  "test_version": 1,
-  "status": "passed",
-  "checks": 30,
-  "scope": "Real invalid-destination Save and immediate retry without timer pumping; newer edit retention; gated active worker; pending import revision conflict"
-}

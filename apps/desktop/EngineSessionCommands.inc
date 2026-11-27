@@ -11,7 +11,16 @@ storage::StoredTrack* storedTrack(storage::StoredProject& s,const juce::String& 
 storage::StoredClip* storedClip(storage::StoredProject& s,const juce::String& id,storage::StoredTrack** parent=nullptr)
 {for(auto& t:s.tracks)for(auto& c:t.clips)if(c.id==id){if(parent)*parent=&t;return &c;}return nullptr;}
 void pruneAssets(storage::StoredProject& s)
-{std::erase_if(s.assets,[&](const auto& a){for(const auto& t:s.tracks)for(const auto& c:t.clips)if(c.assetId==a.id)return false;return true;});}
+{
+ std::set<juce::String> nativeIds;
+ const auto collect=[&](const auto& plugins){for(const auto& plugin:plugins)if(plugin.format=="E-musician"){
+     std::vector<juce::String> ids;if(storage::nativePluginAssetIds(plugin,ids).failed())return false;
+     nativeIds.insert(ids.begin(),ids.end());}return true;};
+ if(!collect(s.masterPlugins))return;
+ for(const auto& track:s.tracks)if(!collect(track.plugins))return;
+ std::erase_if(s.assets,[&](const auto& a){if(nativeIds.contains(a.id))return false;
+     for(const auto& t:s.tracks)for(const auto& c:t.clips)if(c.assetId==a.id||(c.warp.enabled&&c.warp.renderAssetId==a.id))return false;return true;});
+}
 void syncMidiSeconds(storage::StoredProject& s)
 {for(auto& t:s.tracks)for(auto& c:t.clips)if(c.kind=="midi"){c.timelineStart=time::beatsToSeconds(c.startBeats,s.bpm);c.duration=time::beatsToSeconds(c.lengthBeats,s.bpm);c.sourceOffset=0;}}
 std::vector<storage::StoredControllerEvent> sliceControllers(const std::vector<storage::StoredControllerEvent>& source,
@@ -19,9 +28,10 @@ std::vector<storage::StoredControllerEvent> sliceControllers(const std::vector<s
 {
     using Event=storage::StoredControllerEvent;using Key=std::pair<int,int>;
     std::vector<Event> result;std::map<Key,Event> preceding;std::set<Key> atBoundary;
-    const auto key=[](const Event& e){return Key{e.type,e.type==0x1004?e.metadata:0};};
-    const auto stateful=[](const Event& e){return (e.type>=0&&e.type<120)||e.type==0x1001
-        ||e.type==0x1004||e.type==0x1005||e.type==0x1007;};
+    const auto key=[](const Event& e){return Key{e.type,e.type==te::MidiControllerEvent::aftertouchType?e.metadata:0};};
+    const auto stateful=[](const Event& e){return e.type==1||e.type==2||e.type==4||e.type==7||e.type==8||e.type==10||e.type==11
+        ||(e.type>=64&&e.type<=79)||(e.type>=91&&e.type<=95)||e.type==te::MidiControllerEvent::pitchWheelType
+        ||e.type==te::MidiControllerEvent::aftertouchType||e.type==te::MidiControllerEvent::channelPressureType;};
     for(auto event:source){
         if(event.beats<start){
             if(stateful(event)){auto found=preceding.find(key(event));
@@ -31,8 +41,9 @@ std::vector<storage::StoredControllerEvent> sliceControllers(const std::vector<s
             if(newIds)event.id=uid();result.push_back(std::move(event));
         }
     }
-    // Chase persistent controller state at the new edge. Channel-mode actions
-    // (all-sound/all-notes-off etc., CC >= 120) must never be replayed here.
+    // Chase only independent retained state at the edge. Bank/program changes,
+    // RPN/NRPN/data-entry sequences and increment/channel-mode actions cannot
+    // safely be reconstructed by key sorting, so are not synthesized.
     std::vector<Event> chased;
     for(auto& [type,event]:preceding)if(!atBoundary.contains(type)){event.id=uid();event.beats=0;chased.push_back(std::move(event));}
     // Prior state precedes real boundary events (for example bank-select before
@@ -43,23 +54,96 @@ std::vector<storage::StoredControllerEvent> sliceControllers(const std::vector<s
 }
 }
 
-juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::String& cmd,const juce::var& a,juce::String& chooseAfter)
+juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::String& cmd,const juce::var& a,juce::String& chooseAfter,juce::var* batchResult)
 {
     if(!a.isObject())return juce::Result::fail("Command arguments must be an object.");
     auto bad=[](const juce::String& x){return juce::Result::fail(x);};
     auto* t=storedTrack(s,textArg(a,"track_id"));
     auto* c=storedClip(s,textArg(a,"clip_id"));
+    juce::var completedBatch;
     if(cmd=="batch"){
         auto v=a.getProperty("commands",{});auto* list=v.getArray();
         if(!list||list->isEmpty()||list->size()>100)return bad("Batch needs 1 to 100 editing commands.");
-        for(const auto& child:*list){auto name=textArg(child,"command");if(name=="batch")return bad("Nested batches are not supported.");
-            if(auto r=mutate(s,name,child.getProperty("args",object({})),chooseAfter);r.failed())return r;}
+        struct Reference {juce::String id;int type;}; // 0 clip, 1 track, 2 native effect
+        std::map<juce::String,Reference> references;
+        const auto validAlias=[](const juce::String& value){
+            if(value.isEmpty()||value.length()>40)return false;
+            const auto letter=[](juce::juce_wchar ch){return (ch>='A'&&ch<='Z')||(ch>='a'&&ch<='z');};
+            if(!letter(value[0]))return false;
+            for(int i=1;i<value.length();++i){const auto ch=value[i];if(!letter(ch)&&!(ch>='0'&&ch<='9')&&ch!='_'&&ch!='-')return false;}
+            return true;
+        };
+        const auto resolveId=[&](const juce::var& value,int type,juce::String& resolved){
+            if(!value.isString())return bad("Batch object references must be strings.");
+            resolved=value.toString();if(!resolved.startsWithChar('@'))return juce::Result::ok();
+            const auto alias=resolved.substring(1);const auto found=references.find(alias);
+            if(!validAlias(alias)||found==references.end())return bad("Unknown or forward batch reference: "+resolved);
+            if(found->second.type!=type)return bad("Batch reference has the wrong object type: "+resolved);
+            resolved=found->second.id;return juce::Result::ok();
+        };
+        for(const auto& child:*list){
+            if(!child.isObject())return bad("Each batch child must be an object.");
+            for(const auto& field:child.getDynamicObject()->getProperties())
+                if(field.name.toString()!="command"&&field.name.toString()!="args"&&field.name.toString()!="as")return bad("Unknown batch child field: "+field.name.toString());
+            const auto name=textArg(child,"command");
+            if(name.isEmpty()||name=="batch")return bad("A batch child requires a non-nested editing command.");
+            auto parameters=child.getProperty("args",object({})).clone();
+            if(!parameters.isObject())return bad("Batch child args must be an object.");
+            juce::String alias;
+            if(child.hasProperty("as")){
+                if(!child["as"].isString()||!validAlias(alias=child["as"].toString()))return bad("Batch alias must match [A-Za-z][A-Za-z0-9_-]{0,39}.");
+                if(references.contains(alias))return bad("Batch aliases must be unique.");
+                if(name!="create_track"&&name!="create_midi_clip"&&name!="duplicate_clips"&&name!="add_native_effect")return bad("This command cannot produce a batch reference.");
+            }
+            // Only these typed object-ID positions are references. Names, note
+            // payloads, plugin IDs and arbitrary nested strings stay literal.
+            for(const auto* key:{"track_id","target_track_id","clip_id"})if(parameters.hasProperty(key)){
+                juce::String resolved;if(auto r=resolveId(parameters[key],juce::String(key)!="clip_id"?1:0,resolved);r.failed())return r;
+                parameters.getDynamicObject()->setProperty(key,resolved);
+            }
+            if(name=="set_native_effect"&&parameters.hasProperty("device_id")){
+                juce::String resolved;if(auto r=resolveId(parameters["device_id"],2,resolved);r.failed())return r;
+                parameters.getDynamicObject()->setProperty("device_id",resolved);
+            }
+            if(parameters.hasProperty("clip_ids")){
+                auto* values=parameters["clip_ids"].getArray();if(!values)return bad("clip_ids must be an array.");
+                juce::Array<juce::var> resolvedIds;
+                for(const auto& value:*values){juce::String resolved;if(auto r=resolveId(value,0,resolved);r.failed())return r;resolvedIds.add(resolved);}
+                parameters.getDynamicObject()->setProperty("clip_ids",resolvedIds);
+            }
+            if(alias.isNotEmpty()&&name=="duplicate_clips"&&idsArg(parameters,"clip_ids").size()!=1)
+                return bad("A duplicate_clips alias requires exactly one source clip.");
+            // All children still validate the same private candidate. Retain the
+            // existing intermediate invariants; nothing reaches the live Edit.
+            juce::var childResult;
+            if(auto r=mutate(s,name,parameters,chooseAfter,&childResult);r.failed())return r;
+            if(alias.isNotEmpty()){
+                const int type=name=="create_track"?1:name=="add_native_effect"?2:0;
+                const auto id=type==1?s.tracks.back().id:type==2?childResult["device_id"].toString():chooseAfter;
+                if(id.isEmpty()||(type==1&&storedTrack(s,id)==nullptr)||(type==0&&storedClip(s,id)==nullptr))return bad("Batch command produced no reference target.");
+                references.emplace(alias,Reference{id,type});
+            }
+        }
+        auto refs=object({});
+        for(const auto& [alias,reference]:references){
+            bool exists=reference.type==1?storedTrack(s,reference.id)!=nullptr:reference.type==0?storedClip(s,reference.id)!=nullptr:false;
+            if(reference.type==2){for(const auto& p:s.masterPlugins)if(p.id==reference.id)exists=true;
+                for(const auto& t:s.tracks)for(const auto& p:t.plugins)if(p.id==reference.id)exists=true;}
+            if(!exists)return bad("A batch reference target was removed before commit.");
+            refs.getDynamicObject()->setProperty(alias,reference.id);
+        }
+        completedBatch=object({{"refs",refs},{"executed_commands",list->size()}});
     }else if(cmd=="create_track"){
+        if(a.hasProperty("id")||a.hasProperty("track_id"))return bad("New track IDs are assigned by the engine.");
         storage::StoredTrack added;added.id=uid();added.kind=textArg(a,"kind");added.name=textArg(a,"name").trim();
         if(added.kind!="audio"&&added.kind!="instrument"&&added.kind!="bus")return bad("Track kind must be audio, instrument or bus.");
         if(added.name.isEmpty())added.name=added.kind=="audio"?"Audio":added.kind=="bus"?"Bus":"MIDI";s.tracks.push_back(std::move(added));
     }else if(cmd=="rename_track"){
         if(!t)return bad("Track no longer exists.");auto name=textArg(a,"name").trim();if(name.isEmpty()||name.length()>200)return bad("Track name must contain 1 to 200 characters.");t->name=name;
+    }else if(cmd=="set_track_colour"){
+        if(!a["track_id"].isString()||a.getDynamicObject()->getProperties().size()!=2)return bad("Track colour needs only track_id and colour.");
+        if(!t)return bad("Track no longer exists.");
+        if(auto result=storage::canonicalTrackColour(a["colour"],t->colour);result.failed())return result;
     }else if(cmd=="reorder_track"){
         if(!t)return bad("Track no longer exists.");double index=number(a,"index");if(!std::isfinite(index)||index!=std::floor(index)||index<0||index>=s.tracks.size())return bad("Invalid track order.");
         auto copy=*t;std::erase_if(s.tracks,[&](const auto& x){return x.id==copy.id;});s.tracks.insert(s.tracks.begin()+int(index),std::move(copy));
@@ -75,11 +159,17 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
         else{const auto key=cmd=="set_track_muted"?"muted":"solo";auto v=a.getProperty(key,{});if(!v.isBool())return bad("Expected a boolean track setting.");if(cmd=="set_track_muted")t->muted=bool(v);else t->solo=bool(v);}
     }else if(cmd=="set_master_gain")s.masterGainDb=float(number(a,"gain_db"));
     else if(cmd=="set_loop") {auto v=a.getProperty("enabled",{});if(!v.isBool())return bad("Loop enabled must be boolean.");s.looping=bool(v);}
-    else if(cmd=="set_tempo"){s.bpm=number(a,"bpm");if(!std::isfinite(s.bpm)||s.bpm<20||s.bpm>300)return bad("Tempo must be 20 to 300 BPM.");syncMidiSeconds(s);}
+    else if(cmd=="set_tempo"){
+        const double old=s.bpm;s.bpm=number(a,"bpm");if(!std::isfinite(s.bpm)||s.bpm<20||s.bpm>300)return bad("Tempo must be 20 to 300 BPM.");
+        for(auto& track:s.tracks)for(auto& clip:track.clips)if(clip.warp.enabled&&clip.warp.followTempo){
+            const auto scale=old/s.bpm;clip.timelineStart*=scale;clip.duration*=scale;clip.fadeIn*=scale;clip.fadeOut*=scale;clip.warp.targetBpm=s.bpm;
+        }syncMidiSeconds(s);
+    }
     else if(cmd=="set_time_signature"){
         auto n=number(a,"numerator"),d=number(a,"denominator");if(!std::isfinite(n)||!std::isfinite(d)||n!=std::floor(n)||d!=std::floor(d)||n<1||n>32||d<1||d>32)return bad("Time signature must use supported integer values.");s.numerator=int(n);s.denominator=int(d);
     }else if(cmd=="set_loop_range"){s.loopStart=number(a,"start_seconds");s.loopEnd=number(a,"end_seconds");}
     else if(cmd=="create_midi_clip"){
+        if(a.hasProperty("id")||a.hasProperty("clip_id"))return bad("New clip IDs are assigned by the engine.");
         if(!t||t->kind!="instrument")return bad("Choose a MIDI instrument track.");storage::StoredClip added;added.id=uid();added.kind="midi";added.startBeats=number(a,"start_beats");added.lengthBeats=number(a,"length_beats");chooseAfter=added.id;t->clips.push_back(std::move(added));syncMidiSeconds(s);
     }else if(cmd=="write_notes"||cmd=="edit_notes"){
         if(!c||c->kind!="midi")return bad("Choose a MIDI clip.");auto value=a.getProperty(cmd=="write_notes"?"notes":"upsert",juce::var(juce::Array<juce::var>{}));auto* notes=value.getArray();
@@ -112,11 +202,41 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
         for(const auto& id:ids){storage::StoredTrack* parent=nullptr;auto* clip=storedClip(s,id,&parent);if(!clip||!unique.insert(id).second)return bad("A clip is missing or repeated.");if(target&&target->kind!=parent->kind)return bad("Audio and MIDI clips need matching track types.");auto next=*clip;next.timelineStart+=delta;if(next.timelineStart<0)return bad("Clips cannot start before zero.");if(next.kind=="midi")next.startBeats=time::secondsToBeats(next.timelineStart,s.bpm);moving.push_back({target?target->id:parent->id,std::move(next)});}
         for(auto& track:s.tracks)std::erase_if(track.clips,[&](const auto& clip){return unique.contains(clip.id);});
         for(auto& [tid,clip]:moving)storedTrack(s,tid)->clips.push_back(std::move(clip));
+    }else if(cmd=="paste_clips"){
+        if(clipClipboard.clips.empty()||clipClipboard.projectId!=juce::String(guard.projectId()))return bad("Copy clips from this project before pasting.");
+        if(a.hasProperty("clipboard_id")&&(!a["clipboard_id"].isString()||a["clipboard_id"].toString()!=clipClipboard.id))return bad("Clipboard changed. Copy again or read its current identity before pasting.");
+        if(a.hasProperty("target_track_id")&&!a["target_track_id"].isString())return bad("target_track_id must be a string.");
+        const auto at=number(a,"start_seconds");const auto targetId=textArg(a,"target_track_id");
+        if(!std::isfinite(at)||at<0||at>storage::maximumTimelineSeconds)return bad("Paste position is outside the project timeline.");
+        int targetRow=-1;for(size_t i=0;i<s.tracks.size();++i)if(s.tracks[i].id==targetId)targetRow=int(i);
+        if(targetId.isNotEmpty()&&targetRow<0)return bad("The paste target track no longer exists.");
+        // Clipboard holds content, so deleting/changing its source clips does not
+        // change a later paste. Never create plugin instances or duplicate media.
+        for(const auto& asset:clipClipboard.assets){
+            const auto found=std::find_if(s.assets.begin(),s.assets.end(),[&](const auto& x){return x.id==asset.id;});
+            if(found==s.assets.end())s.assets.push_back(asset);
+            // Save As may relocate a stable asset into its new .assets folder.
+            // The current project owns its canonical path; do not restore the old path.
+        }
+        const bool musicalOnly=std::all_of(clipClipboard.clips.begin(),clipClipboard.clips.end(),[](const auto& entry){return entry.clip.kind=="midi";});
+        for(const auto& entry:clipClipboard.clips){
+            storage::StoredTrack* destination=nullptr;
+            if(targetRow<0)destination=storedTrack(s,entry.trackId);
+            else {const int row=targetRow+entry.row-clipClipboard.firstRow;if(row>=0&&row<int(s.tracks.size()))destination=&s.tracks[size_t(row)];}
+            if(!destination||destination->kind!=entry.trackKind)return bad("Paste needs matching audio/MIDI tracks in the same relative row positions.");
+            auto copy=entry.clip;copy.id=uid();copy.timelineStart=at+(copy.timelineStart-clipClipboard.originSeconds);
+            if(copy.kind=="midi"){
+                copy.startBeats=musicalOnly?time::secondsToBeats(at,s.bpm)+entry.clip.startBeats-time::secondsToBeats(clipClipboard.originSeconds,clipClipboard.originBpm)
+                    :time::secondsToBeats(copy.timelineStart,s.bpm);
+                for(auto& n:copy.notes)n.id=uid();for(auto& e:copy.controllers)e.id=uid();
+            }
+            chooseAfter=copy.id;destination->clips.push_back(std::move(copy));
+        }
     }else if(cmd=="trim_clip"){
         if(!c)return bad("Clip no longer exists.");auto start=number(a,"start_seconds"),end=number(a,"end_seconds");
         if(!std::isfinite(start)||!std::isfinite(end)||start<0||end<=start)return bad("Clip trim needs a positive range.");
         if(c->kind=="audio"){
-            c->sourceOffset=number(a,"source_offset",c->sourceOffset+start-c->timelineStart);c->timelineStart=start;c->duration=end-start;
+            c->sourceOffset=number(a,"source_offset",c->sourceOffset+(start-c->timelineStart)*c->warp.speedRatio());c->timelineStart=start;c->duration=end-start;
             c->fadeIn=juce::jmin(c->fadeIn,c->duration);c->fadeOut=juce::jmin(c->fadeOut,c->duration-c->fadeIn);
         }else{
             auto delta=time::secondsToBeats(start,s.bpm)-c->startBeats;c->startBeats=time::secondsToBeats(start,s.bpm);c->lengthBeats=time::secondsToBeats(end-start,s.bpm);
@@ -126,10 +246,10 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
         }
     }else if(cmd=="split_clip"){
         storage::StoredTrack* parent=nullptr;c=storedClip(s,textArg(a,"clip_id"),&parent);if(!c)return bad("Clip no longer exists.");const auto at=number(a,"at_seconds");
-        if(!std::isfinite(at)||at-c->timelineStart<0.001||c->timelineStart+c->duration-at<0.001)return bad("Split must leave at least 1 ms on each side.");
+        if(!std::isfinite(at)||at-c->timelineStart<time::minimumEditSpanSeconds||c->timelineStart+c->duration-at<time::minimumEditSpanSeconds)return bad("Split must leave at least 1 microsecond on each side.");
         auto right=*c;right.id=uid();chooseAfter=right.id;double left=at-c->timelineStart;
         right.timelineStart=at;right.duration=c->duration-left;c->duration=left;
-        if(c->kind=="audio"){right.sourceOffset+=left;right.fadeIn=0;right.fadeOut=juce::jmin(right.fadeOut,right.duration);c->fadeOut=0;c->fadeIn=juce::jmin(c->fadeIn,c->duration);}
+        if(c->kind=="audio"){right.sourceOffset+=left*c->warp.speedRatio();right.fadeIn=0;right.fadeOut=juce::jmin(right.fadeOut,right.duration);c->fadeOut=0;c->fadeIn=juce::jmin(c->fadeIn,c->duration);}
         else{
             double beat=time::secondsToBeats(left,s.bpm);c->lengthBeats=beat;right.startBeats+=beat;right.lengthBeats-=beat;right.notes.clear();std::vector<storage::StoredNote> leftNotes;
             right.controllers=sliceControllers(c->controllers,beat,right.lengthBeats,true);
@@ -143,6 +263,8 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
         for(auto& track:s.tracks){if(cmd=="delete_clips")std::erase_if(track.clips,[&](const auto& clip){return chosen.contains(clip.id);});
             else{auto originals=track.clips;for(auto copy:originals)if(chosen.contains(copy.id)){copy.id=uid();chooseAfter=copy.id;copy.timelineStart+=last-first;if(copy.kind=="midi"){copy.startBeats=time::secondsToBeats(copy.timelineStart,s.bpm);for(auto& n:copy.notes)n.id=uid();for(auto& event:copy.controllers)event.id=uid();}track.clips.push_back(std::move(copy));}}
         }pruneAssets(s);
+    }else if(cmd=="add_native_effect"||cmd=="set_native_effect"){
+        if(auto r=native_effects::mutate(s,cmd,a,batchResult);r.failed())return r;
     }else if(cmd=="add_plugin"||cmd=="remove_plugin"||cmd=="move_plugin"||cmd=="set_plugin_enabled"){
         auto tid=textArg(a,"track_id");if(tid.isNotEmpty()&&tid!="master"&&!t)return bad("Track no longer exists.");auto& list=t?t->plugins:s.masterPlugins;
         auto& lanes=t?t->automation:s.masterAutomation;
@@ -164,17 +286,54 @@ juce::Result EngineSession::Impl::mutate(storage::StoredProject& s,const juce::S
              ||cmd=="set_automation_lane"||cmd=="remove_automation_lane"){
         if(auto r=production::mutateGraph(s,cmd,a);r.failed())return r;
     }else return bad("Unsupported editing command: "+cmd);
-    syncMidiSeconds(s);if(auto r=storage::validate(s);r.failed())return r;return production::validateGraph(s);
+    syncMidiSeconds(s);if(auto r=storage::validate(s);r.failed())return r;
+    if(auto r=production::validateGraph(s);r.failed())return r;
+    if(batchResult&&cmd=="batch")*batchResult=std::move(completedBatch);
+    return juce::Result::ok();
 }
 
-juce::Result EngineSession::Impl::perform(const juce::String& command,const juce::var& args)
+juce::Result EngineSession::Impl::perform(const juce::String& command,const juce::var& args,juce::var* commandResult)
 {
     if(!args.isObject())return fail("Command arguments must be an object.");
-    if(gesture&&command!="set_track_gain"&&command!="set_master_gain"&&command!="set_track_pan")finishGesture();
+    if(command=="copy_clips"||command=="cut_clips"){
+        ClipClipboard next;next.projectId=juce::String(guard.projectId());next.id=uid();next.originSeconds=storage::maximumTimelineSeconds;next.firstRow=int(storage::maximumTracks);
+        try{
+            const auto ids=idsArg(args,"clip_ids");std::set<juce::String> chosen(ids.begin(),ids.end());
+            if(ids.empty()||chosen.size()!=ids.size())return fail("Select clips to copy; repeated IDs are not allowed.");
+            auto source=capture();next.originBpm=source.bpm;
+            std::set<juce::String> assets;
+            for(size_t row=0;row<source.tracks.size();++row)for(const auto& clip:source.tracks[row].clips)if(chosen.erase(clip.id)){
+                next.clips.push_back({source.tracks[row].id,source.tracks[row].kind,int(row),clip});
+                next.firstRow=std::min(next.firstRow,int(row));next.originSeconds=std::min(next.originSeconds,clip.timelineStart);
+                if(clip.assetId.isNotEmpty())assets.insert(clip.assetId);
+                if(clip.warp.enabled)assets.insert(clip.warp.renderAssetId);
+            }
+            if(!chosen.empty())return fail("A selected clip no longer exists. Select it again.");
+            for(const auto& asset:source.assets)if(assets.contains(asset.id))next.assets.push_back(asset);
+        }catch(const std::exception& error){return fail(error.what());}
+        if(command=="cut_clips")if(auto result=perform("delete_clips",args);result.failed())return result;
+        clipClipboard=std::move(next);publish("clipboard_changed",object({{"clip_count",int(clipClipboard.clips.size())}}));
+        status=command=="cut_clips"?"Clips cut. Paste at the playhead; Undo restores the cut.":"Clips copied. Select a destination track and paste at the playhead.";
+        return juce::Result::ok();
+    }
+    if(gesture&&command!="open_plugin"&&command!="batch"&&command!="set_track_gain"&&command!="set_master_gain"&&command!="set_track_pan")finishGesture();
     if(command=="set_plugin_parameter")return setPluginParameter(args);
+    if(command=="set_native_effect")return setNativeEffect(args);
+    if(command=="set_audio_warp")return beginAudioWarp(args,commandResult);
     if(command=="scan_plugins"||command=="cancel_job"||command=="import_audio"||command=="import_midi"||command=="save_project"||command=="open_project"||command=="export_wav"||command=="export_midi")return performJob(command,args);
     if(command=="open_plugin"){
-        auto* p=livePlugin(*edit,textArg(args,"plugin_id"));if(!p)return fail("Plugin is missing or no longer available.");return plugins::PluginHost::showEditor(*p);
+        const auto id=textArg(args,"plugin_id");
+        if(args.hasProperty("track_id")){
+            if(!args["track_id"].isString()||textArg(args,"track_id").isEmpty())return fail("A valid track ID is required.");
+            const auto trackId=textArg(args,"track_id");juce::ValueTree owner;
+            if(trackId=="master")owner=metadata(*edit);
+            else if(auto* binding=find(trackId))owner=binding->track->state;
+            else return fail("Track not found.");
+            bool belongs=false;
+            for(const auto& slot:owner.getChildWithName("EM_PLUGINS"))if(slot["id"].toString()==id){belongs=true;break;}
+            if(!belongs)return fail("Plugin does not belong to the specified track.");
+        }
+        auto* p=livePlugin(*edit,id);if(!p)return fail("Plugin is missing or no longer available.");return plugins::PluginHost::showEditor(*p);
     }
     if(command=="undo"||command=="redo"){
         finishGesture();auto& u=edit->getUndoManager();if(command=="undo"?!u.canUndo():!u.canRedo())return fail("No history available.");
@@ -194,21 +353,29 @@ juce::Result EngineSession::Impl::perform(const juce::String& command,const juce
         if(wasPlaying&&!edit->getTransport().isPlaying())edit->getTransport().play(false);
         return juce::Result::ok();
     }
-    const bool scalar=command=="set_track_gain"||command=="set_track_pan"||command=="set_track_muted"||command=="set_track_solo"
+    const auto* batchCommands=args["commands"].getArray();
+    const bool colourBatch=command=="batch"&&batchCommands&&!batchCommands->isEmpty()
+        &&std::all_of(batchCommands->begin(),batchCommands->end(),[](const auto& child){return child["command"].toString()=="set_track_colour";});
+    const bool scalar=colourBatch||command=="set_track_colour"||command=="set_track_gain"||command=="set_track_pan"||command=="set_track_muted"||command=="set_track_solo"
         ||command=="set_master_gain"||command=="set_loop"||command=="set_loop_range"||command=="set_time_signature"||command=="rename_track";
     if(scalar){
         // Validate the small metadata candidate through the same command rules.
         // None of these commands can change note validity or topology, so they
         // must not copy, rehash, validate, or reapply the project's MIDI notes.
         auto candidate=capture(false,false);auto selectedAfter=selectedClip;const auto before=contentKey(candidate);
-        if(auto r=mutate(candidate,command,args,selectedAfter);r.failed())return fail(r.getErrorMessage());
-        if(contentKey(candidate)==before)return juce::Result::ok();
+        juce::var metadataResult;
+        if(auto r=mutate(candidate,command,args,selectedAfter,&metadataResult);r.failed())return fail(r.getErrorMessage());
+        if(contentKey(candidate)==before){if(commandResult)*commandResult=metadataResult;return juce::Result::ok();}
+        if(colourBatch)finishGesture();
         remember(command.replaceCharacter('_',' '));auto* um=&edit->getUndoManager();
-        if(command.startsWith("set_track_")||command=="rename_track"){
+        if(colourBatch){
+            for(const auto& track:candidate.tracks)if(auto* binding=find(track.id))binding->track->state.setProperty(emColour,track.colour,um);
+        }else if(command.startsWith("set_track_")||command=="rename_track"){
             const auto id=textArg(args,"track_id");auto* b=find(id);auto* t=storedTrack(candidate,id);
             if(command=="set_track_gain"||command=="set_track_pan")applyMix(*edit,*b->track->getVolumePlugin(),id,t->gainDb,t->pan,false);
             else if(command=="set_track_muted")b->track->setMute(t->muted);
             else if(command=="set_track_solo")b->track->setSolo(t->solo);
+            else if(command=="set_track_colour")b->track->state.setProperty(emColour,t->colour,um);
             else b->track->setName(t->name);
         }else if(command=="set_master_gain")applyMix(*edit,*edit->getMasterVolumePlugin(),{},candidate.masterGainDb,edit->getMasterVolumePlugin()->getPan(),false);
         else if(command=="set_loop")um->perform(new LoopChange(*edit,edit->getTransport().looping.get(),candidate.looping));
@@ -218,7 +385,7 @@ juce::Result EngineSession::Impl::perform(const juce::String& command,const juce
             auto* sig=edit->tempoSequence.getTimeSig(0);sig->numerator=candidate.numerator;sig->denominator=candidate.denominator;
         }
         if(command=="set_loop"||command=="set_loop_range")refreshRange();
-        recordEdit();status=command.replaceCharacter('_',' ')+" completed.";return juce::Result::ok();
+        recordEdit(!colourBatch);status=command.replaceCharacter('_',' ')+" completed.";if(commandResult)*commandResult=metadataResult;return juce::Result::ok();
     }
     if(command=="edit_notes"||command=="write_notes"){
         Binding* owner=nullptr;auto* binding=findClip(textArg(args,"clip_id"),&owner);
@@ -316,13 +483,25 @@ juce::Result EngineSession::Impl::perform(const juce::String& command,const juce
         choose(owner->id,binding->id);recordEdit();status=command.replaceCharacter('_',' ')+" completed.";return juce::Result::ok();
     }
     auto s=capture();auto selectedAfter=selectedClip;auto before=contentKey(s);
+    std::map<juce::String,double> oldWarpRatios;
+    for(const auto& track:s.tracks)for(const auto& clip:track.clips)if(clip.warp.enabled)oldWarpRatios.emplace(clip.id,clip.warp.speedRatio());
     const auto pluginTopology=[](const auto& project){juce::StringArray ids;for(const auto& p:project.masterPlugins)ids.add("master:"+p.id);for(const auto& t:project.tracks)for(const auto& p:t.plugins)ids.add(t.id+":"+p.id);return ids;};
     const auto previousTopology=pluginTopology(s);
-    try{if(auto r=mutate(s,command,args,selectedAfter);r.failed())return fail(r.getErrorMessage());}
+    juce::var candidateResult;
+    try{if(auto r=mutate(s,command,args,selectedAfter,&candidateResult);r.failed())return fail(r.getErrorMessage());}
     catch(const std::exception& e){return fail(e.what());}
-    if(contentKey(s)==before)return juce::Result::ok();
+    if(contentKey(s)==before){if(commandResult)*commandResult=std::move(candidateResult);return juce::Result::ok();}
+    // A tempo edit with following audio must publish tempo, lengths and ready
+    // PCM in one transaction. Playback keeps the old complete graph meanwhile.
+    bool needsWarp=false;
+    for(const auto& track:s.tracks)for(const auto& clip:track.clips)if(clip.warp.enabled)
+        if(auto old=oldWarpRatios.find(clip.id);old!=oldWarpRatios.end()&&old->second!=clip.warp.speedRatio())needsWarp=true;
+    if(needsWarp)return beginWarpCandidate(std::move(s),selectedAfter,std::move(candidateResult),commandResult);
     // Large third-party instance changes are explicit structural operations.
     if(pluginTopology(s)!=previousTopology)edit->getTransport().stop(false,false);
+    // A confirmed batch must not merge into an in-progress GUI gesture. Do this
+    // only after candidate validation, so a rejected batch leaves Undo untouched.
+    if(command=="batch")finishGesture();
     remember(command.replaceCharacter('_',' '));
     auto applied=juce::Result::ok();
     try{applied=applyTo(*edit,s,bindings,false);}
@@ -334,5 +513,11 @@ juce::Result EngineSession::Impl::perform(const juce::String& command,const juce
     }
     refreshRange();refreshPluginWatches();if(auto* c=findClip(selectedAfter)){Binding* parent=nullptr;findClip(c->id,&parent);choose(parent->id,c->id);}else choose(selected);
     if(command=="create_track"&&!bindings.empty())choose(bindings.back().id);
-    recordEdit();status=command.replaceCharacter('_',' ')+" completed.";return juce::Result::ok();
+    // Tracktion can finish new clip/track properties on a later message turn.
+    // Keep those derived writes inside this atomic batch, as recording does;
+    // opening an empty transaction here makes one Undo consume only that tail.
+    // The next explicit edit, gesture, save or Undo still closes this boundary.
+    recordEdit(command!="batch");status=command.replaceCharacter('_',' ')+" completed.";
+    if(commandResult)*commandResult=std::move(candidateResult);
+    return juce::Result::ok();
 }

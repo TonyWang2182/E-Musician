@@ -76,10 +76,12 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
             auto a=assets.find(c.assetId);if(a==assets.end())return fail("Audio clip has no source asset.");
             auto p=prepared.find(a->second.source.getFullPathName());if(p==prepared.end())return fail("Audio source is not prepared.");
             if(s.schemaVersion==1)c.duration=p->second.duration;
-            if(c.sourceOffset+c.duration>p->second.duration+1.0e-9)return fail("Clip exceeds its source audio.");
+            if(c.sourceOffset+c.duration*c.warp.speedRatio()>p->second.duration+1.0e-7)return fail("Clip exceeds its source audio.");
+            if(c.warp.enabled){auto rendered=assets.find(c.warp.renderAssetId);
+                if(rendered==assets.end()||!prepared.contains(rendered->second.source.getFullPathName()))return fail("Warp render is not prepared.");}
         }
     }
-    s.schemaVersion=4;
+    s.schemaVersion=storage::requiredSchema(s);
     if(auto r=storage::validate(s);r.failed())return fail(r.getErrorMessage());
     if(auto r=production::validateGraph(s);r.failed())return fail(r.getErrorMessage());
     std::map<juce::String,te::AudioTrack*> tracks;
@@ -116,8 +118,53 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
         }return juce::Result::ok();
     };
     auto meta=metadata(target);
+    // Host-owned metadata is stored in the same authoritative Edit tree and
+    // Undo transaction as the accepted tracks, never a second writable model.
+    const auto syncMetadata=[&](const char* name,const juce::ValueTree& next){
+        auto old=meta.getChildWithName(name);
+        if(old.isValid()&&old.isEquivalentTo(next))return;
+        if(old.isValid())meta.removeChild(old,um);
+        if(next.getNumChildren()>0)meta.addChild(next,-1,um);
+    };
+    juce::ValueTree analysisTree("EM_ANALYSES"),chordTree("EM_CHORDS");
+    for(const auto& a:s.analyses){juce::ValueTree v("ANALYSIS");
+        for(const auto& [k,x]:std::initializer_list<std::pair<juce::Identifier,juce::var>>{{"id",a.id},{"kind",a.kind},{"model_id",a.modelId},{"model_version",a.modelVersion},{"source_clip_id",a.sourceClipId},{"source_asset_id",a.sourceAssetId},{"source_sha256",a.sourceSha256},{"result_sha256",a.resultSha256},{"parameters_json",a.parametersJson},{"annotations_json",a.annotationsJson},{"start_seconds",a.startSeconds},{"duration_seconds",a.durationSeconds}})v.setProperty(k,x,nullptr);
+        analysisTree.addChild(v,-1,nullptr);
+    }
+    for(const auto& c:s.chordRegions){juce::ValueTree v("CHORD");
+        for(const auto& [k,x]:std::initializer_list<std::pair<juce::Identifier,juce::var>>{{"id",c.id},{"label",c.label},{"analysis_id",c.analysisId},{"start_seconds",c.startSeconds},{"end_seconds",c.endSeconds},{"score",c.score},{"uncertain",c.uncertain}})v.setProperty(k,x,nullptr);
+        chordTree.addChild(v,-1,nullptr);
+    }
+    // Defer publishing until plugin validation has succeeded below.
+    std::set<juce::String> nativeIds;
+    const auto collectNative=[&](const auto& list)->juce::Result{for(const auto& plugin:list)if(plugin.format=="E-musician"){
+        std::vector<juce::String> ids;if(auto r=storage::nativePluginAssetIds(plugin,ids);r.failed())return r;
+        nativeIds.insert(ids.begin(),ids.end());}return juce::Result::ok();};
+    if(auto r=collectNative(s.masterPlugins);r.failed())return fail(r.getErrorMessage());
+    for(const auto& track:s.tracks)if(auto r=collectNative(track.plugins);r.failed())return fail(r.getErrorMessage());
+    for(const auto& id:nativeIds)if(std::none_of(s.assets.begin(),s.assets.end(),[&](const auto& a){return a.id==id;}))
+        return fail("Native instrument sample asset is missing.");
     if(auto r=preparePlugins(s.masterPlugins,meta);r.failed())return fail(r.getErrorMessage());
     for(const auto& t:s.tracks)if(auto r=preparePlugins(t.plugins,tracks.contains(t.id)?tracks[t.id]->state:juce::ValueTree());r.failed())return fail(r.getErrorMessage());
+
+    juce::ValueTree generationTree("EM_GENERATIONS");
+    for(const auto& g:s.generations){juce::ValueTree v("GENERATION");
+        for(const auto& [key,value]:std::initializer_list<std::pair<juce::Identifier,juce::var>>{{"id",g.id},{"asset_id",g.assetId},{"clip_id",g.clipId},{"model_id",g.modelId},{"model_revision",g.modelRevision},{"audio_sha256",g.audioSha256},{"result_sha256",g.resultSha256},{"parameters_json",g.parametersJson},{"start_seconds",g.startSeconds},{"duration_seconds",g.durationSeconds}})v.setProperty(key,value,nullptr);
+        generationTree.addChild(v,-1,nullptr);
+    }
+    syncMetadata("EM_GENERATIONS",generationTree);
+    syncMetadata("EM_ANALYSES",analysisTree);syncMetadata("EM_CHORDS",chordTree);
+    auto nativeAssets=meta.getChildWithName("EM_NATIVE_ASSETS");
+    if(!nativeAssets.isValid()&&!nativeIds.empty())nativeAssets=meta.getOrCreateChildWithName("EM_NATIVE_ASSETS",um);
+    if(nativeAssets.isValid()){
+        for(int i=nativeAssets.getNumChildren();--i>=0;)if(!nativeIds.contains(nativeAssets.getChild(i)["id"].toString()))nativeAssets.removeChild(i,um);
+        for(const auto& id:nativeIds){
+            auto source=std::find_if(s.assets.begin(),s.assets.end(),[&](const auto& a){return a.id==id;});
+            auto item=nativeAssets.getChildWithProperty("id",id);
+            if(!item.isValid()){item=juce::ValueTree("ASSET");item.setProperty("id",id,nullptr);nativeAssets.addChild(item,-1,um);}
+            item.setProperty("source",source->source.getFullPathName(),um);
+        }
+    }
 
     target.tempoSequence.getTempo(0)->set(te::BeatPosition::fromBeats(0),s.bpm,0,false);
     auto* sig=target.tempoSequence.getTimeSig(0);sig->numerator=s.numerator;sig->denominator=s.denominator;
@@ -134,11 +181,16 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
             auto slot=slots.getChildWithProperty("id",p.id);
             if(!slot.isValid()){slot=slotTree(p);slots.addChild(slot,index,um);}else{
                 slot.setProperty("enabled",p.enabled,um);slot.setProperty("role",p.role,um);
+                if(p.format=="E-musician")slot.setProperty("data",juce::var(p.state),um);
                 slots.moveChild(slots.indexOf(slot),index,um);
             }
             te::Plugin::Ptr live=livePlugin(target,p.id);
             if(!live&&newPlugins.contains(p.id)){live=newPlugins[p.id];if(live){live->state.setProperty(emId,p.id,um);list.insertPlugin(live,index,nullptr);if(!list.contains(live.get()))return fail("Could not insert plugin into the audio chain.");}}
             if(live){
+                if(p.format=="E-musician" && p.role=="effect") {
+                    live->state.setProperty("emEffectType",p.identifier,um);
+                    live->state.setProperty("emEffectData",juce::var(p.state),um);
+                }
                 live->setEnabled(p.enabled);
                 auto parent=live->state.getParent();int first=-1;
                 for(auto* item:list)if(item->state[emId].toString().isNotEmpty()){first=parent.indexOf(item->state);break;}
@@ -156,7 +208,7 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
             target.ensureNumberOfAudioTracks(te::getAudioTracks(target).size()+1);
             track=te::getAudioTracks(target).getLast();track->state.setProperty(emId,t.id,um);tracks[t.id]=track;
         }
-        track->state.setProperty(emKind,t.kind,um);track->setName(t.name);applyMix(target,*track->getVolumePlugin(),t.id,t.gainDb,t.pan,loading);
+        track->state.setProperty(emKind,t.kind,um);track->state.setProperty(emColour,t.colour,um);track->setName(t.name);applyMix(target,*track->getVolumePlugin(),t.id,t.gainDb,t.pan,loading);
         track->setMute(t.muted);track->setSolo(t.solo);
         if(auto r=syncPlugins(t.plugins,track->state,track->pluginList);r.failed())return r;
         for(const auto& c:t.clips){
@@ -166,17 +218,19 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
             if(!clip){
                 if(c.kind=="midi")clip=track->insertMIDIClip(t.name,range,nullptr);
                 else{
-                    const auto& a=assets.at(c.assetId);const auto& info=prepared.at(a.source.getFullPathName());
-                    clip=track->insertWaveClip(t.name,info.playbackFile,{range,te::TimeDuration::fromSeconds(c.sourceOffset)},false);
+                    const auto& a=assets.at(c.warp.enabled?c.warp.renderAssetId:c.assetId);const auto& info=prepared.at(a.source.getFullPathName());
+                    clip=track->insertWaveClip(t.name,info.playbackFile,{range,te::TimeDuration::fromSeconds(c.sourceOffset/c.warp.speedRatio())},false);
                 }
                 if(!clip)return fail("Could not insert clip.");
                 clip->state.setProperty(emId,c.id,um);
             }else if(clip->getTrack()!=track)clip->moveTo(*track);
             clip->state.setProperty(emKind,c.kind,um);
-            clip->setPosition({range,te::TimeDuration::fromSeconds(c.sourceOffset)});
+            clip->setPosition({range,te::TimeDuration::fromSeconds(c.sourceOffset/c.warp.speedRatio())});
             if(auto* midi=dynamic_cast<te::MidiClip*>(clip.get())){
                 midi->setSyncType(te::Clip::syncBarsBeats);midi->setUsesProxy(false);
-                if(!c.notes.empty())midi->setMidiChannel(te::MidiChannel(c.notes.front().channel));
+                clip->state.setProperty("emMidiChannel",c.midiChannel,um);
+                if(c.midiChannel>0)midi->setMidiChannel(te::MidiChannel(c.midiChannel));
+                else if(!c.notes.empty())midi->setMidiChannel(te::MidiChannel(c.notes.front().channel));
                 if(c.notes.size()>512&&midi->getSequence().getNumNotes()==0){replaceMidiNotes(*midi,c.notes,um);continue;}
                 auto& seq=midi->getSequence();std::map<juce::String,te::MidiNote*> existing;
                 for(auto* n:seq.getNotes())existing[n->state[emId].toString()]=n;
@@ -194,11 +248,16 @@ juce::Result EngineSession::Impl::applyTo(te::Edit& target,storage::StoredProjec
                 }
                 for(const auto& [id,n]:existing)if(!wanted.contains(id))seq.removeNote(*n,um);
             }else if(auto* audio=dynamic_cast<te::WaveAudioClip*>(clip.get())){
+                const auto& playbackAsset=assets.at(c.warp.enabled?c.warp.renderAssetId:c.assetId);
+                audio->getSourceFileReference().setToDirectFileReference(prepared.at(playbackAsset.source.getFullPathName()).playbackFile,false);
+                const auto nextWarp=storage::audioWarpToVar(c.warp);
+                if(juce::JSON::toString(clip->state["emAudioWarp"],true)!=juce::JSON::toString(nextWarp,true))clip->state.setProperty("emAudioWarp",nextWarp,um);
+                clip->state.setProperty("emWarpRenderSource",c.warp.enabled?playbackAsset.source.getFullPathName():juce::String(),um);
                 audio->setSyncType(te::Clip::syncAbsolute);audio->setAutoTempo(false);audio->setAutoPitch(false);audio->setUsesProxy(false);
                 audio->setResamplingQuality(te::ResamplingQuality::sincMedium);
                 audio->setFadeInType(te::AudioFadeCurve::linear);audio->setFadeOutType(te::AudioFadeCurve::linear);
                 audio->setFadeIn(te::TimeDuration::fromSeconds(c.fadeIn));audio->setFadeOut(te::TimeDuration::fromSeconds(c.fadeOut));
-                clip->state.setProperty(emAsset,c.assetId,um);clip->state.setProperty(emSource,assets.at(c.assetId).source.getFullPathName(),um);
+                clip->state.setProperty("emAnalysisRole",c.analysisRole,um);clip->state.setProperty(emAsset,c.assetId,um);clip->state.setProperty(emSource,assets.at(c.assetId).source.getFullPathName(),um);
             }
         }
     }

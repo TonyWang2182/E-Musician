@@ -28,14 +28,29 @@ public:
                              double startBeats, double lengthBeats, double bpm);
     void setPlayhead(double projectSeconds, bool playing);
     void setTimeSignature(int numerator, int denominator);
+    // Recording/finalization keeps navigation and selection available, but
+    // cancels previews and prevents note edits or transport relocation.
+    void setEditingBlocked(bool blocked);
+    // Read-only visual projection of the owning track; never changes notes.
+    void setTrackColour(const juce::String& colour);
+    juce::String clipId() const;
+    juce::StringArray selectedNoteIds(int maximum = 2000) const;
+    int selectedNoteCount() const;
+    std::uint64_t selectionRevision() const;
+    void focusGained(FocusChangeType) override;
+    void focusOfChildComponentChanged(FocusChangeType) override;
     void paint(juce::Graphics&) override;
     void resized() override;
     bool keyPressed(const juce::KeyPress&) override;
-    juce::Result runInteractionSmokeTest(juce::DynamicObject& report);
+    juce::Result runInteractionSmokeTest(juce::DynamicObject& report, const juce::File& artifactDirectory = {});
     std::function<void(const juce::String&, const std::vector<Note>&, std::uint64_t)> onWriteNotes;
+    // Rejected local clipboard operations leave the authoritative notes untouched.
+    std::function<void(const juce::String&)> onEditError;
     std::function<void(double)> onSeek;
     std::function<void()> onTogglePlay;
     std::function<bool(const juce::KeyPress&)> onProjectKey;
+    std::function<void()> onSelectionChange;
+    std::function<void()> onFocus;
 private:
     struct Impl;
     std::unique_ptr<Impl> impl;

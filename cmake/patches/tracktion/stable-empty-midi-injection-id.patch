@@ -1,0 +1,13 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.cpp
+@@ -32,6 +32,10 @@
+ {
+     auto props = input->getNodeProperties();
+     props.hasMidi = true;
++    // A managed empty instrument can use SilentNode as its input. Give that
++    // path a stable identity so queued note-offs survive a monitor rebuild.
++    if (props.nodeID == 0 && track->state.getProperty ("emKind").toString() == "instrument")
++        props.nodeID = static_cast<size_t> (0x454d4c4d);
+     assert (props.nodeID != 0);
+     hash_combine (props.nodeID, track->itemID.getRawID());
+ 

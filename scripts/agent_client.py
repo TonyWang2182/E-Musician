@@ -29,23 +29,55 @@ READ_COMMANDS = {
     "get_capabilities", "get_snapshot", "get_project_state", "get_jobs",
     "get_job", "get_events", "get_clip_notes", "get_track_clips", "get_plugin_catalog", "get_plugin_parameters",
     "get_recording_state", "get_recording_inputs", "get_audio_devices",
-    "get_automation_targets", "get_automation_points", "get_clip_controllers", "get_save_diagnostics",
+    "get_automation_targets", "get_automation_points", "get_clip_controllers", "get_save_diagnostics", "get_native_instrument",
+    "get_analysis_capabilities", "get_analysis_job", "get_analysis_result", "get_chord_regions", "get_analysis_preview_status",
+    "get_generation_capabilities", "get_generation_jobs", "get_generation_job", "get_generation_result",
+    "get_native_effect", "get_selection_context", "get_clipboard_state", "get_analysis_annotations",
+    "get_recording_preferences", "get_audio_warp",
 }
-TERMINAL_JOBS = {"completed", "failed", "cancelled", "canceled", "conflict"}
+TERMINAL_JOBS = {"completed", "ready", "applied", "failed", "cancelled", "canceled", "conflict", "stale"}
 
 
 class ControlError(RuntimeError):
     pass
 
 
+def retry_busy_read(request, exchange, timeout, *, clock=time.monotonic, pause=time.sleep):
+    """Repeat only a definite, matching busy *read* within one RPC deadline.
+
+    A complete busy reply consumed no mutation and leaves framing unambiguous.
+    Never retry writes, mismatched replies, transport errors or timeouts. If the
+    host stays busy, return its final refusal with the stream still synchronized.
+    """
+    deadline = clock() + timeout
+    read_only = isinstance(request, dict) and request.get("command") in READ_COMMANDS
+    reply = None
+    while True:
+        remaining = deadline - clock()
+        if remaining <= 0:
+            if reply is not None:
+                return reply
+            raise ControlError("Control request deadline elapsed before sending.")
+        reply = exchange(remaining)
+        if (not read_only or not isinstance(reply, dict) or reply.get("status") != "busy"
+                or reply.get("request_id", "") != request.get("request_id", "")):
+            return reply
+        remaining = deadline - clock()
+        if remaining <= 0:
+            return reply
+        pause(min(0.025, remaining))
+        if clock() >= deadline:
+            return reply
+
+
 class Client:
-    def __init__(self, executable: Path, timeout: float = 120.0, show: bool = False):
+    def __init__(self, executable: Path, timeout: float = 120.0, show: bool = False, offline_test: bool = False):
         self.timeout = timeout
         self.responses: queue.Queue[object] = queue.Queue(maxsize=32)
         self.closed = threading.Event()
         flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
         self.process = subprocess.Popen(
-            [str(executable.resolve()), "--control-stdio", *(["--show"] if show else [])],
+            [str(executable.resolve()), "--control-stdio", *(["--show"] if show else []), *(["--control-output-probe"] if offline_test else [])],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             creationflags=flags,
         )
@@ -101,16 +133,18 @@ class Client:
         if len(encoded) > MAX_LINE_BYTES:
             raise ControlError("Request exceeds the 1 MiB JSONL limit.")
         assert self.process.stdin is not None
-        try:
-            self.process.stdin.write(encoded + b"\n")
-            self.process.stdin.flush()
-            response = self.responses.get(timeout=self.timeout)
-        except (OSError, queue.Empty) as exc:
-            raise ControlError("Control request failed or timed out.") from exc
-        if isinstance(response, Exception):
-            raise response
-        assert isinstance(response, dict)
-        return response
+        def exchange(remaining):
+            try:
+                self.process.stdin.write(encoded + b"\n")
+                self.process.stdin.flush()
+                response = self.responses.get(timeout=remaining)
+            except (OSError, queue.Empty) as exc:
+                raise ControlError("Control request failed or timed out.") from exc
+            if isinstance(response, Exception):
+                raise response
+            assert isinstance(response, dict)
+            return response
+        return retry_busy_read(envelope, exchange, self.timeout)
 
     @staticmethod
     def completed(response: dict) -> dict:
@@ -126,7 +160,7 @@ class Client:
         while time.monotonic() < deadline:
             job = self.completed(self.raw({"command": "get_job", "args": {"job_id": job_id}}))
             if job.get("status") in TERMINAL_JOBS:
-                if job["status"] != "completed":
+                if job["status"] not in {"completed", "ready", "applied"}:
                     raise ControlError("Background task did not complete: " + json.dumps(job, ensure_ascii=False))
                 return job
             time.sleep(0.05)

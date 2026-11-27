@@ -1,0 +1,37 @@
+--- a/modules/tracktion_engine/model/edit/tracktion_Edit.cpp
++++ b/modules/tracktion_engine/model/edit/tracktion_Edit.cpp
+@@ -2461,7 +2461,7 @@
+ 
+ void Edit::setClickTrackVolume (float gain)
+ {
+-    clickTrackGain = juce::jlimit (0.2f, 1.0f, gain);
++    clickTrackGain = juce::jlimit (0.0f, 1.0f, gain);
+     engine.getPropertyStorage().setProperty (SettingID::lastClickTrackLevel, gain);
+ }
+ 
+@@ -2477,15 +2477,19 @@
+     return static_cast<CountIn> (static_cast<int> (engine.getPropertyStorage().getProperty (SettingID::countInMode)));
+ }
+ 
+-int Edit::getNumCountInBeats() const
+-{
++double Edit::getNumCountInBeats() const
++{
++    const auto& signature = tempoSequence.getTimeSigAt (getTransport().getPosition());
++    const double unit = engine.getEngineBehaviour().lengthOfOneBeatDependsOnTimeSignature()
++        ? 1.0 : 4.0 / signature.denominator;
+     switch (getCountInMode())
+     {
+         case CountIn::none:       return 0;
+-        case CountIn::oneBar:     return tempoSequence.getTimeSig(0)->numerator;
+-        case CountIn::twoBar:     return tempoSequence.getTimeSig(0)->numerator * 2;
+-        case CountIn::oneBeat:    return 1;
+-        case CountIn::twoBeat:    return 2;
++        case CountIn::oneBar:     return signature.numerator * unit;
++        case CountIn::twoBar:     return signature.numerator * unit * 2;
++        case CountIn::fourBar:    return signature.numerator * unit * 4;
++        case CountIn::oneBeat:    return unit;
++        case CountIn::twoBeat:    return unit * 2;
+         default:                  jassertfalse; break;
+     }
+ 

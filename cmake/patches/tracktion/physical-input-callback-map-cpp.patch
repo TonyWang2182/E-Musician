@@ -1,0 +1,60 @@
+--- a/modules/tracktion_engine/playback/tracktion_DeviceManager.cpp
++++ b/modules/tracktion_engine/playback/tracktion_DeviceManager.cpp
+@@ -1476,6 +1476,25 @@
+         return;
+     }
+ 
++    // JUCE's native Windows devices pack enabled input pointers. Wave input
++    // descriptions retain physical channel indices, so expand the callback at
++    // this boundary. Also accept full physical-slot arrays (inactive pointers
++    // may be null), as documented by AudioIODeviceCallback and used by hosts.
++    // For dense masks the two layouts are identical.
++    const bool packedInputs = numInputChannels == numActiveInputChannels;
++
++    for (size_t channel = 0; channel < inputDeviceChannelToCallback.size(); ++channel)
++    {
++        const int packedIndex = inputDeviceChannelToCallback[channel];
++        const int callbackIndex = packedInputs ? packedIndex : static_cast<int> (channel);
++        physicalInputChannels[channel] = packedIndex >= 0 && inputChannelData != nullptr
++                                           && juce::isPositiveAndBelow (callbackIndex, numInputChannels)
++                                             ? inputChannelData[callbackIndex] : nullptr;
++    }
++
++    inputChannelData = physicalInputChannels.data();
++    numInputChannels = static_cast<int> (physicalInputChannels.size());
++
+     // Some interfaces ask for blocks larger than the current buffer size so in
+     // these cases we need to render the buffer in chunks
+     if (numSamples <= maxBlockSize)
+@@ -1491,10 +1510,10 @@
+         const auto numThisTime = std::min (numSamples, maxBlockSize);
+ 
+         for (int i = 0; i < numInputChannels; ++i)
+-            inputChannelsScratch[i] = inputChannelData[i] + sampleStartIndex;
++            inputChannelsScratch[i] = inputChannelData[i] != nullptr ? inputChannelData[i] + sampleStartIndex : nullptr;
+ 
+         for (int i = 0; i < totalNumOutputChannels; ++i)
+-            outputChannelsScratch[i] = outputChannelData[i] + sampleStartIndex;
++            outputChannelsScratch[i] = outputChannelData[i] != nullptr ? outputChannelData[i] + sampleStartIndex : nullptr;
+ 
+         audioDeviceIOCallbackInternal (inputChannelsScratch, numInputChannels,
+                                        outputChannelsScratch, totalNumOutputChannels,
+@@ -1647,8 +1666,17 @@
+         defaultWaveOutID = engine.getPropertyStorage().getPropertyItem (SettingID::defaultWaveOutDevice, device->getTypeName(), defaultWaveOutID);
+         defaultWaveInID  = engine.getPropertyStorage().getPropertyItem (SettingID::defaultWaveInDevice, device->getTypeName(), defaultWaveInID);
+ 
+-        inputChannelsScratch.realloc (device->getInputChannelNames().size());
++        const int numPhysicalInputs = device->getInputChannelNames().size();
++        inputChannelsScratch.realloc (numPhysicalInputs);
+         outputChannelsScratch.realloc (device->getOutputChannelNames().size());
++        inputDeviceChannelToCallback.assign (static_cast<size_t> (numPhysicalInputs), -1);
++        physicalInputChannels.assign (static_cast<size_t> (numPhysicalInputs), nullptr);
++        numActiveInputChannels = 0;
++        const auto activeInputs = device->getActiveInputChannels();
++
++        for (int channel = 0; channel < numPhysicalInputs; ++channel)
++            if (activeInputs[channel])
++                inputDeviceChannelToCallback[static_cast<size_t> (channel)] = numActiveInputChannels++;
+ 
+         {
+             const std::shared_lock sl (contextLock);

@@ -4,12 +4,25 @@
   "configurePresets": [
     {
       "name": "windows-msvc",
-      "displayName": "Windows x64 / Visual Studio 2026",
-      "generator": "Visual Studio 18 2026",
+      "displayName": "Windows x64 / installed Visual Studio",
       "architecture": "x64",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {"CMAKE_CONFIGURATION_TYPES": "Debug;Release"},
       "condition": {"type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows"}
+    },
+    {
+      "name": "windows-vs2022",
+      "inherits": "windows-msvc",
+      "displayName": "Windows x64 / Visual Studio 2022",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "${sourceDir}/build/vs2022"
+    },
+    {
+      "name": "windows-vs2026",
+      "inherits": "windows-msvc",
+      "displayName": "Windows x64 / Visual Studio 2026",
+      "generator": "Visual Studio 18 2026",
+      "binaryDir": "${sourceDir}/build/vs2026"
     }
   ],
   "buildPresets": [

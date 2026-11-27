@@ -1,5 +1,7 @@
 #include "core/commands/RevisionGuard.hpp"
 #include "core/time/Time.hpp"
+#include "core/time/EditGrid.hpp"
+#include "core/time/MusicalPosition.hpp"
 
 #include <algorithm>
 #include <array>
@@ -207,6 +209,51 @@ int main()
 {
     Checks checks;
     testTime(checks);
+    using namespace emusician::time;
+    checks.expect(musicalPosition(0,120,4,4)=="1:1:000","musical display starts at bar1");
+    checks.expect(musicalPosition(1.5,120,6,8)=="2:1:000","6/8 denominator beat display");
+    checks.expect(musicalPosition(0.75,120,3,8)=="2:1:000","3/8 bar uses three eighths");
+    checks.expect(musicalPosition(1.99999999,120,4,4)=="2:1:000","tick carry reaches next bar");
+    for(const auto meter:{std::pair{4,4},std::pair{3,4},std::pair{6,8},std::pair{3,8}}){
+        const auto label=musicalPosition(17.25,123.5,meter.first,meter.second);
+        const auto decoded=parseMusicalPosition(label,123.5,meter.first,meter.second);
+        checks.expect(decoded&&std::abs(*decoded-17.25)<=60.0/123.5*4/meter.second/1920.0+1e-10,"musical roundtrip within half display tick");
+    }
+    for(const auto* invalid:{"0:1:000","2:0:000","1:5:000","1:1:960","1:1:000junk","nan","1:1","1:1:0:0","99999999999999999999:1:0"})
+        checks.expect(!parseMusicalPosition(invalid,120,4,4),"reject malformed/out-of-range musical input");
+    checks.near(editGridBeats(1.0/4096.0,false,64,1000),1.0/4096.0,"fixed finest grid survives distant zoom");
+    checks.near(editGridBeats(0,true,1.0/256.0,1000),1.0/4096.0,"adaptive grid reaches finest supported spacing");
+    checks.near(editGridBeats(0,true,1000.0/16.0/4096.0,1000),1.0/4096.0,"adaptive reaches finest grid at maximum zoom spacing");
+    checks.near(editGridBeats(0,true,864000.0,1000),64.0,"overview grid remains bounded");
+    checks.expect(musicalRulerStep(64,1000,4,4).labelTier==0,"overview labels bars");
+    checks.expect(musicalRulerStep(12,1000,4,4).labelTier==1,"medium zoom labels meter beats");
+    checks.expect(musicalRulerStep(2,1000,4,4).labelTier==2,"close zoom labels beat quarters");
+    checks.expect(musicalRulerStep(0.001,1000,4,4).labelTier==2,"deep zoom never adds a fourth label tier");
+    checks.near(musicalRulerStep(64,1000,4,4).stepBeats,8.0,"64-beat overview labels every second bar");
+    for (const auto meter : {std::pair{4,4},std::pair{3,4},std::pair{6,8}}) {
+        const auto bar = beatsPerBar(meter.first,meter.second);
+        for (int power = 0; power <= 8; ++power) {
+            const double expected = bar * std::ldexp(1.0,power);
+            const double visible = expected * 0.9 * 1000.0 / 72.0;
+            const auto ruler = musicalRulerStep(visible,1000,meter.first,meter.second);
+            checks.near(ruler.stepBeats,expected,"ruler uses uniform power-of-two bar strides in each meter");
+            checks.expect(ruler.labelTier==0,"distant zoom does not add beat suffixes");
+            const auto denser = musicalRulerStep(visible,2000,meter.first,meter.second);
+            checks.expect(denser.stepBeats<=ruler.stepBeats,"zooming in never coarsens the ruler");
+        }
+    }
+    checks.near(musicalRulerStep(64,1000,4,4,140).stepBeats,16.0,"long labels increase the whole ruler stride instead of skipping individual bars");
+    checks.near(musicalRulerStep(4.0*1000/72,1000,4,4).stepBeats,4.0,"exact bar-density threshold keeps the current stride");
+    checks.near(musicalRulerStep(4.0*1000/72+1e-6,1000,4,4).stepBeats,8.0,"crossing a density threshold doubles the stride");
+    checks.expect(musicalRulerLabel(0,4,4,0)=="1" && musicalRulerLabel(0,4,4,1)=="1.1" && musicalRulerLabel(0,4,4,2)=="1.1.1","ruler uses three one-based dot tiers");
+    checks.expect(musicalRulerLabel(3.75,4,4,2)=="1.4.4" && musicalRulerLabel(4,4,4,2)=="2.1.1","ruler carries bars without fourth-level labels");
+    checks.expect(musicalRulerLabel(2.875,6,8,2)=="1.6.4" && musicalRulerLabel(3,6,8,2)=="2.1.1","compound meter subdivisions follow denominator beat");
+    for (double bpm : {20.0,120.0,300.0}) {
+        const auto endBeat=secondsToBeats(172800.0,bpm);
+        const auto nearEnd=endBeat-minimumEditGridBeats*5;
+        checks.near(snapEditBeat(nearEnd+minimumEditGridBeats*0.4,minimumEditGridBeats),nearEnd,"finest grid retains nearest point at48h");
+        checks.expect(beatsToSeconds(minimumEditGridBeats,bpm)>minimumEditSpanSeconds,"finest grid exceeds edit duration guard across tempo range");
+    }
     testRevisionGuard(checks);
     return checks.finish();
 }
